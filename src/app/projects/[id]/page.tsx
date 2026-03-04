@@ -102,7 +102,11 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                   existingTasks={projectTasks}
                 />
                 <div className="mb-6">
-                  <KanbanBoard tasks={projectTasks} />
+                  <KanbanBoard
+                    projectId={projectId}
+                    plans={projectPlans}
+                    tasks={projectTasks}
+                  />
                 </div>
               </>
             )}
