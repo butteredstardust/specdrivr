@@ -113,7 +113,7 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
       setTasksState((prev) =>
         prev.map((task) =>
           task.id === active.id
-            ? { ...task, status: over.id as TaskStatus }
+            ? { ...task, status: over.id as any }
             : task
         )
       );
@@ -133,7 +133,7 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
     const isOverColumn = columns.some((col) => col.id === over.id);
 
     if (isOverColumn && activeTask.status !== over.id) {
-      const newStatus = over.id as TaskStatus;
+      const newStatus = over.id;
 
       try {
         // Update in database via server action
@@ -147,15 +147,14 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
                 : task
             )
           );
+          router.refresh();
         } else {
           // Revert on error
           setTasksState(tasks);
-          console.error('Failed to update task status:', result.error);
         }
       } catch (error) {
         // Revert on error
         setTasksState(tasks);
-        console.error('Error updating task status:', error);
       }
     }
   }
@@ -216,7 +215,7 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
                       projectId={projectId}
                       plans={plans}
                       existingTasks={tasks}
-                      prefilledStatus={column.id as TaskStatus}
+                      prefilledStatus={column.id}
                       onTaskCreated={() => {
                         router.refresh();
                       }}

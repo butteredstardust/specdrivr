@@ -14,8 +14,8 @@ Spec-Drivr is an **Autonomous Development Platform** that uses PostgreSQL as a s
 
 **See Also:**
 - [specification.md](specification.md) - Full project vision and requirements
-- [plan.md](plan.md) - Implementation roadmap (Phases 4-6 prioritized for human parity)
-- [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md) - Current status and findings
+- [plan.md](plan.md) - Implementation roadmap 
+- [ui_plan.md](ui_plan.md) - UI Implementation roadmap 
 
 ---
 

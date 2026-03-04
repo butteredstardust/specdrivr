@@ -1,737 +1,1198 @@
-# Spec-Drivr Development Plan
+# Spec-Drivr Development Plan v3
 
-**Last Updated:** March 5, 2026
-**Current Status:** 80% Complete - Core infrastructure & Agent Control APIs complete
-
-## Project Summary
-
-**Goal:** Build an Autonomous Development Platform enabling AI agents and humans to collaboratively build software through a PostgreSQL state machine with spec-driven workflows.
-
-**Status:** Core platform operational. Agent can execute tasks, humans can create/monitor projects via UI. Missing human feature parity for full collaboration.
-
-## What Has Been Completed ✅ (Phases 1-3)
-
-### Infrastructure Foundation
-- ✅ Next.js 14 with App Router and TypeScript strict mode
-- ✅ PostgreSQL 16 with Docker Compose
-- ✅ Drizzle ORM configured with full schema
-- ✅ Tailwind CSS styling with Shadcn/UI components
-
-### Database Schema (6 Tables)
-- ✅ `projects` - Project metadata (with agent control fields: agent_status, agent_started_at, agent_stopped_at)
-- ✅ `specifications` - Versioned project specs (markdown content, is_active)
-- ✅ `plans` - Architecture decisions (JSON, draft/active/completed/archived status)
-- ✅ `tasks` - Implementation tasks (with retry_count, notes, completed_at, dependency_task_id)
-- ✅ `test_results` - Test verification logs (success, logs, timestamp)
-- ✅ `agent_logs` - Agent execution logs (with project_id for faster filtering)
-- ✅ `users` - User accounts (username, password_hash, avatar, is_admin)
-
-### Agent API Layer (Full Feedback Loop)
-- ✅ `GET /api/agent/mission` - Retrieve active spec, plan, and next task
-- ✅ `POST /api/agent/plans` - Create/update architecture plans
-- ✅ `PATCH /api/agent/tasks/:id` - Update task status through workflow
-- ✅ `POST /api/agent/verify` - Log test results
-- ✅ `POST /api/agent/logs` - Add agent execution logs
-- ✅ `X-Agent-Token` authentication middleware
-- ✅ Zod validation schemas for all endpoints
-
-### Agent Control System (NEW)
-- ✅ Project-level controls: GET/POST /api/projects/:id/agent/{start,pause,stop,retry,status}
-- ✅ Task-level controls: POST /api/tasks/:id/agent/{retry,skip}
-- ✅ Real-time status polling for frontend
-- ✅ Database fields for tracking agent state (status, uptime, errors)
-
-### UI Components (Core Functionality)
-- ✅ Drag-and-drop Kanban board (@dnd-kit implementation)
-- ✅ Task cards with priority indicators and draggable between columns
-- ✅ Project sidebar navigation with all projects listed
-- ✅ Project detail pages with specification viewer
-- ✅ Create project dialog with form validation
-- ✅ Test results panel (placeholder structure)
-- ✅ Agent logs panel (placeholder structure)
-
-### Database Seeds
-- ✅ seed-simple.sql - 2 basic projects for initial testing
-- ✅ seed-demo.sql - 3 comprehensive projects with realistic data
-- ✅ seed-onboarding.sql - Self-onboarding data (shows 100+ completed tasks)
-- ✅ All seeds include projects, specs, plans, tasks, test results, and agent logs
-
-## What Is NOT Working / Incomplete ❌
-
-### Phase 4: Human Feature Parity (CRITICAL - Next)
-
-The platform currently enables agents to perform operations that humans cannot via UI. For true collaboration, humans need equivalent capabilities:
-
-#### 4.1 Human Task Creation (Agent: POST /api/agent/tasks, Human: ❌)
-- **Problem:** Humans cannot create tasks via UI; must use SQL/API directly
-- **Solution:** Create task creation dialog in Kanban board
-- **Database:** Use existing `tasks` table (no schema changes needed)
-- **Files:** New `src/components/create-task-dialog.tsx`, update Kanban board
-
-#### 4.2 Human Plan Editor (Agent: POST /api/agent/plans, Human: ❌)
-- **Problem:** Humans cannot create/edit architecture plans via UI
-- **Solution:** Create plan editor form with JSON structure validation
-- **Database:** Use existing `plans` table (no schema changes needed)
-- **Files:** New `src/components/create-plan-dialog.tsx` integrated into project detail view
-
-#### 4.3 Human Specification Editor (Agent: Create spec via POST /api/agent/projects, Human: ❌)
-- **Problem:** Humans cannot edit specifications after project creation
-- **Solution:** Add markdown editor for specifications with version management
-- **Database:** Consider adding `updated_at` to `specifications` (optional, audit trail)
-- **Files:** New `src/components/spec-editor.tsx`, update specification-viewer
-
-#### 4.4 Human Test Results Logging (Agent: POST /api/agent/verify, Human: ❌)
-- **Problem:** Test results panel is placeholder; no UI for logging results
-- **Solution:** Add "Log Test Result" button on each task card + results form
-- **Database:** Use existing `test_results` table (no schema changes needed)
-- **Files:** Enhance `src/components/test-results-panel.tsx`, modify task cards
-
-#### 4.5 Human Agent Log Creation (Agent: POST /api/agent/logs, Human: ❌)
-- **Problem:** Humans cannot manually log agent activities or notes
-- **Solution:** Add "Add Log Entry" button for manual intervention logging
-- **Database:** May add `is_internal` flag to `agent_logs` to distinguish internal vs agent logs
-- **Files:** Enhance `src/components/agent-logs.tsx` with manual log entry form
-
-#### 4.6 User Role Management (Database: `users` table exists, UI: ❌)
-- **Problem:** Users table exists but authentication/login not implemented
-- **Solution:** Add login state and user attribution to all operations
-- **Database:** Use existing `users` table, add `created_by_user_id` to projects/specs/plans/tasks
-- **Files:** New auth system (NextAuth or custom), update all tables to track ownership
-
-### Phase 5: Agent Self-Bootstrapping (CRITICAL - Next)
-
-Currently, agents cannot start from zero; they require pre-created project structures.
-
-#### 5.1 Project Creation API
-- `POST /api/agent/projects` - Create project + specification + plan in one call
-- Returns: `{ project_id, specification_id, plan_id }`
-- Schema: Accept `name`, `mission`, `description`, `tech_stack`, `instructions`, `base_path`
-
-#### 5.2 Project Configuration API
-- `PATCH /api/agent/projects/:id` - Update project configuration
-- Allows refinement: Update `mission`, `description`, `tech_stack`, `instructions`, `specification.content`
-
-#### 5.3 Task Creation API
-- `POST /api/agent/tasks` - Create individual tasks under a plan
-- Schema: Accept `plan_id`, `description`, `priority`, `files_involved`, `dependency_task_id`
-
-### Phase 6: Polish & Quality (Medium Priority)
-
-#### Quality Issues
-- ❌ Loading states/skeletons for all data-fetching pages
-- ❌ Global error boundaries (Next.js error.tsx)
-- ❌ Standardized API error responses (400/404/500 with proper messages)
-- ❌ Form validation feedback with error states
-- ❌ Offline detection and retry logic
-- ❌ Database indexes on foreign keys (performance)
-
-#### UX Improvements
-- ❌ Task dependency visualization (graph view)
-- ❌ Search/filter across tasks, specs, logs
-- ❌ Real-time updates via WebSocket or polling
-- ❌ Export functionality (JSON/CSV)
-- ❌ Keyboard shortcuts for power users
-
-## Implementation Priority (Revised)
-
-### Phase 4: Human Feature Parity (CRITICAL - 8-12 hours)
-This phase ensures humans can do everything agents can do via UI. Blocks full collaboration.
-
-#### 4.1 Task Creation Flow
-- [ ] Create `src/components/create-task-dialog.tsx` with form
-  - Fields: description, priority (1-5), files_involved (array), dependency_task_id
-  - Form validation with Zod
-  - Submit to `actions.createTask()` server action
-- [ ] Add "Create Task" button to Kanban board header
-- [ ] Update `src/lib/actions.ts` with `createTask()` server action
-- [ ] Success toast and immediate Kanban refresh
-- **Files:** New dialog component, actions.ts, kanban-board.tsx
-- **Priority:** P0 (Core workflow)
-- **Effort:** 2-3 hours
-- **Dependencies:** None (can start immediately)
-
-#### 4.2 Plan Editor
-- [ ] Create `src/components/create-plan-dialog.tsx` with JSON editor
-  - Fields: architecture_decisions (structured JSON/hierarchical)
-  - JSON validation and formatting
-  - POST to `/api/agent/plans` (agent API, humans can reuse)
-- [ ] Add "Create Plan" button to project detail page
-- [ ] Show active plan in project detail view
-- **Files:** New dialog component, project detail page update
-- **Priority:** P0 (Required for spec-driven workflow)
-- **Effort:** 2-3 hours
-- **Dependencies:** None
-
-#### 4.3 Specification Editor
-- [ ] Create `src/components/spec-editor.tsx` markdown editor
-  - Markdown rendering preview
-  - Version history view (read-only previous versions)
-  - Save creates new version, marks as active
-  - Integrated into specification-viewer
-- **Files:** New editor component, update specification-viewer
-- **Priority:** P1 (Power user feature)
-- **Effort:** 3-4 hours
-- **Dependencies:** May need `updated_at` field in specifications
-
-#### 4.4 Test Results Logging UI
-- [ ] Add "Log Test Result" button to task cards/selection
-- [ ] Create `src/components/log-test-result-dialog.tsx`
-  - Fields: success/fail boolean, logs (text area), task_id
-  - Calls `POST /api/agent/verify` (agent API, humans can reuse)
-- [ ] Update test-results-panel to show real data (query test_results table)
-- **Files:** New dialog component, update test-results-panel, task cards
-- **Priority:** P0 (Core verification loop)
-- **Effort:** 2-3 hours
-- **Dependencies:** task creation complete
-
-#### 4.5 Agent Log Creation UI
-- [ ] Add "Add Log Entry" button to agent-logs panel
-- [ ] Create `src/components/add-log-dialog.tsx`
-  - Fields: level (info/warn/error/debug), message, task_id
-  - May add context JSON field for structured data
-  - Calls `POST /api/agent/logs` (agent API, humans can reuse)
-- [ ] Optionally add `is_internal` flag to agent_logs table
-- **Files:** New dialog component, update agent-logs, schema update
-- **Priority:** P1 (Improve debugging/troubleshooting)
-- **Effort:** 1-2 hours
-- **Dependencies:** None
-
-#### 4.6 User Authentication & Authorization (MAY BREAK DOWN)
-- [ ] Implement authentication system (NextAuth or custom)
-- [ ] Create login page and middleware
-- [ ] Add `created_by_user_id` foreign key to:
-  - projects, specifications, plans, tasks tables
-- [ ] Track user actions in audit log
-- [ ] Differentiate UI: user actions vs agent actions
-- **Files:** Auth setup, schema updates, middleware, toast notifications
-- **Priority:** P2 (Nice to have for multi-user)
-- **Effort:** 4-6 hours
-- **Dependencies:** Test results logging complete
-- **Note:** Could be postponed if single-user for now
-
-### Phase 5: Agent Self-Bootstrapping (CRITICAL - 6-8 hours)
-These APIs unlock autonomous agent startup from natural language requests.
-
-#### 5.1 Agent Project Creation API
-- [ ] Implement `POST /api/agent/projects` endpoint
-  - Accept: `name`, `mission`, `description`, `constitution`, `tech_stack`, `base_path`
-  - Creates: project + specification + plan (all with proper relationships)
-  - Returns: `{ project_id, specification_id, plan_id }`
-  - Agent token authentication required
-- [ ] Add bulk insert transactions (rollback on partial failure)
-- **Files:** New route handler, schema validation
-- **Priority:** P0 (Foundation for agent autonomy)
-- **Effort:** 2 hours
-- **Dependencies:** Database schema stable
-
-#### 5.2 Agent Project Configuration API
-- [ ] Implement `PATCH /api/agent/projects/:id` endpoint
-  - Accept: `mission`, `description`, `constitution`, `tech_stack`, `instructions`
-  - Optionally update specification content (creates new version)
-- **Files:** New route handler, update logic for specs/plans
-- **Priority:** P0 (Agent needs refinement capability)
-- **Effort:** 2 hours
-- **Dependencies:** Project creation API
-
-#### 5.3 Agent Task Creation API
-- [ ] Implement `POST /api/agent/tasks` endpoint
-  - Accept: `plan_id`, `description`, `priority`, `files_involved`, `dependency_task_id`
-  - Returns: `{ task_id }`
-  - Validate: plan exists, dependency task is valid
-- [ ] Support bulk task creation (array of tasks)
-- **Files:** New route handler, validation, insert logic
-- **Priority:** P0 (Agent must decompose work)
-- **Effort:** 1.5 hours
-- **Dependencies:** None (standalone)
-
-### Phase 6: Polish & Optimization (Optional - 4-6 hours)
-Can implement based on user feedback and pain points.
-
-#### 6.1 Loading States & Skeletons
-- [ ] Create `src/components/skeleton.tsx` component
-- [ ] Add loading.tsx files to all route directories
-- [ ] Apply to: Kanban board, project detail, task lists
-- **Priority:** P1 (UX polish)
-- **Effort:** 1-2 hours
-
-#### 6.2 Error Boundaries
-- [ ] Create `src/app/error.tsx` global error boundary
-- [ ] Create `src/app/not-found.tsx` for 404 pages
-- [ ] Standardize API error responses with proper HTTP codes
-- **Priority:** P1 (Quality)
-- **Effort:** 1-2 hours
-
-#### 6.3 Database Optimization
-- [ ] Add indexes on common foreign keys: `tasks.project_id`, `specifications.project_id`, `plans.spec_id`, `agent_logs.project_id`, `agent_logs.task_id`
-- [ ] Add compound indexes: (`project_id`, `status`) on tasks
-- [ ] Review query patterns and add optimization
-- **Priority:** P1 (Performance)
-- **Effort:** 1 hour
-
-#### 6.4 Enhanced Features (Future)
-- [ ] Task dependency visualization (graph/chart)
-- [ ] Search and filtering across all entities
-- [ ] Real-time WebSocket updates
-- [ ] Export to JSON/CSV
-- [ ] Keyboard shortcuts
-- **Priority:** P2+ (Future enhancements)
-
-## Database Schema Additions Required
-
-### Potential Changes (REVIEW BEFORE IMPLEMENTING)
-
-#### Table: agent_logs
-**Addition:**
-```sql
--- To distinguish manual human logs from agent logs
-ALTER TABLE agent_logs ADD COLUMN is_internal BOOLEAN DEFAULT false;
-```
-**Reason:** When humans add logs manually, mark as internal for filtering
-**Breaks:** No - default value handles existing rows
-
-#### Table: specifications
-**Addition:**
-```sql
--- Track when specs are updated
-ALTER TABLE specifications ADD COLUMN updated_at TIMESTAMP WITH TIME ZONE;
-```
-**Reason:** Version history tracking for spec editor
-**Breaks:** No - nullable field
-**Alternative:** Could use created_at of newer versions to track update time
-
-#### Tables: projects, specifications, plans, tasks
-**Addition:**
-```sql
--- Track who created what (human or agent)
-ALTER TABLE projects ADD COLUMN created_by_user_id INTEGER REFERENCES users(id);
-ALTER TABLE specifications ADD COLUMN created_by_user_id INTEGER REFERENCES users(id);
-ALTER TABLE plans ADD COLUMN created_by_user_id INTEGER REFERENCES users(id);
-ALTER TABLE tasks ADD COLUMN created_by_user_id INTEGER REFERENCES users(id);
-```
-**Reason:** Attribution for multi-user environments
-**Breaks:** No - nullable fields
-**Priority:** Only needed if implementing user auth (Phase 4.6)
-
-**Decision:** Hold off on these changes until we decide on user auth implementation.
-
-## Success Criteria
-
-### Phase 4 Complete (Human-Agent Parity)
-- [ ] Humans can create, read, update, delete projects, specs, plans, tasks via UI
-- [ ] All agent operations have equivalent UI controls
-- [ ] Test results and logs can be manually entered and viewed
-- [ ] All changes persist to PostgreSQL database
-- [ ] Agent and human can collaborate on same project seamlessly
-
-### Phase 5 Complete (Agent Autonomy)
-- [ ] Agent can self-bootstrap from natural language request
-- [ ] Agent can create complete project structure: project + spec + plan
-- [ ] Agent can decompose work by creating tasks dynamically
-- [ ] Developer can monitor agent progress through UI
-- [ ] Human can pause, resume, or stop agent execution
-
-### MVP Complete (All Phases)
-- [ ] Full spec-driven workflow operational end-to-end
-- [ ] Human+Agent can build software together
-- [ ] All data persisted in PostgreSQL state machine
-- [ ] Type-safe API with comprehensive validation
-- [ ] UI provides visibility into all operations
-
-## Architecture Decisions (Updated)
-
-| Decision | Reasoning | Trade-off |
-| -------- | --------- | --------- |
-| **Human-Agent API Parity** | Same APIs for humans and agents ensures consistency | Slightly more complex API design to support both use cases |
-| **Server Actions + API Routes** | Server actions for UI, API routes for agents | Dual patterns but optimal for each user type |
-| **No Auth Phase 4** | Simpler to postpone user management | Single-user assumption for now |
-| **Reusing Agent APIs** | Humans call same POST endpoints as agents | Agent endpoints must be more robust |
-| **Denormalized agent_logs.project_id** | Faster queries when filtering by project | Minor data duplication |
-
-## Next Immediate Actions (Pick One to Start)
-
-1. **Start Phase 4.1:** Create task creation dialog (2-3 hours, independent)
-2. **Start Phase 4.2:** Create plan editor dialog (2-3 hours, independent)
-3. **Start Phase 4.4:** Implement test results logging UI (2-3 hours, shows verification loop)
-4. **Start Phase 5.1:** Implement agent project creation API (2 hours, unlocks autonomy)
-
-**Recommendation:** Start with **Phase 4.1** (task creation) as it's most visible to users and shows immediate value. Then **Phase 4.4** (test results) to complete the verification loop.
+**Last Updated:** March 2026
+**Current Status:** 80% Complete — Core infrastructure & Agent Control APIs operational
+**Estimate Baseline:** Mid-senior full-stack developer, ±50%
+**Key additions in v3:** Git webhook system, parallel execution waves, verify conditions per task, project state memory, codebase analysis, pause/resume, model routing, quick tasks, exhaustive mission context
 
 ---
 
-**Last Updated:** March 5, 2026
-**Status:** 80% Complete
-**Next:** Phase 4 - Human Feature Parity (8-12 hours)
+## Resolved Design Decisions
 
----
-
-## Project Overview
-
-**Goal:** Build an **Autonomous Development Platform** that operationalizes the "Spec-Driven Development" cycle by using PostgreSQL as a structured State Machine. The system enables AI agents (Claude) to execute complex engineering tasks while maintaining persistent memory across sessions.
-
-**Current State:** The app is **core-feature complete** with a functioning database, API layer, and initial UI components. However, the frontend is not fully integrated with the backend, and several critical features are missing.
-
----
-
-## What Has Been Completed ✅
-
-### Infrastructure & Setup
-- ✅ Next.js 14 project with App Router
-- ✅ PostgreSQL 16 with Docker Compose
-- ✅ Drizzle ORM configured and working
-- ✅ TypeScript strict mode
-- ✅ Tailwind CSS for styling
-- ✅ ESLint and basic build configuration
-
-### Database Layer
-- ✅ Complete schema defined (projects, specifications, plans, tasks, test_results, agent_logs)
-- ✅ Drizzle client and migrations set up
-- ✅ Database seeded with initial project data
-- ✅ Type-safe Drizzle types exported
-
-### Agent Memory & API Layer
-- ✅ Agent authentication middleware (`X-Agent-Token`)
-- ✅ Agent memory utilities (`getNextTask`, `getProjectContext`, `updateTaskStatus`, etc.)
-- ✅ Zod schemas for runtime validation
-- ✅ API endpoints implemented:
-  - `GET /api/agent/mission` - Get active specification, plan, and next task
-  - `POST /api/agent/plans` - Create/update plans
-  - `PATCH /api/agent/tasks/:id` - Update task status
-  - `POST /api/agent/verify` - Log test results
-  - `POST /api/agent/logs` - Add agent logs
-
-### UI Components (Basic)
-- ✅ ProjectSidebar component
-- ✅ KanbanBoard component (with column grouping)
-- ✅ TaskCard component
-- ✅ TestResultsPanel component (basic)
-- ✅ AgentLogs component (basic)
-- ✅ SpecificationViewer component (basic)
-- ✅ Home page layout
-
-### Server-Side Logic
-- ✅ Server actions for database operations
-- ✅ Project CRUD (read, create)
-- ✅ Task fetching and status updates
-
----
-
-## What Is NOT Working / Incomplete ❌
-
-### Critical Issues
-1. **New Project button doesn't work** - Sidebar button shows alert instead of creating project
-2. **Project selection not wired** - Clicking a project in sidebar doesn't load its data
-3. **No project detail view** - Need a dedicated page for each project showing:
-   - Active specification
-   - Architecture plan
-   - Tasks breakdown
-4. **Kanban board shows hardcoded sample data** - Not pulling from actual project
-5. **Environment configuration missing** - No `.env.local` setup instructions
-6. **Database seed not run** - Need to execute migrations and seed data
-
-### Feature Gaps
-7. **Task creation from UI** - Can't create new tasks/plans from frontend
-8. **Task drag-and-drop** - Kanban board doesn't allow status updates via UI
-9. **Real-time updates** - No WebSocket or polling for live task updates
-10. **Specification editor** - Can't create/edit specifications from UI
-11. **Plan editor** - Can't create/edit plans from UI
-12. **Test results integration** - No way to log test results from UI
-13. **Agent logs viewer** - No pagination or search in agent logs
-
-### Quality Gaps
-14. **Error boundaries** - No global error handling
-15. **Loading states** - Missing skeletons and loading indicators
-16. **Form validation** - Need proper form components with Zod validation
-17. **Database constraints** - Consider adding unique constraints, indexes
-18. **API error handling** - Need standardized error responses
-19. **Type safety gaps** - Some API routes may need better validation
-
----
-
-## Implementation Plan (Priority Order)
-
-### Phase 1: Fix Critical Issues (Week 1)
-
-#### 1.1 Database Setup & Verification
-- [ ] Create `.env.local` file with DATABASE_URL
-- [ ] Run `npm run db:push` to create tables
-- [ ] Execute `db/seed-simple.sql` to populate data
-- [ ] Verify tables exist using `drizzle-kit studio`
-- **Files:** `.env.local`, database state
-- **Priority:** P0 (Blocking)
-- **Dependencies:** None
-
-#### 1.2 Fix New Project Button
-- [ ] Create form modal/dialog component
-- [ ] Wire up `createProject` action to button click
-- [ ] Add form validation with Zod
-- [ ] Success/error toast notifications
-- [ ] Refresh project list after creation
-- **Files:** `src/components/create-project-dialog.tsx`, `src/components/project-sidebar.tsx`
-- **Priority:** P0 (User-facing)
-- **Dependencies:** 1.1
-
-#### 1.3 Add Project Selection & Routing
-- [ ] Create dynamic project page: `src/app/projects/[id]/page.tsx`
-- [ ] Add `onProjectSelect` handler in sidebar
-- [ ] Update URL when project is selected
-- [ ] Update layout to show active project context
-- **Files:** `src/app/projects/[id]/page.tsx`, `src/components/project-sidebar.tsx`
-- **Priority:** P0 (Navigation)
-- **Dependencies:** 1.2
-
-#### 1.4 Load Real Project Data into Kanban
-- [ ] Update `getProjectTasks` action to actually query DB
-- [ ] Wire project-specific data to KanbanBoard component
-- [ ] Remove hardcoded sample data from page.tsx
-- [ ] Show empty state when no tasks exist
-- **Files:** `src/lib/actions.ts`, `src/app/projects/[id]/page.tsx`
-- **Priority:** P0 (Core feature)
-- **Dependencies:** 1.3
-
-### Phase 2: Core Interactivity (Week 1-2)
-
-#### 2.1 Interactive Kanban Board
-- [ ] Add drag-and-drop library (react-beautiful-dnd or similar)
-- [ ] Implement task status updates on drop
-- [ ] Add optimistic UI updates with rollback
-- [ ] Add animation for smooth transitions
-- [ ] Show task details on click
-- **Files:** `src/components/kanban-board.tsx`, `src/components/task-card.tsx`
-- **Priority:** P1 (Core feature)
-- **Dependencies:** 1.4
-
-#### 2.2 Project Detail View Page
-- [ ] Show selected project info (name, tech stack, base path)
-- [ ] Display active specification with markdown rendering
-- [ ] Show architecture decisions from plan
-- [ ] Display task breakdown by status
-- [ ] Add breadcrumb navigation
-- **Files:** `src/app/projects/[id]/page.tsx`, new components
-- **Priority:** P1 (UI completeness)
-- **Dependencies:** 1.3
-
-#### 2.3 View Task Details Modal
-- [ ] Show full task description and details
-- [ ] Display files involved in task
-- [ ] Show dependencies (dependent and depended-on tasks)
-- [ ] Show test results if available
-- [ ] Show related agent logs
-- **Files:** `src/components/task-details-modal.tsx`
-- **Priority:** P1 (Usability)
-- **Dependencies:** 2.1
-
-### Phase 3: Advanced Features (Week 2-3)
-
-#### 3.1 Create Plan Flow
-- [ ] Add "Create Plan" button to project view
-- [ ] Create plan designer form (JSON editor for architecture decisions)
-- [ ] Validate plan structure
-- [ ] Link spec to plan
-- [ ] Mark plan as active
-- **Files:** `src/components/create-plan-dialog.tsx`, `src/app/api/projects/[id]/plans/route.ts`
-- **Priority:** P2 (Power user feature)
-- **Dependencies:** 2.2
-
-#### 3.2 Create Task Flow
-- [ ] Add "Create Task" button in Kanban
-- [ ] Create task form with:
-  - Description
-  - Files involved (array)
-  - Priority
-  - Dependency selection
-- [ ] Link task to plan
-- [ ] Validate inputs with Zod
-- **Files:** `src/components/create-task-dialog.tsx`, `src/lib/actions.ts`
-- **Priority:** P2 (Core workflow)
-- **Dependencies:** 2.1
-
-#### 3.3 Test Results Integration
-- [ ] Add "Log Test Result" button on tasks
-- [ ] Create test result form (success/fail, logs)
-- [ ] Display test history for each task
-- [ ] Show pass/fail badges on task cards
-- [ ] Query and display test_results table
-- **Files:** `src/components/test-results-panel.tsx`, `src/components/task-card.tsx`
-- **Priority:** P2 (Verification loop)
-- **Dependencies:** 2.3
-
-#### 3.4 Agent Logs Viewer
-- [ ] Create paginated logs view
-- [ ] Add filtering by task/level
-- [ ] Add search functionality
-- [ ] Show timestamp and level indicators
-- [ ] Add export functionality (JSON)
-- **Files:** `src/components/agent-logs.tsx`, `src/app/projects/[id]/logs/page.tsx`
-- **Priority:** P2 (Debugging)
-- **Dependencies:** 2.2
-
-### Phase 4: Polish & Optimization (Week 3)
-
-#### 4.1 Error Handling & Validation
-- [ ] Add global error boundary
-- [ ] Implement proper API error responses (400/404/500)
-- [ ] Add form validation feedback
-- [ ] Add offline detection
-- [ ] Add retry logic for failed requests
-- **Files:** `src/app/error.tsx`, `src/app/api/middleware`, all forms
-- **Priority:** P3 (Quality)
-- **Dependencies:** All previous phases
-
-#### 4.2 Loading & Skeleton States
-- [ ] Create skeleton component
-- [ ] Add loading states to all data-fetching pages
-- [ ] Add loading indicators to buttons
-- [ ] Add page transitions/animations
-- **Files:** `src/components/skeleton.tsx`, all data-fetching pages
-- **Priority:** P3 (UX)
-- **Dependencies:** All previous phases
-
-#### 4.3 Database Optimization
-- [ ] Add indexes on foreign keys (project_id, spec_id, plan_id, task_id)
-- [ ] Add compound indexes on frequently joined tables
-- [ ] Optimize queries with better join strategies
-- [ ] Add database constraints (unique, check)
-- **Files:** `drizzle.config.ts`, migrations
-- **Priority:** P3 (Performance)
-- **Dependencies:** 1.1
-
-#### 4.4 Documentation
-- [ ] Document API endpoints
-- [ ] Add deployment guide
-- [ ] Create environment setup guide
-- [ ] Add troubleshooting section to README
-- **Files:** `README.md`, `docs/`
-- **Priority:** P3 (Maintenance)
-- **Dependencies:** All previous phases
-
-### Phase 5: Advanced Agent Integration (Week 4+)
-
-#### 5.1 Agent Communication Protocol
-- [ ] Implement proper request/response logging
-- [ ] Add request queuing system
-- [ ] Add webhook support for agent callbacks
-- [ ] Implement distributed locking for concurrent tasks
-- **Files:** New API routes, database tables
-- **Priority:** P4 (Future)
-- **Dependencies:** All Phase 1-3
-
-#### 5.2 Specification & Plan Versioning
-- [ ] Track specification versions with diff support
-- [ ] Track plan iterations with change history
-- [ ] Add version comparison UI
-- [ ] Add rollback functionality
-- **Files:** Database schema updates, new components
-- **Priority:** P4 (Future)
-- **Dependencies:** Phase 1-3
-
-#### 5.3 Task Templates & Presets
-- [ ] Create library of common task templates
-- [ ] Add quick-create buttons for common tasks
-- [ ] Save task configurations as templates
-- **Files:** New tables, new UI components
-- **Priority:** P4 (Future)
-- **Dependencies:** Phase 3
-
----
-
-## Technical Debt & Known Issues
-
-1. **Missing environment validation** - App should fail gracefully if DATABASE_URL is missing
-2. **No request/response logging** - Agent requests aren't logged for debugging
-3. **Default project assumption** - Code assumes project_id=1 in sample data
-4. **Type safety gaps** - Some API responses could be better typed with Zod
-5. **No WebSocket support** - Real-time updates would require Socket.io setup
-6. **Missing transaction safety** - Multi-step operations could fail mid-way
-7. **No backup/restore functionality** - Database changes aren't version controlled
-
----
-
-## Database Tasks to Onboard
-
-The following tasks should be created in the database to track implementation:
-
-```sql
--- Phase 1 Tasks (Critical)
-INSERT INTO tasks (plan_id, description, status, priority, files_involved, dependency_task_id) VALUES
-  (1, 'Set up .env.local with DATABASE_URL', 'todo', 1, '[".env.local"]', NULL),
-  (1, 'Run database migrations (npm run db:push)', 'todo', 1, '["drizzle.config.ts"]', NULL),
-  (1, 'Execute seed-simple.sql to populate data', 'todo', 1, '["db/seed-simple.sql"]', NULL),
-  (1, 'Fix New Project button - wire up action', 'todo', 1, '["src/components/project-sidebar.tsx"]', NULL),
-  (1, 'Create create-project-dialog component', 'todo', 1, '["src/components/create-project-dialog.tsx"]', NULL),
-  (1, 'Add project routing - create [id]/page.tsx', 'todo', 1, '["src/app/projects/[id]/page.tsx"]', NULL),
-  (1, 'Load real project data in Kanban board', 'todo', 1, '["src/lib/actions.ts"]', NULL);
-
--- Phase 2 Tasks (High Priority)
-INSERT INTO tasks (plan_id, description, status, priority, files_involved, dependency_task_id) VALUES
-  (1, 'Add drag-and-drop to Kanban board', 'todo', 2, '["src/components/kanban-board.tsx"]', 38),
-  (1, 'Create project detail view component', 'todo', 2, '["src/app/projects/[id]/page.tsx"]', 37),
-  (1, 'Create task details modal component', 'todo', 2, '["src/components/task-details-modal.tsx"]', 40),
-  (1, 'Add markdown rendering for specifications', 'todo', 2, '["src/components/specification-viewer.tsx"]', 40),
-  (1, 'Display architecture decisions in UI', 'todo', 2, '["src/app/projects/[id]/page.tsx"]', 40),
-  (1, 'Add breadcrumb navigation', 'todo', 2, '["src/components/breadcrumb.tsx"]', 40);
-
--- Phase 3 Tasks (Medium Priority)
-INSERT INTO tasks (plan_id, description, status, priority, files_involved, dependency_task_id) VALUES
-  (1, 'Create plan designer form', 'todo', 2, '["src/components/create-plan-dialog.tsx"]', 41),
-  (1, 'Create task creation form', 'todo', 2, '["src/components/create-task-dialog.tsx"]', 39),
-  (1, 'Implement test result logging UI', 'todo', 2, '["src/components/test-results-panel.tsx"]', 42),
-  (1, 'Build paginated agent logs viewer', 'todo', 2, '["src/components/agent-logs.tsx"]', 42),
-  (1, 'Add search and filter to logs', 'todo', 3, '["src/components/agent-logs.tsx"]', 51);
-
--- Phase 4 Tasks (Polish)
-INSERT INTO tasks (plan_id, description, status, priority, files_involved, dependency_task_id) VALUES
-  (1, 'Implement global error boundary', 'todo', 3, '["src/app/error.tsx"]', NULL),
-  (1, 'Add API error handling standard', 'todo', 3, '["src/app/api/**"]', NULL),
-  (1, 'Create skeleton/loading components', 'todo', 3, '["src/components/skeleton.tsx"]', NULL),
-  (1, 'Add database indexes for performance', 'todo', 3, '["drizzle.config.ts"]', NULL),
-  (1, 'Create API documentation', 'todo', 3, '["docs/API.md"]', NULL);
-```
-
----
-
-## Success Criteria
-
-By the end of Phase 1, the app will:
-- ✅ Have a functioning database with seed data
-- ✅ Allow users to create new projects through the UI
-- ✅ Display project-specific tasks in the Kanban board
-- ✅ Show project details and specifications
-
-By the end of Phase 3, the app will:
-- ✅ Support full project lifecycle (create spec → plan → tasks → execute)
-- ✅ Allow real-time collaboration on tasks
-- ✅ Track and display test results
-- ✅ Provide visibility into agent operations via logs
+| Question                           | Decision                                                                                               | Rationale                                                        |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
+| Should tasks have effort points?   | **Yes** — `estimate_hours` (nullable int) on tasks                                                     | Low schema cost, useful for agent workload planning              |
+| Do we need task comments?          | **No for MVP** — use agent_logs with `task_id`                                                         | Avoids a new table; revisit post-MVP                             |
+| Multiple active specs per project? | **No** — single active spec via `is_active` boolean                                                    | Simplifies mission endpoint; immutable rows handle history       |
+| RBAC?                              | **Yes, schema now; UI enforced in Phase A.7** — `role` on users                                        | Agents must be scoped before autonomous project creation ships   |
+| Agent auto-assign tasks?           | **No for MVP** — agents pick next unblocked task by priority                                           | Add `assigned_to` post-MVP if needed                             |
+| Git integration method?            | **Webhooks** — agent calls `POST /api/webhooks/git` after each task                                    | Decoupled, auditable, works with any git host                    |
+| Git branching strategy?            | **Per-project configurable** — `none`, `per-phase`, or `per-milestone` stored in `projects.git_config` | Mirrors GSD approach; default `none` (commits to current branch) |
+| Parallel task execution?           | **Yes** — `GET /api/agent/wave` returns all currently unblocked tasks                                  | Single-task polling is a bottleneck; waves enable parallelism    |
+| Quick/ad-hoc tasks?                | **Yes** — tasks with `plan_id = NULL` attached directly to project                                     | Phase structure is optional for small fixes                      |
+| Pause/resume?                      | **Yes** — `POST /api/agent/pause` writes `resume_context` JSONB to task                                | Prevents orphaned state when agent stops mid-task                |
+| Model routing?                     | **Yes** — mission response includes `recommended_model` hint based on task type                        | Cheap tasks don't need Opus                                      |
+| Brownfield analysis?               | **Yes** — auto-generated as first task when `base_path` is set                                         | Agent reads codebase conventions before planning                 |
+| Auth provider?                     | **NextAuth with credentials-only for MVP** — no OAuth until post-MVP                                   | Minimizes setup; easy to add GitHub/Google OAuth later           |
+| Context rot mitigation?            | **Mission endpoint must be exhaustive** — returns full context, not just next task                     | Agent must never need a second call to start work                |
 
 ---
 
 ## Architecture Decisions
 
-| Decision                  | Reasoning                                        | Trade-off                       |
-| ------------------------- | ------------------------------------------------ | ------------------------------- |
-| **Next.js 14 App Router** | Modern React patterns, better DX                 | Slightly larger bundle          |
-| **Drizzle ORM**           | Type-safe, lightweight, great DX                 | Less ecosystem than TypeORM     |
-| **PostgreSQL**            | State machine reliability, JSONB for flexibility | More setup than SQLite          |
-| **Tailwind CSS**          | Utility-first, rapid iteration                   | Large CSS output                |
-| **Server Actions**        | Simpler data fetching, reduced API boilerplate   | Less control over network layer |
+| Decision                                         | Reasoning                                                             | Trade-off                                                       |
+| ------------------------------------------------ | --------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Next.js 14 App Router                            | Modern React patterns, better DX                                      | Slightly larger bundle                                          |
+| Drizzle ORM                                      | Type-safe, lightweight                                                | Less ecosystem than Prisma                                      |
+| PostgreSQL 16                                    | State machine reliability, JSONB flexibility                          | More setup than SQLite                                          |
+| Tailwind + Shadcn/UI                             | Utility-first, rapid iteration                                        | Opinionated defaults                                            |
+| Server Actions + API Routes                      | Server actions for UI, API routes for agents                          | Dual patterns, optimal per caller                               |
+| Human-Agent API parity                           | Same POST endpoints for humans and agents                             | Agent endpoints must be robust enough for UI                    |
+| Immutable spec versioning                        | New row per save, `is_active` toggle                                  | Audit trail; no destructive updates                             |
+| Static `X-Agent-Token` → per-project scoped JWTs | MVP simplicity → Phase B.5 upgrade                                    | Must upgrade before multi-agent                                 |
+| Vitest + Playwright                              | Native ESM, fast, integrates with Next.js                             | Playwright E2E adds overhead but catches regressions            |
+| Git webhooks (not direct git CLI calls)          | Decoupled; Spec-Drivr doesn't own the agent's filesystem              | Agent calls webhook; Spec-Drivr records commit SHA and metadata |
+| Parallel task waves                              | Agents capable of parallelism are bottlenecked by single-task polling | Wave endpoint computes dependency graph server-side             |
+| Project state JSONB                              | Cross-session memory for decisions, blockers, context                 | Replaces implicit agent knowledge lost between sessions         |
 
 ---
 
-## Next Immediate Actions
+## Complete Database Schema (v3 — apply all before any Phase A work)
 
-1. Verify `.env.local` exists with `DATABASE_URL`
-2. Run `npm run db:push` to ensure migrations are applied
-3. Execute `db/seed-simple.sql` or create seeding utility
-4. Test `GET /api/agent/mission?project_id=1` to verify API works
-5. Implement the Phase 1 tasks in order of dependency
+### Existing Tables (no changes needed)
+- `projects` — metadata, agent state fields
+- `specifications` — versioned markdown, `is_active`
+- `plans` — JSON architecture decisions, status lifecycle
+- `tasks` — implementation units with retry, dependency, notes
+- `test_results` — verification logs
+- `agent_logs` — execution logs with `project_id`
+- `users` — accounts
+
+### All Schema Additions
+
+```sql
+-- ============================================================
+-- PROJECTS: extended agent tracking, git config, project state
+-- ============================================================
+
+ALTER TABLE projects ADD COLUMN agent_last_heartbeat_at TIMESTAMP WITH TIME ZONE;
+
+-- Cross-session memory: decisions, blockers, current position
+ALTER TABLE projects ADD COLUMN state JSONB DEFAULT '{
+  "decisions": [],
+  "blockers": [],
+  "last_position": null,
+  "context_summary": null
+}'::jsonb;
+
+-- Git integration configuration per project
+ALTER TABLE projects ADD COLUMN git_config JSONB DEFAULT '{
+  "enabled": false,
+  "provider": "github",
+  "repo_url": null,
+  "default_branch": "main",
+  "branching_strategy": "none",
+  "phase_branch_template": "specdriver/phase-{phase_id}-{slug}",
+  "milestone_branch_template": "specdriver/{milestone}-{slug}",
+  "webhook_secret": null,
+  "commit_message_template": "{type}({plan_id}-{task_id}): {description}"
+}'::jsonb;
+
+-- Attribution
+ALTER TABLE projects ADD COLUMN created_by_user_id INTEGER REFERENCES users(id);
+
+-- ============================================================
+-- SPECIFICATIONS: optimistic locking, attribution
+-- ============================================================
+
+ALTER TABLE specifications ADD COLUMN updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+ALTER TABLE specifications ADD COLUMN created_by_user_id INTEGER REFERENCES users(id);
+
+-- ============================================================
+-- PLANS: attribution, phase intent capture (discuss-phase equivalent)
+-- ============================================================
+
+ALTER TABLE plans ADD COLUMN created_by_user_id INTEGER REFERENCES users(id);
+
+-- Human-authored intent captured before agent starts planning
+-- Free text: "I want card layout, infinite scroll, no modals, keep it minimal"
+ALTER TABLE plans ADD COLUMN intent TEXT;
+
+-- Phase label for multi-milestone projects (e.g. "Phase 1", "Auth Milestone")
+ALTER TABLE plans ADD COLUMN phase_label VARCHAR(100);
+
+-- ============================================================
+-- TASKS: verification conditions, effort, model hint, pause state, quick mode
+-- ============================================================
+
+ALTER TABLE tasks ADD COLUMN created_by_user_id INTEGER REFERENCES users(id);
+ALTER TABLE tasks ADD COLUMN estimate_hours INTEGER;
+
+-- Machine-checkable acceptance condition (shell command or curl call)
+-- e.g. "curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/api/health | grep 200"
+ALTER TABLE tasks ADD COLUMN verify_command TEXT;
+
+-- Human-readable success definition
+-- e.g. "Valid credentials return 200 + Set-Cookie header; invalid return 401"
+ALTER TABLE tasks ADD COLUMN done_criteria TEXT;
+
+-- Pause/resume: written by POST /api/agent/pause, read by GET /api/agent/mission
+ALTER TABLE tasks ADD COLUMN resume_context JSONB;
+
+-- Status extension: add 'paused' to workflow
+-- Valid statuses: todo | in_progress | paused | blocked | done | skipped
+ALTER TABLE tasks DROP CONSTRAINT IF EXISTS tasks_status_check;
+ALTER TABLE tasks ADD CONSTRAINT tasks_status_check
+  CHECK (status IN ('todo', 'in_progress', 'paused', 'blocked', 'done', 'skipped'));
+
+-- Model routing hint: 'haiku' | 'sonnet' | 'opus'
+-- Set by planner based on task complexity; returned in mission/wave response
+ALTER TABLE tasks ADD COLUMN recommended_model VARCHAR(20) DEFAULT 'sonnet'
+  CHECK (recommended_model IN ('haiku', 'sonnet', 'opus'));
+
+-- Quick mode: plan_id = NULL means task is ad-hoc, attached directly to project
+-- project_id is already on tasks; make plan_id nullable if not already
+ALTER TABLE tasks ALTER COLUMN plan_id DROP NOT NULL;
+
+-- ============================================================
+-- AGENT LOGS: distinguish human-entered from agent-generated
+-- ============================================================
+
+ALTER TABLE agent_logs ADD COLUMN is_internal BOOLEAN DEFAULT false;
+
+-- ============================================================
+-- USERS: roles for RBAC
+-- ============================================================
+
+ALTER TABLE users ADD COLUMN role VARCHAR(20) DEFAULT 'developer'
+  CHECK (role IN ('admin', 'developer', 'viewer'));
+
+-- ============================================================
+-- NEW TABLE: git_commits — audit trail for all agent git activity
+-- ============================================================
+
+CREATE TABLE git_commits (
+  id          SERIAL PRIMARY KEY,
+  project_id  INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  task_id     INTEGER REFERENCES tasks(id),
+  plan_id     INTEGER REFERENCES plans(id),
+  commit_sha  VARCHAR(40) NOT NULL,
+  branch      VARCHAR(255) NOT NULL,
+  message     TEXT NOT NULL,
+  author      VARCHAR(255),        -- agent token name or username
+  committed_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  metadata    JSONB                -- files changed, lines added/removed, etc.
+);
+
+-- ============================================================
+-- NEW TABLE: agent_tokens — per-project scoped tokens (Phase B.5)
+-- ============================================================
+
+CREATE TABLE agent_tokens (
+  id           SERIAL PRIMARY KEY,
+  project_id   INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  name         VARCHAR(100) NOT NULL,   -- e.g. "claude-code-agent-1"
+  token_hash   VARCHAR(255) NOT NULL UNIQUE,
+  created_by   INTEGER REFERENCES users(id),
+  created_at   TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  last_used_at TIMESTAMP WITH TIME ZONE,
+  revoked_at   TIMESTAMP WITH TIME ZONE,
+  preferred_model VARCHAR(20) DEFAULT 'sonnet'
+    CHECK (preferred_model IN ('haiku', 'sonnet', 'opus'))
+);
+
+-- ============================================================
+-- NEW TABLE: api_request_logs — agent API observability
+-- ============================================================
+
+CREATE TABLE api_request_logs (
+  id          SERIAL PRIMARY KEY,
+  token_id    INTEGER REFERENCES agent_tokens(id),
+  endpoint    VARCHAR(255) NOT NULL,
+  method      VARCHAR(10) NOT NULL,
+  status_code INTEGER NOT NULL,
+  duration_ms INTEGER NOT NULL,
+  project_id  INTEGER REFERENCES projects(id),
+  requested_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- ============================================================
+-- PERFORMANCE INDEXES
+-- ============================================================
+
+CREATE INDEX idx_tasks_project_status    ON tasks (project_id, status);
+CREATE INDEX idx_tasks_plan_status       ON tasks (plan_id, status);
+CREATE INDEX idx_tasks_dependency        ON tasks (dependency_task_id);
+CREATE INDEX idx_agent_logs_project      ON agent_logs (project_id);
+CREATE INDEX idx_agent_logs_task         ON agent_logs (task_id);
+CREATE INDEX idx_specifications_project  ON specifications (project_id);
+CREATE INDEX idx_test_results_task       ON test_results (task_id);
+CREATE INDEX idx_git_commits_project     ON git_commits (project_id);
+CREATE INDEX idx_git_commits_task        ON git_commits (task_id);
+CREATE INDEX idx_api_request_logs_token  ON api_request_logs (token_id);
+CREATE INDEX idx_agent_tokens_project    ON agent_tokens (project_id);
+```
+
+> All additions are nullable or have defaults. No existing rows break. Run via:
+> `npm run db:generate && npm run db:push`
 
 ---
 
-## Questions to Resolve
+## What Is Complete ✅
 
-1. Should tasks have estimated time/effort points?
-2. Do we need task comments/discussions?
-3. Should projects have multiple active specifications?
-4. Do we need role-based access control (admin, developer, viewer)?
-5. Should the agent be able to auto-assign tasks based on rules?
+- Next.js 14, App Router, TypeScript strict mode, PostgreSQL 16, Drizzle ORM, Tailwind + Shadcn/UI
+- `GET /api/agent/mission`, `POST /api/agent/plans`, `PATCH /api/agent/tasks/:id`, `POST /api/agent/verify`, `POST /api/agent/logs`
+- `X-Agent-Token` middleware + Zod validation on all endpoints
+- Project-level agent controls: start, pause, stop, retry, status
+- Task-level controls: retry, skip
+- Drag-and-drop Kanban, project sidebar, project detail pages, spec viewer, create project dialog
+- Test results panel (placeholder), agent logs panel (placeholder)
+- `seed-simple.sql`, `seed-demo.sql`, `seed-onboarding.sql`
 
+---
+
+## What Is Incomplete ❌
+
+- Human feature parity (task creation, plan editor, spec editor, test logging, auth) → Phase A
+- Exhaustive mission endpoint, parallel wave endpoint → Phase A.1 audit + Phase B
+- Git webhook system → Phase G
+- Project state memory, pause/resume, model routing, brownfield analysis → Phase B
+- Agent self-bootstrapping APIs → Phase B
+- Per-project scoped tokens → Phase B.5
+- Quick mode (ad-hoc tasks) → Phase A.2
+- Testing infrastructure → Phase T (runs alongside all phases)
+- Quality hardening → Phase D
+
+---
+
+## Phase A: Human Feature Parity (~16 hours)
+
+### A.1 Schema Migration + Mission Endpoint Audit
+
+**Schema:**
+- Run all SQL from the schema section above
+- `npm run db:generate && npm run db:push`
+- Effort: 1 hour | Priority: P0 | Blocks: everything
+
+**Mission endpoint audit:**
+`GET /api/agent/mission?project_id=X` must return a single self-contained response. Agent must be able to start work immediately with zero follow-up calls. Audit and update the response shape to include:
+
+```typescript
+// src/app/api/agent/mission/route.ts — required response shape
+{
+  project: {
+    id, name, mission, description, tech_stack, base_path, instructions,
+    state: { decisions, blockers, last_position, context_summary }
+  },
+  specification: {
+    id, content, version, updated_at
+  },
+  active_plan: {
+    id, phase_label, intent, architecture_decisions, status
+  },
+  next_task: {
+    id, description, priority, files_involved, estimate_hours,
+    verify_command, done_criteria, recommended_model,
+    dependency_task_id, retry_count, resume_context,
+    test_results: [ { success, logs, created_at } ],  // last 3 results for this task
+    related_logs: [ { level, message, created_at } ]  // last 5 agent logs for this task
+  },
+  // Wave-aware: all currently unblocked tasks (for parallel agents)
+  unblocked_tasks: [ { id, description, priority, recommended_model, estimate_hours } ]
+}
+```
+
+If no active plan, no active spec, or no unblocked tasks, return explicit `null` for each field with a `reason` string. Never return a 200 with ambiguous empty data.
+
+- Effort: 1.5 hours | Priority: P0
+
+### A.2 Task Creation UI (including Quick Mode)
+
+- [ ] `src/components/create-task-dialog.tsx`
+  - Fields: description (required), priority 1–5 (required), files_involved (tag input, comma-separated), estimate_hours (optional int), dependency_task_id (searchable dropdown of tasks in same plan), verify_command (optional text), done_criteria (optional text), recommended_model (select: haiku/sonnet/opus, default sonnet)
+  - Toggle: "Quick task" — when enabled, plan_id is set to NULL and task is attached directly to project_id
+  - Zod validation with inline error display (not just toast)
+  - Submit to `actions.createTask()` server action
+- [ ] "Create Task" button in Kanban board header (always visible)
+- [ ] "Quick Task" shortcut button in project sidebar (sets quick mode toggle by default)
+- [ ] Quick tasks appear in their own Kanban column: "Ad Hoc"
+- [ ] `src/lib/actions.ts` — `createTask()` server action; validates plan_id OR project_id is set
+- [ ] Success toast + optimistic Kanban refresh (add card immediately, revert on error)
+- Effort: 3 hours | Priority: P0 | Dependencies: A.1
+
+### A.3 Plan Editor UI (including Intent Capture)
+
+- [ ] `src/components/create-plan-dialog.tsx`
+  - Step 1 — Intent: free-text textarea "Describe how you want this phase built" → saves to `plans.intent`
+  - Step 2 — Architecture: structured JSON editor for `architecture_decisions` with schema validation and formatted preview
+  - Step 3 — Review: shows intent + decisions side by side before submit
+  - `phase_label` field: text input, e.g. "Phase 1 — Auth"
+  - Calls `POST /api/agent/plans`
+- [ ] "Create Plan" button on project detail page
+- [ ] Active plan card on project detail: shows `phase_label`, `intent`, summarised `architecture_decisions`, status badge
+- Effort: 3 hours | Priority: P0 | Dependencies: A.1
+
+### A.4 Specification Editor
+
+- [ ] `src/components/spec-editor.tsx`
+  - Markdown editor: use `@uiw/react-md-editor` (MIT licensed, no SSR issues with `dynamic` import)
+  - Live split-pane preview
+  - Save behaviour: creates new `specifications` row (`is_active = true`), marks previous row `is_active = false` — never mutates existing rows
+  - Optimistic lock: on save, send `{ content, expected_updated_at }` to server action; server compares `updated_at` from DB; if mismatch, return `409 Conflict` with diff of conflicting changes surfaced in UI
+  - Version history panel: chronological list of all spec versions, each showing `created_at`, word count delta, and "View" button (read-only modal)
+- [ ] Integrate into `specification-viewer` — toggle between view mode and edit mode
+- Effort: 4 hours | Priority: P0 | Dependencies: A.1
+
+### A.5 Test Results Logging UI
+
+- [ ] "Log Test Result" button on every task card (visible in Kanban and task detail modal)
+- [ ] `src/components/log-test-result-dialog.tsx`
+  - Fields: success (toggle: Pass/Fail), logs (textarea), task_id (pre-filled from context)
+  - If task has `verify_command`: show it read-only; add "Copy command" button for convenience
+  - Calls `POST /api/agent/verify`
+- [ ] `test-results-panel.tsx`: query `test_results` table; display chronological list per task with pass/fail badge, timestamp, log preview (expandable)
+- [ ] Task cards show latest test result badge: green check, red X, or grey dash (no results yet)
+- Effort: 2.5 hours | Priority: P0 | Dependencies: A.2
+
+### A.6 Manual Agent Log Entry UI
+
+- [ ] "Add Log Entry" button in agent-logs panel header
+- [ ] `src/components/add-log-dialog.tsx`
+  - Fields: level (select: info/warn/error/debug), message (required textarea), task_id (optional searchable select), context (optional JSON textarea with validation)
+  - Sets `is_internal = true`
+  - Calls `POST /api/agent/logs`
+- [ ] `agent-logs.tsx` filter bar: "All" | "Agent" | "Internal" toggle, plus level filter checkboxes
+- [ ] Pagination: 50 logs per page, load-more button (not infinite scroll — avoids scroll position jumps)
+- Effort: 2 hours | Priority: P1 | Dependencies: A.1
+
+### A.7 Authentication + RBAC
+
+- [ ] Install `next-auth@^5` (Auth.js) with credentials provider
+- [ ] `src/app/auth/login/page.tsx` — login form: username + password, Zod validation, error states inline
+- [ ] NextAuth config: `src/lib/auth.ts` — credentials provider validates against `users.password_hash` (bcrypt)
+- [ ] Middleware `src/middleware.ts` — protect all `/projects/*` routes; redirect to `/auth/login` if no session
+- [ ] Session context: `src/components/user-header.tsx` — show avatar, username, role badge, logout button
+- [ ] All server actions and API route handlers read session and write `created_by_user_id`
+- [ ] Role enforcement in middleware:
+  - `viewer`: GET requests only; all mutations return 403
+  - `developer`: full CRUD on projects/specs/plans/tasks they didn't create + their own; cannot manage users
+  - `admin`: full access + user management page
+- [ ] `src/app/admin/users/page.tsx` — list users, change role, deactivate account (admin only)
+- [ ] UI differentiation in Kanban and logs: label actions as avatar + name vs robot icon + "Agent"
+- Effort: 5 hours | Priority: P1 | Dependencies: A.1
+
+---
+
+## Phase G: Git Webhook System (~7 hours)
+
+This is a standalone phase because git integration touches the schema, a new API surface, and UI. It can run in parallel with Phase B.
+
+### G.1 Git Webhook Inbound Endpoint
+
+Agents call this endpoint immediately after committing. Spec-Drivr does not make git calls itself — it is the receiver, not the initiator.
+
+```typescript
+// POST /api/webhooks/git
+// Called by: the agent (Claude Code, OpenCode, etc.) after every atomic task commit
+// Auth: X-Agent-Token (same as other agent endpoints)
+
+// Request body:
+{
+  project_id: number,
+  task_id: number | null,        // null for non-task commits (e.g. chore: update deps)
+  plan_id: number | null,
+  commit_sha: string,            // 40-char SHA
+  branch: string,                // e.g. "main" or "specdriver/phase-2-auth"
+  message: string,               // full commit message
+  author: string,                // agent token name
+  committed_at: string,          // ISO 8601
+  metadata: {
+    files_changed: string[],
+    lines_added: number,
+    lines_removed: number,
+    repo_url: string             // e.g. "https://github.com/org/repo"
+  }
+}
+
+// Response:
+{ ok: true, commit_id: number }
+```
+
+- [ ] `src/app/api/webhooks/git/route.ts` — validate body with Zod; insert into `git_commits` table; update `tasks.notes` with commit SHA if `task_id` provided
+- [ ] Rate limit: 60 req/min per token (commits should not exceed this in normal use)
+- [ ] Idempotent: if `commit_sha` already exists for the project, return `200` without reinserting
+- Effort: 2 hours | Priority: P0
+
+### G.2 Commit Message Enforcement
+
+The agent is responsible for generating commit messages, but Spec-Drivr provides the template:
+
+- `git_config.commit_message_template` default: `"{type}({plan_id}-{task_id}): {description}"`
+- Template variables: `{type}` (feat/fix/chore/docs/test), `{plan_id}`, `{task_id}`, `{description}` (first 72 chars of task.description), `{phase_label}`
+- `GET /api/agent/mission` response includes resolved `commit_message_template` with plan_id and task_id pre-filled — agent only needs to choose `{type}` and can use `{description}` verbatim
+- Effort: 0.5 hours | Priority: P0 | Dependencies: G.1
+
+### G.3 Branching Strategy Enforcement
+
+Branching strategy is stored in `projects.git_config.branching_strategy`. Mission endpoint returns the current branch the agent should be on:
+
+```typescript
+// Added to GET /api/agent/mission response:
+git: {
+  current_branch: string,         // computed from strategy + current plan/phase
+  commit_message_template: string, // pre-filled with plan_id, task_id
+  webhook_url: string,            // absolute URL to POST /api/webhooks/git
+  strategy: 'none' | 'per-phase' | 'per-milestone'
+}
+```
+
+Strategy behaviour:
+- `none` — agent commits to default branch; `current_branch` = `git_config.default_branch`
+- `per-phase` — branch named from `phase_branch_template`; agent creates it if missing; merged at phase completion via `POST /api/agent/phase-complete`
+- `per-milestone` — single branch per milestone; merged at milestone completion
+
+- [ ] Add `POST /api/agent/phase-complete` endpoint: marks all tasks in plan as done, triggers merge instruction in response (merge commit SHA expected via webhook within 5 min, or warning logged)
+- Effort: 2 hours | Priority: P1 | Dependencies: G.1
+
+### G.4 Git Commit UI in Spec-Drivr
+
+- [ ] New tab on project detail page: "Commits" — lists `git_commits` rows in reverse chronological order
+  - Each row: commit SHA (first 7 chars, links to `metadata.repo_url/commit/{sha}` if set), branch, message, author (agent name or user), timestamp, task link
+  - Filter by: branch, plan, date range
+- [ ] Task detail modal: "Commits" section — lists all commits for that task_id
+- [ ] Kanban task card: small git icon + commit count badge if task has commits
+- Effort: 2.5 hours | Priority: P1 | Dependencies: G.1
+
+### G.5 Git Config UI
+
+- [ ] `src/components/git-config-panel.tsx` on project settings page
+  - Toggle: Enable Git Integration
+  - Fields: provider (GitHub/GitLab/Bitbucket/Other), repo URL, default branch, branching strategy (radio: none/per-phase/per-milestone), commit message template (editable with variable hints), webhook secret (generated, copyable)
+  - Shows: webhook URL to configure in their git provider's settings
+- Effort: 1 hour | Priority: P2 | Dependencies: G.1
+
+---
+
+## Phase B: Agent Autonomy + Intelligence (~12 hours)
+
+All endpoints in this phase use Drizzle transactions. Partial failure rolls back completely.
+
+### B.1 Agent Project Creation API
+
+```typescript
+// POST /api/agent/projects
+// Auth: X-Agent-Token (global token; per-project tokens created after project exists)
+
+// Request:
+{
+  name: string,
+  mission: string,           // 1-2 sentence purpose statement
+  description: string,
+  tech_stack: string[],      // e.g. ["Next.js 14", "PostgreSQL", "TypeScript"]
+  instructions: string,      // agent-specific guidance (code style, patterns to follow)
+  base_path: string,         // absolute path to codebase root on agent's filesystem
+  git_config?: {             // optional; can be set later via PATCH
+    enabled: boolean,
+    repo_url: string,
+    default_branch: string,
+    branching_strategy: 'none' | 'per-phase' | 'per-milestone'
+  }
+}
+
+// Response:
+{
+  project_id: number,
+  specification_id: number,
+  plan_id: number,
+  webhook_url: string,       // pre-computed URL for git webhook
+  mission_url: string        // URL agent should poll: GET /api/agent/mission?project_id=X
+}
+```
+
+- [ ] Transaction: create project → create empty specification (content = mission as markdown) → create empty plan (status = 'draft')
+- [ ] If `base_path` is set: automatically create first task: `{ description: "Analyse codebase at {base_path}: extract stack, conventions, patterns, and concerns. Write findings into specification.content under heading '## Codebase Analysis'.", priority: 1, recommended_model: 'sonnet', verify_command: "curl -s http://localhost:3000/api/projects/{project_id} | jq '.specification.content | contains(\"Codebase Analysis\")'", done_criteria: "Specification contains a Codebase Analysis section with stack, conventions, and at least 3 identified patterns" }`
+- [ ] Rate limit: 10 project creations per hour per token
+- Effort: 2.5 hours | Priority: P0 | Dependencies: schema
+
+### B.2 Agent Project Configuration API
+
+```typescript
+// PATCH /api/agent/projects/:id
+{
+  mission?: string,
+  description?: string,
+  tech_stack?: string[],
+  instructions?: string,
+  specification_content?: string,  // if provided: creates new spec version, marks previous inactive
+  state?: Partial<ProjectState>    // merge-patches existing state JSONB (not replace)
+}
+```
+
+- `state` patch uses PostgreSQL `jsonb_set` to merge — agent can update `decisions` array without knowing the full state object
+- Updating `specification_content` follows the same optimistic lock as the UI editor: request must include `expected_spec_updated_at`; 409 on mismatch
+- Effort: 1.5 hours | Priority: P0 | Dependencies: B.1
+
+### B.3 Agent Task Creation API (Bulk)
+
+```typescript
+// POST /api/agent/tasks
+{
+  plan_id: number | null,  // null for quick/ad-hoc tasks
+  project_id: number,
+  tasks: [{
+    description: string,
+    priority: number,          // 1–5
+    files_involved: string[],
+    dependency_task_id?: number,
+    estimate_hours?: number,
+    verify_command?: string,
+    done_criteria?: string,
+    recommended_model?: 'haiku' | 'sonnet' | 'opus'
+  }]
+}
+
+// Response:
+{ task_ids: number[], tasks: Task[] }
+```
+
+- Validates: plan exists and belongs to the agent's project; all `dependency_task_id` values belong to the same plan
+- Inserts as a single transaction — either all tasks are created or none
+- Effort: 1.5 hours | Priority: P0
+
+### B.4 Parallel Wave Endpoint
+
+Single-task polling bottlenecks agents capable of parallelism. This endpoint computes which tasks can run simultaneously.
+
+```typescript
+// GET /api/agent/wave?project_id=X&plan_id=Y
+// Returns all tasks where:
+//   status = 'todo'
+//   AND (dependency_task_id IS NULL OR dependency.status = 'done')
+// Ordered by priority ASC
+
+{
+  wave_id: string,           // hash of returned task IDs — use to detect wave changes
+  tasks: [{
+    id, description, priority, files_involved,
+    verify_command, done_criteria,
+    recommended_model, estimate_hours,
+    resume_context              // non-null if previously paused
+  }],
+  wave_complete: boolean,    // true if all tasks in plan are done
+  plan_complete: boolean
+}
+```
+
+- Agent claims a task before starting via `PATCH /api/agent/tasks/:id` (`status: 'in_progress'`) — this is the existing endpoint, no change needed
+- If two agents try to claim the same task simultaneously, the second `PATCH` gets a `409 Conflict` (add `WHERE status = 'todo'` check in the update query)
+- Effort: 2 hours | Priority: P1 | Dependencies: schema
+
+### B.5 Agent Heartbeat + Stale Detection
+
+```typescript
+// POST /api/agent/heartbeat
+{ project_id: number, task_id?: number }
+
+// Response:
+{ ok: true, project_status: string }
+```
+
+- Updates `projects.agent_last_heartbeat_at = NOW()`
+- Agent sends this every 30 seconds while running
+- `GET /api/projects/:id/agent/status` response includes:
+  ```typescript
+  {
+    status: string,
+    is_stale: boolean,          // true if last_heartbeat_at > 2 minutes ago
+    stale_since?: string,       // ISO timestamp
+    uptime_seconds: number
+  }
+  ```
+- UI: project header shows "Agent unresponsive — last seen X min ago" warning badge when `is_stale = true`
+- Effort: 1 hour | Priority: P1
+
+### B.6 Pause/Resume
+
+```typescript
+// POST /api/agent/pause
+{
+  project_id: number,
+  task_id: number,
+  resume_context: {
+    completed_steps: string[],   // what was done before pause
+    remaining_steps: string[],   // what still needs doing
+    files_modified: string[],    // files already changed
+    notes: string                // anything the next agent instance needs to know
+  }
+}
+```
+
+- Sets `tasks.status = 'paused'`, writes `resume_context` JSONB
+- `GET /api/agent/mission` and `GET /api/agent/wave` return paused tasks with `resume_context` populated — agent reads this before continuing
+- `POST /api/agent/resume` (body: `{ task_id }`) sets status back to `in_progress`, clears `resume_context` once agent confirms it has read it
+- UI: paused tasks show a "Paused" badge in Kanban with resume_context preview on hover
+- Effort: 1.5 hours | Priority: P1
+
+### B.7 Per-Project Scoped Agent Tokens
+
+- [ ] `agent_tokens` table already created in schema above
+- [ ] `POST /api/projects/:id/tokens` — generate new scoped token (admin or developer only)
+  - Body: `{ name: string, preferred_model?: string }`
+  - Response: `{ token: string, id: number }` — raw token shown once only; store `bcrypt(token)` in DB
+- [ ] `DELETE /api/projects/:id/tokens/:token_id` — revoke token (sets `revoked_at`)
+- [ ] Auth middleware updated: check `agent_tokens` table first; if match, scope request to `token.project_id`; reject if token tries to access a different project
+- [ ] Global `X-Agent-Token` env var still works for bootstrapping (creating new projects), but cannot access existing project data once scoped tokens exist for that project
+- [ ] UI: token management panel in project settings — list tokens (name, last_used_at, created_by, preferred_model), generate button, revoke button
+- Effort: 2 hours | Priority: P1 | Dependencies: A.7
+
+### B.8 Model Routing
+
+- `GET /api/agent/mission` and `GET /api/agent/wave` already include `recommended_model` per task (from `tasks.recommended_model`)
+- Agent token's `preferred_model` field acts as a floor: if token is configured for `haiku`, it will not be sent `opus` tasks; those tasks are returned without a model override (agent uses its own default)
+- `POST /api/agent/projects` and `POST /api/agent/tasks` auto-set `recommended_model` based on heuristics:
+  - Task description contains "analyse", "design", "architect", "research" → `opus`
+  - Task description contains "test", "verify", "check", "lint" → `haiku`
+  - All others → `sonnet`
+- These are hints only — agent may ignore them
+- Effort: 0.5 hours | Priority: P2 | Dependencies: B.3
+
+---
+
+## Phase T: Testing (parallel with all phases — write tests as features land)
+
+### T.1 Setup
+
+```bash
+npm install -D vitest @vitejs/plugin-react @testing-library/react @testing-library/user-event
+npm install -D @playwright/test
+npm install -D @faker-js/faker  # for test data generation
+```
+
+**vitest.config.ts:**
+```typescript
+import { defineConfig } from 'vitest/config'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./src/__tests__/setup.ts'],
+    coverage: {
+      provider: 'v8',
+      thresholds: { lines: 80, functions: 80, branches: 75 }
+    }
+  }
+})
+```
+
+**Test database:**
+```bash
+# .env.test
+TEST_DATABASE_URL=postgresql://localhost:5432/specdriver_test
+```
+
+`src/__tests__/setup.ts` — before each integration test, wrap in a transaction and rollback after:
+```typescript
+import { db } from '@/lib/db'
+import { beforeEach, afterEach } from 'vitest'
+
+let tx: any
+beforeEach(async () => { tx = await db.transaction() })
+afterEach(async () => { await tx.rollback() })
+```
+
+**Scripts in package.json:**
+```json
+{
+  "test": "vitest run",
+  "test:watch": "vitest",
+  "test:coverage": "vitest run --coverage",
+  "test:e2e": "playwright test",
+  "test:e2e:ui": "playwright test --ui",
+  "test:all": "npm run test && npm run test:e2e"
+}
+```
+
+**Directory structure:**
+```
+src/__tests__/
+  setup.ts
+  unit/
+    state-machine.test.ts
+    zod-schemas.test.ts
+    model-routing.test.ts
+    commit-message.test.ts
+  integration/
+    agent-mission.test.ts
+    agent-tasks.test.ts
+    agent-projects.test.ts
+    agent-wave.test.ts
+    git-webhook.test.ts
+    spec-versioning.test.ts
+    auth.test.ts
+  components/
+    kanban-board.test.tsx
+    create-task-dialog.test.tsx
+    spec-editor.test.tsx
+    agent-logs-panel.test.tsx
+e2e/
+  flows/
+    project-lifecycle.spec.ts
+    agent-collaboration.spec.ts
+    auth-rbac.spec.ts
+    spec-versioning.spec.ts
+    git-commits.spec.ts
+  fixtures/
+    auth.setup.ts       # Playwright auth setup reused across tests
+```
+
+- Effort: 2 hours | Priority: P0
+
+### T.2 State Machine Unit Tests
+
+Every valid and invalid transition tested — this is core correctness:
+
+```typescript
+// src/__tests__/unit/state-machine.test.ts
+describe('Task status state machine', () => {
+  const VALID_TRANSITIONS = [
+    ['todo',        'in_progress'],
+    ['in_progress', 'done'],
+    ['in_progress', 'blocked'],
+    ['in_progress', 'paused'],
+    ['blocked',     'in_progress'],
+    ['paused',      'in_progress'],
+    ['done',        'todo'],         // retry
+    ['todo',        'skipped'],
+    ['blocked',     'skipped'],
+  ]
+  const INVALID_TRANSITIONS = [
+    ['todo',        'done'],
+    ['todo',        'blocked'],
+    ['todo',        'paused'],
+    ['done',        'in_progress'],
+    ['done',        'blocked'],
+    ['done',        'paused'],
+    ['skipped',     'in_progress'],
+    ['paused',      'done'],
+    ['blocked',     'done'],
+    ['blocked',     'paused'],
+  ]
+
+  VALID_TRANSITIONS.forEach(([from, to]) => {
+    it(`allows ${from} → ${to}`, async () => {
+      const result = await validateStatusTransition(from, to)
+      expect(result.valid).toBe(true)
+    })
+  })
+  INVALID_TRANSITIONS.forEach(([from, to]) => {
+    it(`rejects ${from} → ${to}`, async () => {
+      const result = await validateStatusTransition(from, to)
+      expect(result.valid).toBe(false)
+    })
+  })
+})
+```
+
+### T.3 API Integration Tests
+
+```typescript
+// src/__tests__/integration/agent-mission.test.ts
+describe('GET /api/agent/mission', () => {
+  it('returns exhaustive context: project state, spec, plan intent, next task with verify_command, unblocked_tasks, git config')
+  it('returns null next_task with reason when all tasks are done')
+  it('returns null next_task with reason when all tasks are blocked')
+  it('excludes tasks where dependency status != done')
+  it('returns paused task with resume_context populated')
+  it('returns tasks ordered by priority ASC, then created_at ASC')
+  it('returns git.current_branch = default_branch when strategy = none')
+  it('returns git.current_branch = phase branch when strategy = per-phase')
+  it('rejects requests with invalid X-Agent-Token — 401')
+  it('rejects requests for project_id not owned by token — 403')
+  it('returns 404 when project does not exist')
+})
+
+describe('GET /api/agent/wave', () => {
+  it('returns all unblocked tasks across a plan')
+  it('excludes in_progress tasks (already claimed)')
+  it('excludes tasks where dependency is not done')
+  it('includes paused tasks with resume_context')
+  it('returns wave_complete=true when all tasks are done or skipped')
+  it('returns consistent wave_id for same set of tasks')
+  it('returns different wave_id when task set changes')
+})
+
+describe('PATCH /api/agent/tasks/:id — status transitions', () => {
+  it('transitions todo → in_progress successfully')
+  it('transitions in_progress → done successfully')
+  it('transitions in_progress → paused and writes resume_context')
+  it('returns 409 when trying to claim an in_progress task (concurrent claim)')
+  it('returns 422 for invalid status transition with descriptive error')
+  it('increments retry_count when transitioning done → todo')
+  it('sets completed_at when transitioning to done')
+  it('returns 403 when task belongs to a different project than token')
+})
+
+describe('POST /api/agent/projects', () => {
+  it('creates project + specification + plan atomically')
+  it('auto-creates codebase analysis task when base_path is provided')
+  it('rolls back all on DB failure — no orphaned rows')
+  it('returns webhook_url and mission_url in response')
+  it('returns 429 when rate limit exceeded (>10/hr)')
+  it('rejects missing required fields with 400 + field-level errors')
+})
+
+describe('POST /api/webhooks/git', () => {
+  it('inserts commit record into git_commits table')
+  it('is idempotent — second call with same SHA returns 200 without duplicate insert')
+  it('links commit to task when task_id provided')
+  it('updates task.notes with commit SHA when task_id provided')
+  it('rejects invalid X-Agent-Token — 401')
+  it('returns 429 when rate limit exceeded')
+})
+
+describe('POST /api/agent/pause', () => {
+  it('sets task status to paused and writes resume_context')
+  it('returns 422 if task is not in_progress')
+})
+
+describe('POST /api/agent/heartbeat', () => {
+  it('updates agent_last_heartbeat_at on the project')
+  it('returns is_stale=false immediately after heartbeat')
+})
+
+describe('Specification versioning', () => {
+  it('creates new spec row on save, marks previous is_active=false')
+  it('returns 409 when expected_updated_at does not match DB updated_at')
+  it('PATCH /api/agent/projects/:id with specification_content follows same lock')
+})
+
+describe('Auth + RBAC', () => {
+  it('unauthenticated request to /projects returns 302 to /auth/login')
+  it('viewer role POST to /api/agent/tasks returns 403')
+  it('developer role can create tasks')
+  it('admin role can access /admin/users')
+  it('agent token cannot access /admin/* routes')
+})
+```
+
+### T.4 Component Tests (Testing Library)
+
+```typescript
+// KanbanBoard
+describe('KanbanBoard', () => {
+  it('renders task cards grouped by status column: todo, in_progress, paused, blocked, done, skipped, ad-hoc')
+  it('calls updateTaskStatus server action after drag-and-drop')
+  it('shows empty state message when column has no tasks')
+  it('shows pass/fail badge from latest test_result on task card')
+  it('shows commit count badge when task has git_commits')
+  it('shows Paused badge on paused tasks')
+})
+
+describe('CreateTaskDialog', () => {
+  it('disables submit when description is empty')
+  it('shows inline validation error for priority outside 1–5')
+  it('switches to quick mode when toggle enabled — plan_id field disappears')
+  it('closes and triggers Kanban refresh on successful submit')
+  it('shows error state (not just toast) when server action throws')
+})
+
+describe('SpecEditor', () => {
+  it('renders current spec content in editor on mount')
+  it('enables Save button only after content changes')
+  it('shows 409 conflict warning with diff when optimistic lock fails')
+  it('creates new spec version on save — version count increments in history panel')
+  it('version history list is read-only — no edit button on historical versions')
+})
+
+describe('AgentLogsPanel', () => {
+  it('renders logs in reverse chronological order')
+  it('shows is_internal logs only when Internal filter is active')
+  it('filters by level when level checkboxes toggled')
+  it('loads next page on "Load more" click')
+})
+
+describe('GitCommitsTab', () => {
+  it('lists commits in reverse chronological order')
+  it('links commit SHA to repo_url/commit/sha when repo_url is set')
+  it('filters to task commits when task_id filter applied')
+})
+```
+
+### T.5 E2E Tests (Playwright)
+
+```typescript
+// e2e/flows/project-lifecycle.spec.ts
+test('Full project lifecycle: create → spec → plan with intent → tasks → execute → verify → commit visible', async ({ page }) => {
+  // 1. Login as developer
+  // 2. Create project (with base_path set)
+  // 3. Verify codebase analysis task auto-created
+  // 4. Edit spec, save, confirm version 2 exists in history
+  // 5. Create plan, fill in intent textarea, add architecture decisions
+  // 6. Create task with verify_command and done_criteria
+  // 7. Use API to move task to done
+  // 8. POST to /api/webhooks/git — verify commit appears in Commits tab
+  // 9. Log test result — verify badge appears on task card
+})
+
+// e2e/flows/agent-collaboration.spec.ts
+test('Agent creates task via API; human sees it in Kanban within 15s poll cycle', async ({ page, request }) => {})
+test('Human pauses task in UI; agent sees resume_context in next mission call', async ({ page, request }) => {})
+test('Agent posts heartbeat; status page shows as active. Heartbeat stops; status shows unresponsive after 2min')
+
+// e2e/flows/auth-rbac.spec.ts
+test('Unauthenticated user redirected to login')
+test('Viewer cannot drag-and-drop Kanban card — status update returns 403')
+test('Developer can create and update tasks')
+test('Admin can change user role on /admin/users')
+test('Agent token with project scope cannot access different project — 403')
+
+// e2e/flows/spec-versioning.spec.ts
+test('Edit spec, save, previous version visible in history')
+test('Two tabs edit same spec simultaneously; second save shows conflict warning with diff')
+
+// e2e/flows/git-commits.spec.ts
+test('POST to /api/webhooks/git appears in Commits tab and on task card badge')
+test('Commit SHA links to correct GitHub URL when repo_url is configured')
+test('Idempotent: same SHA posted twice — only one record appears')
+```
+
+### T.6 CI Pipeline
+
+```yaml
+# .github/workflows/ci.yml
+name: CI
+
+on:
+  push:
+    branches: [main, 'specdriver/**']
+  pull_request:
+    branches: [main]
+
+jobs:
+  unit-and-integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: specdriver_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 5
+
+    env:
+      TEST_DATABASE_URL: postgresql://postgres:test@localhost:5432/specdriver_test
+      NEXTAUTH_SECRET: test-secret-for-ci
+      AGENT_TOKEN: test-agent-token
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'npm' }
+      - run: npm ci
+      - run: npm run db:push  # apply full schema to test DB
+      - run: npm run test -- --coverage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: unit-and-integration
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: specdriver_e2e
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test
+        ports: ['5432:5432']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'npm' }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: npm run db:push
+      - run: npm run db:seed  # seed-simple.sql
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+```
+
+**Coverage gates** (enforced via Vitest threshold config — build fails if below):
+- Lines: 80%
+- Functions: 80%
+- Branches: 75%
+- Agent API routes: 100% of routes must have at least one integration test
+
+---
+
+## Phase D: Quality & Hardening (~8 hours)
+
+### D.1 Error Handling
+
+- [ ] `src/app/error.tsx` — catches unhandled Next.js errors; shows error message + "Reload" + "Report issue" (links to GitHub issues with pre-filled title)
+- [ ] `src/app/not-found.tsx` — 404 with link back to project list
+- [ ] Standardise all API responses to:
+  ```typescript
+  // Success:   { data: T }
+  // Error:     { error: { code: string, message: string, fields?: Record<string, string> } }
+  ```
+  HTTP codes: 200/201 success, 400 bad request, 401 unauthenticated, 403 forbidden, 404 not found, 409 conflict, 422 invalid state transition, 429 rate limited, 500 server error
+- [ ] All forms surface `fields` errors inline below each input (not toast-only)
+- [ ] Offline detection: `navigator.onLine` event listener → sticky banner "You're offline — changes won't save"
+- [ ] Server action failures: retry up to 3× with exponential backoff (100ms, 500ms, 2000ms) before showing error
+- Effort: 3 hours | Priority: P1
+
+### D.2 Loading States
+
+- [ ] `src/components/skeleton.tsx` — base skeleton with shimmer animation (Tailwind `animate-pulse`)
+- [ ] `loading.tsx` for: `/projects/[id]`, `/projects/[id]/commits`, `/admin/users`
+- [ ] Skeleton variants: `TaskCardSkeleton`, `LogRowSkeleton`, `CommitRowSkeleton`
+- [ ] All buttons that trigger async actions: show spinner icon + disabled state while pending
+- Effort: 1.5 hours | Priority: P1
+
+### D.3 Real-Time Updates (Polling)
+
+- [ ] `src/hooks/usePolling.ts` — generic hook: `usePolling(fetchFn, intervalMs, enabled)`
+- [ ] Kanban board: poll `getProjectTasks()` every 15 seconds; update only if task set has changed (compare hash of task IDs + statuses)
+- [ ] Agent logs panel: poll every 10 seconds
+- [ ] Git commits tab: poll every 20 seconds
+- [ ] Agent status badge in project header: poll every 30 seconds (uses heartbeat staleness)
+- [ ] All polling panels show: "Last synced: Xs ago" and a manual "Refresh" button
+- [ ] Polling pauses when tab is hidden (`document.visibilityState === 'hidden'`) to avoid unnecessary DB load
+- Effort: 2 hours | Priority: P1
+
+### D.4 Rate Limiting
+
+- [ ] `src/middleware/rateLimiter.ts` — in-memory sliding window using `Map<tokenId, timestamp[]>`
+- [ ] Applied to all `/api/agent/*` routes via Next.js middleware
+- [ ] Limits per token:
+  - Mutations (POST, PATCH, DELETE): 20 req/min
+  - Reads (GET): 60 req/min
+  - Git webhook: 60 req/min
+  - Project creation: 10 req/hour (separate counter)
+- [ ] Response on limit exceeded: `429` with header `Retry-After: {seconds}`
+- [ ] For production: replace in-memory map with Redis (or `@upstash/ratelimit` if using Vercel)
+- Effort: 1.5 hours | Priority: P1
+
+### D.5 API Request Logging
+
+- [ ] Middleware logs all `/api/agent/*` requests to `api_request_logs` table: `token_id`, `endpoint`, `method`, `status_code`, `duration_ms`, `project_id`
+- [ ] UI: project settings page → "API Usage" tab — table of recent requests with status codes and latencies; grouped by endpoint
+- Effort: 1 hour | Priority: P2
+
+### D.6 Environment Validation
+
+- [ ] `src/lib/env.ts` — use `zod` to parse `process.env` at startup
+- [ ] Required: `DATABASE_URL`, `NEXTAUTH_SECRET`, `AGENT_TOKEN` (global bootstrap token)
+- [ ] Optional with warnings: `TEST_DATABASE_URL`, `REDIS_URL`
+- [ ] App throws on startup (not at request time) if required vars are missing — surfaces immediately in Docker/CI logs
+- Effort: 0.5 hours | Priority: P0
+
+---
+
+## Consolidated Technical Debt
+
+| #   | Issue                     | Resolution                                                                          | Priority |
+| --- | ------------------------- | ----------------------------------------------------------------------------------- | -------- |
+| 1   | No env validation         | D.6 — Zod env schema, fail at startup                                               | P0       |
+| 2   | `project_id=1` hardcoded  | Replace all with dynamic project context from session/token                         | P0       |
+| 3   | No transaction safety     | Drizzle transactions on all B.* endpoints                                           | P0       |
+| 4   | Type safety gaps          | Zod output schemas on all API routes; infer TS types from them                      | P1       |
+| 5   | Global static agent token | B.7 — per-project scoped tokens                                                     | P1       |
+| 6   | No backup/restore         | Add `npm run db:backup` (wraps `pg_dump`) + restore docs                            | P2       |
+| 7   | No WebSocket              | D.3 polling for MVP; replace with Socket.io post-MVP if poll latency is problematic | P3       |
+
+---
+
+## Implementation Order
+
+| Step      | Phase | Description                         | Effort        | Dependency       |
+| --------- | ----- | ----------------------------------- | ------------- | ---------------- |
+| 1         | A.1   | Schema migration + mission audit    | 2.5 hr        | —                |
+| 2         | T.1   | Test stack setup + CI skeleton      | 2 hr          | A.1              |
+| 3         | D.6   | Environment validation              | 0.5 hr        | A.1              |
+| 4         | A.2   | Task creation UI + quick mode       | 3 hr          | A.1, T.1         |
+| 5         | A.3   | Plan editor + intent capture        | 3 hr          | A.1, T.1         |
+| 6         | A.4   | Spec editor + versioning            | 4 hr          | A.1              |
+| 7         | T.2   | State machine unit tests            | 1 hr          | T.1              |
+| 8         | A.5   | Test results logging UI             | 2.5 hr        | A.2              |
+| 9         | A.6   | Manual log entry UI                 | 2 hr          | A.1              |
+| 10        | A.7   | Auth + RBAC                         | 5 hr          | A.1              |
+| 11        | T.3   | API integration tests (A phase)     | 3 hr          | A.1–A.7          |
+| 12        | G.1   | Git webhook endpoint                | 2 hr          | A.1              |
+| 13        | G.2   | Commit message template             | 0.5 hr        | G.1              |
+| 14        | G.3   | Branching strategy + phase-complete | 2 hr          | G.1              |
+| 15        | G.4   | Commits UI tab                      | 2.5 hr        | G.1              |
+| 16        | G.5   | Git config UI panel                 | 1 hr          | G.1              |
+| 17        | B.1   | Agent project creation API          | 2.5 hr        | A.1              |
+| 18        | B.2   | Agent project config API            | 1.5 hr        | B.1              |
+| 19        | B.3   | Agent task creation API (bulk)      | 1.5 hr        | A.1              |
+| 20        | B.4   | Parallel wave endpoint              | 2 hr          | A.1              |
+| 21        | B.5   | Agent heartbeat                     | 1 hr          | A.1              |
+| 22        | B.6   | Pause/resume                        | 1.5 hr        | A.1              |
+| 23        | B.7   | Per-project scoped tokens           | 2 hr          | A.7              |
+| 24        | B.8   | Model routing hints                 | 0.5 hr        | B.3              |
+| 25        | T.3   | API integration tests (B + G phase) | 4 hr          | B.1–B.8, G.1–G.3 |
+| 26        | T.4   | Component tests                     | 3 hr          | A.2–A.6, G.4     |
+| 27        | T.5   | E2E tests                           | 5 hr          | All above        |
+| 28        | D.1   | Error handling                      | 3 hr          | All above        |
+| 29        | D.2   | Loading states                      | 1.5 hr        | All above        |
+| 30        | D.3   | Polling / real-time                 | 2 hr          | All above        |
+| 31        | D.4   | Rate limiting                       | 1.5 hr        | B.1              |
+| 32        | D.5   | API request logging                 | 1 hr          | B.7              |
+| **Total** |       |                                     | **~73 hours** |                  |
+
+---
+
+## Success Criteria
+
+### Phase A — Human-Agent Parity
+- [ ] Human can create, read, update projects, specs, plans, tasks entirely via UI
+- [ ] Plan editor captures intent before agent starts; intent is returned in mission response
+- [ ] Spec saves are immutable (new row); conflicts surface a diff; version history is browsable
+- [ ] Quick tasks (no plan) visible in Ad Hoc Kanban column
+- [ ] All actions attributed to creator (user or agent)
+- [ ] Viewers read-only; developers full CRUD; admins manage users
+
+### Phase G — Git Integration
+- [ ] Agent calls `POST /api/webhooks/git` after every task commit; commit appears in UI within one poll cycle
+- [ ] Commit message follows configured template
+- [ ] Per-phase branching creates branch, commits to it, merges on phase-complete
+- [ ] Idempotent: duplicate SHA post is a no-op
+- [ ] Git config panel lets human configure repo URL, branch, strategy, template
+
+### Phase B — Agent Autonomy
+- [ ] Agent self-bootstraps from one `POST /api/agent/projects` call; receives webhook URL and mission URL in response
+- [ ] `GET /api/agent/wave` returns all unblocked tasks; concurrent task claim returns 409
+- [ ] Heartbeat updates every 30s; UI shows unresponsive warning after 2min silence
+- [ ] Paused task `resume_context` returned in next mission/wave call
+- [ ] Per-project tokens scope agent to exactly one project; cross-project access returns 403
+- [ ] All B endpoints are fully transactional (rollback on partial failure)
+
+### Phase T — Test Coverage
+- [ ] `npm run test:all` passes on every PR in CI
+- [ ] All state machine transitions (valid and invalid) have explicit unit tests
+- [ ] All agent API routes have integration tests running against a real test DB
+- [ ] All critical E2E flows covered: project lifecycle, auth/RBAC, git webhooks, spec conflict
+- [ ] Coverage thresholds enforced: 80% lines/functions, 75% branches
+- [ ] Build fails if coverage drops below threshold
+
+### MVP Complete
+- [ ] Full spec-driven workflow operational end-to-end
+- [ ] Human + Agent collaborate on same project; neither blocks the other
+- [ ] Git history reflects every completed task as an atomic commit
+- [ ] All data persisted in PostgreSQL; type-safe throughout
+- [ ] Zero-downtime schema migrations (all additions nullable or defaulted)
+- [ ] 80%+ test coverage on critical paths; CI green on every merge
+
+---
+
+## Immediate Next Actions
+
+1. **A.1** — Run schema migration (1 hour; unblocks everything)
+2. **T.1 + D.6** — Set up Vitest, Playwright, CI skeleton, env validation (2.5 hours; do before writing any new feature)
+3. **A.2 + T.2** — Task creation UI with quick mode + state machine tests (write tests alongside the feature)
+4. **G.1** — Git webhook endpoint (can run in parallel; highest external-facing value)
+5. **B.1** — Agent project creation API (can run in parallel with UI work)

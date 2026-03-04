@@ -78,11 +78,12 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
   };
 
   // Enhanced markdown rendering
-  const renderMarkdown = (text: string) => {
+  const renderMarkdown = (text: string): JSX.Element => {
     const lines = text.split('\n');
     const elements: JSX.Element[] = [];
+    let i = 0;
 
-    for (let i = 0; i < lines.length; i++) {
+    while (i < lines.length) {
       const line = lines[i];
       const trimmed = line.trim();
 
@@ -152,13 +153,18 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
         // Skip ahead
         if (codeEnd !== -1) {
           i = codeEnd;
-          continue;
         }
       } else if (trimmed.match(/`([^`]+)`/)) {
-        const codeOnly = trimmed.replace(/`([^`]+)`/g, '<code class="bg-gray-100 px-1 rounded text-sm">$1</code>');
-        elements.push(
-          <p key={i} className="mb-3 ios-body ios-font-text" dangerouslySetInnerHTML={{ __html: codeOnly }} />
-        );
+        // Safe inline code rendering without dangerouslySetInnerHTML
+        const match = trimmed.match(/`([^`]+)`/);
+        if (match) {
+          const parts = trimmed.split(match[0]);
+          elements.push(
+            <p key={i} className="mb-3 ios-body ios-font-text">
+              {parts[0]}<code className="bg-gray-100 px-1 rounded text-sm">{match[1]}</code>{parts[1] || ''}
+            </p>
+          );
+        }
       } else if (trimmed === '' && i > 0 && lines[i - 1].trim() !== '' && !lines[i - 1].trim().startsWith('>')) {
         elements.push(<br key={i} />);
       } else if (trimmed) {
@@ -168,6 +174,7 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
           </p>
         );
       }
+      i++;
     }
 
     return <div className="prose prose-gray max-w-none">{elements}</div>;
