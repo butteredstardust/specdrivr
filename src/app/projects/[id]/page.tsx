@@ -3,6 +3,7 @@ import { KanbanBoard } from '@/components/kanban-board';
 import { InlineSpecEditor } from '@/components/inline-spec-editor';
 import { InlineConstitutionEditor } from '@/components/inline-constitution-editor';
 import { InlineTechStackEditor } from '@/components/inline-tech-stack-editor';
+import { InlinePlanEditor } from '@/components/inline-plan-editor';
 import { ActionBar } from '@/components/action-bar';
 import { TestResultsPanel } from '@/components/test-results-panel';
 import { AgentLogs } from '@/components/agent-logs';
@@ -87,6 +88,15 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                 techStack={projectTechStack}
               />
             </div>
+
+            {specification && (
+              <div className="mb-6">
+                <InlinePlanEditor
+                  specId={specification.id}
+                  plans={projectPlans}
+                />
+              </div>
+            )}
 
             {specification && (
               <div className="mb-6">
