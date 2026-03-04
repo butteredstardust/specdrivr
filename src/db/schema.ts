@@ -80,6 +80,19 @@ export const agentLogs = pgTable('agent_logs', {
   timestamp: timestamp('timestamp', { withTimezone: true }).notNull().defaultNow(),
 });
 
+// Users table
+export const users = pgTable('users', {
+  id: serial('id').primaryKey(),
+  username: text('username').notNull().unique(),
+  passwordHash: text('password_hash').notNull(),
+  avatarUrl: text('avatar_url'),
+  avatarId: integer('avatar_id').notNull().default(1),
+  isActive: boolean('is_active').notNull().default(true),
+  isAdmin: boolean('is_admin').notNull().default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
+});
+
 // Types for insertion
 export type ProjectInsert = typeof projects.$inferInsert;
 export type ProjectSelect = typeof projects.$inferSelect;
@@ -93,6 +106,8 @@ export type TestResultInsert = typeof testResults.$inferInsert;
 export type TestResultSelect = typeof testResults.$inferSelect;
 export type AgentLogInsert = typeof agentLogs.$inferInsert;
 export type AgentLogSelect = typeof agentLogs.$inferSelect;
+export type UserInsert = typeof users.$inferInsert;
+export type UserSelect = typeof users.$inferSelect;
 
 // Enum types for use in applications
 export type TaskStatus = 'todo' | 'in_progress' | 'done' | 'blocked';

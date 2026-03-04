@@ -8,6 +8,8 @@ import { TestResultsPanel } from '@/components/test-results-panel';
 import { AgentLogs } from '@/components/agent-logs';
 import { ProjectSidebarWrapper } from '@/components/project-sidebar-wrapper';
 import { Logo } from '@/components/logo';
+import { DatabaseStatus } from '@/components/database-status';
+import { UserMenu } from '@/components/user-menu';
 import { notFound } from 'next/navigation';
 import { ReactNode } from 'react';
 import { db } from '@/db';
@@ -53,19 +55,18 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
               <Logo size="large" className="min-w-48" />
               {project.basePath && (
-                <p className="text-sm text-gray-500 mt-1">{project.basePath}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{project.basePath}</p>
               )}
             </div>
             <div className="flex items-center gap-4">
-              <div className="text-sm text-gray-600">
-                Status: <span className="text-green-600 font-medium">Active</span>
-              </div>
+              <DatabaseStatus />
+              <UserMenu />
             </div>
           </div>
         </div>
