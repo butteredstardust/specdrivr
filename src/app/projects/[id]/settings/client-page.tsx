@@ -7,6 +7,7 @@ import { ConfirmDialog } from '@/components/ui/dialog';
 import { ProjectSidebarWrapper } from '@/components/project-sidebar-wrapper';
 import { InlineConstitutionEditor } from '@/components/inline-constitution-editor';
 import { InlineTechStackEditor } from '@/components/inline-tech-stack-editor';
+import { GenerateTokenDialog } from '@/components/generate-token-dialog';
 import type { TabData } from '@/components/ui/tabs';
 
 interface ProjectSettingsClientProps {
@@ -21,6 +22,7 @@ export function ProjectSettingsClient({
   projects,
 }: ProjectSettingsClientProps) {
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
+  const [showTokenDialog, setShowTokenDialog] = useState(false);
   const [projectNameInput, setProjectNameInput] = useState(project.name);
 
   const tabs: TabData[] = [
@@ -213,7 +215,7 @@ export function ProjectSettingsClient({
                   <h2 className="ios-title-3 text-ios-text-primary ios-font-display">
                     Agent Tokens
                   </h2>
-                  <Button variant="secondary" size="small">
+                  <Button variant="secondary" size="small" onClick={() => setShowTokenDialog(true)}>
                     + Generate New Token
                   </Button>
                 </div>
@@ -261,6 +263,12 @@ export function ProjectSettingsClient({
         confirmText="Archive"
         cancelText="Cancel"
         variant="danger"
+      />
+
+      {/* Generate Token Dialog */}
+      <GenerateTokenDialog
+        isOpen={showTokenDialog}
+        onClose={() => setShowTokenDialog(false)}
       />
     </div>
   );

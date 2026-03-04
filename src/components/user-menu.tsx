@@ -23,21 +23,66 @@ export function UserMenu() {
 
   const fetchUser = async () => {
     try {
+      // Check API session first
       const response = await fetch('/api/auth/session');
       const data = await response.json();
 
       if (data.success && data.user) {
         setUser(data.user);
       } else {
-        await fetch('/api/auth/auto-login');
-        const autoResponse = await fetch('/api/auth/session');
-        const autoData = await autoResponse.json();
-        if (autoData.success && autoData.user) {
-          setUser(autoData.user);
+        // Try auto-login API
+        try {
+          await fetch('/api/auth/auto-login');
+          const autoResponse = await fetch('/api/auth/session');
+          const autoData = await autoResponse.json();
+          if (autoData.success && autoData.user) {
+            setUser(autoData.user);
+          } else {
+            // Fall back to localStorage (demo auth)
+            const session = localStorage.getItem('specdrivr_session');
+            if (session) {
+              const sessionData = JSON.parse(session);
+              setUser({
+                id: 1,
+                username: sessionData.username || 'Demo User',
+                avatarId: 1,
+                avatarUrl: null,
+                isAdmin: true,
+              });
+            }
+          }
+        } catch {
+          // Fall back to localStorage (demo auth)
+          const localSession = localStorage.getItem('specdrivr_session');
+          if (localSession) {
+            const sessionData = JSON.parse(localSession);
+            setUser({
+              id: 1,
+              username: sessionData.username || 'Demo User',
+              avatarId: 1,
+              avatarUrl: null,
+              isAdmin: true,
+            });
+          }
         }
       }
     } catch (error) {
-      console.error('Failed to fetch user:', error);
+      // Fall back to localStorage on API failure
+      try {
+        const session = localStorage.getItem('specdrivr_session');
+        if (session) {
+          const sessionData = JSON.parse(session);
+          setUser({
+            id: 1,
+            username: sessionData.username || 'Demo User',
+            avatarId: 1,
+            avatarUrl: null,
+            isAdmin: true,
+          });
+        }
+      } catch {
+        console.error('Failed to fetch user:', error);
+      }
     } finally {
       setLoading(false);
     }
@@ -45,9 +90,18 @@ export function UserMenu() {
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      // Clear localStorage session (demo auth)
+      localStorage.removeItem('specdrivr_session');
+
+      // Also try API logout if available
+      try {
+        await fetch('/api/auth/logout', { method: 'POST' });
+      } catch {
+        // API might not exist, ignore
+      }
+
       setUser(null);
-      window.location.reload();
+      window.location.href = '/auth/login';
     } catch (error) {
       console.error('Logout failed:', error);
     }

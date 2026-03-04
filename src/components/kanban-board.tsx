@@ -20,6 +20,7 @@ import {
 import { useState } from 'react';
 import { updateTaskStatus } from '@/lib/actions';
 import { CreateTaskDialog } from './create-task-dialog';
+import { TaskDetailModal } from './task-detail-modal';
 
 interface KanbanBoardProps {
   projectId?: number;
@@ -31,6 +32,7 @@ interface KanbanBoardProps {
 export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: KanbanBoardProps) {
   const [tasksState, setTasksState] = useState<TaskSelect[]>(tasks);
   const [activeTask, setActiveTask] = useState<TaskSelect | null>(null);
+  const [selectedTask, setSelectedTask] = useState<TaskSelect | null>(null);
   const router = useRouter();
 
   // Type narrowing for valid status values
@@ -218,7 +220,10 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
                       <TaskCard
                         key={task.id}
                         task={task}
-                        onClick={onTaskClick}
+                        onClick={(t) => {
+                          setSelectedTask(t);
+                          onTaskClick?.(t);
+                        }}
                       />
                     ))}
                   </SortableContext>
@@ -251,10 +256,59 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
       <DragOverlay>
         {activeTask ? (
           <div className="opacity-80">
-            <TaskCard task={activeTask} onClick={onTaskClick} />
+            <TaskCard
+              task={activeTask}
+              onClick={(t) => {
+                setSelectedTask(t);
+                onTaskClick?.(t);
+              }}
+            />
           </div>
         ) : null}
       </DragOverlay>
+
+      {selectedTask && (
+        <TaskDetailModal
+          isOpen={true}
+          onClose={() => setSelectedTask(null)}
+          task={selectedTask}
+          onStatusChange={async (taskId, status) => {
+            const result = await updateTaskStatus(taskId, status);
+            if (result.success) {
+              setTasksState((prev) =>
+                prev.map((t) =>
+                  t.id === taskId ? { ...t, status: status as TaskSelect['status'] } : t
+                )
+              );
+              router.refresh();
+            }
+          }}
+          onRetry={async (taskId) => {
+            try {
+              const response = await fetch(`/api/tasks/${taskId}/agent/retry`, {
+                method: 'POST',
+              });
+              if (response.ok) {
+                router.refresh();
+              }
+            } catch (error) {
+              console.error('Failed to retry task:', error);
+            }
+          }}
+          onSkip={async (taskId) => {
+            try {
+              const response = await fetch(`/api/tasks/${taskId}/agent/skip`, {
+                method: 'POST',
+              });
+              if (response.ok) {
+                router.refresh();
+              }
+            } catch (error) {
+              console.error('Failed to skip task:', error);
+            }
+          }}
+        />
+      )}
     </DndContext>
   );
 }

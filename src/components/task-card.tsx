@@ -7,26 +7,12 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { useState } from 'react';
 import { LogTestResultDialog } from './log-test-result-dialog';
+import { taskStatusColors, taskPriorityBorderColors } from '@/lib/ios-styles';
 
 interface TaskCardProps {
   task: TaskSelect;
   onClick?: (task: TaskSelect) => void;
 }
-
-const statusColors = {
-  todo: 'bg-gray-100 text-gray-700',
-  in_progress: 'bg-blue-100 text-blue-800',
-  done: 'bg-green-100 text-green-800',
-  blocked: 'bg-red-100 text-red-800',
-};
-
-const priorityColors: Record<number, string> = {
-  1: 'border-gray-300',
-  2: 'border-yellow-400',
-  3: 'border-orange-400',
-  4: 'border-red-400',
-  5: 'border-red-600',
-};
 
 export function TaskCard({ task, onClick }: TaskCardProps) {
   const [showLogDialog, setShowLogDialog] = useState(false);
@@ -58,6 +44,9 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
     onClick?.(task);
   };
 
+  const statusInfo = taskStatusColors[status as keyof typeof taskStatusColors] || taskStatusColors.todo;
+  const priorityBorder = taskPriorityBorderColors[priority];
+
   return (
     <>
       <div
@@ -65,11 +54,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
         style={style}
         {...attributes}
         {...listeners}
-        className={`
-          bg-white rounded-lg shadow-sm border-2
-          p-4 mb-3 cursor-pointer hover:shadow-md transition-shadow
-          border-l-4 ${priorityColors[priority]}
-        `}
+        className={`ios-card p-4 mb-3 cursor-pointer hover:shadow-md transition-shadow border-l-4 ${priorityBorder}`}
         onClick={handleCardClick}
         role="button"
         tabIndex={0}
@@ -81,22 +66,22 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
         }}
       >
         <div className="flex items-start justify-between mb-2">
-          <h3 className="font-semibold text-gray-900 flex-1 pr-2 text-sm ios-body ios-font-text">
+          <h3 className="ios-body text-ios-text-primary ios-font-text flex-1 pr-2">
             {task.description || 'Untitled Task'}
           </h3>
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[status as keyof typeof statusColors]} flex-shrink-0`}>
-            {status.replace('_', ' ')}
+          <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${statusInfo.bg} ${statusInfo.text} ${statusInfo.border} border flex-shrink-0`}>
+            {status.replace('_', ' ').toUpperCase()}
           </span>
         </div>
 
         {Array.isArray(task.filesInvolved) && task.filesInvolved.length > 0 && (
           <div className="mb-2">
-            <p className="text-xs text-gray-500 mb-1 ios-caption ios-font-text">Files:</p>
+            <p className="ios-caption-1 text-ios-text-secondary mb-1">Files:</p>
             <div className="flex flex-wrap gap-1">
               {task.filesInvolved.map((file: string, idx: number) => (
                 <span
                   key={idx}
-                  className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded ios-caption ios-font-text"
+                  className="ios-caption-1 bg-ios-secondary border border-ios-border px-2 py-1 rounded text-ios-text-primary"
                 >
                   {file}
                 </span>
@@ -105,14 +90,14 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
           </div>
         )}
 
-        <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100">
-          <div className="text-xs text-gray-500 flex items-center gap-3 ios-caption ios-font-text">
+        <div className="flex items-center justify-between mt-3 pt-2 border-t border-ios-border">
+          <div className="ios-caption-1 text-ios-text-secondary flex items-center gap-3">
             <span>P{priority}</span>
             <span>#{task.id}</span>
           </div>
           <button
             onClick={handleLogResultClick}
-            className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 transition-colors"
+            className="flex items-center gap-1 ios-caption-1 text-ios-blue hover:text-ios-blue-dark transition-colors"
             title="Log Test Result"
             type="button"
           >

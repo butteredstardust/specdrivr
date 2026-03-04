@@ -164,12 +164,14 @@ export function Dialog({
 export interface ConfirmDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm?: () => void;
   title: string;
   message: string;
   confirmText?: string;
   cancelText?: string;
   variant?: 'primary' | 'danger';
+  hideConfirm?: boolean;
+  showCloseButton?: boolean;
 }
 
 export function ConfirmDialog({
@@ -181,21 +183,28 @@ export function ConfirmDialog({
   confirmText = 'Confirm',
   cancelText = 'Cancel',
   variant = 'primary',
+  hideConfirm = false,
+  showCloseButton = true,
 }: ConfirmDialogProps) {
   return (
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
       title={title}
+      showCloseButton={showCloseButton}
       footer={
-        <>
-          <Button variant="secondary" onClick={onClose}>
-            {cancelText}
-          </Button>
-          <Button variant={variant} onClick={onConfirm}>
-            {confirmText}
-          </Button>
-        </>
+        !hideConfirm ? (
+          <>
+            <Button variant="secondary" onClick={onClose}>
+              {cancelText}
+            </Button>
+            {onConfirm && (
+              <Button variant={variant} onClick={onConfirm}>
+                {confirmText}
+              </Button>
+            )}
+          </>
+        ) : null
       }
     >
       <p className="ios-body text-ios-text-secondary">{message}</p>
