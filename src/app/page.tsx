@@ -1,5 +1,5 @@
 import { getProjects } from '@/lib/actions';
-import { ProjectSidebar } from '@/components/project-sidebar';
+import { ProjectSidebarWrapper } from '@/components/project-sidebar-wrapper';
 import { KanbanBoard } from '@/components/kanban-board';
 import { getProjectContext } from '@/lib/agent-memory';
 
@@ -40,7 +40,7 @@ export default async function Home() {
       </header>
 
       <div className="flex h-screen pt-0">
-        <ProjectSidebar
+        <ProjectSidebarWrapper
           projects={projects}
         />
 
