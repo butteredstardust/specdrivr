@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { AgentLogSelect, TaskSelect } from '@/db/schema';
 import { AddLogDialog } from './add-log-dialog';
 import type { LogLevel } from '@/db/schema';
@@ -12,11 +12,11 @@ interface AgentLogsProps {
   projectId?: number;
 }
 
-const levelColors: Record<LogLevel, { bg: string; text: string }> = {
-  debug: { bg: 'bg-gray-100', text: 'text-gray-700' },
-  info: { bg: 'bg-blue-100', text: 'text-blue-700' },
-  warn: { bg: 'bg-yellow-100', text: 'text-yellow-700' },
-  error: { bg: 'bg-red-100', text: 'text-red-700' },
+const levelColors: Record<LogLevel, { bg: string; text: string; border: string }> = {
+  debug: { bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-300' },
+  info: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-300' },
+  warn: { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-300' },
+  error: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-300' },
 };
 
 const levelIcons: Record<LogLevel, JSX.Element> = {
@@ -50,11 +50,14 @@ const levelIcons: Record<LogLevel, JSX.Element> = {
   ),
 };
 
-export function AgentLogs({ logs, tasks, onLogAdded, projectId }: AgentLogsProps) {
+export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
   const [showAddDialog, setShowAddDialog] = useState(false);
 
-  const sortedLogs = [...logs].sort((a, b) =>
-    new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  const sortedLogs = useMemo(() =>
+    [...logs].sort((a, b) =>
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    ),
+    [logs],
   );
 
   return (
@@ -75,10 +78,10 @@ export function AgentLogs({ logs, tasks, onLogAdded, projectId }: AgentLogsProps
         />
       </div>
 
-      <div className="space-y-2 max-h-80 overflow-y-auto ios">
+      <div className="space-y-2 max-h-80 overflow-y-auto ios" role="log">
         {sortedLogs.length === 0 ? (
           <div className="text-center py-8 ios">
-            <div className="mb-3 flex justify-center">
+            <div className="mb-3 flex justify-center text-ios-placeholder">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-ios-placeholder">
                 <path d="M3 3v18h18"/>
                 <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
@@ -91,8 +94,8 @@ export function AgentLogs({ logs, tasks, onLogAdded, projectId }: AgentLogsProps
           </div>
         ) : (
           sortedLogs.map((log) => {
-            const colors = levelColors[log.level as LogLevel];
-            const icon = levelIcons[log.level as LogLevel];
+            const colors = levelColors[log.level as LogLevel] || levelColors.info;
+            const icon = levelIcons[log.level as LogLevel] || levelIcons.info;
 
             return (
               <div
@@ -100,7 +103,7 @@ export function AgentLogs({ logs, tasks, onLogAdded, projectId }: AgentLogsProps
                 className="p-3 rounded-lg border border-ios bg-white hover:shadow-sm transition-shadow ios"
               >
                 <div className="flex items-start gap-3">
-                  <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${colors.bg}`}>
+                  <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${colors.bg} ${colors.border}`}>
                     <span className={colors.text}>{icon}</span>
                   </div>
                   <div className="flex-1 min-w-0">
