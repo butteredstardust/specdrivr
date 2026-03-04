@@ -129,3 +129,18 @@ export async function getAgentLogs(
     return { success: false, error: 'Failed to fetch logs' };
   }
 }
+
+/**
+ * Get project by ID with full context
+ */
+export async function getProjectById(projectId: number) {
+  try {
+    const { getProjectContext } = await import('@/lib/agent-memory');
+    const context = await getProjectContext(projectId);
+
+    return { success: true, context };
+  } catch (error) {
+    console.error('Error getting project:', error);
+    return { success: false, error: 'Failed to fetch project' };
+  }
+}
