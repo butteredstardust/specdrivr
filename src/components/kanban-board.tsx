@@ -18,6 +18,7 @@ import {
 } from '@dnd-kit/sortable';
 import { useState } from 'react';
 import { updateTaskStatus } from '@/lib/actions';
+import { CreateTaskDialog } from './create-task-dialog';
 
 interface KanbanBoardProps {
   tasks: TaskSelect[];

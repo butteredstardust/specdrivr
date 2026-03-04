@@ -46,17 +46,41 @@ Spec-Drivr is an **Autonomous Development Platform** that uses PostgreSQL as a s
 ```bash
 # Setup
 npm run db:push                    # Create database schema
-psql $DATABASE_URL < db/seed-simple.sql  # Load initial data
-psql $DATABASE_URL < db/seed-plan.sql    # Load tasks
+
+# Seed Data Options:
+## Option 1: Demo data (3 projects with realistic content)
+psql $DATABASE_URL < db/seed-demo.sql
+
+## Option 2: Simple test data (minimal)
+psql $DATABASE_URL < db/seed-simple.sql
+
+## Option 3: Plan implementation tasks (from original roadmap)
+psql $DATABASE_URL < db/seed-plan.sql
 
 # Development
 npm run dev                        # Start dev server (http://localhost:3000)
+npm run dev:clean                  # Kill existing processes and start fresh
 npm run db:studio                  # Open database explorer
+
+# Dev Server Management (NEW!)
+npm run killall                    # Kill all Next.js dev processes
+npm run kill:3000                  # Kill process on port 3000
+npm run kill:3001                  # Kill process on port 3001
 
 # Build & Deploy
 npm run build                      # Production build
 npm run start                      # Run production server
 ```
+
+**Seed Data Summary:**
+- **seed-demo.sql**: 3 comprehensive projects (Event Platform, IoT Dashboard, AI Code Review) with 24 tasks, test results, and logs
+- **seed-simple.sql**: 2 basic projects for quick testing
+- **seed-plan.sql**: 1 project with implementation tasks from the roadmap
+
+**Note:** If you get "Port 3000 is in use," either:
+1. Run `npm run killall` to clean up old processes
+2. Or use `npm run dev:clean` to start fresh
+3. The app will automatically use port 3001 if 3000 is busy
 
 ---
 
