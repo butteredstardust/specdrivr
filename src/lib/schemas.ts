@@ -6,7 +6,7 @@ export const ProjectSchema = z.object({
   id: z.number(),
   name: z.string(),
   constitution: z.string().nullable(),
-  techStack: z.record(z.unknown()).nullable(),
+  techStack: z.record(z.string(), z.unknown()).nullable(),
   basePath: z.string().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
@@ -15,7 +15,7 @@ export const ProjectSchema = z.object({
 export const CreateProjectSchema = z.object({
   name: z.string().min(1),
   constitution: z.string().optional(),
-  techStack: z.record(z.unknown()).optional(),
+  techStack: z.record(z.string(), z.unknown()).optional(),
   basePath: z.string().optional(),
 });
 
@@ -39,14 +39,14 @@ export const CreateSpecificationSchema = z.object({
 export const PlanSchema = z.object({
   id: z.number(),
   specId: z.number(),
-  architectureDecisions: z.record(z.unknown()).nullable(),
+  architectureDecisions: z.record(z.string(), z.unknown()).nullable(),
   status: z.enum(['draft', 'active', 'completed', 'archived']),
   createdAt: z.date(),
 });
 
 export const CreatePlanSchema = z.object({
   specId: z.number(),
-  architectureDecisions: z.record(z.unknown()).optional(),
+  architectureDecisions: z.record(z.string(), z.unknown()).optional(),
   status: z.enum(['draft', 'active', 'completed', 'archived']).optional().default('draft'),
 });
 

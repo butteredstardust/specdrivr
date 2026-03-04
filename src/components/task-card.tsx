@@ -67,7 +67,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
         </span>
       </div>
 
-      {task.filesInvolved && task.filesInvolved.length > 0 ? (
+      {(Array.isArray(task.filesInvolved) && task.filesInvolved.length > 0) ? (
         <div className="mb-2">
           <p className="text-xs text-gray-500 mb-1">Files:</p>
           <div className="flex flex-wrap gap-1">

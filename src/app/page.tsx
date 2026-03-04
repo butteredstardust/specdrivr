@@ -2,6 +2,7 @@ import { getProjects } from '@/lib/actions';
 import { ProjectSidebarWrapper } from '@/components/project-sidebar-wrapper';
 import { KanbanBoard } from '@/components/kanban-board';
 import { getProjectContext } from '@/lib/agent-memory';
+import { Logo } from '@/components/logo';
 
 export default async function Home() {
   const result = await getProjects();
@@ -26,10 +27,7 @@ export default async function Home() {
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Spec-Drivr</h1>
-              <p className="text-sm text-gray-500">AI Agent Development Platform</p>
-            </div>
+            <Logo size="large" />
             <div className="flex items-center gap-4">
               <div className="text-sm text-gray-600">
                 Status: <span className="text-green-600 font-medium">Operational</span>

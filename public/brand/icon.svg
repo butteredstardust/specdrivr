@@ -1,0 +1,30 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" rx="96" fill="#3B82F6" opacity="0.1"/>
+
+  <!-- Main Gear/Cog structure -->
+  <path d="M256 96L264 116L291 116L269 128L277 148L255 136L233 148L241 128L219 116L246 116L256 96Z"
+        fill="#3B82F6" opacity="0.3"/>
+  <path d="M256 416L264 396L291 396L269 384L277 364L255 376L233 364L241 384L219 396L246 396L256 416Z"
+        fill="#3B82F6" opacity="0.3"/>
+
+  <!-- Main circle -->
+  <circle cx="256" cy="256" r="80" fill="#3B82F6" opacity="0.9"/>
+
+  <!-- Inner AI/Circuit pattern -->
+  <circle cx="256" cy="256" r="40" fill="#1E40AF"/>
+
+  <!-- Circuit connections -->
+  <g stroke="#1E40AF" stroke-width="3" stroke-linecap="round">
+    <line x1="256" y1="216" x2="256" y2="176"/>
+    <line x1="296" y1="256" x2="336" y2="256"/>
+    <line x1="256" y1="296" x2="256" y2="336"/>
+    <line x1="216" y1="256" x2="176" y2="256"/>
+  </g>
+
+  <!-- Connection nodes -->
+  <circle cx="256" cy="176" r="6" fill="#1E40AF"/>
+  <circle cx="336" cy="256" r="6" fill="#1E40AF"/>
+  <circle cx="256" cy="336" r="6" fill="#1E40AF"/>
+  <circle cx="176" cy="256" r="6" fill="#1E40AF"/>
+</svg>
