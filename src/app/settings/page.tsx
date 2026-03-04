@@ -3,6 +3,8 @@ import { ProjectSidebarWrapper } from '@/components/project-sidebar-wrapper';
 import { getProjects } from '@/lib/actions';
 import { notFound } from 'next/navigation';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { DatabaseStatus } from '@/components/database-status';
+import { UserMenu } from '@/components/user-menu';
 
 interface SettingsPageProps {}
 
@@ -36,12 +38,13 @@ export default async function SettingsPage({}: SettingsPageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <Logo size="large" className="min-w-48" />
             <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-semibold text-gray-900">Settings</h1>
+              <DatabaseStatus />
+              <UserMenu />
             </div>
           </div>
         </div>

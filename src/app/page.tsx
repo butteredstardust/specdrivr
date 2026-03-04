@@ -3,6 +3,8 @@ import { ProjectSidebarWrapper } from '@/components/project-sidebar-wrapper';
 import { KanbanBoard } from '@/components/kanban-board';
 import { getProjectContext } from '@/lib/agent-memory';
 import { Logo } from '@/components/logo';
+import { DatabaseStatus } from '@/components/database-status';
+import { UserMenu } from '@/components/user-menu';
 
 export default async function Home() {
   const result = await getProjects();
@@ -24,20 +26,13 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <Logo size="large" />
             <div className="flex items-center gap-4">
-              <div className="text-sm text-gray-600">
-                Status: <span className="text-green-600 font-medium">Operational</span>
-              </div>
-              <a
-                href="/settings"
-                className="px-3 py-1 text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
-              >
-                ⚙️ Settings
-              </a>
+              <DatabaseStatus />
+              <UserMenu />
             </div>
           </div>
         </div>
