@@ -1,8 +1,16 @@
 import { getProjects } from '@/lib/actions';
 import { ProjectSidebar } from '@/components/project-sidebar';
 import { KanbanBoard } from '@/components/kanban-board';
+import { revalidatePath } from 'next/cache';
+import { ProjectSelect } from '@/db/schema';
+
+async function handleProjectCreated(project: ProjectSelect) {
+  'use server';
+  revalidatePath('/');
+}
 
 export default async function Home() {
+  const handleProjectCreatedBound = handleProjectCreated.bind(null);
   const result = await getProjects();
 
   let projects = [];
@@ -101,6 +109,7 @@ export default async function Home() {
       <div className="flex h-screen pt-0">
         <ProjectSidebar
           projects={projects}
+          onProjectCreated={handleProjectCreatedBound}
         />
 
         <main className="flex-1 overflow-y-auto p-6">
