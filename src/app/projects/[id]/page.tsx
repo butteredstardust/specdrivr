@@ -1,4 +1,4 @@
-import { getProjects, getProjectById, getProjectSpecs } from '@/lib/actions';
+import { getProjects, getProjectById, getProjectSpecs, getProjectTestResults } from '@/lib/actions';
 import { KanbanBoard } from '@/components/kanban-board';
 import { InlineSpecEditor } from '@/components/inline-spec-editor';
 import { InlineConstitutionEditor } from '@/components/inline-constitution-editor';
@@ -45,6 +45,8 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   const { project, specification, plan, tasks: projectTasks } = result.context;
   const projectPlans = specification ? await db.select().from(plans).where(eq(plans.specId, specification.id)) : [];
   const allSpecs = specification ? (await getProjectSpecs(projectId)).specs || [] : [];
+  const testResultsData = await getProjectTestResults(projectId);
+  const testResults = testResultsData.success ? testResultsData.testResults || [] : [];
 
   const projectConstitution = project.constitution as string | null;
   const projectTechStack: Record<string, unknown> = (project.techStack as Record<string, unknown>) || {};
@@ -131,7 +133,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               </h2>
               <div className="ios-card shadow-sm ios">
                 <div className="px-4 py-[13px]">
-                  <TestResultsPanel testResults={[]} />
+                  <TestResultsPanel testResults={testResults} />
                 </div>
               </div>
             </div>
