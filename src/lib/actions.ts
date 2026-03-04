@@ -108,3 +108,91 @@ export async function getProjectById(projectId: number) {
     return { success: false, error: 'Failed to fetch project' };
   }
 }
+
+/**
+ * Create a new task (developer-facing)
+ */
+export async function createTaskDev(taskData: {
+  planId: number;
+  description?: string;
+  filesInvolved?: string[];
+  priority?: number;
+  dependencyTaskId?: number | null;
+}) {
+  try {
+    // Import the createTask helper from agent-memory
+    const { createTask } = await import('@/lib/agent-memory');
+
+    // Create the task using the existing helper
+    const task = await createTask(taskData.planId, {
+      description: taskData.description,
+      filesInvolved: taskData.filesInvolved,
+      priority: taskData.priority,
+      dependencyTaskId: taskData.dependencyTaskId,
+    });
+
+    // Revalidate the project page to show the new task
+    revalidatePath('/projects/[id]', 'page');
+    return { success: true, task };
+  } catch (error) {
+    console.error('Error creating task:', error);
+    return { success: false, error: 'Failed to create task' };
+  }
+}
+
+/**
+ * Update specification with versioning (developer-facing)
+ * Creates new version and marks old as inactive
+ */
+export async function updateSpecificationDev(
+  specId: number,
+  content: string
+) {
+  try {
+    if (!content.trim()) {
+      throw new Error('Content cannot be empty');
+    }
+
+    // Get existing specification
+    const [oldSpec] = await db
+      .select()
+      .from(specifications)
+      .where(eq(specifications.id, specId))
+      .limit(1);
+
+    if (!oldSpec) {
+      throw new Error('Specification not found');
+    }
+
+    // Parse version and increment
+    const versionParts = oldSpec.version.split('.');
+    const majorVersion = parseInt(versionParts[0]);
+    const minorVersion = parseInt(versionParts[1] || '0');
+    const newVersion = `${majorVersion}.${minorVersion + 1}`;
+
+    // Mark old specification as inactive
+    await db
+      .update(specifications)
+      .set({ isActive: false })
+      .where(eq(specifications.id, specId));
+
+    // Create new specification version
+    const [newSpec] = await db
+      .insert(specifications)
+      .values({
+        projectId: oldSpec.projectId,
+        content: content.trim(),
+        version: newVersion,
+        isActive: true,
+      })
+      .returning();
+
+    // Revalidate the project page
+    revalidatePath('/projects/[id]', 'page');
+
+    return { success: true, spec: newSpec };
+  } catch (error) {
+    console.error('Error updating specification:', error);
+    return { success: false, error: 'Failed to update specification' };
+  }
+}

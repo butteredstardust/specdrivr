@@ -1,12 +1,16 @@
 import { getProjects, getProjectById } from '@/lib/actions';
 import { KanbanBoard } from '@/components/kanban-board';
-import { SpecificationViewer } from '@/components/specification-viewer';
+import { InlineSpecEditor } from '@/components/inline-spec-editor';
+import { ActionBar } from '@/components/action-bar';
 import { TestResultsPanel } from '@/components/test-results-panel';
 import { AgentLogs } from '@/components/agent-logs';
 import { ProjectSidebarWrapper } from '@/components/project-sidebar-wrapper';
 import { Logo } from '@/components/logo';
 import { notFound } from 'next/navigation';
 import { ReactNode } from 'react';
+import { db } from '@/db';
+import { plans } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 interface ProjectDetailPageProps {
   params: {
@@ -36,6 +40,9 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   }
 
   const { project, specification, plan, tasks: projectTasks } = result.context;
+
+  // Fetch plans for this project to pass to Kanban and task creation
+  const projectPlans = specification ? await db.select().from(plans).where(eq(plans.specId, specification.id)) : [];
 
   // Extract and cast values to proper types
   const projectConstitution = project.constitution as string | null;
@@ -100,15 +107,18 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
         {/* Specification */}
         {specification && (
           <div className="mb-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-3">Active Specification</h2>
-            <SpecificationViewer content={specification.content} />
+            <InlineSpecEditor specification={specification} />
           </div>
         )}
 
         {/* Tasks Kanban Board */}
-        {projectTasks && projectTasks.length > 0 && (
+        {projectTasks && (
           <div className="mb-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-3">Project Tasks</h2>
+            <ActionBar
+              projectId={projectId}
+              plans={projectPlans}
+              existingTasks={projectTasks}
+            />
             <KanbanBoard tasks={projectTasks} />
           </div>
         )}

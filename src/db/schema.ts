@@ -10,6 +10,8 @@ export const agentStatusEnum = pgEnum('agent_status', ['idle', 'running', 'pause
 export const projects = pgTable('projects', {
   id: serial('id').primaryKey(),
   name: text('name').notNull(),
+  mission: text('mission'),
+  description: text('description'),
   constitution: text('constitution'), // markdown content
   techStack: jsonb('tech_stack'),
   basePath: text('base_path'),
