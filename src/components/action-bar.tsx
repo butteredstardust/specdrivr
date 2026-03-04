@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { CreateTaskDialog } from './create-task-dialog';
 import { PlanSelect, TaskSelect } from '@/db/schema';
 
@@ -12,6 +13,7 @@ interface ActionBarProps {
 }
 
 export function ActionBar({ projectId, plans, existingTasks, onTaskCreated }: ActionBarProps) {
+  const router = useRouter();
   const [showCreateTask, setShowCreateTask] = useState(false);
 
   return (
@@ -41,6 +43,7 @@ export function ActionBar({ projectId, plans, existingTasks, onTaskCreated }: Ac
           onTaskCreated={(task) => {
             setShowCreateTask(false);
             onTaskCreated?.(task);
+            router.refresh();
           }}
         />
       )}

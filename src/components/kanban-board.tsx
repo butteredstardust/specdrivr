@@ -1,7 +1,8 @@
 "use client";
 
-import { TaskSelect } from '@/db/schema';
+import { TaskSelect, PlanSelect } from '@/db/schema';
 import { TaskCard } from './task-card';
+import { useRouter } from 'next/navigation';
 import {
   DndContext,
   DragEndEvent,
@@ -21,13 +22,16 @@ import { updateTaskStatus } from '@/lib/actions';
 import { CreateTaskDialog } from './create-task-dialog';
 
 interface KanbanBoardProps {
+  projectId?: number;
+  plans?: PlanSelect[];
   tasks: TaskSelect[];
   onTaskClick?: (task: TaskSelect) => void;
 }
 
-export function KanbanBoard({ tasks, onTaskClick }: KanbanBoardProps) {
+export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: KanbanBoardProps) {
   const [tasksState, setTasksState] = useState<TaskSelect[]>(tasks);
   const [activeTask, setActiveTask] = useState<TaskSelect | null>(null);
+  const router = useRouter();
 
   const columns = [
     {
@@ -204,6 +208,21 @@ export function KanbanBoard({ tasks, onTaskClick }: KanbanBoardProps) {
                     </div>
                   )}
                 </div>
+
+                {/* Create Task Button for this column */}
+                {projectId && plans.length > 0 && (
+                  <div className="mt-3">
+                    <CreateTaskDialog
+                      projectId={projectId}
+                      plans={plans}
+                      existingTasks={tasks}
+                      prefilledStatus={column.id as TaskStatus}
+                      onTaskCreated={() => {
+                        router.refresh();
+                      }}
+                    />
+                  </div>
+                )}
               </div>
             );
           })}
