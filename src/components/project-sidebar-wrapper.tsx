@@ -22,9 +22,10 @@ export function useSidebar() {
 
 interface ProjectSidebarWrapperProps {
   projects: ProjectSelect[];
+  currentProjectId?: number;
 }
 
-export function ProjectSidebarWrapper({ projects }: ProjectSidebarWrapperProps) {
+export function ProjectSidebarWrapper({ projects, currentProjectId }: ProjectSidebarWrapperProps) {
   const router = useRouter();
   const [isHidden, setIsHidden] = useState(false);
 
@@ -54,7 +55,11 @@ export function ProjectSidebarWrapper({ projects }: ProjectSidebarWrapperProps) 
       {isHidden ? (
         <ToggleButton />
       ) : (
-        <ProjectSidebar projects={projects} onProjectSelect={handleProjectSelect} />
+        <ProjectSidebar
+          projects={projects}
+          currentProjectId={currentProjectId}
+          onProjectSelect={handleProjectSelect}
+        />
       )}
     </SidebarContext.Provider>
   );

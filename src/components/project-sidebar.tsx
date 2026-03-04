@@ -4,18 +4,34 @@ import { ProjectSelect } from '@/db/schema';
 import { CreateProjectDialog } from './create-project-dialog';
 import { usePathname } from 'next/navigation';
 import { useSidebar } from './project-sidebar-wrapper';
+import { agentStatusColors, type AgentStatus } from '@/lib/ios-styles';
 
 interface ProjectSidebarProps {
   projects: ProjectSelect[];
   activeProjectId?: number;
+  currentProjectId?: number;
   onProjectSelect?: (project: ProjectSelect) => void;
   onProjectCreated?: (project: ProjectSelect) => void;
 }
 
-export function ProjectSidebar({ projects, activeProjectId, onProjectSelect, onProjectCreated }: ProjectSidebarProps) {
+function getAgentStatusClass(status: string): string {
+  const statusMap: Record<string, string> = {
+    idle: 'ios-status-dot-idle',
+    running: 'ios-status-dot-running',
+    paused: 'ios-status-dot-paused',
+    stopped: 'ios-status-dot-idle',
+    error: 'ios-status-dot-error',
+  };
+  return statusMap[status] || 'ios-status-dot-idle';
+}
+
+export function ProjectSidebar({ projects, activeProjectId, currentProjectId, onProjectSelect, onProjectCreated }: ProjectSidebarProps) {
   const pathname = usePathname();
   const { toggleSidebar } = useSidebar();
   const isHomeActive = pathname === '/';
+
+  // Normalize current project ID for comparison
+  const activeId = currentProjectId || activeProjectId;
 
   return (
     <div className="w-64 h-screen flex flex-col ios-font p-3">
@@ -85,7 +101,10 @@ export function ProjectSidebar({ projects, activeProjectId, onProjectSelect, onP
 
             {/* Projects List */}
             {projects.map((project) => {
-              const isProjectActive = pathname === `/projects/${project.id}`;
+              const isProjectActive = pathname === `/projects/${project.id}` || activeId === project.id;
+              const agentStatus = (project as any).agentStatus || 'idle';
+              const statusClass = getAgentStatusClass(agentStatus);
+
               return (
                 <a
                   key={project.id}
@@ -94,19 +113,21 @@ export function ProjectSidebar({ projects, activeProjectId, onProjectSelect, onP
                     block cursor-pointer ios-radius p-[13px] transition-colors
                     ${isProjectActive
                       ? 'bg-ios-blue text-white'
-                      : 'bg-ios-primary hover:bg-ios-secondary border border-ios'
+                      : 'bg-ios-bg-card hover:bg-ios-secondary text-ios-text-primary border border-ios-border'
                     }
                   `}
                 >
                   <div className="flex items-start justify-between ios-font-text">
                     <div className="flex items-center gap-2.5">
+                      {/* Agent Status Dot */}
+                      <div className={`ios-status-dot ${statusClass}`} title={`Agent status: ${agentStatus}`} />
                       <span className="text-lg">📁</span>
-                      <h3 className="text-[17px] font-medium">
+                      <h3 className="text-[17px] font-medium truncate max-w-[150px]" title={project.name}>
                         {project.name}
                       </h3>
                     </div>
                     {isProjectActive && (
-                      <span className="bg-white/20 text-white text-[13px] px-2 py-0.5 ios-radius-small">
+                      <span className="bg-white/20 text-white text-[13px] px-2 py-0.5 rounded-full">
                         Active
                       </span>
                     )}

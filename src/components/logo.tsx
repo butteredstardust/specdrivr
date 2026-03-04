@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils';
 
-interface LogoProps {
+export interface LogoProps {
   size?: 'icon' | 'small' | 'medium' | 'large';
   className?: string;
 }
