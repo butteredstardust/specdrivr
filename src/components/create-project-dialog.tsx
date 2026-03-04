@@ -25,7 +25,6 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
     setError('');
 
     try {
-      // Parse tech stack JSON if provided
       let techStack: Record<string, unknown> | undefined;
       if (formData.techStack.trim()) {
         try {
@@ -77,75 +76,101 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
   if (!isOpen) {
     return (
       <button
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
         onClick={() => setIsOpen(true)}
+        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[13px] font-medium text-ios-blue bg-ios-secondary border border-ios ios-radius transition-colors ios-font-text"
+        style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}
       >
-        + New Project
+        <span className="text-base">+</span>
+        <span>New Project</span>
       </button>
     );
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center ios-font">
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={handleCancel}
+      />
+
+      {/* Dialog Content */}
+      <div className="ios-card shadow-xl w-full max-w-md mx-4 overflow-hidden ios">
         <div className="p-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Create New Project</h2>
+          <h2 className="ios-title-2 text-ios-primary mb-6 ios-font-display">
+            Create New Project
+          </h2>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-sm text-red-600">{error}</p>
+            <div className="mb-4 p-3 bg-opacity-10 border ios-radius" style={{ backgroundColor: 'var(--ios-red)', borderColor: 'var(--ios-separator)' }}>
+              <p className="text-sm text-ios-red ios-font-text">{error}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 ios-font-text">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                Project Name *
+              <label htmlFor="name" className="block ios-subheadline text-ios-primary mb-1">
+                Project Name
               </label>
               <input
                 type="text"
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 ios-radius border border-ios bg-ios-primary text-ios-primary ios-font-text focus:outline-none focus:ring-2 focus:ring-[var(--ios-blue)] focus:border-[var(--ios-blue)] transition-shadow"
                 placeholder="My Awesome Project"
                 required
+                style={{
+                  backgroundColor: 'var(--ios-bg-primary)',
+                  color: 'var(--ios-text-primary)',
+                  borderColor: 'var(--ios-separator)',
+                }}
               />
             </div>
 
             <div>
-              <label htmlFor="constitution" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="constitution" className="block ios-subheadline text-ios-primary mb-1">
                 Project Constitution
               </label>
               <textarea
                 id="constitution"
                 value={formData.constitution}
                 onChange={(e) => setFormData({ ...formData, constitution: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 ios-radius border border-ios bg-ios-primary text-ios-primary ios-font-text focus:outline-none focus:ring-2 focus:ring-[var(--ios-blue)] focus:border-[var(--ios-blue)] transition-shadow resize-none"
                 placeholder="Brief description of the project's purpose..."
                 rows={3}
+                style={{
+                  backgroundColor: 'var(--ios-bg-primary)',
+                  color: 'var(--ios-text-primary)',
+                  borderColor: 'var(--ios-separator)',
+                }}
               />
             </div>
 
             <div>
-              <label htmlFor="techStack" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="techStack" className="block ios-subheadline text-ios-primary mb-1">
                 Tech Stack (JSON)
               </label>
               <textarea
                 id="techStack"
                 value={formData.techStack}
                 onChange={(e) => setFormData({ ...formData, techStack: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
+                className="w-full px-3 py-2 ios-radius border border-ios bg-ios-primary text-ios-primary ios-font-text font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ios-blue)] focus:border-[var(--ios-blue)] transition-shadow resize-none"
                 placeholder='{"language": "TypeScript", "framework": "Next.js"}'
                 rows={3}
+                style={{
+                  backgroundColor: 'var(--ios-bg-primary)',
+                  color: 'var(--ios-text-primary)',
+                  borderColor: 'var(--ios-separator)',
+                }}
               />
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 ios-caption text-ios-placeholder">
                 Optional: Enter tech stack as JSON object
               </p>
             </div>
 
             <div>
-              <label htmlFor="basePath" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="basePath" className="block ios-subheadline text-ios-primary mb-1">
                 Base Path
               </label>
               <input
@@ -153,26 +178,32 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
                 id="basePath"
                 value={formData.basePath}
                 onChange={(e) => setFormData({ ...formData, basePath: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 ios-radius border border-ios bg-ios-primary text-ios-primary ios-font-text font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ios-blue)] focus:border-[var(--ios-blue)] transition-shadow"
                 placeholder="/path/to/project"
+                style={{
+                  backgroundColor: 'var(--ios-bg-primary)',
+                  color: 'var(--ios-text-primary)',
+                  borderColor: 'var(--ios-separator)',
+                }}
               />
             </div>
 
-            <div className="flex justify-end space-x-3 pt-4">
+            <div className="flex justify-end gap-3 pt-4">
               <button
                 type="button"
                 onClick={handleCancel}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                className="px-4 py-2 text-[17px] font-medium text-ios-blue bg-ios-secondary border border-ios ios-radius transition-colors ios-font-text disabled:opacity-50"
                 disabled={isSubmitting}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors disabled:opacity-50"
+                className="px-4 py-2 text-[17px] font-medium text-white ios-radius transition-colors ios-font-text disabled:opacity-50"
                 disabled={isSubmitting || !formData.name.trim()}
+                style={{ backgroundColor: 'var(--ios-blue)' }}
               >
-                {isSubmitting ? 'Creating...' : 'Create Project'}
+                {isSubmitting ? 'Creating...' : 'Create'}
               </button>
             </div>
           </form>
