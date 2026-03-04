@@ -2,6 +2,8 @@
 
 import { ProjectSelect } from '@/db/schema';
 import { CreateProjectDialog } from './create-project-dialog';
+import { usePathname } from 'next/navigation';
+import { useSidebar } from './project-sidebar-wrapper';
 
 interface ProjectSidebarProps {
   projects: ProjectSelect[];
@@ -11,60 +13,123 @@ interface ProjectSidebarProps {
 }
 
 export function ProjectSidebar({ projects, activeProjectId, onProjectSelect, onProjectCreated }: ProjectSidebarProps) {
+  const pathname = usePathname();
+  const { toggleSidebar } = useSidebar();
+  const isHomeActive = pathname === '/';
+
   return (
-    <div className="w-64 bg-ios-system border-r border-ios h-screen flex flex-col ios-font">
-      <div className="p-[13px] border-b border-opacity-12" style={{ borderColor: 'var(--ios-separator)' }}>
-        <h2 className="text-[17px] font-semibold text-ios-primary mb-1 ios-font-display">
-          Projects
-        </h2>
-        <p className="text-[13px] text-ios-placeholder ios-font-text">
-          Track AI agent progress
-        </p>
-      </div>
-
-      <div className="flex-1 overflow-y-auto">
-        <nav className="p-3 space-y-2">
-          {projects.map((project) => {
-            const isActive = activeProjectId === project.id;
-            return (
-              <a
-                key={project.id}
-                href={`/projects/${project.id}`}
-                className={`
-                  block cursor-pointer ios-radius p-[13px] transition-colors
-                  ${isActive
-                    ? 'bg-ios-blue text-white'
-                    : 'bg-ios-primary hover:bg-ios-secondary border border-ios'
-                  }
-                `}
-              >
-                <div className="flex items-start justify-between ios-font-text">
-                  <h3 className="text-[17px] font-medium">
-                    {project.name}
-                  </h3>
-                  {isActive && (
-                    <span className="bg-white/20 text-white text-[13px] px-2 py-0.5 ios-radius-small">
-                      Active
-                    </span>
-                  )}
-                </div>
-              </a>
-            );
-          })}
-        </nav>
-      </div>
-
-      <div className="p-3 border-t border-opacity-12" style={{ borderColor: 'var(--ios-separator)' }}>
-        <div className="flex gap-2">
-          <a
-            href="/settings"
-            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[13px] font-medium text-ios-blue bg-ios-primary border border-ios ios-radius transition-colors ios-font-text"
+    <div className="w-64 h-screen flex flex-col ios-font p-3">
+      {/* Floating Sidebar Container */}
+      <div className="flex-1 flex flex-col ios-card shadow-lg overflow-hidden">
+        {/* Header with Hide Button */}
+        <div className="p-[13px] border-b border-opacity-12 flex items-center justify-between" style={{ borderColor: 'var(--ios-separator)' }}>
+          <div>
+            <h2 className="text-[17px] font-semibold text-ios-primary mb-1 ios-font-display">
+              Menu
+            </h2>
+            <p className="text-[13px] text-ios-placeholder ios-font-text">
+              Navigate your workspace
+            </p>
+          </div>
+          <button
+            onClick={toggleSidebar}
+            className="p-2 rounded-lg hover:bg-opacity-80 hover:bg-ios-secondary transition-colors"
+            aria-label="Hide sidebar"
+            title="Hide sidebar"
           >
-            <span className="text-base">⚙️</span>
-            <span>Settings</span>
-          </a>
-          <div className="flex-1 min-w-0">
-            <CreateProjectDialog onProjectCreated={onProjectCreated} />
+            <svg
+              className="w-5 h-5 text-ios-placeholder"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+              />
+            </svg>
+          </button>
+        </div>
+
+        {/* Navigation */}
+        <div className="flex-1 overflow-y-auto">
+          <nav className="p-3 space-y-2">
+            {/* Home Link */}
+            <a
+              href="/"
+              className={`
+                block cursor-pointer ios-radius p-[13px] transition-colors ios-font-text
+                ${isHomeActive
+                  ? 'bg-ios-blue text-white'
+                  : 'bg-ios-secondary hover:bg-opacity-80'
+                }
+              `}
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-xl">🏠</span>
+                <span className="text-[17px] font-medium">Home</span>
+              </div>
+            </a>
+
+            {/* Divider */}
+            <div className="h-[1px] bg-opacity-12 my-2" style={{ backgroundColor: 'var(--ios-separator)' }} />
+
+            {/* Projects Header */}
+            <div className="px-2 py-2">
+              <h3 className="text-[11px] font-semibold uppercase tracking-wide text-ios-placeholder">
+                Projects
+              </h3>
+            </div>
+
+            {/* Projects List */}
+            {projects.map((project) => {
+              const isProjectActive = pathname === `/projects/${project.id}`;
+              return (
+                <a
+                  key={project.id}
+                  href={`/projects/${project.id}`}
+                  className={`
+                    block cursor-pointer ios-radius p-[13px] transition-colors
+                    ${isProjectActive
+                      ? 'bg-ios-blue text-white'
+                      : 'bg-ios-primary hover:bg-ios-secondary border border-ios'
+                    }
+                  `}
+                >
+                  <div className="flex items-start justify-between ios-font-text">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-lg">📁</span>
+                      <h3 className="text-[17px] font-medium">
+                        {project.name}
+                      </h3>
+                    </div>
+                    {isProjectActive && (
+                      <span className="bg-white/20 text-white text-[13px] px-2 py-0.5 ios-radius-small">
+                        Active
+                      </span>
+                    )}
+                  </div>
+                </a>
+              );
+            })}
+          </nav>
+
+          {/* Bottom Actions */}
+          <div className="p-3 border-t border-opacity-12 mt-auto" style={{ borderColor: 'var(--ios-separator)' }}>
+            <div className="flex gap-2">
+              <a
+                href="/settings"
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[13px] font-medium text-ios-blue bg-ios-secondary border border-ios ios-radius transition-colors ios-font-text"
+              >
+                <span className="text-base">⚙️</span>
+                <span>Settings</span>
+              </a>
+              <div className="flex-1 min-w-0">
+                <CreateProjectDialog onProjectCreated={onProjectCreated} />
+              </div>
+            </div>
           </div>
         </div>
       </div>

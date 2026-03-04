@@ -9,6 +9,23 @@ interface CreatePlanDialogProps {
   onPlanCreated?: (plan: any) => void;
 }
 
+const iosInputStyle = {
+  width: '100%',
+  padding: '8px 12px',
+  backgroundColor: 'var(--ios-bg-primary)',
+  color: 'var(--ios-text-primary)',
+  borderColor: 'var(--ios-separator)',
+  borderRadius: '8px',
+  fontSize: '17px',
+  outline: 'none',
+  transition: 'box-shadow 0.2s',
+  fontFamily: '-apple-system, BlinkMacSystemFont, SF Pro Text, Helvetica, sans-serif',
+};
+
+const iosFontStyle = {
+  fontFamily: '-apple-system, BlinkMacSystemFont, SF Pro Display, Helvetica, sans-serif',
+};
+
 export function CreatePlanDialog({ specId, onPlanCreated }: CreatePlanDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -24,7 +41,6 @@ export function CreatePlanDialog({ specId, onPlanCreated }: CreatePlanDialogProp
     setError('');
 
     try {
-      // Parse architecture decisions JSON
       let architectureDecisions = {};
       if (formData.architectureDecisions.trim()) {
         try {
@@ -36,7 +52,6 @@ export function CreatePlanDialog({ specId, onPlanCreated }: CreatePlanDialogProp
         }
       }
 
-      // Create plan using DB insert
       const [plan] = await db
         .insert(plans)
         .values({
@@ -76,7 +91,7 @@ export function CreatePlanDialog({ specId, onPlanCreated }: CreatePlanDialogProp
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="px-4 py-2 text-sm font-medium text-blue-600 border border-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+        className="px-4 py-2 ios-body text-ios-blue bg-ios-secondary border border-ios ios-radius ios-font-text"
       >
         Create Plan
       </button>
@@ -84,71 +99,79 @@ export function CreatePlanDialog({ specId, onPlanCreated }: CreatePlanDialogProp
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center ios-font">
+      <div
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={handleCancel}
+      />
+
+      <div className="ios-card shadow-xl w-full max-w-lg mx-4 overflow-hidden ios relative z-10">
         <div className="p-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Create New Plan</h2>
+          <h2 className="ios-title-2 text-ios-primary mb-6 ios-font-display">
+            Create New Plan
+          </h2>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-sm text-red-600">{error}</p>
+            <div className="mb-4 p-3 bg-opacity-10 border ios-radius" style={{ backgroundColor: 'var(--ios-red)', borderColor: 'var(--ios-separator)' }}>
+              <p className="text-sm text-ios-red" style={iosFontStyle}>{error}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" style={iosFontStyle}>
             <div>
-              <p className="text-sm text-gray-600 mb-4">
+              <p className="ios-body text-ios-secondary mb-4">
                 Creating plan for specification #{specId}
               </p>
             </div>
 
             <div>
-              <label htmlFor="architectureDecisions" className="block text-sm font-medium text-gray-700 mb-1">
-                Architecture Decisions (JSON)
+              <label htmlFor="architectureDecisions" className="block ios-subheadline text-ios-primary mb-2">
+                Architecture Decisions
               </label>
               <textarea
                 id="architectureDecisions"
                 value={formData.architectureDecisions}
                 onChange={(e) => setFormData({ ...formData, architectureDecisions: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
                 placeholder='{"frontend": "Next.js 14", "backend": "API Routes"}'
                 rows={6}
+                style={{ ...iosInputStyle, resize: 'none', fontFamily: 'monospace, Menlo, Monaco, Consolas, monospace' }}
               />
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 ios-caption text-ios-placeholder">
                 Enter architecture decisions as JSON object
               </p>
             </div>
 
             <div>
-              <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="status" className="block ios-subheadline text-ios-primary mb-2">
                 Status
               </label>
               <select
                 id="status"
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                style={iosInputStyle}
               >
                 <option value="draft">Draft</option>
                 <option value="active">Active</option>
               </select>
             </div>
 
-            <div className="flex justify-end space-x-3 pt-4">
+            <div className="flex justify-end gap-3 pt-4">
               <button
                 type="button"
                 onClick={handleCancel}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
                 disabled={isSubmitting}
+                className="px-4 py-2 ios-body text-ios-blue bg-ios-secondary border border-ios ios-radius ios-font-text disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors disabled:opacity-50"
                 disabled={isSubmitting}
+                className="px-4 py-2 ios-body text-white ios-radius ios-font-text transition-colors disabled:opacity-50"
+                style={{ backgroundColor: 'var(--ios-blue)' }}
               >
-                {isSubmitting ? 'Creating...' : 'Create Plan'}
+                {isSubmitting ? 'Creating...' : 'Create'}
               </button>
             </div>
           </form>

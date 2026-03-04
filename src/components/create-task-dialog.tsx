@@ -15,6 +15,21 @@ interface CreateTaskDialogProps {
   onTaskCreated?: (task: TaskSelect) => void;
 }
 
+const iosInputStyle = {
+  width: '100%',
+  padding: '8px 12px',
+  backgroundColor: 'var(--ios-bg-primary)',
+  color: 'var(--ios-text-primary)',
+  borderColor: 'var(--ios-separator)',
+  borderRadius: '8px',
+  fontSize: '17px',
+  outline: 'none',
+  transition: 'box-shadow 0.2s',
+};
+const iosInputFocusStyle = {
+  boxShadow: '0 0 0 2px var(--ios-blue)',
+};
+
 export function CreateTaskDialog({
   projectId,
   plans,
@@ -42,12 +57,10 @@ export function CreateTaskDialog({
     setError('');
 
     try {
-      // Parse files involved
       const filesInvolved = formData.filesInvolved
         ? formData.filesInvolved.split(',').map((f) => f.trim()).filter((f) => f)
         : undefined;
 
-      // Parse priority
       const priority = parseInt(formData.priority, 10);
       if (isNaN(priority) || priority < 1 || priority > 10) {
         setError('Priority must be a number between 1 and 10');
@@ -55,7 +68,6 @@ export function CreateTaskDialog({
         return;
       }
 
-      // Parse dependency task id
       const dependencyTaskId = formData.dependencyTaskId
         ? parseInt(formData.dependencyTaskId, 10)
         : null;
@@ -115,7 +127,7 @@ export function CreateTaskDialog({
   if (!isOpen) {
     return (
       <button
-        className="text-gray-400 hover:text-gray-600 font-medium transition-colors"
+        className="text-ios-placeholder hover:text-ios-primary font-medium transition-colors ios-font-text text-2xl"
         onClick={() => {
           if (controlledIsOpen === undefined) {
             setIsOpenInternal(true);
@@ -129,74 +141,75 @@ export function CreateTaskDialog({
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center ios-font">
+      <div
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={handleCancel}
+      />
+
+      <div className="ios-card shadow-xl w-full max-w-lg mx-4 overflow-hidden ios relative z-10">
         <div className="p-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Create New Task</h2>
+          <h2 className="ios-title-2 text-ios-primary mb-6 ios-font-display">
+            Create New Task
+          </h2>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-sm text-red-600">{error}</p>
+            <div className="mb-4 p-3 bg-opacity-10 border ios-radius" style={{ backgroundColor: 'var(--ios-red)', borderColor: 'var(--ios-separator)' }}>
+              <p className="text-sm text-ios-red ios-font-text">{error}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Plan Selection */}
+          <form onSubmit={handleSubmit} className="space-y-4 ios-font-text">
             <div>
-              <label htmlFor="planId" className="block text-sm font-medium text-gray-700 mb-1">
-                Select Plan *
+              <label htmlFor="planId" className="block ios-subheadline text-ios-primary mb-2">
+                Plan
               </label>
               <select
                 id="planId"
                 value={formData.planId}
                 onChange={(e) => setFormData({ ...formData, planId: parseInt(e.target.value, 10) })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 required
+                style={iosInputStyle}
               >
                 {plans.map((plan) => (
-                  <option key={plan.id} value={plan.id}>
-                    Plan #{plan.id} (ID: {plan.id})
-                  </option>
+                  <option key={plan.id} value={plan.id}>Plan #{plan.id}</option>
                 ))}
               </select>
             </div>
 
-            {/* Description */}
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                Description *
+              <label htmlFor="description" className="block ios-subheadline text-ios-primary mb-2">
+                Description
               </label>
               <textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Implement user authentication API endpoint"
                 rows={3}
                 required
+                style={{ ...iosInputStyle, resize: 'none' }}
               />
             </div>
 
-            {/* Files Involved */}
             <div>
-              <label htmlFor="filesInvolved" className="block text-sm font-medium text-gray-700 mb-1">
-                Files Involved (comma-separated)
+              <label htmlFor="filesInvolved" className="block ios-subheadline text-ios-primary mb-2">
+                Files
               </label>
               <input
                 type="text"
                 id="filesInvolved"
                 value={formData.filesInvolved}
                 onChange={(e) => setFormData({ ...formData, filesInvolved: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="src/api/auth.ts, tests/auth.test.ts"
+                style={iosInputStyle}
               />
-              <p className="mt-1 text-xs text-gray-500">Separate multiple files with commas</p>
+              <p className="mt-1 ios-caption text-ios-placeholder">Separate files with commas</p>
             </div>
 
-            {/* Priority */}
             <div>
-              <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-1">
-                Priority (1-10, higher = more important)
+              <label htmlFor="priority" className="block ios-subheadline text-ios-primary mb-2">
+                Priority (1-10)
               </label>
               <input
                 type="number"
@@ -205,20 +218,19 @@ export function CreateTaskDialog({
                 max="10"
                 value={formData.priority}
                 onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                style={iosInputStyle}
               />
             </div>
 
-            {/* Dependency Task */}
             <div>
-              <label htmlFor="dependencyTaskId" className="block text-sm font-medium text-gray-700 mb-1">
-                Depends on Task (optional)
+              <label htmlFor="dependencyTaskId" className="block ios-subheadline text-ios-primary mb-2">
+                Depends on Task
               </label>
               <select
                 id="dependencyTaskId"
                 value={formData.dependencyTaskId}
                 onChange={(e) => setFormData({ ...formData, dependencyTaskId: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                style={iosInputStyle}
               >
                 <option value="">No dependencies</option>
                 {existingTasks.map((task) => (
@@ -230,21 +242,22 @@ export function CreateTaskDialog({
               </select>
             </div>
 
-            <div className="flex justify-end space-x-3 pt-4">
+            <div className="flex justify-end gap-3 pt-4">
               <button
                 type="button"
                 onClick={handleCancel}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
                 disabled={isSubmitting}
+                className="px-4 py-2 ios-body text-ios-blue bg-ios-secondary border border-ios ios-radius ios-font-text disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors disabled:opacity-50"
                 disabled={isSubmitting || !formData.description.trim()}
+                className="px-4 py-2 ios-body text-white ios-radius ios-font-text transition-colors disabled:opacity-50"
+                style={{ backgroundColor: 'var(--ios-blue)' }}
               >
-                {isSubmitting ? 'Creating...' : 'Create Task'}
+                {isSubmitting ? 'Creating...' : 'Create'}
               </button>
             </div>
           </form>
