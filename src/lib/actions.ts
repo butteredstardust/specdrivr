@@ -1,9 +1,9 @@
 'use server';
 
 import { db } from '@/db';
-import { projects, specifications, plans, tasks } from '@/db/schema';
+import { projects, specifications, plans, tasks, testResults } from '@/db/schema';
 import { revalidatePath } from 'next/cache';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, inArray } from 'drizzle-orm';
 
 /**
  * Create a new project
@@ -334,5 +334,64 @@ export async function updatePlanDev(
   } catch (error) {
     console.error('Error updating plan:', error);
     return { success: false, error: 'Failed to update plan' };
+  }
+}
+
+/**
+ * Log test result (developer-facing)
+ */
+export async function logTestResultDev(testData: {
+  taskId: number;
+  success: boolean;
+  logs?: string;
+}) {
+  try {
+    const { logTestResult } = await import('@/lib/agent-memory');
+    const resultId = await logTestResult(
+      testData.taskId,
+      testData.success,
+      testData.logs || ''
+    );
+
+    // Revalidate the project page
+    revalidatePath('/projects/[id]', 'page');
+
+    return { success: true, resultId };
+  } catch (error) {
+    console.error('Error logging test result:', error);
+    return { success: false, error: 'Failed to log test result' };
+  }
+}
+
+/**
+ * Get test results for a project (developer-facing)
+ */
+export async function getProjectTestResults(projectId: number) {
+  try {
+    // First, get all task IDs for this project
+    const projectTasks = await db
+      .select({ id: tasks.id })
+      .from(tasks)
+      .innerJoin(plans, eq(tasks.planId, plans.id))
+      .innerJoin(specifications, eq(plans.specId, specifications.id))
+      .where(eq(specifications.projectId, projectId));
+
+    const taskIds = projectTasks.map(t => t.id);
+
+    if (taskIds.length === 0) {
+      return { success: true, testResults: [] };
+    }
+
+    // Get test results for these tasks
+    const results = await db
+      .select()
+      .from(testResults)
+      .where(inArray(testResults.taskId, taskIds))
+      .orderBy(desc(testResults.timestamp));
+
+    return { success: true, testResults: results };
+  } catch (error) {
+    console.error('Error getting test results:', error);
+    return { success: false, error: 'Failed to fetch test results' };
   }
 }
