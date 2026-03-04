@@ -257,6 +257,21 @@ export function truncateText(text: string, maxLength: number): string {
 }
 
 /**
+ * Get CSS class for agent status dot
+ */
+export function getAgentStatusClass(status: string): string {
+  const statusMap: Record<string, string> = {
+    idle: 'ios-status-dot-idle',
+    running: 'ios-status-dot-running',
+    paused: 'ios-status-dot-paused',
+    stopped: 'ios-status-dot-idle',
+    error: 'ios-status-dot-error',
+    stale: 'ios-status-dot-stale',
+  };
+  return statusMap[status] || 'ios-status-dot-idle';
+}
+
+/**
  * Generate initials from a name
  */
 export function getInitials(name: string): string {
