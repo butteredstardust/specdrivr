@@ -3,7 +3,7 @@
 import { db } from '@/db';
 import { projects, specifications, plans, tasks } from '@/db/schema';
 import { revalidatePath } from 'next/cache';
-import { eq } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
 
 /**
  * Create a new project
@@ -106,6 +106,24 @@ export async function getProjectById(projectId: number) {
   } catch (error) {
     console.error('Error getting project:', error);
     return { success: false, error: 'Failed to fetch project' };
+  }
+}
+
+/**
+ * Get all specifications for a project (for version history)
+ */
+export async function getProjectSpecs(projectId: number) {
+  try {
+    const allSpecs = await db
+      .select()
+      .from(specifications)
+      .where(eq(specifications.projectId, projectId))
+      .orderBy(desc(specifications.createdAt));
+
+    return { success: true, specs: allSpecs };
+  } catch (error) {
+    console.error('Error getting project specs:', error);
+    return { success: false, error: 'Failed to fetch specifications' };
   }
 }
 
