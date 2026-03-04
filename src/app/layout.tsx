@@ -19,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased">
+      <body className="bg-bg-primary text-text-primary antialiased">
         <ThemeProvider>
           {children}
         </ThemeProvider>
