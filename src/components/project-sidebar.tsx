@@ -52,17 +52,17 @@ export function ProjectSidebar({ projects, activeProjectId, onProjectSelect, onP
       </div>
 
       <div className="p-4 border-t border-border-primary">
-        <nav className="space-y-2">
+        <div className="flex gap-2">
           <a
             href="/settings"
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-bg-secondary bg-bg-secondary rounded-lg transition-colors"
+            className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-xs font-medium text-text-secondary hover:text-text-primary hover:bg-bg-secondary bg-bg-secondary rounded-lg transition-colors"
           >
-            <span className="text-lg">⚙️</span>
+            <span className="text-base">⚙️</span>
             <span>Settings</span>
           </a>
-        </nav>
-        <div className="mt-3">
-          <CreateProjectDialog onProjectCreated={onProjectCreated} />
+          <div className="flex-1 min-w-0">
+            <CreateProjectDialog onProjectCreated={onProjectCreated} />
+          </div>
         </div>
       </div>
     </div>
