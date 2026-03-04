@@ -4,6 +4,7 @@ import { SpecificationViewer } from '@/components/specification-viewer';
 import { TestResultsPanel } from '@/components/test-results-panel';
 import { AgentLogs } from '@/components/agent-logs';
 import { ProjectSidebarWrapper } from '@/components/project-sidebar-wrapper';
+import { Logo } from '@/components/logo';
 import { notFound } from 'next/navigation';
 import { ReactNode } from 'react';
 
@@ -47,7 +48,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{project.name}</h1>
+              <Logo size="large" className="min-w-48" />
               {project.basePath && (
                 <p className="text-sm text-gray-500 mt-1">{project.basePath}</p>
               )}

@@ -3,6 +3,7 @@
 import { db } from '@/db';
 import { projects, specifications, plans, tasks } from '@/db/schema';
 import { revalidatePath } from 'next/cache';
+import { eq } from 'drizzle-orm';
 
 /**
  * Create a new project
@@ -50,43 +51,6 @@ export async function getProjects() {
 }
 
 /**
- * Get tasks for a project
- */
-export async function getProjectTasks(projectId: number) {
-  try {
-    const projectTasks = await db.query.projects.findMany({
-      where: (projects, { eq }) => eq(projects.id, projectId),
-      with: {
-        specifications: {
-          where: (specs, { eq }) => eq(specs.isActive, true),
-          with: {
-            plans: {
-              with: {
-                tasks: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (projectTasks.length === 0) {
-      return { success: false, error: 'Project not found' };
-    }
-
-    const allTasks = projectTasks
-      .flatMap((p) => p.specifications)
-      .flatMap((s) => s.plans)
-      .flatMap((pl) => pl.tasks);
-
-    return { success: true, tasks: allTasks };
-  } catch (error) {
-    console.error('Error getting project tasks:', error);
-    return { success: false, error: 'Failed to fetch tasks' };
-  }
-}
-
-/**
  * Update task status
  */
 export async function updateTaskStatus(taskId: number, status: string) {
@@ -94,10 +58,10 @@ export async function updateTaskStatus(taskId: number, status: string) {
     const [updatedTask] = await db
       .update(tasks)
       .set({
-        status,
+        status: status as any,
         updatedAt: new Date(),
       })
-      .where(tasks.id.equals(taskId))
+      .where(eq(tasks.id, taskId))
       .returning();
 
     if (!updatedTask) {
