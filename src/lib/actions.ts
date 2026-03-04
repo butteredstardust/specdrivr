@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/db';
-import { projects, specifications, plans, tasks, testResults } from '@/db/schema';
+import { projects, specifications, plans, tasks, testResults, agentLogs } from '@/db/schema';
 import { revalidatePath } from 'next/cache';
 import { eq, desc, inArray } from 'drizzle-orm';
 
@@ -393,5 +393,52 @@ export async function getProjectTestResults(projectId: number) {
   } catch (error) {
     console.error('Error getting test results:', error);
     return { success: false, error: 'Failed to fetch test results' };
+  }
+}
+
+/**
+ * Add agent log (developer-facing)
+ */
+export async function addAgentLogDev(logData: {
+  taskId: number;
+  level?: 'debug' | 'info' | 'warn' | 'error';
+  message: string;
+  context?: Record<string, unknown>;
+
+}) {
+  try {
+    const { addAgentLog } = await import('@/lib/agent-memory');
+    const logId = await addAgentLog(
+      logData.taskId,
+      logData.level || 'info',
+      logData.message
+    );
+
+    // Revalidate the project page
+    revalidatePath('/projects/[id]', 'page');
+
+    return { success: true, logId };
+  } catch (error) {
+    console.error('Error adding agent log:', error);
+    return { success: false, error: 'Failed to add log' };
+  }
+}
+
+/**
+ * Get agent logs for a project (developer-facing)
+ */
+export async function getProjectAgentLogs(projectId: number, limit: number = 50) {
+  try {
+    const logs = await db
+      .select()
+      .from(agentLogs)
+      .where(eq(agentLogs.projectId, projectId))
+      .orderBy(desc(agentLogs.timestamp))
+      .limit(limit);
+
+    return { success: true, logs };
+  } catch (error) {
+    console.error('Error getting agent logs:', error);
+    return { success: false, error: 'Failed to fetch logs' };
   }
 }
