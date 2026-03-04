@@ -1,14 +1,16 @@
 "use client";
 
 import { ProjectSelect } from '@/db/schema';
+import { CreateProjectDialog } from './create-project-dialog';
 
 interface ProjectSidebarProps {
   projects: ProjectSelect[];
   activeProjectId?: number;
   onProjectSelect?: (project: ProjectSelect) => void;
+  onProjectCreated?: (project: ProjectSelect) => void;
 }
 
-export function ProjectSidebar({ projects, activeProjectId, onProjectSelect }: ProjectSidebarProps) {
+export function ProjectSidebar({ projects, activeProjectId, onProjectSelect, onProjectCreated }: ProjectSidebarProps) {
   return (
     <div className="w-64 bg-white border-r border-gray-200 h-screen flex flex-col">
       <div className="p-4 border-b border-gray-200">
@@ -50,15 +52,7 @@ export function ProjectSidebar({ projects, activeProjectId, onProjectSelect }: P
       </div>
 
       <div className="p-4 border-t border-gray-200">
-        <button
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-          onClick={() => {
-            // TODO: Implement create new project
-            alert('New project creation coming soon!');
-          }}
-        >
-          + New Project
-        </button>
+        <CreateProjectDialog onProjectCreated={onProjectCreated} />
       </div>
     </div>
   );
