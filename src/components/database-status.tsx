@@ -41,31 +41,31 @@ export function DatabaseStatus() {
 
   const statusConfig = {
     connecting: {
-      color: 'text-yellow-600 dark:text-yellow-400',
-      bg: 'bg-yellow-50 dark:bg-yellow-900/20',
-      borderColor: 'border-yellow-200 dark:border-yellow-700',
+      color: 'text-[#FF9500]',
+      bg: 'bg-[#F2F2F7] dark:bg-[#2C2C2E]',
+      borderColor: 'border-[rgba(60,60,67,0.12)] dark:border-[rgba(84,84,88,0.65)]',
       indicator: '⏳',
       label: 'Connecting...',
     },
     connected: {
-      color: 'text-green-600 dark:text-green-400',
-      bg: 'bg-green-50 dark:bg-green-900/20',
-      borderColor: 'border-green-200 dark:border-green-700',
-      indicator: '🟢',
+      color: 'text-[#34C759]',
+      bg: 'bg-[#F2F2F7] dark:bg-[#2C2C2E]',
+      borderColor: 'border-[rgba(60,60,67,0.12)] dark:border-[rgba(84,84,88,0.65)]',
+      indicator: '●',
       label: 'Connected',
     },
     disconnected: {
-      color: 'text-red-600 dark:text-red-400',
-      bg: 'bg-red-50 dark:bg-red-900/20',
-      borderColor: 'border-red-200 dark:border-red-700',
-      indicator: '🔴',
+      color: 'text-[#FF3B30]',
+      bg: 'bg-[#F2F2F7] dark:bg-[#2C2C2E]',
+      borderColor: 'border-[rgba(60,60,67,0.12)] dark:border-[rgba(84,84,88,0.65)]',
+      indicator: '●',
       label: 'Disconnected',
     },
     error: {
-      color: 'text-red-600 dark:text-red-400',
-      bg: 'bg-red-50 dark:bg-red-900/20',
-      borderColor: 'border-red-200 dark:border-red-700',
-      indicator: '⚠️',
+      color: 'text-[#FF3B30]',
+      bg: 'bg-[#F2F2F7] dark:bg-[#2C2C2E]',
+      borderColor: 'border-[rgba(60,60,67,0.12)] dark:border-[rgba(84,84,88,0.65)]',
+      indicator: '⚠',
       label: 'Error',
     },
   };
@@ -75,19 +75,20 @@ export function DatabaseStatus() {
   return (
     <div
       className={cn(
-        'flex items-center gap-2 px-3 py-1.5 rounded-lg border',
+        'flex items-center gap-2.5 px-3 py-2 rounded-[12px] border',
         config.bg,
         config.borderColor,
         config.color
       )}
       title="PostgreSQL database connection status"
+      style={{ fontFamily: '-apple-system, BlinkMacSystemFont, SF Pro Text, sans-serif' }}
     >
-      <span className="animate-pulse">{config.indicator}</span>
+      <span className="animate-pulse text-base">{config.indicator}</span>
       <div className="flex flex-col">
-        <span className="text-xs font-semibold">{config.label}</span>
+        <span className="text-[13px] font-semibold">{config.label}</span>
         {lastCheck && (
-          <span className="text-[10px] opacity-70">
-            {lastCheck.toLocaleTimeString()}
+          <span className="text-[11px] text-[#8E8E93]">
+            {lastCheck.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
         )}
       </div>

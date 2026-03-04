@@ -1,28 +1,168 @@
 @import "tailwindcss";
 
-/* Dark theme (default) */
+/* iOS/iPad Design System - Apple Colors */
+
+/* Light Mode Colors */
 :root {
-  --bg-primary: #111827 !important;
-  --bg-secondary: #1f2937 !important;
-  --text-primary: #f9fafb !important;
-  --text-secondary: #9ca3af !important;
-  --border-primary: #374151 !important;
+  /* iOS System Colors - Light Mode */
+  --ios-system-background: #F2F2F7;
+  --ios-primary-background: #FFFFFF;
+  --ios-secondary-background: #F2F2F7;
+  --ios-tertiary-background: #FFFFFF;
+
+  /* iOS Text Colors - Light Mode */
+  --ios-label: #000000;
+  --ios-secondary-label: #3C3C43;
+  --ios-tertiary-label: #3C3C43;
+  --ios-quaternary-label: #3C3C43;
+  --ios-placeholder-text: #8E8E93;
+
+  /* iOS Separator Colors - Light Mode */
+  --ios-separator: rgba(60, 60, 67, 0.12);
+  --ios-separator-opaque: #C6C6C8;
+
+  /* iOS Accent Colors */
+  --ios-blue: #007AFF;
+  --ios-green: #34C759;
+  --ios-red: #FF3B30;
+  --ios-orange: #FF9500;
+  --ios-yellow: #FFCC00;
+  --ios-purple: #5856D6;
+  --ios-pink: #FF2D55;
+  --ios-indigo: #5856D6;
+  --ios-teal: #5AC8FA;
+  --ios-mint: #00C7BE;
+
+  /* iOS Gray Colors - Light Mode */
+  --ios-gray-minimum: #F2F2F7;
+  --ios-gray-light: #F2F2F7;
+  --ios-gray: #8E8E93;
+  --ios-gray-dark: #636366;
+  --ios-gray-darker: #48484A;
+
+  /* iOS Link Colors */
+  --ios-link: #007AFF;
+  --ios-link-hover: #0055D4;
+
+  /* iOS Shadow */
+  --ios-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) / 0 1px 2px rgba(0, 0, 0, 0.03);
+
+  /* iOS Border Radius */
+  --ios-radius-small: 8px;
+  --ios-radius-medium: 12px;
+  --ios-radius-large: 16px;
+
+  /* iOS Spacing */
+  --ios-spacing-tiny: 4px;
+  --ios-spacing-small: 8px;
+  --ios-spacing-medium: 12px;
+  --ios-spacing-large: 16px;
+  --ios-spacing-xlarge: 20px;
+
+  /* iOS Typography - Light Mode */
+  --ios-large-title: 34px;
+  --ios-title-1: 28px;
+  --ios-title-2: 22px;
+  --ios-title-3: 20px;
+  --ios-headline: 17px;
+  --ios-body: 17px;
+  --ios-callout: 16px;
+  --ios-subheadline: 15px;
+  --ios-footnote: 13px;
+  --ios-caption-1: 12px;
+  --ios-caption-2: 11px;
+
+  /* Dark theme (default) */
+  --bg-primary: #1C1C1E !important;
+  --bg-secondary: #2C2C2E !important;
+  --text-primary: #FFFFFF !important;
+  --text-secondary: #AEAEB2 !important;
+  --border-primary: #38383A !important;
 }
 
-/* Light theme - applied when dark class is removed */
-html:not(.dark) {
-  --bg-primary: #ffffff !important;
-  --bg-secondary: #f9fafb !important;
-  --text-primary: #111827 !important;
-  --text-secondary: #6b7280 !important;
-  --border-primary: #e5e7eb !important;
+/* Dark Mode Colors */
+.dark {
+  /* iOS System Colors - Dark Mode */
+  --ios-system-background: #000000;
+  --ios-primary-background: #1C1C1E;
+  --ios-secondary-background: #2C2C2E;
+  --ios-tertiary-background: #3A3A3C;
+
+  /* iOS Text Colors - Dark Mode */
+  --ios-label: #FFFFFF;
+  --ios-secondary-label: #EBEBF5;
+  --ios-tertiary-label: #EBEBF5;
+  --ios-quaternary-label: #EBEBF5;
+  --ios-placeholder-text: #8E8E93;
+
+  /* iOS Separator Colors - Dark Mode */
+  --ios-separator: rgba(84, 84, 88, 0.65);
+  --ios-separator-opaque: #38383A;
+
+  /* iOS Gray Colors - Dark Mode */
+  --ios-gray-minimum: #1C1C1E;
+  --ios-gray-light: #2C2C2E;
+  --ios-gray: #8E8E93;
+  --ios-gray-dark: #98989D;
+  --ios-gray-darker: #AEAEB2;
+
+  /* iOS Shadow - Dark Mode */
+  --ios-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) / 0 1px 2px rgba(0, 0, 0, 0.08);
+
+  /* Dark theme specific overrides */
+  --bg-primary: #000000 !important;
+  --bg-secondary: #2C2C2E !important;
+  --text-primary: #FFFFFF !important;
+  --text-secondary: #AEAEB2 !important;
+  --border-primary: #38383A !important;
+}
+
+/* iOS System Font Stack */
+.ios-font {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, sans-serif;
 }
 
 body {
-  background-color: var(--bg-primary) !important;
-  color: var(--text-primary) !important;
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--ios-system-background) !important;
+  color: var(--ios-label) !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   transition-property: background-color, color;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 300ms;
+}
+
+/* Utility classes for iOS design */
+.ios-card {
+  background-color: var(--ios-primary-background);
+  border-radius: var(--ios-radius-medium);
+  box-shadow: var(--ios-shadow);
+}
+
+.ios-list-item {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--ios-separator);
+}
+
+.ios-list-item:last-child {
+  border-bottom: none;
+}
+
+.ios-button {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ios-blue);
+}
+
+.ios-header {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.dark .ios-header {
+  background-color: rgba(28, 28, 30, 0.8);
 }

@@ -8,10 +8,21 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary bg-bg-secondary hover:bg-bg-primary rounded-md transition-colors"
+      className="relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#007AFF]/50 focus:ring-offset-2"
+      style={{
+        backgroundColor: theme === 'dark' ? '#32D74B' : '#E9E9EA',
+      }}
     >
-      <span className="text-lg">{theme === 'dark' ? '🌙' : '☀️'}</span>
-      <span>{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</span>
+      <span
+        className="inline-block h-6 w-6 transform rounded-full bg-white shadow-lg transition-transform"
+        style={{
+          transform: `translateX(${theme === 'dark' ? '6px' : '-6px'})`,
+        }}
+      >
+        <span className="flex h-full w-full items-center justify-center text-sm">
+          {theme === 'dark' ? '🌙' : '☀️'}
+        </span>
+      </span>
     </button>
   );
 }

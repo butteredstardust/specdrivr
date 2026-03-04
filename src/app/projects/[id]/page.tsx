@@ -53,13 +53,15 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   const projectTechStack: Record<string, unknown> = (project.techStack as Record<string, unknown>) || {};
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#F2F2F7] dark:bg-black">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-800">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+      <header className="sticky top-0 z-50 bg-[rgba(255,255,255,0.8)] dark:bg-[rgba(28,28,30,0.8)] backdrop-blur-md border-b border-[rgba(60,60,67,0.12)] dark:border-[rgba(84,84,88,0.65)]">
+        <div className="max-w-3xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <Logo size="large" className="min-w-48" />
-            <div className="flex items-center gap-4">
+            <div className="flex-1">
+              <Logo size="large" className="min-w-40" />
+            </div>
+            <div className="flex items-center gap-3">
               <DatabaseStatus />
               <UserMenu />
             </div>
@@ -72,55 +74,78 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
           projects={projects}
         />
 
-        <main className="flex-1 overflow-y-auto p-6">
-          <div className="max-w-7xl mx-auto">
-        {/* Project Constitution */}
-        <div className="mb-8">
-          <InlineConstitutionEditor
-            projectId={projectId}
-            constitution={projectConstitution}
-          />
-        </div>
-        {/* Tech Stack */}
-        <div className="mb-8">
-          <InlineTechStackEditor
-            projectId={projectId}
-            techStack={projectTechStack}
-          />
-        </div>
-        {/* Specification */}
-        {specification && (
-          <div className="mb-8">
-            <InlineSpecEditor specification={specification} />
+        <main className="flex-1 overflow-y-auto bg-[#F2F2F7] dark:bg-black">
+          <div className="max-w-3xl mx-auto px-6 py-8">
+            {/* iOS-style Large Title */}
+            <div className="mb-8">
+              <h1 className="text-[34px] font-bold text-black dark:text-white mb-2" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, SF Pro Display, sans-serif' }}>
+                {project.name}
+              </h1>
+            </div>
+
+            {/* Project Constitution */}
+            <div className="mb-6">
+              <InlineConstitutionEditor
+                projectId={projectId}
+                constitution={projectConstitution}
+              />
+            </div>
+
+            {/* Tech Stack */}
+            <div className="mb-6">
+              <InlineTechStackEditor
+                projectId={projectId}
+                techStack={projectTechStack}
+              />
+            </div>
+
+            {/* Specification */}
+            {specification && (
+              <div className="mb-6">
+                <InlineSpecEditor specification={specification} />
+              </div>
+            )}
+
+            {/* Tasks Kanban Board */}
+            {projectTasks && (
+              <>
+                <ActionBar
+                  projectId={projectId}
+                  plans={projectPlans}
+                  existingTasks={projectTasks}
+                />
+                <div className="mb-6">
+                  <KanbanBoard tasks={projectTasks} />
+                </div>
+              </>
+            )}
+
+            {/* Test Results */}
+            <div className="mb-6">
+              <h2 className="text-[13px] font-semibold text-[#3C3C43]/[0.6] dark:text-[#FFFFFF]/[0.6] uppercase tracking-wide mb-2 px-4" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, SF Pro Text, sans-serif' }}>
+                Test Results
+              </h2>
+              <div className="bg-white dark:bg-[#1C1C1E] rounded-[12px] overflow-hidden shadow-sm border border-[#C6C6C829] dark:border-[#38383A52]">
+                <div className="px-4 py-[13px]">
+                  <TestResultsPanel testResults={[]} />
+                </div>
+              </div>
+            </div>
+
+            {/* Agent Logs */}
+            <div className="mb-6">
+              <h2 className="text-[13px] font-semibold text-[#3C3C43]/[0.6] dark:text-[#FFFFFF]/[0.6] uppercase tracking-wide mb-2 px-4" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, SF Pro Text, sans-serif' }}>
+                Agent Logs
+              </h2>
+              <div className="bg-white dark:bg-[#1C1C1E] rounded-[12px] overflow-hidden shadow-sm border border-[#C6C6C829] dark:border-[#38383A52]">
+                <div className="px-4 py-[13px]">
+                  <AgentLogs logs={[]} />
+                </div>
+              </div>
+            </div>
           </div>
-        )}
-
-        {/* Tasks Kanban Board */}
-        {projectTasks && (
-          <div className="mb-8">
-            <ActionBar
-              projectId={projectId}
-              plans={projectPlans}
-              existingTasks={projectTasks}
-            />
-            <KanbanBoard tasks={projectTasks} />
-          </div>
-        )}
-
-        {/* Test Results */}
-        <div className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">Test Results</h2>
-          <TestResultsPanel testResults={[]} />
-        </div>
-
-        {/* Agent Logs */}
-        <div className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">Agent Logs</h2>
-          <AgentLogs logs={[]} />
-        </div>
+        </main>
       </div>
-    </main>
-  </div>
-</div>
+    </div>
   );
 }

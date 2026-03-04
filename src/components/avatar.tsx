@@ -62,7 +62,7 @@ export function Avatar({
   return (
     <div
       className={cn(
-        'flex items-center justify-center rounded-full bg-gradient-to-br from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 border border-purple-200 dark:border-purple-700/50',
+        'flex items-center justify-center rounded-full bg-[#F2F2F7] dark:bg-[#2C2C2E] border border-[#C6C6C829] dark:border-[#38383A52]',
         sizeClass,
         className
       )}
@@ -81,20 +81,21 @@ export function AvatarPicker({
   onSelect: (avatarId: number) => void;
 }) {
   return (
-    <div className="grid grid-cols-5 gap-2">
+    <div className="grid grid-cols-5 gap-3">
       {DEFAULT_AVATARS.map((avatar) => (
         <button
           key={avatar.id}
           onClick={() => onSelect(avatar.id)}
           className={`
-            flex items-center justify-center w-12 h-12 rounded-lg transition-all
-            hover:scale-110 hover:shadow-lg
+            flex items-center justify-center w-12 h-12 rounded-[12px] transition-all
+            hover:scale-105
             ${selectedId === avatar.id
-              ? 'ring-2 ring-purple-500 ring-offset-2 bg-purple-50 dark:bg-purple-900/30'
-              : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'
+              ? 'ring-2 ring-[#007AFF] bg-[#F2F2F7] dark:bg-[#2C2C2E]'
+              : 'bg-[#F2F2F7] dark:bg-[#2C2C2E] hover:bg-[#E5E5EA] dark:hover:bg-[#3A3A3C]'
             }
           `}
           title={avatar.theme}
+          style={{ fontFamily: '-apple-system, BlinkMacSystemFont, SF Pro Text, sans-serif' }}
         >
           <span className="text-2xl select-none">{avatar.emoji}</span>
         </button>
