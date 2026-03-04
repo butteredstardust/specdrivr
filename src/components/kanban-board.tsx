@@ -33,6 +33,9 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
   const [activeTask, setActiveTask] = useState<TaskSelect | null>(null);
   const router = useRouter();
 
+  // Type narrowing for valid status values
+  const validStatuses = ['todo', 'in_progress', 'done', 'blocked', 'paused', 'skipped'] as const;
+
   const columns = [
     {
       id: 'todo',
@@ -47,16 +50,28 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
       borderColor: 'border-blue-300',
     },
     {
-      id: 'done',
-      title: 'Done',
-      bgColor: 'bg-green-50',
-      borderColor: 'border-green-300',
+      id: 'paused',
+      title: 'Paused',
+      bgColor: 'bg-amber-50',
+      borderColor: 'border-amber-300',
     },
     {
       id: 'blocked',
       title: 'Blocked',
       bgColor: 'bg-red-50',
       borderColor: 'border-red-300',
+    },
+    {
+      id: 'done',
+      title: 'Done',
+      bgColor: 'bg-green-50',
+      borderColor: 'border-green-300',
+    },
+    {
+      id: 'skipped',
+      title: 'Skipped',
+      bgColor: 'bg-gray-50',
+      borderColor: 'border-gray-200',
     },
   ];
 
@@ -107,16 +122,20 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
     if (!activeTask) return;
 
     // Check if over is a column
-    const isOverColumn = columns.some((col) => col.id === over.id);
-    if (isOverColumn && activeTask.status !== over.id) {
-      // Update task in UI immediately for smooth UX
-      setTasksState((prev) =>
-        prev.map((task) =>
-          task.id === active.id
-            ? { ...task, status: over.id as any }
-            : task
-        )
-      );
+    const column = columns.find((col) => col.id === over.id);
+    if (column && activeTask.status !== over.id) {
+      // Type assertion - we know over.id matches one of our valid statuses
+      const newStatus = over.id as string;
+      if (validStatuses.includes(newStatus as any)) {
+        // Update task in UI immediately for smooth UX
+        setTasksState((prev) =>
+          prev.map((task) =>
+            task.id === active.id
+              ? { ...task, status: newStatus as TaskSelect['status'] }
+              : task
+          )
+        );
+      }
     }
   }
 
@@ -130,31 +149,33 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
     if (!activeTask) return;
 
     // Check if over is a column
-    const isOverColumn = columns.some((col) => col.id === over.id);
+    const column = columns.find((col) => col.id === over.id);
 
-    if (isOverColumn && activeTask.status !== over.id) {
-      const newStatus = over.id;
-
-      try {
-        // Update in database via server action
-        const result = await updateTaskStatus(active.id as number, newStatus);
-        if (result.success) {
-          // Ensure state matches database
-          setTasksState((prev) =>
-            prev.map((task) =>
-              task.id === active.id
-                ? { ...task, status: newStatus }
-                : task
-            )
-          );
-          router.refresh();
-        } else {
+    if (column && activeTask.status !== over.id) {
+      const newStatus = over.id as string;
+      if (validStatuses.includes(newStatus as any)) {
+        try {
+          // Update in database via server action
+          const taskId = typeof active.id === 'number' ? active.id : parseInt(active.id as string, 10);
+          const result = await updateTaskStatus(taskId, newStatus);
+          if (result.success) {
+            // Ensure state matches database
+            setTasksState((prev) =>
+              prev.map((task) =>
+                task.id === active.id
+                  ? { ...task, status: newStatus as TaskSelect['status'] }
+                  : task
+              )
+            );
+            router.refresh();
+          } else {
+            // Revert on error
+            setTasksState(tasks);
+          }
+        } catch (error) {
           // Revert on error
           setTasksState(tasks);
         }
-      } catch (error) {
-        // Revert on error
-        setTasksState(tasks);
       }
     }
   }
