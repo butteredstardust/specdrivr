@@ -29,7 +29,6 @@ export function UserMenu() {
       if (data.success && data.user) {
         setUser(data.user);
       } else {
-        // Try auto-login
         await fetch('/api/auth/auto-login');
         const autoResponse = await fetch('/api/auth/session');
         const autoData = await autoResponse.json();
@@ -57,8 +56,8 @@ export function UserMenu() {
   if (loading) {
     return (
       <div className="flex items-center gap-2.5 h-10 px-3">
-        <div className="w-8 h-8 rounded-full bg-[#F2F2F7] dark:bg-[#2C2C2E] animate-pulse" />
-        <div className="w-16 h-4 rounded-[8px] bg-[#F2F2F7] dark:bg-[#2C2C2E] animate-pulse" />
+        <div className="w-8 h-8 rounded-full bg-ios-secondary animate-pulse" />
+        <div className="w-16 h-4 ios-radius-small bg-ios-secondary animate-pulse" />
       </div>
     );
   }
@@ -72,19 +71,17 @@ export function UserMenu() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'flex items-center gap-3 px-3 py-2 rounded-[12px]',
-          'hover:bg-[#F2F2F7] dark:hover:bg-[#2C2C2E]',
-          'transition-colors',
-          isOpen && 'bg-[#F2F2F7] dark:bg-[#2C2C2E]'
+          'flex items-center gap-3 px-3 py-2 ios-radius transition-colors',
+          'hover:bg-ios-secondary bg-opacity-50',
+          isOpen && 'bg-ios-secondary'
         )}
-        style={{ fontFamily: '-apple-system, BlinkMacSystemFont, SF Pro Text, sans-serif' }}
       >
-        <div className="text-right hidden sm:block">
-          <div className="text-[17px] font-medium text-black dark:text-white">
+        <div className="text-right hidden sm:block ios-font-text">
+          <div className="text-[17px] font-medium text-ios-primary">
             {user.username}
           </div>
           {user.isAdmin && (
-            <div className="text-[13px] text-[#8E8E93]">
+            <div className="text-[13px] text-ios-placeholder">
               Admin
             </div>
           )}
@@ -99,27 +96,23 @@ export function UserMenu() {
 
       {isOpen && (
         <>
+          <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
           <div
-            className="fixed inset-0 z-10"
-            onClick={() => setIsOpen(false)}
-          />
-          <div
-            className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-[#1C1C1E] rounded-[12px] shadow-lg border border-[rgba(60,60,67,0.12)] dark:border-[rgba(84,84,88,0.65)] py-1 z-20"
-            style={{ fontFamily: '-apple-system, BlinkMacSystemFont, SF Pro Text, sans-serif' }}
+            className="absolute right-0 top-full mt-2 w-56 ios-card shadow-lg border ios-font-text z-20 overflow-hidden"
           >
-            <div className="px-4 py-3 border-b border-[rgba(60,60,67,0.12)] dark:border-[rgba(84,84,88,0.65)]">
-              <div className="text-[17px] font-semibold text-black dark:text-white">
+            <div className="px-4 py-3 border-b border-opacity-12" style={{ borderColor: 'var(--ios-separator)' }}>
+              <div className="text-[17px] font-semibold text-ios-primary">
                 {user.username}
               </div>
               {user.isAdmin && (
-                <div className="text-[15px] text-[#8E8E93] mt-0.5">
+                <div className="text-[15px] text-ios-placeholder mt-0.5">
                   Administrator
                 </div>
               )}
             </div>
             <button
               onClick={handleLogout}
-              className="w-full px-4 py-[13px] text-left text-[17px] text-[#FF3B30] hover:bg-[#FF3B30]/[0.1] transition-colors flex items-center gap-2"
+              className="w-full px-4 py-[13px] text-left text-[17px] text-ios-red hover:bg-opacity-10 hover:bg-ios-secondary transition-colors flex items-center gap-2"
             >
               <span>Sign Out</span>
             </button>

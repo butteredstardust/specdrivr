@@ -9,13 +9,10 @@ export function DatabaseStatus() {
   const [status, setStatus] = useState<DbStatus>('connecting');
   const [lastCheck, setLastCheck] = useState<Date | null>(null);
 
-  // Check database connection
   const checkConnection = async () => {
     try {
       setStatus('connecting');
-      const response = await fetch('/api/health/db', {
-        cache: 'no-store',
-      });
+      const response = await fetch('/api/health/db', { cache: 'no-store' });
 
       if (response.ok) {
         setStatus('connected');
@@ -30,41 +27,30 @@ export function DatabaseStatus() {
     }
   };
 
-  // Check connection immediately and every minute
   useEffect(() => {
     checkConnection();
-
-    const interval = setInterval(checkConnection, 60000); // 1 minute
-
+    const interval = setInterval(checkConnection, 60000);
     return () => clearInterval(interval);
   }, []);
 
   const statusConfig = {
     connecting: {
-      color: 'text-[#FF9500]',
-      bg: 'bg-[#F2F2F7] dark:bg-[#2C2C2E]',
-      borderColor: 'border-[rgba(60,60,67,0.12)] dark:border-[rgba(84,84,88,0.65)]',
+      cssVar: '--ios-status-connecting',
       indicator: '⏳',
       label: 'Connecting...',
     },
     connected: {
-      color: 'text-[#34C759]',
-      bg: 'bg-[#F2F2F7] dark:bg-[#2C2C2E]',
-      borderColor: 'border-[rgba(60,60,67,0.12)] dark:border-[rgba(84,84,88,0.65)]',
+      cssVar: '--ios-status-connected',
       indicator: '●',
       label: 'Connected',
     },
     disconnected: {
-      color: 'text-[#FF3B30]',
-      bg: 'bg-[#F2F2F7] dark:bg-[#2C2C2E]',
-      borderColor: 'border-[rgba(60,60,67,0.12)] dark:border-[rgba(84,84,88,0.65)]',
+      cssVar: '--ios-status-disconnected',
       indicator: '●',
       label: 'Disconnected',
     },
     error: {
-      color: 'text-[#FF3B30]',
-      bg: 'bg-[#F2F2F7] dark:bg-[#2C2C2E]',
-      borderColor: 'border-[rgba(60,60,67,0.12)] dark:border-[rgba(84,84,88,0.65)]',
+      cssVar: '--ios-status-error',
       indicator: '⚠',
       label: 'Error',
     },
@@ -75,19 +61,20 @@ export function DatabaseStatus() {
   return (
     <div
       className={cn(
-        'flex items-center gap-2.5 px-3 py-2 rounded-[12px] border',
-        config.bg,
-        config.borderColor,
-        config.color
+        'flex items-center gap-2.5 px-3 py-2 ios-radius border border-opacity-12',
+        'bg-ios-secondary'
       )}
       title="PostgreSQL database connection status"
-      style={{ fontFamily: '-apple-system, BlinkMacSystemFont, SF Pro Text, sans-serif' }}
     >
-      <span className="animate-pulse text-base">{config.indicator}</span>
-      <div className="flex flex-col">
-        <span className="text-[13px] font-semibold">{config.label}</span>
+      <span className="animate-pulse text-base" style={{ color: `var(${config.cssVar})` }}>
+        {config.indicator}
+      </span>
+      <div className="flex flex-col ios-font-text">
+        <span className="text-[13px] font-semibold text-ios-primary">
+          {config.label}
+        </span>
         {lastCheck && (
-          <span className="text-[11px] text-[#8E8E93]">
+          <span className="text-[11px] text-ios-placeholder">
             {lastCheck.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
         )}
