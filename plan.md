@@ -1,7 +1,366 @@
 # Spec-Drivr Development Plan
 
-**Last Updated:** March 4, 2026  
-**Current Status:** Core infrastructure complete, UI integration in progress
+**Last Updated:** March 5, 2026
+**Current Status:** 80% Complete - Core infrastructure & Agent Control APIs complete
+
+## Project Summary
+
+**Goal:** Build an Autonomous Development Platform enabling AI agents and humans to collaboratively build software through a PostgreSQL state machine with spec-driven workflows.
+
+**Status:** Core platform operational. Agent can execute tasks, humans can create/monitor projects via UI. Missing human feature parity for full collaboration.
+
+## What Has Been Completed ✅ (Phases 1-3)
+
+### Infrastructure Foundation
+- ✅ Next.js 14 with App Router and TypeScript strict mode
+- ✅ PostgreSQL 16 with Docker Compose
+- ✅ Drizzle ORM configured with full schema
+- ✅ Tailwind CSS styling with Shadcn/UI components
+
+### Database Schema (6 Tables)
+- ✅ `projects` - Project metadata (with agent control fields: agent_status, agent_started_at, agent_stopped_at)
+- ✅ `specifications` - Versioned project specs (markdown content, is_active)
+- ✅ `plans` - Architecture decisions (JSON, draft/active/completed/archived status)
+- ✅ `tasks` - Implementation tasks (with retry_count, notes, completed_at, dependency_task_id)
+- ✅ `test_results` - Test verification logs (success, logs, timestamp)
+- ✅ `agent_logs` - Agent execution logs (with project_id for faster filtering)
+- ✅ `users` - User accounts (username, password_hash, avatar, is_admin)
+
+### Agent API Layer (Full Feedback Loop)
+- ✅ `GET /api/agent/mission` - Retrieve active spec, plan, and next task
+- ✅ `POST /api/agent/plans` - Create/update architecture plans
+- ✅ `PATCH /api/agent/tasks/:id` - Update task status through workflow
+- ✅ `POST /api/agent/verify` - Log test results
+- ✅ `POST /api/agent/logs` - Add agent execution logs
+- ✅ `X-Agent-Token` authentication middleware
+- ✅ Zod validation schemas for all endpoints
+
+### Agent Control System (NEW)
+- ✅ Project-level controls: GET/POST /api/projects/:id/agent/{start,pause,stop,retry,status}
+- ✅ Task-level controls: POST /api/tasks/:id/agent/{retry,skip}
+- ✅ Real-time status polling for frontend
+- ✅ Database fields for tracking agent state (status, uptime, errors)
+
+### UI Components (Core Functionality)
+- ✅ Drag-and-drop Kanban board (@dnd-kit implementation)
+- ✅ Task cards with priority indicators and draggable between columns
+- ✅ Project sidebar navigation with all projects listed
+- ✅ Project detail pages with specification viewer
+- ✅ Create project dialog with form validation
+- ✅ Test results panel (placeholder structure)
+- ✅ Agent logs panel (placeholder structure)
+
+### Database Seeds
+- ✅ seed-simple.sql - 2 basic projects for initial testing
+- ✅ seed-demo.sql - 3 comprehensive projects with realistic data
+- ✅ seed-onboarding.sql - Self-onboarding data (shows 100+ completed tasks)
+- ✅ All seeds include projects, specs, plans, tasks, test results, and agent logs
+
+## What Is NOT Working / Incomplete ❌
+
+### Phase 4: Human Feature Parity (CRITICAL - Next)
+
+The platform currently enables agents to perform operations that humans cannot via UI. For true collaboration, humans need equivalent capabilities:
+
+#### 4.1 Human Task Creation (Agent: POST /api/agent/tasks, Human: ❌)
+- **Problem:** Humans cannot create tasks via UI; must use SQL/API directly
+- **Solution:** Create task creation dialog in Kanban board
+- **Database:** Use existing `tasks` table (no schema changes needed)
+- **Files:** New `src/components/create-task-dialog.tsx`, update Kanban board
+
+#### 4.2 Human Plan Editor (Agent: POST /api/agent/plans, Human: ❌)
+- **Problem:** Humans cannot create/edit architecture plans via UI
+- **Solution:** Create plan editor form with JSON structure validation
+- **Database:** Use existing `plans` table (no schema changes needed)
+- **Files:** New `src/components/create-plan-dialog.tsx` integrated into project detail view
+
+#### 4.3 Human Specification Editor (Agent: Create spec via POST /api/agent/projects, Human: ❌)
+- **Problem:** Humans cannot edit specifications after project creation
+- **Solution:** Add markdown editor for specifications with version management
+- **Database:** Consider adding `updated_at` to `specifications` (optional, audit trail)
+- **Files:** New `src/components/spec-editor.tsx`, update specification-viewer
+
+#### 4.4 Human Test Results Logging (Agent: POST /api/agent/verify, Human: ❌)
+- **Problem:** Test results panel is placeholder; no UI for logging results
+- **Solution:** Add "Log Test Result" button on each task card + results form
+- **Database:** Use existing `test_results` table (no schema changes needed)
+- **Files:** Enhance `src/components/test-results-panel.tsx`, modify task cards
+
+#### 4.5 Human Agent Log Creation (Agent: POST /api/agent/logs, Human: ❌)
+- **Problem:** Humans cannot manually log agent activities or notes
+- **Solution:** Add "Add Log Entry" button for manual intervention logging
+- **Database:** May add `is_internal` flag to `agent_logs` to distinguish internal vs agent logs
+- **Files:** Enhance `src/components/agent-logs.tsx` with manual log entry form
+
+#### 4.6 User Role Management (Database: `users` table exists, UI: ❌)
+- **Problem:** Users table exists but authentication/login not implemented
+- **Solution:** Add login state and user attribution to all operations
+- **Database:** Use existing `users` table, add `created_by_user_id` to projects/specs/plans/tasks
+- **Files:** New auth system (NextAuth or custom), update all tables to track ownership
+
+### Phase 5: Agent Self-Bootstrapping (CRITICAL - Next)
+
+Currently, agents cannot start from zero; they require pre-created project structures.
+
+#### 5.1 Project Creation API
+- `POST /api/agent/projects` - Create project + specification + plan in one call
+- Returns: `{ project_id, specification_id, plan_id }`
+- Schema: Accept `name`, `mission`, `description`, `tech_stack`, `instructions`, `base_path`
+
+#### 5.2 Project Configuration API
+- `PATCH /api/agent/projects/:id` - Update project configuration
+- Allows refinement: Update `mission`, `description`, `tech_stack`, `instructions`, `specification.content`
+
+#### 5.3 Task Creation API
+- `POST /api/agent/tasks` - Create individual tasks under a plan
+- Schema: Accept `plan_id`, `description`, `priority`, `files_involved`, `dependency_task_id`
+
+### Phase 6: Polish & Quality (Medium Priority)
+
+#### Quality Issues
+- ❌ Loading states/skeletons for all data-fetching pages
+- ❌ Global error boundaries (Next.js error.tsx)
+- ❌ Standardized API error responses (400/404/500 with proper messages)
+- ❌ Form validation feedback with error states
+- ❌ Offline detection and retry logic
+- ❌ Database indexes on foreign keys (performance)
+
+#### UX Improvements
+- ❌ Task dependency visualization (graph view)
+- ❌ Search/filter across tasks, specs, logs
+- ❌ Real-time updates via WebSocket or polling
+- ❌ Export functionality (JSON/CSV)
+- ❌ Keyboard shortcuts for power users
+
+## Implementation Priority (Revised)
+
+### Phase 4: Human Feature Parity (CRITICAL - 8-12 hours)
+This phase ensures humans can do everything agents can do via UI. Blocks full collaboration.
+
+#### 4.1 Task Creation Flow
+- [ ] Create `src/components/create-task-dialog.tsx` with form
+  - Fields: description, priority (1-5), files_involved (array), dependency_task_id
+  - Form validation with Zod
+  - Submit to `actions.createTask()` server action
+- [ ] Add "Create Task" button to Kanban board header
+- [ ] Update `src/lib/actions.ts` with `createTask()` server action
+- [ ] Success toast and immediate Kanban refresh
+- **Files:** New dialog component, actions.ts, kanban-board.tsx
+- **Priority:** P0 (Core workflow)
+- **Effort:** 2-3 hours
+- **Dependencies:** None (can start immediately)
+
+#### 4.2 Plan Editor
+- [ ] Create `src/components/create-plan-dialog.tsx` with JSON editor
+  - Fields: architecture_decisions (structured JSON/hierarchical)
+  - JSON validation and formatting
+  - POST to `/api/agent/plans` (agent API, humans can reuse)
+- [ ] Add "Create Plan" button to project detail page
+- [ ] Show active plan in project detail view
+- **Files:** New dialog component, project detail page update
+- **Priority:** P0 (Required for spec-driven workflow)
+- **Effort:** 2-3 hours
+- **Dependencies:** None
+
+#### 4.3 Specification Editor
+- [ ] Create `src/components/spec-editor.tsx` markdown editor
+  - Markdown rendering preview
+  - Version history view (read-only previous versions)
+  - Save creates new version, marks as active
+  - Integrated into specification-viewer
+- **Files:** New editor component, update specification-viewer
+- **Priority:** P1 (Power user feature)
+- **Effort:** 3-4 hours
+- **Dependencies:** May need `updated_at` field in specifications
+
+#### 4.4 Test Results Logging UI
+- [ ] Add "Log Test Result" button to task cards/selection
+- [ ] Create `src/components/log-test-result-dialog.tsx`
+  - Fields: success/fail boolean, logs (text area), task_id
+  - Calls `POST /api/agent/verify` (agent API, humans can reuse)
+- [ ] Update test-results-panel to show real data (query test_results table)
+- **Files:** New dialog component, update test-results-panel, task cards
+- **Priority:** P0 (Core verification loop)
+- **Effort:** 2-3 hours
+- **Dependencies:** task creation complete
+
+#### 4.5 Agent Log Creation UI
+- [ ] Add "Add Log Entry" button to agent-logs panel
+- [ ] Create `src/components/add-log-dialog.tsx`
+  - Fields: level (info/warn/error/debug), message, task_id
+  - May add context JSON field for structured data
+  - Calls `POST /api/agent/logs` (agent API, humans can reuse)
+- [ ] Optionally add `is_internal` flag to agent_logs table
+- **Files:** New dialog component, update agent-logs, schema update
+- **Priority:** P1 (Improve debugging/troubleshooting)
+- **Effort:** 1-2 hours
+- **Dependencies:** None
+
+#### 4.6 User Authentication & Authorization (MAY BREAK DOWN)
+- [ ] Implement authentication system (NextAuth or custom)
+- [ ] Create login page and middleware
+- [ ] Add `created_by_user_id` foreign key to:
+  - projects, specifications, plans, tasks tables
+- [ ] Track user actions in audit log
+- [ ] Differentiate UI: user actions vs agent actions
+- **Files:** Auth setup, schema updates, middleware, toast notifications
+- **Priority:** P2 (Nice to have for multi-user)
+- **Effort:** 4-6 hours
+- **Dependencies:** Test results logging complete
+- **Note:** Could be postponed if single-user for now
+
+### Phase 5: Agent Self-Bootstrapping (CRITICAL - 6-8 hours)
+These APIs unlock autonomous agent startup from natural language requests.
+
+#### 5.1 Agent Project Creation API
+- [ ] Implement `POST /api/agent/projects` endpoint
+  - Accept: `name`, `mission`, `description`, `constitution`, `tech_stack`, `base_path`
+  - Creates: project + specification + plan (all with proper relationships)
+  - Returns: `{ project_id, specification_id, plan_id }`
+  - Agent token authentication required
+- [ ] Add bulk insert transactions (rollback on partial failure)
+- **Files:** New route handler, schema validation
+- **Priority:** P0 (Foundation for agent autonomy)
+- **Effort:** 2 hours
+- **Dependencies:** Database schema stable
+
+#### 5.2 Agent Project Configuration API
+- [ ] Implement `PATCH /api/agent/projects/:id` endpoint
+  - Accept: `mission`, `description`, `constitution`, `tech_stack`, `instructions`
+  - Optionally update specification content (creates new version)
+- **Files:** New route handler, update logic for specs/plans
+- **Priority:** P0 (Agent needs refinement capability)
+- **Effort:** 2 hours
+- **Dependencies:** Project creation API
+
+#### 5.3 Agent Task Creation API
+- [ ] Implement `POST /api/agent/tasks` endpoint
+  - Accept: `plan_id`, `description`, `priority`, `files_involved`, `dependency_task_id`
+  - Returns: `{ task_id }`
+  - Validate: plan exists, dependency task is valid
+- [ ] Support bulk task creation (array of tasks)
+- **Files:** New route handler, validation, insert logic
+- **Priority:** P0 (Agent must decompose work)
+- **Effort:** 1.5 hours
+- **Dependencies:** None (standalone)
+
+### Phase 6: Polish & Optimization (Optional - 4-6 hours)
+Can implement based on user feedback and pain points.
+
+#### 6.1 Loading States & Skeletons
+- [ ] Create `src/components/skeleton.tsx` component
+- [ ] Add loading.tsx files to all route directories
+- [ ] Apply to: Kanban board, project detail, task lists
+- **Priority:** P1 (UX polish)
+- **Effort:** 1-2 hours
+
+#### 6.2 Error Boundaries
+- [ ] Create `src/app/error.tsx` global error boundary
+- [ ] Create `src/app/not-found.tsx` for 404 pages
+- [ ] Standardize API error responses with proper HTTP codes
+- **Priority:** P1 (Quality)
+- **Effort:** 1-2 hours
+
+#### 6.3 Database Optimization
+- [ ] Add indexes on common foreign keys: `tasks.project_id`, `specifications.project_id`, `plans.spec_id`, `agent_logs.project_id`, `agent_logs.task_id`
+- [ ] Add compound indexes: (`project_id`, `status`) on tasks
+- [ ] Review query patterns and add optimization
+- **Priority:** P1 (Performance)
+- **Effort:** 1 hour
+
+#### 6.4 Enhanced Features (Future)
+- [ ] Task dependency visualization (graph/chart)
+- [ ] Search and filtering across all entities
+- [ ] Real-time WebSocket updates
+- [ ] Export to JSON/CSV
+- [ ] Keyboard shortcuts
+- **Priority:** P2+ (Future enhancements)
+
+## Database Schema Additions Required
+
+### Potential Changes (REVIEW BEFORE IMPLEMENTING)
+
+#### Table: agent_logs
+**Addition:**
+```sql
+-- To distinguish manual human logs from agent logs
+ALTER TABLE agent_logs ADD COLUMN is_internal BOOLEAN DEFAULT false;
+```
+**Reason:** When humans add logs manually, mark as internal for filtering
+**Breaks:** No - default value handles existing rows
+
+#### Table: specifications
+**Addition:**
+```sql
+-- Track when specs are updated
+ALTER TABLE specifications ADD COLUMN updated_at TIMESTAMP WITH TIME ZONE;
+```
+**Reason:** Version history tracking for spec editor
+**Breaks:** No - nullable field
+**Alternative:** Could use created_at of newer versions to track update time
+
+#### Tables: projects, specifications, plans, tasks
+**Addition:**
+```sql
+-- Track who created what (human or agent)
+ALTER TABLE projects ADD COLUMN created_by_user_id INTEGER REFERENCES users(id);
+ALTER TABLE specifications ADD COLUMN created_by_user_id INTEGER REFERENCES users(id);
+ALTER TABLE plans ADD COLUMN created_by_user_id INTEGER REFERENCES users(id);
+ALTER TABLE tasks ADD COLUMN created_by_user_id INTEGER REFERENCES users(id);
+```
+**Reason:** Attribution for multi-user environments
+**Breaks:** No - nullable fields
+**Priority:** Only needed if implementing user auth (Phase 4.6)
+
+**Decision:** Hold off on these changes until we decide on user auth implementation.
+
+## Success Criteria
+
+### Phase 4 Complete (Human-Agent Parity)
+- [ ] Humans can create, read, update, delete projects, specs, plans, tasks via UI
+- [ ] All agent operations have equivalent UI controls
+- [ ] Test results and logs can be manually entered and viewed
+- [ ] All changes persist to PostgreSQL database
+- [ ] Agent and human can collaborate on same project seamlessly
+
+### Phase 5 Complete (Agent Autonomy)
+- [ ] Agent can self-bootstrap from natural language request
+- [ ] Agent can create complete project structure: project + spec + plan
+- [ ] Agent can decompose work by creating tasks dynamically
+- [ ] Developer can monitor agent progress through UI
+- [ ] Human can pause, resume, or stop agent execution
+
+### MVP Complete (All Phases)
+- [ ] Full spec-driven workflow operational end-to-end
+- [ ] Human+Agent can build software together
+- [ ] All data persisted in PostgreSQL state machine
+- [ ] Type-safe API with comprehensive validation
+- [ ] UI provides visibility into all operations
+
+## Architecture Decisions (Updated)
+
+| Decision | Reasoning | Trade-off |
+| -------- | --------- | --------- |
+| **Human-Agent API Parity** | Same APIs for humans and agents ensures consistency | Slightly more complex API design to support both use cases |
+| **Server Actions + API Routes** | Server actions for UI, API routes for agents | Dual patterns but optimal for each user type |
+| **No Auth Phase 4** | Simpler to postpone user management | Single-user assumption for now |
+| **Reusing Agent APIs** | Humans call same POST endpoints as agents | Agent endpoints must be more robust |
+| **Denormalized agent_logs.project_id** | Faster queries when filtering by project | Minor data duplication |
+
+## Next Immediate Actions (Pick One to Start)
+
+1. **Start Phase 4.1:** Create task creation dialog (2-3 hours, independent)
+2. **Start Phase 4.2:** Create plan editor dialog (2-3 hours, independent)
+3. **Start Phase 4.4:** Implement test results logging UI (2-3 hours, shows verification loop)
+4. **Start Phase 5.1:** Implement agent project creation API (2 hours, unlocks autonomy)
+
+**Recommendation:** Start with **Phase 4.1** (task creation) as it's most visible to users and shows immediate value. Then **Phase 4.4** (test results) to complete the verification loop.
+
+---
+
+**Last Updated:** March 5, 2026
+**Status:** 80% Complete
+**Next:** Phase 4 - Human Feature Parity (8-12 hours)
 
 ---
 

@@ -1,7 +1,7 @@
 # claude.md - Spec-Drivr Development Guide
 
 **Project:** Spec-Drivr - Autonomous Development Platform
-**Status:** 70% complete (Core infrastructure + Project management + Agent Control APIs complete)
+**Status:** 80% complete (Core infrastructure + Agent Control APIs done. Human feature parity in progress)
 **Last Updated:** March 5, 2026
 
 ---
@@ -14,7 +14,7 @@ Spec-Drivr is an **Autonomous Development Platform** that uses PostgreSQL as a s
 
 **See Also:**
 - [specification.md](specification.md) - Full project vision and requirements
-- [plan.md](plan.md) - 5-phase implementation roadmap
+- [plan.md](plan.md) - Implementation roadmap (Phases 4-6 prioritized for human parity)
 - [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md) - Current status and findings
 
 ---
@@ -542,32 +542,38 @@ Database Schema Extensions:
 - [x] tasks.completed_at timestamp
 - [x] agent_logs.project_id (denormalized for faster filtering)
 
-### 🟡 Phase 4: Features (Partially Complete)
-- [x] Agent control APIs and endpoints
+### 🟡 Phase 4: Human Feature Parity (IN PROGRESS - CRITICAL)
+Phase 4 ensures humans can do everything agents can do via UI controls.
+
+**Agent Control (COMPLETE):**
+- [x] Agent control APIs and endpoints (start, pause, stop, retry, status)
 - [x] Agent status tracking in database
-- [x] Retry and skip functionality
-- [ ] Real-time agent logs viewer (placeholder exists)
-- [ ] Test results logging UI (placeholder exists)
-- [ ] Specification editor (not started)
-- [ ] Plan editor (not started)
+- [x] Retry and skip functionality for tasks
 
-### 🔴 Phase 5: Agent Self-Bootstrapping (Blocked)
-These APIs are required for an agent to create a project from scratch:
+**Human UI Features (MISSING - In Progress):**
+- [ ] Task creation via UI (currently only agent can POST /api/tasks)
+- [ ] Plan editor for architecture decisions
+- [ ] Specification editor with markdown support
+- [ ] Test results logging UI (currently placeholder)
+- [ ] Agent logs viewer with manual entry (currently placeholder)
+- [ ] User authentication (users table exists but unused)
 
-- [ ] **POST /api/agent/projects** - Agent project creation
-  - Blocker: Agent cannot self-bootstrap without this
-  - Priority: 🔴 CRITICAL
-  - Effort: 2 hours
+### 🔴 Phase 5: Agent Self-Bootstrapping APIs
+These APIs enable agents to work from scratch without pre-created structures.
 
-- [ ] **PATCH /api/agent/projects/:id** - Agent project configuration
-  - Blocker: Agent cannot refine project config
-  - Priority: 🔴 CRITICAL
-  - Effort: 2 hours
+**Note:** Phase 4 provides human feature parity, which is prioritized before Phase 5.
 
-- [ ] **POST /api/agent/tasks** - Agent task creation
-  - Blocker: Agent cannot decompose work
-  - Priority: 🔴 CRITICAL
-  - Effort: 1.5 hours
+- [ ] **POST /api/agent/projects** - Agent project creation (2 hours)
+  - Blocker: Agent cannot self-bootstrap from natural language
+  - Priority: 🔴 HIGH (after Phase 4)
+
+- [ ] **PATCH /api/agent/projects/:id** - Agent project configuration (2 hours)
+  - Blocker: Agent cannot refine scope mid-execution
+  - Priority: 🔴 HIGH (after Phase 4)
+
+- [ ] **POST /api/agent/tasks** - Agent task creation (1.5 hours)
+  - Blocker: Agent cannot decompose work dynamically
+  - Priority: 🔴 HIGH (after Phase 4)
 
 ### 🔴 Phase 6: Developer Convenience APIs (Nice to Have)
 These are duplicate functionality but provide cleaner REST interface:
@@ -584,61 +590,88 @@ These are duplicate functionality but provide cleaner REST interface:
 
 ## 🎯 Critical Path to Fully Autonomous Agent
 
-### Goal: Agent can create and manage projects without human intervention
+### Goal: Humans and Agents can collaborate as equals
 
-**Current Blockers:**
+**Priority Shift:** Before achieving full agent autonomy, we must enable **human feature parity** - allowing humans to do everything agents can do via UI controls.
 
-1. **Agent cannot create projects**
-   - Missing: `POST /api/agent/projects`
-   - Impact: Agent must be "assigned" to existing project
-   - Cannot self-bootstrap from natural language request
+### Current State: What's Missing
 
-2. **Agent cannot update project configuration**
-   - Missing: `PATCH /api/agent/projects/:id`
-   - Impact: Agent cannot refine project scope mid-execution
-   - Must get it right on first attempt
+**Phase 4: Human Feature Parity (NOW - CRITICAL)**
 
-3. **Agent cannot create tasks**
-   - Missing: `POST /api/agent/tasks`
-   - Impact: Agent must have all tasks pre-created
-   - Cannot decompose work dynamically
+1. **Humans cannot create tasks via UI**
+   - Agent has `POST /api/agent/tasks`
+   - Human workaround: SQL or API calls (not user-friendly)
+   - Impact: Humans cannot decompose work in UI
 
-**Once these 3 endpoints exist:**
+2. **Humans cannot edit plans via UI**
+   - Agent has `POST /api/agent/plans`
+   - Human workaround: Database edits
+   - Impact: Architecture decisions locked to agent-only
+
+3. **Humans cannot edit specifications via UI**
+   - Agent creates specs via project creation API
+   - Human workaround: None (agent-only flow)
+   - Impact: "What/Why" cannot be refined by humans
+
+4. **Humans cannot log test results via UI**
+   - Agent uses `POST /api/agent/verify`
+   - Human workaround: Direct database inserts
+   - Impact: Verification loop incomplete for manual testing
+
+5. **Humans cannot view or add agent logs via UI**
+   - Agent populates `agent_logs` via `POST /api/agent/logs`
+   - Human workaround: Use `npm run db:studio`
+   - Impact: No visibility into agent execution
+
+**Once Phase 4 is complete:**
 
 ```
-Human: "Build a real-time chat app"
+Scenario: Building a Feature Together
+
+Human opens project: Click "Spec-Drivr" in sidebar
+Human creates plan: Click "Create Plan" → Define architecture in JSON
+Human creates tasks: Click "Create Task" → Describe work → Specify dependencies
+Human starts agent: Click "Start Work" → Agent begins execution
     ↓
-Agent calls: POST /api/agent/projects
+Agent queries mission: GET /api/agent/mission?project_id=1
+Agent gets context: spec, plan, next available task
+Agent executes: Implements code → Runs tests
+Agent logs results: POST /api/agent/verify (success/fail)
+Agent updates status: PATCH /api/agent/tasks/42 (in_progress → done)
     ↓
-Server creates: project, spec, plan
+Human monitors: Watches Kanban board update in real-time
+Human reviews: Opens test results panel → Sees passing tests
+Human intervenes: Adds manual log entry → "Manual review: PASS"
+Human adjusts: Edits specification → Adds new requirements
+Human creates tasks: Adds 3 more tasks for new requirements
+Human continues: Clicks "Resume"
     ↓
-Agent reads: GET /api/agent/mission
+Agent adapts: Queries updated mission → Gets new tasks
+Agent executes: Cycles through new tasks
     ↓
-Agent creates tasks: POST /api/agent/tasks (multiple)
-    ↓
-Agent executes: PATCH /api/agent/tasks/:id, POST /api/agent/verify, POST /api/agent/logs
-    ↓
-Agent monitors: GET /api/agent/mission (loop)
-    ↓
-Human monitors: visits http://localhost:3000/projects/:id
-    ↓
-Human controls: clicks Pause/Stop buttons (POST /api/projects/:id/agent/pause)
-    ↓
-Agent responds: gracefully pauses, saves state to DB
+Final result: Feature complete, fully tested, fully documented
 ```
 
-### Implementation Priority (Updated)
+### Implementation Priority (Revised)
 
-**Phase 5 - CRITICAL (2-3 hours total):**
+**Phase 4 - Human Feature Parity (8-12 hours) - START HERE**
+1. Create task creation UI (2-3 hours)
+2. Create plan editor UI (2-3 hours)
+3. Create specification editor (3-4 hours)
+4. Implement test results logging UI (2-3 hours)
+5. Add user authentication (4-6 hours) - *Optional, postponed*
+
+**Phase 5 - Agent Self-Bootstrapping (5-6 hours) - AFTER Phase 4**
 1. Implement `POST /api/agent/projects` (2 hours)
 2. Implement `PATCH /api/agent/projects/:id` (2 hours)
 3. Implement `POST /api/agent/tasks` (1.5 hours)
 
-**Phase 6 - Nice to have (if time permits):**
-4. Add loading states and skeleton components
-5. Add error boundaries
-6. Add specification editor
-7. Add plan editor
+**Phase 6 - Polish (4-6 hours) - NICE TO HAVE**
+1. Loading states and skeletons (1-2 hours)
+2. Error boundaries and error handling (1-2 hours)
+3. Database optimization and indexes (1 hour)
+
+**Why Phase 4 first?** Enables real human-agent collaboration NOW, while Phase 5 enables future autonomy. Without Phase 4, agents are second-class citizens that humans cannot truly collaborate with.
 
 ---
 
