@@ -22,7 +22,7 @@ export async function createProject(projectData: {
         techStack: projectData.techStack || {},
         basePath: projectData.basePath || '',
       })
-      .returning({ id: projects.id, name: projects.name });
+      .returning();
 
     if (!newProject) {
       throw new Error('Failed to create project');

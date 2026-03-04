@@ -6,9 +6,9 @@ import { getProjectContext } from '@/lib/agent-memory';
 export default async function Home() {
   const result = await getProjects();
 
-  let projects = [];
-  let tasks = [];
-  if (result.success) {
+  let projects: any[] = [];
+  let tasks: any[] = [];
+  if (result.success && result.projects) {
     projects = result.projects;
   }
 

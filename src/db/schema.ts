@@ -4,6 +4,7 @@ import { pgTable, serial, text, timestamp, boolean, jsonb, integer, pgEnum } fro
 export const planStatusEnum = pgEnum('plan_status', ['draft', 'active', 'completed', 'archived']);
 export const taskStatusEnum = pgEnum('task_status', ['todo', 'in_progress', 'done', 'blocked']);
 export const logLevelEnum = pgEnum('log_level', ['debug', 'info', 'warn', 'error']);
+export const agentStatusEnum = pgEnum('agent_status', ['idle', 'running', 'paused', 'stopped', 'error']);
 
 // Projects table
 export const projects = pgTable('projects', {
@@ -14,6 +15,10 @@ export const projects = pgTable('projects', {
   basePath: text('base_path'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  // Agent control fields
+  agentStatus: agentStatusEnum('agent_status').notNull().default('idle'),
+  agentStartedAt: timestamp('agent_started_at', { withTimezone: true }),
+  agentStoppedAt: timestamp('agent_stopped_at', { withTimezone: true }),
 });
 
 // Specifications table
@@ -43,9 +48,14 @@ export const tasks = pgTable('tasks', {
   description: text('description'),
   filesInvolved: jsonb('files_involved'), // array of file paths
   priority: integer('priority').notNull().default(1),
-  dependencyTaskId: integer('dependency_task_id').references(() => tasks.id),
+  // dependencyTaskId: integer('dependency_task_id').references(() => tasks.id), // Circular reference
+  dependencyTaskId: integer('dependency_task_id'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  // Agent control fields
+  retryCount: integer('retry_count').notNull().default(0),
+  notes: text('notes'),
+  completedAt: timestamp('completed_at', { withTimezone: true }),
 });
 
 // Test_Results table
@@ -61,8 +71,10 @@ export const testResults = pgTable('test_results', {
 export const agentLogs = pgTable('agent_logs', {
   id: serial('id').primaryKey(),
   taskId: integer('task_id').notNull().references(() => tasks.id, { onDelete: 'cascade' }),
+  projectId: integer('project_id'), // denormalized for faster filtering
   level: logLevelEnum('level').notNull().default('info'),
   message: text('message').notNull(),
+  context: jsonb('context'), // Additional context like file, function, etc.
   timestamp: timestamp('timestamp', { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -79,3 +91,9 @@ export type TestResultInsert = typeof testResults.$inferInsert;
 export type TestResultSelect = typeof testResults.$inferSelect;
 export type AgentLogInsert = typeof agentLogs.$inferInsert;
 export type AgentLogSelect = typeof agentLogs.$inferSelect;
+
+// Enum types for use in applications
+export type TaskStatus = 'todo' | 'in_progress' | 'done' | 'blocked';
+export type PlanStatus = 'draft' | 'active' | 'completed' | 'archived';
+export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+export type AgentStatus = 'idle' | 'running' | 'paused' | 'stopped' | 'error';

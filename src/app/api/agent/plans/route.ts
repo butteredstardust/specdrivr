@@ -4,6 +4,7 @@ import { CreatePlanSchema, ApiResponseSchema } from '@/lib/schemas';
 import { db } from '@/db';
 import { plans, PlanInsert } from '@/db/schema';
 import { addAgentLog } from '@/lib/agent-memory';
+import { z } from 'zod';
 /**
  * POST /api/agent/plans
  * Create a new plan for a specification
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: 'Validation failed',
-          details: error.errors,
+          details: error.issues,
         },
         { status: 400 }
       );
