@@ -11,18 +11,17 @@ interface AvatarProps {
   className?: string;
 }
 
-// 10 default avatar emojis with themes
 const DEFAULT_AVATARS = [
-  { id: 1, emoji: '👨‍💻', theme: 'Tech' },
-  { id: 2, emoji: '👩‍💻', theme: 'Tech 2' },
-  { id: 3, emoji: '🦸', theme: 'Hero' },
-  { id: 4, emoji: '🧙', theme: 'Wizard' },
-  { id: 5, emoji: '🧑‍🚀', theme: 'Space' },
-  { id: 6, emoji: '🕵️', theme: 'Detective' },
-  { id: 7, emoji: '👨‍🎨', theme: 'Creative' },
-  { id: 8, emoji: '👩‍🏫', theme: 'Teacher' },
-  { id: 9, emoji: '👨‍🏭', theme: 'Engineer' },
-  { id: 10, emoji: '🧑‍💼', theme: 'Business' },
+  { id: 1, emoji: '👨‍💻' },
+  { id: 2, emoji: '👩‍💻' },
+  { id: 3, emoji: '🦸' },
+  { id: 4, emoji: '🧙' },
+  { id: 5, emoji: '🧑‍🚀' },
+  { id: 6, emoji: '🕵️' },
+  { id: 7, emoji: '👨‍🎨' },
+  { id: 8, emoji: '👩‍🏫' },
+  { id: 9, emoji: '👨‍🏭' },
+  { id: 10, emoji: '🧑‍💼' },
 ];
 
 const sizeClasses = {
@@ -41,32 +40,27 @@ export function Avatar({
 }: AvatarProps) {
   const sizeClass = sizeClasses[size];
 
-  // If custom avatar URL is provided, use it
   if (avatarUrl) {
     return (
       <img
         src={avatarUrl}
         alt={username || 'User avatar'}
-        className={cn(
-          'rounded-full object-cover',
-          sizeClass,
-          className
-        )}
+        className={cn('rounded-full object-cover', sizeClass, className)}
       />
     );
   }
 
-  // Use default avatar emoji
   const avatar = DEFAULT_AVATARS[Math.min(avatarId - 1, DEFAULT_AVATARS.length - 1)] || DEFAULT_AVATARS[0];
 
   return (
     <div
       className={cn(
-        'flex items-center justify-center rounded-full bg-[#F2F2F7] dark:bg-[#2C2C2E] border border-[#C6C6C829] dark:border-[#38383A52]',
+        'flex items-center justify-center rounded-full border',
         sizeClass,
+        'bg-ios-secondary border-opacity-20',
         className
       )}
-      title={username ? `${username} - ${avatar.theme}` : avatar.theme}
+      title={username || avatar.id.toString()}
     >
       <span className="select-none">{avatar.emoji}</span>
     </div>
@@ -81,21 +75,20 @@ export function AvatarPicker({
   onSelect: (avatarId: number) => void;
 }) {
   return (
-    <div className="grid grid-cols-5 gap-3">
+    <div className="grid grid-cols-5 gap-3 ios-font">
       {DEFAULT_AVATARS.map((avatar) => (
         <button
           key={avatar.id}
           onClick={() => onSelect(avatar.id)}
           className={`
-            flex items-center justify-center w-12 h-12 rounded-[12px] transition-all
+            flex items-center justify-center w-12 h-12 ios-radius transition-all duration-200
             hover:scale-105
             ${selectedId === avatar.id
-              ? 'ring-2 ring-[#007AFF] bg-[#F2F2F7] dark:bg-[#2C2C2E]'
-              : 'bg-[#F2F2F7] dark:bg-[#2C2C2E] hover:bg-[#E5E5EA] dark:hover:bg-[#3A3A3C]'
+              ? 'ring-2 ring-[var(--ios-blue)] bg-ios-secondary'
+              : 'bg-ios-secondary hover:bg-opacity-80'
             }
           `}
-          title={avatar.theme}
-          style={{ fontFamily: '-apple-system, BlinkMacSystemFont, SF Pro Text, sans-serif' }}
+          title={`Avatar ${avatar.id}`}
         >
           <span className="text-2xl select-none">{avatar.emoji}</span>
         </button>
