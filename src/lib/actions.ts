@@ -250,3 +250,71 @@ export async function updateTechStackDev(
     return { success: false, error: 'Failed to update tech stack' };
   }
 }
+
+/**
+ * Create a new plan (developer-facing)
+ */
+export async function createPlanDev(planData: {
+  specId: number;
+  architectureDecisions?: Record<string, unknown>;
+  status?: 'draft' | 'active' | 'completed' | 'archived';
+}) {
+  try {
+    if (!planData.specId) {
+      throw new Error('specId is required');
+    }
+
+    const [newPlan] = await db
+      .insert(plans)
+      .values({
+        specId: planData.specId,
+        architectureDecisions: planData.architectureDecisions || {},
+        status: planData.status || 'draft',
+      })
+      .returning();
+
+    if (!newPlan) {
+      throw new Error('Failed to create plan');
+    }
+
+    // Revalidate the project page
+    revalidatePath('/projects/[id]', 'page');
+
+    return { success: true, plan: newPlan };
+  } catch (error) {
+    console.error('Error creating plan:', error);
+    return { success: false, error: 'Failed to create plan' };
+  }
+}
+
+/**
+ * Update an existing plan (developer-facing)
+ */
+export async function updatePlanDev(
+  planId: number,
+  architectureDecisions: Record<string, unknown>,
+  status?: 'draft' | 'active' | 'completed' | 'archived'
+) {
+  try {
+    const [updatedPlan] = await db
+      .update(plans)
+      .set({
+        architectureDecisions,
+        ...(status && { status }),
+      })
+      .where(eq(plans.id, planId))
+      .returning();
+
+    if (!updatedPlan) {
+      throw new Error('Plan not found');
+    }
+
+    // Revalidate the project page
+    revalidatePath('/projects/[id]', 'page');
+
+    return { success: true, plan: updatedPlan };
+  } catch (error) {
+    console.error('Error updating plan:', error);
+    return { success: false, error: 'Failed to update plan' };
+  }
+}
