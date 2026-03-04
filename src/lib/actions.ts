@@ -196,3 +196,57 @@ export async function updateSpecificationDev(
     return { success: false, error: 'Failed to update specification' };
   }
 }
+
+/**
+ * Update project constitution (developer-facing)
+ */
+export async function updateConstitutionDev(
+  projectId: number,
+  constitution: string
+) {
+  try {
+    // Update the project constitution
+    await db
+      .update(projects)
+      .set({
+        constitution: constitution.trim(),
+        updatedAt: new Date(),
+      })
+      .where(eq(projects.id, projectId));
+
+    // Revalidate the project page
+    revalidatePath('/projects/[id]', 'page');
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating constitution:', error);
+    return { success: false, error: 'Failed to update constitution' };
+  }
+}
+
+/**
+ * Update project tech stack (developer-facing)
+ */
+export async function updateTechStackDev(
+  projectId: number,
+  techStack: Record<string, unknown>
+) {
+  try {
+    // Update the project tech stack
+    await db
+      .update(projects)
+      .set({
+        techStack: techStack,
+        updatedAt: new Date(),
+      })
+      .where(eq(projects.id, projectId));
+
+    // Revalidate the project page
+    revalidatePath('/projects/[id]', 'page');
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating tech stack:', error);
+    return { success: false, error: 'Failed to update tech stack' };
+  }
+}

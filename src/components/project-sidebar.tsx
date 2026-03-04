@@ -52,7 +52,18 @@ export function ProjectSidebar({ projects, activeProjectId, onProjectSelect, onP
       </div>
 
       <div className="p-4 border-t border-gray-200">
-        <CreateProjectDialog onProjectCreated={onProjectCreated} />
+        <nav className="space-y-2">
+          <a
+            href="/settings"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 bg-gray-100 rounded-lg transition-colors"
+          >
+            <span className="text-lg">⚙️</span>
+            <span>Settings</span>
+          </a>
+        </nav>
+        <div className="mt-3">
+          <CreateProjectDialog onProjectCreated={onProjectCreated} />
+        </div>
       </div>
     </div>
   );

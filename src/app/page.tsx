@@ -32,6 +32,12 @@ export default async function Home() {
               <div className="text-sm text-gray-600">
                 Status: <span className="text-green-600 font-medium">Operational</span>
               </div>
+              <a
+                href="/settings"
+                className="px-3 py-1 text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
+              >
+                ⚙️ Settings
+              </a>
             </div>
           </div>
         </div>
