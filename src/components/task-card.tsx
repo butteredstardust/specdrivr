@@ -13,7 +13,7 @@ interface TaskCardProps {
 
 export function TaskCard({ task, onClick }: TaskCardProps) {
   const statusColors = {
-    todo: 'bg-gray-100 text-gray-800',
+    todo: 'bg-bg-secondary text-text-primary',
     in_progress: 'bg-blue-100 text-blue-800',
     done: 'bg-green-100 text-green-800',
     blocked: 'bg-red-100 text-red-800',
@@ -52,14 +52,14 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
       {...attributes}
       {...listeners}
       className={`
-        bg-white rounded-lg shadow-sm border-2
+        bg-bg-primary rounded-lg shadow-sm border-2
         p-4 mb-3 cursor-pointer hover:shadow-md transition-shadow
         border-${priorityColors[priority]} border-l-4
       `}
       onClick={() => onClick && onClick(task)}
     >
       <div className="flex items-start justify-between mb-2">
-        <h3 className="font-semibold text-gray-900 flex-1">
+        <h3 className="font-semibold text-text-primary flex-1">
           {task.description || 'Untitled Task'}
         </h3>
         <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[status as keyof typeof statusColors]}`}>
@@ -69,12 +69,12 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
 
       {(Array.isArray(task.filesInvolved) && task.filesInvolved.length > 0) ? (
         <div className="mb-2">
-          <p className="text-xs text-gray-500 mb-1">Files:</p>
+          <p className="text-xs text-text-secondary mb-1">Files:</p>
           <div className="flex flex-wrap gap-1">
             {task.filesInvolved.map((file: string, idx: number) => (
               <span
                 key={idx}
-                className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded"
+                className="text-xs bg-bg-secondary text-text-primary px-2 py-1 rounded"
               >
                 {file}
               </span>
@@ -83,7 +83,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
         </div>
       ) : null}
 
-      <div className="flex items-center justify-between text-xs text-gray-500">
+      <div className="flex items-center justify-between text-xs text-text-secondary">
         <span>Priority: {priority}</span>
         <span>ID: #{task.id}</span>
       </div>

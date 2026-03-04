@@ -54,15 +54,15 @@ export default async function SettingsPage({}: SettingsPageProps) {
           <div className="max-w-4xl mx-auto">
             {/* Welcome section */}
             <div className="mb-8">
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-bg-primary rounded-lg shadow p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
+                  <h1 className="text-2xl font-bold text-text-primary">Settings</h1>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600">Theme:</span>
+                    <span className="text-sm text-text-secondary">Theme:</span>
                     <ThemeToggle />
                   </div>
                 </div>
-                <p className="text-gray-600 mb-6">
+                <p className="text-text-secondary mb-6">
                   This page shows the current application configuration settings. These values are read from your environment configuration and cannot be changed here.
                 </p>
                 <p className="text-sm text-red-600 font-medium">
@@ -73,27 +73,27 @@ export default async function SettingsPage({}: SettingsPageProps) {
 
             {/* Database Configuration */}
             <div className="mb-8">
-              <div className="bg-white rounded-lg shadow">
-                <div className="px-6 py-4 border-b border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900">Database Configuration</h2>
+              <div className="bg-bg-primary rounded-lg shadow">
+                <div className="px-6 py-4 border-b border-border-primary">
+                  <h2 className="text-lg font-semibold text-text-primary">Database Configuration</h2>
                 </div>
                 <div className="p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-700">Connection URL</label>
-                      <div className="px-3 py-2 bg-gray-100 border border-gray-300 rounded-md font-mono text-sm text-gray-900">
+                      <label className="text-sm font-medium text-text-secondary">Connection URL</label>
+                      <div className="px-3 py-2 bg-bg-secondary border border-border-primary rounded-md font-mono text-sm text-text-primary">
                         {maskedDatabaseUrl || '(not set)'}
                       </div>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-text-secondary">
                         PostgreSQL connection string from DATABASE_URL environment variable
                       </p>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-700">Database Type</label>
-                      <div className="px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-sm text-gray-900">
+                      <label className="text-sm font-medium text-text-secondary">Database Type</label>
+                      <div className="px-3 py-2 bg-bg-secondary border border-border-primary rounded-md text-sm text-text-primary">
                         PostgreSQL 16
                       </div>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-text-secondary">
                         Primary database for project data
                       </p>
                     </div>
@@ -104,27 +104,27 @@ export default async function SettingsPage({}: SettingsPageProps) {
 
             {/* Authentication Configuration */}
             <div className="mb-8">
-              <div className="bg-white rounded-lg shadow">
-                <div className="px-6 py-4 border-b border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900">Authentication Configuration</h2>
+              <div className="bg-bg-primary rounded-lg shadow">
+                <div className="px-6 py-4 border-b border-border-primary">
+                  <h2 className="text-lg font-semibold text-text-primary">Authentication Configuration</h2>
                 </div>
                 <div className="p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-700">Agent Token</label>
-                      <div className="px-3 py-2 bg-gray-100 border border-gray-300 rounded-md font-mono text-sm text-gray-900">
+                      <label className="text-sm font-medium text-text-secondary">Agent Token</label>
+                      <div className="px-3 py-2 bg-bg-secondary border border-border-primary rounded-md font-mono text-sm text-text-primary">
                         {maskedAgentToken || '(not set)'}
                       </div>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-text-secondary">
                         X-Agent-Token header for agent API authentication
                       </p>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-700">NextAuth URL</label>
-                      <div className="px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-sm text-gray-900">
+                      <label className="text-sm font-medium text-text-secondary">NextAuth URL</label>
+                      <div className="px-3 py-2 bg-bg-secondary border border-border-primary rounded-md text-sm text-text-primary">
                         {nextAuthUrl || '(not set)'}
                       </div>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-text-secondary">
                         URL for NextAuth authentication
                       </p>
                     </div>
@@ -135,33 +135,33 @@ export default async function SettingsPage({}: SettingsPageProps) {
 
             {/* Application Information */}
             <div className="mb-8">
-              <div className="bg-white rounded-lg shadow">
-                <div className="px-6 py-4 border-b border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900">Application Information</h2>
+              <div className="bg-bg-primary rounded-lg shadow">
+                <div className="px-6 py-4 border-b border-border-primary">
+                  <h2 className="text-lg font-semibold text-text-primary">Application Information</h2>
                 </div>
                 <div className="p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-700">App Version</label>
-                      <div className="px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-sm text-gray-900">
+                      <label className="text-sm font-medium text-text-secondary">App Version</label>
+                      <div className="px-3 py-2 bg-bg-secondary border border-border-primary rounded-md text-sm text-text-primary">
                         {appVersion}
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-700">Node.js Version</label>
-                      <div className="px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-sm text-gray-900">
+                      <label className="text-sm font-medium text-text-secondary">Node.js Version</label>
+                      <div className="px-3 py-2 bg-bg-secondary border border-border-primary rounded-md text-sm text-text-primary">
                         {nodeVersion}
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-700">Next.js Version</label>
-                      <div className="px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-sm text-gray-900">
+                      <label className="text-sm font-medium text-text-secondary">Next.js Version</label>
+                      <div className="px-3 py-2 bg-bg-secondary border border-border-primary rounded-md text-sm text-text-primary">
                         {nextJsVersion}
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-700">Framework</label>
-                      <div className="px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-sm text-gray-900">
+                      <label className="text-sm font-medium text-text-secondary">Framework</label>
+                      <div className="px-3 py-2 bg-bg-secondary border border-border-primary rounded-md text-sm text-text-primary">
                         Next.js 14 App Router
                       </div>
                     </div>
