@@ -1,9 +1,11 @@
-import { getProjectById } from '@/lib/actions';
+import { getProjects, getProjectById } from '@/lib/actions';
 import { KanbanBoard } from '@/components/kanban-board';
 import { SpecificationViewer } from '@/components/specification-viewer';
 import { TestResultsPanel } from '@/components/test-results-panel';
 import { AgentLogs } from '@/components/agent-logs';
+import { ProjectSidebarWrapper } from '@/components/project-sidebar-wrapper';
 import { notFound } from 'next/navigation';
+import { ReactNode } from 'react';
 
 interface ProjectDetailPageProps {
   params: {
@@ -18,13 +20,25 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
     return notFound();
   }
 
+  // Get all projects for the sidebar
+  const projectsResult = await getProjects();
+  let projects: any[] = [];
+  if (projectsResult.success && projectsResult.projects) {
+    projects = projectsResult.projects;
+  }
+
+  // Get the specific project data
   const result = await getProjectById(projectId);
 
   if (!result.success || !result.context) {
     return notFound();
   }
 
-  const { project, specification, plan, tasks } = result.context;
+  const { project, specification, plan, tasks: projectTasks } = result.context;
+
+  // Extract and cast values to proper types
+  const projectConstitution = project.constitution as string | null;
+  const projectTechStack: Record<string, unknown> = (project.techStack as Record<string, unknown>) || {};
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -47,24 +61,29 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="flex h-screen pt-0">
+        <ProjectSidebarWrapper
+          projects={projects}
+        />
+
+        <main className="flex-1 overflow-y-auto p-6">
+          <div className="max-w-7xl mx-auto">
         {/* Project Constitution */}
-        {project.constitution && (
+        {projectConstitution ? (
           <div className="mb-8">
             <h2 className="text-lg font-semibold text-gray-900 mb-3">Project Constitution</h2>
             <div className="bg-white rounded-lg shadow p-6">
-              <p className="text-gray-700 whitespace-pre-wrap">{project.constitution}</p>
+              <p className="text-gray-700 whitespace-pre-wrap">{projectConstitution}</p>
             </div>
           </div>
-        )}
-
+        ) : null}
         {/* Tech Stack */}
-        {project.techStack && Object.keys(project.techStack).length > 0 && (
+        {projectTechStack && Object.keys(projectTechStack).length > 0 && (
           <div className="mb-8">
             <h2 className="text-lg font-semibold text-gray-900 mb-3">Tech Stack</h2>
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex flex-wrap gap-2">
-                {Object.entries(project.techStack).map(([key, value]) => (
+                {Object.entries(projectTechStack).map(([key, value]) => (
                   <span
                     key={key}
                     className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
@@ -77,20 +96,19 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             </div>
           </div>
         )}
-
         {/* Specification */}
         {specification && (
           <div className="mb-8">
             <h2 className="text-lg font-semibold text-gray-900 mb-3">Active Specification</h2>
-            <SpecificationViewer specification={specification} />
+            <SpecificationViewer content={specification.content} />
           </div>
         )}
 
         {/* Tasks Kanban Board */}
-        {tasks && tasks.length > 0 && (
+        {projectTasks && projectTasks.length > 0 && (
           <div className="mb-8">
             <h2 className="text-lg font-semibold text-gray-900 mb-3">Project Tasks</h2>
-            <KanbanBoard tasks={tasks} />
+            <KanbanBoard tasks={projectTasks} />
           </div>
         )}
 
@@ -106,6 +124,8 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
           <AgentLogs logs={[]} />
         </div>
       </div>
-    </div>
+    </main>
+  </div>
+</div>
   );
 }
