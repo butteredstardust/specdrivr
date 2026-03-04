@@ -1,7 +1,7 @@
 # claude.md - Spec-Drivr Development Guide
 
-**Project:** Spec-Drivr - Autonomous Development Platform  
-**Status:** 50% complete (Core infrastructure + Project management in progress)  
+**Project:** Spec-Drivr - Autonomous Development Platform
+**Status:** 70% complete (Core infrastructure + Project management + Agent Control APIs complete)
 **Last Updated:** March 5, 2026
 
 ---
@@ -22,7 +22,7 @@ Spec-Drivr is an **Autonomous Development Platform** that uses PostgreSQL as a s
 ## 📚 Quick Reference
 
 ### Architecture
-- **Frontend:** Next.js 14 App Router + React 18 + Tailwind CSS
+- **Frontend:** Next.js 14 App Router + React 18 + Tailwind CSS + @dnd-kit
 - **Backend:** Next.js API Routes + Server Actions
 - **Database:** PostgreSQL 16 + Drizzle ORM
 - **Type Safety:** TypeScript (strict mode) + Zod validation
@@ -37,7 +37,8 @@ Spec-Drivr is an **Autonomous Development Platform** that uses PostgreSQL as a s
   "orm": "Drizzle",
   "language": "TypeScript 5",
   "styling": "Tailwind CSS",
-  "validation": "Zod"
+  "validation": "Zod",
+  "drag-drop": "@dnd-kit/core, @dnd-kit/sortable, @dnd-kit/utilities"
 }
 ```
 
@@ -65,56 +66,61 @@ npm run start                      # Run production server
 specdrivr/
 ├── src/
 │   ├── app/
-│   │   ├── page.tsx              # Home page (dashboard)
-│   │   ├── projects/[id]/        # Project detail pages (TODO: create)
+│   │   ├── page.tsx              # Homepage with Kanban dashboard
+│   │   ├── projects/[id]/page.tsx # Project detail pages (with sidebar)
 │   │   ├── api/
-│   │   │   └── agent/            # Agent API endpoints
-│   │   │       ├── mission/      # GET next task
-│   │   │       ├── plans/        # POST create plan
-│   │   │       ├── tasks/[id]/   # PATCH update task
-│   │   │       ├── verify/       # POST test results
-│   │   │       └── logs/         # POST agent logs
+│   │   │   ├── agent/            # Agent API endpoints
+│   │   │   │   ├── mission/      # GET - Get next task/project context
+│   │   │   │   ├── plans/        # POST - Create/update plans
+│   │   │   │   ├── tasks/[id]/   # PATCH - Update task status
+│   │   │   │   ├── verify/       # POST - Log test results
+│   │   │   │   └── logs/         # POST - Add agent logs
+│   │   │   ├── projects/
+│   │   │   │   └── [id]/agent/   # Agent control endpoints (NEW!)
+│   │   │   │       ├── status/   # GET - Agent status
+│   │   │   │       ├── start/    # POST - Start agent
+│   │   │   │       ├── pause/    # POST - Pause agent
+│   │   │   │       ├── stop/     # POST - Stop agent
+│   │   │   │       └── retry/    # POST - Retry project
+│   │   │   └── tasks/
+│   │   │       └── [id]/agent/   # Task control endpoints (NEW!)
+│   │   │           ├── retry/    # POST - Retry task
+│   │   │           └── skip/     # POST - Skip task
 │   │   └── layout.tsx            # Root layout
 │   ├── components/               # React components
-│   │   ├── kanban-board.tsx      # Task board (TODO: add drag-drop)
-│   │   ├── project-sidebar.tsx   # Project list (TODO: fix New button)
-│   │   ├── task-card.tsx         # Task display
-│   │   ├── task-details-modal.tsx# (TODO: create)
-│   │   ├── create-project-dialog.tsx# (TODO: create)
+│   │   ├── kanban-board.tsx      # Drag-and-drop task board
+│   │   ├── project-sidebar-wrapper.tsx # Client wrapper for navigation
+│   │   ├── project-sidebar.tsx   # Project list navigation
+│   │   ├── task-card.tsx         # Draggable task cards
+│   │   ├── create-project-dialog.tsx # Project creation form
 │   │   ├── test-results-panel.tsx
 │   │   ├── agent-logs.tsx
 │   │   └── specification-viewer.tsx
 │   ├── lib/
 │   │   ├── actions.ts            # Server actions (DB queries)
 │   │   ├── agent-memory.ts       # Database context helpers
-│   │   ├── auth.ts               # Auth middleware
-│   │   ├── schemas.ts            # Zod validation schemas
-│   │   └── utils.ts              # Utility functions
-│   └── db/
-│       ├── index.ts              # Database client
-│       └── schema.ts             # Drizzle schema definition
+│   │   └── auth.ts               # Auth middleware
+│   ├── db/
+│   │   ├── index.ts              # Database client
+│   │   └── schema.ts             # Drizzle schema definition
+│   └── styles/
+│       └── globals.css
 ├── db/
-│   ├── seed-simple.sql           # Initial project data
+│   ├── seed-simple.sql           # Initial project data (2 projects)
 │   └── seed-plan.sql             # Implementation tasks
-├── public/                        # Static assets
-├── docs/                         # (TODO: create API docs)
-├── docker-compose.yml            # PostgreSQL setup
-├── drizzle.config.ts             # ORM configuration
-├── package.json                  # Dependencies
-├── tsconfig.json                 # TypeScript config
-├── next.config.js                # Next.js config
-├── tailwind.config.mjs           # Tailwind config
-├── postcss.config.mjs            # CSS config
-├── eslint.config.mjs             # Linting config
-│
+├── public/                       # Static assets
 ├── documentation/
 │   ├── specification.md          # Project vision
 │   ├── plan.md                   # Implementation roadmap
-│   ├── EVALUATION.md             # Current state assessment
 │   ├── PROJECT_SUMMARY.md        # Overview
 │   ├── QUICKSTART.md             # Setup guide
 │   ├── INDEX.md                  # Documentation index
 │   └── claude.md                 # This file
+│
+docker-compose.yml                # PostgreSQL setup
+drizzle.config.ts                 # ORM configuration
+package.json                      # Dependencies
+tailwind.config.mjs              # Tailwind config
 
 ```
 
@@ -123,21 +129,20 @@ specdrivr/
 ## 🗂️ Key Files & Their Purpose
 
 ### Database Layer
-- **[src/db/schema.ts](src/db/schema.ts)** - Drizzle schema with 6 tables
-  - `projects` - Projects metadata
+- **[src/db/schema.ts](src/db/schema.ts)** - Drizzle schema with 6 tables + agent control fields
+  - `projects` - Projects metadata (with agent_status, agent_started_at, agent_stopped_at)
   - `specifications` - Project specs (versioned)
   - `plans` - Architecture decisions
-  - `tasks` - Implementation tasks with status
+  - `tasks` - Implementation tasks with status (with retry_count, notes, completed_at)
   - `test_results` - Test pass/fail logs
-  - `agent_logs` - Agent execution logs
+  - `agent_logs` - Agent execution logs (with project_id for faster filtering)
 
 - **[src/db/index.ts](src/db/index.ts)** - Database client initialization
 
-- **[drizzle.config.ts](drizzle.config.ts)** - ORM configuration
-
-### API Layer
-- **[src/app/api/agent/mission/route.ts](src/app/api/agent/mission/route.ts)** - `GET /api/agent/mission`
-  - Returns active spec, plan, and next task for a project
+### API Layer - Agent Core (Implemented ✅)
+- **[src/app/api/agent/mission/route.ts](src/app/api/agent/mission/route.ts)** - `GET /api/agent/mission?project_id=1`
+  - Returns: active spec, plan, next task, project stats
+  - Status: ✅ Working
   - Auth: Requires `X-Agent-Token` header
   - Used by: Agent to understand current context
 
@@ -145,138 +150,160 @@ specdrivr/
   - Create or update architecture plans
   - Body: spec_id, architecture_decisions
   - Used by: Agent to publish architecture decisions
+  - Status: ✅ Working
 
 - **[src/app/api/agent/tasks/[id]/route.ts](src/app/api/agent/tasks/[id]/route.ts)** - `PATCH /api/agent/tasks/:id`
   - Update task status (todo → in_progress → done)
   - Body: status, updated_at
   - Used by: Agent to move task through workflow
+  - Status: ✅ Working
 
 - **[src/app/api/agent/verify/route.ts](src/app/api/agent/verify/route.ts)** - `POST /api/agent/verify`
   - Log test results after verification
   - Body: task_id, success, logs
   - Used by: Agent to record test pass/fail
+  - Status: ✅ Working
 
 - **[src/app/api/agent/logs/route.ts](src/app/api/agent/logs/route.ts)** - `POST /api/agent/logs`
   - Add agent execution logs
-  - Body: task_id, level, message
+  - Body: task_id, level, message, context
   - Used by: Agent to provide execution visibility
+  - Status: ✅ Working
 
-### API Layer Extensions (NEEDED FOR MVP)
-- **`POST /api/agent/projects`** - Create new project (⚠️ MISSING)
-  - Payload: name, mission, description, tech_stack, instructions, base_path
-  - Returns: { project_id, specification_id, plan_id }
-  - Priority: 🔴 Critical for agent and developer
+### API Layer - Agent Control (NEW! ✅)
+- **[src/app/api/projects/[id]/agent/status/route.ts](src/app/api/projects/[id]/agent/status/route.ts)** - `GET /api/projects/1/agent/status`
+  - Returns: agent_status, current_task, uptime, recent_logs, error_count
+  - Used by: Frontend to show agent status in real-time
+  - Status: ✅ Working
 
-- **`PATCH /api/agent/projects/:id`** - Configure existing project (⚠️ MISSING)
-  - Payload: mission, description, instructions, tech_stack
-  - Returns: Updated project config
+- **[src/app/api/projects/[id]/agent/start/route.ts](src/app/api/projects/[id]/agent/start/route.ts)** - `POST /api/projects/1/agent/start`
+  - Starts agent work on a project
+  - Sets: agent_status = 'running', agent_started_at = now()
+  - Used by: Frontend "Start Work" button
+  - Status: ✅ Implemented
+
+- **[src/app/api/projects/[id]/agent/pause/route.ts](src/app/api/projects/[id]/agent/pause/route.ts)** - `POST /api/projects/1/agent/pause`
+  - Pauses agent work, keeps current task in progress state
+  - Sets: agent_status = 'paused'
+  - Status: ✅ Implemented
+
+- **[src/app/api/projects/[id]/agent/stop/route.ts](src/app/api/projects/[id]/agent/stop/route.ts)** - `POST /api/projects/1/agent/stop`
+  - Immediately stops agent, marks current task as blocked
+  - Sets: agent_status = 'stopped', agent_stopped_at = now()
+  - Status: ✅ Implemented
+
+- **[src/app/api/projects/[id]/agent/retry/route.ts](src/app/api/projects/[id]/agent/retry/route.ts)** - `POST /api/projects/1/agent/retry`
+  - Tells agent to retry the current or most recent failed task
+  - Status: ✅ Implemented
+
+- **[src/app/api/tasks/[id]/agent/retry/route.ts](src/app/api/tasks/[id]/agent/retry/route.ts)** - `POST /api/tasks/42/agent/retry`
+  - Retry a failed or blocked task
+  - Increments: retry_count, resets status to 'todo'
+  - Status: ✅ Implemented
+
+- **[src/app/api/tasks/[id]/agent/skip/route.ts](src/app/api/tasks/[id]/agent/skip/route.ts)** - `POST /api/tasks/42/agent/skip`
+  - Mark task as done without execution
+  - Sets: status = 'done', completed_at = now()
+  - Status: ✅ Implemented
+
+### API Layer - Missing (Need Implementation)
+- **[ ] POST /api/agent/projects** - Agent project creation
+  - Accept: name, mission, description, tech_stack, instructions, base_path
+  - Return: { project_id, specification_id, plan_id }
+  - Priority: 🔴 Critical for agent self-bootstrapping
+
+- **[ ] PATCH /api/agent/projects/:id** - Agent project configuration
+  - Accept: mission, description, instructions, tech_stack
+  - Update: projects + specifications
   - Priority: 🔴 Critical for agent iteration
 
-- **`POST /api/agent/tasks`** - Create task for agent (⚠️ MISSING)
-  - Payload: plan_id, description, priority, files_involved, dependency_task_id
-  - Returns: { task_id }
+- **[ ] POST /api/agent/tasks** - Agent task creation
+  - Accept: plan_id, description, priority, files_involved, dependency_task_id
+  - Return: { task_id }
   - Priority: 🔴 Critical for task decomposition
 
-- **`POST /api/projects`** - Developer project creation (⚠️ MISSING)
-  - Payload: name, mission, description, tech_stack, instructions
-  - Returns: { project_id }
-  - Priority: 🔴 Critical for developer workflow
+- **[ ] POST /api/projects** - Developer project creation
+  - Accept: name, mission, description, tech_stack, instructions
+  - Return: { project_id }
+  - Priority: 🟡 Medium (can use create-project-dialog.tsx for now)
 
-- **`POST /api/tasks`** - Developer task creation (⚠️ MISSING)
-  - Payload: project_id, description, priority, files_involved, dependency_task_id
-  - Returns: { task_id }
-  - Priority: 🔴 Critical for manual task addition
-
-### Agent Control API (NEEDED FOR MVP)
-- **`POST /api/projects/:id/agent/start`** - Start agent work (⚠️ MISSING)
-  - Tells agent to begin working on this project
-  - Returns: { status: 'started', project_id }
-  - Priority: 🔴 Critical for developer control
-
-- **`POST /api/projects/:id/agent/pause`** - Pause agent work (⚠️ MISSING)
-  - Pauses agent, keeps current task in progress state
-  - Returns: { status: 'paused', current_task_id }
-  - Priority: 🔴 Critical for developer control
-
-- **`POST /api/projects/:id/agent/stop`** - Stop agent work (⚠️ MISSING)
-  - Immediately stops agent, marks task as blocked
-  - Returns: { status: 'stopped', last_task_id, reason }
-  - Priority: 🔴 Critical for developer control
-
-- **`POST /api/projects/:id/agent/retry`** - Retry current/last task (⚠️ MISSING)
-  - Tells agent to retry the current or most recent failed task
-  - Returns: { status: 'retrying', task_id }
-  - Priority: 🔴 Critical for developer control
-
-- **`POST /api/tasks/:id/agent/start`** - Start specific task (⚠️ MISSING)
-  - Tell agent to work on this specific task
-  - Returns: { status: 'started', task_id }
-  - Priority: 🟡 High for task-level control
-
-- **`POST /api/tasks/:id/agent/pause`** - Pause specific task (⚠️ MISSING)
-  - Pause this task execution
-  - Returns: { status: 'paused', task_id }
-  - Priority: 🟡 High for task-level control
-
-- **`POST /api/tasks/:id/agent/skip`** - Skip task execution (⚠️ MISSING)
-  - Mark task as done without executing
-  - Returns: { status: 'done', task_id, reason: 'skipped' }
-  - Priority: 🟡 High for task-level control
-
-- **`POST /api/tasks/:id/agent/retry`** - Retry task (⚠️ MISSING)
-  - Retry failed or blocked task
-  - Returns: { status: 'retrying', task_id }
-  - Priority: 🟡 High for task-level control
-
-- **`GET /api/projects/:id/agent/status`** - Get agent status (⚠️ MISSING)
-  - Get current status of agent working on this project
-  - Returns: { status, current_task_id, uptime, last_update, errors }
-  - Priority: 🔴 Critical for UI visibility
-
-- **`GET /api/agent/logs`** - Stream/fetch agent logs (⚠️ MISSING)
-  - Fetch recent logs (with pagination, filtering)
-  - Query params: task_id, level, limit, offset, stream=true
-  - Returns: { logs: [...], total, hasMore }
-  - Priority: 🔴 Critical for visibility
+- **[ ] POST /api/tasks** - Developer task creation
+  - Accept: project_id, description, priority, files_involved, dependency_task_id
+  - Return: { task_id }
+  - Priority: 🟡 Medium (can create via database/API directly)
 
 ### Backend Utilities
 - **[src/lib/agent-memory.ts](src/lib/agent-memory.ts)** - Database query helpers
   - `getProjectContext(projectId)` - Get spec, plan, tasks
-  - `getNextTask(projectId)` - Get next todo task
+  - `getNextTask(projectId)` - Get next todo task based on dependencies
   - `updateTaskStatus(taskId, status)` - Change task state
   - `logTestResult(taskId, success, logs)` - Record test run
   - `addAgentLog(taskId, level, message)` - Log agent action
 
 - **[src/lib/actions.ts](src/lib/actions.ts)** - Server actions
-  - `getProjects()` - Fetch all projects
   - `createProject(data)` - Create new project
-  - `getProjectTasks(projectId)` - Get project tasks
+  - `getProjects()` - Fetch all projects
+  - `getProjectTasks(projectId)` - Get project tasks (WIP - needs fixing)
   - `updateTaskStatus(taskId, status)` - Update task
 
 - **[src/lib/auth.ts](src/lib/auth.ts)** - Authentication
   - `validateAgentToken(request)` - Check X-Agent-Token header
+  - Returns 401 if missing/invalid
 
 - **[src/lib/schemas.ts](src/lib/schemas.ts)** - Zod validation
   - Request/response schemas for all endpoints
   - Type-safe validate at runtime
 
 ### Frontend Components
-- **[src/app/page.tsx](src/app/page.tsx)** - Home/dashboard page
-  - Shows projects sidebar and kanban board
-  - **TODO:** Load real project data (currently hardcoded)
+- **[src/app/page.tsx](src/app/page.tsx)** - Homepage with all projects Kanban
+  - Shows all projects sidebar + Kanban dashboard
+  - Fetches real data from database
+  - Status: ✅ Working
 
-- **[src/components/kanban-board.tsx](src/components/kanban-board.tsx)** - Kanban UI
+- **[src/app/projects/[id]/page.tsx](src/app/projects/[id]/page.tsx)** - Project detail page
+  - Shows project info, constitution, tech stack, specification
+  - Shows Kanban board with project-specific tasks
+  - Shows Test Results and Agent Logs panels
+  - Fixed: Now includes ProjectSidebarWrapper for navigation
+  - Status: ✅ Working
+
+- **[src/components/kanban-board.tsx](src/components/kanban-board.tsx)** - Drag-and-drop Kanban
+  - ✅ Drag-and-drop implemented (Phase 2 complete!)
   - Groups tasks by status (todo, in_progress, done, blocked)
-  - **TODO:** Add drag-and-drop functionality
+  - Shows task counts per column
+  - Updates database via updateTaskStatus server action
+  - Status: ✅ Fully working with drag-and-drop
+
+- **[src/components/task-card.tsx](src/components/task-card.tsx)** - Draggable task cards
+  - ✅ Draggable with @dnd-kit
+  - Shows priority (color-coded border), description, status badge
+  - Shows files involved
+  - Status: ✅ Working
 
 - **[src/components/project-sidebar.tsx](src/components/project-sidebar.tsx)** - Project list
   - Shows all projects
-  - **TODO:** Fix New Project button (currently shows alert)
-  - **TODO:** Implement `onProjectSelect` navigation
+  - "New Project" button wired to CreateProjectDialog
+  - Click to navigate to project detail page
+  - Status: ✅ Working
 
-- **[src/components/task-card.tsx](src/components/task-card.tsx)** - Task display
-  - Shows priority, description, status
-  - **TODO:** Add click handler for details modal
+- **[src/components/project-sidebar-wrapper.tsx](src/components/project-sidebar-wrapper.tsx)** - Client wrapper
+  - Enables client-side navigation between projects
+  - Used on all pages
+  - Status: ✅ Working
+
+- **[src/components/create-project-dialog.tsx](src/components/create-project-dialog.tsx)** - Project creation form
+  - Form fields: name, mission, description, techStack, instructions
+  - Client component with server action
+  - Success/error feedback
+  - Status: ✅ Working
+
+- **[src/components/test-results-panel.tsx](src/components/test-results-panel.tsx)** - Test results display
+  - Placeholder component
+  - Status: 🟡 Needs real data integration
+
+- **[src/components/agent-logs.tsx](src/components/agent-logs.tsx)** - Agent logs display
+  - Placeholder component
+  - Status: 🟡 Needs real data integration
 
 ---
 
@@ -284,532 +311,349 @@ specdrivr/
 
 ### Developer Workflow (Web UI)
 ```
-1. Developer clicks "New Project"
+1. Developer opens homepage → sees all projects in sidebar
    ↓
-2. Fills form: name, mission, description, tech_stack, instructions
+2. Developer clicks "New Project" → CreateProjectDialog opens
    ↓
-3. Clicks "Create" → POST /api/projects
+3. Developer fills form: name, mission, description, techStack, instructions
    ↓
-4. Server creates project + specification + plan in database
+4. Developer clicks "Create" → POST to server action createProject
    ↓
-5. Navigate to /projects/[id] to see project detail
+5. Database creates: project, specification (active), plan (draft)
    ↓
-6. Developer can:
-   - View active specification and plan
-   - Click "Add Task" to create task manually
-   - See Kanban board of all tasks
-   - Monitor agent progress in real-time
+6. Sidebar revalidates → new project appears
+   ↓
+7. Developer clicks project → navigate to /projects/[id]
+   ↓
+8. Project detail page shows:
+   - Project info (name, constitution, tech stack)
+   - Specification viewer
+   - Kanban board with real tasks from database
+   - Test Results panel (placeholder)
+   - Agent Logs panel (placeholder)
+   ↓
+9. Developer can drag-and-drop tasks between columns
+   ↓
+10. Drag triggers PATCH to updateTaskStatus → saves to database
 ```
 
-### Agent Workflow (API)
+### Agent Workflow (Agent API)
 ```
 1. Agent starts work
    ↓
 2. Agent calls GET /api/agent/mission?project_id=1
    ↓
-3. Receives: active specification, plan, next todo task
+3. Server validates X-Agent-Token header
    ↓
-4. Agent executes task:
-   - Parse specification to understand "What"
-   - Read plan to understand "How"
-   - Implement code based on task description
+4. Server fetches from database:
+   - Project details
+   - Active specification
+   - Plan
+   - All tasks
    ↓
-5. Agent moves task: PATCH /api/agent/tasks/:id with status=in_progress
+5. Server determines next task via getNextTask()
    ↓
-6. Agent executes tests and gets results
+6. Returns JSON: { project, specification, plan, nextTask, context }
    ↓
-7. Agent moves task: PATCH /api/agent/tasks/:id with status=done
+7. Agent executes task based on description
    ↓
-8. Agent logs results: POST /api/agent/verify with success=true/false
+8. Agent moves task to in_progress: PATCH /api/agent/tasks/:id
    ↓
-9. Loop back to step 2 for next task
+9. Agent executes tests and gets results
+   ↓
+10. Agent logs results: POST /api/agent/verify
+    ↓
+11. Agent moves task to done: PATCH /api/agent/tasks/:id
+    ↓
+12. Agent logs execution: POST /api/agent/logs
+    ↓
+13. Loop back to step 2 for next task
 ```
 
 ### Agent Self-Bootstrapping Workflow
 ```
 1. Agent receives: "Build a feature for Spec-Drivr"
    ↓
-2. Agent calls: POST /api/agent/projects with:
-   - name: "Website Redesign"
-   - mission: "Modernize the marketing website"
-   - description: "Full design and implementation"
-   - instructions: "Use Next.js 14, Tailwind CSS"
+2. Agent realizes it needs to create a project
    ↓
-3. Server creates project and returns: project_id=42
+3. Agent calls: POST /api/agent/projects (⚠️ NOT YET IMPLEMENTED)
    ↓
-4. Agent calls: PATCH /api/agent/projects/42 with:
-   - description: "More detailed specification..."
+4. Server creates project + specification + plan
    ↓
-5. Agent calls: POST /api/agent/tasks multiple times:
-   - Task 1: Design database schema
-   - Task 2: Create API endpoints
-   - Task 3: Build UI components
+5. Agent calls: PATCH /api/agent/projects/:id (⚠️ NOT YET IMPLEMENTED)
    ↓
-6. Agent loops through tasks via GET /api/agent/mission?project_id=42
+6. Agent calls: POST /api/agent/tasks multiple times (⚠️ NOT YET IMPLEMENTED)
    ↓
-7. Developer can monitor progress at http://localhost:3000/projects/42
+7. Agent loops through tasks via GET /api/agent/mission?project_id=:id
+   ↓
+8. Developer can monitor progress at http://localhost:3000/projects/:id
+```
+
+### Agent Control Workflow (NEW!)
+```
+1. Developer opens project detail page
+   ↓
+2. Developer clicks "Start Work" button
+   ↓
+3. Frontend calls: POST /api/projects/1/agent/start
+   ↓
+4. Server updates: agent_status = 'running', agent_started_at = now()
+   ↓
+5. Frontend polls: GET /api/projects/1/agent/status (every 5s)
+   ↓
+6. Frontend shows real-time updates:
+   - Current task being executed
+   - Uptime counter
+   - Recent logs
+   - Error count
+   ↓
+7. Developer can click "Pause" → agent_status = 'paused'
+   ↓
+8. Developer can click "Stop" → agent_status = 'stopped', task = 'blocked'
+   ↓
+9. Developer can click "Retry Task" → retry_count++, status = 'todo'
+   ↓
+10. Agent can self-report status via POST /api/agent/logs
 ```
 
 ---
 
-## 🎮 Agent Control & Visibility Panel (NEW)
+## 🎮 Agent Control & Visibility Panel (IMPLEMENTED!)
 
 ### Developer-Visible Agent Operations
 
-The web UI must provide **complete visibility into agent execution** with control capabilities:
+The web UI provides **complete visibility into agent execution** with control capabilities:
 
-#### Project-Level Controls & Visibility
+#### Project-Level Controls & Status
 ```
 ┌─────────────────────────────────────────────────────┐
-│  Project: "Spec-Drivr" | Status: 🟢 Agent Working   │
+│  Project: "Spec-Drivr" | Status: 🟢 Running         │
 ├─────────────────────────────────────────────────────┤
-│  Mission:       [Edit] Autonomous Development Platform
-│  Description:   [Edit] Build an AI-driven dev platform
-│  Instructions:  [Edit] Use Next.js 14, TypeScript...
-│  Tech Stack:    [Edit] Next.js, PostgreSQL, Drizzle
-│  Agent Config:  Claude CLI (installed at /usr/local/bin/claude)
-│                 
-│  ┌─ Project Controls ─────────────────────────────┐
-│  │  [🚀 Start Work] [⏸️ Pause] [⛔ Stop] [🔄 Retry] │
-│  └────────────────────────────────────────────────┘
-│
-│  ┌─ Agent Status ─────────────────────────────────┐
-│  │  Currently Working: Task #42 - Update UI       │
-│  │  Time Elapsed: 18 minutes                      │
-│  │  Last Heartbeat: 2 seconds ago                 │
-│  │  Status: 🟢 Running                           │
-│  └────────────────────────────────────────────────┘
-│
-│  ┌─ Real-time Logs (Last 20) ─────────────────────┐
-│  │  [INFO] Starting task: Update UI components    │
-│  │  [INFO] Analyzed current codebase               │
-│  │  [DEBUG] Found 12 components to update          │
-│  │  [INFO] Creating component updates...          │
-│  │  [WARN] Component missing prop type validation │
-│  │  [INFO] Wrote 3 files successfully             │
-│  │  [INFO] Running tests...                       │
-│  │  [INFO] 4 of 5 tests passing                   │
-│  │  [ERROR] Test failure: TaskCard not rendering   │
-│  │  > Scroll for more logs [Auto-refresh: ON]     │
-│  └────────────────────────────────────────────────┘
+│  Agent Uptime: 18 minutes                          │
+│  Current Task: #42 - "Update UI components"        │
+│  Last Heartbeat: 2 seconds ago                     │
+│  Recent Errors: 0                                  │
+│                                                    │
+│  ┌─ Controls ───────────────────────────────────┐ │
+│  │  [🚀 Start] [⏸️ Pause] [⛔ Stop] [🔄 Retry] │ │
+│  └───────────────────────────────────────────────┘ │
+│                                                    │
+│  Recent Logs:                                      │
+│  ┌──────────────────────────────────────────────┐ │
+│  │ [19:45:23] INFO: Starting task execution     │ │
+│  │ [19:45:28] DEBUG: Analyzing requirements     │ │
+│  │ [19:46:12] INFO: Writing components          │ │
+│  │ [19:47:23] INFO: Running tests (4/5 passing) │ │
+│  └──────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────┘
 ```
 
-#### Task-Level Controls & Visibility
-```
-┌─ Task #42: Update UI Components ────────────────────────────┐
-│  Status: ⏳ in_progress (started 18 min ago)                │
-│  Description: Create project detail page with edit forms  │
-│  Priority: 1 (Highest)                                     │
-│  Assigned: Claude Agent                                    │
-│                                                             │
-│  ┌─ Task Controls ──────────────────────────────────────┐ │
-│  │ [▶️ Start] [⏸️ Pause] [✓ Skip] [↩️ Retry] [❌ Block] │ │
-│  └──────────────────────────────────────────────────────┘ │
-│                                                             │
-│  ┌─ Task Progress ──────────────────────────────────────┐ │
-│  │  Test Results: 4/5 passing (80%)                    │ │
-│  │  Files Modified: 3 (kanban-board.tsx, ...)          │ │
-│  │  Lines Added: 247 | Lines Removed: 89               │ │
-│  │  Last Update: 2 seconds ago                         │ │
-│  └──────────────────────────────────────────────────────┘ │
-│                                                             │
-│  ┌─ Related Logs ────────────────────────────────────────┐ │
-│  │  [19:45:23] INFO: Analyzing task requirements       │ │
-│  │  [19:45:28] INFO: Reading 5 related files           │ │
-│  │  [19:46:12] INFO: Writing kanban-board.tsx          │ │
-│  │  [19:46:45] DEBUG: Modified component structure     │ │
-│  │  [19:47:01] INFO: Running test suite                │ │
-│  │  [19:47:23] ERROR: TaskCard test: Expected ...      │ │
-│  │  [19:48:10] INFO: Fixing test issues              │ │
-│  └──────────────────────────────────────────────────────┘ │
-└────────────────────────────────────────────────────────────┘
-```
-
-### Required Features for Visibility & Control
-
-1. **Live Agent Status Display**
-   - Current task being executed
-   - Time elapsed on current task
-   - Last heartbeat/update time
-   - Agent status (running, paused, stopped, error)
-
-2. **Real-time Log Viewer**
-   - Stream or poll agent logs
-   - Color-coded by level (debug, info, warn, error)
-   - Searchable and filterable
-   - Auto-scroll with manual override
-   - Timestamps on each entry
-
-3. **In-place Editing**
-   - Edit mission, description, instructions while agent is running
-   - Changes take effect immediately (agent reads from DB next query)
-   - Edit indicator showing "unsaved changes"
-   - Confirmation when changing while agent is working
-
-4. **Project-Level Controls**
-   - Start Work: Tell agent to begin working on this project
-   - Pause: Pause current execution, keep state
-   - Stop: Stop immediately, mark current task as blocked
-   - Retry: Retry the current or last failed task
-
-5. **Task-Level Controls**
-   - Start Task: Begin working on a specific task
-   - Pause Task: Pause this specific task
-   - Skip Task: Mark as done without execution
-   - Retry Task: Retry a failed or blocked task
-   - Block Task: Manually mark as blocked
-
-### Configuration Page (Agent Settings)
-
-```
-┌─────────────────────────────────────────────────────┐
-│  ⚙️  Agent Configuration                            │
-├─────────────────────────────────────────────────────┤
-│                                                     │
-│  Agent Selection:                                  │
-│  ○ Claude (via Claude CLI)                         │
-│  ○ GPT-4 (not configured)                         │
-│  ○ Custom (API endpoint)                           │
-│                                                     │
-│  Claude CLI Settings:                              │
-│  CLI Path: [/usr/local/bin/claude      ✓ Verified]│
-│  Version:  Claude 3.5 (latest)                     │
-│                                                     │
-│  Execution Settings:                               │
-│  Default Project: [Spec-Drivr            ▼]        │
-│  Max Retries:     [3                     ]         │
-│  Timeout (min):   [60                    ]         │
-│  Logs Level:      [Debug                 ▼]        │
-│                                                     │
-│  API Token (Project):                              │
-│  [X-Agent-Token: dev-agent-token-12345 ]          │
-│  [🔄 Regenerate]                                   │
-│                                                     │
-│  [Test Connection] [Save Settings] [Reset to Default]
-│                                                     │
-└─────────────────────────────────────────────────────┘
-```
+**Implementation:**
+- GET /api/projects/1/agent/status - Real-time status polling
+- POST /api/projects/1/agent/start - Start agent
+- POST /api/projects/1/agent/pause - Pause agent
+- POST /api/projects/1/agent/stop - Stop agent
+- POST /api/projects/1/agent/retry - Retry project
+- Database stores agent_status, agent_started_at, agent_stopped_at
+- Agent logs automatically populate via POST /api/agent/logs
 
 ---
 
 ## 👥 Dual-Purpose Architecture
 
-This platform  (Infrastructure Foundation)
+This platform serves **two distinct users:**
+
+1. **The Developer** - Human using the web UI to manage projects
+2. **The Agent** - AI calling APIs to execute tasks
+
+Both work from the **same PostgreSQL database**, ensuring perfect synchronization.
+
+---
+
+## 📊 Implementation Status
+
+### ✅ Phase 1: Infrastructure Foundation (COMPLETE)
 - [x] Database schema and migrations (6 tables, proper relationships)
 - [x] Drizzle ORM setup with TypeScript types
 - [x] Authorization middleware (`X-Agent-Token` validation)
 - [x] Server actions framework for safe data operations
 - [x] Basic UI components structure
 - [x] Core API endpoints for agent feedback loop
+- [x] Project sidebar navigation
+- [x] Create project dialog (New Project button wired)
+- [x] Project detail pages with sidebar navigation
+- [x] Database seeding with 2 sample projects
+- [x] All pages have consistent sidebar navigation
 
-### 🔴 Critical Priority: Developer Project Management (This Sprint)
-**Goal:** Enable developers to create and manage projects with full configuration
+### ✅ Phase 2: Enhanced Interactivity (COMPLETE)
+- [x] **Drag-and-drop Kanban board** (@dnd-kit implementation)
+- [x] Task cards are draggable between columns
+- [x] Drag updates database via server actions
+- [x] Smooth UX with DragOverlay preview
+- [x] TypeScript compilation fixes
+- [x] Self-referencing foreign key resolved
+- [x] Conditional rendering type fixes
+- [x] All drag-and-drop features working end-to-end
 
-- [ ] **Project Creation UI** (Developer Priority #1)
-  - [ ] Create project dialog with form (name, mission, description, tech stack, instructions)
-  - [ ] Implement `createProject` action with full config
-  - [ ] Wire "New Project" button to dialog
-  - [ ] Show success/error feedback
-  - **Effort:** 3-4 hours
-  - **Why:** Without this, developers can't onboard projects
+### 🟡 Phase 3: Agent Control APIs (COMPLETE - NEW!)
+**All agent control APIs have been implemented and are working:**
 
-- [ ] **Project Configuration Page** (Developer Priority #2)
-  - [ ] Create `projects/[id]/page.tsx` detail view
-  - [ ] Display project info, mission, description, instructions
-  - [ ] Allow editing project configuration
-  - [ ] Show active specification and plan
-  - **Effort:** 3-4 hours
-  - **Why:** Developers need to see and adjust project context
+Project-Level Control:
+- [x] GET /api/projects/:id/agent/status - Get real-time agent status
+- [x] POST /api/projects/:id/agent/start - Start agent work
+- [x] POST /api/projects/:id/agent/pause - Pause agent work
+- [x] POST /api/projects/:id/agent/stop - Stop agent immediately
+- [x] POST /api/projects/:id/agent/retry - Retry entire project
 
-- [ ] **Manual Task Creation** (Developer Priority #3)
-  - [ ] Create task form in project view (description, priority, dependencies)
-  - [ ] Implement `createTask` action
-  - [ ] Add tasks to project plan
-  - [ ] Link tasks to specification
-  - **Effort:** 2-3 hours
-  - **Why:** Developers must be able to decompose work manually
+Task-Level Control:
+- [x] POST /api/tasks/:id/agent/retry - Retry individual task
+- [x] POST /api/tasks/:id/agent/skip - Skip individual task
 
-- [ ] **Task Status Board** (Developer Priority #4)
-  - [ ] Display real data in kanban (remove sample data)
-  - [ ] Show tasks grouped by status
-  - [ ] Display task priorities, descriptions, due dates
-  - [ ] Click task for details
-  - **Effort:** 2 hours
-  - **Why:** Developers need visibility into agent progress
+Database Schema Extensions:
+- [x] projects.agent_status enum (idle/running/paused/stopped/error)
+- [x] projects.agent_started_at timestamp
+- [x] projects.agent_stopped_at timestamp
+- [x] tasks.retry_count integer (tracks retry attempts)
+- [x] tasks.notes text (agent can add notes)
+- [x] tasks.completed_at timestamp
+- [x] agent_logs.project_id (denormalized for faster filtering)
 
-### 🔵 Critical Priority: Agent API Completeness (This Sprint)
-**Goal:** Enable agent to bootstrap and manage entire project lifecycle
+### 🟡 Phase 4: Features (Partially Complete)
+- [x] Agent control APIs and endpoints
+- [x] Agent status tracking in database
+- [x] Retry and skip functionality
+- [ ] Real-time agent logs viewer (placeholder exists)
+- [ ] Test results logging UI (placeholder exists)
+- [ ] Specification editor (not started)
+- [ ] Plan editor (not started)
 
-- [ ] **Agent Project Creation API** (Agent Priority #1)
-  - [ ] `POST /api/agent/projects` - Full project creation with config
-  - [ ] Payload: name, mission, description, tech_stack, base_path, instructions
-  - [ ] Return: project_id and created specification/plan
-  - **Effort:** 2 hours
-  - **Why:** Agent can't self-bootstrap without this
+### 🔴 Phase 5: Agent Self-Bootstrapping (Blocked)
+These APIs are required for an agent to create a project from scratch:
 
-- [ ] **Agent Project Config API** (Agent Priority #2)
-  - [ ] `PATCH /api/agent/projects/:id` - Update project config
-  - [ ] Support: mission, description, instructions, tech_stack
-  - [ ] Support: Add/update active specification
-  - **Effort:** 2 hours
-  - **Why:** Agent needs to refine project config during execution
+- [ ] **POST /api/agent/projects** - Agent project creation
+  - Blocker: Agent cannot self-bootstrap without this
+  - Priority: 🔴 CRITICAL
+  - Effort: 2 hours
 
-- [ ] **Agent Task Creation API** (Agent Priority #3)
-  - [ ] `POST /api/agent/tasks` - Create task in project
-  - [ ] Payload: plan_id, description, priority, files_involved, dependency_task_id
-  - [ ] Return: task_id for tracking
-  - **Effort:** 1.5 hours
-  - **Why:** Agent needs to decompose plans into atomic tasks
+- [ ] **PATCH /api/agent/projects/:id** - Agent project configuration
+  - Blocker: Agent cannot refine project config
+  - Priority: 🔴 CRITICAL
+  - Effort: 2 hours
 
-- [ ] **Agent Task Status Update** (Already exists)
-  - [ ] `PATCH /api/agent/tasks/:id` - Move task between statuses
-  - [ ] Support: todo → in_progress → done/blocked
-  - [ ] Already implemented ✅
+- [ ] **POST /api/agent/tasks** - Agent task creation
+  - Blocker: Agent cannot decompose work
+  - Priority: 🔴 CRITICAL
+  - Effort: 1.5 hours
 
-- [ ] **Agent Mission API** (Already exists)
-  - [ ] `GET /api/agent/mission?project_id=1` - Get current state
-  - [ ] Returns: spec, plan, next task with dependencies resolved
-  - [ ] Already implemented ✅
+### 🔴 Phase 6: Developer Convenience APIs (Nice to Have)
+These are duplicate functionality but provide cleaner REST interface:
 
-### ⚠️ High Priority: Enhanced Interactivity (Next Sprint)
-- [ ] Add drag-and-drop kanban board (developer workflow smoothness)
-- [ ] Add task details modal (viewing full context)
-- [ ] Add specification editor (managing requirements)
-- [ ] Add plan editor (managing architecture)
-- [ ] Test result logging UI (seeing verification results)
+- [ ] POST /api/projects - Developer project creation
+  - Alternative: create-project-dialog.tsx already works
+  - Priority: 🟡 Medium
 
-### ⚠️ Medium Priority: Quality & Polish (Future Sprints)
-- [ ] Error boundaries and global error handling
-- [ ] Loading states and skeleton components
-- [ ] Form validation with visual feedback
-- [ ] Database indexes for performance
-- [ ] Agent logs viewer with pagination and filtering
-- [ ] Automated tests (unit, integration, E2E)
-- [ ] **Phase 2: Interactivity** (1-2 weeks)
-  - [ ] Add drag-and-drop to kanban-board
-  - [ ] Create task details modal
-  - [ ] Implement task creation form
-  - [ ] Add plan creation form
-
-- [ ] **Phase 3: Features** (1-2 weeks)
-  - [ ] Test result logging UI
-  - [ ] Agent logs viewer with pagination
-  - [ ] Specification editor
-  - [ ] Plan editor
-
-- [ ] **Phase 4: Polish** (1 week)
-  - [ ] Error boundaries
-  - [ ] Loading states
-  - [ ] Form validation
-  - [ ] Database indexes
-
-### ❌ Not Started
-- [ ] Automated tests (unit, integration, E2E)
-- [ ] Production deployment
-- [ ] Monitoring/logging infrastructure
-
-**See [plan.md](plan.md) for complete task list**
+- [ ] POST /api/tasks - Developer task creation
+  - Alternative: Can create via database directly
+  - Priority: 🟡 Medium
 
 ---
 
-## 🎯 Critical Path to MVP
+## 🎯 Critical Path to Fully Autonomous Agent
 
-### Phase 1A: Developer Project Management (Week 1) 🔴 HIGHEST PRIORITY
-**Goal:** Developers can create, configure, and manage projects through the web UI
+### Goal: Agent can create and manage projects without human intervention
 
-1. **Update `createProject` action** (2 hours)
-   - Accept: name, mission, description, tech_stack, instructions, base_path
-   - Create: project, specification, plan in one transaction
-   - Return: project with relationships
+**Current Blockers:**
 
-2. **Create Project Creation UI** (2-3 hours)
-   - `src/components/create-project-dialog.tsx` - form component
-   - Wire "New Project" button in sidebar
-   - Show success/error toasts
+1. **Agent cannot create projects**
+   - Missing: `POST /api/agent/projects`
+   - Impact: Agent must be "assigned" to existing project
+   - Cannot self-bootstrap from natural language request
 
-3. **Create Project Detail Page** (3-4 hours)
-   - `src/app/projects/[id]/page.tsx` - project overview
-   - Display: name, mission, description, tech stack, instructions
-   - Show: active spec, plan, task count
-   - Edit buttons for each field
+2. **Agent cannot update project configuration**
+   - Missing: `PATCH /api/agent/projects/:id`
+   - Impact: Agent cannot refine project scope mid-execution
+   - Must get it right on first attempt
 
-4. **Create Task Creation UI** (2-3 hours)
-   - `src/components/create-task-dialog.tsx` - task form
-   - Fields: description, priority, files, dependency_task_id
-   - Button in project detail page
-   - Link to project plan
+3. **Agent cannot create tasks**
+   - Missing: `POST /api/agent/tasks`
+   - Impact: Agent must have all tasks pre-created
+   - Cannot decompose work dynamically
 
-5. **Load Real Data in Kanban** (2 hours)
-   - Update home/projects pages to fetch from database
-   - Remove hardcoded sample data
-   - Show tasks for selected project
+**Once these 3 endpoints exist:**
 
-**Result:** Developers can fully manage projects through UI ✅
-
-### Phase 1B: Agent API Completeness (Week 1) 🔴 HIGHEST PRIORITY
-**Goal:** Agent can bootstrap projects and manage them through API
-
-1. **Implement `POST /api/agent/projects`** (2 hours)
-   - Accept: name, mission, description, tech_stack, instructions, base_path
-   - Create project + specification + plan
-   - Return: { project_id, specification_id, plan_id }
-   - Example: `curl -X POST http://localhost:3000/api/agent/projects \
-     -H "X-Agent-Token: dev-agent-token-12345" \
-     -H "Content-Type: application/json" \
-     -d '{"name":"MyProject","mission":"Build X",...}'`
-
-2. **Implement `PATCH /api/agent/projects/:id`** (2 hours)
-   - Accept: mission, description, instructions, tech_stack
-   - Update project and specification
-   - Return: updated project
-   - Example: `curl -X PATCH http://localhost:3000/api/agent/projects/1 \
-     -H "X-Agent-Token: dev-agent-token-12345" \
-     -d '{"mission":"Updated mission",...}'`
-
-3. **Implement `POST /api/agent/tasks`** (1.5 hours)
-   - Accept: plan_id, description, priority, files_involved, dependency_task_id
-   - Create task
-   - Return: { task_id }
-   - Example: `curl -X POST http://localhost:3000/api/agent/tasks \
-     -H "X-Agent-Token: dev-agent-token-12345" \
-     -d '{"plan_id":1,"description":"Implement feature",...}'`
-
-4. **Update existing endpoints for consistency** (1 hour)
-   - Ensure all responses follow same format
-   - Add proper error codes (400, 404, 500)
-   - Add request/response logging
-
-**Result:** Agent can fully manage projects without UI ✅
-
-### Phase 2: Enhanced Interactivity (Week 2)
-- Add drag-and-drop to kanban (4 hours)
-- Task details modal (2 hours)
-- Edit forms for specifications (3 hours)
-- Real-time task status updates (2 hours)
-
-### Phase 3-4: Polish & Testing
-- Error boundaries and loading states
-- Automated tests
-- Performance optimization
-- Deployment readiness
-
-### Code Style
-- **TypeScript:** Always use strict mode, no `any`
-- **Components:** Use functional components with hooks
-- **Naming:** camelCase for variables/functions, PascalCase for components
-- **Files:** Use kebab-case (e.g., `task-card.tsx`)
-- **Imports:** Use absolute paths with `@/` alias
-- **Error Handling:** Always use try/catch in server actions
-- **Validation:** Always validate with Zod before data operations
-
-### Type Safety
-```typescript
-// ✅ Good - Typed from database
-import { TaskSelect, ProjectSelect } from '@/db/schema';
-
-function MyComponent({ task }: { task: TaskSelect }) {
-  // ...
-}
-
-// ❌ Bad - Using `any`
-function MyComponent({ task }: any) {
-  // ...
-}
+```
+Human: "Build a real-time chat app"
+    ↓
+Agent calls: POST /api/agent/projects
+    ↓
+Server creates: project, spec, plan
+    ↓
+Agent reads: GET /api/agent/mission
+    ↓
+Agent creates tasks: POST /api/agent/tasks (multiple)
+    ↓
+Agent executes: PATCH /api/agent/tasks/:id, POST /api/agent/verify, POST /api/agent/logs
+    ↓
+Agent monitors: GET /api/agent/mission (loop)
+    ↓
+Human monitors: visits http://localhost:3000/projects/:id
+    ↓
+Human controls: clicks Pause/Stop buttons (POST /api/projects/:id/agent/pause)
+    ↓
+Agent responds: gracefully pauses, saves state to DB
 ```
 
-### Database Operations
-```typescript
-// ✅ Good - Use server actions
-export async function updateTask(id: number, status: string) {
-  'use server';
-  try {
-    const result = await db.update(tasks).set({ status }).where(...);
-    return { success: true, data: result };
-  } catch (error) {
-    return { success: false, error: 'Failed to update' };
-  }
-}
+### Implementation Priority (Updated)
 
-// ❌ Bad - Direct DB from component
-app.get('/tasks/:id', async (req, res) => {
-  // Client-side direct access
-});
-```
+**Phase 5 - CRITICAL (2-3 hours total):**
+1. Implement `POST /api/agent/projects` (2 hours)
+2. Implement `PATCH /api/agent/projects/:id` (2 hours)
+3. Implement `POST /api/agent/tasks` (1.5 hours)
 
-### Validation
-```typescript
-// ✅ Good - Validate with Zod
-import { TaskUpdateSchema } from '@/lib/schemas';
-
-const result = TaskUpdateSchema.safeParse(input);
-if (!result.success) {
-  return { error: result.error.flatten() };
-}
-
-// ❌ Bad - No validation
-const status = req.body.status; // Could be anything
-```
-
-### Components
-```typescript
-// ✅ Good - Typed, modular, single responsibility
-'use client';
-
-import { TaskSelect } from '@/db/schema';
-import { TaskCard } from './task-card';
-
-interface TaskListProps {
-  tasks: TaskSelect[];
-  onTaskSelect?: (task: TaskSelect) => void;
-}
-
-export function TaskList({ tasks, onTaskSelect }: TaskListProps) {
-  return (
-    <div className="grid gap-4">
-      {tasks.map((task) => (
-        <TaskCard
-          key={task.id}
-          task={task}
-          onClick={onTaskSelect}
-        />
-      ))}
-    </div>
-  );
-}
-
-// ❌ Bad - Inline logic, no types
-export function TaskList(props: any) {
-  return (
-    <div>
-      {props.tasks.map((t: any) => (
-        <div onClick={() => alert('TODO')}>
-          {t.description}
-        </div>
-      ))}
-    </div>
-  );
-}
-```
+**Phase 6 - Nice to have (if time permits):**
+4. Add loading states and skeleton components
+5. Add error boundaries
+6. Add specification editor
+7. Add plan editor
 
 ---
 
 ## 🧪 Testing & Validation
 
-### Running Tests
-```bash
-# (Tests not yet implemented, see Phase 4)
-npm run test        # Unit tests
-npm run test:e2e    # End-to-end tests
-```
-
 ### Manual Testing Checklist
-- [ ] Database connection works: `npm run db:studio`
-- [ ] API endpoint responds: `curl http://localhost:3000/api/agent/mission?project_id=1 -H "X-Agent-Token: dev-agent-token-12345"`
-- [ ] Home page loads: `http://localhost:3000`
-- [ ] Projects load from database (sidebar shows "Spec-Drivr")
-- [ ] Kanban board displays tasks from database
-- [ ] No console errors in browser DevTools
+- [x] Database connection works: `npm run db:studio`
+- [x] API endpoints respond: `curl -H "X-Agent-Token: dev-agent-token-12345" http://localhost:3000/api/agent/mission?project_id=1`
+- [x] Home page loads: `http://localhost:3000`
+- [x] Projects load from database (sidebar shows "Spec-Drivr" and "Website Redesign")
+- [x] Kanban board displays tasks from database
+- [x] Drag-and-drop works between columns
+- [x] Task status updates persist after refresh
+- [x] No console errors in browser DevTools
+- [x] Project detail pages load: `/projects/1`
+- [x] Create project dialog creates new project
+- [x] Sidebar navigation works on all pages
+
+### Test Agent Workflow
+```bash
+# Get mission
+curl "http://localhost:3000/api/agent/mission?project_id=1" \
+  -H "X-Agent-Token: dev-agent-token-12345"
+
+# Update task status
+curl -X PATCH "http://localhost:3000/api/agent/tasks/1" \
+  -H "X-Agent-Token: dev-agent-token-12345" \
+  -H "Content-Type: application/json" \
+  -d '{"status":"in_progress"}'
+
+# Log test result
+curl -X POST "http://localhost:3000/api/agent/verify" \
+  -H "X-Agent-Token: dev-agent-token-12345" \
+  -H "Content-Type: application/json" \
+  -d '{"task_id":1,"success":true,"logs":"All tests passing"}'
+
+# Get agent status
+curl "http://localhost:3000/api/projects/1/agent/status"
+```
 
 ### Debugging Database
 ```bash
@@ -820,7 +664,8 @@ npm run db:studio
 psql $DATABASE_URL
   \dt                          # List tables
   SELECT * FROM projects;      # View projects
-  SELECT * FROM tasks WHERE status = 'todo'; # View pending tasks
+  SELECT * FROM tasks WHERE project_id = 1;  # View tasks
+  SELECT * FROM agent_logs ORDER BY timestamp DESC LIMIT 20;  # Recent logs
 ```
 
 ---
@@ -840,382 +685,11 @@ AGENT_TOKEN=dev-agent-token-12345
 NEXTAUTH_URL=http://localhost:3000
 ```
 
-**Note:** Keep `.env.local` out of version control (in .gitignore)
+**Security:** Keep `.env.local` out of version control (included in .gitignore)
 
 ---
 
-## �️ Required API Implementations for MVP
-
-### 1. POST /api/agent/projects
-**Purpose:** Agent can bootstrap entire projects
-
-```typescript
-// src/app/api/agent/projects/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { validateAgentToken } from '@/lib/auth';
-import { ProjectCreateSchema } from '@/lib/schemas'; // Define this schema
-import { db } from '@/db';
-import { projects, specifications, plans } from '@/db/schema';
-
-export async function POST(request: NextRequest) {
-  if (!validateAgentToken(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  try {
-    const body = await request.json();
-    const validated = ProjectCreateSchema.parse(body);
-
-    // Create project, specification, and plan in one transaction
-    const [project] = await db
-      .insert(projects)
-      .values({
-        name: validated.name,
-        constitution: validated.instructions || '',
-        techStack: validated.tech_stack || {},
-        basePath: validated.base_path || '',
-      })
-      .returning();
-
-    const [spec] = await db
-      .insert(specifications)
-      .values({
-        projectId: project.id,
-        content: `# ${validated.name}\n\n${validated.description || ''}`,
-        isActive: true,
-      })
-      .returning();
-
-    const [plan] = await db
-      .insert(plans)
-      .values({
-        specId: spec.id,
-        status: 'active',
-        architectureDecisions: {},
-      })
-      .returning();
-
-    return NextResponse.json({
-      success: true,
-      project_id: project.id,
-      specification_id: spec.id,
-      plan_id: plan.id,
-    });
-  } catch (error) {
-    console.error('Error creating project:', error);
-    return NextResponse.json(
-      { error: 'Failed to create project' },
-      { status: 500 }
-    );
-  }
-}
-```
-
-### 2. PATCH /api/agent/projects/:id
-**Purpose:** Agent can update project configuration
-
-```typescript
-// src/app/api/agent/projects/[id]/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { validateAgentToken } from '@/lib/auth';
-import { db } from '@/db';
-import { projects, specifications } from '@/db/schema';
-import { eq } from 'drizzle-orm';
-
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  if (!validateAgentToken(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  try {
-    const projectId = parseInt(params.id, 10);
-    const body = await request.json();
-
-    // Update project
-    const [updatedProject] = await db
-      .update(projects)
-      .set({
-        constitution: body.instructions || undefined,
-        techStack: body.tech_stack || undefined,
-      })
-      .where(eq(projects.id, projectId))
-      .returning();
-
-    // Update specification if description provided
-    if (body.description) {
-      await db
-        .update(specifications)
-        .set({
-          content: body.description,
-        })
-        .where(eq(specifications.projectId, projectId));
-    }
-
-    return NextResponse.json({
-      success: true,
-      project: updatedProject,
-    });
-  } catch (error) {
-    console.error('Error updating project:', error);
-    return NextResponse.json(
-      { error: 'Failed to update project' },
-      { status: 500 }
-    );
-  }
-}
-```
-
-### 3. POST /api/agent/tasks
-**Purpose:** Agent can decompose work into atomic tasks
-
-```typescript
-// src/app/api/agent/tasks/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { validateAgentToken } from '@/lib/auth';
-import { TaskCreateSchema } from '@/lib/schemas'; // Define this schema
-import { db } from '@/db';
-import { tasks } from '@/db/schema';
-
-export async function POST(request: NextRequest) {
-  if (!validateAgentToken(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  try {
-    const body = await request.json();
-    const validated = TaskCreateSchema.parse(body);
-
-    const [newTask] = await db
-      .insert(tasks)
-      .values({
-        planId: validated.plan_id,
-        description: validated.description,
-        priority: validated.priority || 1,
-        filesInvolved: validated.files_involved || [],
-        dependencyTaskId: validated.dependency_task_id || null,
-        status: 'todo',
-      })
-      .returning();
-
-    return NextResponse.json({
-      success: true,
-      task_id: newTask.id,
-    });
-  } catch (error) {
-    console.error('Error creating task:', error);
-    return NextResponse.json(
-      { error: 'Failed to create task' },
-      { status: 500 }
-    );
-  }
-}
-```
-
----
-
-## 🎨 Required UI Implementations for MVP
-
-### 1. CreateProjectDialog Component
-
-```typescript
-// src/components/create-project-dialog.tsx
-'use client';
-
-import { useState } from 'react';
-import { createProject } from '@/lib/actions';
-
-export function CreateProjectDialog({ onClose, onSuccess }: {
-  onClose: () => void;
-  onSuccess: () => void;
-}) {
-  const [formData, setFormData] = useState({
-    name: '',
-    mission: '',
-    description: '',
-    techStack: '',
-    instructions: '',
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    try {
-      const result = await createProject({
-        name: formData.name,
-        constitution: formData.instructions,
-        techStack: { stack: formData.techStack },
-        basePath: process.cwd(),
-      });
-
-      if (result.success) {
-        onSuccess();
-        onClose();
-      } else {
-        setError(result.error || 'Failed to create project');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <dialog className="fixed inset-0 bg-black/50 flex items-center justify-center">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-xl font-bold mb-4">Create New Project</h2>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Project Name</label>
-            <input
-              type="text"
-              required
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full border rounded px-3 py-2"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Mission</label>
-            <input
-              type="text"
-              required
-              value={formData.mission}
-              onChange={(e) => setFormData({ ...formData, mission: e.target.value })}
-              className="w-full border rounded px-3 py-2"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Description</label>
-            <textarea
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full border rounded px-3 py-2"
-              rows={3}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Tech Stack</label>
-            <input
-              type="text"
-              value={formData.techStack}
-              onChange={(e) => setFormData({ ...formData, techStack: e.target.value })}
-              placeholder="Next.js, React, PostgreSQL..."
-              className="w-full border rounded px-3 py-2"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Instructions</label>
-            <textarea
-              value={formData.instructions}
-              onChange={(e) => setFormData({ ...formData, instructions: e.target.value })}
-              className="w-full border rounded px-3 py-2"
-              rows={3}
-            />
-          </div>
-
-          {error && <div className="text-red-600 text-sm">{error}</div>}
-
-          <div className="flex gap-2 justify-end mt-6">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 border rounded hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-            >
-              {loading ? 'Creating...' : 'Create'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </dialog>
-  );
-}
-```
-
-### 2. Project Detail Page
-
-```typescript
-// src/app/projects/[id]/page.tsx
-import { getProjects } from '@/lib/actions';
-import { KanbanBoard } from '@/components/kanban-board';
-import { TaskCreateDialog } from '@/components/create-task-dialog';
-
-export default async function ProjectPage({ params }: { params: { id: string } }) {
-  const result = await getProjects();
-  const projectId = parseInt(params.id, 10);
-
-  if (!result.success || !result.projects) {
-    return <div>Error loading project</div>;
-  }
-
-  const project = result.projects.find((p) => p.id === projectId);
-
-  if (!project) {
-    return <div>Project not found</div>;
-  }
-
-  // TODO: Fetch tasks for this project
-  const tasks = []; // Replace with actual task data
-
-  return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold mb-2">{project.name}</h1>
-        {project.constitution && (
-          <p className="text-gray-600 mb-6">{project.constitution}</p>
-        )}
-
-        <div className="grid grid-cols-2 gap-6 mb-8">
-          <div>
-            <h3 className="font-semibold mb-2">Tech Stack</h3>
-            <pre className="bg-white p-4 rounded border text-sm">
-              {JSON.stringify(project.techStack, null, 2)}
-            </pre>
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold">Tasks</h2>
-            <TaskCreateDialog projectId={projectId} />
-          </div>
-          <KanbanBoard tasks={tasks} />
-        </div>
-      </div>
-    </div>
-  );
-}
-```
-
-### Creating a New API Endpoint
-1. Create file: `src/app/api/agent/[feature]/route.ts`
-2. Export handler: `export async function POST(request: NextRequest)`
-3. Validate auth: `validateAgentToken(request)`
-4. Parse body: `await request.json()`
-5. Validate input: Use Zod schema
-6. Query database: Use Drizzle from `src/db`
-7. Return response: Use `NextResponse.json()`
-
-See [src/app/api/agent/mission/route.ts](src/app/api/agent/mission/route.ts) for example.
+## 🎨 Component & API Quick Reference
 
 ### Creating a New Component
 1. Create file: `src/components/new-component.tsx`
@@ -1223,29 +697,28 @@ See [src/app/api/agent/mission/route.ts](src/app/api/agent/mission/route.ts) for
 3. Import types: `import { TaskSelect } from '@/db/schema'`
 4. Define props interface
 5. Export component with proper types
-6. Style with Tailwind classes
+6. Use Tailwind for styling
 
 See [src/components/task-card.tsx](src/components/task-card.tsx) for example.
 
-### Adding a Database Table
-1. Add table to [src/db/schema.ts](src/db/schema.ts)
-2. Export types: `export type NewTableInsert = ...`
-3. Run migration: `npm run db:generate`
-4. Push to database: `npm run db:push`
-5. Update [src/lib/agent-memory.ts](src/lib/agent-memory.ts) with query helpers
+### Creating a New API Endpoint
+1. Create dir: `src/app/api/[feature]/route.ts`
+2. Add auth check: `validateAgentToken(request)` for agent APIs
+3. Parse body: `await request.json()`
+4. Validate input: Use Zod schema
+5. Query database: Use Drizzle from `src/db`
+6. Return: `NextResponse.json({ success: true, data: ... })`
+
+See [src/app/api/agent/mission/route.ts](src/app/api/agent/mission/route.ts) for example.
 
 ### Creating a Server Action
 1. Create/edit file in `src/lib/actions.ts`
 2. Add `'use server'` at top
 3. Use `try/catch` for error handling
 4. Call `revalidatePath()` to update cache
-5. Return `{ success: boolean, data?: T, error?: string }`
+5. Return: `{ success: boolean, data?: T, error?: string }`
 
 See [src/lib/actions.ts](src/lib/actions.ts) for examples.
-
----
-
-## 🔍 Key Patterns
 
 ### Database Query Pattern
 ```typescript
@@ -1260,327 +733,192 @@ const result = await db
   .where(eq(tasks.projectId, 1));
 
 // Insert
-const [newTask] = await db
-  .insert(tasks)
-  .values({ projectId: 1, description: 'Fix button' })
+const [newProject] = await db
+  .insert(projects)
+  .values({ name: 'My Project' })
   .returning();
 
 // Update
-const [updated] = await db
+await db
   .update(tasks)
   .set({ status: 'done' })
-  .where(eq(tasks.id, taskId))
-  .returning();
-```
-
-### Error Handling Pattern
-```typescript
-'use server';
-
-export async function myAction(input: unknown) {
-  try {
-    // Validate
-    const validated = MySchema.parse(input);
-    
-    // Process
-    const result = await db.insert(...).values(...);
-    
-    // Return success
-    return { success: true, data: result };
-  } catch (error) {
-    console.error('Action error:', error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Unknown error'
-    };
-  }
-}
-```
-
-### Component Data Fetching Pattern
-```typescript
-'use client';
-
-import { useEffect, useState } from 'react';
-import { getProjectTasks } from '@/lib/actions';
-
-interface Task { id: number; description: string; }
-
-export function TaskList({ projectId }: { projectId: number }) {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    getProjectTasks(projectId).then((result) => {
-      if (result.success) {
-        setTasks(result.tasks);
-      }
-      setLoading(false);
-    });
-  }, [projectId]);
-
-  if (loading) return <div>Loading...</div>;
-  if (!tasks.length) return <div>No tasks</div>;
-
-  return (
-    <div>
-      {tasks.map((task) => (
-        <div key={task.id}>{task.description}</div>
-      ))}
-    </div>
-  );
-}
+  .where(eq(tasks.id, 42));
 ```
 
 ---
 
-## 📊 Current Issues & Blockers
+## ⚠️ Known Issues & Limitations
 
-### CRITICAL - Developer Workflow Blocked
-1. **New Project button shows alert** instead of creating
-   - Location: [src/components/project-sidebar.tsx](src/components/project-sidebar.tsx)
-   - Blocks: All developer workflows
-   - Impact: Cannot create projects through UI
-   - Fix: Wire to new dialog and `createProject` action
-   - Effort: 2-3 hours
+### Current Known Issues
+1. **Circular dependency in schema** (workaround implemented)
+   - Location: schema.ts line 51
+   - Issue: Self-referencing foreign key in tasks table
+   - Workaround: Commented out, using plain integer field instead
+   - Impact: No referential integrity for dependency_task_id
+   - Fix: Could use deferred constraints or application-level validation
 
-2. **No project detail page**
-   - Missing: `src/app/projects/[id]/page.tsx`
-   - Blocks: Cannot view individual projects
-   - Impact: No project management interface
-   - Fix: Create detail page with edit forms
-   - Effort: 3-4 hours
+2. **getProjectTasks server action is broken**
+   - Location: src/lib/actions.ts line 55
+   - Issue: FlatMap chaining doesn't work with TypeScript type inference
+   - Impact: Cannot fetch tasks by projectId via this action
+   - Workaround: Use getProjectContext() from agent-memory.ts instead
+   - Fix: Refactor to use proper Drizzle relations or write raw SQL
 
-3. **No task creation UI**
-   - Missing: `src/components/create-task-dialog.tsx`
-   - Blocks: Cannot manually add tasks
-   - Impact: Cannot decompose work from UI
-   - Fix: Create task form dialog
-   - Effort: 2-3 hours
+3. **No loading states or skeleton components**
+   - Impact: Users see blank screen while data loads
+   - Priority: Low (app works, just not polished)
+   - Fix: Add loading.tsx files in route directories
 
-### CRITICAL - Agent Workflow Blocked
-4. **Missing `POST /api/agent/projects` endpoint**
-   - Impact: Agent cannot create projects
-   - Blocks: Self-bootstrapping capability
-   - Fix: Create endpoint with full project setup
-   - Effort: 2 hours
+4. **No error boundaries**
+   - Impact: Errors crash the entire page
+   - Priority: Low (no known errors in production flow)
+   - Fix: Add error.tsx files in route directories
 
-5. **Missing `PATCH /api/agent/projects/:id` endpoint**
-   - Impact: Agent cannot configure projects
-   - Blocks: Project iteration
-   - Fix: Create endpoint to update config
-   - Effort: 2 hours
-
-6. **Missing `POST /api/agent/tasks` endpoint**
-   - Impact: Agent cannot create tasks
-   - Blocks: Task decomposition
-   - Fix: Create endpoint for task creation
-   - Effort: 1.5 hours
-
-### HIGH - Frontend Data Integration
-7. **Hardcoded sample data in home page**
-   - Location: [src/app/page.tsx](src/app/page.tsx)
-   - Impact: UI doesn't reflect database
-   - Fix: Load real data from `getProjectTasks()`
-   - Effort: 2-3 hours
-
-8. **Project selection doesn't navigate**
-   - Location: [src/components/project-sidebar.tsx](src/components/project-sidebar.tsx)
-   - Impact: Cannot switch between projects in UI
-   - Fix: Implement `onProjectSelect` handler
-   - Effort: 1-2 hours
-
-### MEDIUM - Quality Issues
-9. **No error handling**
-   - Impact: Errors crash the page
-   - Fix: Add error boundaries and proper error responses
-   - Effort: 2-3 hours
-
-10. **No loading states**
-    - Impact: Users don't know if page is working
-    - Fix: Add skeleton loaders
-    - Effort: 2 hours
+### Performance Considerations
+- Agent logs are fetched synchronously - could add pagination
+- No database indexes beyond primary keys - could add composite indexes
+- Project detail page fetches all projects for sidebar on every load - could cache
 
 ---
 
-## 🎓 Learning Resources
+## 📞 When You're Stuck
+
+### Common Issues
+
+**Database issues?**
+```bash
+# Reset database (destructive!)
+docker-compose down -v
+docker-compose up -d
+npm run db:push
+psql $DATABASE_URL < db/seed-simple.sql
+```
+
+**Dev server won't start?**
+```bash
+# Kill any hanging processes
+pkill -f "npm run dev"
+npm run dev
+```
+
+**TypeScript errors?**
+```bash
+# Check specific file
+npx tsc --noEmit --incremental false src/components/kanban-board.tsx
+
+# Full type check
+npm run build
+```
+
+**Build fails?**
+```bash
+# Check for circular dependencies
+npm run build 2>&1 | grep "error"
+
+# Clear cache
+rm -rf .next
+npm run build
+```
+
+**Agent API returns 401?**
+```bash
+# Check your token
+cat .env.local | grep AGENT_TOKEN
+
+# Test manually
+curl -H "X-Agent-Token: dev-agent-token-12345" http://localhost:3000/api/agent/mission?project_id=1
+```
+
+**More help?**
+- Drizzle errors: Check [drizzle.config.ts](drizzle.config.ts)
+- Auth errors: Check [src/lib/auth.ts](src/lib/auth.ts)
+- Schema errors: Check [src/db/schema.ts](src/db/schema.ts)
+- Component errors: Check for missing 'use client' directives
+
+---
+
+## 📚 Learning Resources
 
 ### Understanding the Project
 1. [specification.md](specification.md) - Project vision and requirements
 2. [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md) - Current status
 3. [plan.md](plan.md) - Implementation roadmap
+4. [QUICKSTART.md](QUICKSTART.md) - Setup guide
+5. [EVALUATION.md](EVALUATION.md) - Architecture assessment
 
-### References
+### Technology References
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Drizzle ORM Guide](https://orm.drizzle.team)
 - [Tailwind CSS](https://tailwindcss.com)
 - [PostgreSQL Docs](https://www.postgresql.org/docs/)
 - [Zod Validation](https://zod.dev)
-
----
-
-## ⚠️ Important Constraints
-
-1. **Type Safety First** - No `any` types, use strict TypeScript
-2. **Database as Source of Truth** - All state lives in PostgreSQL
-3. **Server Actions for Data** - All database writes through server actions
-4. **Authentication Required** - Agent endpoints need `X-Agent-Token`
-5. **Validation Always** - Use Zod for all external input
-6. **Components are Dumb** - UI components fetch data via actions/props
-7. **No Direct API Calls** - Components use server actions, not fetch()
+- [@dnd-kit Drag & Drop](https://dndkit.com)
 
 ---
 
 ## 🔗 Quick Links
 
 **Documentation:**
-- [INDEX.md](INDEX.md) - Documentation index
 - [specification.md](specification.md) - Project vision
 - [plan.md](plan.md) - Development roadmap
 - [QUICKSTART.md](QUICKSTART.md) - Setup guide
-- [EVALUATION.md](EVALUATION.md) - Current state analysis
 
 **Source Code:**
 - [Database Schema](src/db/schema.ts)
 - [Agent Memory](src/lib/agent-memory.ts)
-- [API Endpoints](src/app/api/agent/)
+- [Agent APIs](src/app/api/agent/)
+- [Control APIs](src/app/api/projects/[id]/agent/)
 - [Components](src/components/)
 
 **Development:**
 - [docker-compose.yml](docker-compose.yml) - PostgreSQL setup
 - [drizzle.config.ts](drizzle.config.ts) - ORM config
 - [package.json](package.json) - Dependencies
-- [tsconfig.json](tsconfig.json) - TypeScript config
 
 ---
 
-## 📞 When You're Stuck
+## ✅ File Checklist (Before Committing)
 
-1. **Database issues?** → Run `npm run db:studio` to inspect state
-2. **API not working?** → Check auth token and Zod validation
-3. **Component not updating?** → Check if using `revalidatePath()`
-4. **Build errors?** → Run `npm run build` to see full errors
-5. **Database schema wrong?** → Delete and rerun `npm run db:push`
-6. **Type errors?** → Check [src/db/schema.ts](src/db/schema.ts) and Zod schemas
-
-See [QUICKSTART.md#troubleshooting](QUICKSTART.md#troubleshooting) for detailed help.
-
----
-
----
-
-## 🎯 Success Criteria
-
-### Phase 1A: Developer Capabilities (Week 1)
-Developer should be able to:
-- [ ] Create new project through "New Project" button
-- [ ] See "Create Project" form with all fields (name, mission, description, tech, instructions)
-- [ ] Successfully create project and see it in sidebar
-- [ ] Click project to navigate to detail page
-- [ ] View project details (mission, description, tech stack, instructions)
-- [ ] Edit project configuration
-- [ ] See active specification and plan
-- [ ] See Kanban board with real tasks from database
-- [ ] Create new task with description, priority, dependencies
-- [ ] See newly created tasks appear in Kanban
-
-**Success Indicator:** Developer can go through complete project setup and task management workflow without API
-
-### Phase 1B: Agent Capabilities (Week 1)
-Agent should be able to:
-- [ ] Call `POST /api/agent/projects` and create new project
-- [ ] Receive project_id in response
-- [ ] Call `GET /api/agent/mission?project_id={id}` and get project context
-- [ ] Call `PATCH /api/agent/projects/:id` to update project config
-- [ ] Call `POST /api/agent/tasks` to create new tasks
-- [ ] Call `PATCH /api/agent/tasks/:id` to move task to in_progress
-- [ ] Call `POST /api/agent/verify` to log test results
-- [ ] Call `POST /api/agent/logs` to add execution logs
-- [ ] Work through complete project without any manual intervention
-
-**Success Indicator:** Agent can bootstrap a project completely from scratch and manage it through API
-
-### Phase 2: Combined System
-- [ ] Developer creates base project with mission and instructions
-- [ ] Agent picks it up via API
-- [ ] Agent creates detailed tasks
-- [ ] Developer monitors progress in real-time Kanban
-- [ ] Agent moves tasks through workflow
-- [ ] Developer sees agent logs and test results
-- [ ] Developer can adjust project mid-execution
-
-**Success Indicator:** Complete feedback loop between developer UI and agent API
-
-### MVP Complete (Phase 1-2)
-- [ ] Phases 1A and 1B fully complete
-- [ ] Phase 2 integration working
-- [ ] App self-hosting on spec-drivr platform
-- [ ] Agent can autonomously plan, create, execute, verify
-- [ ] Developer can monitor and adjust at any point
-
----
-
-## 📝 File Checklist
-
-Before committing changes:
 - [ ] Code follows TypeScript strict mode
 - [ ] All imports use `@/` alias
 - [ ] Components are typed with interfaces
 - [ ] Server actions have error handling
 - [ ] Database queries use Drizzle properly
-- [ ] No console.log in production code (debug → agent_logs table)
+- [ ] No console.log in production code
 - [ ] UI tested in browser
 - [ ] No TypeScript errors: `npm run build`
+- [ ] Code formatted (consistent spacing)
+- [ ] Git commit message follows convention
 
 ---
 
-## 📝 File Checklist
+## 📝 Success Criteria (Updated)
 
-Before committing changes:
-- [ ] Code follows TypeScript strict mode
-- [ ] All imports use `@/` alias
-- [ ] Components are typed with interfaces
-- [ ] Server actions have error handling
-- [ ] Database queries use Drizzle properly
-- [ ] No console.log in production code (debug → agent_logs table)
-- [ ] UI tested in browser
-- [ ] No TypeScript errors: `npm run build`
+### Phase 1-3: Complete! ✅
+- [x] Developers can create projects via UI
+- [x] Developers can navigate between all projects
+- [x] Developers can view project details
+- [x] Kanban board shows real data with drag-and-drop
+- [x] Agent APIs work for mission, plans, tasks, verify, logs
+- [x] Agent control APIs implemented (start, pause, stop, status, retry)
+- [x] Database tracks agent state (agent_status, retry_count, etc)
 
----
+### Phase 5: Critical (Next)
+- [ ] Agent can create projects via API
+- [ ] Agent can update project config via API
+- [ ] Agent can create tasks via API
+- [ ] Agent can self-bootstrap from natural language
 
-## 🔗 Implementation Priorities (TLDR)
-
-### 🔴 Do These First (Week 1)
-1. **Implement 3 critical APIs** (5 hours total)
-   - `POST /api/agent/projects` - Agent project creation
-   - `PATCH /api/agent/projects/:id` - Agent project configuration
-   - `POST /api/agent/tasks` - Agent task creation
-
-2. **Implement Developer UIs** (10 hours total)
-   - Create project dialog + "New Project" button wire-up
-   - Project detail page at `/projects/[id]`
-   - Task creation dialog in project view
-   - Load real data in home page Kanban
-
-3. **Test End-to-End Workflows** (2 hours)
-   - Developer creates project → Agent sees it via API → Agent creates tasks
-   - Developer monitors progress → Agent moves tasks between statuses
-   - Both workflows work in parallel
-
-### 🟡 Do These Next (Week 2)
-- Add drag-and-drop to Kanban
-- Task details modal
-- Test results logging UI
-- Agent logs viewer
-
-### 🟢 Nice to Have (Week 3+)
-- Error boundaries
-- Loading states
-- Automated tests
-- Database optimization
+### MVP Complete (When Phase 5 done)
+- [ ] Agent receives natural language request
+- [ ] Agent creates full project structure
+- [ ] Agent executes all tasks autonomously
+- [ ] Developer monitors via web UI
+- [ ] Developer can pause/resume/stop agent
+- [ ] Agent completes entire project
 
 ---
 
-**Last Updated:** March 5, 2026  
-**Status:** Phase 1 implementation starting  
-**Next:** Build critical APIs and developer UIs
+**Last Updated:** March 5, 2026
+**Status:** Phase 1, 2, 3 Complete! 🎉
+**Next:** Phase 5 - Agent Self-Bootstrapping (3 endpoints, 5.5 hours)
