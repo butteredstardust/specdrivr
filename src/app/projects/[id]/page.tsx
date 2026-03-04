@@ -1,4 +1,4 @@
-import { getProjects, getProjectById } from '@/lib/actions';
+import { getProjects, getProjectById, getProjectSpecs } from '@/lib/actions';
 import { KanbanBoard } from '@/components/kanban-board';
 import { InlineSpecEditor } from '@/components/inline-spec-editor';
 import { InlineConstitutionEditor } from '@/components/inline-constitution-editor';
@@ -44,6 +44,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
   const { project, specification, plan, tasks: projectTasks } = result.context;
   const projectPlans = specification ? await db.select().from(plans).where(eq(plans.specId, specification.id)) : [];
+  const allSpecs = specification ? (await getProjectSpecs(projectId)).specs || [] : [];
 
   const projectConstitution = project.constitution as string | null;
   const projectTechStack: Record<string, unknown> = (project.techStack as Record<string, unknown>) || {};
@@ -100,7 +101,10 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
             {specification && (
               <div className="mb-6">
-                <InlineSpecEditor specification={specification} />
+                <InlineSpecEditor
+                  specification={specification}
+                  allSpecs={allSpecs}
+                />
               </div>
             )}
 
