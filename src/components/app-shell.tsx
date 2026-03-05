@@ -5,6 +5,7 @@ import { Logo, LogoProps } from './logo';
 import { DatabaseStatus } from './database-status';
 import { UserMenu } from './user-menu';
 import { ProjectSidebarWrapper } from './project-sidebar-wrapper';
+import { BottomTabs } from './bottom-tabs';
 
 export interface AppShellProps {
   children: ReactNode;
@@ -81,10 +82,10 @@ export function AppShell({
       </header>
 
       {/* Main content area with sidebar */}
-      <div className="flex h-[calc(100vh-57px)] pt-0">
-        {/* Sidebar */}
+      <div className="flex h-[calc(100vh-57px)] pt-0 md:pb-0 pb-20">
+        {/* Sidebar (hidden on mobile) */}
         {showSidebar && (
-          <aside className="w-60 flex-shrink-0 border-r border-ios-border bg-ios-bg-card ios-scrollbar overflow-y-auto">
+          <aside className="hidden md:flex w-60 flex-shrink-0 border-r border-ios-border bg-ios-bg-card ios-scrollbar overflow-y-auto">
             <ProjectSidebarWrapper
               projects={sidebarProjects}
               currentProjectId={currentProjectId}
@@ -98,6 +99,9 @@ export function AppShell({
             {children}
           </div>
         </main>
+
+        {/* Bottom Tabs (visible on mobile only) */}
+        <BottomTabs />
       </div>
     </div>
   );

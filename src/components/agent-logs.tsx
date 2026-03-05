@@ -13,10 +13,10 @@ interface AgentLogsProps {
 }
 
 const levelColors: Record<LogLevel, { bg: string; text: string; border: string }> = {
-  debug: { bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-300' },
-  info: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-300' },
-  warn: { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-300' },
-  error: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-300' },
+  debug: { bg: 'bg-ios-gray-6', text: 'text-ios-gray-1', border: 'border-ios-gray-4' },
+  info: { bg: 'bg-ios-blue/10', text: 'text-ios-blue', border: 'border-ios-blue/20' },
+  warn: { bg: 'bg-ios-yellow/10', text: 'text-ios-yellow', border: 'border-ios-yellow/20' },
+  error: { bg: 'bg-ios-red/10', text: 'text-ios-red', border: 'border-ios-red/20' },
 };
 
 const levelIcons: Record<LogLevel, JSX.Element> = {
@@ -122,7 +122,7 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
         <div className="flex gap-2">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`px-3 py-1 rounded text-sm font-medium transition-colors ios-font-text ${
+            className={`px-3 py-1 rounded-ios-md ios-caption-2 font-medium transition-colors ios-font-text ${
               showFilters
                 ? 'bg-ios-blue text-white'
                 : 'bg-ios-secondary text-ios-text-secondary hover:bg-ios-gray-5'
@@ -149,7 +149,7 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
             <h3 className="ios-subheadline text-ios-text-primary font-medium">Filters</h3>
             <button
               onClick={clearFilters}
-              className="ios-caption-1 text-ios-blue hover:text-blue-700 ios-font-text"
+              className="ios-caption-1 text-ios-blue hover:text-ios-blue/80 ios-font-text"
             >
               Clear All
             </button>
@@ -165,7 +165,7 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
                     type="checkbox"
                     checked={levelFilters[level]}
                     onChange={() => toggleLevelFilter(level)}
-                    className="w-4 h-4 rounded border-ios-gray-400"
+                    className="w-4 h-4 rounded border-ios-border"
                   />
                   <span className={`ios-caption-1 ${levelColors[level].text} ios-font-text capitalize`}>
                     {level}
@@ -242,7 +242,7 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
             return (
               <div
                 key={log.id}
-                className="p-3 rounded-lg border border-ios bg-white hover:shadow-sm transition-shadow ios"
+                className="p-3 rounded-ios-md border border-ios ios-bg-card hover:shadow-ios-elevated transition-shadow ios"
               >
                 <div className="flex items-start gap-3">
                   <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${colors.bg} ${colors.border}`}>
@@ -253,7 +253,7 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
                       {log.message}
                     </p>
                     <div className="flex items-center gap-3 mt-1.5">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${colors.bg} ${colors.text} ios-font-text`}>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-ios-md ios-caption-2 font-medium ${colors.bg} ${colors.text} ios-font-text`}>
                         {log.level.toUpperCase()}
                       </span>
                       {log.taskId && (
@@ -273,7 +273,7 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
                             <summary className="cursor-pointer ios-caption text-ios-blue ios-font-text">
                               Context
                             </summary>
-                            <pre className="mt-2 p-2 bg-gray-100 ios-caption text-gray-700 rounded overflow-x-auto ios-font-text">
+                            <pre className="mt-2 p-2 bg-ios-gray-6 ios-caption-1 text-ios-text-primary rounded-ios-md overflow-x-auto ios-font-text">
                               {JSON.stringify(ctx, null, 2)}
                             </pre>
                           </details>

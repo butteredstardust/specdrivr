@@ -25,10 +25,10 @@ const iosInputStyle = {
 };
 
 const statusColors: Record<PlanStatus, { bg: string; text: string; border: string }> = {
-  draft: { bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-300' },
-  active: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-300' },
-  completed: { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-300' },
-  archived: { bg: 'bg-gray-100', text: 'text-gray-500', border: 'border-gray-300' },
+  draft: { bg: 'bg-ios-gray-6', text: 'ios-text-primary', border: 'border-ios-gray-4' },
+  active: { bg: 'bg-ios-blue/10', text: 'ios-blue', border: 'border-ios-blue/20' },
+  completed: { bg: 'bg-ios-green/10', text: 'ios-green', border: 'border-ios-green/20' },
+  archived: { bg: 'bg-ios-gray-6', text: 'ios-text-secondary', border: 'border-ios-gray-4' },
 };
 
 export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorProps) {
@@ -162,7 +162,7 @@ export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorP
                     setEditingPlanId(null);
                   }
                 }}
-                className="px-3 py-1.5 text-sm ios-body ios-radius bg-ios-secondary border border-ios text-ios-primary ios-font-text"
+                className="px-3 py-1.5 ios-footnote ios-body ios-radius bg-ios-secondary border border-ios text-ios-primary ios-font-text"
               >
                 {plans.map((plan) => (
                   <option key={plan.id} value={plan.id}>
@@ -197,7 +197,7 @@ export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorP
           <div className="mt-4 p-3 bg-opacity-10 border ios-radius"
             style={{ backgroundColor: 'var(--ios-red)', borderColor: 'var(--ios-separator)' }}
           >
-            <p className="text-sm text-ios-red ios-font-text">{error}</p>
+            <p className="ios-footnote text-ios-red ios-font-text">{error}</p>
           </div>
         )}
 
@@ -215,10 +215,10 @@ export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorP
                       key={status}
                       type="button"
                       onClick={() => setSelectedStatus(status)}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      className={`px-4 py-2 rounded-ios-lg ios-footnote font-medium transition-colors ${
                         selectedStatus === status
                           ? `${colors.bg} ${colors.text} ${colors.border} border-2`
-                          : 'bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100'
+                          : 'bg-ios-gray-6 ios-text-secondary border border-ios-gray-4 hover:bg-ios-gray-5'
                       } ios-font-text`}
                     >
                       {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -236,7 +236,7 @@ export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorP
                 value={editedJson}
                 onChange={(e) => setEditedJson(e.target.value)}
                 rows={16}
-                className="font-mono text-sm"
+                className="font-mono ios-footnote"
                 style={{
                   ...iosInputStyle,
                   fontFamily: "'SF Mono', Monaco, 'Andale Mono', 'Ubuntu Mono', monospace",
@@ -282,7 +282,7 @@ export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorP
             {activePlan?.architectureDecisions ? (
               <div className="space-y-2">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${statusColors[activePlan.status as PlanStatus].bg} ${statusColors[activePlan.status as PlanStatus].text} ios-font-text`}>
+                  <span className={`inline-flex items-center px-3 py-1 rounded-ios-xl ios-caption-1 font-medium ${statusColors[activePlan.status as PlanStatus].bg} ${statusColors[activePlan.status as PlanStatus].text} ios-font-text`}>
                     {activePlan.status.charAt(0).toUpperCase() + activePlan.status.slice(1)}
                   </span>
                   <span className="ios-caption text-ios-placeholder ios-font-text">

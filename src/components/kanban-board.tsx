@@ -42,38 +42,38 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
     {
       id: 'todo',
       title: 'To Do',
-      bgColor: 'bg-gray-100',
-      borderColor: 'border-gray-300',
+      bgColor: 'ios-card',
+      borderColor: 'border-ios-border',
     },
     {
       id: 'in_progress',
       title: 'In Progress',
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-300',
+      bgColor: 'ios-card',
+      borderColor: 'border-ios-border',
     },
     {
       id: 'paused',
       title: 'Paused',
-      bgColor: 'bg-amber-50',
-      borderColor: 'border-amber-300',
+      bgColor: 'ios-card',
+      borderColor: 'border-ios-border',
     },
     {
       id: 'blocked',
       title: 'Blocked',
-      bgColor: 'bg-red-50',
-      borderColor: 'border-red-300',
+      bgColor: 'ios-card',
+      borderColor: 'border-ios-border',
     },
     {
       id: 'done',
       title: 'Done',
-      bgColor: 'bg-green-50',
-      borderColor: 'border-green-300',
+      bgColor: 'ios-card',
+      borderColor: 'border-ios-border',
     },
     {
       id: 'skipped',
       title: 'Skipped',
-      bgColor: 'bg-gray-50',
-      borderColor: 'border-gray-200',
+      bgColor: 'ios-card',
+      borderColor: 'border-ios-border',
     },
   ];
 
@@ -204,17 +204,17 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
                 id={column.id}
                 role="column"
                 data-testid={`column-${column.id}`}
-                className={`rounded-lg p-4 min-h-96 ${column.bgColor}`}
+                className={`rounded-ios-lg p-4 min-h-96 ${column.bgColor}`}
               >
                 <div
                   className={`flex items-center justify-between mb-4 pb-2 border-b-2 ${column.borderColor}`}
                 >
-                  <h3 className="font-semibold text-lg text-gray-800">
+                  <h3 className="font-semibold text-lg ios-text-primary">
                     {column.title}
                   </h3>
                   <span
                     data-testid={`count-${column.id}`}
-                    className="bg-white px-2 py-1 rounded-full text-sm font-medium text-gray-600"
+                    className="ios-bg-card px-2 py-1 rounded-ios-xl ios-footnote font-medium ios-text-secondary"
                   >
                     {columnTasks.length}
                   </span>
@@ -237,8 +237,8 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
                     ))}
                   </SortableContext>
                   {columnTasks.length === 0 && (
-                    <div className="text-center text-gray-400 py-8">
-                      <p className="text-sm">No tasks</p>
+                    <div className="text-center ios-text-tertiary py-8">
+                      <p className="ios-footnote">No tasks</p>
                     </div>
                   )}
                 </div>

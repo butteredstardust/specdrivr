@@ -18,9 +18,11 @@
     "fkillall": "fkill -f \"npm run dev\"",
     "test:e2e": "playwright test",
     "test:unit": "jest tests/unit",
-    "test:api": "jest tests/api",
-    "test:integration": "jest tests/integration",
     "test:api": "jest --testPathPatterns=tests/api",
+    "test:integration": "jest tests/integration",
     "test:all": "npm run test:unit && npm run test:api && npm run test:e2e"
+  },
+  "devDependencies": {
+    "shadcn": "^3.8.5"
   }
 }

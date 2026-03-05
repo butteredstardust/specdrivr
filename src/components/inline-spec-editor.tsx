@@ -90,44 +90,44 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
 
       if (trimmed.startsWith('# ')) {
         elements.push(
-          <h1 key={i} className="text-2xl font-bold text-gray-900 mb-4 ios-font-display">
+          <h1 key={i} className="ios-title-1 text-ios-primary mb-4 ios-font-display">
             {trimmed.substring(2)}
           </h1>
         );
       } else if (trimmed.startsWith('## ')) {
         elements.push(
-          <h2 key={i} className="text-xl font-semibold text-gray-900 mb-3 mt-6 ios-font-display">
+          <h2 key={i} className="ios-title-2 text-ios-primary mb-3 mt-6 ios-font-display">
             {trimmed.substring(3)}
           </h2>
         );
       } else if (trimmed.startsWith('### ')) {
         elements.push(
-          <h3 key={i} className="text-lg font-medium text-gray-900 mb-2 mt-4 ios-font-display">
+          <h3 key={i} className="ios-title-3 text-ios-primary mb-2 mt-4 ios-font-display">
             {trimmed.substring(4)}
           </h3>
         );
       } else if (trimmed.startsWith('#### ')) {
         elements.push(
-          <h4 key={i} className="text-base font-semibold text-gray-900 mb-2 mt-4 ios-font-display">
+          <h4 key={i} className="ios-headline text-ios-primary mb-2 mt-4 ios-font-display">
             {trimmed.substring(5)}
           </h4>
         );
       } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
         elements.push(
-          <li key={i} className="ml-4 mb-1 text-gray-700 ios-body ios-font-text list-disc">
+          <li key={i} className="ml-4 mb-1 ios-body ios-font-text list-disc">
             {trimmed.substring(2)}
           </li>
         );
       } else if (trimmed.match(/^\d+\.\s/)) {
         elements.push(
-          <li key={i} className="ml-4 mb-1 text-gray-700 ios-body ios-font-text list-decimal">
+          <li key={i} className="ml-4 mb-1 ios-body ios-font-text list-decimal">
             {trimmed.replace(/^\d+\.\s/, '')}
           </li>
         );
       } else if (trimmed.startsWith('**') && trimmed.endsWith('**')) {
         elements.push(
           <p key={i} className="mb-3 ios-body ios-font-text">
-            <strong className="text-gray-900">{trimmed.substring(2, trimmed.length - 2)}</strong>
+            <strong className="ios-text-primary">{trimmed.substring(2, trimmed.length - 2)}</strong>
           </p>
         );
       } else if (trimmed.startsWith('*') && trimmed.endsWith('*') && !trimmed.startsWith('**')) {
@@ -138,7 +138,7 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
         );
       } else if (trimmed.startsWith('> ')) {
         elements.push(
-          <blockquote key={i} className="pl-4 border-l-4 border-gray-300 mb-3 italic text-gray-600 ios-body ios-font-text">
+          <blockquote key={i} className="pl-4 border-l-4 border-ios-separator mb-3 italic ios-body ios-font-text">
             {trimmed.substring(2)}
           </blockquote>
         );
@@ -147,8 +147,8 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
         const codeEnd = lines.findIndex((l, idx) => idx > i && l.trim().startsWith('```'));
         const codeLines = codeEnd !== -1 ? lines.slice(i + 1, codeEnd) : lines.slice(i + 1);
         elements.push(
-          <pre key={i} className="bg-gray-100 p-4 rounded-lg mb-4 overflow-x-auto ios-font-text">
-            <code className="text-sm text-gray-800">{codeLines.join('\n')}</code>
+          <pre key={i} className="ios-bg-secondary p-4 rounded-ios-lg mb-4 overflow-x-auto ios-font-text">
+            <code className="ios-footnote ios-text-primary">{codeLines.join('\n')}</code>
           </pre>
         );
         // Skip ahead
@@ -162,7 +162,7 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
           const parts = trimmed.split(match[0]);
           elements.push(
             <p key={i} className="mb-3 ios-body ios-font-text">
-              {parts[0]}<code className="bg-gray-100 px-1 rounded text-sm">{match[1]}</code>{parts[1] || ''}
+              {parts[0]}<code className="ios-bg-secondary px-1 rounded-ios-md ios-footnote">{match[1]}</code>{parts[1] || ''}
             </p>
           );
         }
@@ -170,7 +170,7 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
         elements.push(<br key={i} />);
       } else if (trimmed) {
         elements.push(
-          <p key={i} className="mb-3 text-gray-700 ios-body ios-font-text">
+          <p key={i} className="mb-3 ios-body ios-font-text">
             {trimmed}
           </p>
         );
@@ -205,7 +205,7 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
             </button>
           )}
           {isViewingHistorical && (
-            <span className="inline-flex items-center gap-1.5 px-2 py-1 ios-caption bg-yellow-50 text-yellow-700 rounded-full ios-font-text">
+            <span className="inline-flex items-center gap-1.5 px-2 py-1 ios-caption bg-yellow-50 text-yellow-700 rounded-ios-xl ios-font-text">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                 <circle cx="12" cy="12" r="3"/>
@@ -312,7 +312,7 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
         <div className="px-6 py-3 bg-opacity-10 border-l-4 ios"
           style={{ backgroundColor: 'var(--ios-red)', borderColor: 'var(--ios-red)' }}
         >
-          <p className="text-sm text-ios-red ios-font-text">{error}</p>
+          <p className="ios-footnote text-ios-red ios-font-text">{error}</p>
         </div>
       )}
 

@@ -28,7 +28,7 @@ export function ActionBar({ projectId, plans, existingTasks, onTaskCreated }: Ac
             className="px-4 py-2 ios-body text-white ios-radius transition-colors flex items-center gap-1.5 ios-font-text"
             style={{ backgroundColor: 'var(--ios-blue)' }}
           >
-            <span className="text-lg">+</span>
+            <span className="ios-title-2">+</span>
             <span>Add Task</span>
           </button>
         </div>

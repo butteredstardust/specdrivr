@@ -83,7 +83,7 @@ export function ProjectCard({
           {techStack.slice(0, 4).map((tech) => (
             <span
               key={tech}
-              className="ios-caption-1 bg-ios-secondary ios-text-secondary border border-ios-border px-2 py-0.5 rounded-full"
+              className="ios-caption-1 bg-ios-secondary ios-text-secondary border border-ios-border px-2 py-0.5 rounded-ios-xl"
             >
               {tech}
             </span>
@@ -107,9 +107,9 @@ export function ProjectCard({
               {Math.round(progressPercent)}%
             </span>
           </div>
-          <div className="h-1.5 bg-ios-gray-5 rounded-full overflow-hidden">
+          <div className="h-1.5 bg-ios-gray-5 rounded-ios-xl overflow-hidden">
             <div
-              className="h-full bg-ios-green rounded-full transition-all duration-500"
+              className="h-full bg-ios-green rounded-ios-xl transition-all duration-500"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -117,7 +117,7 @@ export function ProjectCard({
       )}
 
       {/* Footer info */}
-      <div className="flex items-center justify-between text-xs">
+      <div className="flex items-center justify-between">
         {/* Agent Status Text */}
         <span className={`ios-caption-1 ${statusInfo.text}`}>
           {agentStatus === 'running' ? 'Agent running' : agentStatus === 'idle' ? 'Agent idle' : agentStatusLabels[agentStatus]}

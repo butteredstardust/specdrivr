@@ -23,7 +23,7 @@ export function Logo({ size = 'medium', className }: LogoProps) {
       <div
         className={cn(
           sizeClass,
-          'rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center font-bold text-white text-sm',
+          'rounded-ios-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center font-bold text-white ios-footnote',
           className
         )}
         aria-label="Spec-Drivr Logo"

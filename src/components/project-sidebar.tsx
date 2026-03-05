@@ -49,7 +49,7 @@ export function ProjectSidebar({ projects, activeProjectId, currentProjectId, on
           </div>
           <button
             onClick={toggleSidebar}
-            className="p-2 rounded-lg hover:bg-opacity-80 hover:bg-ios-secondary transition-colors"
+            className="p-2 rounded-ios-md hover:bg-opacity-80 hover:bg-ios-secondary transition-colors"
             aria-label="Hide sidebar"
             title="Hide sidebar"
           >
@@ -133,7 +133,7 @@ export function ProjectSidebar({ projects, activeProjectId, currentProjectId, on
                       </h3>
                     </div>
                     {isProjectActive && (
-                      <span className="bg-white/20 text-white text-[13px] px-2 py-0.5 rounded-full">
+                      <span className="ios-bg-card/20 text-white text-[13px] px-2 py-0.5 rounded-ios-xl">
                         Active
                       </span>
                     )}
