@@ -1,243 +1,118 @@
-# Spec-Drivr: AI Agent Development Platform
+# Spec-Drivr
 
-An **Autonomous Development Platform** that operationalizes the "Spec-Driven Development" cycle. Uses PostgreSQL as a state machine to enable AI agents to execute complex engineering tasks while maintaining persistent memory across sessions.
+**Transform Specifications into Code with Autonomous AI Agents.**
 
-## Architecture
+Spec-Drivr is an orchestration platform designed for "Spec-Driven Development." It allows developers to define features through markdown specifications, which are then autonomously planned, executed, and verified by AI agents. By utilizing PostgreSQL as a persistent state machine, Spec-Drivr ensures that agents maintain full context and high-fidelity memory across long-running development sessions.
 
-- **Next.js 14** (App Router)
-- **TypeScript** (Strict Mode)
-- **PostgreSQL** (State Machine)
-- **Drizzle ORM** (Type-safe database access)
-- **Zod** (Runtime validation)
-- **Tailwind CSS** (Styling)
+## What is Spec-Drivr?
 
-## Quick Start
+In traditional development, AI context is often lost between prompts or sessions. **Spec-Drivr** solves this by operationalizing the development cycle. 
+- **Spec-Driven Development**: You write a "Spec," and the system handles the rest.
+- **Persistent State**: Unlike stateless chat interfaces, Spec-Drivr stores every decision, task, and log in a relational database.
+- **Autonomous Agents**: Agents fetch their "mission" from the platform, work on the local codebase, and report results back to the UI.
+- **Session Continuity**: An agent can pick up exactly where it (or another agent) left off, with complete access to the project's history.
 
-### 1. Setup Environment
+## Features
 
-```bash
-# Copy environment file
-cp .env.example .env.local
+- **Project Dashboard**: Real-time monitoring of agent activity and task progress.
+- **Kanban Task Management**: Visualize the agent's work queue and dependency graph.
+- **Live Agent Logs**: Stream events directly from the agent's execution loop.
+- **Versioned Specifications**: Track how requirements evolve over time.
+- **Architecture Planning**: Agents generate structured plans before writing a single line of code.
+- **Integrated Verification**: Automatic status updates based on test results.
 
-# Edit .env.local with your values:
-DATABASE_URL=postgresql://specdrivr:specdrivr_password@localhost:5432/specdrivr
-AGENT_TOKEN=your-secure-agent-token-here
-```
+## Tech Stack
 
-### 2. Start PostgreSQL
+| Component     | Technology              | Why it was chosen                 |
+|---------------|-------------------------|-----------------------------------|
+| **Framework** | Next.js 14 (App Router) | For a fast, modern, and unified React experience. |
+| **Language**  | TypeScript              | To ensure reliability with strict type safety. |
+| **Database**  | PostgreSQL              | For robust ACID compliance and relational state storage. |
+| **ORM**       | Drizzle ORM             | Modern SQL toolkit that feels like writing raw SQL but with types. |
+| **Validation**| Zod                     | To guarantee data integrity at every API boundary. |
+| **Styling**   | Tailwind CSS            | To build a premium, Linear-inspired dark UI. |
 
-```bash
-docker compose up -d
-```
+## Prerequisites
 
-### 3. Initialize Database
+- **Node.js**: 18.17+ (LTS recommended)
+- **PostgreSQL**: 14+
+- **npm**: 9.x+
 
-```bash
-npm run db:push
-```
+## Getting Started
 
-### 4. Run the Application
+Follow these steps to get your local development environment running in under 5 minutes:
 
-```bash
-npm run dev
-```
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/your-org/specdrivr.git
+   cd specdrivr
+   ```
 
-Visit `http://localhost:3000` to see the application.
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-### 5. Open Drizzle Studio (Optional)
+3. **Set up environment variables**:
+   Copy the example file and fill in your details (refer to `.env.example` for guidance).
+   ```bash
+   cp .env.example .env.local
+   ```
 
-```bash
-npm run db:studio
-```
+4. **Initialize the database**:
+   Ensure PostgreSQL is running and your `DATABASE_URL` is correct, then run:
+   ```bash
+   npm run db:push
+   npm run db:seed
+   ```
 
-## The Context Hydration Protocol
+5. **Start the development server**:
+   ```bash
+   npm run dev
+   ```
 
-### Setup Project and Get Mission Context
-
-**1. Create a Project & Specification (via Web UI)**
-Projects and Specifications should be created via the SpecDrivr web interface at `http://localhost:3000`.
-
-**2. Create Plan (via Agent API):**
-```bash
-curl -X POST http://localhost:3000/api/agent/plans \
-  -H "X-Agent-Token: $AGENT_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"specId": 1, "architectureDecisions": {"framework": "Next.js"}}'
-```
-
-**3. Get Next Mission:**
-```bash
-curl -H "X-Agent-Token: $AGENT_TOKEN" \
-  "http://localhost:3000/api/agent/mission?project_id=1"
-```
-
-## API Endpoints
-
-### Authentication
-
-All agent endpoints require `X-Agent-Token` header:
-
-```bash
-curl -H "X-Agent-Token: your-token" <endpoint>
-```
-
-### Agent API
-
-#### Get Mission Context
-`GET /api/agent/mission?project_id=1`
-
-#### Create Plan
-`POST /api/agent/plans`
-
-#### Update Task
-`PATCH /api/agent/tasks/:id`
-
-#### Log Test Results
-`POST /api/agent/verify`
-
-#### Get Parallel Wave
-`GET /api/agent/wave?project_id=1`
-
-#### Add Agent Logs
-`POST /api/agent/logs`
-`GET /api/agent/logs?project_id=1`
-
-### Agent Control API (UI-Facing)
-
-#### Agent State
-- `GET /api/projects/:id/agent/status`
-- `POST /api/projects/:id/agent/start`
-- `POST /api/projects/:id/agent/stop`
-- `POST /api/projects/:id/agent/pause`
-- `POST /api/projects/:id/agent/retry`
-
-#### Task Control
-- `POST /api/tasks/:id/agent/skip`
-- `POST /api/tasks/:id/agent/retry`
-
-### Git Webhooks
-- `POST /api/webhooks/git` (Receives commit payloads)
-
-## Database Schema
-
-### Tables
-
-- **projects** - Project metadata
-- **specifications** - Functional requirements
-- **plans** - Technical architecture
-- **tasks** - Atomic work items
-- **test_results** - Verification logs
-- **agent_logs** - Agent activity logs
-
-See `src/db/schema.ts` for full schema definition.
-
-## Prompt to Use This With Claude
-
-To get started with Claude as your agent, use this prompt:
-
-```
-You are an AI agent working with the Spec-Drivr platform.
-
-PROJECT_ID=1
-API_BASE=http://localhost:3000
-AGENT_TOKEN=your-token
-
-Use the following workflow:
-
-1. Always check your current mission first:
-   GET /api/agent/mission?project_id=${PROJECT_ID}
-
-2. If no specification exists, ask me to provide one
-
-3. If specification exists but no plan, create a technical plan:
-   POST /api/agent/plans
-   Body: { specId: <id>, architectureDecisions: {...} }
-
-4. If plan exists, get next available task (tasks with status='todo')
-
-5. Work on one task at a time, following the causality chain:
-   Specification → Plan → Tasks → Implementation → Verification
-
-6. After implementing, run tests and log results:
-   POST /api/agent/verify
-   Body: { taskId: <id>, success: true/false, logs: "..." }
-
-7. Log all activity:
-   POST /api/agent/logs
-   Body: { taskId: <id>, level: "info", message: "..." }
-
-8. Continue until all tasks are marked 'done'
-
-Never write feature code without:
-- Validating spec exists and is active
-- Validating plan exists
-- Getting next task from API
-- Running tests and logging results
-
-Always use SQL queries to retrieve state rather than relying on conversation context.
-```
-
-## Development Commands
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run db:push` - Push schema changes
-- `npm run db:studio` - Open Drizzle Studio
-- `npm run db:generate` - Generate migrations
-- `npm run lint` - Run linter
-
-## Documentation
-
-### For Different Use Cases
-
-**New to the project?**
-- Start with [specification.md](specification.md) for project vision and high-level requirements
-- Read [claude.md](claude.md) for comprehensive developer guide
-- Check out [plan.md](plan.md) for architecture and implementation roadmap
-
-**Working on UI/UX?**
-- See [ui_plan.md](ui_plan.md) for detailed UI specifications
-
-**Setting up testing?**
-- See [testing/README.md](testing/README.md) for comprehensive testing guide
-- Check [TESTING_SUMMARY.md](TESTING_SUMMARY.md) for testing infrastructure overview
-
-**Historical context:**
-- See [documentation/progress/](documentation/progress/) for project progress tracking
+6. **Confirm it's working**:
+   Visit [http://localhost:3000](http://localhost:3000) to see the dashboard.
 
 ## Project Structure
 
-```
-/app/              # Next.js app router
-  ├── api/        # API routes
-  └── projects/   # Project pages
-/components/       # React components
-/db/              # Database
-  ├── schema.ts   # Table schemas
-  └── index.ts    # Drizzle client
-/lib/             # Utilities
-  ├── schemas.ts  # Zod schemas
-  ├── agent-memory.ts
-  ├── auth.ts
-  └── actions.ts
-```
+- `src/app`: UI pages and API endpoints. Look here for routing logic.
+- `src/components`: UI elements (Buttons, Cards, Panels).
+- `src/db`: Schema definitions and database configuration.
+- `src/lib`: The "brains" of the app (Agent memory, shared actions, validation logic).
+- `tests`: Our test suite for ensuring reliability.
+
+## Development
+
+Day-to-day commands you'll need:
+
+- **Generate Migrations**: `npm run db:generate`
+- **Apply Migrations**: `npm run db:migrate`
+- **Database Studio**: `npm run db:studio` (Visual DB explorer)
+- **Run Tests**: `npm run test` (Unit) or `npm run test:e2e` (Browser)
+
+## Contributing
+
+We use a standard Git flow:
+1. Create a feature branch (`feat/your-feature`).
+2. Follow our coding conventions: kebab-case files, PascalCase components.
+3. Ensure all tests pass (`npm run test:all`).
+4. Open a PR for review.
+
+Detailed technical guidelines are available in [CLAUDE.md](./claude.md).
+
+## Architecture
+
+Spec-Drivr is built around the concept of a **Stateful Orchestrator**. The Next.js API layer serves as a Zod-validated boundary between the UI, the PostgreSQL state machine, and external agents. 
+
+When a spec is created, an agent generates a **Plan** consisting of **Tasks**. Each task has dependencies and status flags. The agent's memory is persisted in PostgreSQL, allowing for complex branching and long-running workflows that traditional AI assistants cannot handle.
 
 ## Troubleshooting
 
-### Database Issues
+- **DB Connection Issues**: Verify your `DATABASE_URL` in `.env.local` and ensure your Postgres instance is reachable.
+- **Migration Errors**: If the schema is out of sync, try `npm run db:push` in development to force synchronization.
+- **Auth Failures**: Ensure `AUTH_SECRET` is set correctly in your environment.
 
-1. Ensure PostgreSQL is running: `docker ps`
-2. Check logs: `docker logs specdrivr_db`
-3. Verify DATABASE_URL in `.env.local`
-4. Run `npm run db:studio`
+## License
 
-### API Authentication
-
-1. Check AGENT_TOKEN in .env.local
-2. Ensure X-Agent-Token header is present
-
-### Type Errors
-
-TypeScript strict mode enabled. Use proper types from `@/db/schema`.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is currently **Proprietary**. All rights reserved.
