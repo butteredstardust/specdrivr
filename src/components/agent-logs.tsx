@@ -52,34 +52,171 @@ const levelIcons: Record<LogLevel, JSX.Element> = {
 
 export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [levelFilters, setLevelFilters] = useState<Record<LogLevel, boolean>>({
+    debug: true,
+    info: true,
+    warn: true,
+    error: true,
+  });
+  const [selectedTaskId, setSelectedTaskId] = useState<string>('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
-  const sortedLogs = useMemo(() =>
-    [...logs].sort((a, b) =>
-      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    ),
-    [logs],
-  );
+  const filteredLogs = useMemo(() => {
+    return [...logs]
+      .sort((a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      )
+      .filter((log) => {
+        // Filter by level
+        if (!levelFilters[log.level as LogLevel]) {
+          return false;
+        }
+
+        // Filter by task
+        if (selectedTaskId && log.taskId !== parseInt(selectedTaskId, 10)) {
+          return false;
+        }
+
+        // Filter by date range
+        const logDate = new Date(log.timestamp);
+        if (dateFrom && logDate < new Date(dateFrom)) {
+          return false;
+        }
+        if (dateTo) {
+          // Set the time to end of day for inclusive filtering
+          const endDate = new Date(dateTo);
+          endDate.setHours(23, 59, 59, 999);
+          if (logDate > endDate) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+  }, [logs, levelFilters, selectedTaskId, dateFrom, dateTo]);
+
+  const toggleLevelFilter = (level: LogLevel) => {
+    setLevelFilters((prev) => ({
+      ...prev,
+      [level]: !prev[level],
+    }));
+  };
+
+  const clearFilters = () => {
+    setLevelFilters({ debug: true, info: true, warn: true, error: true });
+    setSelectedTaskId('');
+    setDateFrom('');
+    setDateTo('');
+  };
 
   return (
     <div>
-      {/* Header with Add button */}
+      {/* Header with Add and Filter buttons */}
       <div className="flex items-center justify-between mb-2">
         <span className="ios-body text-ios-secondary ios-font-text">
-          {sortedLogs.length} log{sortedLogs.length !== 1 ? 's' : ''}
+          {filteredLogs.length} of {logs.length} log{logs.length !== 1 ? 's' : ''}
         </span>
-        <AddLogDialog
-          tasks={tasks}
-          isOpen={showAddDialog}
-          onClose={() => setShowAddDialog(false)}
-          onLogAdded={() => {
-            setShowAddDialog(false);
-            onLogAdded?.();
-          }}
-        />
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`px-3 py-1 rounded text-sm font-medium transition-colors ios-font-text ${
+              showFilters
+                ? 'bg-ios-blue text-white'
+                : 'bg-ios-secondary text-ios-text-secondary hover:bg-ios-gray-5'
+            }`}
+          >
+            Filters
+          </button>
+          <AddLogDialog
+            tasks={tasks}
+            isOpen={showAddDialog}
+            onClose={() => setShowAddDialog(false)}
+            onLogAdded={() => {
+              setShowAddDialog(false);
+              onLogAdded?.();
+            }}
+          />
+        </div>
       </div>
 
+      {/* Filters Panel */}
+      {showFilters && (
+        <div className="ios-card p-4 mb-4 border border-ios-border">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="ios-subheadline text-ios-text-primary font-medium">Filters</h3>
+            <button
+              onClick={clearFilters}
+              className="ios-caption-1 text-ios-blue hover:text-blue-700 ios-font-text"
+            >
+              Clear All
+            </button>
+          </div>
+
+          {/* Level Filters */}
+          <div className="mb-3">
+            <label className="ios-caption-1 text-ios-text-secondary	block mb-2">Log Level</label>
+            <div className="flex gap-2 flex-wrap">
+              {(Object.keys(levelFilters) as LogLevel[]).map((level) => (
+                <label key={level} className="flex items-center gap-1.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={levelFilters[level]}
+                    onChange={() => toggleLevelFilter(level)}
+                    className="w-4 h-4 rounded border-ios-gray-400"
+                  />
+                  <span className={`ios-caption-1 ${levelColors[level].text} ios-font-text capitalize`}>
+                    {level}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Task Filter */}
+          {tasks.length > 0 && (
+            <div className="mb-3">
+              <label className="ios-caption-1 text-ios-text-secondary block mb-2">Task</label>
+              <select
+                value={selectedTaskId}
+                onChange={(e) => setSelectedTaskId(e.target.value)}
+                className="ios-input ios-body"
+              >
+                <option value="">All Tasks</option>
+                {tasks.map((task) => (
+                  <option key={task.id} value={task.id}>
+                    #{task.id}: {(task.description || '').substring(0, 40)}
+                    {task.description && task.description.length > 40 ? '...' : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Date Range Filter */}
+          <div>
+            <label className="ios-caption-1 text-ios-text-secondary block mb-2">Date Range</label>
+            <div className="flex gap-2">
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                className="ios-input ios-body flex-1"
+              />
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                className="ios-input ios-body flex-1"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="space-y-2 max-h-80 overflow-y-auto ios" role="log">
-        {sortedLogs.length === 0 ? (
+        {filteredLogs.length === 0 ? (
           <div className="text-center py-8 ios">
             <div className="mb-3 flex justify-center text-ios-placeholder">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-ios-placeholder">
@@ -87,13 +224,17 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
                 <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
               </svg>
             </div>
-            <p className="ios-body text-ios-placeholder ios-font-text">No agent logs yet</p>
-            <p className="ios-caption text-ios-secondary ios-font-text mt-1">
-              Add a log to track manual interventions
+            <p className="ios-body text-ios-placeholder ios-font-text">
+              {logs.length === 0 ? 'No agent logs yet' : 'No logs match the current filters'}
             </p>
+            {logs.length === 0 && (
+              <p className="ios-caption text-ios-secondary ios-font-text mt-1">
+                Add a log to track manual interventions
+              </p>
+            )}
           </div>
         ) : (
-          sortedLogs.map((log) => {
+          filteredLogs.map((log) => {
             const colors = levelColors[log.level as LogLevel] || levelColors.info;
             const icon = levelIcons[log.level as LogLevel] || levelIcons.info;
 

@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/db';
-import { projects, specifications, plans, tasks, testResults, agentLogs } from '@/db/schema';
+import { projects, specifications, plans, tasks, testResults, agentLogs, gitCommits } from '@/db/schema';
 import { revalidatePath } from 'next/cache';
 import { eq, desc, inArray } from 'drizzle-orm';
 
@@ -270,6 +270,37 @@ export async function updateTechStackDev(
 }
 
 /**
+ * Update project git configuration (developer-facing)
+ */
+export async function updateGitConfigDev(
+  projectId: number,
+  gitConfig: {
+    basePath?: string;
+    gitBranch?: string;
+    gitStrategy?: string;
+  }
+) {
+  try {
+    await db
+      .update(projects)
+      .set({
+        ...gitConfig,
+        updatedAt: new Date(),
+      })
+      .where(eq(projects.id, projectId));
+
+    // Revalidate the project page and settings
+    revalidatePath('/projects/[id]', 'page');
+    revalidatePath('/projects/[id]/settings', 'page');
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating git config:', error);
+    return { success: false, error: 'Failed to update git configuration' };
+  }
+}
+
+/**
  * Create a new plan (developer-facing)
  */
 export async function createPlanDev(planData: {
@@ -440,5 +471,24 @@ export async function getProjectAgentLogs(projectId: number, limit: number = 50)
   } catch (error) {
     console.error('Error getting agent logs:', error);
     return { success: false, error: 'Failed to fetch logs' };
+  }
+}
+
+/**
+ * Get git commits for a project (developer-facing)
+ */
+export async function getProjectCommits(projectId: number, limit: number = 100) {
+  try {
+    const commits = await db
+      .select()
+      .from(gitCommits)
+      .where(eq(gitCommits.projectId, projectId))
+      .orderBy(desc(gitCommits.timestamp))
+      .limit(limit);
+
+    return { success: true, commits };
+  } catch (error) {
+    console.error('Error getting commits:', error);
+    return { success: false, error: 'Failed to fetch commits' };
   }
 }

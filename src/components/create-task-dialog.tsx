@@ -41,6 +41,7 @@ export function CreateTaskDialog({
 }: CreateTaskDialogProps) {
   const [isOpenInternal, setIsOpenInternal] = useState(false);
   const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : isOpenInternal;
+  const [isQuickMode, setIsQuickMode] = useState(false);
   const [formData, setFormData] = useState({
     planId: plans[0]?.id || 0,
     description: '',
@@ -50,6 +51,53 @@ export function CreateTaskDialog({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  // Parse description for quick mode
+  // Supports: "[P3] Modify src/api/auth.ts and tests/auth.test.ts"
+  const parseQuickDescription = (text: string) => {
+    const trimmed = text.trim();
+
+    // Extract priority: [P1], [P2], [P3], etc.
+    const priorityMatch = trimmed.match(/\[P([1-9]|10)\]/i);
+    const priority = priorityMatch ? priorityMatch[1] : '1';
+
+    // Extract file paths: simple .ts, .tsx extensions, or paths in quotes
+    const fileMatches = trimmed.matchAll(/"([^"]+\.(ts|tsx|js|jsx))"/g);
+    const extMatches = trimmed.matchAll(/\b([a-zA-Z0-9_/\\.-]+\.(ts|tsx|js|jsx))\b/g);
+
+    const files = [
+      ...[...fileMatches].map((m) => m[1]),
+      ...[...extMatches].map((m) => m[1]),
+    ];
+
+    return { priority, files, text: trimmed.replace(/\[P([1-9]|10)\]/gi, '').replace(/"[^"]+\.(ts|tsx|js|jsx)"/g, '').trim() };
+  };
+
+  const handleDescriptionChange = (value: string) => {
+    setFormData({ ...formData, description: value });
+
+    if (isQuickMode) {
+      const parsed = parseQuickDescription(value);
+      setFormData((prev) => ({
+        ...prev,
+        priority: parsed.priority,
+        filesInvolved: parsed.files.join(', '),
+      }));
+    }
+  };
+
+  const handleQuickModeToggle = (checked: boolean) => {
+    setIsQuickMode(checked);
+    // When switching to quick mode, parse current description
+    if (checked && formData.description) {
+      const parsed = parseQuickDescription(formData.description);
+      setFormData((prev) => ({
+        ...prev,
+        priority: parsed.priority,
+        filesInvolved: parsed.files.join(', '),
+      }));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,11 +120,14 @@ export function CreateTaskDialog({
         ? parseInt(formData.dependencyTaskId, 10)
         : null;
 
-      if (!formData.planId || formData.planId === 0) {
+      if (!isQuickMode && (!formData.planId || formData.planId === 0)) {
         setError('Please select a plan');
         setIsSubmitting(false);
         return;
       }
+
+      // In quick mode, use default plan if not selected
+      const planId = isQuickMode ? (plans[0]?.id || 0) : formData.planId;
 
       if (!formData.description.trim()) {
         setError('Description is required');
@@ -85,7 +136,7 @@ export function CreateTaskDialog({
       }
 
       const result = await createTaskDev({
-        planId: formData.planId,
+        planId,
         description: formData.description.trim(),
         filesInvolved,
         priority,
@@ -153,6 +204,30 @@ export function CreateTaskDialog({
             Create New Task
           </h2>
 
+          {/* Quick Mode Toggle */}
+          <div className="mb-6 flex items-center justify-between ios-card p-3 border-ios-border">
+            <div>
+              <span className="ios-body text-ios-primary font-medium">Quick Mode</span>
+              <p className="ios-caption-1 text-ios-secondary">
+                Auto-parse priority and files from description
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleQuickModeToggle(!isQuickMode)}
+              className={`w-12 h-7 rounded-full p-1 transition-colors ${
+                isQuickMode ? 'bg-ios-blue' : 'bg-ios-gray-5'
+              }`}
+              aria-pressed={isQuickMode}
+            >
+              <span
+                className={`block w-5 h-5 rounded-full transition-transform ${
+                  isQuickMode ? 'translate-x-5 bg-white' : 'translate-x-0 bg-white'
+                }`}
+              />
+            </button>
+          </div>
+
           {error && (
             <div className="mb-4 p-3 bg-opacity-10 border ios-radius" style={{ backgroundColor: 'var(--ios-red)', borderColor: 'var(--ios-separator)' }}>
               <p className="text-sm text-ios-red ios-font-text">{error}</p>
@@ -160,22 +235,24 @@ export function CreateTaskDialog({
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4 ios-font-text">
-            <div>
-              <label htmlFor="planId" className="block ios-subheadline text-ios-primary mb-2">
-                Plan
-              </label>
-              <select
-                id="planId"
-                value={formData.planId}
-                onChange={(e) => setFormData({ ...formData, planId: parseInt(e.target.value, 10) })}
-                required
-                style={iosInputStyle}
-              >
-                {plans.map((plan) => (
-                  <option key={plan.id} value={plan.id}>Plan #{plan.id}</option>
-                ))}
-              </select>
-            </div>
+            {!isQuickMode && (
+              <div>
+                <label htmlFor="planId" className="block ios-subheadline text-ios-primary mb-2">
+                  Plan
+                </label>
+                <select
+                  id="planId"
+                  value={formData.planId}
+                  onChange={(e) => setFormData({ ...formData, planId: parseInt(e.target.value, 10) })}
+                  required={!isQuickMode}
+                  style={iosInputStyle}
+                >
+                  {plans.map((plan) => (
+                    <option key={plan.id} value={plan.id}>Plan #{plan.id}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div>
               <label htmlFor="description" className="block ios-subheadline text-ios-primary mb-2">
@@ -184,43 +261,56 @@ export function CreateTaskDialog({
               <textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Implement user authentication API endpoint"
+                onChange={(e) => handleDescriptionChange(e.target.value)}
+                placeholder={
+                  isQuickMode
+                    ? '[P3] Modify "src/api/auth.ts" to add JWT verification'
+                    : 'Implement user authentication API endpoint'
+                }
                 rows={3}
                 required
                 style={{ ...iosInputStyle, resize: 'none' }}
               />
+              {isQuickMode && (
+                <p className="mt-1 ios-caption text-ios-secondary">
+                  Tips: Use [P1-P10] for priority, quote files like "src/api/auth.ts"
+                </p>
+              )}
             </div>
 
-            <div>
-              <label htmlFor="filesInvolved" className="block ios-subheadline text-ios-primary mb-2">
-                Files
-              </label>
-              <input
-                type="text"
-                id="filesInvolved"
-                value={formData.filesInvolved}
-                onChange={(e) => setFormData({ ...formData, filesInvolved: e.target.value })}
-                placeholder="src/api/auth.ts, tests/auth.test.ts"
-                style={iosInputStyle}
-              />
-              <p className="mt-1 ios-caption text-ios-placeholder">Separate files with commas</p>
-            </div>
+            {!isQuickMode && (
+              <div>
+                <label htmlFor="filesInvolved" className="block ios-subheadline text-ios-primary mb-2">
+                  Files
+                </label>
+                <input
+                  type="text"
+                  id="filesInvolved"
+                  value={formData.filesInvolved}
+                  onChange={(e) => setFormData({ ...formData, filesInvolved: e.target.value })}
+                  placeholder="src/api/auth.ts, tests/auth.test.ts"
+                  style={iosInputStyle}
+                />
+                <p className="mt-1 ios-caption text-ios-placeholder">Separate files with commas</p>
+              </div>
+            )}
 
-            <div>
-              <label htmlFor="priority" className="block ios-subheadline text-ios-primary mb-2">
-                Priority (1-10)
-              </label>
-              <input
-                type="number"
-                id="priority"
-                min="1"
-                max="10"
-                value={formData.priority}
-                onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-                style={iosInputStyle}
-              />
-            </div>
+            {!isQuickMode && (
+              <div>
+                <label htmlFor="priority" className="block ios-subheadline text-ios-primary mb-2">
+                  Priority (1-10)
+                </label>
+                <input
+                  type="number"
+                  id="priority"
+                  min="1"
+                  max="10"
+                  value={formData.priority}
+                  onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+                  style={iosInputStyle}
+                />
+              </div>
+            )}
 
             <div>
               <label htmlFor="dependencyTaskId" className="block ios-subheadline text-ios-primary mb-2">

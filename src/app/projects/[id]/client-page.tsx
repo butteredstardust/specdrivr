@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ProjectSelect, SpecificationSelect, PlanSelect, TaskSelect } from '@/db/schema';
+import { ProjectSelect, SpecificationSelect, PlanSelect, TaskSelect, TestResultSelect, AgentLogSelect } from '@/db/schema';
 import { InlineConstitutionEditor } from '@/components/inline-constitution-editor';
 import { InlineTechStackEditor } from '@/components/inline-tech-stack-editor';
 import { InlinePlanEditor } from '@/components/inline-plan-editor';
@@ -24,6 +24,8 @@ interface ProjectDetailClientProps {
   tasks: TaskSelect[];
   projects: ProjectSelect[];
   hasActivePlan: boolean;
+  testResults?: TestResultSelect[];
+  agentLogs?: AgentLogSelect[];
 }
 
 // Tab content components
@@ -76,7 +78,7 @@ function PlanTabContent({ specification, plans }: { specification: Specification
   );
 }
 
-function LogsTabContent({ logs, tasks, projectId }: { logs: any[]; tasks: TaskSelect[]; projectId: number }) {
+function LogsTabContent({ logs, tasks, projectId }: { logs: AgentLogSelect[]; tasks: TaskSelect[]; projectId: number }) {
   return (
     <AgentLogs
       logs={logs}
@@ -84,6 +86,12 @@ function LogsTabContent({ logs, tasks, projectId }: { logs: any[]; tasks: TaskSe
       projectId={projectId}
       onLogAdded={() => {}}
     />
+  );
+}
+
+function TestResultsTabContent({ testResults }: { testResults: TestResultSelect[] }) {
+  return (
+    <TestResultsPanel testResults={testResults} />
   );
 }
 
@@ -96,6 +104,8 @@ export function ProjectDetailClient({
   tasks,
   projects,
   hasActivePlan,
+  testResults = [],
+  agentLogs = [],
 }: ProjectDetailClientProps) {
   const [activeTabId, setActiveTabId] = useState('kanban');
   const { data: agentStatus } = useAgentStatus({ projectId });
@@ -106,11 +116,6 @@ export function ProjectDetailClient({
     : typeof project.techStack === 'string'
     ? [project.techStack]
     : [];
-
-  // Fetch test results and logs - in a real app these would be server-side
-  // For now, we'll pass empty arrays
-  const testResults: any[] = [];
-  const agentLogs: any[] = [];
 
   // Create tabs configuration
   const tabs: TabData[] = [
@@ -133,6 +138,12 @@ export function ProjectDetailClient({
       id: 'commits',
       label: 'Commits',
       href: `/projects/${projectId}/commits`,
+    },
+    {
+      id: 'test-results',
+      label: 'Test Results',
+      href: `/projects/${projectId}?tab=test-results`,
+      badge: testResults.length > 0 ? testResults.length : undefined,
     },
     {
       id: 'logs',
@@ -162,6 +173,8 @@ export function ProjectDetailClient({
         return <PlanTabContent specification={specification} plans={plans} />;
       case 'logs':
         return <LogsTabContent logs={agentLogs} tasks={tasks} projectId={projectId} />;
+      case 'test-results':
+        return <TestResultsTabContent testResults={testResults} />;
       default:
         return <KanbanTabContent projectId={projectId} plans={plans} tasks={tasks} />;
     }

@@ -1,4 +1,4 @@
-import { getProjects, getProjectById, getProjectSpecs } from '@/lib/actions';
+import { getProjects, getProjectById, getProjectSpecs, getProjectTestResults, getProjectAgentLogs } from '@/lib/actions';
 import { ProjectDetailClient } from './client-page';
 import { notFound } from 'next/navigation';
 import { db } from '@/db';
@@ -35,6 +35,13 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   const allSpecs = specification ? (await getProjectSpecs(projectId)).specs || [] : [];
   const hasActivePlan = projectPlans.some(p => p.status === 'active');
 
+  // Fetch test results and agent logs
+  const testResultsResult = await getProjectTestResults(projectId);
+  const testResults = testResultsResult.success ? testResultsResult.testResults || [] : [];
+
+  const agentLogsResult = await getProjectAgentLogs(projectId, 100);
+  const agentLogs = agentLogsResult.success ? agentLogsResult.logs || [] : [];
+
   return (
     <ProjectDetailClient
       projectId={projectId}
@@ -45,6 +52,8 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
       tasks={projectTasks || []}
       projects={projects}
       hasActivePlan={hasActivePlan}
+      testResults={testResults}
+      agentLogs={agentLogs}
     />
   );
 }
