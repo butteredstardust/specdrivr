@@ -150,8 +150,7 @@ specdrivr/
 ├── documentation/
 │   ├── specification.md          # Project vision
 │   ├── plan.md                   # Implementation roadmap
-│   ├── PROJECT_SUMMARY.md        # Overview
-│   ├── QUICKSTART.md             # Setup guide
+│   ├── PROJECT_STATUS.md        # Overview
 │   ├── INDEX.md                  # Documentation index
 │   └── claude.md                 # This file
 │
@@ -926,10 +925,8 @@ curl -H "X-Agent-Token: dev-agent-token-12345" http://localhost:3000/api/agent/m
 
 ### Understanding the Project
 1. [specification.md](specification.md) - Project vision and requirements
-2. [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md) - Current status
+2. [PROJECT_STATUS.md](PROJECT_STATUS.md) - Current status
 3. [plan.md](plan.md) - Implementation roadmap
-4. [QUICKSTART.md](QUICKSTART.md) - Setup guide
-5. [EVALUATION.md](EVALUATION.md) - Architecture assessment
 
 ### Technology References
 - [Next.js Documentation](https://nextjs.org/docs)
@@ -946,7 +943,6 @@ curl -H "X-Agent-Token: dev-agent-token-12345" http://localhost:3000/api/agent/m
 **Documentation:**
 - [specification.md](specification.md) - Project vision
 - [plan.md](plan.md) - Development roadmap
-- [QUICKSTART.md](QUICKSTART.md) - Setup guide
 
 **Source Code:**
 - [Database Schema](src/db/schema.ts)
