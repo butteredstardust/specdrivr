@@ -8,7 +8,7 @@ import { ProjectSidebarWrapper } from '@/components/project-sidebar-wrapper';
 import { InlineConstitutionEditor } from '@/components/inline-constitution-editor';
 import { InlineTechStackEditor } from '@/components/inline-tech-stack-editor';
 import { GenerateTokenDialog } from '@/components/generate-token-dialog';
-import { updateGitConfigDev as updateGitConfig } from '@/lib/actions';
+import { updateGitConfigDev as updateGitConfig, archiveProjectDev } from '@/lib/actions';
 import type { TabData } from '@/components/ui/tabs';
 
 interface ProjectSettingsClientProps {
@@ -66,9 +66,29 @@ export function ProjectSettingsClient({
     ? [project.techStack]
     : [];
 
+  const [isArchiving, setIsArchiving] = useState(false);
+  const [archiveMessage, setArchiveMessage] = useState<string | null>(null);
+
   const handleArchive = async () => {
-    // TODO: Implement archive functionality
-    console.log('Archiving project:', projectId);
+    setIsArchiving(true);
+    setArchiveMessage(null);
+
+    try {
+      const result = await archiveProjectDev(projectId, !project.isArchived);
+
+      if (result.success) {
+        setArchiveMessage(result.message);
+        setShowArchiveConfirm(false);
+        // Clear message after 3 seconds
+        setTimeout(() => setArchiveMessage(null), 3000);
+      } else {
+        setArchiveMessage(result.error || 'Failed to update project');
+      }
+    } catch (error) {
+      setArchiveMessage('An unexpected error occurred');
+    } finally {
+      setIsArchiving(false);
+    }
   };
 
   const handleSaveGitConfig = async () => {
@@ -306,16 +326,31 @@ export function ProjectSettingsClient({
                   Danger Zone
                 </h2>
 
+                {archiveMessage && (
+                  <div className="mb-4 p-3 rounded-md"
+                    style={{
+                      backgroundColor: archiveMessage.includes('success') ? 'rgba(52, 199, 89, 0.1)' : 'rgba(255, 69, 58, 0.1)',
+                      borderColor: 'var(--ios-separator)',
+                    }}>
+                    <p className={`ios-caption-1 ${archiveMessage.includes('success') ? 'text-ios-green' : 'text-ios-red'}`}>
+                      {archiveMessage}
+                    </p>
+                  </div>
+                )}
+
                 <p className="ios-body text-ios-text-secondary mb-4">
-                  Archiving a project will hide it from the dashboard but preserve all data.
+                  {project.isArchived
+                    ? 'This project is currently archived and hidden from the dashboard.'
+                    : 'Archiving a project will hide it from the dashboard but preserve all data.'}
                 </p>
 
                 <Button
-                  variant="danger"
+                  variant={project.isArchived ? "secondary" : "danger"}
                   size="small"
                   onClick={() => setShowArchiveConfirm(true)}
+                  disabled={isArchiving}
                 >
-                  Archive Project
+                  {isArchiving ? 'Processing...' : (project.isArchived ? 'Unarchive Project' : 'Archive Project')}
                 </Button>
               </section>
             </div>
@@ -323,16 +358,16 @@ export function ProjectSettingsClient({
         </main>
       </div>
 
-      {/* Archive Confirmation Dialog */}
+      {/* Archive/Unarchive Confirmation Dialog */}
       <ConfirmDialog
         isOpen={showArchiveConfirm}
         onClose={() => setShowArchiveConfirm(false)}
         onConfirm={handleArchive}
-        title="Archive Project?"
-        message="This will archive the project and hide it from the dashboard. You can unarchive it later from settings."
-        confirmText="Archive"
+        title={project.isArchived ? "Unarchive Project?" : "Archive Project?"}
+        message={project.isArchived ? "This will restore the project to the dashboard and make it visible again." : "This will archive the project and hide it from the dashboard. You can unarchive it later from settings."}
+        confirmText={project.isArchived ? "Unarchive" : "Archive"}
         cancelText="Cancel"
-        variant="danger"
+        variant={project.isArchived ? "secondary" : "danger"}
       />
 
       {/* Generate Token Dialog */}
