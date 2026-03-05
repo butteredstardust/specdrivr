@@ -58,6 +58,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
         onClick={handleCardClick}
         role="button"
         tabIndex={0}
+        data-testid={`task-card-${task.id}`}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();

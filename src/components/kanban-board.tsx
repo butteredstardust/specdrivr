@@ -189,8 +189,8 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="w-full">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="w-full" role="main">
+        <div data-testid="kanban-wrapper" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {columns.map((column) => {
             const columnTasks = (groupedTasks[column.id] || []) as TaskSelect[];
 
@@ -198,6 +198,7 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
               <div
                 key={column.id}
                 id={column.id}
+                role="column"
                 className={`rounded-lg p-4 min-h-96 ${column.bgColor}`}
               >
                 <div
