@@ -156,7 +156,7 @@ export function GenerateTokenDialog({ isOpen, onClose, onTokenGenerated }: Gener
                 Your Token
               </label>
               <div className="flex items-center gap-2">
-                <code className="flex-1 ios-card p-3 text-sm text-ios-text-primary bg-ios-gray-6 break-all">
+                <code className="flex-1 ios-card p-3 ios-footnote text-ios-text-primary bg-ios-gray-6 break-all">
                   {generatedToken}
                 </code>
                 <Button variant="secondary" size="small" onClick={handleCopyToken}>

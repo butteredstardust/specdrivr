@@ -224,14 +224,14 @@ export function CreateTaskDialog({
             <button
               type="button"
               onClick={() => handleQuickModeToggle(!isQuickMode)}
-              className={`w-12 h-7 rounded-full p-1 transition-colors ${
+              className={`w-12 h-7 rounded-ios-xl p-1 transition-colors ${
                 isQuickMode ? 'bg-ios-blue' : 'bg-ios-gray-5'
               }`}
               aria-pressed={isQuickMode}
             >
               <span
                 className={`block w-5 h-5 rounded-full transition-transform ${
-                  isQuickMode ? 'translate-x-5 bg-white' : 'translate-x-0 bg-white'
+                  isQuickMode ? 'translate-x-5 ios-bg-card' : 'translate-x-0 ios-bg-card'
                 }`}
               />
             </button>
@@ -239,7 +239,7 @@ export function CreateTaskDialog({
 
           {error && (
             <div className="mb-4 p-3 bg-opacity-10 border ios-radius" style={{ backgroundColor: 'var(--ios-red)', borderColor: 'var(--ios-separator)' }}>
-              <p className="text-sm text-ios-red ios-font-text">{error}</p>
+              <p className="ios-footnote text-ios-red ios-font-text">{error}</p>
             </div>
           )}
 

@@ -26,10 +26,10 @@ const iosInputStyle = {
 };
 
 const levelColors: Record<LogLevel, { bg: string; text: string; border: string }> = {
-  debug: { bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-300' },
-  info: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-300' },
-  warn: { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-300' },
-  error: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-300' },
+  debug: { bg: 'bg-ios-gray-6', text: 'text-ios-gray-2', border: 'border-ios-gray-4' },
+  info: { bg: 'bg-ios-blue/10', text: 'text-ios-blue', border: 'border-ios-blue/20' },
+  warn: { bg: 'bg-ios-yellow/10', text: 'text-ios-yellow', border: 'border-ios-yellow/20' },
+  error: { bg: 'bg-ios-red/10', text: 'text-ios-red', border: 'border-ios-red/20' },
 };
 
 export function AddLogDialog({
@@ -135,7 +135,7 @@ export function AddLogDialog({
               style={{ backgroundColor: 'var(--ios-red)', borderColor: 'var(--ios-separator)' }}
               data-testid="error-message"
             >
-              <p className="text-sm text-ios-red ios-font-text">{error}</p>
+              <p className="ios-footnote text-ios-red ios-font-text">{error}</p>
             </div>
           )}
 
@@ -172,10 +172,10 @@ export function AddLogDialog({
                       key={lvl}
                       type="button"
                       onClick={() => setLevel(lvl)}
-                      className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors ios-font-text ${
+                      className={`px-3 py-2 rounded-ios-md ios-caption-2 font-medium transition-colors ios-font-text ${
                         level === lvl
                           ? `${colors.bg} ${colors.text} ${colors.border} border-2`
-                          : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300'
+                          : 'ios-bg-card ios-text-secondary border-2 border-ios-border hover:border-ios-separator/50'
                       }`}
                     >
                       {lvl.toUpperCase()}

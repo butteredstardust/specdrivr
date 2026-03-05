@@ -16,12 +16,12 @@ export function ThemeToggle() {
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
     >
       <span
-        className="inline-block h-6 w-6 transform rounded-full bg-white shadow-lg transition-transform duration-200"
+        className="inline-block h-6 w-6 transform rounded-ios-md ios-bg-card shadow-ios-elevated transition-transform duration-200"
         style={{
           transform: isDark ? 'translateX(6px)' : 'translateX(-6px)',
         }}
       >
-        <span className="flex h-full w-full items-center justify-center text-sm">
+        <span className="flex h-full w-full items-center justify-center ios-headline">
           {isDark ? '🌙' : '☀️'}
         </span>
       </span>

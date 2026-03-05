@@ -77,10 +77,10 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[13px] font-medium text-ios-blue bg-ios-secondary border border-ios ios-radius transition-colors ios-font-text"
+        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 ios-footnote font-medium text-ios-blue bg-ios-secondary border border-ios ios-radius transition-colors ios-font-text"
         style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}
       >
-        <span className="text-base">+</span>
+        <span className="ios-body">+</span>
         <span>New Project</span>
       </button>
     );
@@ -103,7 +103,7 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
 
           {error && (
             <div className="mb-4 p-3 bg-opacity-10 border ios-radius" style={{ backgroundColor: 'var(--ios-red)', borderColor: 'var(--ios-separator)' }}>
-              <p className="text-sm text-ios-red ios-font-text">{error}</p>
+              <p className="ios-footnote text-ios-red ios-font-text">{error}</p>
             </div>
           )}
 
@@ -155,7 +155,7 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
                 id="techStack"
                 value={formData.techStack}
                 onChange={(e) => setFormData({ ...formData, techStack: e.target.value })}
-                className="w-full px-3 py-2 ios-radius border border-ios bg-ios-primary text-ios-primary ios-font-text font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ios-blue)] focus:border-[var(--ios-blue)] transition-shadow resize-none"
+                className="w-full px-3 py-2 ios-radius border border-ios bg-ios-primary text-ios-primary ios-font-text font-mono ios-footnote focus:outline-none focus:ring-2 focus:ring-[var(--ios-blue)] focus:border-[var(--ios-blue)] transition-shadow resize-none"
                 placeholder='{"language": "TypeScript", "framework": "Next.js"}'
                 rows={3}
                 style={{
@@ -178,7 +178,7 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
                 id="basePath"
                 value={formData.basePath}
                 onChange={(e) => setFormData({ ...formData, basePath: e.target.value })}
-                className="w-full px-3 py-2 ios-radius border border-ios bg-ios-primary text-ios-primary ios-font-text font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ios-blue)] focus:border-[var(--ios-blue)] transition-shadow"
+                className="w-full px-3 py-2 ios-radius border border-ios bg-ios-primary text-ios-primary ios-font-text font-mono ios-footnote focus:outline-none focus:ring-2 focus:ring-[var(--ios-blue)] focus:border-[var(--ios-blue)] transition-shadow"
                 placeholder="/path/to/project"
                 style={{
                   backgroundColor: 'var(--ios-bg-primary)',

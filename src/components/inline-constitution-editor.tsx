@@ -46,13 +46,13 @@ export function InlineConstitutionEditor({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="ios-card p-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-900">Project Constitution</h2>
+        <h2 className="ios-title-2 ios-text-primary">Project Constitution</h2>
         {!isEditing && (
           <button
             onClick={() => setIsEditing(true)}
-            className="px-3 py-1 text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
+            className="px-3 py-1 ios-footnote font-medium ios-button-secondary"
           >
             Edit
           </button>
@@ -60,8 +60,8 @@ export function InlineConstitutionEditor({
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-          <p className="text-sm text-red-600">{error}</p>
+        <div className="mb-4 p-3 bg-opacity-10 border ios-radius" style={{ backgroundColor: 'var(--ios-red)', borderColor: 'var(--ios-separator)' }}>
+          <p className="ios-footnote ios-red">{error}</p>
         </div>
       )}
 
@@ -70,21 +70,21 @@ export function InlineConstitutionEditor({
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border ios-radius shadow-sm focus:outline-none"
             rows={8}
             placeholder="Enter project constitution..."
           />
           <div className="flex justify-end space-x-3">
             <button
               onClick={handleCancel}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+              className="px-4 py-2 ios-footnote font-medium ios-button-secondary"
               disabled={isSubmitting}
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors disabled:opacity-50"
+              className="px-4 py-2 ios-footnote font-medium ios-button-primary disabled:opacity-50"
               disabled={isSubmitting || !content.trim()}
             >
               {isSubmitting ? 'Saving...' : 'Save'}
@@ -92,9 +92,9 @@ export function InlineConstitutionEditor({
           </div>
         </div>
       ) : (
-        <div className="text-gray-700 whitespace-pre-wrap">
+        <div className="ios-text-primary whitespace-pre-wrap">
           {content.trim() ? content : (
-            <span className="text-gray-500 italic">No constitution defined. Click Edit to add one.</span>
+            <span className="ios-text-secondary italic">No constitution defined. Click Edit to add one.</span>
           )}
         </div>
       )}

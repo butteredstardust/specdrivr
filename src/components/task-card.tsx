@@ -70,7 +70,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
           <h3 className="ios-body text-ios-text-primary ios-font-text flex-1 pr-2">
             {task.description || 'Untitled Task'}
           </h3>
-          <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${statusInfo.bg} ${statusInfo.text} ${statusInfo.border} border flex-shrink-0`}>
+          <span className={`inline-flex items-center px-2 py-1 rounded-md ios-caption-1 font-medium ${statusInfo.bg} ${statusInfo.text} ${statusInfo.border} border flex-shrink-0`}>
             {status.replace('_', ' ').toUpperCase()}
           </span>
         </div>

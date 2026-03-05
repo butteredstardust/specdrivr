@@ -66,7 +66,7 @@ export function DatabaseStatus() {
       )}
       title="PostgreSQL database connection status"
     >
-      <span className="animate-pulse text-base" style={{ color: `var(${config.cssVar})` }}>
+      <span className="animate-pulse ios-body" style={{ color: `var(${config.cssVar})` }}>
         {config.indicator}
       </span>
       <div className="flex flex-col ios-font-text">

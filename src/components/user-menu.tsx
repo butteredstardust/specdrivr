@@ -110,7 +110,7 @@ export function UserMenu() {
   if (loading) {
     return (
       <div className="flex items-center gap-2.5 h-10 px-3">
-        <div className="w-8 h-8 rounded-full bg-ios-secondary animate-pulse" />
+        <div className="w-8 h-8 rounded-ios-xl bg-ios-secondary animate-pulse" />
         <div className="w-16 h-4 ios-radius-small bg-ios-secondary animate-pulse" />
       </div>
     );
@@ -120,7 +120,8 @@ export function UserMenu() {
     return (
       <a
         href="/auth/login"
-        className="ios-button-primary px-4 py-2 text-sm"
+        className="ios-button-primary px-4 py-2"
+        style={{ fontSize: '15px' }}
       >
         Sign In
       </a>

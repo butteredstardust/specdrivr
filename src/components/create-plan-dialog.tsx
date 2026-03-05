@@ -113,7 +113,7 @@ export function CreatePlanDialog({ specId, onPlanCreated }: CreatePlanDialogProp
 
           {error && (
             <div className="mb-4 p-3 bg-opacity-10 border ios-radius" style={{ backgroundColor: 'var(--ios-red)', borderColor: 'var(--ios-separator)' }}>
-              <p className="text-sm text-ios-red" style={iosFontStyle}>{error}</p>
+              <p className="ios-footnote text-ios-red" style={iosFontStyle}>{error}</p>
             </div>
           )}
 
