@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { type UserRole, userRoleColors, userRoleLabels } from '@/lib/ios-styles';
 import { Dialog } from '@/components/ui/dialog';
@@ -20,45 +20,51 @@ interface User {
 
 export default function AdminUsersPage() {
   const router = useRouter();
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showRoleDialog, setShowRoleDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [newRole, setNewRole] = useState<UserRole>('viewer');
   const [showDeactivateDialog, setShowDeactivateDialog] = useState(false);
+  const [newUsername, setNewUsername] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [creatingUser, setCreatingUser] = useState(false);
 
-  // Demo users - in production, fetch from API
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: 1,
-      username: 'admin',
-      avatarId: 1,
-      avatarUrl: null,
-      role: 'admin',
-      isActive: true,
-      lastLoginAt: new Date(Date.now() - 3600000),
-      createdAt: new Date('2024-01-01'),
-    },
-    {
-      id: 2,
-      username: 'developer1',
-      avatarId: 2,
-      avatarUrl: null,
-      role: 'developer',
-      isActive: true,
-      lastLoginAt: new Date(Date.now() - 86400000),
-      createdAt: new Date('2024-02-15'),
-    },
-    {
-      id: 3,
-      username: 'viewer1',
-      avatarId: 3,
-      avatarUrl: null,
-      role: 'viewer',
-      isActive: true,
-      lastLoginAt: new Date(Date.now() - 172800000),
-      createdAt: new Date('2024-03-01'),
-    },
-  ]);
+  // Fetch users on mount
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const loadUsers = async () => {
+    try {
+      const response = await fetch('/api/admin/users');
+      if (!response.ok) {
+        if (response.status === 401) {
+          router.push('/auth/login');
+          return;
+        }
+        if (response.status === 403) {
+          router.push('/403');
+          return;
+        }
+        throw new Error('Failed to fetch users');
+      }
+
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to fetch users');
+      }
+
+      setUsers(result.users);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getInitials = (username: string) => {
     return username
@@ -83,8 +89,26 @@ export default function AdminUsersPage() {
     return date.toLocaleDateString();
   };
 
-  const handleRoleChange = () => {
-    if (selectedUser) {
+  const handleRoleChange = async () => {
+    if (!selectedUser) return;
+
+    try {
+      const response = await fetch(`/api/admin/users/${selectedUser.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: newRole }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update user role');
+      }
+
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to update user role');
+      }
+
+      // Update local state
       setUsers((prev) =>
         prev.map((u) =>
           u.id === selectedUser.id ? { ...u, role: newRole } : u
@@ -92,11 +116,31 @@ export default function AdminUsersPage() {
       );
       setShowRoleDialog(false);
       setSelectedUser(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update user role');
     }
   };
 
-  const handleToggleActive = () => {
-    if (selectedUser) {
+  const handleToggleActive = async () => {
+    if (!selectedUser) return;
+
+    try {
+      const response = await fetch(`/api/admin/users/${selectedUser.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: !selectedUser.isActive }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update user status');
+      }
+
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to update user status');
+      }
+
+      // Update local state
       setUsers((prev) =>
         prev.map((u) =>
           u.id === selectedUser.id ? { ...u, isActive: !u.isActive } : u
@@ -104,6 +148,8 @@ export default function AdminUsersPage() {
       );
       setShowDeactivateDialog(false);
       setSelectedUser(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update user status');
     }
   };
 
@@ -116,6 +162,48 @@ export default function AdminUsersPage() {
   const handleOpenDeactivateDialog = (user: User) => {
     setSelectedUser(user);
     setShowDeactivateDialog(true);
+  };
+
+  const handleCreateUser = async () => {
+    if (!newUsername || !newPassword) {
+      setError('Username and password are required');
+      return;
+    }
+
+    setCreatingUser(true);
+    try {
+      const response = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: newUsername,
+          password: newPassword,
+          role: 'viewer',
+          isActive: true,
+          isAdmin: false,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create user');
+      }
+
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to create user');
+      }
+
+      // Add new user to local state
+      setUsers((prev) => [...prev, result.user]);
+      setShowCreateDialog(false);
+      setNewUsername('');
+      setNewPassword('');
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create user');
+    } finally {
+      setCreatingUser(false);
+    }
   };
 
   return (
@@ -156,29 +244,54 @@ export default function AdminUsersPage() {
             </Button>
           </div>
 
+          {/* Loading State */}
+          {loading && (
+            <div className="ios-card p-12 text-center">
+              <div className="inline-flex items-center gap-3 ios-body text-ios-text-secondary">
+                <div className="w-5 h-5 rounded-full border-2 border-ios-gray-400 border-t-ios-blue animate-spin" />
+                Loading users...
+              </div>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && !loading && (
+            <div className="ios-card p-6">
+              <div className="flex items-center gap-3 p-3 rounded-md bg-ios-red/10 text-ios-red">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12" y2="16" />
+                </svg>
+                <span>{error}</span>
+              </div>
+            </div>
+          )}
+
           {/* Users Table */}
-          <div className="ios-card overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-ios-border bg-ios-gray-5">
-                  <th className="text-left px-6 py-3 ios-subheadline font-semibold text-ios-text-primary">
-                    User
-                  </th>
-                  <th className="text-left px-6 py-3 ios-subheadline font-semibold text-ios-text-primary">
-                    Role
-                  </th>
-                  <th className="text-left px-6 py-3 ios-subheadline font-semibold text-ios-text-primary">
-                    Status
-                  </th>
-                  <th className="text-left px-6 py-3 ios-subheadline font-semibold text-ios-text-primary">
-                    Last Login
-                  </th>
-                  <th className="text-right px-6 py-3 ios-subheadline font-semibold text-ios-text-primary">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
+          {!loading && !error && users.length > 0 && (
+            <div className="ios-card overflow-hidden">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-ios-border bg-ios-gray-5">
+                    <th className="text-left px-6 py-3 ios-subheadline font-semibold text-ios-text-primary">
+                      User
+                    </th>
+                    <th className="text-left px-6 py-3 ios-subheadline font-semibold text-ios-text-primary">
+                      Role
+                    </th>
+                    <th className="text-left px-6 py-3 ios-subheadline font-semibold text-ios-text-primary">
+                      Status
+                    </th>
+                    <th className="text-left px-6 py-3 ios-subheadline font-semibold text-ios-text-primary">
+                      Last Login
+                    </th>
+                    <th className="text-right px-6 py-3 ios-subheadline font-semibold text-ios-text-primary">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
                 {users.map((user) => {
                   const roleInfo = userRoleColors[user.role];
 
@@ -247,6 +360,23 @@ export default function AdminUsersPage() {
               </tbody>
             </table>
           </div>
+          )}
+
+          {/* Empty State */}
+          {!loading && !error && users.length === 0 && (
+            <div className="ios-card p-12 text-center">
+              <div className="text-ios-gray-400 mb-3">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="mx-auto">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              </div>
+              <h3 className="ios-title-3 text-ios-text-primary mb-2">No users found</h3>
+              <p className="ios-body text-ios-text-secondary">Create your first user to get started</p>
+            </div>
+          )}
         </div>
       </main>
 
@@ -261,8 +391,8 @@ export default function AdminUsersPage() {
             <Button variant="secondary" onClick={() => setShowCreateDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={() => setShowCreateDialog(false)}>
-              Send Invite
+            <Button onClick={handleCreateUser} disabled={creatingUser}>
+              {creatingUser ? 'Creating...' : 'Create User'}
             </Button>
           </div>
         }
@@ -270,19 +400,37 @@ export default function AdminUsersPage() {
         <div className="space-y-4">
           <div>
             <label className="ios-caption-1 text-ios-text-primary uppercase tracking-wide block mb-2">
-              Email Address
+              Username
             </label>
             <input
-              type="email"
-              placeholder="user@example.com"
+              type="text"
+              placeholder="username"
               className="ios-input ios-body w-full"
+              value={newUsername}
+              onChange={(e) => setNewUsername(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="ios-caption-1 text-ios-text-primary uppercase tracking-wide block mb-2">
+              Password
+            </label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              className="ios-input ios-body w-full"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
             />
           </div>
           <div>
             <label className="ios-caption-1 text-ios-text-primary uppercase tracking-wide block mb-2">
               Role
             </label>
-            <select className="ios-select ios-body w-full">
+            <select
+              className="ios-select ios-body w-full"
+              value="viewer"
+              disabled
+            >
               <option value="viewer">Viewer</option>
               <option value="developer">Developer</option>
               <option value="admin">Admin</option>
