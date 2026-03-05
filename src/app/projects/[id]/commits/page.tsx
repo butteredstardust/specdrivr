@@ -1,4 +1,4 @@
-import { getProjects, getProjectById } from '@/lib/actions';
+import { getProjects, getProjectById, getProjectCommits } from '@/lib/actions';
 import { ProjectCommitsClient } from './client-page';
 import { notFound } from 'next/navigation';
 
@@ -29,11 +29,16 @@ export default async function CommitsPage({ params }: CommitsPageProps) {
 
   const { project } = result.context;
 
+  // Fetch commits for this project
+  const commitsResult = await getProjectCommits(projectId, 100);
+  const commits = commitsResult.success ? commitsResult.commits || [] : [];
+
   return (
     <ProjectCommitsClient
       projectId={projectId}
       project={project}
       projects={projects}
+      commits={commits}
     />
   );
 }

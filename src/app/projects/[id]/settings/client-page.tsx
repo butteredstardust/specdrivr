@@ -8,6 +8,7 @@ import { ProjectSidebarWrapper } from '@/components/project-sidebar-wrapper';
 import { InlineConstitutionEditor } from '@/components/inline-constitution-editor';
 import { InlineTechStackEditor } from '@/components/inline-tech-stack-editor';
 import { GenerateTokenDialog } from '@/components/generate-token-dialog';
+import { updateGitConfigDev as updateGitConfig } from '@/lib/actions';
 import type { TabData } from '@/components/ui/tabs';
 
 interface ProjectSettingsClientProps {
@@ -24,6 +25,11 @@ export function ProjectSettingsClient({
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
   const [showTokenDialog, setShowTokenDialog] = useState(false);
   const [projectNameInput, setProjectNameInput] = useState(project.name);
+  const [repoUrl, setRepoUrl] = useState(project.basePath || '');
+  const [gitBranch, setGitBranch] = useState(project.gitBranch as string || 'main');
+  const [gitStrategy, setGitStrategy] = useState(project.gitStrategy as string || 'merge');
+  const [isSavingGitConfig, setIsSavingGitConfig] = useState(false);
+  const [gitConfigMessage, setGitConfigMessage] = useState<string | null>(null);
 
   const tabs: TabData[] = [
     {
@@ -63,6 +69,31 @@ export function ProjectSettingsClient({
   const handleArchive = async () => {
     // TODO: Implement archive functionality
     console.log('Archiving project:', projectId);
+  };
+
+  const handleSaveGitConfig = async () => {
+    setIsSavingGitConfig(true);
+    setGitConfigMessage(null);
+
+    try {
+      const result = await updateGitConfig(projectId, {
+        basePath: repoUrl,
+        gitBranch,
+        gitStrategy,
+      });
+
+      if (result.success) {
+        setGitConfigMessage('Git configuration saved successfully');
+      } else {
+        setGitConfigMessage(result.error || 'Failed to save git configuration');
+      }
+    } catch (error) {
+      setGitConfigMessage('An unexpected error occurred');
+    } finally {
+      setIsSavingGitConfig(false);
+      // Clear message after 3 seconds
+      setTimeout(() => setGitConfigMessage(null), 3000);
+    }
   };
 
   return (
@@ -182,29 +213,68 @@ export function ProjectSettingsClient({
                   Connect a repository to track agent commits automatically.
                 </p>
 
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="flex-1">
+                <div className="space-y-4">
+                  <div>
                     <label className="ios-callout block text-ios-text-secondary mb-2">
-                    Repository URL
+                      Repository URL
                     </label>
                     <input
                       type="text"
+                      value={repoUrl}
+                      onChange={(e) => setRepoUrl(e.target.value)}
                       placeholder="https://github.com/org/repo"
                       className="ios-input"
                     />
                   </div>
-                </div>
 
-                <div className="flex items-center gap-4">
-                  <div className="flex-1">
-                    <label className="ios-callout block text-ios-text-secondary mb-2">
-                      Default Branch
-                    </label>
-                    <select className="ios-select">
-                      <option>main</option>
-                      <option>master</option>
-                      <option>develop</option>
-                    </select>
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1">
+                      <label className="ios-callout block text-ios-text-secondary mb-2">
+                        Default Branch
+                      </label>
+                      <select
+                        value={gitBranch}
+                        onChange={(e) => setGitBranch(e.target.value)}
+                        className="ios-select"
+                      >
+                        <option value="main">main</option>
+                        <option value="master">master</option>
+                        <option value="develop">develop</option>
+                        <option value="staging">staging</option>
+                      </select>
+                    </div>
+
+                    <div className="flex-1">
+                      <label className="ios-callout block text-ios-text-secondary mb-2">
+                        Merge Strategy
+                      </label>
+                      <select
+                        value={gitStrategy}
+                        onChange={(e) => setGitStrategy(e.target.value)}
+                        className="ios-select"
+                      >
+                        <option value="merge">Merge</option>
+                        <option value="rebase">Rebase</option>
+                        <option value="squash">Squash</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2">
+                    <div>
+                      {gitConfigMessage && (
+                        <span className={`ios-caption-1 ${gitConfigMessage.includes('saved') ? 'text-ios-green' : 'text-ios-red'}`}>
+                          {gitConfigMessage}
+                        </span>
+                      )}
+                    </div>
+                    <Button
+                      onClick={handleSaveGitConfig}
+                      disabled={isSavingGitConfig}
+                      variant="secondary"
+                    >
+                      {isSavingGitConfig ? 'Saving...' : 'Save Git Config'}
+                    </Button>
                   </div>
                 </div>
               </section>
