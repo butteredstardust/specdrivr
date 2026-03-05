@@ -4,6 +4,22 @@ import { useState, useMemo } from 'react';
 import { AgentLogSelect, TaskSelect } from '@/db/schema';
 import { AddLogDialog } from './add-log-dialog';
 import type { LogLevel } from '@/db/schema';
+import { Button } from './ui/button';
+import {
+  Filter,
+  Plus,
+  Info,
+  AlertTriangle,
+  XCircle,
+  Search,
+  Clock,
+  ChevronLeft,
+  ChevronRight,
+  Terminal,
+  Calendar,
+  X
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface AgentLogsProps {
   logs: AgentLogSelect[];
@@ -12,42 +28,18 @@ interface AgentLogsProps {
   projectId?: number;
 }
 
-const levelColors: Record<LogLevel, { bg: string; text: string; border: string }> = {
-  debug: { bg: 'bg-status-idle-6', text: 'text-status-idle-1', border: 'border-status-idle-4' },
-  info: { bg: 'bg-accent/10', text: 'text-accent', border: 'border-accent/20' },
-  warn: { bg: 'bg-ios-yellow/10', text: 'text-ios-yellow', border: 'border-ios-yellow/20' },
-  error: { bg: 'bg-status-error/10', text: 'text-status-error', border: 'border-status-error/20' },
+const levelLozengeStyles: Record<LogLevel, string> = {
+  debug: 'bg-[var(--color-bg-sunken)] text-[var(--color-text-tertiary)]',
+  info: 'bg-[var(--status-inprogress-bg)] text-[var(--status-inprogress-text)]',
+  warn: 'bg-[var(--status-todo-bg)] text-[var(--status-todo-text)]',
+  error: 'bg-[var(--status-error-bg)] text-[var(--status-error-text)]',
 };
 
 const levelIcons: Record<LogLevel, JSX.Element> = {
-  debug: (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <circle cx="12" cy="12" r="10" />
-      <line x1="12" y1="16" x2="12" y2="12" />
-      <line x1="12" y1="8" x2="12.01" y2="8" />
-    </svg>
-  ),
-  info: (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <circle cx="12" cy="12" r="10" />
-      <line x1="12" y1="16" x2="12" y2="12" />
-      <line x1="12" y1="8" x2="12.01" y2="8" />
-    </svg>
-  ),
-  warn: (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="m21.73 18-8-14a2 2 0 0 1-3.48 0l-8-14A2 2 0 0 1 4 2h16a2 2 0 0 1 1.73 3Z" />
-      <line x1="12" y1="9" x2="12" y2="13" />
-      <line x1="12" y1="17" x2="12.01" y2="17" />
-    </svg>
-  ),
-  error: (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <circle cx="12" cy="12" r="10" />
-      <line x1="15" y1="9" x2="9" y2="15" />
-      <line x1="9" y1="9" x2="15" y2="15" />
-    </svg>
-  ),
+  debug: <Terminal size={12} />,
+  info: <Info size={12} />,
+  warn: <AlertTriangle size={12} />,
+  error: <XCircle size={12} />,
 };
 
 export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
@@ -67,43 +59,22 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
 
   const filteredLogs = useMemo(() => {
     return [...logs]
-      .sort((a, b) =>
-        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-      )
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       .filter((log) => {
-        // Filter by level - allow unknown levels by default
-        const levelInFilters = log.level in levelFilters;
-        if (levelInFilters && !levelFilters[log.level as LogLevel]) {
-          return false;
-        }
-
-        // Filter by task
-        if (selectedTaskId && log.taskId !== parseInt(selectedTaskId, 10)) {
-          return false;
-        }
-
-        // Filter by date range
+        if (log.level in levelFilters && !levelFilters[log.level as LogLevel]) return false;
+        if (selectedTaskId && log.taskId !== parseInt(selectedTaskId, 10)) return false;
         const logDate = new Date(log.timestamp);
-        if (dateFrom && logDate < new Date(dateFrom)) {
-          return false;
-        }
+        if (dateFrom && logDate < new Date(dateFrom)) return false;
         if (dateTo) {
-          // Set the time to end of day for inclusive filtering
           const endDate = new Date(dateTo);
           endDate.setHours(23, 59, 59, 999);
-          if (logDate > endDate) {
-            return false;
-          }
+          if (logDate > endDate) return false;
         }
-
         return true;
       });
   }, [logs, levelFilters, selectedTaskId, dateFrom, dateTo]);
 
-  // Reset to first page when filters change
-  useMemo(() => {
-    setCurrentPage(1);
-  }, [filteredLogs.length]);
+  useMemo(() => { setCurrentPage(1); }, [filteredLogs.length]);
 
   const paginatedLogs = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -113,10 +84,7 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
   const totalPages = Math.max(1, Math.ceil(filteredLogs.length / itemsPerPage));
 
   const toggleLevelFilter = (level: LogLevel) => {
-    setLevelFilters((prev) => ({
-      ...prev,
-      [level]: !prev[level],
-    }));
+    setLevelFilters((prev) => ({ ...prev, [level]: !prev[level] }));
   };
 
   const clearFilters = () => {
@@ -127,173 +95,142 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
   };
 
   return (
-    <div>
-      {/* Header with Add and Filter buttons */}
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-[13px] text-text-secondary ">
-          {filteredLogs.length} of {logs.length} log{logs.length !== 1 ? 's' : ''}
-        </span>
-        <div className="flex gap-2">
-          <button
+    <div className="flex flex-col gap-[var(--sp-4)]">
+      {/* Header Actions */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-[var(--sp-4)]">
+          <span className="text-[12px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">
+            Agent Activity ({filteredLogs.length})
+          </span>
+          <Button
+            variant="secondary"
+            size="small"
             onClick={() => setShowFilters(!showFilters)}
-            className={`px-3 py-1 rounded-ios-md text-[11px] font-medium font-medium transition-colors  ${showFilters
-              ? 'bg-accent text-white'
-              : 'bg-ios-secondary text-text-secondary hover:bg-status-idle-5'
-              }`}
+            icon={<Filter size={14} />}
+            className={cn(showFilters && "bg-[var(--color-bg-selected)] text-[var(--color-brand-bold)] border-[var(--color-border-selected)]")}
           >
             Filters
-          </button>
-          <AddLogDialog
-            tasks={tasks}
-            isOpen={showAddDialog}
-            onClose={() => setShowAddDialog(false)}
-            onLogAdded={() => {
-              setShowAddDialog(false);
-              onLogAdded?.();
-            }}
-          />
+          </Button>
         </div>
+        <Button
+          variant="primary"
+          size="small"
+          onClick={() => setShowAddDialog(true)}
+          icon={<Plus size={16} />}
+        >
+          Add Log
+        </Button>
       </div>
 
       {/* Filters Panel */}
       {showFilters && (
-        <div className="bg-bg-elevated border border-border-default rounded-[8px] p-4 mb-4 border border-border-default">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-[12px] text-text-primary font-medium">Filters</h3>
-            <button
-              onClick={clearFilters}
-              className="text-[11px] text-accent hover:text-accent/80 "
-            >
+        <div className="bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] p-[var(--sp-5)] space-y-[var(--sp-4)] animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center justify-between">
+            <h4 className="text-[12px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Active Filters</h4>
+            <Button variant="ghost" size="small" onClick={clearFilters} icon={<X size={14} />} className="text-[var(--color-text-danger)] hover:text-[var(--color-text-danger)]">
               Clear All
-            </button>
+            </Button>
           </div>
 
-          {/* Level Filters */}
-          <div className="mb-3">
-            <label className="text-[11px] text-text-secondary block mb-2">Log Level</label>
-            <div className="flex gap-2 flex-wrap">
-              {(Object.keys(levelFilters) as LogLevel[]).map((level) => (
-                <label key={level} className="flex items-center gap-1.5 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={levelFilters[level]}
-                    onChange={() => toggleLevelFilter(level)}
-                    className="w-4 h-4 rounded border-border-default"
-                  />
-                  <span className={`text-[11px] ${levelColors[level].text}  capitalize`}>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-[var(--sp-6)]">
+            <div>
+              <label className="block text-[11px] font-bold text-[var(--color-text-tertiary)] uppercase tracking-wider mb-[var(--sp-2)]">Log Levels</label>
+              <div className="flex flex-wrap gap-[var(--sp-2)]">
+                {(Object.keys(levelFilters) as LogLevel[]).map((level) => (
+                  <button
+                    key={level}
+                    onClick={() => toggleLevelFilter(level)}
+                    className={cn(
+                      "px-2 py-1 rounded-[var(--radius-sm)] text-[11px] font-bold uppercase transition-all border",
+                      levelFilters[level]
+                        ? cn("border-[var(--color-border-selected)]", levelLozengeStyles[level])
+                        : "bg-[var(--color-bg-surface)] border-[var(--color-border-default)] text-[var(--color-text-tertiary)] opacity-50"
+                    )}
+                  >
                     {level}
-                  </span>
-                </label>
-              ))}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Task Filter */}
-          {tasks.length > 0 && (
-            <div className="mb-3">
-              <label className="text-[11px] text-text-secondary block mb-2">Task</label>
+            <div>
+              <label className="block text-[11px] font-bold text-[var(--color-text-tertiary)] uppercase tracking-wider mb-[var(--sp-2)]">Related Task</label>
               <select
                 value={selectedTaskId}
                 onChange={(e) => setSelectedTaskId(e.target.value)}
-                className="h-[30px] bg-bg-elevated border border-border-default rounded-[6px] text-text-primary text-[12px] px-[10px] outline-none focus:border-border-strong placeholder:text-text-tertiary transition-colors text-[13px]"
+                className="w-full h-[32px] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[13px] px-[var(--sp-2)] focus:border-[var(--color-border-selected)] outline-none"
               >
                 <option value="">All Tasks</option>
                 {tasks.map((task) => (
-                  <option key={task.id} value={task.id}>
-                    #{task.id}: {(task.description || '').substring(0, 40)}
-                    {task.description && task.description.length > 40 ? '...' : ''}
-                  </option>
+                  <option key={task.id} value={task.id}>SD-{task.id}: {task.description?.substring(0, 30)}...</option>
                 ))}
               </select>
             </div>
-          )}
 
-          {/* Date Range Filter */}
-          <div>
-            <label className="text-[11px] text-text-secondary block mb-2">Date Range</label>
-            <div className="flex gap-2">
-              <input
-                type="date"
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
-                className="h-[30px] bg-bg-elevated border border-border-default rounded-[6px] text-text-primary text-[12px] px-[10px] outline-none focus:border-border-strong placeholder:text-text-tertiary transition-colors text-[13px] flex-1"
-              />
-              <input
-                type="date"
-                value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
-                className="h-[30px] bg-bg-elevated border border-border-default rounded-[6px] text-text-primary text-[12px] px-[10px] outline-none focus:border-border-strong placeholder:text-text-tertiary transition-colors text-[13px] flex-1"
-              />
+            <div>
+              <label className="block text-[11px] font-bold text-[var(--color-text-tertiary)] uppercase tracking-wider mb-[var(--sp-2)]">Date Range</label>
+              <div className="flex items-center gap-[var(--sp-2)]">
+                <input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  className="w-full h-[32px] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[12px] px-[var(--sp-2)]"
+                />
+                <span className="text-[var(--color-text-tertiary)]">-</span>
+                <input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  className="w-full h-[32px] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[12px] px-[var(--sp-2)]"
+                />
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      <div className="space-y-2 max-h-80 overflow-y-auto ios" role="log">
+      {/* Logs List */}
+      <div className="space-y-[var(--sp-2)]">
         {filteredLogs.length === 0 ? (
-          <div className="text-center py-8 ios">
-            <div className="mb-3 flex justify-center text-text-tertiary">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-text-tertiary">
-                <path d="M3 3v18h18" />
-                <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
-              </svg>
-            </div>
-            <p className="text-[13px] text-text-tertiary ">
-              {logs.length === 0 ? 'No agent logs yet' : 'No logs match the current filters'}
-            </p>
-            {logs.length === 0 && (
-              <p className="ios-caption text-text-secondary  mt-1">
-                Add a log to track manual interventions
-              </p>
-            )}
+          <div className="py-[var(--sp-12)] flex flex-col items-center justify-center border-2 border-dashed border-[var(--color-border-default)] rounded-[var(--radius-lg)] opacity-60">
+            <Search size={32} className="text-[var(--color-border-default)] mb-[var(--sp-3)]" />
+            <p className="text-[14px] text-[var(--color-text-secondary)] italic">No logs found matching your filters.</p>
           </div>
         ) : (
           paginatedLogs.map((log) => {
-            const colors = levelColors[log.level as LogLevel] || levelColors.info;
-            const icon = levelIcons[log.level as LogLevel] || levelIcons.info;
-
+            const level = log.level as LogLevel;
             return (
               <div
                 key={log.id}
-                className="p-3 rounded-ios-md border border-ios bg-bg-elevated hover:shadow-ios-elevated transition-shadow ios"
+                className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] p-[var(--sp-3)] hover:border-[var(--color-border-selected)] transition-colors group"
               >
-                <div className="flex items-start gap-3">
-                  <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${colors.bg} ${colors.border}`}>
-                    <span className={colors.text}>{icon}</span>
+                <div className="flex items-start gap-[var(--sp-4)]">
+                  <div className={cn("p-2 rounded-full", levelLozengeStyles[level])}>
+                    {levelIcons[level]}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] text-ios-primary  break-words">
-                      {log.message}
-                    </p>
-                    <div className="flex items-center gap-3 mt-1.5">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-ios-md text-[11px] font-medium font-medium ${colors.bg} ${colors.text} `}>
-                        {log.level.toUpperCase()}
+                    <div className="flex items-center gap-[var(--sp-3)] mb-1">
+                      <span className={cn("px-1.5 py-0.5 rounded-[var(--radius-sm)] text-[10px] font-bold uppercase", levelLozengeStyles[level])}>
+                        {log.level}
                       </span>
-                      {log.taskId && (
-                        <span className="ios-caption text-text-secondary ">
-                          Task #{log.taskId}
-                        </span>
-                      )}
-                      <span className="ios-caption text-text-tertiary ">
-                        {new Date(log.timestamp).toLocaleString()}
-                      </span>
+                      <div className="flex items-center gap-1 text-[11px] font-bold text-[var(--color-text-tertiary)] group-hover:text-[var(--color-brand-bold)] transition-colors">
+                        <Clock size={10} />
+                        {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • SD-{log.taskId || 'SYSTEM'}
+                      </div>
                     </div>
-                    {(() => {
-                      const ctx = log.context;
-                      if (ctx && typeof ctx === 'object' && ctx !== null && Object.keys(ctx).length > 0) {
-                        return (
-                          <details className="mt-2">
-                            <summary className="cursor-pointer ios-caption text-accent ">
-                              Context
-                            </summary>
-                            <pre className="mt-2 p-2 bg-status-idle-6 text-[11px] text-text-primary rounded-ios-md overflow-x-auto ">
-                              {JSON.stringify(ctx, null, 2)}
-                            </pre>
-                          </details>
-                        );
-                      }
-                      return null;
-                    })()}
+                    <p className="text-[14px] text-[var(--color-text-primary)] leading-relaxed">{log.message}</p>
+
+                    {!!log.context && typeof log.context === 'object' && Object.keys(log.context).length > 0 && (
+                      <details className="mt-[var(--sp-2)] group/details">
+                        <summary className="text-[12px] font-bold text-[var(--color-brand-bold)] cursor-pointer hover:underline list-none flex items-center gap-1">
+                          <Terminal size={12} />
+                          View Execution Context
+                        </summary>
+                        <pre className="mt-[var(--sp-2)] p-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[11px] font-mono overflow-x-auto linear-scrollbar">
+                          {JSON.stringify(log.context, null, 2)}
+                        </pre>
+                      </details>
+                    )}
                   </div>
                 </div>
               </div>
@@ -302,29 +239,28 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
         )}
       </div>
 
-      {/* Pagination Controls */}
+      {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-4 py-2 border-t border-border-default">
-          <span className="ios-caption text-text-secondary">
-            Page {currentPage} of {totalPages}
-          </span>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="px-3 py-1 rounded-ios-md ios-caption font-medium border border-border-default disabled:opacity-50 disabled:cursor-not-allowed hover:bg-status-idle-5"
-            >
+        <div className="flex items-center justify-between pt-[var(--sp-4)] border-t border-[var(--color-border-default)]">
+          <span className="text-[12px] text-[var(--color-text-tertiary)] font-medium">Page {currentPage} of {totalPages}</span>
+          <div className="flex gap-[var(--sp-2)]">
+            <Button variant="secondary" size="small" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} icon={<ChevronLeft size={14} />}>
               Previous
-            </button>
-            <button
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="px-3 py-1 rounded-ios-md ios-caption font-medium border border-border-default disabled:opacity-50 disabled:cursor-not-allowed hover:bg-status-idle-5"
-            >
+            </Button>
+            <Button variant="secondary" size="small" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} iconRight={<ChevronRight size={14} />}>
               Next
-            </button>
+            </Button>
           </div>
         </div>
+      )}
+
+      {showAddDialog && (
+        <AddLogDialog
+          tasks={tasks}
+          isOpen={true}
+          onClose={() => setShowAddDialog(false)}
+          onLogAdded={() => { setShowAddDialog(false); onLogAdded?.(); }}
+        />
       )}
     </div>
   );

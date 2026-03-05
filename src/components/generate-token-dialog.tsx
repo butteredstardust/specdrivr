@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Dialog, ConfirmDialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { CheckCircle2, AlertCircle, Copy, Key, ChevronDown } from 'lucide-react';
 
 interface GenerateTokenDialogProps {
   isOpen: boolean;
@@ -77,31 +78,32 @@ export function GenerateTokenDialog({ isOpen, onClose, onTokenGenerated }: Gener
       <Dialog
         isOpen={isOpen}
         onClose={handleClose}
-        title={generatedToken ? 'Token Generated' : 'Generate Agent Token'}
+        title={generatedToken ? 'Token Created' : 'Generate Agent Token'}
         size="small"
         footer={
-          <div className="flex items-center justify-end gap-3">
+          <div className="flex items-center justify-end gap-[var(--sp-2)]">
             <Button variant="secondary" onClick={handleClose}>
               {generatedToken ? 'Done' : 'Cancel'}
             </Button>
             {!generatedToken && (
-              <Button onClick={handleGenerate} disabled={!tokenName.trim() || isGenerating}>
-                {isGenerating ? 'Generating...' : 'Generate'}
+              <Button variant="primary" onClick={handleGenerate} disabled={!tokenName.trim() || isGenerating} loading={isGenerating}>
+                Generate Token
               </Button>
             )}
           </div>
         }
       >
         {!generatedToken ? (
-          <div className="space-y-4">
-            <div className="bg-ios-yellow/10 text-status-warning-700 text-[11px] px-3 py-2 rounded-md border border-ios-yellow/30">
-              ⚠️ Warning: Agent tokens provide full API access. Keep them secret and rotate regularly.
+          <div className="space-y-[var(--sp-6)]">
+            <div className="bg-[#FFF7E6] text-[#824400] text-[13px] p-[var(--sp-3)] rounded-[var(--radius-sm)] border border-[#FFE3B3] flex gap-[var(--sp-3)]">
+              <span className="mt-0.5 shrink-0">⚠️</span>
+              <p>Agent tokens provide full API access. Keep them secret and rotate them regularly for security.</p>
             </div>
 
-            <div>
+            <div className="space-y-[var(--sp-2)]">
               <label
                 htmlFor="token-name"
-                className="text-[11px] text-text-primary uppercase tracking-wide block mb-2"
+                className="text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-[0.05em]"
               >
                 Token Name
               </label>
@@ -110,75 +112,78 @@ export function GenerateTokenDialog({ isOpen, onClose, onTokenGenerated }: Gener
                 type="text"
                 value={tokenName}
                 onChange={(e) => setTokenName(e.target.value)}
-                placeholder="e.g.,Production Agent, Claude Opus"
-                className="h-[30px] bg-bg-elevated border border-border-default rounded-[6px] text-text-primary text-[12px] px-[10px] outline-none focus:border-border-strong placeholder:text-text-tertiary transition-colors text-[13px] w-full"
+                placeholder="e.g. Production CI/CD"
+                className="w-full h-[40px] px-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--color-border-selected)] transition-all"
                 disabled={isGenerating}
                 maxLength={100}
               />
-              <p className="text-[11px] text-text-tertiary mt-1">
-                Give this token a recognizable name
+              <p className="text-[12px] text-[var(--color-text-tertiary)] italic">
+                A descriptive name to identify where this token is used.
               </p>
             </div>
 
-            <div>
+            <div className="space-y-[var(--sp-2)]">
               <label
                 htmlFor="model-hint"
-                className="text-[11px] text-text-primary uppercase tracking-wide block mb-2"
+                className="text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-[0.05em]"
               >
                 Primary Model (Optional)
               </label>
-              <select
-                id="model-hint"
-                value={modelHint}
-                onChange={(e) => setModelHint(e.target.value)}
-                className="ios-select text-[13px] w-full"
-                disabled={isGenerating}
-              >
-                {modelOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              <p className="text-[11px] text-text-tertiary mt-1">
-                The model this token is primarily configured for
-              </p>
+              <div className="relative">
+                <select
+                  id="model-hint"
+                  value={modelHint}
+                  onChange={(e) => setModelHint(e.target.value)}
+                  className="w-full h-[40px] pl-[var(--sp-3)] pr-[var(--sp-10)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--color-border-selected)] transition-all appearance-none cursor-pointer"
+                  disabled={isGenerating}
+                >
+                  {modelOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-text-tertiary)]">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                </div>
+              </div>
             </div>
           </div>
         ) : (
-          <div className="space-y-4">
-            <div className="bg-status-success/10 text-status-success-700 text-[11px] px-3 py-2 rounded-md border border-status-success/30">
-              ✓ Token generated successfully. Store it securely - you won't see it again!
+          <div className="space-y-[var(--sp-6)]">
+            <div className="bg-[#E3FCEF] text-[#006644] text-[13px] p-[var(--sp-3)] rounded-[var(--radius-sm)] border border-[#ABF5D1] flex gap-[var(--sp-3)]">
+              <span className="mt-0.5 shrink-0">✓</span>
+              <p>Token generated successfully. Store it securelly — it won't be shown again.</p>
             </div>
 
-            <div>
-              <label className="text-[11px] text-text-primary uppercase tracking-wide block mb-2">
-                Your Token
+            <div className="space-y-[var(--sp-2)]">
+              <label className="text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">
+                Access Token
               </label>
-              <div className="flex items-center gap-2">
-                <code className="flex-1 bg-bg-elevated border border-border-default rounded-[8px] p-3 text-[11px] text-text-tertiary text-text-primary bg-status-idle-6 break-all">
+              <div className="flex gap-[var(--sp-2)]">
+                <div className="flex-1 bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] p-[var(--sp-3)] font-mono text-[12px] text-[var(--color-text-primary)] break-all select-all">
                   {generatedToken}
-                </code>
+                </div>
                 <Button variant="secondary" size="small" onClick={handleCopyToken}>
                   Copy
                 </Button>
               </div>
             </div>
 
-            <div className="bg-bg-elevated border border-border-default rounded-[8px] p-3 space-y-2 text-[11px] text-text-tertiary">
-              <div className="flex justify-between">
-                <span className="text-text-secondary">Name:</span>
-                <span className="text-text-primary font-medium">{tokenName}</span>
+            <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] p-[var(--sp-4)] space-y-[var(--sp-2)] shadow-[var(--shadow-card)]">
+              <div className="flex justify-between items-center text-[12px]">
+                <span className="text-[var(--color-text-tertiary)] font-bold uppercase tracking-wide">Name</span>
+                <span className="text-[var(--color-text-primary)] font-semibold">{tokenName}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-text-secondary">Model:</span>
-                <span className="text-text-primary">
+              <div className="flex justify-between items-center text-[12px]">
+                <span className="text-[var(--color-text-tertiary)] font-bold uppercase tracking-wide">Model</span>
+                <span className="text-[var(--color-text-primary)]">
                   {modelOptions.find((o) => o.value === modelHint)?.label}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-text-secondary">Created:</span>
-                <span className="text-text-primary">Just now</span>
+              <div className="flex justify-between items-center text-[12px]">
+                <span className="text-[var(--color-text-tertiary)] font-bold uppercase tracking-wide">Created</span>
+                <span className="text-[var(--color-text-primary)]">Now</span>
               </div>
             </div>
           </div>

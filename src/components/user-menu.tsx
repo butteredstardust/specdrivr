@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Avatar } from './avatar';
 import { cn } from '@/lib/utils';
+import { LogOut } from 'lucide-react';
 
 interface User {
   id: number;
@@ -24,66 +25,20 @@ export function UserMenu() {
 
   const fetchUser = async () => {
     try {
-      // Check API session first
       const response = await fetch('/api/auth/session');
       const data = await response.json();
-
       if (data.success && data.user) {
         setUser(data.user);
       } else {
-        // Try auto-login API
-        try {
-          await fetch('/api/auth/auto-login');
-          const autoResponse = await fetch('/api/auth/session');
-          const autoData = await autoResponse.json();
-          if (autoData.success && autoData.user) {
-            setUser(autoData.user);
-          } else {
-            // Fall back to localStorage (demo auth)
-            const session = localStorage.getItem('specdrivr_session');
-            if (session) {
-              const sessionData = JSON.parse(session);
-              setUser({
-                id: 1,
-                username: sessionData.username || 'Demo User',
-                avatarId: 1,
-                avatarUrl: null,
-                isAdmin: true,
-              });
-            }
-          }
-        } catch {
-          // Fall back to localStorage (demo auth)
-          const localSession = localStorage.getItem('specdrivr_session');
-          if (localSession) {
-            const sessionData = JSON.parse(localSession);
-            setUser({
-              id: 1,
-              username: sessionData.username || 'Demo User',
-              avatarId: 1,
-              avatarUrl: null,
-              isAdmin: true,
-            });
-          }
+        await fetch('/api/auth/auto-login');
+        const autoResponse = await fetch('/api/auth/session');
+        const autoData = await autoResponse.json();
+        if (autoData.success && autoData.user) {
+          setUser(autoData.user);
         }
       }
     } catch (error) {
-      // Fall back to localStorage on API failure
-      try {
-        const session = localStorage.getItem('specdrivr_session');
-        if (session) {
-          const sessionData = JSON.parse(session);
-          setUser({
-            id: 1,
-            username: sessionData.username || 'Demo User',
-            avatarId: 1,
-            avatarUrl: null,
-            isAdmin: true,
-          });
-        }
-      } catch {
-        console.error('Failed to fetch user:', error);
-      }
+      console.error('Failed to fetch user:', error);
     } finally {
       setLoading(false);
     }
@@ -91,16 +46,7 @@ export function UserMenu() {
 
   const handleLogout = async () => {
     try {
-      // Clear localStorage session (demo auth)
-      localStorage.removeItem('specdrivr_session');
-
-      // Also try API logout if available
-      try {
-        await fetch('/api/auth/logout', { method: 'POST' });
-      } catch {
-        // API might not exist, ignore
-      }
-
+      await fetch('/api/auth/logout', { method: 'POST' });
       setUser(null);
       window.location.href = '/auth/login';
     } catch (error) {
@@ -108,24 +54,9 @@ export function UserMenu() {
     }
   };
 
-  if (loading) {
+  if (loading || !user) {
     return (
-      <div className="flex items-center gap-2.5 h-10 px-3">
-        <div className="w-8 h-8 rounded-ios-xl bg-ios-secondary animate-pulse" />
-        <div className="w-16 h-4 rounded-[8px]-small bg-ios-secondary animate-pulse" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <Link
-        href="/auth/login"
-        className="ios-button-primary px-4 py-2"
-        style={{ fontSize: '15px' }}
-      >
-        Sign In
-      </Link>
+      <div className="w-[32px] h-[32px] rounded-full bg-white/20 animate-pulse" />
     );
   }
 
@@ -134,49 +65,33 @@ export function UserMenu() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'flex items-center gap-3 px-3 py-2 rounded-[8px] transition-colors',
-          'hover:bg-ios-secondary bg-opacity-50',
-          isOpen && 'bg-ios-secondary'
+          'w-[32px] h-[32px] rounded-full flex items-center justify-center bg-white/20 hover:bg-white/30 text-white text-[12px] font-semibold transition-colors',
+          isOpen && 'bg-white/30'
         )}
       >
-        <div className="text-right hidden sm:block ">
-          <div className="text-[17px] font-medium text-ios-primary">
-            {user.username}
-          </div>
-          {user.isAdmin && (
-            <div className="text-[13px] text-text-tertiary">
-              Admin
-            </div>
-          )}
-        </div>
-        <Avatar
-          size="sm"
-          avatarId={user.avatarId}
-          avatarUrl={user.avatarUrl || undefined}
-          username={user.username}
-        />
+        <span className="uppercase">{user.username.charAt(0)}</span>
       </button>
 
       {isOpen && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
           <div
-            className="absolute right-0 top-full mt-2 w-56 bg-bg-elevated border border-border-default rounded-[8px] shadow-lg border  z-20 overflow-hidden"
+            className="absolute right-0 top-full mt-[var(--sp-2)] w-56 bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-overlay)] z-20 overflow-hidden animate-in fade-in zoom-in-95 duration-100"
           >
-            <div className="px-4 py-3 border-b border-opacity-12" style={{ borderColor: 'var(--ios-separator)' }}>
-              <div className="text-[17px] font-semibold text-ios-primary">
+            <div className="px-[var(--sp-4)] py-[var(--sp-3)] border-b border-[var(--color-border-default)]">
+              <div className="text-[14px] font-semibold text-[var(--color-text-primary)]">
                 {user.username}
               </div>
-              {user.isAdmin && (
-                <div className="text-[15px] text-text-tertiary mt-0.5">
-                  Administrator
-                </div>
-              )}
+              <div className="text-[12px] text-[var(--color-text-secondary)] mt-0.5">
+                {user.isAdmin ? 'Administrator' : 'Viewer'}
+              </div>
             </div>
+
             <button
               onClick={handleLogout}
-              className="w-full px-4 py-[13px] text-left text-[17px] text-status-error hover:bg-opacity-10 hover:bg-ios-secondary transition-colors flex items-center gap-2"
+              className="w-full px-[var(--sp-4)] py-[var(--sp-3)] text-left text-[13px] text-[var(--color-text-danger)] hover:bg-[var(--color-bg-hovered)] transition-colors flex items-center gap-[var(--sp-2)]"
             >
+              <LogOut size={14} />
               <span>Sign Out</span>
             </button>
           </div>

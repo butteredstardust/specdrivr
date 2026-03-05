@@ -40,28 +40,28 @@ export function ArchiveProjectDialog({
             onClick={onConfirm}
             disabled={!isNameMatch}
           >
-            {isArchived ? "Unarchive" : "Archive"}
+            {isArchived ? "Unarchive" : "Archive Project"}
           </Button>
         </>
       }
     >
-      <div className="space-y-4">
-        <p className="text-[13px] text-text-secondary">{message}</p>
+      <div className="space-y-[var(--sp-6)]">
+        <p className="text-[14px] text-[var(--color-text-secondary)] leading-relaxed">{message}</p>
 
-        <div className="space-y-2">
-          <label className="block text-[13px] font-medium text-text-secondary">
-            Type "{projectName}" to confirm:
+        <div className="space-y-[var(--sp-2)]">
+          <label className="block text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">
+            Type "{projectName}" to confirm
           </label>
           <input
             type="text"
             value={projectNameInput}
             onChange={(e) => setProjectNameInput(e.target.value)}
-            className="h-[30px] bg-bg-elevated border border-border-default rounded-[6px] text-text-primary text-[12px] px-[10px] outline-none focus:border-border-strong placeholder:text-text-tertiary transition-colors text-[12px]"
+            className="w-full h-[40px] px-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--color-border-selected)] transition-all placeholder:text-[var(--color-text-tertiary)]"
             placeholder={projectName}
           />
           {!isNameMatch && projectNameInput && (
-            <p className="ios-caption text-status-error">
-              Name must match exactly
+            <p className="text-[12px] font-medium text-[var(--color-text-danger)] mt-[var(--sp-1)]">
+              Project name does not match
             </p>
           )}
         </div>

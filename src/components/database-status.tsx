@@ -34,23 +34,19 @@ export function DatabaseStatus() {
 
   const statusConfig = {
     connecting: {
-      dot: 'bg-status-warning',
-      color: 'text-status-warning',
+      dot: 'bg-[#FFAB00]', // Yellow for connecting
       label: 'Connecting...',
     },
     connected: {
-      dot: 'bg-status-success',
-      color: 'text-text-primary',
+      dot: 'bg-[#57D9A3]', // Mint for connected
       label: 'Connected',
     },
     disconnected: {
-      dot: 'bg-status-idle',
-      color: 'text-text-secondary',
+      dot: 'bg-[#FF8F73]', // Red/Peach for disconnected
       label: 'Disconnected',
     },
     error: {
-      dot: 'bg-status-error',
-      color: 'text-status-error',
+      dot: 'bg-[#AE2A19]', // Dark red for error
       label: 'Error',
     },
   };
@@ -59,22 +55,20 @@ export function DatabaseStatus() {
 
   return (
     <div
-      className="flex items-center gap-[6px] px-2 py-1"
+      className="flex items-center gap-[5px] px-[8px] py-[3px] bg-white/15 text-white font-medium text-[11px] rounded-[var(--radius-full)]"
       title="PostgreSQL database connection status"
     >
       <span
-        className={`w-2 h-2 rounded-full flex-shrink-0 ${config.dot} ${status === 'connecting' ? 'animate-pulse' : ''}`}
+        className={`w-[6px] h-[6px] rounded-full flex-shrink-0 ${config.dot} ${status === 'connecting' ? 'animate-pulse' : ''}`}
       />
-      <div className="flex items-center gap-[8px] text-[12px]">
-        <span className={`font-medium ${config.color}`}>
-          {config.label}
+      <span>
+        {config.label}
+      </span>
+      {lastCheck && (
+        <span className="opacity-60 font-normal">
+          • {lastCheck.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </span>
-        {lastCheck && (
-          <span className="text-[11px] text-text-tertiary">
-            {lastCheck.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-          </span>
-        )}
-      </div>
+      )}
     </div>
   );
 }

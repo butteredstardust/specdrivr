@@ -1,13 +1,21 @@
 "use client";
 
 import { TaskSelect } from '@/db/schema';
-import {
-  useSortable,
-} from '@dnd-kit/sortable';
+import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useState } from 'react';
 import { LogTestResultDialog } from './log-test-result-dialog';
-import { taskStatusColors, taskPriorityBorderColors } from '@/lib/ios-styles';
+import { taskStatusColors } from '@/lib/ios-styles';
+import {
+  ChevronsUp,
+  ChevronUp,
+  Minus,
+  ChevronDown,
+  ChevronsDown,
+  CheckCircle,
+  FileText
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface TaskCardProps {
   task: TaskSelect;
@@ -16,7 +24,6 @@ interface TaskCardProps {
 
 export function TaskCard({ task, onClick }: TaskCardProps) {
   const [showLogDialog, setShowLogDialog] = useState(false);
-
   const priority = Math.max(1, Math.min(5, (task.priority as number) || 1));
   const status = (task.status as string) || 'todo';
 
@@ -32,20 +39,21 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.7 : 1,
+    opacity: isDragging ? 0.5 : 1,
   };
 
-  const handleLogResultClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setShowLogDialog(true);
-  };
-
-  const handleCardClick = () => {
-    onClick?.(task);
+  const getPriorityIcon = (p: number) => {
+    switch (p) {
+      case 5: return <ChevronsUp size={14} className="text-[var(--color-text-danger)]" />;
+      case 4: return <ChevronUp size={14} className="text-[var(--color-text-danger)]" />;
+      case 3: return <Minus size={14} className="text-[var(--status-inprogress-text)]" />;
+      case 2: return <ChevronDown size={14} className="text-[var(--color-brand-bold)]" />;
+      case 1: return <ChevronsDown size={14} className="text-[var(--color-brand-bold)]" />;
+      default: return <Minus size={14} />;
+    }
   };
 
   const statusInfo = taskStatusColors[status as keyof typeof taskStatusColors] || taskStatusColors.todo;
-  const priorityBorder = taskPriorityBorderColors[priority];
 
   return (
     <>
@@ -54,60 +62,39 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
         style={style}
         {...attributes}
         {...listeners}
-        className={`bg-bg-elevated border border-border-default rounded-[8px] p-4 mb-3 cursor-pointer hover:shadow-md transition-shadow border-l-4 ${priorityBorder}`}
-        onClick={handleCardClick}
-        role="button"
-        tabIndex={0}
-        data-testid={`task-card-${task.id}`}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            handleCardClick();
-          }
-        }}
-      >
-        <div className="flex items-start justify-between mb-2">
-          <h3 className="text-[13px] text-text-primary  flex-1 pr-2">
-            {task.description || 'Untitled Task'}
-          </h3>
-          <span className={`inline-flex items-center px-2 py-1 rounded-md text-[11px] font-medium ${statusInfo.bg} ${statusInfo.text} ${statusInfo.border} border flex-shrink-0`}>
-            {status.replace('_', ' ').toUpperCase()}
-          </span>
-        </div>
-
-        {Array.isArray(task.filesInvolved) && task.filesInvolved.length > 0 && (
-          <div className="mb-2" data-testid={`task-files-${task.id}`}>
-            <p className="text-[11px] text-text-secondary mb-1">Files:</p>
-            <div className="flex flex-wrap gap-1">
-              {task.filesInvolved.map((file: string, idx: number) => (
-                <span
-                  key={idx}
-                  className="text-[11px] bg-ios-secondary border border-border-default px-2 py-1 rounded text-text-primary"
-                >
-                  {file}
-                </span>
-              ))}
-            </div>
-          </div>
+        className={cn(
+          "bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] shadow-[var(--shadow-card)] p-[var(--sp-3)] cursor-pointer hover:bg-[var(--color-bg-hovered)] transition-all group",
+          isDragging && "z-50 shadow-2xl scale-[1.02]"
         )}
+        onClick={() => onClick?.(task)}
+      >
+        <p className="text-[14px] text-[var(--color-text-primary)] leading-tight mb-[var(--sp-3)] line-clamp-2 group-hover:text-[var(--color-brand-bold)] transition-colors">
+          {task.description || 'Untitled Task'}
+        </p>
 
-        <div className="flex items-center justify-between mt-3 pt-2 border-t border-border-default">
-          <div className="text-[11px] text-text-secondary flex items-center gap-3">
-            <span data-testid={`priority-indicator-${task.priority || 'medium'}`}>P{priority}</span>
-            <span>#{task.id}</span>
+        <div className="flex items-center justify-between mt-auto">
+          <div className="flex items-center gap-[var(--sp-2)]">
+            {getPriorityIcon(priority)}
+            <span className="text-[11px] font-bold text-[var(--color-text-tertiary)] uppercase leading-none">
+              SD-{task.id}
+            </span>
           </div>
-          <button
-            onClick={handleLogResultClick}
-            className="flex items-center gap-1 text-[11px] text-accent hover:text-accent-dark transition-colors"
-            title="Log Test Result"
-            type="button"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-              <polyline points="22 4 12 14.01 9 11.01"/>
-            </svg>
-            Log Test
-          </button>
+
+          <div className="flex items-center gap-[var(--sp-2)]">
+            <span className={cn(
+              "px-1.5 py-0.5 rounded-[var(--radius-sm)] text-[10px] font-bold uppercase tracking-tight",
+              statusInfo.bg, statusInfo.text
+            )}>
+              {status.replace('_', ' ')}
+            </span>
+            <button
+              onClick={(e) => { e.stopPropagation(); setShowLogDialog(true); }}
+              className="p-1 text-[var(--color-text-tertiary)] hover:text-[var(--color-brand-bold)] hover:bg-[var(--color-bg-sunken)] rounded transition-all"
+              title="Log Test Result"
+            >
+              <CheckCircle size={14} />
+            </button>
+          </div>
         </div>
       </div>
 

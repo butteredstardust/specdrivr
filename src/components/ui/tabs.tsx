@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { ReactNode } from 'react';
+import { cn } from '@/lib/utils';
 
 export interface TabData {
   id: string;
@@ -23,8 +24,8 @@ export function Tabs({ tabs, activeTab, className = '' }: TabsProps) {
   const currentTab = activeTab || getCurrentTabFromPath(pathname, tabs);
 
   return (
-    <div className={`border-b border-border-default ${className}`}>
-      <nav className="flex space-x-0 linear-scrollbar overflow-x-auto">
+    <div className={cn("border-b border-[var(--color-border-default)]", className)}>
+      <nav className="flex items-center gap-[var(--sp-4)] overflow-x-auto scrollbar-hide">
         {tabs.map((tab) => {
           const isActive = currentTab === tab.id;
           return (
@@ -42,30 +43,33 @@ export function Tabs({ tabs, activeTab, className = '' }: TabsProps) {
 
 function TabItem({ tab, isActive }: { tab: TabData; isActive: boolean }) {
   return (
-    <Link href={tab.href}>
+    <Link href={tab.href} className="group outline-none">
       <div
-        className={`
-          relative flex items-center gap-2 px-4 py-3 text-[13px] font-medium transition-colors whitespace-nowrap
-          ${isActive
-            ? 'text-accent ios-tab-active'
-            : 'text-text-secondary ios-tab-inactive'
-          }
-        `}
+        className={cn(
+          "relative flex items-center gap-[var(--sp-2)] h-[40px] px-[var(--sp-1)] text-[12px] font-medium transition-colors whitespace-nowrap outline-none",
+          isActive
+            ? "text-[var(--color-brand-bold)]"
+            : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+        )}
       >
-        {tab.icon && <span className="flex-shrink-0">{tab.icon}</span>}
+        {tab.icon && <span className="flex-shrink-0 opacity-70 group-hover:opacity-100 transition-opacity">{tab.icon}</span>}
         <span>{tab.label}</span>
-        {tab.badge && (
+        {tab.badge !== undefined && (
           <span
-            className={`
-              ios-badge px-2 py-0.5 rounded-full text-[11px]
-              ${isActive
-                ? 'bg-accent text-white'
-                : 'bg-status-idle-5 text-text-secondary'
-              }
-            `}
+            className={cn(
+              "min-w-[16px] h-[16px] px-1 rounded-full text-[10px] flex items-center justify-center font-bold",
+              isActive
+                ? "bg-[var(--color-brand-bold)] text-white"
+                : "bg-[var(--color-bg-sunken)] text-[var(--color-text-secondary)]"
+            )}
           >
             {typeof tab.badge === 'number' && tab.badge > 99 ? '99+' : tab.badge}
           </span>
+        )}
+
+        {/* Underline Indicator */}
+        {isActive && (
+          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[var(--color-brand-bold)] rounded-t-sm" />
         )}
       </div>
     </Link>
@@ -73,14 +77,10 @@ function TabItem({ tab, isActive }: { tab: TabData; isActive: boolean }) {
 }
 
 function getCurrentTabFromPath(pathname: string, tabs: TabData[]): string {
-  // Find the tab whose href matches or is a prefix of the current path
   const exactMatch = tabs.find(tab => tab.href === pathname);
   if (exactMatch) return exactMatch.id;
-
-  // Check for prefix match (deepest match wins)
   const prefixMatch = tabs
     .filter(tab => pathname.startsWith(tab.href) && tab.href !== '/')
     .sort((a, b) => b.href.length - a.href.length)[0];
-
   return prefixMatch?.id || tabs[0]?.id || '';
 }

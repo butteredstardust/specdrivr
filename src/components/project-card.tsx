@@ -1,7 +1,11 @@
 'use client';
 
+import React from 'react';
+
 import Link from 'next/link';
 import { type ProjectSelect } from '@/db/schema';
+import { GlassCard } from './ui/glass-card';
+import { cn } from '@/lib/utils';
 import {
   agentStatusLabels,
   formatRelativeTime,
@@ -47,30 +51,30 @@ export function ProjectCard({
   return (
     <Link
       href={`/projects/${project.id}`}
-      className="group flex items-center min-h-[36px] px-[16px] border-b border-border-subtle hover:bg-bg-hover transition-colors last:border-b-0"
+      className="group flex items-center min-h-[44px] px-[20px] border-b border-white/[0.05] hover:bg-white/[0.05] hover:backdrop-blur-md transition-all duration-300 last:border-b-0"
     >
       {/* Name */}
       <div className="flex-1 min-w-0 pr-4 flex items-center h-full">
-        <span className="text-[13px] font-medium text-text-primary truncate group-hover:text-text-primary">
+        <span className="text-[14px] font-semibold text-white/90 group-hover:text-white transition-colors">
           {project.name}
         </span>
       </div>
 
       {/* Progress */}
       {totalTasks > 0 && (
-        <div className="w-[100px] flex items-center justify-end text-[12px] text-text-secondary pr-4 shrink-0">
+        <div className="w-[120px] flex items-center justify-end text-[12px] text-white/50 pr-6 shrink-0 font-medium">
           <span>{doneTasks}/{totalTasks} tasks</span>
         </div>
       )}
 
       {/* Status Dot */}
-      <div className={`w-[130px] flex items-center gap-[6px] text-[12px] shrink-0 ${badge.color}`}>
-        <span className={`w-2 h-2 rounded-full flex-shrink-0 ${badge.dot}`} />
+      <div className={cn("w-[140px] flex items-center gap-[10px] text-[13px] shrink-0 font-medium", badge.color)}>
+        <span className={cn("w-2 h-2 rounded-full flex-shrink-0 shadow-[0_0_8px_currentColor]", badge.dot)} />
         <span>{agentStatusLabels[agentStatus]}</span>
       </div>
 
       {/* Last Activity */}
-      <div className="w-[100px] flex items-center justify-end text-[12px] text-text-tertiary shrink-0">
+      <div className="w-[120px] flex items-center justify-end text-[12px] text-white/30 shrink-0 font-medium">
         {lastActivity}
       </div>
     </Link>
@@ -80,28 +84,28 @@ export function ProjectCard({
 // Empty state
 export function DashboardEmptyState() {
   return (
-    <div className="bg-bg-elevated border border-border-dashed rounded-[8px] p-[32px] text-center">
-      <div className="mb-[16px] flex justify-center">
+    <GlassCard className="p-[48px] text-center" intensity="low">
+      <div className="mb-[20px] flex justify-center">
         <svg
-          width="24"
-          height="24"
+          width="32"
+          height="32"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"
-          className="text-text-tertiary"
+          className="text-white/20"
         >
           <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
           <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
         </svg>
       </div>
-      <h3 className="text-[13px] font-semibold text-text-primary mb-[4px]">No projects yet</h3>
-      <p className="text-[12px] text-text-secondary">Create your first project to get started</p>
-    </div>
+      <h3 className="text-[16px] font-bold text-white mb-[8px]">No projects yet</h3>
+      <p className="text-[14px] text-white/50">Create your first project to get started</p>
+    </GlassCard>
   );
 }
 
-// Summary stat card — horizontal row layout
+// Summary stat card — Jira flat card layout
 export function DashboardSummaryCard({
   value,
   label,
@@ -112,12 +116,12 @@ export function DashboardSummaryCard({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="relative bg-bg-elevated border border-border-subtle rounded-[8px] px-[20px] py-[16px] min-w-[140px] flex flex-col justify-center">
-      <div className="absolute top-[16px] right-[20px] text-text-tertiary flex items-center justify-center pointer-events-none">
-        {icon}
+    <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] p-[var(--sp-4)] px-[var(--sp-5)] relative h-[88px] flex flex-col justify-center overflow-hidden">
+      <div className="absolute top-[var(--sp-4)] right-[var(--sp-4)] text-[var(--color-text-tertiary)] opacity-50">
+        {React.cloneElement(icon as React.ReactElement, { size: 16 })}
       </div>
-      <p className="text-[24px] font-semibold text-text-primary leading-none block">{value}</p>
-      <p className="text-[11px] font-medium text-text-secondary uppercase tracking-[0.04em] mt-[4px]">{label}</p>
+      <p className="text-[24px] font-bold text-[var(--color-text-primary)] leading-none">{value}</p>
+      <p className="text-[11px] font-bold text-[var(--color-text-tertiary)] uppercase tracking-[0.06em] mt-[var(--sp-1)]">{label}</p>
     </div>
   );
 }
