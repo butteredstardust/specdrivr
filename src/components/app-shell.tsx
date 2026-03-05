@@ -64,7 +64,7 @@ export function AppShell({
       )}
 
       {/* Header */}
-      <header className="sticky top-0 z-30 ios-header border-b border-ios-border">
+      <header className={`sticky z-50 ios-header border-b border-ios-border ${isOffline && !dismissedOffline ? 'top-10' : 'top-0'}`}>
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-3">
           <div className="flex items-center justify-between gap-4">
             {/* Left side - Logo */}

@@ -90,8 +90,8 @@ export function LogTestResultDialog({
         title="Log Test Result"
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-          <polyline points="22 4 12 14.01 9 11.01"/>
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <polyline points="22 4 12 14.01 9 11.01" />
         </svg>
       </button>
     );
@@ -125,7 +125,7 @@ export function LogTestResultDialog({
             <div className="mb-4 p-3 bg-opacity-10 border ios-radius"
               style={{ backgroundColor: 'var(--ios-red)', borderColor: 'var(--ios-separator)' }}
             >
-              <p className="text-sm text-ios-red ios-font-text">{error}</p>
+              <p className="ios-footnote text-ios-red ios-font-text">{error}</p>
             </div>
           )}
 
@@ -138,16 +138,15 @@ export function LogTestResultDialog({
                 <button
                   type="button"
                   onClick={() => setSuccess(true)}
-                  className={`p-4 rounded-lg ios-body ios-font-text transition-all ${
-                    success === true
-                      ? 'bg-green-100 text-green-800 border-2 border-green-400'
-                      : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-green-300'
-                  }`}
+                  className={`p-4 rounded-lg ios-body ios-font-text transition-all ${success === true
+                    ? 'bg-ios-green/15 text-ios-green border-2 border-ios-green'
+                    : 'bg-ios-secondary text-ios-text-secondary border-2 border-ios-border hover:border-ios-green'
+                    }`}
                 >
                   <div className="flex flex-col items-center gap-2">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={success === true ? 'text-green-600' : 'text-gray-400'}>
-                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                      <polyline points="22 4 12 14.01 9 11.01"/>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={success === true ? 'text-ios-green' : 'text-ios-text-tertiary'}>
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                      <polyline points="22 4 12 14.01 9 11.01" />
                     </svg>
                     <span className="font-semibold">Passed</span>
                   </div>
@@ -155,17 +154,16 @@ export function LogTestResultDialog({
                 <button
                   type="button"
                   onClick={() => setSuccess(false)}
-                  className={`p-4 rounded-lg ios-body ios-font-text transition-all ${
-                    success === false
-                      ? 'bg-red-100 text-red-800 border-2 border-red-400'
-                      : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-red-300'
-                  }`}
+                  className={`p-4 rounded-lg ios-body ios-font-text transition-all ${success === false
+                    ? 'bg-ios-red/15 text-ios-red border-2 border-ios-red'
+                    : 'bg-ios-secondary text-ios-text-secondary border-2 border-ios-border hover:border-ios-red'
+                    }`}
                 >
                   <div className="flex flex-col items-center gap-2">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={success === false ? 'text-red-600' : 'text-gray-400'}>
-                      <circle cx="12" cy="12" r="10"/>
-                      <line x1="15" y1="9" x2="9" y2="15"/>
-                      <line x1="9" y1="9" x2="15" y2="15"/>
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="15" y1="9" x2="9" y2="15" />
+                      <line x1="9" y1="9" x2="15" y2="15" />
                     </svg>
                     <span className="font-semibold">Failed</span>
                   </div>
@@ -183,7 +181,7 @@ export function LogTestResultDialog({
                 onChange={(e) => setLogs(e.target.value)}
                 placeholder="Paste test output, error messages, or verification details..."
                 rows={6}
-                className="font-mono text-sm ios-font-text"
+                className="font-mono ios-footnote ios-font-text"
                 style={{ ...iosInputStyle, resize: 'none' }}
               />
               <p className="mt-1 ios-caption text-ios-placeholder ios-font-text">

@@ -14,6 +14,7 @@ import { AgentStatusPanel, type AgentStatusData } from '@/components/agent-statu
 import { type TabData } from '@/components/ui/tabs';
 import { useAgentStatus } from '@/hooks/use-agent-status';
 import { ProjectSidebarWrapper } from '@/components/project-sidebar-wrapper';
+import Link from 'next/link';
 
 interface ProjectDetailClientProps {
   projectId: number;
@@ -84,7 +85,7 @@ function LogsTabContent({ logs, tasks, projectId }: { logs: AgentLogSelect[]; ta
       logs={logs}
       tasks={tasks}
       projectId={projectId}
-      onLogAdded={() => {}}
+      onLogAdded={() => { }}
     />
   );
 }
@@ -114,8 +115,8 @@ export function ProjectDetailClient({
   const techStack = Array.isArray(project.techStack)
     ? (project.techStack as string[])
     : typeof project.techStack === 'string'
-    ? [project.techStack]
-    : [];
+      ? [project.techStack]
+      : [];
 
   // Create tabs configuration
   const tabs: TabData[] = [
@@ -188,12 +189,12 @@ export function ProjectDetailClient({
           <div className="flex items-center justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-3">
-                <a
+                <Link
                   href="/"
                   className="ios-callout text-ios-blue hover:text-ios-blue-dark transition-colors"
                 >
                   ← Dashboard
-                </a>
+                </Link>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -242,60 +243,45 @@ export function ProjectDetailClient({
             </div>
           </div>
 
-          {/* Quick Edit Section (Constitution, Tech Stack) */}
-          <div className="max-w-6xl mx-auto px-6 py-4 space-y-4">
-            <div>
-              <h3 className="ios-footnote ios-placeholder mb-2 uppercase tracking-wide">
-                Constitution
-              </h3>
-              <InlineConstitutionEditor
-                projectId={projectId}
-                constitution={project.constitution as string | null}
-              />
-            </div>
-
-            <div>
-              <h3 className="ios-footnote ios-placeholder mb-2 uppercase tracking-wide">
-                Tech Stack
-              </h3>
-              <InlineTechStackEditor
-                projectId={projectId}
-                techStack={project.techStack as Record<string, unknown> || {}}
-              />
-            </div>
-          </div>
 
           {/* Tabs */}
           <div className="border-b border-ios-border bg-ios-bg-card sticky top-0 z-10">
             <nav className="flex space-x-0 ios-scrollbar overflow-x-auto max-w-6xl mx-auto">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTabId(tab.id)}
-                  className={`
-                    relative flex items-center gap-2 px-4 py-3 ios-body font-medium transition-colors whitespace-nowrap
-                    ${activeTabId === tab.id
-                      ? 'text-ios-blue border-b-2 border-ios-blue'
-                      : 'text-ios-text-secondary hover:text-ios-text-primary border-b-2 border-transparent'
-                    }
-                  `}
-                >
-                  {tab.label}
-                  {tab.badge && (
-                    <span
-                      className={`
-                        ios-badge px-2 py-0.5 rounded-full text-[11px]
-                        ${activeTabId === tab.id
-                          ? 'bg-ios-blue text-white'
-                          : 'bg-ios-gray-5 text-ios-text-secondary'
-                        }
-                      `}
-                    >
-                      {typeof tab.badge === 'number' && tab.badge > 99 ? '99+' : tab.badge}
-                    </span>
-                  )}
-                </button>
-              ))}
+              {tabs.map((tab) => {
+                // Route-based tabs (separate pages) must use <a>, not button
+                const isRouteBased = tab.href && !tab.href.includes('?tab=') && tab.href !== `/projects/${projectId}`;
+                const isActive = activeTabId === tab.id;
+                const sharedClass = `relative flex items-center gap-2 px-4 py-3 ios-body font-medium transition-colors whitespace-nowrap ${isActive
+                  ? 'text-ios-blue border-b-2 border-ios-blue'
+                  : 'text-ios-text-secondary hover:text-ios-text-primary border-b-2 border-transparent'
+                  }`;
+                const badge = tab.badge && (
+                  <span
+                    className={`ios-badge px-2 py-0.5 rounded-full text-[11px] ${isActive ? 'bg-ios-blue text-white' : 'bg-ios-gray-5 text-ios-text-secondary'
+                      }`}
+                  >
+                    {typeof tab.badge === 'number' && tab.badge > 99 ? '99+' : tab.badge}
+                  </span>
+                );
+                if (isRouteBased) {
+                  return (
+                    <a key={tab.id} href={tab.href} className={sharedClass}>
+                      {tab.label}
+                      {badge}
+                    </a>
+                  );
+                }
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTabId(tab.id)}
+                    className={sharedClass}
+                  >
+                    {tab.label}
+                    {badge}
+                  </button>
+                );
+              })}
             </nav>
           </div>
 

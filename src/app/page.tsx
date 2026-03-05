@@ -5,6 +5,7 @@ import { DatabaseStatus } from '@/components/database-status';
 import { UserMenu } from '@/components/user-menu';
 import { CreateProjectDialog } from '@/components/create-project-dialog';
 import { ProjectCard, DashboardEmptyState, DashboardSummaryCard } from '@/components/project-card';
+import { BottomTabs } from '@/components/bottom-tabs';
 
 export default async function Home() {
   const result = await getProjects();
@@ -39,9 +40,9 @@ export default async function Home() {
       </header>
 
       {/* Main Layout */}
-      <div className="flex h-[calc(100vh-57px)]">
-        {/* Sidebar */}
-        <aside className="w-60 flex-shrink-0 border-r border-ios-border bg-ios-bg-card ios-scrollbar overflow-y-auto">
+      <div className="flex h-[calc(100vh-57px)] pb-20 md:pb-0">
+        {/* Sidebar (hidden on mobile) */}
+        <aside className="hidden md:flex w-60 flex-shrink-0 border-r border-ios-border bg-ios-bg-card ios-scrollbar overflow-y-auto">
           <ProjectSidebarWrapper projects={projects} />
         </aside>
 
@@ -124,6 +125,9 @@ export default async function Home() {
           </div>
         </main>
       </div>
+
+      {/* Bottom Tabs (mobile only) */}
+      <BottomTabs />
     </div>
   );
 }

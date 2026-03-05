@@ -25,10 +25,10 @@ const iosInputStyle = {
 };
 
 const statusColors: Record<PlanStatus, { bg: string; text: string; border: string }> = {
-  draft: { bg: 'bg-ios-gray-6', text: 'ios-text-primary', border: 'border-ios-gray-4' },
-  active: { bg: 'bg-ios-blue/10', text: 'ios-blue', border: 'border-ios-blue/20' },
-  completed: { bg: 'bg-ios-green/10', text: 'ios-green', border: 'border-ios-green/20' },
-  archived: { bg: 'bg-ios-gray-6', text: 'ios-text-secondary', border: 'border-ios-gray-4' },
+  draft: { bg: 'bg-ios-gray-6', text: 'text-ios-text-secondary', border: 'border-ios-gray-4' },
+  active: { bg: 'bg-ios-blue/10', text: 'text-ios-blue', border: 'border-ios-blue/20' },
+  completed: { bg: 'bg-ios-green/10', text: 'text-ios-green', border: 'border-ios-green/20' },
+  archived: { bg: 'bg-ios-gray-6', text: 'text-ios-text-secondary', border: 'border-ios-gray-4' },
 };
 
 export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorProps) {
@@ -215,11 +215,10 @@ export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorP
                       key={status}
                       type="button"
                       onClick={() => setSelectedStatus(status)}
-                      className={`px-4 py-2 rounded-ios-lg ios-footnote font-medium transition-colors ${
-                        selectedStatus === status
-                          ? `${colors.bg} ${colors.text} ${colors.border} border-2`
-                          : 'bg-ios-gray-6 ios-text-secondary border border-ios-gray-4 hover:bg-ios-gray-5'
-                      } ios-font-text`}
+                      className={`px-4 py-2 rounded-ios-lg ios-footnote font-medium transition-colors ${selectedStatus === status
+                        ? `${colors.bg} ${colors.text} ${colors.border} border-2`
+                        : 'bg-ios-gray-6 ios-text-secondary border border-ios-gray-4 hover:bg-ios-gray-5'
+                        } ios-font-text`}
                     >
                       {status.charAt(0).toUpperCase() + status.slice(1)}
                     </button>
@@ -290,16 +289,16 @@ export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorP
                   </span>
                 </div>
                 {Object.entries(activePlan.architectureDecisions as Record<string, unknown>).map(([key, value]) => (
-                  <div key={key} className="bg-gray-50 rounded-lg p-3 ios">
-                    <p className="font-medium text-gray-900 ios-body ios-font-text">{key}</p>
-                    <p className="text-sm text-gray-600 ios-body ios-font-text mt-1">
+                  <div key={key} className="bg-ios-secondary rounded-ios-lg p-3">
+                    <p className="font-medium text-ios-text-primary ios-body ios-font-text">{key}</p>
+                    <p className="ios-footnote text-ios-text-secondary ios-font-text mt-1">
                       {String(value)}
                     </p>
                   </div>
                 ))}
               </div>
             ) : (
-              <span className="text-gray-500 italic ios-body ios-font-text">
+              <span className="text-ios-text-secondary italic ios-body ios-font-text">
                 No plan defined. Create one to define architecture decisions.
               </span>
             )}

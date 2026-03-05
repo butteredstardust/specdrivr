@@ -195,20 +195,20 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
               className="flex items-center gap-1.5 px-3 py-1.5 ios-body text-ios-blue bg-ios-secondary border border-ios ios-radius ios-font-text transition-colors"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="12 6 12 12 16 14"/>
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
               </svg>
               <span>v{currentSpec.version}</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="6 9 12 15 18 9"/>
+                <polyline points="6 9 12 15 18 9" />
               </svg>
             </button>
           )}
           {isViewingHistorical && (
             <span className="inline-flex items-center gap-1.5 px-2 py-1 ios-caption bg-yellow-50 text-yellow-700 rounded-ios-xl ios-font-text">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
               </svg>
               Historical View
             </span>
@@ -264,11 +264,10 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
             {allVersions.map((spec) => (
               <div
                 key={spec.id}
-                className={`flex items-center justify-between p-3 rounded-lg ios ${
-                  currentSpec.id === spec.id
-                    ? 'bg-blue-50 border-2 border-blue-200'
-                    : 'bg-white border border-ios hover:border-ios-blue'
-                }`}
+                className={`flex items-center justify-between p-3 rounded-ios-lg ios ${currentSpec.id === spec.id
+                  ? 'ios-card border-2 border-ios-blue'
+                  : 'bg-ios-bg-card border border-ios-border hover:border-ios-blue'
+                  }`}
               >
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
@@ -276,7 +275,7 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
                       v{spec.version}
                     </span>
                     {spec.isActive && (
-                      <span className="inline-flex items-center px-2 py-0.5 ios-caption bg-green-100 text-green-700 rounded-full ios-font-text">
+                      <span className="inline-flex items-center px-2 py-0.5 ios-caption bg-green-100 text-green-700 rounded-ios-xl ios-font-text">
                         Active
                       </span>
                     )}
@@ -323,11 +322,11 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
             {isViewingHistorical && (
               <div className="flex items-center gap-2 px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-yellow-600">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="12" y1="16" x2="12" y2="12"/>
-                  <line x1="12" y1="8" x2="12.01" y2="8"/>
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="16" x2="12" y2="12" />
+                  <line x1="12" y1="8" x2="12.01" y2="8" />
                 </svg>
-                <p className="text-sm text-yellow-800 ios-body ios-font-text">
+                <p className="ios-footnote text-yellow-800 ios-body ios-font-text">
                   Restoring v{currentSpec.version}. Saving will create a new version.
                 </p>
               </div>
@@ -336,7 +335,7 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
               value={content}
               onChange={(e) => setContent(e.target.value)}
               rows={16}
-              className="font-mono text-sm ios-font-text"
+              className="font-mono ios-footnote ios-font-text"
               style={iosInputStyle}
               placeholder={"# Project Specification\n\n## Overview\n\nDescribe the project goals and requirements..."}
               spellCheck={false}

@@ -22,30 +22,30 @@ const levelColors: Record<LogLevel, { bg: string; text: string; border: string }
 const levelIcons: Record<LogLevel, JSX.Element> = {
   debug: (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <circle cx="12" cy="12" r="10"/>
-      <line x1="12" y1="16" x2="12" y2="12"/>
-      <line x1="12" y1="8" x2="12.01" y2="8"/>
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="16" x2="12" y2="12" />
+      <line x1="12" y1="8" x2="12.01" y2="8" />
     </svg>
   ),
   info: (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <circle cx="12" cy="12" r="10"/>
-      <line x1="12" y1="16" x2="12" y2="12"/>
-      <line x1="12" y1="8" x2="12.01" y2="8"/>
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="16" x2="12" y2="12" />
+      <line x1="12" y1="8" x2="12.01" y2="8" />
     </svg>
   ),
   warn: (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="m21.73 18-8-14a2 2 0 0 1-3.48 0l-8-14A2 2 0 0 1 4 2h16a2 2 0 0 1 1.73 3Z"/>
-      <line x1="12" y1="9" x2="12" y2="13"/>
-      <line x1="12" y1="17" x2="12.01" y2="17"/>
+      <path d="m21.73 18-8-14a2 2 0 0 1-3.48 0l-8-14A2 2 0 0 1 4 2h16a2 2 0 0 1 1.73 3Z" />
+      <line x1="12" y1="9" x2="12" y2="13" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
     </svg>
   ),
   error: (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <circle cx="12" cy="12" r="10"/>
-      <line x1="15" y1="9" x2="9" y2="15"/>
-      <line x1="9" y1="9" x2="15" y2="15"/>
+      <circle cx="12" cy="12" r="10" />
+      <line x1="15" y1="9" x2="9" y2="15" />
+      <line x1="9" y1="9" x2="15" y2="15" />
     </svg>
   ),
 };
@@ -122,11 +122,10 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
         <div className="flex gap-2">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`px-3 py-1 rounded-ios-md ios-caption-2 font-medium transition-colors ios-font-text ${
-              showFilters
+            className={`px-3 py-1 rounded-ios-md ios-caption-2 font-medium transition-colors ios-font-text ${showFilters
                 ? 'bg-ios-blue text-white'
                 : 'bg-ios-secondary text-ios-text-secondary hover:bg-ios-gray-5'
-            }`}
+              }`}
           >
             Filters
           </button>
@@ -157,7 +156,7 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
 
           {/* Level Filters */}
           <div className="mb-3">
-            <label className="ios-caption-1 text-ios-text-secondary	block mb-2">Log Level</label>
+            <label className="ios-caption-1 text-ios-text-secondary block mb-2">Log Level</label>
             <div className="flex gap-2 flex-wrap">
               {(Object.keys(levelFilters) as LogLevel[]).map((level) => (
                 <label key={level} className="flex items-center gap-1.5 cursor-pointer">
@@ -221,8 +220,8 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
           <div className="text-center py-8 ios">
             <div className="mb-3 flex justify-center text-ios-placeholder">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-ios-placeholder">
-                <path d="M3 3v18h18"/>
-                <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
+                <path d="M3 3v18h18" />
+                <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
               </svg>
             </div>
             <p className="ios-body text-ios-placeholder ios-font-text">

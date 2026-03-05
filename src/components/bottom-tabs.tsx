@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, PlusSquare, Layout, Cog } from 'lucide-react';
+import { Menu, Layout, Cog } from 'lucide-react';
 
 interface BottomTab {
   href: string;
@@ -12,7 +12,6 @@ interface BottomTab {
 
 const tabs: BottomTab[] = [
   { href: '/', label: 'Dashboard', icon: <Layout className="w-6 h-6" /> },
-  { href: '/projects/new', label: 'New Project', icon: <PlusSquare className="w-6 h-6" /> },
   { href: '/settings', label: 'Settings', icon: <Cog className="w-6 h-6" /> },
 ];
 
@@ -28,11 +27,10 @@ export function BottomTabs() {
             <Link
               key={tab.href}
               href={tab.href}
-              className={`flex flex-col items-center justify-center w-16 h-16 min-w-[44px] min-h-[44px] mx-1 rounded-ios-md transition-all ${
-                isActive
-                  ? 'text-ios-blue'
-                  : 'text-ios-text-secondary hover:text-ios-text-primary'
-              }`}
+              className={`flex flex-col items-center justify-center w-16 h-16 min-w-[44px] min-h-[44px] mx-1 rounded-ios-md transition-all ${isActive
+                ? 'text-ios-blue'
+                : 'text-ios-text-secondary hover:text-ios-text-primary'
+                }`}
             >
               <div className="mb-1">{tab.icon}</div>
               <span className="ios-caption-1 font-medium">{tab.label}</span>

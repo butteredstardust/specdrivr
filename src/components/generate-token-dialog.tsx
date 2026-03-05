@@ -165,7 +165,7 @@ export function GenerateTokenDialog({ isOpen, onClose, onTokenGenerated }: Gener
               </div>
             </div>
 
-            <div className="ios-card p-3 space-y-2 text-sm">
+            <div className="ios-card p-3 space-y-2 ios-footnote">
               <div className="flex justify-between">
                 <span className="text-ios-text-secondary">Name:</span>
                 <span className="text-ios-text-primary font-medium">{tokenName}</span>
