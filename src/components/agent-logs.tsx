@@ -13,10 +13,10 @@ interface AgentLogsProps {
 }
 
 const levelColors: Record<LogLevel, { bg: string; text: string; border: string }> = {
-  debug: { bg: 'bg-ios-gray-6', text: 'text-ios-gray-1', border: 'border-ios-gray-4' },
-  info: { bg: 'bg-ios-blue/10', text: 'text-ios-blue', border: 'border-ios-blue/20' },
+  debug: { bg: 'bg-status-idle-6', text: 'text-status-idle-1', border: 'border-status-idle-4' },
+  info: { bg: 'bg-accent/10', text: 'text-accent', border: 'border-accent/20' },
   warn: { bg: 'bg-ios-yellow/10', text: 'text-ios-yellow', border: 'border-ios-yellow/20' },
-  error: { bg: 'bg-ios-red/10', text: 'text-ios-red', border: 'border-ios-red/20' },
+  error: { bg: 'bg-status-error/10', text: 'text-status-error', border: 'border-status-error/20' },
 };
 
 const levelIcons: Record<LogLevel, JSX.Element> = {
@@ -130,15 +130,15 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
     <div>
       {/* Header with Add and Filter buttons */}
       <div className="flex items-center justify-between mb-2">
-        <span className="ios-body text-ios-secondary ios-font-text">
+        <span className="text-[13px] text-text-secondary ">
           {filteredLogs.length} of {logs.length} log{logs.length !== 1 ? 's' : ''}
         </span>
         <div className="flex gap-2">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`px-3 py-1 rounded-ios-md ios-caption-2 font-medium transition-colors ios-font-text ${showFilters
-              ? 'bg-ios-blue text-white'
-              : 'bg-ios-secondary text-ios-text-secondary hover:bg-ios-gray-5'
+            className={`px-3 py-1 rounded-ios-md text-[11px] font-medium font-medium transition-colors  ${showFilters
+              ? 'bg-accent text-white'
+              : 'bg-ios-secondary text-text-secondary hover:bg-status-idle-5'
               }`}
           >
             Filters
@@ -157,12 +157,12 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
 
       {/* Filters Panel */}
       {showFilters && (
-        <div className="ios-card p-4 mb-4 border border-ios-border">
+        <div className="bg-bg-elevated border border-border-default rounded-[8px] p-4 mb-4 border border-border-default">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="ios-subheadline text-ios-text-primary font-medium">Filters</h3>
+            <h3 className="text-[12px] text-text-primary font-medium">Filters</h3>
             <button
               onClick={clearFilters}
-              className="ios-caption-1 text-ios-blue hover:text-ios-blue/80 ios-font-text"
+              className="text-[11px] text-accent hover:text-accent/80 "
             >
               Clear All
             </button>
@@ -170,7 +170,7 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
 
           {/* Level Filters */}
           <div className="mb-3">
-            <label className="ios-caption-1 text-ios-text-secondary block mb-2">Log Level</label>
+            <label className="text-[11px] text-text-secondary block mb-2">Log Level</label>
             <div className="flex gap-2 flex-wrap">
               {(Object.keys(levelFilters) as LogLevel[]).map((level) => (
                 <label key={level} className="flex items-center gap-1.5 cursor-pointer">
@@ -178,9 +178,9 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
                     type="checkbox"
                     checked={levelFilters[level]}
                     onChange={() => toggleLevelFilter(level)}
-                    className="w-4 h-4 rounded border-ios-border"
+                    className="w-4 h-4 rounded border-border-default"
                   />
-                  <span className={`ios-caption-1 ${levelColors[level].text} ios-font-text capitalize`}>
+                  <span className={`text-[11px] ${levelColors[level].text}  capitalize`}>
                     {level}
                   </span>
                 </label>
@@ -191,11 +191,11 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
           {/* Task Filter */}
           {tasks.length > 0 && (
             <div className="mb-3">
-              <label className="ios-caption-1 text-ios-text-secondary block mb-2">Task</label>
+              <label className="text-[11px] text-text-secondary block mb-2">Task</label>
               <select
                 value={selectedTaskId}
                 onChange={(e) => setSelectedTaskId(e.target.value)}
-                className="ios-input ios-body"
+                className="h-[30px] bg-bg-elevated border border-border-default rounded-[6px] text-text-primary text-[12px] px-[10px] outline-none focus:border-border-strong placeholder:text-text-tertiary transition-colors text-[13px]"
               >
                 <option value="">All Tasks</option>
                 {tasks.map((task) => (
@@ -210,19 +210,19 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
 
           {/* Date Range Filter */}
           <div>
-            <label className="ios-caption-1 text-ios-text-secondary block mb-2">Date Range</label>
+            <label className="text-[11px] text-text-secondary block mb-2">Date Range</label>
             <div className="flex gap-2">
               <input
                 type="date"
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
-                className="ios-input ios-body flex-1"
+                className="h-[30px] bg-bg-elevated border border-border-default rounded-[6px] text-text-primary text-[12px] px-[10px] outline-none focus:border-border-strong placeholder:text-text-tertiary transition-colors text-[13px] flex-1"
               />
               <input
                 type="date"
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
-                className="ios-input ios-body flex-1"
+                className="h-[30px] bg-bg-elevated border border-border-default rounded-[6px] text-text-primary text-[12px] px-[10px] outline-none focus:border-border-strong placeholder:text-text-tertiary transition-colors text-[13px] flex-1"
               />
             </div>
           </div>
@@ -232,17 +232,17 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
       <div className="space-y-2 max-h-80 overflow-y-auto ios" role="log">
         {filteredLogs.length === 0 ? (
           <div className="text-center py-8 ios">
-            <div className="mb-3 flex justify-center text-ios-placeholder">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-ios-placeholder">
+            <div className="mb-3 flex justify-center text-text-tertiary">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-text-tertiary">
                 <path d="M3 3v18h18" />
                 <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
               </svg>
             </div>
-            <p className="ios-body text-ios-placeholder ios-font-text">
+            <p className="text-[13px] text-text-tertiary ">
               {logs.length === 0 ? 'No agent logs yet' : 'No logs match the current filters'}
             </p>
             {logs.length === 0 && (
-              <p className="ios-caption text-ios-secondary ios-font-text mt-1">
+              <p className="ios-caption text-text-secondary  mt-1">
                 Add a log to track manual interventions
               </p>
             )}
@@ -255,26 +255,26 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
             return (
               <div
                 key={log.id}
-                className="p-3 rounded-ios-md border border-ios ios-bg-card hover:shadow-ios-elevated transition-shadow ios"
+                className="p-3 rounded-ios-md border border-ios bg-bg-elevated hover:shadow-ios-elevated transition-shadow ios"
               >
                 <div className="flex items-start gap-3">
                   <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${colors.bg} ${colors.border}`}>
                     <span className={colors.text}>{icon}</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="ios-body text-ios-primary ios-font-text break-words">
+                    <p className="text-[13px] text-ios-primary  break-words">
                       {log.message}
                     </p>
                     <div className="flex items-center gap-3 mt-1.5">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-ios-md ios-caption-2 font-medium ${colors.bg} ${colors.text} ios-font-text`}>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-ios-md text-[11px] font-medium font-medium ${colors.bg} ${colors.text} `}>
                         {log.level.toUpperCase()}
                       </span>
                       {log.taskId && (
-                        <span className="ios-caption text-ios-secondary ios-font-text">
+                        <span className="ios-caption text-text-secondary ">
                           Task #{log.taskId}
                         </span>
                       )}
-                      <span className="ios-caption text-ios-placeholder ios-font-text">
+                      <span className="ios-caption text-text-tertiary ">
                         {new Date(log.timestamp).toLocaleString()}
                       </span>
                     </div>
@@ -283,10 +283,10 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
                       if (ctx && typeof ctx === 'object' && ctx !== null && Object.keys(ctx).length > 0) {
                         return (
                           <details className="mt-2">
-                            <summary className="cursor-pointer ios-caption text-ios-blue ios-font-text">
+                            <summary className="cursor-pointer ios-caption text-accent ">
                               Context
                             </summary>
-                            <pre className="mt-2 p-2 bg-ios-gray-6 ios-caption-1 text-ios-text-primary rounded-ios-md overflow-x-auto ios-font-text">
+                            <pre className="mt-2 p-2 bg-status-idle-6 text-[11px] text-text-primary rounded-ios-md overflow-x-auto ">
                               {JSON.stringify(ctx, null, 2)}
                             </pre>
                           </details>
@@ -304,22 +304,22 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-4 py-2 border-t border-ios-border">
-          <span className="ios-caption text-ios-text-secondary">
+        <div className="flex items-center justify-between mt-4 py-2 border-t border-border-default">
+          <span className="ios-caption text-text-secondary">
             Page {currentPage} of {totalPages}
           </span>
           <div className="flex gap-2">
             <button
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1 rounded-ios-md ios-caption font-medium border border-ios-border disabled:opacity-50 disabled:cursor-not-allowed hover:bg-ios-gray-5"
+              className="px-3 py-1 rounded-ios-md ios-caption font-medium border border-border-default disabled:opacity-50 disabled:cursor-not-allowed hover:bg-status-idle-5"
             >
               Previous
             </button>
             <button
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="px-3 py-1 rounded-ios-md ios-caption font-medium border border-ios-border disabled:opacity-50 disabled:cursor-not-allowed hover:bg-ios-gray-5"
+              className="px-3 py-1 rounded-ios-md ios-caption font-medium border border-border-default disabled:opacity-50 disabled:cursor-not-allowed hover:bg-status-idle-5"
             >
               Next
             </button>

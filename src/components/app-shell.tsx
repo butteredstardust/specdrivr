@@ -37,7 +37,7 @@ export function AppShell({
   }
 
   return (
-    <div className="min-h-screen bg-ios-bg-primary ios-font-text">
+    <div className="min-h-screen bg-bg-primary ">
       {/* Offline Banner */}
       {isOffline && !dismissedOffline && (
         <div className="fixed top-0 left-0 right-0 z-40 bg-amber-100 dark:bg-amber-900/30 border-b border-amber-300 dark:border-amber-700 py-2 px-4">
@@ -46,7 +46,7 @@ export function AppShell({
               <path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
               <line x1="12" y1="2" x2="12" y2="12" />
             </svg>
-            <p className="ios-callout text-amber-900 dark:text-amber-100">
+            <p className="text-[13px] font-medium text-amber-900 dark:text-amber-100">
               You&apos;re offline — changes won&apos;t save until connection is restored
             </p>
             <button
@@ -64,7 +64,7 @@ export function AppShell({
       )}
 
       {/* Header */}
-      <header className={`sticky z-50 ios-header border-b border-ios-border ${isOffline && !dismissedOffline ? 'top-10' : 'top-0'}`}>
+      <header className={`sticky z-50 ios-header border-b border-border-default ${isOffline && !dismissedOffline ? 'top-10' : 'top-0'}`}>
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-3">
           <div className="flex items-center justify-between gap-4">
             {/* Left side - Logo */}
@@ -85,7 +85,7 @@ export function AppShell({
       <div className="flex h-[calc(100vh-57px)] pt-0 md:pb-0 pb-20">
         {/* Sidebar (hidden on mobile) */}
         {showSidebar && (
-          <aside className="hidden md:flex w-60 flex-shrink-0 border-r border-ios-border bg-ios-bg-card ios-scrollbar overflow-y-auto">
+          <aside className="hidden md:flex w-60 flex-shrink-0 border-r border-border-default bg-bg-elevated linear-scrollbar overflow-y-auto">
             <ProjectSidebarWrapper
               projects={sidebarProjects}
               currentProjectId={currentProjectId}
@@ -94,7 +94,7 @@ export function AppShell({
         )}
 
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto ios-scrollbar bg-ios-bg-primary">
+        <main className="flex-1 overflow-y-auto linear-scrollbar bg-bg-primary">
           <div className="max-w-6xl mx-auto px-4 md:px-6 py-6">
             {children}
           </div>

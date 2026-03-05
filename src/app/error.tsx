@@ -26,7 +26,7 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-ios-bg-primary ios-font-text flex items-center justify-center px-4">
+    <div className="min-h-screen bg-bg-primary  flex items-center justify-center px-4">
       <div className="text-center max-w-md">
         {/* Error Icon */}
         <div className="mb-6 flex justify-center">
@@ -48,18 +48,18 @@ export default function Error({
         </div>
 
         {/* Error Title */}
-        <h1 className="ios-title-1 text-ios-text-primary ios-font-display mb-3">
+        <h1 className="text-[24px] font-semibold text-text-primary  mb-3">
           Something went wrong
         </h1>
 
         {/* Error Message */}
-        <p className="ios-body text-ios-text-secondary mb-6">
+        <p className="text-[13px] text-text-secondary mb-6">
           {error.message || 'An unexpected error occurred. We apologize for the inconvenience.'}
         </p>
 
         {/* Error Digest (for debugging) */}
         {process.env.NODE_ENV === 'development' && error.digest && (
-          <p className="ios-caption text-ios-placeholder ios-font-text mb-6 font-mono bg-gray-100 p-2 rounded">
+          <p className="ios-caption text-text-tertiary  mb-6 font-mono bg-gray-100 p-2 rounded">
             Error ID: {error.digest}
           </p>
         )}
@@ -68,14 +68,14 @@ export default function Error({
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button
             onClick={reset}
-            className="px-6 py-3 ios-body text-white ios-radius ios-font-text transition-colors"
-            style={{ backgroundColor: 'var(--ios-blue)' }}
+            className="px-6 py-3 text-[13px] text-white rounded-[8px]  transition-colors"
+            style={{ backgroundColor: 'var(--accent)' }}
           >
             Try again
           </button>
           <Link
             href="/"
-            className="px-6 py-3 ios-body text-ios-blue bg-ios-secondary border border-ios ios-radius ios-font-text transition-colors"
+            className="px-6 py-3 text-[13px] text-accent bg-ios-secondary border border-ios rounded-[8px]  transition-colors"
           >
             Go to Dashboard
           </Link>
@@ -83,9 +83,9 @@ export default function Error({
 
         {/* Support Link */}
         {process.env.NODE_ENV === 'production' && (
-          <p className="ios-caption text-ios-text-secondary ios-font-text mt-6">
+          <p className="ios-caption text-text-secondary  mt-6">
             If this persists, please{' '}
-            <a href="mailto:support@example.com" className="text-ios-blue hover:text-ios-blue-dark">
+            <a href="mailto:support@example.com" className="text-accent hover:text-accent-dark">
               contact support
             </a>
           </p>

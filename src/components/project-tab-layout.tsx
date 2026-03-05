@@ -85,26 +85,26 @@ export function ProjectTabLayout({
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Breadcrumb Bar */}
-      <div className="px-6 py-3 border-b border-ios-border bg-ios-bg-card ios-scrollbar overflow-x-auto">
+      <div className="px-6 py-3 border-b border-border-default bg-bg-elevated linear-scrollbar overflow-x-auto">
         <Link
           href="/"
-          className="ios-callout text-ios-blue hover:text-ios-blue-dark transition-colors inline-flex items-center gap-1"
+          className="text-[13px] font-medium text-accent hover:text-accent-dark transition-colors inline-flex items-center gap-1"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polyline points="15 18 9 12 15 6" />
           </svg>
           Dashboard
         </Link>
-        <span className="ios-callout text-ios-text-secondary"> / </span>
-        <span className="ios-callout text-ios-text-primary font-medium">{projectName}</span>
+        <span className="text-[13px] font-medium text-text-secondary"> / </span>
+        <span className="text-[13px] font-medium text-text-primary font-medium">{projectName}</span>
       </div>
 
       {/* Project Header */}
-      <div className="px-6 py-4 border-b border-ios-border bg-ios-bg-card">
+      <div className="px-6 py-4 border-b border-border-default bg-bg-elevated">
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
           {/* Left side - Project info and agent status */}
           <div className="flex-1">
-            <h1 className="ios-title-2 text-ios-text-primary ios-font-display">
+            <h1 className="text-[20px] font-semibold text-text-primary ">
               {projectName}
             </h1>
 
@@ -114,13 +114,13 @@ export function ProjectTabLayout({
                 {techStack.slice(0, 4).map((tech) => (
                   <span
                     key={tech}
-                    className="ios-badge bg-ios-secondary ios-text-secondary border border-ios-border"
+                    className="ios-badge bg-ios-secondary text-text-secondary border border-border-default"
                   >
                     {tech}
                   </span>
                 ))}
                 {techStack.length > 4 && (
-                  <span className="ios-caption-1 text-ios-text-secondary">
+                  <span className="text-[11px] text-text-secondary">
                     +{techStack.length - 4} more
                   </span>
                 )}
@@ -130,9 +130,9 @@ export function ProjectTabLayout({
             {/* Base Path */}
             {basePath && (
               <div className="mt-2 flex items-center gap-2">
-                <span className="ios-caption-1 text-ios-text-secondary">Path:</span>
+                <span className="text-[11px] text-text-secondary">Path:</span>
                 <code
-                  className="ios-caption-1 bg-ios-secondary px-2 py-0.5 rounded ios-font-text text-ios-text-secondary truncate max-w-md block"
+                  className="text-[11px] bg-ios-secondary px-2 py-0.5 rounded  text-text-secondary truncate max-w-md block"
                   title={basePath}
                 >
                   {basePath}
@@ -179,12 +179,12 @@ export function ProjectTabLayout({
       </div>
 
       {/* Tabs */}
-      <div className="bg-ios-bg-card border-b border-ios-border">
+      <div className="bg-bg-elevated border-b border-border-default">
         <Tabs tabs={tabs} />
       </div>
 
       {/* Tab Content */}
-      <div className="flex-1 overflow-y-auto ios-scrollbar bg-ios-bg-primary">
+      <div className="flex-1 overflow-y-auto linear-scrollbar bg-bg-primary">
         <div className="p-6">
           {children}
         </div>
@@ -203,9 +203,9 @@ export interface ProjectHeaderProps {
 
 export function ProjectHeader({ projectName, techStack, basePath, lastSynced }: ProjectHeaderProps) {
   return (
-    <div className="px-6 py-4 border-b border-ios-border bg-ios-bg-card">
+    <div className="px-6 py-4 border-b border-border-default bg-bg-elevated">
       <div className="flex flex-col gap-3">
-        <h1 className="ios-title-2 text-ios-text-primary ios-font-display">
+        <h1 className="text-[20px] font-semibold text-text-primary ">
           {projectName}
         </h1>
 
@@ -214,13 +214,13 @@ export function ProjectHeader({ projectName, techStack, basePath, lastSynced }: 
             {techStack.slice(0, 4).map((tech) => (
               <span
                 key={tech}
-                className="ios-badge bg-ios-secondary ios-text-secondary border border-ios-border"
+                className="ios-badge bg-ios-secondary text-text-secondary border border-border-default"
               >
                 {tech}
               </span>
             ))}
             {techStack.length > 4 && (
-              <span className="ios-caption-1 text-ios-text-secondary">
+              <span className="text-[11px] text-text-secondary">
                 +{techStack.length - 4} more
               </span>
             )}
@@ -229,9 +229,9 @@ export function ProjectHeader({ projectName, techStack, basePath, lastSynced }: 
 
         {basePath && (
           <div className="flex items-center gap-2">
-            <span className="ios-caption-1 text-ios-text-secondary">Path:</span>
+            <span className="text-[11px] text-text-secondary">Path:</span>
             <code
-              className="ios-caption-1 bg-ios-secondary px-2 py-0.5 rounded ios-font-text text-ios-text-secondary truncate max-w-md block"
+              className="text-[11px] bg-ios-secondary px-2 py-0.5 rounded  text-text-secondary truncate max-w-md block"
             >
               {basePath}
             </code>

@@ -9,74 +9,80 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // iOS System Blue
-        'ios-blue': '#007AFF',
-        'ios-blue-dark': '#0056B3',
-
-        // iOS System Gray (grayscale for semantic elements)
-        'ios-gray': '#8E8E93',
-        'ios-gray-2': '#AEAEB2',
-        'ios-gray-3': '#C7C7CC',
-        'ios-gray-4': '#D1D1D6',
-        'ios-gray-5': '#E5E5EA',
-        'ios-gray-6': '#F2F2F7',
-
-        // iOS Text
-        'ios-label': '#000000',
-        'ios-secondary-label': '#3C3C4399',
-        'ios-tertiary-label': '#3C3C4366',
-
-        // iOS Background
-        'ios-system-background': '#FFFFFF',
-        'ios-secondary-system-background': '#F2F2F7',
-        'ios-tertiary-system-background': '#FFFFFF',
-        'ios-grouped-background': '#F2F2F7',
-
-        // iOS Separator
-        'ios-separator': '#C6C6C8',
-        'ios-separator-opaque': '#38383A',
-
-        // iOS Semantic
-        'ios-green': '#34C759',
-        'ios-red': '#FF3B30',
-        'ios-orange': '#FF9500',
-        'ios-yellow': '#FFCC00',
-
-        // Legacy semantic colors (using variables)
-        'bg-primary': 'var(--bg-primary)',
-        'bg-secondary': 'var(--bg-secondary)',
-        'text-primary': 'var(--text-primary)',
-        'text-secondary': 'var(--text-secondary)',
-        'border-primary': 'var(--border-primary)',
+        bg: {
+          primary: 'var(--color-bg-primary)',
+          secondary: 'var(--color-bg-secondary)',
+          elevated: 'var(--color-bg-elevated)',
+          hover: 'var(--color-bg-hover)',
+          active: 'var(--color-bg-active)',
+        },
+        border: {
+          subtle: 'var(--color-border-subtle)',
+          default: 'var(--color-border-default)',
+          strong: 'var(--color-border-strong)',
+        },
+        text: {
+          primary: 'var(--color-text-primary)',
+          secondary: 'var(--color-text-secondary)',
+          tertiary: 'var(--color-text-tertiary)',
+          link: 'var(--color-text-link)',
+        },
+        accent: {
+          DEFAULT: 'var(--color-accent)',
+          hover: 'var(--color-accent-hover)',
+          subtle: 'var(--color-accent-subtle)',
+        },
+        status: {
+          success: 'var(--color-success)',
+          warning: 'var(--color-warning)',
+          danger: 'var(--color-danger)',
+          idle: 'var(--color-status-idle)',
+          running: 'var(--color-status-running)',
+          error: 'var(--color-status-error)',
+        }
+      },
+      fontFamily: {
+        sans: ['var(--font-family)'],
       },
       fontSize: {
-        // iOS Typography Scale (SF Pro approximation)
-        'ios-large-title': ['34px', { lineHeight: '41px', fontWeight: '700' }],
-        'ios-title-1': ['28px', { lineHeight: '34px', fontWeight: '700' }],
-        'ios-title-2': ['22px', { lineHeight: '28px', fontWeight: '700' }],
-        'ios-title-3': ['20px', { lineHeight: '25px', fontWeight: '700' }],
-        'ios-headline': ['17px', { lineHeight: '22px', fontWeight: '600' }],
-        'ios-body': ['17px', { lineHeight: '22px', fontWeight: '400' }],
-        'ios-callout': ['16px', { lineHeight: '21px', fontWeight: '400' }],
-        'ios-subheadline': ['15px', { lineHeight: '20px', fontWeight: '400' }],
-        'ios-footnote': ['13px', { lineHeight: '18px', fontWeight: '400' }],
-        'ios-caption-1': ['12px', { lineHeight: '16px', fontWeight: '400' }],
-        'ios-caption-2': ['11px', { lineHeight: '13px', fontWeight: '400' }],
+        xs: 'var(--font-size-xs)',
+        sm: 'var(--font-size-sm)',
+        base: 'var(--font-size-base)',
+        md: 'var(--font-size-md)',
+        lg: 'var(--font-size-lg)',
+        xl: 'var(--font-size-xl)',
+        '2xl': 'var(--font-size-2xl)',
+      },
+      fontWeight: {
+        normal: 'var(--font-weight-normal)',
+        medium: 'var(--font-weight-medium)',
+        semibold: 'var(--font-weight-semibold)',
+      },
+      lineHeight: {
+        tight: 'var(--line-height-tight)',
+        base: 'var(--line-height-base)',
+        relaxed: 'var(--line-height-relaxed)',
+      },
+      spacing: {
+        1: 'var(--space-1)',
+        2: 'var(--space-2)',
+        3: 'var(--space-3)',
+        4: 'var(--space-4)',
+        5: 'var(--space-5)',
+        6: 'var(--space-6)',
+        8: 'var(--space-8)',
+        10: 'var(--space-10)',
+        12: 'var(--space-12)',
       },
       borderRadius: {
-        'ios-sm': '8px',
-        'ios-md': '12px',
-        'ios-lg': '14px',
-        'ios-xl': '16px',
+        sm: 'var(--radius-sm)',
+        md: 'var(--radius-md)',
+        lg: 'var(--radius-lg)',
+        full: 'var(--radius-full)',
       },
       boxShadow: {
-        'ios-card': '0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06)',
-        'ios-elevated': '0 4px 12px rgba(0, 0, 0, 0.08)',
-        'ios-modal': '0 20px 40px rgba(0, 0, 0, 0.2)',
-      },
-      backdropBlur: {
-        'ios': '20px',
-      },
+        none: 'var(--shadow-none)',
+      }
     },
   },
   plugins: [],

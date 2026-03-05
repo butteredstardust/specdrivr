@@ -16,8 +16,8 @@ interface AddLogDialogProps {
 const iosInputStyle = {
   width: '100%',
   padding: '8px 12px',
-  backgroundColor: 'var(--ios-bg-primary)',
-  color: 'var(--ios-text-primary)',
+  backgroundColor: 'var(--bg-bg-primary)',
+  color: 'var(--text-text-primary)',
   borderColor: 'var(--ios-separator)',
   borderRadius: '8px',
   fontSize: '17px',
@@ -26,10 +26,10 @@ const iosInputStyle = {
 };
 
 const levelColors: Record<LogLevel, { bg: string; text: string; border: string }> = {
-  debug: { bg: 'bg-ios-gray-6', text: 'text-ios-gray-2', border: 'border-ios-gray-4' },
-  info: { bg: 'bg-ios-blue/10', text: 'text-ios-blue', border: 'border-ios-blue/20' },
+  debug: { bg: 'bg-status-idle-6', text: 'text-status-idle-2', border: 'border-status-idle-4' },
+  info: { bg: 'bg-accent/10', text: 'text-accent', border: 'border-accent/20' },
   warn: { bg: 'bg-ios-yellow/10', text: 'text-ios-yellow', border: 'border-ios-yellow/20' },
-  error: { bg: 'bg-ios-red/10', text: 'text-ios-red', border: 'border-ios-red/20' },
+  error: { bg: 'bg-status-error/10', text: 'text-status-error', border: 'border-status-error/20' },
 };
 
 export function AddLogDialog({
@@ -103,8 +103,8 @@ export function AddLogDialog({
             setIsOpenInternal(true);
           }
         }}
-        className="flex items-center gap-2 px-4 py-2 ios-body text-white ios-radius ios-font-text transition-colors"
-        style={{ backgroundColor: 'var(--ios-blue)' }}
+        className="flex items-center gap-2 px-4 py-2 text-[13px] text-white rounded-[8px]  transition-colors"
+        style={{ backgroundColor: 'var(--accent)' }}
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M12 5v14"/>
@@ -124,24 +124,24 @@ export function AddLogDialog({
       />
 
       {/* Dialog */}
-      <div className="ios-card shadow-xl w-full max-w-md mx-4 overflow-hidden ios relative z-10">
+      <div className="bg-bg-elevated border border-border-default rounded-[8px] shadow-xl w-full max-w-md mx-4 overflow-hidden ios relative z-10">
         <div className="p-6">
-          <h2 className="ios-title-2 text-ios-primary mb-6 ios-font-display">
+          <h2 className="text-[20px] font-semibold text-ios-primary mb-6 ">
             Add Agent Log
           </h2>
 
           {error && (
-            <div className="mb-4 p-3 bg-opacity-10 border ios-radius"
-              style={{ backgroundColor: 'var(--ios-red)', borderColor: 'var(--ios-separator)' }}
+            <div className="mb-4 p-3 bg-opacity-10 border rounded-[8px]"
+              style={{ backgroundColor: 'var(--status-error)', borderColor: 'var(--ios-separator)' }}
               data-testid="error-message"
             >
-              <p className="ios-footnote text-ios-red ios-font-text">{error}</p>
+              <p className="text-[11px] text-text-tertiary text-status-error ">{error}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4 ios-font-text">
+          <form onSubmit={handleSubmit} className="space-y-4 ">
             <div>
-              <label htmlFor="taskId" className="block ios-subheadline text-ios-primary mb-2">
+              <label htmlFor="taskId" className="block text-[12px] text-ios-primary mb-2">
                 Task
               </label>
               <select
@@ -161,7 +161,7 @@ export function AddLogDialog({
             </div>
 
             <div>
-              <label className="block ios-subheadline text-ios-primary mb-2">
+              <label className="block text-[12px] text-ios-primary mb-2">
                 Level
               </label>
               <div className="grid grid-cols-4 gap-2">
@@ -172,10 +172,10 @@ export function AddLogDialog({
                       key={lvl}
                       type="button"
                       onClick={() => setLevel(lvl)}
-                      className={`px-3 py-2 rounded-ios-md ios-caption-2 font-medium transition-colors ios-font-text ${
+                      className={`px-3 py-2 rounded-ios-md text-[11px] font-medium font-medium transition-colors  ${
                         level === lvl
                           ? `${colors.bg} ${colors.text} ${colors.border} border-2`
-                          : 'ios-bg-card ios-text-secondary border-2 border-ios-border hover:border-ios-separator/50'
+                          : 'bg-bg-elevated text-text-secondary border-2 border-border-default hover:border-ios-separator/50'
                       }`}
                     >
                       {lvl.toUpperCase()}
@@ -186,7 +186,7 @@ export function AddLogDialog({
             </div>
 
             <div>
-              <label htmlFor="message" className="block ios-subheadline text-ios-primary mb-2">
+              <label htmlFor="message" className="block text-[12px] text-ios-primary mb-2">
                 Message
               </label>
               <textarea
@@ -205,15 +205,15 @@ export function AddLogDialog({
                 type="button"
                 onClick={handleCancel}
                 disabled={isSubmitting}
-                className="px-4 py-2 ios-body text-ios-blue bg-ios-secondary border border-ios ios-radius ios-font-text disabled:opacity-50"
+                className="px-4 py-2 text-[13px] text-accent bg-ios-secondary border border-ios rounded-[8px]  disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-4 py-2 ios-body text-white ios-radius ios-font-text transition-colors disabled:opacity-50"
-                style={{ backgroundColor: 'var(--ios-blue)' }}
+                className="px-4 py-2 text-[13px] text-white rounded-[8px]  transition-colors disabled:opacity-50"
+                style={{ backgroundColor: 'var(--accent)' }}
               >
                 {isSubmitting ? 'Adding...' : 'Add Log'}
               </button>

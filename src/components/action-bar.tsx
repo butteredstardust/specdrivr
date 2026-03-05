@@ -17,18 +17,18 @@ export function ActionBar({ projectId, plans, existingTasks, onTaskCreated }: Ac
   const [showCreateTask, setShowCreateTask] = useState(false);
 
   return (
-    <div className="mb-6 ios-card shadow-sm">
+    <div className="mb-6 bg-bg-elevated border border-border-default rounded-[8px] shadow-sm">
       <div className="px-6 py-4">
         <div className="flex items-center justify-between ios-font">
-          <h2 className="ios-title-3 text-ios-primary ios-font-display">
+          <h2 className="text-[16px] font-semibold text-ios-primary ">
             Project Actions
           </h2>
           <button
             onClick={() => setShowCreateTask(true)}
-            className="px-4 py-2 ios-body text-white ios-radius transition-colors flex items-center gap-1.5 ios-font-text"
-            style={{ backgroundColor: 'var(--ios-blue)' }}
+            className="px-4 py-2 text-[13px] text-white rounded-[8px] transition-colors flex items-center gap-1.5 "
+            style={{ backgroundColor: 'var(--accent)' }}
           >
-            <span className="ios-title-2">+</span>
+            <span className="text-[20px] font-semibold">+</span>
             <span>Add Task</span>
           </button>
         </div>

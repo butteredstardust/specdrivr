@@ -1,9 +1,5 @@
 import { getProjects, getTasksDoneToday } from '@/lib/actions';
 import { ProjectSidebarWrapper } from '@/components/project-sidebar-wrapper';
-import { Logo } from '@/components/logo';
-import { DatabaseStatus } from '@/components/database-status';
-import { UserMenu } from '@/components/user-menu';
-import { CreateProjectDialog } from '@/components/create-project-dialog';
 import { DashboardSummaryCard } from '@/components/project-card';
 import { DashboardProjectList } from '@/components/dashboard-project-list';
 import { BottomTabs } from '@/components/bottom-tabs';
@@ -21,45 +17,28 @@ export default async function Home() {
   const tasksDoneToday = await getTasksDoneToday();
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#F5F5F7', fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif' }}>
-      {/* Top Navbar */}
-      <header className="sticky top-0 z-30 bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
-          {/* Left: app name/logo */}
-          <div className="flex items-center gap-3">
-            <Logo size="large" className="min-w-36" />
+    <div className="flex h-screen w-full bg-bg-primary overflow-hidden text-text-primary">
+      <aside className="hidden md:flex flex-col h-full shrink-0">
+        <ProjectSidebarWrapper projects={projects} />
+      </aside>
+
+      <main className="flex-1 flex flex-col min-w-0 h-full bg-bg-primary">
+        <header className="h-[48px] border-b border-border-subtle flex items-center justify-between px-[24px] shrink-0 bg-bg-primary">
+          <div className="text-[13px] font-semibold text-text-primary">
+            Dashboard
           </div>
-          {/* Right: status + avatar — mutually exclusive, rendered by their own components */}
-          <div className="flex items-center gap-3">
-            <DatabaseStatus />
-            <UserMenu />
-          </div>
-        </div>
-      </header>
+          <div className="flex items-center gap-[8px]"></div>
+        </header>
 
-      {/* Main body layout */}
-      <div className="flex h-[calc(100vh-57px)] pb-16 md:pb-0">
-        {/* Sidebar (hidden on mobile) */}
-        <aside className="hidden md:block w-56 flex-shrink-0 border-r border-gray-200 bg-white overflow-y-auto">
-          <ProjectSidebarWrapper projects={projects} />
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="max-w-5xl mx-auto px-6 py-8">
-
-            {/* Page Header row: title left, New Project button right */}
+        <div className="flex-1 overflow-y-auto p-[24px]">
+          <div className="max-w-5xl mx-auto">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
-                <p className="text-sm text-gray-500 mt-0.5">Overview of all your projects</p>
+                <p className="text-sm text-text-secondary mt-0.5">Overview of all your projects</p>
               </div>
-              {/* CreateProjectDialog already renders as a proper button */}
-              <CreateProjectDialog />
             </div>
 
-            {/* Stat row — 3 cards side by side, always horizontal */}
-            <div className="grid grid-cols-3 gap-4 mb-8">
+            <div className="grid grid-cols-3 gap-[16px] mb-8">
               <DashboardSummaryCard
                 value={totalProjects}
                 label="Projects"
@@ -94,12 +73,10 @@ export default async function Home() {
             </div>
 
             <DashboardProjectList projects={projects} />
-
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
 
-      {/* Mobile bottom tabs */}
       <BottomTabs />
     </div>
   );

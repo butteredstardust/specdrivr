@@ -46,21 +46,21 @@ export function ArchiveProjectDialog({
       }
     >
       <div className="space-y-4">
-        <p className="ios-body text-ios-text-secondary">{message}</p>
+        <p className="text-[13px] text-text-secondary">{message}</p>
 
         <div className="space-y-2">
-          <label className="block ios-callout text-ios-text-secondary">
+          <label className="block text-[13px] font-medium text-text-secondary">
             Type "{projectName}" to confirm:
           </label>
           <input
             type="text"
             value={projectNameInput}
             onChange={(e) => setProjectNameInput(e.target.value)}
-            className="ios-input ios-subheadline"
+            className="h-[30px] bg-bg-elevated border border-border-default rounded-[6px] text-text-primary text-[12px] px-[10px] outline-none focus:border-border-strong placeholder:text-text-tertiary transition-colors text-[12px]"
             placeholder={projectName}
           />
           {!isNameMatch && projectNameInput && (
-            <p className="ios-caption text-ios-red">
+            <p className="ios-caption text-status-error">
               Name must match exactly
             </p>
           )}

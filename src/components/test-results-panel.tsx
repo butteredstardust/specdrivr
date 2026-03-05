@@ -9,14 +9,14 @@ export function TestResultsPanel({ testResults }: TestResultsPanelProps) {
     return (
       <div className="text-center py-8 ios">
         <div className="mb-3 flex justify-center">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-ios-placeholder">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-text-tertiary">
             <path d="M9 11H15"/>
             <path d="M12 8V14"/>
             <rect width="18" height="18" x="3" y="3" rx="2"/>
           </svg>
         </div>
-        <p className="ios-body text-ios-placeholder ios-font-text">No test results yet</p>
-        <p className="ios-caption text-ios-secondary ios-font-text mt-1">
+        <p className="text-[13px] text-text-tertiary ">No test results yet</p>
+        <p className="ios-caption text-text-secondary  mt-1">
           Click "Log Test" on a task to add results
         </p>
       </div>
@@ -25,7 +25,7 @@ export function TestResultsPanel({ testResults }: TestResultsPanelProps) {
 
   return (
     <div className="space-y-3 ios">
-      <div className="flex items-center justify-between ios-body text-ios-secondary ios-font-text">
+      <div className="flex items-center justify-between text-[13px] text-text-secondary ">
         <span>{testResults.length} result{testResults.length !== 1 ? 's' : ''}</span>
       </div>
       <div className="space-y-2">
@@ -35,8 +35,8 @@ export function TestResultsPanel({ testResults }: TestResultsPanelProps) {
             className={`
               rounded-ios-md p-3 ios border-l-4
               ${result.success
-                ? 'bg-ios-green/10 border-l-ios-green'
-                : 'bg-ios-red/10 border-l-ios-red'
+                ? 'bg-status-success/10 border-l-status-success'
+                : 'bg-status-error/10 border-l-status-error'
               }
             `}
           >
@@ -44,33 +44,33 @@ export function TestResultsPanel({ testResults }: TestResultsPanelProps) {
               <div className="flex items-center gap-2">
                 <span
                   className={`
-                    px-2 py-0.5 rounded-ios-md ios-caption-2 font-medium ios-font-text
+                    px-2 py-0.5 rounded-ios-md text-[11px] font-medium font-medium 
                     ${result.success
-                      ? 'bg-ios-green/20 text-ios-green'
-                      : 'bg-ios-red/20 text-ios-red'
+                      ? 'bg-status-success/20 text-status-success'
+                      : 'bg-status-error/20 text-status-error'
                     }
                   `}
                 >
                   {result.success ? 'PASSED' : 'FAILED'}
                 </span>
-                <span className="ios-caption text-ios-secondary ios-font-text">
+                <span className="ios-caption text-text-secondary ">
                   Task #{result.taskId}
                 </span>
               </div>
-              <span className="ios-caption text-ios-placeholder ios-font-text">
+              <span className="ios-caption text-text-tertiary ">
                 {new Date(result.timestamp).toLocaleDateString()} {new Date(result.timestamp).toLocaleTimeString()}
               </span>
             </div>
 
             {result.logs && (
               <details className="mt-2">
-                <summary className="cursor-pointer ios-caption text-ios-blue hover:text-ios-blue/80 ios-font-text inline-flex items-center gap-1">
+                <summary className="cursor-pointer ios-caption text-accent hover:text-accent/80  inline-flex items-center gap-1">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="6 9 12 15 18 9"/>
                   </svg>
                   View logs
                 </summary>
-                <pre className="mt-2 p-2 bg-gray-900 text-green-400 ios-caption-2 rounded-ios-md overflow-x-auto ios-font-text font-mono">
+                <pre className="mt-2 p-2 bg-gray-900 text-green-400 text-[11px] font-medium rounded-ios-md overflow-x-auto  font-mono">
 {result.logs}
                 </pre>
               </details>

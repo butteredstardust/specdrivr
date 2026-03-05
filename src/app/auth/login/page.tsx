@@ -63,25 +63,25 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-ios-bg-primary ios-font-text flex items-center justify-center p-4">
+    <div className="min-h-screen bg-bg-primary  flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         {/* Logo and Tagline */}
         <div className="text-center mb-8">
           <Logo size="large" className="mx-auto mb-4" />
-          <p className="ios-subheadline text-ios-text-secondary">
+          <p className="text-[12px] text-text-secondary">
             Autonomous Development Platform
           </p>
         </div>
 
         {/* Login Card */}
-        <div className="ios-card p-6">
+        <div className="bg-bg-elevated border border-border-default rounded-[8px] p-6">
           <form onSubmit={handleSubmit}>
             <div className="space-y-4">
               {/* Username Field */}
               <div>
                 <label
                   htmlFor="username"
-                  className="ios-caption-1 text-ios-text-primary uppercase tracking-wide block mb-2"
+                  className="text-[11px] text-text-primary uppercase tracking-wide block mb-2"
                 >
                   Username
                 </label>
@@ -93,7 +93,7 @@ export default function LoginPage() {
                   onKeyDown={handleKeyDown}
                   placeholder="Enter your username"
                   autoComplete="username"
-                  className="ios-input ios-body w-full"
+                  className="h-[30px] bg-bg-elevated border border-border-default rounded-[6px] text-text-primary text-[12px] px-[10px] outline-none focus:border-border-strong placeholder:text-text-tertiary transition-colors text-[13px] w-full"
                   disabled={isLoading}
                 />
               </div>
@@ -102,7 +102,7 @@ export default function LoginPage() {
               <div>
                 <label
                   htmlFor="password"
-                  className="ios-caption-1 text-ios-text-primary uppercase tracking-wide block mb-2"
+                  className="text-[11px] text-text-primary uppercase tracking-wide block mb-2"
                 >
                   Password
                 </label>
@@ -115,13 +115,13 @@ export default function LoginPage() {
                     onKeyDown={handleKeyDown}
                     placeholder="Enter your password"
                     autoComplete="current-password"
-                    className="ios-input ios-body w-full pr-10"
+                    className="h-[30px] bg-bg-elevated border border-border-default rounded-[6px] text-text-primary text-[12px] px-[10px] outline-none focus:border-border-strong placeholder:text-text-tertiary transition-colors text-[13px] w-full pr-10"
                     disabled={isLoading}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-ios-text-secondary hover:text-ios-text-primary transition-colors p-1"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors p-1"
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? (
@@ -141,7 +141,7 @@ export default function LoginPage() {
 
               {/* Error Message */}
               {error && (
-                <div className="bg-ios-red/10 text-ios-red ios-caption-1 px-3 py-2 rounded-md border border-ios-red/20">
+                <div className="bg-status-error/10 text-status-error text-[11px] px-3 py-2 rounded-md border border-status-error/20">
                   {error}
                 </div>
               )}

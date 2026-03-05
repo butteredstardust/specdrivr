@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { cn } from '@/lib/utils';
 
 type DbStatus = 'connecting' | 'connected' | 'disconnected' | 'error';
 
@@ -35,23 +34,23 @@ export function DatabaseStatus() {
 
   const statusConfig = {
     connecting: {
-      cssVar: '--ios-status-connecting',
-      indicator: '⏳',
+      dot: 'bg-status-warning',
+      color: 'text-status-warning',
       label: 'Connecting...',
     },
     connected: {
-      cssVar: '--ios-status-connected',
-      indicator: '●',
+      dot: 'bg-status-success',
+      color: 'text-text-primary',
       label: 'Connected',
     },
     disconnected: {
-      cssVar: '--ios-status-disconnected',
-      indicator: '●',
+      dot: 'bg-status-idle',
+      color: 'text-text-secondary',
       label: 'Disconnected',
     },
     error: {
-      cssVar: '--ios-status-error',
-      indicator: '⚠',
+      dot: 'bg-status-error',
+      color: 'text-status-error',
       label: 'Error',
     },
   };
@@ -60,21 +59,18 @@ export function DatabaseStatus() {
 
   return (
     <div
-      className={cn(
-        'flex items-center gap-2.5 px-3 py-2 ios-radius border border-opacity-12',
-        'bg-ios-secondary'
-      )}
+      className="flex items-center gap-[6px] px-2 py-1"
       title="PostgreSQL database connection status"
     >
-      <span className="animate-pulse ios-body" style={{ color: `var(${config.cssVar})` }}>
-        {config.indicator}
-      </span>
-      <div className="flex flex-col ios-font-text">
-        <span className="text-[13px] font-semibold text-ios-primary">
+      <span
+        className={`w-2 h-2 rounded-full flex-shrink-0 ${config.dot} ${status === 'connecting' ? 'animate-pulse' : ''}`}
+      />
+      <div className="flex items-center gap-[8px] text-[12px]">
+        <span className={`font-medium ${config.color}`}>
           {config.label}
         </span>
         {lastCheck && (
-          <span className="text-[11px] text-ios-placeholder">
+          <span className="text-[11px] text-text-tertiary">
             {lastCheck.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
         )}

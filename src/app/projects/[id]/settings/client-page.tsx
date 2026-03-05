@@ -157,56 +157,42 @@ export function ProjectSettingsClient({
   };
 
   return (
-    <div className="min-h-screen bg-ios-bg-primary ios-font-text">
-      {/* Header */}
-      <header className="sticky top-0 z-30 ios-header border-b border-ios-border">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-3">
-                <a
-                  href="/"
-                  className="ios-callout text-ios-blue hover:text-ios-blue-dark transition-colors"
-                >
-                  ← Dashboard
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="flex h-screen w-full bg-bg-primary overflow-hidden text-text-primary">
+      <aside className="hidden md:flex flex-col h-full shrink-0">
+        <ProjectSidebarWrapper
+          projects={projects}
+          currentProjectId={projectId}
+        />
+      </aside>
 
-      {/* Main Layout */}
-      <div className="flex h-[calc(100vh-57px)]">
-        {/* Sidebar */}
-        <aside className="w-60 flex-shrink-0 border-r border-ios-border bg-ios-bg-card ios-scrollbar overflow-y-auto">
-          <ProjectSidebarWrapper
-            projects={projects}
-            currentProjectId={projectId}
-          />
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex-1 overflow-y-auto ios-scrollbar bg-ios-bg-primary">
-          {/* Project Title Section */}
-          <div className="px-6 py-4 bg-ios-bg-card border-b border-ios-border">
-            <h1 className="ios-title-1 text-ios-text-primary ios-font-display">
-              {project.name}
-            </h1>
+      <main className="flex-1 flex flex-col min-w-0 h-full bg-bg-primary">
+        <header className="h-[48px] border-b border-border-subtle flex items-center justify-between px-[24px] shrink-0 bg-bg-primary">
+          <div className="text-[13px] font-semibold text-text-primary flex items-center gap-2 max-w-[60%]">
+            <a
+              href="/"
+              className="text-text-secondary hover:text-text-primary transition-colors inline-flex"
+            >
+              ←
+            </a>
+            <span className="truncate">{project.name}</span>
           </div>
+          <div className="flex items-center gap-[8px]"></div>
+        </header>
+
+        <div className="flex-1 overflow-y-auto bg-bg-primary">
 
           {/* Settings Tabs */}
-          <div className="border-b border-ios-border bg-ios-bg-card sticky top-0 z-10">
-            <nav className="flex space-x-0 ios-scrollbar overflow-x-auto max-w-6xl mx-auto">
+          <div className="border-b border-border-default bg-bg-elevated sticky top-0 z-10">
+            <nav className="flex space-x-0 linear-scrollbar overflow-x-auto max-w-6xl mx-auto">
               {tabs.map((tab) => (
                 <a
                   key={tab.id}
                   href={tab.href}
                   className={`
-                    relative flex items-center gap-2 px-4 py-3 ios-body font-medium transition-colors whitespace-nowrap
+                    relative flex items-center gap-2 px-4 py-3 text-[13px] font-medium transition-colors whitespace-nowrap
                     ${tab.id === 'settings'
-                      ? 'text-ios-blue border-b-2 border-ios-blue'
-                      : 'text-ios-text-secondary hover:text-ios-text-primary border-b-2 border-transparent'
+                      ? 'text-accent border-b-2 border-accent'
+                      : 'text-text-secondary hover:text-text-primary border-b-2 border-transparent'
                     }
                   `}
                 >
@@ -220,8 +206,8 @@ export function ProjectSettingsClient({
           <div className="px-6 py-6">
             <div className="max-w-3xl space-y-6">
               {/* General Section */}
-              <section className="ios-card p-6">
-                <h2 className="ios-title-3 text-ios-text-primary mb-4 ios-font-display">
+              <section className="bg-bg-elevated border border-border-default rounded-[8px] p-6">
+                <h2 className="text-[16px] font-semibold text-text-primary mb-4 ">
                   General
                 </h2>
 
@@ -229,18 +215,18 @@ export function ProjectSettingsClient({
                   {/* Project Details */}
                   <div className="space-y-4">
                     <div>
-                      <label className="ios-callout block text-ios-text-secondary mb-2">
+                      <label className="text-[13px] font-medium block text-text-secondary mb-2">
                         Name
                       </label>
                       <input
                         type="text"
                         value={projectNameInput}
                         onChange={(e) => setProjectNameInput(e.target.value)}
-                        className="ios-input w-full"
+                        className="h-[30px] bg-bg-elevated border border-border-default rounded-[6px] text-text-primary text-[12px] px-[10px] outline-none focus:border-border-strong placeholder:text-text-tertiary transition-colors w-full"
                       />
                     </div>
                     <div>
-                      <label className="ios-callout block text-ios-text-secondary mb-2">
+                      <label className="text-[13px] font-medium block text-text-secondary mb-2">
                         Description
                       </label>
                       <input
@@ -248,25 +234,25 @@ export function ProjectSettingsClient({
                         value={projectDescriptionInput}
                         onChange={(e) => setProjectDescriptionInput(e.target.value)}
                         placeholder="A brief summary of what this project is"
-                        className="ios-input w-full"
+                        className="h-[30px] bg-bg-elevated border border-border-default rounded-[6px] text-text-primary text-[12px] px-[10px] outline-none focus:border-border-strong placeholder:text-text-tertiary transition-colors w-full"
                       />
                     </div>
                     <div>
-                      <label className="ios-callout block text-ios-text-secondary mb-2">
+                      <label className="text-[13px] font-medium block text-text-secondary mb-2">
                         Mission
                       </label>
                       <textarea
                         value={projectMissionInput}
                         onChange={(e) => setProjectMissionInput(e.target.value)}
                         placeholder="The core goal or purpose of the project"
-                        className="ios-input w-full min-h-[80px]"
+                        className="h-[30px] bg-bg-elevated border border-border-default rounded-[6px] text-text-primary text-[12px] px-[10px] outline-none focus:border-border-strong placeholder:text-text-tertiary transition-colors w-full min-h-[80px]"
                       />
                     </div>
 
                     <div className="flex items-center justify-between pt-2">
                       <div>
                         {detailsMessage && (
-                          <span className={`ios-caption-1 ${detailsMessage.includes('saved') ? 'text-ios-green' : 'text-ios-red'}`}>
+                          <span className={`text-[11px] ${detailsMessage.includes('saved') ? 'text-status-success' : 'text-status-error'}`}>
                             {detailsMessage}
                           </span>
                         )}
@@ -283,7 +269,7 @@ export function ProjectSettingsClient({
 
                   {/* Constitution */}
                   <div>
-                    <label className="ios-callout block text-ios-text-secondary mb-2">
+                    <label className="text-[13px] font-medium block text-text-secondary mb-2">
                       Constitution
                     </label>
                     <InlineConstitutionEditor
@@ -294,7 +280,7 @@ export function ProjectSettingsClient({
 
                   {/* Tech Stack */}
                   <div>
-                    <label className="ios-callout block text-ios-text-secondary mb-2">
+                    <label className="text-[13px] font-medium block text-text-secondary mb-2">
                       Tech Stack
                     </label>
                     <InlineTechStackEditor
@@ -306,18 +292,18 @@ export function ProjectSettingsClient({
               </section>
 
               {/* Git Integration Section */}
-              <section className="ios-card p-6">
-                <h2 className="ios-title-3 text-ios-text-primary mb-4 ios-font-display">
+              <section className="bg-bg-elevated border border-border-default rounded-[8px] p-6">
+                <h2 className="text-[16px] font-semibold text-text-primary mb-4 ">
                   Git Integration
                 </h2>
 
-                <p className="ios-body text-ios-text-secondary mb-4">
+                <p className="text-[13px] text-text-secondary mb-4">
                   Connect a repository to track agent commits automatically.
                 </p>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="ios-callout block text-ios-text-secondary mb-2">
+                    <label className="text-[13px] font-medium block text-text-secondary mb-2">
                       Repository URL
                     </label>
                     <input
@@ -325,13 +311,13 @@ export function ProjectSettingsClient({
                       value={repoUrl}
                       onChange={(e) => setRepoUrl(e.target.value)}
                       placeholder="https://github.com/org/repo"
-                      className="ios-input"
+                      className="h-[30px] bg-bg-elevated border border-border-default rounded-[6px] text-text-primary text-[12px] px-[10px] outline-none focus:border-border-strong placeholder:text-text-tertiary transition-colors"
                     />
                   </div>
 
                   <div className="flex items-center gap-4">
                     <div className="flex-1">
-                      <label className="ios-callout block text-ios-text-secondary mb-2">
+                      <label className="text-[13px] font-medium block text-text-secondary mb-2">
                         Default Branch
                       </label>
                       <select
@@ -347,7 +333,7 @@ export function ProjectSettingsClient({
                     </div>
 
                     <div className="flex-1">
-                      <label className="ios-callout block text-ios-text-secondary mb-2">
+                      <label className="text-[13px] font-medium block text-text-secondary mb-2">
                         Merge Strategy
                       </label>
                       <select
@@ -365,7 +351,7 @@ export function ProjectSettingsClient({
                   <div className="flex items-center justify-between pt-2">
                     <div>
                       {gitConfigMessage && (
-                        <span className={`ios-caption-1 ${gitConfigMessage.includes('saved') ? 'text-ios-green' : 'text-ios-red'}`}>
+                        <span className={`text-[11px] ${gitConfigMessage.includes('saved') ? 'text-status-success' : 'text-status-error'}`}>
                           {gitConfigMessage}
                         </span>
                       )}
@@ -382,9 +368,9 @@ export function ProjectSettingsClient({
               </section>
 
               {/* Agent Tokens Section */}
-              <section className="ios-card p-6">
+              <section className="bg-bg-elevated border border-border-default rounded-[8px] p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="ios-title-3 text-ios-text-primary ios-font-display">
+                  <h2 className="text-[16px] font-semibold text-text-primary ">
                     Agent Tokens
                   </h2>
                   <Button variant="secondary" size="small" onClick={() => setShowTokenDialog(true)}>
@@ -392,19 +378,19 @@ export function ProjectSettingsClient({
                   </Button>
                 </div>
 
-                <div className="text-center py-8 bg-ios-secondary rounded-ios-lg border border-ios-border">
-                  <p className="ios-body text-ios-text-secondary">
+                <div className="text-center py-8 bg-ios-secondary rounded-ios-lg border border-border-default">
+                  <p className="text-[13px] text-text-secondary">
                     No agent tokens configured yet.
                   </p>
-                  <p className="ios-caption-1 text-ios-placeholder mt-2">
+                  <p className="text-[11px] text-text-tertiary mt-2">
                     Generate a token to allow agents to access this project.
                   </p>
                 </div>
               </section>
 
               {/* Danger Zone */}
-              <section className="ios-card p-6 border-2 border-ios-red">
-                <h2 className="ios-title-3 text-ios-red mb-4 ios-font-display">
+              <section className="bg-bg-elevated border border-border-default rounded-[8px] p-6 border-2 border-status-error">
+                <h2 className="text-[16px] font-semibold text-status-error mb-4 ">
                   Danger Zone
                 </h2>
 
@@ -414,13 +400,13 @@ export function ProjectSettingsClient({
                       backgroundColor: archiveMessage.includes('success') ? 'rgba(52, 199, 89, 0.1)' : 'rgba(255, 69, 58, 0.1)',
                       borderColor: 'var(--ios-separator)',
                     }}>
-                    <p className={`ios-caption-1 ${archiveMessage.includes('success') ? 'text-ios-green' : 'text-ios-red'}`}>
+                    <p className={`text-[11px] ${archiveMessage.includes('success') ? 'text-status-success' : 'text-status-error'}`}>
                       {archiveMessage}
                     </p>
                   </div>
                 )}
 
-                <p className="ios-body text-ios-text-secondary mb-4">
+                <p className="text-[13px] text-text-secondary mb-4">
                   {project.status === 'archived'
                     ? 'This project is currently archived and hidden from the dashboard.'
                     : 'Archiving a project will hide it from the dashboard but preserve all data.'}
@@ -437,8 +423,8 @@ export function ProjectSettingsClient({
               </section>
             </div>
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
 
       {/* Archive/Unarchive Confirmation Dialog */}
       <ArchiveProjectDialog

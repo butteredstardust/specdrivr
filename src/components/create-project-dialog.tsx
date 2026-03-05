@@ -98,21 +98,21 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
       />
 
       {/* Dialog Content */}
-      <div className="ios-card shadow-xl w-full max-w-md mx-4 overflow-hidden ios">
+      <div className="bg-bg-elevated border border-border-default rounded-[8px] shadow-xl w-full max-w-md mx-4 overflow-hidden ios">
         <div className="p-6">
-          <h2 className="ios-title-2 text-ios-primary mb-6 ios-font-display">
+          <h2 className="text-[20px] font-semibold text-ios-primary mb-6 ">
             Create New Project
           </h2>
 
           {error && (
-            <div className="mb-4 p-3 bg-opacity-10 border ios-radius" style={{ backgroundColor: 'var(--ios-red)', borderColor: 'var(--ios-separator)' }}>
-              <p className="ios-footnote text-ios-red ios-font-text">{error}</p>
+            <div className="mb-4 p-3 bg-opacity-10 border rounded-[8px]" style={{ backgroundColor: 'var(--status-error)', borderColor: 'var(--ios-separator)' }}>
+              <p className="text-[11px] text-text-tertiary text-status-error ">{error}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4 ios-font-text">
+          <form onSubmit={handleSubmit} className="space-y-4 ">
             <div>
-              <label htmlFor="name" className="block ios-subheadline text-ios-primary mb-1">
+              <label htmlFor="name" className="block text-[12px] text-ios-primary mb-1">
                 Project Name
               </label>
               <input
@@ -120,60 +120,60 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 ios-radius border border-ios bg-ios-primary text-ios-primary ios-font-text focus:outline-none focus:ring-2 focus:ring-[var(--ios-blue)] focus:border-[var(--ios-blue)] transition-shadow"
+                className="w-full px-3 py-2 rounded-[8px] border border-ios bg-ios-primary text-ios-primary  focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-shadow"
                 placeholder="My Awesome Project"
                 required
                 style={{
-                  backgroundColor: 'var(--ios-bg-primary)',
-                  color: 'var(--ios-text-primary)',
+                  backgroundColor: 'var(--bg-bg-primary)',
+                  color: 'var(--text-text-primary)',
                   borderColor: 'var(--ios-separator)',
                 }}
               />
             </div>
 
             <div>
-              <label htmlFor="constitution" className="block ios-subheadline text-ios-primary mb-1">
+              <label htmlFor="constitution" className="block text-[12px] text-ios-primary mb-1">
                 Project Constitution
               </label>
               <textarea
                 id="constitution"
                 value={formData.constitution}
                 onChange={(e) => setFormData({ ...formData, constitution: e.target.value })}
-                className="w-full px-3 py-2 ios-radius border border-ios bg-ios-primary text-ios-primary ios-font-text focus:outline-none focus:ring-2 focus:ring-[var(--ios-blue)] focus:border-[var(--ios-blue)] transition-shadow resize-none"
+                className="w-full px-3 py-2 rounded-[8px] border border-ios bg-ios-primary text-ios-primary  focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-shadow resize-none"
                 placeholder="Brief description of the project's purpose..."
                 rows={3}
                 style={{
-                  backgroundColor: 'var(--ios-bg-primary)',
-                  color: 'var(--ios-text-primary)',
+                  backgroundColor: 'var(--bg-bg-primary)',
+                  color: 'var(--text-text-primary)',
                   borderColor: 'var(--ios-separator)',
                 }}
               />
             </div>
 
             <div>
-              <label htmlFor="techStack" className="block ios-subheadline text-ios-primary mb-1">
+              <label htmlFor="techStack" className="block text-[12px] text-ios-primary mb-1">
                 Tech Stack (JSON)
               </label>
               <textarea
                 id="techStack"
                 value={formData.techStack}
                 onChange={(e) => setFormData({ ...formData, techStack: e.target.value })}
-                className="w-full px-3 py-2 ios-radius border border-ios bg-ios-primary text-ios-primary ios-font-text font-mono ios-footnote focus:outline-none focus:ring-2 focus:ring-[var(--ios-blue)] focus:border-[var(--ios-blue)] transition-shadow resize-none"
+                className="w-full px-3 py-2 rounded-[8px] border border-ios bg-ios-primary text-ios-primary  font-mono text-[11px] text-text-tertiary focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-shadow resize-none"
                 placeholder='{"language": "TypeScript", "framework": "Next.js"}'
                 rows={3}
                 style={{
-                  backgroundColor: 'var(--ios-bg-primary)',
-                  color: 'var(--ios-text-primary)',
+                  backgroundColor: 'var(--bg-bg-primary)',
+                  color: 'var(--text-text-primary)',
                   borderColor: 'var(--ios-separator)',
                 }}
               />
-              <p className="mt-1 ios-caption text-ios-placeholder">
+              <p className="mt-1 ios-caption text-text-tertiary">
                 Optional: Enter tech stack as JSON object
               </p>
             </div>
 
             <div>
-              <label htmlFor="basePath" className="block ios-subheadline text-ios-primary mb-1">
+              <label htmlFor="basePath" className="block text-[12px] text-ios-primary mb-1">
                 Base Path
               </label>
               <input
@@ -181,11 +181,11 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
                 id="basePath"
                 value={formData.basePath}
                 onChange={(e) => setFormData({ ...formData, basePath: e.target.value })}
-                className="w-full px-3 py-2 ios-radius border border-ios bg-ios-primary text-ios-primary ios-font-text font-mono ios-footnote focus:outline-none focus:ring-2 focus:ring-[var(--ios-blue)] focus:border-[var(--ios-blue)] transition-shadow"
+                className="w-full px-3 py-2 rounded-[8px] border border-ios bg-ios-primary text-ios-primary  font-mono text-[11px] text-text-tertiary focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-shadow"
                 placeholder="/path/to/project"
                 style={{
-                  backgroundColor: 'var(--ios-bg-primary)',
-                  color: 'var(--ios-text-primary)',
+                  backgroundColor: 'var(--bg-bg-primary)',
+                  color: 'var(--text-text-primary)',
                   borderColor: 'var(--ios-separator)',
                 }}
               />
@@ -195,16 +195,16 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
               <button
                 type="button"
                 onClick={handleCancel}
-                className="px-4 py-2 text-[17px] font-medium text-ios-blue bg-ios-secondary border border-ios ios-radius transition-colors ios-font-text disabled:opacity-50"
+                className="px-4 py-2 text-[17px] font-medium text-accent bg-ios-secondary border border-ios rounded-[8px] transition-colors  disabled:opacity-50"
                 disabled={isSubmitting}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 text-[17px] font-medium text-white ios-radius transition-colors ios-font-text disabled:opacity-50"
+                className="px-4 py-2 text-[17px] font-medium text-white rounded-[8px] transition-colors  disabled:opacity-50"
                 disabled={isSubmitting || !formData.name.trim()}
-                style={{ backgroundColor: 'var(--ios-blue)' }}
+                style={{ backgroundColor: 'var(--accent)' }}
               >
                 {isSubmitting ? 'Creating...' : 'Create'}
               </button>

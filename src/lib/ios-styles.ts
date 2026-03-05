@@ -10,7 +10,7 @@ export const iosInputStyle = {
   width: '100%',
   padding: '8px 12px',
   backgroundColor: 'var(--ios-bg-card)',
-  color: 'var(--ios-text-primary)',
+  color: 'var(--ios-text-text-primary)',
   borderColor: 'var(--ios-border)',
   borderRadius: '12px',
   fontSize: '17px',
@@ -23,13 +23,13 @@ export const iosInputFocusStyle = {
 } as const;
 
 export const iosButtonBase = {
-  base: 'px-4 py-2 ios-body ios-rounded-lg ios-font-text transition-colors disabled:opacity-50',
+  base: 'px-4 py-2 text-[13px] text-text-primary ios-rounded-lg  transition-colors disabled:opacity-50',
   variants: {
     primary: 'text-white bg-ios-blue',
     secondary: 'text-ios-blue bg-ios-bg-card border border-ios-border',
     tertiary: 'text-ios-blue bg-ios-secondary border border-ios-border',
     danger: 'text-white bg-ios-red',
-    ghost: 'text-ios-text-primary bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800',
+    ghost: 'text-ios-text-text-primary bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800',
   },
 } as const;
 

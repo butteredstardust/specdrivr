@@ -94,14 +94,14 @@ export function GenerateTokenDialog({ isOpen, onClose, onTokenGenerated }: Gener
       >
         {!generatedToken ? (
           <div className="space-y-4">
-            <div className="bg-ios-yellow/10 text-ios-orange-700 ios-caption-1 px-3 py-2 rounded-md border border-ios-yellow/30">
+            <div className="bg-ios-yellow/10 text-status-warning-700 text-[11px] px-3 py-2 rounded-md border border-ios-yellow/30">
               ⚠️ Warning: Agent tokens provide full API access. Keep them secret and rotate regularly.
             </div>
 
             <div>
               <label
                 htmlFor="token-name"
-                className="ios-caption-1 text-ios-text-primary uppercase tracking-wide block mb-2"
+                className="text-[11px] text-text-primary uppercase tracking-wide block mb-2"
               >
                 Token Name
               </label>
@@ -111,11 +111,11 @@ export function GenerateTokenDialog({ isOpen, onClose, onTokenGenerated }: Gener
                 value={tokenName}
                 onChange={(e) => setTokenName(e.target.value)}
                 placeholder="e.g.,Production Agent, Claude Opus"
-                className="ios-input ios-body w-full"
+                className="h-[30px] bg-bg-elevated border border-border-default rounded-[6px] text-text-primary text-[12px] px-[10px] outline-none focus:border-border-strong placeholder:text-text-tertiary transition-colors text-[13px] w-full"
                 disabled={isGenerating}
                 maxLength={100}
               />
-              <p className="ios-caption-1 text-ios-text-tertiary mt-1">
+              <p className="text-[11px] text-text-tertiary mt-1">
                 Give this token a recognizable name
               </p>
             </div>
@@ -123,7 +123,7 @@ export function GenerateTokenDialog({ isOpen, onClose, onTokenGenerated }: Gener
             <div>
               <label
                 htmlFor="model-hint"
-                className="ios-caption-1 text-ios-text-primary uppercase tracking-wide block mb-2"
+                className="text-[11px] text-text-primary uppercase tracking-wide block mb-2"
               >
                 Primary Model (Optional)
               </label>
@@ -131,7 +131,7 @@ export function GenerateTokenDialog({ isOpen, onClose, onTokenGenerated }: Gener
                 id="model-hint"
                 value={modelHint}
                 onChange={(e) => setModelHint(e.target.value)}
-                className="ios-select ios-body w-full"
+                className="ios-select text-[13px] w-full"
                 disabled={isGenerating}
               >
                 {modelOptions.map((option) => (
@@ -140,23 +140,23 @@ export function GenerateTokenDialog({ isOpen, onClose, onTokenGenerated }: Gener
                   </option>
                 ))}
               </select>
-              <p className="ios-caption-1 text-ios-text-tertiary mt-1">
+              <p className="text-[11px] text-text-tertiary mt-1">
                 The model this token is primarily configured for
               </p>
             </div>
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="bg-ios-green/10 text-ios-green-700 ios-caption-1 px-3 py-2 rounded-md border border-ios-green/30">
+            <div className="bg-status-success/10 text-status-success-700 text-[11px] px-3 py-2 rounded-md border border-status-success/30">
               ✓ Token generated successfully. Store it securely - you won't see it again!
             </div>
 
             <div>
-              <label className="ios-caption-1 text-ios-text-primary uppercase tracking-wide block mb-2">
+              <label className="text-[11px] text-text-primary uppercase tracking-wide block mb-2">
                 Your Token
               </label>
               <div className="flex items-center gap-2">
-                <code className="flex-1 ios-card p-3 ios-footnote text-ios-text-primary bg-ios-gray-6 break-all">
+                <code className="flex-1 bg-bg-elevated border border-border-default rounded-[8px] p-3 text-[11px] text-text-tertiary text-text-primary bg-status-idle-6 break-all">
                   {generatedToken}
                 </code>
                 <Button variant="secondary" size="small" onClick={handleCopyToken}>
@@ -165,20 +165,20 @@ export function GenerateTokenDialog({ isOpen, onClose, onTokenGenerated }: Gener
               </div>
             </div>
 
-            <div className="ios-card p-3 space-y-2 ios-footnote">
+            <div className="bg-bg-elevated border border-border-default rounded-[8px] p-3 space-y-2 text-[11px] text-text-tertiary">
               <div className="flex justify-between">
-                <span className="text-ios-text-secondary">Name:</span>
-                <span className="text-ios-text-primary font-medium">{tokenName}</span>
+                <span className="text-text-secondary">Name:</span>
+                <span className="text-text-primary font-medium">{tokenName}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-ios-text-secondary">Model:</span>
-                <span className="text-ios-text-primary">
+                <span className="text-text-secondary">Model:</span>
+                <span className="text-text-primary">
                   {modelOptions.find((o) => o.value === modelHint)?.label}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-ios-text-secondary">Created:</span>
-                <span className="text-ios-text-primary">Just now</span>
+                <span className="text-text-secondary">Created:</span>
+                <span className="text-text-primary">Just now</span>
               </div>
             </div>
           </div>
