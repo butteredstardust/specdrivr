@@ -83,6 +83,7 @@ describe('InlinePlanEditor - View Mode', () => {
 
 describe('InlinePlanEditor - Edit Mode', () => {
   beforeEach(() => {
+    mockUpdatePlanDev.mockResolvedValue({ success: true });
     render(<InlinePlanEditor specId={1} plans={mockPlans} />);
     // Click Edit to enter edit mode
     fireEvent.click(screen.getByText('Edit'));
@@ -151,7 +152,7 @@ describe('InlinePlanEditor - Edit Mode', () => {
     const textarea = document.querySelector('textarea') as HTMLTextAreaElement;
     fireEvent.change(textarea, { target: { value: 'invalid json' } });
 
-    fireEvent.click(screen.getByText('Save'));
+    fireEvent.click(screen.getByText('Update'));
 
     await waitFor(() => {
       expect(screen.getByText('Invalid JSON format')).toBeInTheDocument();
@@ -384,13 +385,15 @@ describe('InlinePlanEditor - Edge Cases', () => {
     ];
 
     render(<InlinePlanEditor specId={1} plans={mixedPlans} />);
-    fireEvent.click(screen.getByText('Edit'));
 
+    // Select dropdown should be visible when in view mode with multiple plans
     const select = document.querySelector('select');
     expect(select).toBeInTheDocument();
 
-    // Should have both plans in dropdown
-    expect(screen.getByText(/Plan #1/)).toBeInTheDocument();
-    expect(screen.getByText(/Plan #2/)).toBeInTheDocument();
+    // Should have both plans in dropdown options
+    const options = document.querySelectorAll('option');
+    expect(options.length).toBeGreaterThanOrEqual(2);
+    expect(options[0].textContent).toContain('Plan #1');
+    expect(options[1].textContent).toContain('Plan #2');
   });
 });
