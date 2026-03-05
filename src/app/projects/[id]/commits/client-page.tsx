@@ -53,14 +53,19 @@ export function ProjectCommitsClient({
       href: `/projects/${projectId}?tab=plan`,
     },
     {
-      id: 'logs',
-      label: 'Logs',
-      href: `/projects/${projectId}?tab=logs`,
-    },
-    {
       id: 'commits',
       label: 'Commits',
       href: `/projects/${projectId}/commits`,
+    },
+    {
+      id: 'test-results',
+      label: 'Test Results',
+      href: `/projects/${projectId}?tab=test-results`,
+    },
+    {
+      id: 'logs',
+      label: 'Logs',
+      href: `/projects/${projectId}?tab=logs`,
     },
     {
       id: 'settings',

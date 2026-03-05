@@ -104,11 +104,9 @@ export function ProjectTabLayout({
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
           {/* Left side - Project info and agent status */}
           <div className="flex-1">
-            <div className="flex items-start justify-between lg:hidden">
-              <h1 className="ios-title-2 text-ios-text-primary ios-font-display">
-                {projectName}
-              </h1>
-            </div>
+            <h1 className="ios-title-2 text-ios-text-primary ios-font-display">
+              {projectName}
+            </h1>
 
             {/* Tech Stack */}
             {techStack.length > 0 && (
@@ -150,11 +148,6 @@ export function ProjectTabLayout({
 
           {/* Right side - Agent controls */}
           <div className="flex flex-col items-end gap-3">
-            {/* Project title (desktop only) */}
-            <h1 className="hidden lg:block ios-title-2 text-ios-text-primary ios-font-display">
-              {projectName}
-            </h1>
-
             {/* Agent Buttons */}
             <AgentButtons
               projectId={projectId}

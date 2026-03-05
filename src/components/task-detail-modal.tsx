@@ -178,13 +178,13 @@ export function TaskDetailModal({
               Priority
             </span>
             <div className="flex items-center gap-2">
-              <div className="flex">
+              <div className="flex gap-0.5">
                 {[1, 2, 3, 4, 5].map((p) => (
                   <div
                     key={p}
                     className={clsx(
                       'w-3 h-3 rounded-ios-xl',
-                      p <= task.priority
+                      p <= Math.min(task.priority, 5)
                         ? `bg-${['gray', 'yellow', 'orange', 'red', 'red'][p - 1]}-${400 + (p === 5 ? 200 : 100)}`
                         : 'bg-ios-gray-5'
                     )}

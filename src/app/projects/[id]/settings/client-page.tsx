@@ -49,6 +49,16 @@ export function ProjectSettingsClient({
       href: `/projects/${projectId}?tab=plan`,
     },
     {
+      id: 'commits',
+      label: 'Commits',
+      href: `/projects/${projectId}/commits`,
+    },
+    {
+      id: 'test-results',
+      label: 'Test Results',
+      href: `/projects/${projectId}?tab=test-results`,
+    },
+    {
       id: 'logs',
       label: 'Logs',
       href: `/projects/${projectId}?tab=logs`,
@@ -64,8 +74,8 @@ export function ProjectSettingsClient({
   const techStack = Array.isArray(project.techStack)
     ? (project.techStack as string[])
     : typeof project.techStack === 'string'
-    ? [project.techStack]
-    : [];
+      ? [project.techStack]
+      : [];
 
   const [isArchiving, setIsArchiving] = useState(false);
   const [archiveMessage, setArchiveMessage] = useState<string | null>(null);
@@ -370,13 +380,6 @@ export function ProjectSettingsClient({
         onConfirm={handleArchive}
         projectName={project.name}
         isArchived={project.status === 'archived'}
-      />
-
-      {/* Archive confirmation state */}
-      <input
-        type="hidden"
-        value={projectNameInput}
-        onChange={(e) => setProjectNameInput(e.target.value)}
       />
 
       {/* Generate Token Dialog */}

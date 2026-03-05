@@ -17,9 +17,9 @@ interface SettingGroup {
   items: SettingItem[];
 }
 
-interface SettingsPageProps {}
+interface SettingsPageProps { }
 
-export default async function SettingsPage({}: SettingsPageProps) {
+export default async function SettingsPage({ }: SettingsPageProps) {
   const projectsResult = await getProjects();
   let projects: any[] = [];
   if (projectsResult.success && projectsResult.projects) {
@@ -112,7 +112,7 @@ export default async function SettingsPage({}: SettingsPageProps) {
   return (
     <div className="min-h-screen bg-ios-system">
       <header className="sticky top-0 z-50 ios-header border-b ios">
-        <div className="max-w-3xl mx-auto px-6 py-4">
+        <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex-1">
               <Logo size="large" className="min-w-40" />

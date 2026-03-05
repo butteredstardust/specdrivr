@@ -3,6 +3,7 @@
 import { ProjectSelect } from '@/db/schema';
 import { CreateProjectDialog } from './create-project-dialog';
 import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { useSidebar } from './project-sidebar-wrapper';
 import { agentStatusColors, type AgentStatus } from '@/lib/ios-styles';
 
@@ -73,7 +74,7 @@ export function ProjectSidebar({ projects, activeProjectId, currentProjectId, on
         <div className="flex-1 overflow-y-auto">
           <nav className="p-3 space-y-2">
             {/* Home Link */}
-            <a
+            <Link
               href="/"
               className={`
                 block cursor-pointer ios-radius p-[13px] transition-colors ios-font-text
@@ -87,7 +88,7 @@ export function ProjectSidebar({ projects, activeProjectId, currentProjectId, on
                 <span className="text-xl">🏠</span>
                 <span className="text-[17px] font-medium">Home</span>
               </div>
-            </a>
+            </Link>
 
             {/* Divider */}
             <div className="h-[1px] bg-opacity-12 my-2" style={{ backgroundColor: 'var(--ios-separator)' }} />
@@ -106,7 +107,7 @@ export function ProjectSidebar({ projects, activeProjectId, currentProjectId, on
               const statusClass = getAgentStatusClass(agentStatus);
 
               return (
-                <a
+                <Link
                   key={project.id}
                   href={`/projects/${project.id}`}
                   onClick={(e) => {
@@ -138,7 +139,7 @@ export function ProjectSidebar({ projects, activeProjectId, currentProjectId, on
                       </span>
                     )}
                   </div>
-                </a>
+                </Link>
               );
             })}
           </nav>
@@ -146,13 +147,13 @@ export function ProjectSidebar({ projects, activeProjectId, currentProjectId, on
           {/* Bottom Actions */}
           <div className="p-3 border-t border-opacity-12 mt-auto" style={{ borderColor: 'var(--ios-separator)' }}>
             <div className="flex gap-2">
-              <a
+              <Link
                 href="/settings"
                 className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[13px] font-medium text-ios-blue bg-ios-secondary border border-ios ios-radius transition-colors ios-font-text"
               >
                 <span className="text-base">⚙️</span>
                 <span>Settings</span>
-              </a>
+              </Link>
               <div className="flex-1 min-w-0">
                 <CreateProjectDialog onProjectCreated={onProjectCreated} />
               </div>

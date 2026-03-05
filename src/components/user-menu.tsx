@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Avatar } from './avatar';
 import { cn } from '@/lib/utils';
 
@@ -118,13 +119,13 @@ export function UserMenu() {
 
   if (!user) {
     return (
-      <a
+      <Link
         href="/auth/login"
         className="ios-button-primary px-4 py-2"
         style={{ fontSize: '15px' }}
       >
         Sign In
-      </a>
+      </Link>
     );
   }
 

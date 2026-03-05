@@ -89,7 +89,7 @@ export function CompactAgentStatus({ status }: { status: AgentStatus }) {
 
   return (
     <div
-      className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[11px] font-medium ${statusInfo.bg} ${statusInfo.text}`}
+      className={`flex items-center gap-1.5 px-2 py-1 rounded-ios-xl ios-caption-1 font-medium ${statusInfo.bg} ${statusInfo.text}`}
       title={agentStatusLabels[status]}
     >
       <div className={`ios-status-dot ${statusInfo.dot}`} />
