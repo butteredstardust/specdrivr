@@ -30,6 +30,7 @@ export default function AdminUsersPage() {
   const [showDeactivateDialog, setShowDeactivateDialog] = useState(false);
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [newUserRole, setNewUserRole] = useState<UserRole>('viewer');
   const [creatingUser, setCreatingUser] = useState(false);
 
   // Fetch users on mount
@@ -178,9 +179,9 @@ export default function AdminUsersPage() {
         body: JSON.stringify({
           username: newUsername,
           password: newPassword,
-          role: 'viewer',
+          role: newUserRole,
           isActive: true,
-          isAdmin: false,
+          isAdmin: newUserRole === 'admin',
         }),
       });
 
@@ -198,6 +199,7 @@ export default function AdminUsersPage() {
       setShowCreateDialog(false);
       setNewUsername('');
       setNewPassword('');
+      setNewUserRole('viewer');
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create user');
@@ -428,8 +430,8 @@ export default function AdminUsersPage() {
             </label>
             <select
               className="ios-select ios-body w-full"
-              value="viewer"
-              disabled
+              value={newUserRole}
+              onChange={(e) => setNewUserRole(e.target.value as UserRole)}
             >
               <option value="viewer">Viewer</option>
               <option value="developer">Developer</option>
