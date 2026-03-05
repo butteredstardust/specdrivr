@@ -15,16 +15,14 @@ jest.mock('@/lib/actions', () => ({
 
 const mockUpdateTaskStatus = require('@/lib/actions').updateTaskStatus as jest.Mock;
 
-// Mock the drag sensors
-jest.mock('@dnd-kit/core', () => {
-  const original = jest.requireActual('@dnd-kit/core');
-  return {
-    ...original,
-    useSensors: jest.fn(() => original.useSensors),
-    PointerSensor: original.PointerSensor,
-    KeyboardSensor: original.KeyboardSensor,
-  };
-});
+// Helper to wrap component in DndContext for testing
+const renderWithDnd = (component: React.ReactElement) => {
+  return render(
+    <DndContext sensors={[]} onDragStart={() => {}} onDragEnd={() => {}}>
+      {component}
+    </DndContext>
+  );
+};
 
 describe('KanbanBoard - Core Functionality', () => {
   describe('Column Structure', () => {
@@ -36,7 +34,11 @@ describe('KanbanBoard - Core Functionality', () => {
         { id: 4, description: 'Blocked task', status: 'blocked', priority: 'high', filesInvolved: null },
       ];
 
-      render(<KanbanBoard tasks={tasks} />);
+      render(
+        <DndContext sensors={[]} onDragStart={() => {}} onDragEnd={() => {}}>
+          <KanbanBoard tasks={tasks} />
+        </DndContext>
+      );
 
       const columns = ['todo', 'in_progress', 'done', 'blocked'];
       for (const column of columns) {

@@ -109,6 +109,12 @@ export function ProjectSidebar({ projects, activeProjectId, currentProjectId, on
                 <a
                   key={project.id}
                   href={`/projects/${project.id}`}
+                  onClick={(e) => {
+                    if (onProjectSelect) {
+                      e.preventDefault();
+                      onProjectSelect(project);
+                    }
+                  }}
                   className={`
                     block cursor-pointer ios-radius p-[13px] transition-colors
                     ${isProjectActive
@@ -118,11 +124,11 @@ export function ProjectSidebar({ projects, activeProjectId, currentProjectId, on
                   `}
                 >
                   <div className="flex items-start justify-between ios-font-text">
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-2.5 max-w-[150px]">
                       {/* Agent Status Dot */}
                       <div className={`ios-status-dot ${statusClass}`} title={`Agent status: ${agentStatus}`} />
                       <span className="text-lg">📁</span>
-                      <h3 className="text-[17px] font-medium truncate max-w-[150px]" title={project.name}>
+                      <h3 className="text-[17px] font-medium truncate" title={project.name}>
                         {project.name}
                       </h3>
                     </div>

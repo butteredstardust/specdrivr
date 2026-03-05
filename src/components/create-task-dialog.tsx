@@ -15,6 +15,36 @@ interface CreateTaskDialogProps {
   onTaskCreated?: (task: TaskSelect) => void;
 }
 
+// Parse description for quick mode
+// Supports: "Fix bug #5 in src/api/auth.ts"
+export const parseQuickDescription = (text: string) => {
+  const trimmed = text.trim();
+
+  // Extract priority: #1, #2, #3 through #10
+  const priorityMatch = trimmed.match(/#([1-9]|10)\b/);
+  const priority = priorityMatch ? priorityMatch[1] : '5'; // Default to 5
+
+  // Extract file paths from quotes
+  const filePaths: string[] = [];
+  const quotedMatches = trimmed.matchAll(/"([^"]+?)"/g);
+  for (const match of quotedMatches) {
+    filePaths.push(match[1]);
+  }
+
+  // Remove file paths and priority notation from description
+  let description = trimmed;
+  filePaths.forEach((file) => {
+    description = description.replace(`"${file}"`, '');
+  });
+  description = description.replace(/#[1-9]\b/g, '').replace(/#10\b/g, '').replace(/\s+/g, ' ').trim();
+
+  return {
+    priority: parseInt(priority, 10),
+    description: description || trimmed,
+    filesInvolved: filePaths,
+  };
+};
+
 const iosInputStyle = {
   width: '100%',
   padding: '8px 12px',
@@ -51,27 +81,6 @@ export function CreateTaskDialog({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
-
-  // Parse description for quick mode
-  // Supports: "[P3] Modify src/api/auth.ts and tests/auth.test.ts"
-  const parseQuickDescription = (text: string) => {
-    const trimmed = text.trim();
-
-    // Extract priority: [P1], [P2], [P3], etc.
-    const priorityMatch = trimmed.match(/\[P([1-9]|10)\]/i);
-    const priority = priorityMatch ? priorityMatch[1] : '1';
-
-    // Extract file paths: simple .ts, .tsx extensions, or paths in quotes
-    const fileMatches = trimmed.matchAll(/"([^"]+\.(ts|tsx|js|jsx))"/g);
-    const extMatches = trimmed.matchAll(/\b([a-zA-Z0-9_/\\.-]+\.(ts|tsx|js|jsx))\b/g);
-
-    const files = [
-      ...[...fileMatches].map((m) => m[1]),
-      ...[...extMatches].map((m) => m[1]),
-    ];
-
-    return { priority, files, text: trimmed.replace(/\[P([1-9]|10)\]/gi, '').replace(/"[^"]+\.(ts|tsx|js|jsx)"/g, '').trim() };
-  };
 
   const handleDescriptionChange = (value: string) => {
     setFormData({ ...formData, description: value });
