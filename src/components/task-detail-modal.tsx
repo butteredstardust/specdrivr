@@ -104,6 +104,7 @@ export function TaskDetailModal({
                   variant="secondary"
                   onClick={() => setShowRetryConfirm(true)}
                   disabled={isSubmitting}
+                  data-testid="task-retry-button"
                 >
                   Retry
                 </Button>
@@ -113,11 +114,12 @@ export function TaskDetailModal({
                   variant="secondary"
                   onClick={() => setShowSkipConfirm(true)}
                   disabled={isSubmitting}
+                  data-testid="task-skip-button"
                 >
                   Skip
                 </Button>
               )}
-              <Button onClick={onClose}>Close</Button>
+              <Button onClick={onClose} data-testid="task-close-button">Close</Button>
             </div>
           </div>
         }
@@ -207,6 +209,7 @@ export function TaskDetailModal({
                     key={status}
                     onClick={() => handleStatusChange(status)}
                     disabled={status === task.status || isSubmitting}
+                    data-testid={`task-status-${status}`}
                     className={clsx(
                       'px-3 py-1.5 rounded-md text-sm font-medium border transition-colors',
                       status === task.status
