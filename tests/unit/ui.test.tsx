@@ -1,23 +1,27 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { AgentStatusPanel } from '@/components/agent-status-panel';
+import { describe, it, expect } from 'vitest';
 
-// Minimal UI test suite to fulfill TC-04 requirement
 describe('AgentStatusPanel', () => {
     it('should render idle status correctly', () => {
         render(<AgentStatusPanel agentStatus={{ status: 'idle' }} />);
-        expect(screen.getByText('Idle')).toBeInTheDocument();
+        expect(screen.getByText('Agent Idle')).toBeInTheDocument();
     });
 
-    it('should render running status with stale warning correctly', () => {
-        render(<AgentStatusPanel agentStatus={{ status: 'running', is_stale: true }} />);
-        expect(screen.getByText('Running')).toBeInTheDocument();
-        // Assuming the warning dot or title is rendered, checking presence
-        expect(screen.getByTitle(/Agent hasn't reported/)).toBeInTheDocument();
+    it('should render running status correctly', () => {
+        render(<AgentStatusPanel agentStatus={{ status: 'running' }} />);
+        expect(screen.getByText('Agent Running')).toBeInTheDocument();
+    });
+
+    it('should render unresponsive (stale) status correctly', () => {
+        render(<AgentStatusPanel agentStatus={{ status: 'stale', lastHeartbeat: new Date().toISOString() }} />);
+        expect(screen.getByText('Agent Unresponsive')).toBeInTheDocument();
+        expect(screen.getByText(/Last seen/)).toBeInTheDocument();
     });
 
     it('should render paused status correctly', () => {
-        render(<AgentStatusPanel agentStatus={{ status: 'paused', last_task_id: 42 }} />);
-        expect(screen.getByText('Paused')).toBeInTheDocument();
+        render(<AgentStatusPanel agentStatus={{ status: 'paused' }} />);
+        expect(screen.getByText('Agent Paused')).toBeInTheDocument();
     });
 });

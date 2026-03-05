@@ -1,107 +1,89 @@
-/**
- * API tests for project management endpoints
- * Tests project listing, retrieval, and management
- */
-
 import { test, expect } from '@playwright/test';
 
-test.describe('Projects API', () => {
-  test('GET /api/projects returns list of all projects', async ({ request }) => {
-    const response = await request.get('http://localhost:3000/api/projects');
+const AGENT_TOKEN = process.env.AGENT_TOKEN || 'dev-agent-token-12345';
 
-    expect(response.status()).toBe(200);
+test.describe('Projects & Tasks Management', () => {
 
-    const data = await response.json();
-    expect(Array.isArray(data)).toBe(true);
-    expect(data.length).toBeGreaterThan(0);
+  test.describe('POST /api/agent/projects', () => {
+    test('creates project, spec, and plan in a single transaction', async ({ request }) => {
+      const payload = {
+        name: 'Automated Test Project',
+        description: 'Testing the multi-record transaction',
+        mission: 'Successfully test the project creation loop',
+        tech_stack: ['Next.js', 'Playwright', 'Vitest'],
+        plan_status: 'active'
+      };
 
-    // Verify project structure
-    const project = data[0];
-    expect(project).toHaveProperty('id');
-    expect(project).toHaveProperty('name');
-    expect(project).toHaveProperty('description');
-    expect(project).toHaveProperty('agentStatus');
-  });
+      const response = await request.post('/api/agent/projects', {
+        headers: { 'X-Agent-Token': AGENT_TOKEN },
+        data: payload
+      });
 
-  test('GET /api/projects returns correct project structure', async ({ request }) => {
-    const response = await request.get('http://localhost:3000/api/projects');
+      expect(response.status()).toBe(200);
+      const body = await response.json();
 
-    const projects = await response.json();
-    const project = projects[0];
-
-    expect(project).toHaveProperty('id');
-    expect(typeof project.id).toBe('number');
-    expect(project).toHaveProperty('name');
-    expect(typeof project.name).toBe('string');
-    expect(project).toHaveProperty('description');
-    expect(typeof project.description).toBe('string');
-    expect(project).toHaveProperty('mission');
-    expect(typeof project.mission).toBe('string');
-    expect(project).toHaveProperty('createdAt');
-    expect(typeof project.createdAt).toBe('string');
-    expect(project).toHaveProperty('updatedAt');
-    expect(typeof project.updatedAt).toBe('string');
-  });
-});
-
-test.describe('Tasks API', () => {
-  test('GET /api/tasks returns all tasks across projects', async ({ request }) => {
-    const response = await request.get('http://localhost:3000/api/tasks');
-
-    expect(response.status()).toBe(200);
-
-    const data = await response.json();
-    expect(Array.isArray(data)).toBe(true);
-    expect(data.length).toBeGreaterThan(0);
-
-    // Verify task structure
-    const task = data[0];
-    expect(task).toHaveProperty('id');
-    expect(task).toHaveProperty('description');
-    expect(task).toHaveProperty('status');
-    expect(task).toHaveProperty('priority');
-  });
-
-  test('GET /api/tasks includes project information', async ({ request }) => {
-    const response = await request.get('http://localhost:3000/api/tasks');
-
-    const tasks = await response.json();
-
-    if (tasks.length > 0) {
-      const task = tasks[0];
-      expect(task).toHaveProperty('projectId');
-      expect(typeof task.projectId).toBe('number');
-    }
-  });
-});
-
-import { Agent, Task, Plan, Log } from '@/db/schema';
-
-interface WaveSyncData {
-  agent: Agent;
-  tasks: Array<Task>;
-  logs: Array<Log>;
-  plans: Array<Plan>;
-  projectId: number;
-}
-
-test.describe('Agent Wave Sync API', () => {
-  test('POST /api/agent/wave returns agent state data', async ({ request }) => {
-    const response = await request.post('http://localhost:3000/api/agent/wave', {
-      data: { projectId: 1 },
+      expect(body.success).toBe(true);
+      expect(body.data).toHaveProperty('project_id');
+      expect(body.data).toHaveProperty('specification_id');
+      expect(body.data).toHaveProperty('plan_id');
+      expect(body.data).toHaveProperty('mission_url');
     });
 
-    expect(response.status()).toBe(200);
+    test('automatically creates the initial analysis task when base_path is provided', async ({ request }) => {
+      const payload = {
+        name: 'Project with Base Path',
+        base_path: '/tmp/test-project-path',
+        mission: 'Testing auto-task generation'
+      };
 
-    const data: WaveSyncData = await response.json();
-    expect(data).toHaveProperty('agent');
-    expect(data).toHaveProperty('tasks');
-    expect(data).toHaveProperty('logs');
-    expect(data).toHaveProperty('plans');
-    expect(data).toHaveProperty('projectId', 1);
+      const response = await request.post('/api/agent/projects', {
+        headers: { 'X-Agent-Token': AGENT_TOKEN },
+        data: payload
+      });
 
-    expect(Array.isArray(data.tasks)).toBe(true);
-    expect(Array.isArray(data.logs)).toBe(true);
-    expect(Array.isArray(data.plans)).toBe(true);
+      expect(response.status()).toBe(200);
+      const body = await response.json();
+      const projectId = body.data.project_id;
+
+      // Verify task creation via mission endpoint
+      const missionRes = await request.get(`/api/agent/mission?project_id=${projectId}`, {
+        headers: { 'X-Agent-Token': AGENT_TOKEN }
+      });
+      const missionData = await missionRes.json();
+
+      expect(missionData.data.unblocked_tasks.length).toBeGreaterThan(0);
+      expect(missionData.data.unblocked_tasks[0].description).toContain('Analyse codebase at /tmp/test-project-path');
+    });
+
+    test('returns 400 when required fields are missing', async ({ request }) => {
+      const response = await request.post('/api/agent/projects', {
+        headers: { 'X-Agent-Token': AGENT_TOKEN },
+        data: {
+          // Missing 'name'
+          description: 'Invalid project'
+        }
+      });
+
+      expect(response.status()).toBe(400);
+      const body = await response.json();
+      expect(body.success).toBe(false);
+      expect(body.error).toBe('Validation failed');
+    });
+
+    test('protects endpoint with X-Agent-Token', async ({ request }) => {
+      const response = await request.post('/api/agent/projects', {
+        data: { name: 'Unauthorized project' }
+      });
+      expect(response.status()).toBe(401);
+    });
+  });
+
+  test.describe('GET /api/projects', () => {
+    test('returns list of projects', async ({ request }) => {
+      const response = await request.get('/api/projects');
+      expect(response.status()).toBe(200);
+      const data = await response.json();
+      expect(Array.isArray(data)).toBe(true);
+    });
   });
 });

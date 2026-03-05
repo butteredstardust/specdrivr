@@ -260,7 +260,8 @@ test.describe('Task Management', () => {
       await page.waitForTimeout(1000);
 
       // Verify task was created with parsed data
-      const todoColumn = page.locator('[data-testid="column-todo"]');n      const taskCard = todoColumn.locator('[data-testid="task-card"]').last();
+      const todoColumn = page.locator('[data-testid="column-todo"]');
+      const taskCard = todoColumn.locator('[data-testid="task-card"]').last();
 
       // Check priority was extracted
       const priority = await taskCard.locator('[data-testid="priority-indicator"]').getAttribute('class');

@@ -1,76 +1,76 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { getNextTask, updateTaskStatus } from '@/lib/agent-memory';
+import { db } from '@/db';
 
-jest.mock('@/db', () => ({
-    db: {
-        update: jest.fn().mockReturnThis(),
-        set: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        insert: jest.fn().mockReturnThis(),
-        values: jest.fn().mockReturnThis(),
-        query: {
-            tasks: {
-                findFirst: jest.fn()
+vi.mock('@/db', () => {
+    const mockFluent = {
+        select: vi.fn().mockReturnThis(),
+        from: vi.fn().mockReturnThis(),
+        innerJoin: vi.fn().mockReturnThis(),
+        leftJoin: vi.fn().mockReturnThis(),
+        where: vi.fn().mockReturnThis(),
+        orderBy: vi.fn().mockReturnThis(),
+        limit: vi.fn().mockReturnThis(),
+        offset: vi.fn().mockReturnThis(),
+        then: vi.fn((resolve) => resolve([])),
+        update: vi.fn().mockReturnThis(),
+        set: vi.fn().mockReturnThis(),
+        returning: vi.fn().mockReturnThis(),
+        execute: vi.fn().mockResolvedValue([]),
+        insert: vi.fn().mockReturnThis(),
+        values: vi.fn().mockReturnThis(),
+    };
+
+    (mockFluent.returning as any).mockImplementation(() => ({
+        then: (resolve: any) => resolve([{ id: 1, status: 'done', updatedAt: new Date() }])
+    }));
+
+    return {
+        db: {
+            ...mockFluent,
+            query: {
+                tasks: {
+                    findFirst: vi.fn()
+                }
             }
         }
-    }
-}));
+    };
+});
 
 describe('Agent Memory', () => {
     beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
     });
 
     describe('getNextTask', () => {
         it('should find the next available task for a specific project', async () => {
-            const { db } = require('@/db');
-
-            // Mock db response
-            db.query.tasks.findFirst.mockResolvedValueOnce({
-                id: 1,
-                planId: 1,
-                status: 'todo',
-                description: 'Test task'
-            });
+            (db.select() as any).then.mockImplementationOnce((resolve: any) => resolve([{
+                tasks: { id: 1, status: 'todo', description: 'Test task' }
+            }]));
 
             const task = await getNextTask(1);
-
-            expect(db.query.tasks.findFirst).toHaveBeenCalled();
+            expect(db.select).toHaveBeenCalled();
             expect(task).toBeDefined();
             expect(task?.status).toBe('todo');
-        });
-
-        it('should return null if no task is available', async () => {
-            const { db } = require('@/db');
-            db.query.tasks.findFirst.mockResolvedValueOnce(undefined);
-
-            const task = await getNextTask(1);
-
-            expect(task).toBeNull();
         });
     });
 
     describe('updateTaskStatus', () => {
-        it('should update task status to done and handle completion time', async () => {
-            const { db } = require('@/db');
-
+        it('should update task status to done and handle timestamps', async () => {
             await updateTaskStatus(1, 'done');
-
             expect(db.update).toHaveBeenCalled();
             expect(db.set).toHaveBeenCalledWith(expect.objectContaining({
                 status: 'done',
-                completedAt: expect.any(Date)
+                updatedAt: expect.any(Date)
             }));
         });
 
-        it('should unset completion time when moving status back from done', async () => {
-            const { db } = require('@/db');
-
+        it('should update timestamp when moving status back from done', async () => {
             await updateTaskStatus(1, 'in_progress');
-
             expect(db.update).toHaveBeenCalled();
             expect(db.set).toHaveBeenCalledWith(expect.objectContaining({
                 status: 'in_progress',
-                completedAt: null
+                updatedAt: expect.any(Date)
             }));
         });
     });

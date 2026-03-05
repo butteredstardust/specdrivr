@@ -10,6 +10,7 @@ export function validateAgentToken(request: NextRequest): boolean {
   return !!(token && expectedToken && token === expectedToken);
 }
 
+
 /**
  * Get error response for unauthorized access
  */
