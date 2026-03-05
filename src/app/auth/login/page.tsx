@@ -32,20 +32,27 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      // Demo login - in production, this would call an auth API
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
 
-      // Store a mock session
-      localStorage.setItem('specdrivr_session', JSON.stringify({
-        username,
-        authenticatedAt: new Date().toISOString(),
-      }));
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'An error occurred. Please try again.');
+        return;
+      }
 
       setShowSuccessDialog(true);
 
       // Redirect after dialog closes
       setTimeout(() => {
         router.push('/');
+        router.refresh();
       }, 1500);
     } catch (err) {
       setError('An error occurred. Please try again.');
@@ -176,12 +183,6 @@ export default function LoginPage() {
             </div>
           </form>
 
-          {/* Demo Note */}
-          <div className="mt-6 pt-4 border-t border-ios-border">
-            <p className="ios-caption-1 text-ios-text-secondary text-center">
-              Demo mode: Enter any username and password to sign in
-            </p>
-          </div>
         </div>
       </div>
 
