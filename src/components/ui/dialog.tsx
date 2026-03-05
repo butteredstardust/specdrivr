@@ -195,11 +195,11 @@ export function ConfirmDialog({
       footer={
         !hideConfirm ? (
           <>
-            <Button variant="secondary" onClick={onClose}>
+            <Button variant="secondary" onClick={onClose} data-testid="confirm-cancel-button">
               {cancelText}
             </Button>
             {onConfirm && (
-              <Button variant={variant} onClick={onConfirm}>
+              <Button variant={variant} onClick={onConfirm} data-testid="confirm-confirm-button">
                 {confirmText}
               </Button>
             )}

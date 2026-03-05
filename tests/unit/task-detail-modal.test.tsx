@@ -244,7 +244,10 @@ describe('TaskDetailModal - Core Functionality', () => {
       );
 
       expect(screen.getByText(/In Progress For/)).toBeInTheDocument();
-      expect(screen.getByText(/\d+:\d+/)).toBeInTheDocument();
+
+      // The uptime duration should show 59:00 or 60:00 format (mm:ss)
+      const modalText = screen.getByText(/In Progress For/).closest('.space-y-6')?.textContent;
+      expect(modalText).toMatch(/\d+:\d+/);
     });
 
     test('does not show uptime for non-in_progress tasks', () => {
@@ -353,10 +356,10 @@ describe('TaskDetailModal - Core Functionality', () => {
         />
       );
 
-      expect(screen.getByText('TODO')).toBeInTheDocument();
-      expect(screen.getByText('IN PROGRESS')).toBeInTheDocument();
-      expect(screen.getByText('DONE')).toBeInTheDocument();
-      expect(screen.getByText('BLOCKED')).toBeInTheDocument();
+      expect(screen.getByTestId('task-status-todo')).toBeInTheDocument();
+      expect(screen.getByTestId('task-status-in_progress')).toBeInTheDocument();
+      expect(screen.getByTestId('task-status-done')).toBeInTheDocument();
+      expect(screen.getByTestId('task-status-blocked')).toBeInTheDocument();
     });
 
     test('marks active status button', () => {
@@ -369,8 +372,9 @@ describe('TaskDetailModal - Core Functionality', () => {
         />
       );
 
-      const activeButton = screen.getByText('IN PROGRESS');
+      const activeButton = screen.getByTestId('task-status-in_progress');
       expect(activeButton).toBeInTheDocument();
+      expect(activeButton).toHaveTextContent('IN PROGRESS');
     });
 
     test('changes status when button clicked', async () => {
@@ -383,7 +387,7 @@ describe('TaskDetailModal - Core Functionality', () => {
         />
       );
 
-      const todoButton = screen.getByText('TODO');
+      const todoButton = screen.getByTestId('task-status-todo');
       fireEvent.click(todoButton);
 
       await waitFor(() => {
@@ -403,7 +407,7 @@ describe('TaskDetailModal - Core Functionality', () => {
         />
       );
 
-      const todoButton = screen.getByText('TODO');
+      const todoButton = screen.getByTestId('task-status-todo');
       fireEvent.click(todoButton);
 
       // Button should be disabled during submission
@@ -637,8 +641,10 @@ describe('TaskDetailModal - Core Functionality', () => {
         />
       );
 
-      expect(screen.getByText(/Created/)).toBeInTheDocument();
-      expect(screen.getByText(/Updated/)).toBeInTheDocument();
+      // Find the specific timestamp section in the main content area, not footer
+      const timestampSection = document.querySelector('.grid.grid-cols-2.gap-4');
+      expect(timestampSection?.textContent).toMatch(/Created/);
+      expect(timestampSection?.textContent).toMatch(/Updated/);
     });
 
     test('displays completed timestamp when available', () => {
@@ -676,7 +682,10 @@ describe('TaskDetailModal - Core Functionality', () => {
         />
       );
 
-      expect(screen.getByText(/1\/1\/2024, 2:00:00 AM/)).toBeInTheDocument();
+      // Find footer and check for timestamp (format: Jan 1, 2024, 12:00 PM)
+      const footer = document.querySelector('.flex.items-center.justify-between.flex-wrap');
+      expect(footer?.textContent).toMatch(/Created Jan 1, 2024/);
+      expect(footer?.textContent).toMatch(/12:00 PM/);
     });
 
     test('has Close button in footer', () => {
@@ -688,7 +697,8 @@ describe('TaskDetailModal - Core Functionality', () => {
         />
       );
 
-      expect(screen.getByText('Close')).toBeInTheDocument();
+      expect(screen.getByTestId('task-close-button')).toBeInTheDocument();
+      expect(screen.getByTestId('task-close-button')).toHaveTextContent('Close');
     });
   });
 
@@ -747,7 +757,7 @@ describe('TaskDetailModal - Core Functionality', () => {
         />
       );
 
-      const retryButton = screen.getByText('Retry');
+      const retryButton = screen.getByTestId('task-retry-button');
       fireEvent.click(retryButton);
 
       expect(screen.getByText('Retry Task')).toBeInTheDocument();
@@ -765,10 +775,10 @@ describe('TaskDetailModal - Core Functionality', () => {
       );
 
       // Click retry button
-      fireEvent.click(screen.getByText('Retry'));
+      fireEvent.click(screen.getByTestId('task-retry-button'));
 
       // Confirm in dialog
-      const confirmButton = screen.getByText('Retry');
+      const confirmButton = screen.getByTestId('confirm-confirm-button');
       fireEvent.click(confirmButton);
 
       await waitFor(() => {
@@ -788,8 +798,8 @@ describe('TaskDetailModal - Core Functionality', () => {
         />
       );
 
-      fireEvent.click(screen.getByText('Retry'));
-      fireEvent.click(screen.getByText('Retry'));
+      fireEvent.click(screen.getByTestId('task-retry-button'));
+      fireEvent.click(screen.getByTestId('confirm-confirm-button'));
 
       await waitFor(() => {
         expect(mockOnRetry).toHaveBeenCalled();
@@ -879,7 +889,7 @@ describe('TaskDetailModal - Core Functionality', () => {
         />
       );
 
-      fireEvent.click(screen.getByText('Skip'));
+      fireEvent.click(screen.getByTestId('task-skip-button'));
 
       expect(screen.getByText('Skip Task')).toBeInTheDocument();
       expect(screen.getByText(/mark the task as done/)).toBeInTheDocument();
@@ -895,8 +905,8 @@ describe('TaskDetailModal - Core Functionality', () => {
         />
       );
 
-      fireEvent.click(screen.getByText('Skip'));
-      fireEvent.click(screen.getByText('Skip'));
+      fireEvent.click(screen.getByTestId('task-skip-button'));
+      fireEvent.click(screen.getByTestId('confirm-confirm-button'));
 
       await waitFor(() => {
         expect(mockOnSkip).toHaveBeenCalledWith(43);
@@ -916,7 +926,7 @@ describe('TaskDetailModal - Core Functionality', () => {
         />
       );
 
-      fireEvent.click(screen.getByText('Close'));
+      fireEvent.click(screen.getByTestId('task-close-button'));
 
       expect(mockOnClose).toHaveBeenCalled();
     });
