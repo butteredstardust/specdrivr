@@ -25,6 +25,8 @@ export const projects = pgTable('projects', {
   agentStartedAt: timestamp('agent_started_at', { withTimezone: true }),
   agentStoppedAt: timestamp('agent_stopped_at', { withTimezone: true }),
   createdByUserId: integer('created_by_user_id').references(() => users.id),
+  // Archive status
+  isArchived: boolean('is_archived').notNull().default(false),
 });
 
 // Specifications table

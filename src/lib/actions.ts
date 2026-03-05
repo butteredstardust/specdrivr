@@ -46,11 +46,18 @@ export async function createProject(projectData: {
 }
 
 /**
- * Get all projects
+ * Get all projects (optionally including archived)
  */
-export async function getProjects() {
+export async function getProjects(includeArchived: boolean = false) {
   try {
-    const allProjects = await db.select().from(projects);
+    const query = db.select().from(projects);
+
+    if (!includeArchived) {
+      // @ts-expect-error - drizzle doesn't type where clauses perfectly
+      query.where(eq(projects.isArchived, false));
+    }
+
+    const allProjects = await query;
     return { success: true, projects: allProjects };
   } catch (error) {
     console.error('Error getting projects:', error);
@@ -552,5 +559,51 @@ export async function getProjectCommits(projectId: number, limit: number = 100) 
   } catch (error) {
     console.error('Error getting commits:', error);
     return { success: false, error: 'Failed to fetch commits' };
+  }
+}
+
+/**
+ * Archive/Unarchive a project (admin only)
+ */
+export async function archiveProjectDev(projectId: number, archive: boolean) {
+  try {
+    // Verify authentication and admin status
+    const user = await getSessionUser();
+    if (!user) {
+      return { success: false, error: 'Authentication required' };
+    }
+
+    if (!user.isAdmin) {
+      return { success: false, error: 'Admin privileges required' };
+    }
+
+    // Update project archive status
+    const [updatedProject] = await db
+      .update(projects)
+      .set({
+        isArchived: archive,
+        updatedAt: new Date(),
+      })
+      .where(eq(projects.id, projectId))
+      .returning();
+
+    if (!updatedProject) {
+      throw new Error('Project not found');
+    }
+
+    // Revalidate affected paths
+    revalidatePath('/');
+    revalidatePath('/projects');
+    revalidatePath('/projects/[id]', 'page');
+    revalidatePath('/projects/[id]/settings', 'page');
+
+    return {
+      success: true,
+      project: updatedProject,
+      message: archive ? 'Project archived successfully' : 'Project unarchived successfully',
+    };
+  } catch (error) {
+    console.error('Error archiving project:', error);
+    return { success: false, error: 'Failed to update project' };
   }
 }
