@@ -1,21 +1,22 @@
-test:e2e:data -X POST http://localhost:3001/api/agent/mission?project_id=1 "ngrok http 3001"
-
-    "scripts": {
-      "dev": "next dev",
-      "dev:clean": "npm run killall && next dev",
-      "build": "next build",
-      "start": "next start",
-      "lint": "eslint",
-      "kill:3000": "lsof -ti:3000 | xargs kill -9 || true",
-      "kill:3001": "lsof -ti:3001 | xargs kill -9 || true",
-      "killall": "pkill -f \"next dev\" || true && npm run kill:3000 && npm run kill:3001",
-      "db:generate": "drizzle-kit generate",
-      "db:push": "drizzle-kit push",
-      "db:migrate": "drizzle-kit migrate",
-      "db:studio": "drizzle-kit studio",
-      "seed:demo": "node scripts/seed-demo-drizzle.js",
-      "fkillall": "fkill -f \"npm run dev\"",
-      "jest:data:0 -X GET http://localhost:3001/api/agent/mission?project_id=1 "ngrok http 3001"
-    }
+{
+  "scripts": {
+    "dev": "next dev",
+    "dev:clean": "npm run killall && next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "kill:3000": "lsof -ti:3000 | xargs kill -9 || true",
+    "kill:3001": "lsof -ti:3001 | xargs kill -9 || true",
+    "killall": "pkill -f \"next dev\" || true && npm run kill:3000 && npm run kill:3001",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "seed:demo": "node scripts/seed-demo-drizzle.js",
+    "fkillall": "fkill -f \"npm run dev\"",
+    "test:e2e": "playwright test",
+    "test:unit": "jest",
+    "test:api": "jest --testPathPattern=tests/api",
+    "test:all": "npm run test:unit && npm run test:api && npm run test:e2e"
   }
 }
