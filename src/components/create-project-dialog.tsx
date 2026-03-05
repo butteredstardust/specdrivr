@@ -77,11 +77,14 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 ios-footnote font-medium text-ios-blue bg-ios-secondary border border-ios ios-radius transition-colors ios-font-text"
-        style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}
+        className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white rounded-lg transition-colors hover:opacity-90 active:opacity-80"
+        style={{ backgroundColor: '#0071E3' }}
       >
-        <span className="ios-body">+</span>
-        <span>New Project</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        New Project
       </button>
     );
   }

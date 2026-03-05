@@ -35,129 +35,99 @@ export function ProjectSidebar({ projects, activeProjectId, currentProjectId, on
   const activeId = currentProjectId || activeProjectId;
 
   return (
-    <div className="w-64 h-screen flex flex-col ios-font p-3">
-      {/* Floating Sidebar Container */}
-      <div className="flex-1 flex flex-col ios-card shadow-lg overflow-hidden">
-        {/* Header with Hide Button */}
-        <div className="p-[13px] border-b border-opacity-12 flex items-center justify-between" style={{ borderColor: 'var(--ios-separator)' }}>
-          <div>
-            <h2 className="text-[17px] font-semibold text-ios-primary mb-1 ios-font-display">
-              Menu
-            </h2>
-            <p className="text-[13px] text-ios-placeholder ios-font-text">
-              Navigate your workspace
-            </p>
-          </div>
-          <button
-            onClick={toggleSidebar}
-            className="p-2 rounded-ios-md hover:bg-opacity-80 hover:bg-ios-secondary transition-colors"
-            aria-label="Hide sidebar"
-            title="Hide sidebar"
+    <div className="h-full flex flex-col">
+      {/* Sidebar header */}
+      <div className="px-4 py-4 border-b border-gray-100 flex items-center justify-between">
+        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Navigation</span>
+        <button
+          onClick={toggleSidebar}
+          className="p-1 rounded hover:bg-gray-100 transition-colors"
+          aria-label="Hide sidebar"
+          title="Hide sidebar"
+        >
+          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Navigation */}
+      <div className="flex-1 overflow-y-auto py-2">
+        <nav className="px-2 space-y-0.5">
+          {/* Home Link */}
+          <Link
+            href="/"
+            className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors ${isHomeActive
+                ? 'bg-blue-50 text-blue-700 font-medium'
+                : 'text-gray-600 hover:bg-gray-100'
+              }`}
           >
-            <svg
-              className="w-5 h-5 text-ios-placeholder"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
-              />
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
             </svg>
-          </button>
-        </div>
+            Home
+          </Link>
 
-        {/* Navigation */}
-        <div className="flex-1 overflow-y-auto">
-          <nav className="p-3 space-y-2">
-            {/* Home Link */}
-            <Link
-              href="/"
-              className={`
-                block cursor-pointer ios-radius p-[13px] transition-colors ios-font-text
-                ${isHomeActive
-                  ? 'bg-ios-blue text-white'
-                  : 'bg-ios-secondary hover:bg-opacity-80'
-                }
-              `}
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-xl">🏠</span>
-                <span className="text-[17px] font-medium">Home</span>
-              </div>
-            </Link>
+          {/* Divider */}
+          <div className="h-px bg-gray-100 my-2" />
 
-            {/* Divider */}
-            <div className="h-[1px] bg-opacity-12 my-2" style={{ backgroundColor: 'var(--ios-separator)' }} />
+          {/* Projects Header */}
+          <div className="px-3 py-1">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Projects</span>
+          </div>
 
-            {/* Projects Header */}
-            <div className="px-2 py-2">
-              <h3 className="text-[11px] font-semibold uppercase tracking-wide text-ios-placeholder">
-                Projects
-              </h3>
-            </div>
+          {/* Projects List */}
+          {projects.map((project) => {
+            const isProjectActive = pathname === `/projects/${project.id}` || activeId === project.id;
+            const agentStatus = (project as any).agentStatus || 'idle';
+            const dotColor: Record<string, string> = {
+              running: 'bg-emerald-500',
+              paused: 'bg-amber-400',
+              error: 'bg-red-500',
+              idle: 'bg-gray-300',
+              stopped: 'bg-gray-300',
+              stale: 'bg-orange-400',
+            };
 
-            {/* Projects List */}
-            {projects.map((project) => {
-              const isProjectActive = pathname === `/projects/${project.id}` || activeId === project.id;
-              const agentStatus = (project as any).agentStatus || 'idle';
-              const statusClass = getAgentStatusClass(agentStatus);
-
-              return (
-                <Link
-                  key={project.id}
-                  href={`/projects/${project.id}`}
-                  onClick={(e) => {
-                    if (onProjectSelect) {
-                      e.preventDefault();
-                      onProjectSelect(project);
-                    }
-                  }}
-                  className={`
-                    block cursor-pointer ios-radius p-[13px] transition-colors
-                    ${isProjectActive
-                      ? 'bg-ios-blue text-white'
-                      : 'bg-ios-bg-card hover:bg-ios-secondary text-ios-text-primary border border-ios-border'
-                    }
-                  `}
-                >
-                  <div className="flex items-start justify-between ios-font-text">
-                    <div className="flex items-center gap-2.5 max-w-[150px]">
-                      {/* Agent Status Dot */}
-                      <div className={`ios-status-dot ${statusClass}`} title={`Agent status: ${agentStatus}`} />
-                      <span className="text-lg">📁</span>
-                      <h3 className="text-[17px] font-medium truncate" title={project.name}>
-                        {project.name}
-                      </h3>
-                    </div>
-                    {isProjectActive && (
-                      <span className="ios-bg-card/20 text-white text-[13px] px-2 py-0.5 rounded-ios-xl">
-                        Active
-                      </span>
-                    )}
-                  </div>
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* Bottom Actions */}
-          <div className="p-3 border-t border-opacity-12 mt-auto" style={{ borderColor: 'var(--ios-separator)' }}>
-            <div className="flex gap-2">
+            return (
               <Link
-                href="/settings"
-                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-[13px] font-medium text-ios-blue bg-ios-secondary border border-ios ios-radius transition-colors ios-font-text"
+                key={project.id}
+                href={`/projects/${project.id}`}
+                onClick={(e) => {
+                  if (onProjectSelect) {
+                    e.preventDefault();
+                    onProjectSelect(project);
+                  }
+                }}
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors ${isProjectActive
+                    ? 'bg-blue-50 text-blue-700 font-medium'
+                    : 'text-gray-600 hover:bg-gray-100'
+                  }`}
               >
-                <span className="text-base">⚙️</span>
-                <span>Settings</span>
+                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${dotColor[agentStatus] || 'bg-gray-300'}`} />
+                <span className="truncate" title={project.name}>{project.name}</span>
               </Link>
-              <div className="flex-1 min-w-0">
-                <CreateProjectDialog onProjectCreated={onProjectCreated} />
-              </div>
-            </div>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* Bottom Actions */}
+      <div className="p-3 border-t border-gray-100">
+        <div className="flex gap-2">
+          <Link
+            href="/settings"
+            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+            Settings
+          </Link>
+          <div className="flex-1 min-w-0">
+            <CreateProjectDialog onProjectCreated={onProjectCreated} />
           </div>
         </div>
       </div>
