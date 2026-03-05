@@ -26,15 +26,19 @@ global.fetch = jest.fn(() =>
   Promise.resolve({
     json: () => Promise.resolve({}),
   })
-) as jest.Mock;
+);
+
+// Type the fetch mock properly
+/** @type {jest.Mock} */
+global.fetch = global.fetch;
 
 // Add custom matchers here if needed
 expect.extend({});
 
 // Suppress console errors during tests
 const originalError = console.error;
-bbeforeAll(() => {
-  console.error = (...args: any[]) => {
+beforeAll(() => {
+  console.error = (...args) => {
     if (
       typeof args[0] === 'string' &&
       (args[0].includes('Warning: ReactDOM.render') ||
