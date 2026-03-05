@@ -105,7 +105,6 @@ export function DashboardEmptyState() {
   );
 }
 
-// Summary stat card — Jira flat card layout
 export function DashboardSummaryCard({
   value,
   label,
@@ -116,12 +115,12 @@ export function DashboardSummaryCard({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] p-[var(--sp-4)] px-[var(--sp-5)] relative h-[88px] flex flex-col justify-center overflow-hidden">
-      <div className="absolute top-[var(--sp-4)] right-[var(--sp-4)] text-[var(--color-text-tertiary)] opacity-50">
+    <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[8px] shadow-[var(--shadow-card)] p-4 px-5 relative h-[88px] flex flex-col justify-end overflow-hidden">
+      <div className="absolute top-4 right-4 text-[var(--color-text-tertiary)] opacity-50">
         {React.cloneElement(icon as React.ReactElement, { size: 16 })}
       </div>
       <p className="text-[24px] font-bold text-[var(--color-text-primary)] leading-none">{value}</p>
-      <p className="text-[11px] font-bold text-[var(--color-text-tertiary)] uppercase tracking-[0.06em] mt-[var(--sp-1)]">{label}</p>
+      <p className="text-[11px] font-bold text-[var(--color-text-tertiary)] uppercase tracking-[0.06em] mt-1">{label}</p>
     </div>
   );
 }

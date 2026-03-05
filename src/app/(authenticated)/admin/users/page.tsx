@@ -6,7 +6,6 @@ import { type UserRole, userRoleColors, userRoleLabels } from '@/lib/ios-styles'
 import { Dialog } from '@/components/ui/dialog';
 import { ConfirmDialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { AppShell } from '@/components/app-shell';
 import { Plus, MoreHorizontal, User as UserIcon, Shield, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -123,7 +122,7 @@ export default function AdminUsersPage() {
   const inputClasses = "w-full h-[32px] px-[var(--sp-2)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[var(--color-text-primary)] text-[14px] focus:outline-none focus:border-[var(--color-border-selected)] transition-colors placeholder:text-[var(--color-text-tertiary)]";
 
   return (
-    <AppShell>
+    <>
       <div className="flex items-center justify-between mb-[var(--sp-6)]">
         <div>
           <h1 className="text-[20px] font-semibold text-[var(--color-text-primary)]">User Management</h1>
@@ -256,6 +255,6 @@ export default function AdminUsersPage() {
         message={`Are you sure you want to ${selectedUser?.isActive ? 'deactivate' : 'activate'} ${selectedUser?.username}?`}
         variant={selectedUser?.isActive ? "danger" : "primary"}
       />
-    </AppShell>
+    </>
   );
 }

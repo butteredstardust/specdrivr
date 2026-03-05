@@ -2,7 +2,7 @@ import { getProjects, getTasksDoneToday } from '@/lib/actions';
 import { DashboardSummaryCard } from '@/components/project-card';
 import { DashboardProjectList } from '@/components/dashboard-project-list';
 import { AppShell } from '@/components/app-shell';
-import { Layout, Radio, CheckCircle, Plus } from 'lucide-react';
+import { Layout, Radio, CheckSquare, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CreateProjectDialog } from '@/components/create-project-dialog';
 
@@ -19,8 +19,8 @@ export default async function Home() {
   const tasksDoneToday = await getTasksDoneToday();
 
   return (
-    <AppShell sidebarProjects={projects}>
-      <div className="flex items-center justify-between mb-[var(--sp-4)]">
+    <>
+      <div className="flex items-start justify-between mb-6">
         <div>
           <h1 className="text-[20px] font-semibold text-[var(--color-text-primary)]">Dashboard</h1>
           <p className="text-[14px] text-[var(--color-text-secondary)] mt-1">Overview of all your architectural projects</p>
@@ -28,7 +28,7 @@ export default async function Home() {
         <CreateProjectDialog />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-[var(--sp-3)] mb-[var(--sp-8)]">
+      <div className="grid grid-cols-3 gap-3 mb-6">
         <DashboardSummaryCard
           value={totalProjects}
           label="Projects"
@@ -42,11 +42,11 @@ export default async function Home() {
         <DashboardSummaryCard
           value={tasksDoneToday}
           label="Tasks Done Today"
-          icon={<CheckCircle size={16} />}
+          icon={<CheckSquare size={16} />}
         />
       </div>
 
       <DashboardProjectList projects={projects} />
-    </AppShell>
+    </>
   );
 }

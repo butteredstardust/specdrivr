@@ -75,7 +75,7 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
         variant="primary"
         onClick={() => setIsOpen(true)}
         icon={<Plus size={14} />}
-        className="w-full justify-start"
+        className="h-8 px-3 whitespace-nowrap"
       >
         New Project
       </Button>
