@@ -17,8 +17,10 @@
     "setup": "npm run db:push && npm run db:seed",
     "fkillall": "fkill -f \"npm run dev\"",
     "test:e2e": "playwright test",
-    "test:unit": "jest",
-    "test:api": "jest --testPathPattern=tests/api",
+    "test:unit": "jest tests/unit",
+    "test:api": "jest tests/api",
+    "test:integration": "jest tests/integration",
+    "test:api": "jest --testPathPatterns=tests/api",
     "test:all": "npm run test:unit && npm run test:api && npm run test:e2e"
   }
 }

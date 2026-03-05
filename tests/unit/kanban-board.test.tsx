@@ -134,7 +134,8 @@ describe('KanbanBoard - Core Functionality', () => {
     test('sorts tasks by priority within columns', async () => {
       const tasks = [
         { id: 1, description: 'Low priority', status: 'todo', priority: 'low', filesInvolved: null },
-        { id: 2, description: 'High priority', status: 'todo', priority: 'high', filesInvolved: null },n        { id: 3, description: 'Medium priority', status: 'todo', priority: 'medium', filesInvolved: null },
+        { id: 2, description: 'High priority', status: 'todo', priority: 'high', filesInvolved: null },
+        { id: 3, description: 'Medium priority', status: 'todo', priority: 'medium', filesInvolved: null },
       ];
 
       render(<KanbanBoard tasks={tasks} />);
