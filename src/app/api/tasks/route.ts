@@ -3,6 +3,9 @@ import { CreateTaskSchema, ApiResponseSchema } from '@/lib/schemas';
 import { createTask } from '@/lib/agent-memory';
 import { z } from 'zod';
 
+import { getSessionUser } from '@/lib/auth-utils';
+import { validateAgentToken } from '@/lib/auth';
+
 /**
  * POST /api/tasks
  * Create a new task (developer-facing, RESTful API)
@@ -10,6 +13,17 @@ import { z } from 'zod';
  */
 export async function POST(request: NextRequest) {
   try {
+    // Requires either a valid user session or a valid agent token
+    const user = await getSessionUser();
+    const isAgent = await validateAgentToken(request);
+
+    if (!user && !isAgent) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
 
     // Validate request body

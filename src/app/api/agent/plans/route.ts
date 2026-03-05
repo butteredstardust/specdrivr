@@ -45,13 +45,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Log the plan creation
-    await addAgentLog(
-      newPlan.id, // Using plan id as a special marker for system events
-      'info',
-      `Plan created for specification ${parsedBody.specId}`
-    );
-
     const response = {
       success: true,
       data: {

@@ -11,6 +11,7 @@ import { ActionBar } from '@/components/action-bar';
 import { TestResultsPanel } from '@/components/test-results-panel';
 import { AgentLogs } from '@/components/agent-logs';
 import { AgentStatusPanel, type AgentStatusData } from '@/components/agent-status-panel';
+import { WaveManager } from '@/components/wave-manager';
 import { type TabData } from '@/components/ui/tabs';
 import { useAgentStatus } from '@/hooks/use-agent-status';
 import { ProjectSidebarWrapper } from '@/components/project-sidebar-wrapper';
@@ -136,6 +137,11 @@ export function ProjectDetailClient({
       href: `/projects/${projectId}?tab=plan`,
     },
     {
+      id: 'wave',
+      label: 'Wave Execution',
+      href: `/projects/${projectId}?tab=wave`,
+    },
+    {
       id: 'commits',
       label: 'Commits',
       href: `/projects/${projectId}/commits`,
@@ -163,7 +169,6 @@ export function ProjectDetailClient({
     status: 'idle',
   };
 
-  // Render active tab content
   const renderTabContent = () => {
     switch (activeTabId) {
       case 'kanban':
@@ -172,6 +177,8 @@ export function ProjectDetailClient({
         return <SpecTabContent specification={specification} allSpecs={allSpecs} />;
       case 'plan':
         return <PlanTabContent specification={specification} plans={plans} />;
+      case 'wave':
+        return <WaveManager projectId={projectId} />;
       case 'logs':
         return <LogsTabContent logs={agentLogs} tasks={tasks} projectId={projectId} />;
       case 'test-results':

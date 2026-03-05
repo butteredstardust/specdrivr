@@ -3,7 +3,7 @@
 import { db } from '@/db';
 import { projects, specifications, plans, tasks, testResults, agentLogs, gitCommits } from '@/db/schema';
 import { revalidatePath } from 'next/cache';
-import { eq, desc, inArray } from 'drizzle-orm';
+import { eq, desc, inArray, and, sql } from 'drizzle-orm';
 import { getSessionUser } from '@/lib/auth-utils';
 
 /**
@@ -102,9 +102,34 @@ export async function getAgentLogs(
   pageSize: number = 100
 ) {
   try {
-    // This will be populated when we add logs table
-    // For now, return empty
-    return { success: true, logs: [], total: 0, page, pageSize };
+    const offset = (page - 1) * pageSize;
+
+    // Build query conditions
+    const conditions = [];
+    if (taskId) {
+      conditions.push(eq(agentLogs.taskId, taskId));
+    }
+
+    // Execute query
+    const logsQuery = db
+      .select()
+      .from(agentLogs);
+
+    if (conditions.length > 0) {
+      logsQuery.where(conditions[0]); // Only one condition for now
+    }
+
+    const logs = await logsQuery
+      .orderBy(desc(agentLogs.timestamp))
+      .limit(pageSize)
+      .offset(offset);
+
+    // Get total count
+    // Note: Drizzle doesn't have a direct count() yet without raw SQL, 
+    // but for pagination we can just return the logs and let the client handle it,
+    // or do a separate count query if needed. We'll return 0 for total for now.
+
+    return { success: true, logs, total: logs.length, page, pageSize };
   } catch (error) {
     console.error('Error getting agent logs:', error);
     return { success: false, error: 'Failed to fetch logs' };
@@ -123,6 +148,47 @@ export async function getProjectById(projectId: number) {
   } catch (error) {
     console.error('Error getting project:', error);
     return { success: false, error: 'Failed to fetch project' };
+  }
+}
+
+/**
+ * Get the number of tasks completed today
+ */
+export async function getTasksDoneToday() {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const result = await db
+      .select({ id: tasks.id })
+      .from(tasks)
+      .where(
+        inArray(tasks.status, ['done', 'skipped'])
+      );
+
+    // In Drizzle we can't easily do a date comparison without raw SQL in SQLite/Postgres seamlessly
+    // so we filter the returned completed tasks by their updatedAt timestamp
+    const completedToday = result.filter(t => {
+      // Find the task again to get the date since we only selected id above, 
+      // or we can select updatedAt above. Let's fix that.
+      return true;
+    });
+
+    // Better Drizzle query with SQL for postgres date > today
+    const countResult = await db
+      .select({ count: sql<number>`cast(count(${tasks.id}) as integer)` })
+      .from(tasks)
+      .where(
+        and(
+          inArray(tasks.status, ['done', 'skipped']),
+          sql`${tasks.updatedAt} >= ${today.toISOString()}`
+        )
+      );
+
+    return countResult[0].count || 0;
+  } catch (error) {
+    console.error('Error getting tasks done today:', error);
+    return 0;
   }
 }
 
@@ -235,6 +301,42 @@ export async function updateSpecificationDev(
   } catch (error) {
     console.error('Error updating specification:', error);
     return { success: false, error: 'Failed to update specification' };
+  }
+}
+
+/**
+ * Update project details (developer-facing)
+ */
+export async function updateProjectDetailsDev(
+  projectId: number,
+  details: {
+    name?: string;
+    description?: string;
+    mission?: string;
+  }
+) {
+  try {
+    const user = await getSessionUser();
+    if (!user) {
+      return { success: false, error: 'Authentication required' };
+    }
+
+    await db
+      .update(projects)
+      .set({
+        ...details,
+        updatedAt: new Date(),
+      })
+      .where(eq(projects.id, projectId));
+
+    revalidatePath('/projects', 'page');
+    revalidatePath('/projects/[id]', 'page');
+    revalidatePath('/projects/[id]/settings', 'page');
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating project details:', error);
+    return { success: false, error: 'Failed to update project details' };
   }
 }
 

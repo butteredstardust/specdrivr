@@ -54,7 +54,7 @@ export const CreatePlanSchema = z.object({
 export const TaskSchema = z.object({
   id: z.number(),
   planId: z.number(),
-  status: z.enum(['todo', 'in_progress', 'done', 'blocked']),
+  status: z.enum(['todo', 'in_progress', 'done', 'blocked', 'paused', 'skipped']),
   description: z.string().nullable(),
   filesInvolved: z.array(z.string()).nullable(),
   priority: z.number(),
@@ -72,7 +72,7 @@ export const CreateTaskSchema = z.object({
 });
 
 export const UpdateTaskSchema = z.object({
-  status: z.enum(['todo', 'in_progress', 'done', 'blocked']).optional(),
+  status: z.enum(['todo', 'in_progress', 'done', 'blocked', 'paused', 'skipped']).optional(),
   filesInvolved: z.array(z.string()).optional(),
   priority: z.number().optional(),
 });

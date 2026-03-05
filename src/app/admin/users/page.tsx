@@ -294,74 +294,74 @@ export default function AdminUsersPage() {
                   </tr>
                 </thead>
                 <tbody>
-                {users.map((user) => {
-                  const roleInfo = userRoleColors[user.role];
+                  {users.map((user) => {
+                    const roleInfo = userRoleColors[user.role];
 
-                  return (
-                    <tr key={user.id} className="border-b border-ios-border last:border-0 hover:bg-ios-gray-5 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-ios-blue flex items-center justify-center text-white ios-subheadline font-semibold flex-shrink-0">
-                            {getInitials(user.username)}
-                          </div>
-                          <div>
-                            <div className="ios-body text-ios-text-primary font-medium">
-                              {user.username}
+                    return (
+                      <tr key={user.id} className="border-b border-ios-border last:border-0 hover:bg-ios-gray-5 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-ios-blue flex items-center justify-center text-white ios-subheadline font-semibold flex-shrink-0">
+                              {getInitials(user.username)}
                             </div>
-                            <div className="ios-caption-1 text-ios-text-secondary">
-                              ID: {user.id}
+                            <div>
+                              <div className="ios-body text-ios-text-primary font-medium">
+                                {user.username}
+                              </div>
+                              <div className="ios-caption-1 text-ios-text-secondary">
+                                ID: {user.id}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <button
-                          onClick={() => handleOpenRoleDialog(user)}
-                          className={`${roleInfo.bg} ${roleInfo.text} px-3 py-1.5 rounded-md text-sm font-medium hover:opacity-80 transition-opacity`}
-                        >
-                          {userRoleLabels[user.role]}
-                        </button>
-                      </td>
-                      <td className="px-6 py-4">
-                        {user.isActive ? (
-                          <span className="inline-flex items-center gap-1.5 text-ios-green">
-                            <span className="w-2 h-2 rounded-full bg-ios-green" />
-                            Active
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 text-ios-text-secondary">
-                            <span className="w-2 h-2 rounded-full bg-ios-gray" />
-                            Inactive
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 ios-body text-ios-text-secondary">
-                        {formatDate(user.lastLoginAt)}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button
-                            variant="secondary"
-                            size="small"
+                        </td>
+                        <td className="px-6 py-4">
+                          <button
                             onClick={() => handleOpenRoleDialog(user)}
+                            className={`${roleInfo.bg} ${roleInfo.text} px-3 py-1.5 rounded-md text-sm font-medium hover:opacity-80 transition-opacity`}
                           >
-                            Edit Role
-                          </Button>
-                          <Button
-                            variant={user.isActive ? 'secondary' : 'danger'}
-                            size="small"
-                            onClick={() => handleOpenDeactivateDialog(user)}
-                          >
-                            {user.isActive ? 'Deactivate' : 'Activate'}
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                            {userRoleLabels[user.role]}
+                          </button>
+                        </td>
+                        <td className="px-6 py-4">
+                          {user.isActive ? (
+                            <span className="inline-flex items-center gap-1.5 text-ios-green">
+                              <span className="w-2 h-2 rounded-full bg-ios-green" />
+                              Active
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 text-ios-text-secondary">
+                              <span className="w-2 h-2 rounded-full bg-ios-gray" />
+                              Inactive
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 ios-body text-ios-text-secondary">
+                          {formatDate(user.lastLoginAt)}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              variant="secondary"
+                              size="small"
+                              onClick={() => handleOpenRoleDialog(user)}
+                            >
+                              Edit Role
+                            </Button>
+                            <Button
+                              variant={user.isActive ? 'secondary' : 'danger'}
+                              size="small"
+                              onClick={() => handleOpenDeactivateDialog(user)}
+                            >
+                              {user.isActive ? 'Deactivate' : 'Activate'}
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           )}
 
           {/* Empty State */}
@@ -438,8 +438,8 @@ export default function AdminUsersPage() {
               <option value="admin">Admin</option>
             </select>
           </div>
-          <p className="ios-caption-1 text-ios-text-secondary">
-            An email invitation will be sent to the user with instructions to set up their account.
+          <p className="ios-caption-1 text-ios-text-secondary mt-4">
+            The user can log in immediately after their account is created. Give them their password directly.
           </p>
         </div>
       </Dialog>
@@ -489,11 +489,10 @@ export default function AdminUsersPage() {
                     key={role}
                     type="button"
                     onClick={() => setNewRole(role)}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-md border transition-colors ${
-                      newRole === role
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-md border transition-colors ${newRole === role
                         ? `${roleInfo.bg} ${roleInfo.text} border-ios-blue border-2`
                         : 'bg-ios-bg-card border-ios-border text-ios-text-primary hover:bg-ios-gray-5'
-                    }`}
+                      }`}
                   >
                     <span className="ios-body font-medium">{userRoleLabels[role]}</span>
                     {newRole === role && (

@@ -62,6 +62,8 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
   const [selectedTaskId, setSelectedTaskId] = useState<string>('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 50;
 
   const filteredLogs = useMemo(() => {
     return [...logs]
@@ -98,6 +100,18 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
       });
   }, [logs, levelFilters, selectedTaskId, dateFrom, dateTo]);
 
+  // Reset to first page when filters change
+  useMemo(() => {
+    setCurrentPage(1);
+  }, [filteredLogs.length]);
+
+  const paginatedLogs = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredLogs.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredLogs, currentPage]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredLogs.length / itemsPerPage));
+
   const toggleLevelFilter = (level: LogLevel) => {
     setLevelFilters((prev) => ({
       ...prev,
@@ -123,8 +137,8 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`px-3 py-1 rounded-ios-md ios-caption-2 font-medium transition-colors ios-font-text ${showFilters
-                ? 'bg-ios-blue text-white'
-                : 'bg-ios-secondary text-ios-text-secondary hover:bg-ios-gray-5'
+              ? 'bg-ios-blue text-white'
+              : 'bg-ios-secondary text-ios-text-secondary hover:bg-ios-gray-5'
               }`}
           >
             Filters
@@ -234,7 +248,7 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
             )}
           </div>
         ) : (
-          filteredLogs.map((log) => {
+          paginatedLogs.map((log) => {
             const colors = levelColors[log.level as LogLevel] || levelColors.info;
             const icon = levelIcons[log.level as LogLevel] || levelIcons.info;
 
@@ -287,6 +301,31 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
           })
         )}
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between mt-4 py-2 border-t border-ios-border">
+          <span className="ios-caption text-ios-text-secondary">
+            Page {currentPage} of {totalPages}
+          </span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 rounded-ios-md ios-caption font-medium border border-ios-border disabled:opacity-50 disabled:cursor-not-allowed hover:bg-ios-gray-5"
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 rounded-ios-md ios-caption font-medium border border-ios-border disabled:opacity-50 disabled:cursor-not-allowed hover:bg-ios-gray-5"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

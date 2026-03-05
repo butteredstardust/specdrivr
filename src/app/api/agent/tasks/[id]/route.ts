@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { validateAgentToken, getUnauthorizedResponse } from '@/lib/auth';
 import { UpdateTaskSchema, ApiResponseSchema } from '@/lib/schemas';
 import { updateTaskStatus } from '@/lib/agent-memory';
-import { taskStatusEnum } from '@/db/schema';
+import { db } from '@/db';
+import * as schema from '@/db/schema';
+import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 
 /**
@@ -21,29 +23,52 @@ export async function PATCH(
 
   try {
     const body = await request.json();
-    const { id } = await params;
-    const taskId = parseInt(id, 10);
+    const routeParams = await params;
+    const taskId = parseInt(routeParams.id, 10);
 
     // Validate request body
     const parsedBody = UpdateTaskSchema.parse(body);
 
-    // Update task status if provided
-    if (parsedBody.status) {
-      await updateTaskStatus(taskId, parsedBody.status);
+    const updateData: Record<string, any> = {};
+
+    // Build update payload
+    if (parsedBody.status !== undefined) {
+      updateData.status = parsedBody.status;
+      if (parsedBody.status === 'done' || parsedBody.status === 'skipped') {
+        updateData.completedAt = new Date();
+      }
     }
 
-    // TODO: In a real implementation, we would also update:
-    // - files_involved
-    // - priority
-    // For now, we're just updating status
+    if (parsedBody.filesInvolved !== undefined) {
+      updateData.filesInvolved = parsedBody.filesInvolved;
+    }
+
+    if (parsedBody.priority !== undefined) {
+      updateData.priority = parsedBody.priority;
+    }
+
+    if (Object.keys(updateData).length > 0) {
+      updateData.updatedAt = new Date();
+      // Since updateTaskStatus handles history/logging for status changes, 
+      // we use it if only status changed, but for multi-field updates we use direct DB update
+      // for simplicity, or we could update fields first then call updateTaskStatus.
+
+      // Let's do direct update for all fields to be safe and avoid duplicated 'updatedAt' triggers
+      await db.update(schema.tasks)
+        .set(updateData)
+        .where(eq(schema.tasks.id, taskId));
+
+      // If status changed, we still want the agent memory log
+      if (parsedBody.status) {
+        await updateTaskStatus(taskId, parsedBody.status);
+      }
+    }
 
     const response = {
       success: true,
       data: {
         taskId,
-        updatedFields: {
-          status: parsedBody.status,
-        },
+        updatedFields: updateData,
         message: 'Task updated successfully',
       },
     };

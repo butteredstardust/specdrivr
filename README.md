@@ -54,21 +54,10 @@ npm run db:studio
 
 ### Setup Project and Get Mission Context
 
-**Create a Project:**
-```bash
-curl -X POST http://localhost:3000/api/demo/projects \
-  -H "Content-Type: application/json" \
-  -d '{"name": "My Project"}'
-```
+**1. Create a Project & Specification (via Web UI)**
+Projects and Specifications should be created via the SpecDrivr web interface at `http://localhost:3000`.
 
-**Create Specification:**
-```bash
-curl -X POST http://localhost:3000/api/demo/specs \
-  -H "Content-Type: application/json" \
-  -d '{"projectId": 1, "content": "Build a web app"}'
-```
-
-**Create Plan:**
+**2. Create Plan (via Agent API):**
 ```bash
 curl -X POST http://localhost:3000/api/agent/plans \
   -H "X-Agent-Token: $AGENT_TOKEN" \
@@ -76,7 +65,7 @@ curl -X POST http://localhost:3000/api/agent/plans \
   -d '{"specId": 1, "architectureDecisions": {"framework": "Next.js"}}'
 ```
 
-**Get Next Mission:**
+**3. Get Next Mission:**
 ```bash
 curl -H "X-Agent-Token: $AGENT_TOKEN" \
   "http://localhost:3000/api/agent/mission?project_id=1"
@@ -106,8 +95,28 @@ curl -H "X-Agent-Token: your-token" <endpoint>
 #### Log Test Results
 `POST /api/agent/verify`
 
+#### Get Parallel Wave
+`GET /api/agent/wave?project_id=1`
+
 #### Add Agent Logs
 `POST /api/agent/logs`
+`GET /api/agent/logs?project_id=1`
+
+### Agent Control API (UI-Facing)
+
+#### Agent State
+- `GET /api/projects/:id/agent/status`
+- `POST /api/projects/:id/agent/start`
+- `POST /api/projects/:id/agent/stop`
+- `POST /api/projects/:id/agent/pause`
+- `POST /api/projects/:id/agent/retry`
+
+#### Task Control
+- `POST /api/tasks/:id/agent/skip`
+- `POST /api/tasks/:id/agent/retry`
+
+### Git Webhooks
+- `POST /api/webhooks/git` (Receives commit payloads)
 
 ## Database Schema
 

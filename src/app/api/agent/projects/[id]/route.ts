@@ -12,7 +12,7 @@ import { z } from 'zod';
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   // Validate authentication
   if (!validateAgentToken(request)) {
@@ -20,7 +20,8 @@ export async function PATCH(
   }
 
   try {
-    const projectId = parseInt(params.id, 10);
+    const routeParams = await params;
+    const projectId = parseInt(routeParams.id, 10);
 
     if (isNaN(projectId)) {
       return NextResponse.json(
@@ -37,7 +38,6 @@ export async function PATCH(
       description: z.string().optional(),
       constitution: z.string().optional(),
       tech_stack: z.record(z.string(), z.unknown()).optional(),
-      instructions: z.string().optional(),
       base_path: z.string().optional(),
       git_branch: z.string().optional(),
       git_strategy: z.string().optional(),
@@ -76,11 +76,8 @@ export async function PATCH(
     if (parsedBody.tech_stack !== undefined) {
       updateData.techStack = parsedBody.tech_stack;
     }
-    if (parsedBody.instructions !== undefined) {
-      updateData.instructions = parsedBody.instructions;
-    }
     if (parsedBody.base_path !== undefined) {
-      updateData.base_path = parsedBody.base_path;
+      updateData.basePath = parsedBody.base_path; // Fixed mapping from base_path to basePath
     }
     if (parsedBody.git_branch !== undefined) {
       updateData.gitBranch = parsedBody.git_branch;
@@ -198,7 +195,7 @@ export async function PATCH(
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   // Validate authentication
   if (!validateAgentToken(request)) {
@@ -206,7 +203,8 @@ export async function GET(
   }
 
   try {
-    const projectId = parseInt(params.id, 10);
+    const routeParams = await params;
+    const projectId = parseInt(routeParams.id, 10);
 
     if (isNaN(projectId)) {
       return NextResponse.json(

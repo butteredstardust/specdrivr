@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { projects, tasks, agentLogs } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, inArray, and } from 'drizzle-orm';
+import * as schema from '@/db/schema';
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const projectId = parseInt(params.id, 10);
+        const routeParams = await params;
+        const projectId = parseInt(routeParams.id, 10);
 
         // Get the project
         const project = await db.query.projects.findFirst({
@@ -19,10 +21,31 @@ export async function GET(
             return NextResponse.json({ error: 'Project not found' }, { status: 404 });
         }
 
-        // Find current in_progress task
-        const currentTask = await db.query.tasks.findFirst({
-            where: (t) => eq(t.status, 'in_progress'),
+        // Get all specs for this project
+        const projectSpecs = await db.query.specifications.findMany({
+            where: eq(schema.specifications.projectId, projectId)
         });
+
+        const specIds = projectSpecs.map(s => s.id);
+
+        let projectPlanIds: number[] = [];
+        if (specIds.length > 0) {
+            const projectPlansList = await db.query.plans.findMany({
+                where: inArray(schema.plans.specId, specIds)
+            });
+            projectPlanIds = projectPlansList.map(p => p.id);
+        }
+
+        // Find current in_progress task scoped to this project
+        let currentTask = null;
+        if (projectPlanIds.length > 0) {
+            currentTask = await db.query.tasks.findFirst({
+                where: and(
+                    eq(tasks.status, 'in_progress'),
+                    inArray(tasks.planId, projectPlanIds)
+                ),
+            });
+        }
 
         // Get recent logs
         const recentLogs = await db.query.agentLogs.findMany({

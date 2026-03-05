@@ -1,19 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { projects, tasks } from '@/db/schema';
-import { eq, or } from 'drizzle-orm';
+import { eq, or, inArray, and } from 'drizzle-orm';
+import * as schema from '@/db/schema';
 import { validateAgentToken } from '@/lib/auth';
 
 export async function POST(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     if (!validateAgentToken(request)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     try {
-        const projectId = parseInt(params.id, 10);
+        const routeParams = await params;
+        const projectId = parseInt(routeParams.id, 10);
 
         // Get the project
         const project = await db.query.projects.findFirst({
@@ -24,14 +26,34 @@ export async function POST(
             return NextResponse.json({ error: 'Project not found' }, { status: 404 });
         }
 
-        // Find last failed or blocked task
-        const lastFailedTask = await db.query.tasks.findFirst({
-            where: (t) =>
-                or(
-                    eq(t.status, 'blocked'),
-                    eq(t.status, 'todo') // Or any todo task to retry
-                ),
+        // Get all specs for this project
+        const projectSpecs = await db.query.specifications.findMany({
+            where: eq(schema.specifications.projectId, projectId)
         });
+
+        const specIds = projectSpecs.map(s => s.id);
+
+        let projectPlanIds: number[] = [];
+        if (specIds.length > 0) {
+            const projectPlansList = await db.query.plans.findMany({
+                where: inArray(schema.plans.specId, specIds)
+            });
+            projectPlanIds = projectPlansList.map(p => p.id);
+        }
+
+        // Find last failed or blocked task scoped to this project
+        let lastFailedTask = null;
+        if (projectPlanIds.length > 0) {
+            lastFailedTask = await db.query.tasks.findFirst({
+                where: and(
+                    or(
+                        eq(tasks.status, 'blocked'),
+                        eq(tasks.status, 'todo') // Or any todo task to retry
+                    ),
+                    inArray(tasks.planId, projectPlanIds)
+                ),
+            });
+        }
 
         if (!lastFailedTask) {
             return NextResponse.json(

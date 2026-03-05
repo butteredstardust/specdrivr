@@ -1,10 +1,11 @@
-import { getProjects } from '@/lib/actions';
+import { getProjects, getTasksDoneToday } from '@/lib/actions';
 import { ProjectSidebarWrapper } from '@/components/project-sidebar-wrapper';
 import { Logo } from '@/components/logo';
 import { DatabaseStatus } from '@/components/database-status';
 import { UserMenu } from '@/components/user-menu';
 import { CreateProjectDialog } from '@/components/create-project-dialog';
-import { ProjectCard, DashboardEmptyState, DashboardSummaryCard } from '@/components/project-card';
+import { DashboardSummaryCard } from '@/components/project-card';
+import { DashboardProjectList } from '@/components/dashboard-project-list';
 import { BottomTabs } from '@/components/bottom-tabs';
 
 export default async function Home() {
@@ -17,7 +18,7 @@ export default async function Home() {
 
   const totalProjects = projects.length;
   const agentsRunning = projects.filter((p: any) => p.agentStatus === 'running').length;
-  const tasksDoneToday = 0;
+  const tasksDoneToday = await getTasksDoneToday();
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F5F5F7', fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif' }}>
@@ -92,40 +93,7 @@ export default async function Home() {
               />
             </div>
 
-            {/* Projects section */}
-            {projects.length > 0 ? (
-              <>
-                {/* Section header + Search on same row */}
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-base font-semibold text-gray-800">Projects</h2>
-                  {/* Search bar — full width below on small, inline on wider */}
-                </div>
-
-                {/* Search bar — full width, with icon inside */}
-                <div className="relative mb-4">
-                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400">
-                      <circle cx="11" cy="11" r="8" />
-                      <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                    </svg>
-                  </div>
-                  <input
-                    type="search"
-                    placeholder="Search projects..."
-                    className="w-full bg-white border border-gray-200 rounded-lg pl-9 pr-4 py-2 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                  />
-                </div>
-
-                {/* Project cards grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {projects.map((project) => (
-                    <ProjectCard key={project.id} project={project} />
-                  ))}
-                </div>
-              </>
-            ) : (
-              <DashboardEmptyState />
-            )}
+            <DashboardProjectList projects={projects} />
 
           </div>
         </main>

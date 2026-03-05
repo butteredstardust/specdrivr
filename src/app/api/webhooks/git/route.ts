@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { projectId, sha, branch, message, authorName, authorEmail, taskId, planId } = result.data;
+    const { project_id: projectId, sha, branch, message, author_name: authorName, author_email: authorEmail, task_id: taskId, plan_id: planId } = result.data;
 
     // Verify project exists and token has access
     const project = await db.query.projects.findFirst({
@@ -125,12 +125,12 @@ export async function POST(request: NextRequest) {
 // ============================================================================
 
 const gitWebhookSchema = z.object({
-  projectId: z.number().int().positive('project_id is required'),
+  project_id: z.number().int().positive('project_id is required'),
   sha: z.string().length(40).regex(/^[a-f0-9]{40}$/i, 'Invalid commit SHA'),
   branch: z.string().min(1, 'Branch is required'),
   message: z.string().min(1, 'Message is required'),
-  authorName: z.string().optional(),
-  authorEmail: z.string().email().optional(),
-  taskId: z.number().int().positive().optional(),
-  planId: z.number().int().positive().optional(),
+  author_name: z.string().optional(),
+  author_email: z.string().email().optional(),
+  task_id: z.number().int().positive().optional(),
+  plan_id: z.number().int().positive().optional(),
 });

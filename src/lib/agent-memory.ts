@@ -24,6 +24,7 @@ import { eq, and, isNull, desc, sql } from 'drizzle-orm';
 export async function getNextTask(projectId: number): Promise<TaskSelect | null> {
   try {
     // Get the first task where status is 'todo' and has no dependencies or dependencies are met
+    // And ensure we are only matching tasks within the scope of our given projectId
     const nextTasks = await db
       .select()
       .from(tasks)
@@ -34,8 +35,15 @@ export async function getNextTask(projectId: number): Promise<TaskSelect | null>
         and(
           eq(projects.id, projectId),
           eq(tasks.status, 'todo'),
-          // Check if dependency task is completed or is null
-          sql`${tasks.dependencyTaskId} IS NULL OR ${tasks.dependencyTaskId} IN (SELECT id FROM ${tasks} WHERE status = 'done')`
+          // Ensure dependency task is in a 'done' state OR null
+          sql`${tasks.dependencyTaskId} IS NULL OR EXISTS (
+            SELECT 1 FROM ${tasks} AS dt
+            INNER JOIN ${plans} AS dp ON dt.plan_id = dp.id
+            INNER JOIN ${specifications} AS ds ON dp.spec_id = ds.id
+            WHERE dt.id = ${tasks.dependencyTaskId}
+              AND dt.status = 'done'
+              AND ds.project_id = ${projectId}
+          )`
         )
       )
       .orderBy(tasks.priority, tasks.createdAt)
