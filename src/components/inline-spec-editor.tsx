@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { updateSpecificationDev } from '@/lib/actions';
 import { SpecificationSelect } from '@/db/schema';
+import MDEditor from '@uiw/react-md-editor';
 
 interface InlineSpecEditorProps {
   specification: SpecificationSelect;
@@ -78,108 +79,7 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
     setShowHistory(false);
   };
 
-  // Enhanced markdown rendering
-  const renderMarkdown = (text: string): JSX.Element => {
-    const lines = text.split('\n');
-    const elements: JSX.Element[] = [];
-    let i = 0;
-
-    while (i < lines.length) {
-      const line = lines[i];
-      const trimmed = line.trim();
-
-      if (trimmed.startsWith('# ')) {
-        elements.push(
-          <h1 key={i} className="text-[24px] font-semibold text-ios-primary mb-4 ">
-            {trimmed.substring(2)}
-          </h1>
-        );
-      } else if (trimmed.startsWith('## ')) {
-        elements.push(
-          <h2 key={i} className="text-[20px] font-semibold text-ios-primary mb-3 mt-6 ">
-            {trimmed.substring(3)}
-          </h2>
-        );
-      } else if (trimmed.startsWith('### ')) {
-        elements.push(
-          <h3 key={i} className="text-[16px] font-semibold text-ios-primary mb-2 mt-4 ">
-            {trimmed.substring(4)}
-          </h3>
-        );
-      } else if (trimmed.startsWith('#### ')) {
-        elements.push(
-          <h4 key={i} className="text-[14px] font-semibold text-ios-primary mb-2 mt-4 ">
-            {trimmed.substring(5)}
-          </h4>
-        );
-      } else if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-        elements.push(
-          <li key={i} className="ml-4 mb-1 text-[13px]  list-disc">
-            {trimmed.substring(2)}
-          </li>
-        );
-      } else if (trimmed.match(/^\d+\.\s/)) {
-        elements.push(
-          <li key={i} className="ml-4 mb-1 text-[13px]  list-decimal">
-            {trimmed.replace(/^\d+\.\s/, '')}
-          </li>
-        );
-      } else if (trimmed.startsWith('**') && trimmed.endsWith('**')) {
-        elements.push(
-          <p key={i} className="mb-3 text-[13px] ">
-            <strong className="text-text-primary">{trimmed.substring(2, trimmed.length - 2)}</strong>
-          </p>
-        );
-      } else if (trimmed.startsWith('*') && trimmed.endsWith('*') && !trimmed.startsWith('**')) {
-        elements.push(
-          <p key={i} className="mb-3 text-[13px] ">
-            <em>{trimmed.substring(1, trimmed.length - 1)}</em>
-          </p>
-        );
-      } else if (trimmed.startsWith('> ')) {
-        elements.push(
-          <blockquote key={i} className="pl-4 border-l-4 border-ios-separator mb-3 italic text-[13px] ">
-            {trimmed.substring(2)}
-          </blockquote>
-        );
-      } else if (trimmed.startsWith('```')) {
-        // Code block (simple handling)
-        const codeEnd = lines.findIndex((l, idx) => idx > i && l.trim().startsWith('```'));
-        const codeLines = codeEnd !== -1 ? lines.slice(i + 1, codeEnd) : lines.slice(i + 1);
-        elements.push(
-          <pre key={i} className="bg-bg-secondary p-4 rounded-ios-lg mb-4 overflow-x-auto ">
-            <code className="text-[11px] text-text-tertiary text-text-primary">{codeLines.join('\n')}</code>
-          </pre>
-        );
-        // Skip ahead
-        if (codeEnd !== -1) {
-          i = codeEnd;
-        }
-      } else if (trimmed.match(/`([^`]+)`/)) {
-        // Safe inline code rendering without dangerouslySetInnerHTML
-        const match = trimmed.match(/`([^`]+)`/);
-        if (match) {
-          const parts = trimmed.split(match[0]);
-          elements.push(
-            <p key={i} className="mb-3 text-[13px] ">
-              {parts[0]}<code className="bg-bg-secondary px-1 rounded-ios-md text-[11px] text-text-tertiary">{match[1]}</code>{parts[1] || ''}
-            </p>
-          );
-        }
-      } else if (trimmed === '' && i > 0 && lines[i - 1].trim() !== '' && !lines[i - 1].trim().startsWith('>')) {
-        elements.push(<br key={i} />);
-      } else if (trimmed) {
-        elements.push(
-          <p key={i} className="mb-3 text-[13px] ">
-            {trimmed}
-          </p>
-        );
-      }
-      i++;
-    }
-
-    return <div className="prose prose-gray max-w-none">{elements}</div>;
-  };
+  // Render is now handled by MDEditor.Markdown
 
   return (
     <div className="bg-bg-elevated border border-border-default rounded-[8px] shadow-sm">
@@ -331,21 +231,23 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
                 </p>
               </div>
             )}
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              rows={16}
-              className="font-mono text-[11px] text-text-tertiary "
-              style={iosInputStyle}
-              placeholder={"# Project Specification\n\n## Overview\n\nDescribe the project goals and requirements..."}
-              spellCheck={false}
-            />
-            <p className="ios-caption text-text-tertiary ">
+            <div data-color-mode="light">
+              <MDEditor
+                value={content}
+                onChange={(val) => setContent(val || '')}
+                preview="edit"
+                height={500}
+                className="w-full"
+              />
+            </div>
+            <p className="ios-caption text-text-tertiary mt-2">
               Markdown syntax supported (headers, lists, bold, italic, code blocks, blockquotes)
             </p>
           </div>
         ) : (
-          <div>{renderMarkdown(currentSpec.content)}</div>
+          <div data-color-mode="light">
+            <MDEditor.Markdown source={currentSpec.content} style={{ backgroundColor: 'transparent', color: 'var(--text-text-primary)' }} />
+          </div>
         )}
       </div>
     </div>

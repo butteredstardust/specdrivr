@@ -19,6 +19,24 @@ export const projects = pgTable('projects', {
   basePath: text('base_path'),
   gitBranch: text('git_branch').default('main'),
   gitStrategy: text('git_strategy'), // e.g., 'merge', 'rebase', 'squash'
+  agentLastHeartbeatAt: timestamp('agent_last_heartbeat_at', { withTimezone: true }),
+  state: jsonb('state').default({
+    decisions: [],
+    blockers: [],
+    last_position: null,
+    context_summary: null
+  }),
+  gitConfig: jsonb('git_config').default({
+    enabled: false,
+    provider: 'github',
+    repo_url: null,
+    default_branch: 'main',
+    branching_strategy: 'none',
+    phase_branch_template: 'specdriver/phase-{phase_id}-{slug}',
+    milestone_branch_template: 'specdriver/{milestone}-{slug}',
+    webhook_secret: null,
+    commit_message_template: '{type}({plan_id}-{task_id}): {description}'
+  }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   // Agent control fields
@@ -38,6 +56,7 @@ export const specifications = pgTable('specifications', {
   version: text('version').notNull().default('1.0'),
   isActive: boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   createdByUserId: integer('created_by_user_id').references(() => users.id),
 });
 
@@ -46,6 +65,8 @@ export const plans = pgTable('plans', {
   id: serial('id').primaryKey(),
   specId: integer('spec_id').notNull().references(() => specifications.id, { onDelete: 'cascade' }),
   architectureDecisions: jsonb('architecture_decisions'),
+  intent: text('intent'),
+  phaseLabel: text('phase_label'),
   status: planStatusEnum('status').notNull().default('draft'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   createdByUserId: integer('created_by_user_id').references(() => users.id),
@@ -54,7 +75,7 @@ export const plans = pgTable('plans', {
 // Tasks table
 export const tasks = pgTable('tasks', {
   id: serial('id').primaryKey(),
-  planId: integer('plan_id').notNull().references(() => plans.id, { onDelete: 'cascade' }),
+  planId: integer('plan_id').references(() => plans.id, { onDelete: 'cascade' }),
   status: taskStatusEnum('status').notNull().default('todo'),
   description: text('description'),
   filesInvolved: jsonb('files_involved'), // array of file paths
@@ -72,6 +93,7 @@ export const tasks = pgTable('tasks', {
   verifyCommand: text('verify_command'),
   doneCriteria: text('done_criteria'),
   resumeContext: jsonb('resume_context'),
+  recommendedModel: text('recommended_model').default('sonnet'),
   createdByUserId: integer('created_by_user_id').references(() => users.id),
 });
 
@@ -91,6 +113,7 @@ export const agentLogs = pgTable('agent_logs', {
   taskId: integer('task_id').notNull().references(() => tasks.id, { onDelete: 'cascade' }),
   projectId: integer('project_id'), // denormalized for faster filtering
   level: logLevelEnum('level').notNull().default('info'),
+  isInternal: boolean('is_internal').default(false),
   message: text('message').notNull(),
   context: jsonb('context'), // Additional context like file, function, etc.
   timestamp: timestamp('timestamp', { withTimezone: true }).notNull().defaultNow(),
@@ -115,16 +138,42 @@ export const users = pgTable('users', {
 export const gitCommits = pgTable('git_commits', {
   id: serial('id').primaryKey(),
   projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
-  sha: text('sha').notNull().unique(),
+  commitSha: text('commit_sha').notNull(),
   branch: text('branch').notNull(),
   message: text('message').notNull(),
-  authorName: text('author_name'),
-  authorEmail: text('author_email'),
+  author: text('author'),
+  metadata: jsonb('metadata'),
+  committedAt: timestamp('committed_at', { withTimezone: true }).notNull().defaultNow(),
   timestamp: timestamp('timestamp', { withTimezone: true }).notNull().defaultNow(),
   taskId: integer('task_id').references(() => tasks.id, { onDelete: 'set null' }),
   planId: integer('plan_id').references(() => plans.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   createdByUserId: integer('created_by_user_id').references(() => users.id),
+});
+
+// Agent Tokens table
+export const agentTokens = pgTable('agent_tokens', {
+  id: serial('id').primaryKey(),
+  projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  tokenHash: text('token_hash').notNull().unique(),
+  createdByUserId: integer('created_by_user_id').references(() => users.id),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
+  preferredModel: text('preferred_model').default('sonnet'),
+});
+
+// API Request Logs table
+export const apiRequestLogs = pgTable('api_request_logs', {
+  id: serial('id').primaryKey(),
+  tokenId: integer('token_id').references(() => agentTokens.id),
+  endpoint: text('endpoint').notNull(),
+  method: text('method').notNull(),
+  statusCode: integer('status_code').notNull(),
+  durationMs: integer('duration_ms').notNull(),
+  projectId: integer('project_id').references(() => projects.id),
+  requestedAt: timestamp('requested_at', { withTimezone: true }).defaultNow(),
 });
 
 // Types for insertion
@@ -144,6 +193,10 @@ export type UserInsert = typeof users.$inferInsert;
 export type UserSelect = typeof users.$inferSelect;
 export type GitCommitInsert = typeof gitCommits.$inferInsert;
 export type GitCommitSelect = typeof gitCommits.$inferSelect;
+export type AgentTokenInsert = typeof agentTokens.$inferInsert;
+export type AgentTokenSelect = typeof agentTokens.$inferSelect;
+export type ApiRequestLogInsert = typeof apiRequestLogs.$inferInsert;
+export type ApiRequestLogSelect = typeof apiRequestLogs.$inferSelect;
 
 // Enum types for use in applications
 export type TaskStatus = 'todo' | 'in_progress' | 'done' | 'blocked' | 'paused' | 'skipped';
