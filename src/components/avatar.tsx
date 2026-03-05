@@ -25,10 +25,10 @@ const DEFAULT_AVATARS = [
 ];
 
 const sizeClasses = {
-  xs: 'w-6 h-6 ios-caption-2',
-  sm: 'w-8 h-8 ios-footnote',
-  md: 'w-10 h-10 ios-body',
-  lg: 'w-12 h-12 ios-headline',
+  xs: 'w-6 h-6 text-[11px] font-medium',
+  sm: 'w-8 h-8 text-[11px] text-text-tertiary',
+  md: 'w-10 h-10 text-[13px]',
+  lg: 'w-12 h-12 text-[14px] font-semibold',
 };
 
 export function Avatar({
@@ -84,13 +84,13 @@ export function AvatarPicker({
             flex items-center justify-center w-12 h-12 rounded-ios-lg transition-all duration-200
             hover:scale-105
             ${selectedId === avatar.id
-              ? 'ring-2 ring-[var(--ios-blue)] bg-ios-secondary'
+              ? 'ring-2 ring-[var(--accent)] bg-ios-secondary'
               : 'bg-ios-secondary hover:bg-opacity-80'
             }
           `}
           title={`Avatar ${avatar.id}`}
         >
-          <span className="ios-title-2 select-none">{avatar.emoji}</span>
+          <span className="text-[20px] font-semibold select-none">{avatar.emoji}</span>
         </button>
       ))}
     </div>

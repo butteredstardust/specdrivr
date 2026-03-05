@@ -2,264 +2,118 @@
 @tailwind components;
 @tailwind utilities;
 
-/* iOS Color System Using CSS Variables */
 :root {
-  /* Background Colors - Light Mode */
-  --ios-bg-system: #F2F2F7;
-  --ios-bg-primary: #FFFFFF;
-  --ios-bg-secondary: #F2F2F7;
-  --ios-bg-tertiary: #FFFFFF;
+  --color-bg-primary:       #0F0F0F;
+  --color-bg-secondary:     #141414;
+  --color-bg-elevated:      #1A1A1A;
+  --color-bg-hover:         #1F1F1F;
+  --color-bg-active:        #242424;
 
-  /* Text Colors - Light Mode */
-  --ios-text-primary: #000000;
-  --ios-text-secondary: #3C3C43;
-  --ios-text-tertiary: #3C3C43;
-  --ios-text-placeholder: #8E8E93;
-  --ios-text-link: #007AFF;
+  --color-border-subtle:    #1F1F1F;
+  --color-border-default:   #2A2A2A;
+  --color-border-strong:    #3A3A3A;
 
-  /* Separator Colors */
-  --ios-separator: rgba(60, 60, 67, 0.12);
-  --ios-border: rgba(60, 60, 67, 0.12);
+  --color-text-primary:     #E5E5E5;
+  --color-text-secondary:   #8A8A8A;
+  --color-text-tertiary:    #555555;
+  --color-text-link:        #E5E5E5;
 
-  /* iOS Accent Colors */
-  --ios-blue: #007AFF;
-  --ios-blue-hover: #0056b3;
-  --ios-green: #34C759;
-  --ios-green-active: #32D74B;
-  --ios-red: #FF3B30;
-  --ios-orange: #FF9500;
-  --ios-yellow: #FFCC00;
-  --ios-purple: #5856D6;
-  --ios-pink: #FF2D55;
-  --ios-indigo: #5856D6;
-  --ios-teal: #5AC8FA;
+  --color-accent:           #5E6AD2;
+  --color-accent-hover:     #6872D9;
+  --color-accent-subtle:    rgba(94, 106, 210, 0.12);
 
-  /* Status Colors */
-  --ios-status-connecting: #FF9500;
-  --ios-status-connected: #34C759;
-  --ios-status-disconnected: #FF3B30;
-  --ios-status-error: #FF3B30;
+  --color-success:          #4CB782;
+  --color-warning:          #F4C430;
+  --color-danger:           #CD4B4B;
+
+  --color-status-idle:      #555555;
+  --color-status-running:   #4CB782;
+  --color-status-error:     #CD4B4B;
+
+  --font-family:            'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-size-xs:           11px;
+  --font-size-sm:           12px;
+  --font-size-base:         13px;
+  --font-size-md:           14px;
+  --font-size-lg:           16px;
+  --font-size-xl:           20px;
+  --font-size-2xl:          24px;
+
+  --font-weight-normal:     400;
+  --font-weight-medium:     500;
+  --font-weight-semibold:   600;
+
+  --line-height-tight:      1.2;
+  --line-height-base:       1.5;
+  --line-height-relaxed:    1.6;
+
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:   12px;
+  --space-4:   16px;
+  --space-5:   20px;
+  --space-6:   24px;
+  --space-8:   32px;
+  --space-10:  40px;
+  --space-12:  48px;
+
+  --radius-sm:   4px;
+  --radius-md:   6px;
+  --radius-lg:   8px;
+  --radius-full: 9999px;
+
+  --shadow-none: none;
 }
 
-.dark {
-  /* Background Colors - Dark Mode */
-  --ios-bg-system: #000000;
-  --ios-bg-primary: #1C1C1E;
-  --ios-bg-secondary: #2C2C2E;
-  --ios-bg-tertiary: #3A3A3C;
+@layer base {
+  body {
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-  /* Text Colors - Dark Mode */
-  --ios-text-primary: #FFFFFF;
-  --ios-text-secondary: #EBEBF5;
-  --ios-text-tertiary: #EBEBF5;
-  --ios-text-placeholder: #8E8E93;
-  --ios-text-link: #0A84FF;
+  h1 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+  }
 
-  /* Separator Colors - Dark Mode */
-  --ios-separator: rgba(84, 84, 88, 0.65);
-  --ios-border: rgba(84, 84, 88, 0.65);
+  h2 {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+  }
 
-  /* iOS Accent Colors - Dark Mode */
-  --ios-blue: #0A84FF;
-  --ios-blue-hover: #0066D6;
-  --ios-green: #32D74B;
-  --ios-green-active: #30D158;
-  --ios-red: #FF453A;
-  --ios-orange: #FF9F0A;
-  --ios-yellow: #FFD60A;
-  --ios-purple: #AF52DE;
-  --ios-pink: #FF2D55;
-  --ios-indigo: #5E5CE6;
-  --ios-teal: #64D2FF;
-
-  /* Status Colors - Dark Mode */
-  --ios-status-connecting: #FF9F0A;
-  --ios-status-connected: #32D74B;
-  --ios-status-disconnected: #FF453A;
-  --ios-status-error: #FF453A;
+  * {
+    box-shadow: none !important;
+  }
 }
 
-/* Apply CSS Variables to CSS Custom Properties for Tailwind */
-body {
-  background-color: var(--ios-bg-system);
-  color: var(--ios-text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-  transition-property: background-color, color;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 300ms;
-}
+@layer components {
+  /* Scrollbar Styling */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
 
-/* Dark Mode class support */
-.dark body {
-  background-color: var(--ios-bg-system);
-}
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
 
-/* Utility classes using CSS variables */
-.bg-ios-system {
-  background-color: var(--ios-bg-system);
-}
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border-strong);
+    border-radius: var(--radius-full);
+  }
 
-.bg-ios-primary {
-  background-color: var(--ios-bg-primary);
-}
-
-.bg-ios-secondary {
-  background-color: var(--ios-bg-secondary);
-}
-
-.bg-ios-tertiary {
-  background-color: var(--ios-bg-tertiary);
-}
-
-.text-ios-primary {
-  color: var(--ios-text-primary);
-}
-
-.text-ios-secondary {
-  color: var(--ios-text-secondary);
-}
-
-.text-ios-placeholder {
-  color: var(--ios-text-placeholder);
-}
-
-.text-ios-blue {
-  color: var(--ios-blue);
-}
-
-.text-ios-green {
-  color: var(--ios-green);
-}
-
-.text-ios-red {
-  color: var(--ios-red);
-}
-
-.text-ios-orange {
-  color: var(--ios-orange);
-}
-
-.border-ios {
-  border-color: var(--ios-border);
-}
-
-/* iOS Card Styling */
-.ios-card {
-  background-color: var(--ios-bg-primary);
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
-}
-
-.dark .ios-card {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
-}
-
-/* iOS List Item Styling */
-.ios-list-item {
-  padding: 13px 16px;
-  border-bottom: 1px solid var(--ios-separator);
-}
-
-.ios-list-item:last-child {
-  border-bottom: none;
-}
-
-/* iOS Header Styling */
-.ios-header {
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  background-color: rgba(255, 255, 255, 0.8);
-  border-bottom: 1px solid var(--ios-separator);
-}
-
-.dark .ios-header {
-  background-color: rgba(28, 28, 30, 0.8);
-}
-
-/* iOS Font Family */
-.ios-font {
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, sans-serif;
-}
-
-.ios-font-display {
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Helvetica, sans-serif;
-}
-
-.ios-font-text {
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, sans-serif;
-}
-
-/* iOS Typography Sizes */
-.ios-title-large {
-  font-size: 34px;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.ios-title-1 {
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1.25;
-}
-
-.ios-title-2 {
-  font-size: 22px;
-  font-weight: 700;
-  line-height: 1.25;
-}
-
-.ios-title-3 {
-  font-size: 20px;
-  font-weight: 600;
-  line-height: 1.25;
-}
-
-.ios-headline {
-  font-size: 17px;
-  font-weight: 600;
-}
-
-.ios-body {
-  font-size: 17px;
-  font-weight: 400;
-}
-
-.ios-callout {
-  font-size: 16px;
-  font-weight: 400;
-}
-
-.ios-subheadline {
-  font-size: 15px;
-  font-weight: 400;
-}
-
-.ios-footnote {
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.ios-caption {
-  font-size: 13px;
-  font-weight: 400;
-}
-
-.ios-caption-2 {
-  font-size: 11px;
-}
-
-/* iOS Radius */
-.ios-radius {
-  border-radius: 12px;
-}
-
-.ios-radius-small {
-  border-radius: 8px;
-}
-
-.ios-radius-large {
-  border-radius: 16px;
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-tertiary);
+  }
+  
+  hr {
+    border: none;
+    border-top: 1px solid var(--color-border-subtle);
+    margin: 0;
+  }
 }

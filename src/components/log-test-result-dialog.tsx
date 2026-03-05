@@ -14,8 +14,8 @@ interface LogTestResultDialogProps {
 const iosInputStyle = {
   width: '100%',
   padding: '8px 12px',
-  backgroundColor: 'var(--ios-bg-primary)',
-  color: 'var(--ios-text-primary)',
+  backgroundColor: 'var(--bg-bg-primary)',
+  color: 'var(--text-text-primary)',
   borderColor: 'var(--ios-separator)',
   borderRadius: '8px',
   fontSize: '17px',
@@ -86,7 +86,7 @@ export function LogTestResultDialog({
             setIsOpenInternal(true);
           }
         }}
-        className="text-ios-placeholder hover:text-ios-primary transition-colors ios-font-text"
+        className="text-text-tertiary hover:text-ios-primary transition-colors "
         title="Log Test Result"
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -106,45 +106,45 @@ export function LogTestResultDialog({
       />
 
       {/* Dialog */}
-      <div className="ios-card shadow-xl w-full max-w-lg mx-4 overflow-hidden ios relative z-10">
+      <div className="bg-bg-elevated border border-border-default rounded-[8px] shadow-xl w-full max-w-lg mx-4 overflow-hidden ios relative z-10">
         <div className="p-6">
-          <h2 className="ios-title-2 text-ios-primary mb-4 ios-font-display">
+          <h2 className="text-[20px] font-semibold text-ios-primary mb-4 ">
             Log Test Result
           </h2>
 
           {/* Task Info */}
           <div className="mb-4 p-3 bg-ios-secondary rounded-lg">
-            <p className="ios-caption text-ios-placeholder mb-1 ios-font-text">Task</p>
-            <p className="ios-body text-ios-primary ios-font-text">
+            <p className="ios-caption text-text-tertiary mb-1 ">Task</p>
+            <p className="text-[13px] text-ios-primary ">
               #{task.id}: {task.description?.substring(0, 80)}
               {task.description && task.description.length > 80 ? '...' : ''}
             </p>
           </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-opacity-10 border ios-radius"
-              style={{ backgroundColor: 'var(--ios-red)', borderColor: 'var(--ios-separator)' }}
+            <div className="mb-4 p-3 bg-opacity-10 border rounded-[8px]"
+              style={{ backgroundColor: 'var(--status-error)', borderColor: 'var(--ios-separator)' }}
             >
-              <p className="ios-footnote text-ios-red ios-font-text">{error}</p>
+              <p className="text-[11px] text-text-tertiary text-status-error ">{error}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4 ios-font-text">
+          <form onSubmit={handleSubmit} className="space-y-4 ">
             <div>
-              <label className="block ios-subheadline text-ios-primary mb-3">
+              <label className="block text-[12px] text-ios-primary mb-3">
                 Test Result
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={() => setSuccess(true)}
-                  className={`p-4 rounded-lg ios-body ios-font-text transition-all ${success === true
-                    ? 'bg-ios-green/15 text-ios-green border-2 border-ios-green'
-                    : 'bg-ios-secondary text-ios-text-secondary border-2 border-ios-border hover:border-ios-green'
+                  className={`p-4 rounded-lg text-[13px]  transition-all ${success === true
+                    ? 'bg-status-success/15 text-status-success border-2 border-status-success'
+                    : 'bg-ios-secondary text-text-secondary border-2 border-border-default hover:border-status-success'
                     }`}
                 >
                   <div className="flex flex-col items-center gap-2">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={success === true ? 'text-ios-green' : 'text-ios-text-tertiary'}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={success === true ? 'text-status-success' : 'text-text-tertiary'}>
                       <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                       <polyline points="22 4 12 14.01 9 11.01" />
                     </svg>
@@ -154,9 +154,9 @@ export function LogTestResultDialog({
                 <button
                   type="button"
                   onClick={() => setSuccess(false)}
-                  className={`p-4 rounded-lg ios-body ios-font-text transition-all ${success === false
-                    ? 'bg-ios-red/15 text-ios-red border-2 border-ios-red'
-                    : 'bg-ios-secondary text-ios-text-secondary border-2 border-ios-border hover:border-ios-red'
+                  className={`p-4 rounded-lg text-[13px]  transition-all ${success === false
+                    ? 'bg-status-error/15 text-status-error border-2 border-status-error'
+                    : 'bg-ios-secondary text-text-secondary border-2 border-border-default hover:border-status-error'
                     }`}
                 >
                   <div className="flex flex-col items-center gap-2">
@@ -172,7 +172,7 @@ export function LogTestResultDialog({
             </div>
 
             <div>
-              <label htmlFor="logs" className="block ios-subheadline text-ios-primary mb-2">
+              <label htmlFor="logs" className="block text-[12px] text-ios-primary mb-2">
                 Test Logs
               </label>
               <textarea
@@ -181,10 +181,10 @@ export function LogTestResultDialog({
                 onChange={(e) => setLogs(e.target.value)}
                 placeholder="Paste test output, error messages, or verification details..."
                 rows={6}
-                className="font-mono ios-footnote ios-font-text"
+                className="font-mono text-[11px] text-text-tertiary "
                 style={{ ...iosInputStyle, resize: 'none' }}
               />
-              <p className="mt-1 ios-caption text-ios-placeholder ios-font-text">
+              <p className="mt-1 ios-caption text-text-tertiary ">
                 Optional but recommended for tracking
               </p>
             </div>
@@ -194,15 +194,15 @@ export function LogTestResultDialog({
                 type="button"
                 onClick={handleCancel}
                 disabled={isSubmitting}
-                className="px-4 py-2 ios-body text-ios-blue bg-ios-secondary border border-ios ios-radius ios-font-text disabled:opacity-50"
+                className="px-4 py-2 text-[13px] text-accent bg-ios-secondary border border-ios rounded-[8px]  disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting || success === null}
-                className="px-4 py-2 ios-body text-white ios-radius ios-font-text transition-colors disabled:opacity-50"
-                style={{ backgroundColor: 'var(--ios-blue)' }}
+                className="px-4 py-2 text-[13px] text-white rounded-[8px]  transition-colors disabled:opacity-50"
+                style={{ backgroundColor: 'var(--accent)' }}
               >
                 {isSubmitting ? 'Saving...' : 'Save Result'}
               </button>

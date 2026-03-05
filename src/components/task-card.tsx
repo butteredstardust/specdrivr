@@ -54,7 +54,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
         style={style}
         {...attributes}
         {...listeners}
-        className={`ios-card p-4 mb-3 cursor-pointer hover:shadow-md transition-shadow border-l-4 ${priorityBorder}`}
+        className={`bg-bg-elevated border border-border-default rounded-[8px] p-4 mb-3 cursor-pointer hover:shadow-md transition-shadow border-l-4 ${priorityBorder}`}
         onClick={handleCardClick}
         role="button"
         tabIndex={0}
@@ -67,22 +67,22 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
         }}
       >
         <div className="flex items-start justify-between mb-2">
-          <h3 className="ios-body text-ios-text-primary ios-font-text flex-1 pr-2">
+          <h3 className="text-[13px] text-text-primary  flex-1 pr-2">
             {task.description || 'Untitled Task'}
           </h3>
-          <span className={`inline-flex items-center px-2 py-1 rounded-md ios-caption-1 font-medium ${statusInfo.bg} ${statusInfo.text} ${statusInfo.border} border flex-shrink-0`}>
+          <span className={`inline-flex items-center px-2 py-1 rounded-md text-[11px] font-medium ${statusInfo.bg} ${statusInfo.text} ${statusInfo.border} border flex-shrink-0`}>
             {status.replace('_', ' ').toUpperCase()}
           </span>
         </div>
 
         {Array.isArray(task.filesInvolved) && task.filesInvolved.length > 0 && (
           <div className="mb-2" data-testid={`task-files-${task.id}`}>
-            <p className="ios-caption-1 text-ios-text-secondary mb-1">Files:</p>
+            <p className="text-[11px] text-text-secondary mb-1">Files:</p>
             <div className="flex flex-wrap gap-1">
               {task.filesInvolved.map((file: string, idx: number) => (
                 <span
                   key={idx}
-                  className="ios-caption-1 bg-ios-secondary border border-ios-border px-2 py-1 rounded text-ios-text-primary"
+                  className="text-[11px] bg-ios-secondary border border-border-default px-2 py-1 rounded text-text-primary"
                 >
                   {file}
                 </span>
@@ -91,14 +91,14 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
           </div>
         )}
 
-        <div className="flex items-center justify-between mt-3 pt-2 border-t border-ios-border">
-          <div className="ios-caption-1 text-ios-text-secondary flex items-center gap-3">
+        <div className="flex items-center justify-between mt-3 pt-2 border-t border-border-default">
+          <div className="text-[11px] text-text-secondary flex items-center gap-3">
             <span data-testid={`priority-indicator-${task.priority || 'medium'}`}>P{priority}</span>
             <span>#{task.id}</span>
           </div>
           <button
             onClick={handleLogResultClick}
-            className="flex items-center gap-1 ios-caption-1 text-ios-blue hover:text-ios-blue-dark transition-colors"
+            className="flex items-center gap-1 text-[11px] text-accent hover:text-accent-dark transition-colors"
             title="Log Test Result"
             type="button"
           >

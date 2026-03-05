@@ -14,8 +14,8 @@ interface InlinePlanEditorProps {
 const iosInputStyle = {
   width: '100%',
   padding: '8px 12px',
-  backgroundColor: 'var(--ios-bg-primary)',
-  color: 'var(--ios-text-primary)',
+  backgroundColor: 'var(--bg-bg-primary)',
+  color: 'var(--text-text-primary)',
   borderColor: 'var(--ios-separator)',
   borderRadius: '8px',
   fontSize: '17px',
@@ -25,10 +25,10 @@ const iosInputStyle = {
 };
 
 const statusColors: Record<PlanStatus, { bg: string; text: string; border: string }> = {
-  draft: { bg: 'bg-ios-gray-6', text: 'text-ios-text-secondary', border: 'border-ios-gray-4' },
-  active: { bg: 'bg-ios-blue/10', text: 'text-ios-blue', border: 'border-ios-blue/20' },
-  completed: { bg: 'bg-ios-green/10', text: 'text-ios-green', border: 'border-ios-green/20' },
-  archived: { bg: 'bg-ios-gray-6', text: 'text-ios-text-secondary', border: 'border-ios-gray-4' },
+  draft: { bg: 'bg-status-idle-6', text: 'text-text-secondary', border: 'border-status-idle-4' },
+  active: { bg: 'bg-accent/10', text: 'text-accent', border: 'border-accent/20' },
+  completed: { bg: 'bg-status-success/10', text: 'text-status-success', border: 'border-status-success/20' },
+  archived: { bg: 'bg-status-idle-6', text: 'text-text-secondary', border: 'border-status-idle-4' },
 };
 
 export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorProps) {
@@ -145,10 +145,10 @@ export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorP
   const isCreatingOrEditing = isCreating || editingPlanId !== null;
 
   return (
-    <div className="ios-card shadow-sm">
+    <div className="bg-bg-elevated border border-border-default rounded-[8px] shadow-sm">
       <div className="px-6 py-4">
         <div className="flex items-center justify-between ios-font">
-          <h2 className="ios-title-3 text-ios-primary ios-font-display">
+          <h2 className="text-[16px] font-semibold text-ios-primary ">
             Plan
           </h2>
           <div className="flex items-center gap-2">
@@ -162,7 +162,7 @@ export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorP
                     setEditingPlanId(null);
                   }
                 }}
-                className="px-3 py-1.5 ios-footnote ios-body ios-radius bg-ios-secondary border border-ios text-ios-primary ios-font-text"
+                className="px-3 py-1.5 text-[11px] text-text-tertiary text-[13px] rounded-[8px] bg-ios-secondary border border-ios text-ios-primary "
               >
                 {plans.map((plan) => (
                   <option key={plan.id} value={plan.id}>
@@ -176,15 +176,15 @@ export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorP
                 {activePlan && (
                   <button
                     onClick={() => handleEdit(activePlan.id)}
-                    className="px-4 py-2 ios-body text-ios-blue bg-ios-secondary border border-ios ios-radius ios-font-text transition-colors"
+                    className="px-4 py-2 text-[13px] text-accent bg-ios-secondary border border-ios rounded-[8px]  transition-colors"
                   >
                     Edit
                   </button>
                 )}
                 <button
                   onClick={() => setIsCreating(true)}
-                  className="px-4 py-2 ios-body text-white ios-radius ios-font-text transition-colors"
-                  style={{ backgroundColor: 'var(--ios-blue)' }}
+                  className="px-4 py-2 text-[13px] text-white rounded-[8px]  transition-colors"
+                  style={{ backgroundColor: 'var(--accent)' }}
                 >
                   + New
                 </button>
@@ -194,17 +194,17 @@ export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorP
         </div>
 
         {error && (
-          <div className="mt-4 p-3 bg-opacity-10 border ios-radius"
-            style={{ backgroundColor: 'var(--ios-red)', borderColor: 'var(--ios-separator)' }}
+          <div className="mt-4 p-3 bg-opacity-10 border rounded-[8px]"
+            style={{ backgroundColor: 'var(--status-error)', borderColor: 'var(--ios-separator)' }}
           >
-            <p className="ios-footnote text-ios-red ios-font-text">{error}</p>
+            <p className="text-[11px] text-text-tertiary text-status-error ">{error}</p>
           </div>
         )}
 
         {isCreatingOrEditing ? (
           <div className="mt-4 space-y-4">
             <div>
-              <label className="block ios-subheadline text-ios-primary mb-2 ios-font-text">
+              <label className="block text-[12px] text-ios-primary mb-2 ">
                 Status
               </label>
               <div className="flex gap-2">
@@ -215,10 +215,10 @@ export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorP
                       key={status}
                       type="button"
                       onClick={() => setSelectedStatus(status)}
-                      className={`px-4 py-2 rounded-ios-lg ios-footnote font-medium transition-colors ${selectedStatus === status
+                      className={`px-4 py-2 rounded-ios-lg text-[11px] text-text-tertiary font-medium transition-colors ${selectedStatus === status
                         ? `${colors.bg} ${colors.text} ${colors.border} border-2`
-                        : 'bg-ios-gray-6 ios-text-secondary border border-ios-gray-4 hover:bg-ios-gray-5'
-                        } ios-font-text`}
+                        : 'bg-status-idle-6 text-text-secondary border border-status-idle-4 hover:bg-status-idle-5'
+                        } `}
                     >
                       {status.charAt(0).toUpperCase() + status.slice(1)}
                     </button>
@@ -228,21 +228,21 @@ export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorP
             </div>
 
             <div>
-              <label className="block ios-subheadline text-ios-primary mb-2 ios-font-text">
+              <label className="block text-[12px] text-ios-primary mb-2 ">
                 Architecture Decisions (JSON)
               </label>
               <textarea
                 value={editedJson}
                 onChange={(e) => setEditedJson(e.target.value)}
                 rows={16}
-                className="font-mono ios-footnote"
+                className="font-mono text-[11px] text-text-tertiary"
                 style={{
                   ...iosInputStyle,
                   fontFamily: "'SF Mono', Monaco, 'Andale Mono', 'Ubuntu Mono', monospace",
                 }}
                 spellCheck={false}
               />
-              <p className="mt-2 ios-caption text-ios-placeholder ios-font-text">
+              <p className="mt-2 ios-caption text-text-tertiary ">
                 Architecture decisions in JSON format. This describes technical choices, patterns, and structure.
               </p>
             </div>
@@ -251,7 +251,7 @@ export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorP
               <button
                 type="button"
                 onClick={formatJson}
-                className="px-4 py-2 ios-body text-ios-blue bg-ios-secondary border border-ios ios-radius ios-font-text transition-colors"
+                className="px-4 py-2 text-[13px] text-accent bg-ios-secondary border border-ios rounded-[8px]  transition-colors"
               >
                 Format JSON
               </button>
@@ -260,7 +260,7 @@ export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorP
                   type="button"
                   onClick={handleCancel}
                   disabled={isSubmitting}
-                  className="px-4 py-2 ios-body text-ios-blue bg-ios-secondary border border-ios ios-radius ios-font-text transition-colors disabled:opacity-50"
+                  className="px-4 py-2 text-[13px] text-accent bg-ios-secondary border border-ios rounded-[8px]  transition-colors disabled:opacity-50"
                 >
                   Cancel
                 </button>
@@ -268,8 +268,8 @@ export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorP
                   type="button"
                   onClick={handleSave}
                   disabled={isSubmitting}
-                  className="px-4 py-2 ios-body text-white ios-radius ios-font-text transition-colors disabled:opacity-50"
-                  style={{ backgroundColor: 'var(--ios-blue)' }}
+                  className="px-4 py-2 text-[13px] text-white rounded-[8px]  transition-colors disabled:opacity-50"
+                  style={{ backgroundColor: 'var(--accent)' }}
                 >
                   {isSubmitting ? 'Saving...' : (editingPlanId ? 'Update' : 'Create')}
                 </button>
@@ -281,24 +281,24 @@ export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorP
             {activePlan?.architectureDecisions ? (
               <div className="space-y-2">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className={`inline-flex items-center px-3 py-1 rounded-ios-xl ios-caption-1 font-medium ${statusColors[activePlan.status as PlanStatus].bg} ${statusColors[activePlan.status as PlanStatus].text} ios-font-text`}>
+                  <span className={`inline-flex items-center px-3 py-1 rounded-ios-xl text-[11px] font-medium ${statusColors[activePlan.status as PlanStatus].bg} ${statusColors[activePlan.status as PlanStatus].text} `}>
                     {activePlan.status.charAt(0).toUpperCase() + activePlan.status.slice(1)}
                   </span>
-                  <span className="ios-caption text-ios-placeholder ios-font-text">
+                  <span className="ios-caption text-text-tertiary ">
                     Plan #{activePlan.id}
                   </span>
                 </div>
                 {Object.entries(activePlan.architectureDecisions as Record<string, unknown>).map(([key, value]) => (
                   <div key={key} className="bg-ios-secondary rounded-ios-lg p-3">
-                    <p className="font-medium text-ios-text-primary ios-body ios-font-text">{key}</p>
-                    <p className="ios-footnote text-ios-text-secondary ios-font-text mt-1">
+                    <p className="font-medium text-text-primary text-[13px] ">{key}</p>
+                    <p className="text-[11px] text-text-tertiary text-text-secondary  mt-1">
                       {String(value)}
                     </p>
                   </div>
                 ))}
               </div>
             ) : (
-              <span className="text-ios-text-secondary italic ios-body ios-font-text">
+              <span className="text-text-secondary italic text-[13px] ">
                 No plan defined. Create one to define architecture decisions.
               </span>
             )}

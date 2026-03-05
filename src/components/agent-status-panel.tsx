@@ -1,6 +1,6 @@
 'use client';
 
-import { agentStatusLabels, agentStatusColors, formatRelativeTime, formatDuration, type AgentStatus } from '@/lib/ios-styles';
+import { agentStatusLabels, formatRelativeTime, formatDuration, type AgentStatus } from '@/lib/ios-styles';
 
 export interface AgentStatusData {
   status: AgentStatus;
@@ -15,6 +15,15 @@ export interface AgentStatusPanelProps {
   className?: string;
 }
 
+const statusBadgeStyles: Record<AgentStatus, { color: string; dot: string }> = {
+  running: { color: 'text-text-primary', dot: 'bg-status-success' },
+  paused: { color: 'text-text-secondary', dot: 'bg-status-warning' },
+  stopped: { color: 'text-text-secondary', dot: 'bg-status-idle' },
+  idle: { color: 'text-text-secondary', dot: 'bg-status-idle' },
+  error: { color: 'text-status-error', dot: 'bg-status-error' },
+  stale: { color: 'text-status-warning', dot: 'bg-status-warning' },
+};
+
 export function AgentStatusPanel({ agentStatus, className = '' }: AgentStatusPanelProps) {
   const {
     status,
@@ -24,53 +33,44 @@ export function AgentStatusPanel({ agentStatus, className = '' }: AgentStatusPan
     errorCount = 0,
   } = agentStatus;
 
-  const statusInfo = agentStatusColors[status];
-  const isRunning = status === 'running';
+  const badge = statusBadgeStyles[status] || statusBadgeStyles.idle;
   const isStale = status === 'stale';
 
-  // Format uptime if available
   let uptimeText = '';
   if (uptimeSeconds) {
     uptimeText = `· ${formatDuration(uptimeSeconds * 1000)}`;
   } else if (lastHeartbeat) {
-    // If we have last heartbeat but not uptime, show relative time
     uptimeText = `· Last heartbeat ${formatRelativeTime(lastHeartbeat)}`;
   }
 
   return (
-    <div className={`flex items-center gap-3 ios-badge ${statusInfo.bg} ${statusInfo.text} ${className}`}>
-      {/* Status Dot */}
-      <div className={`ios-status-dot ${statusInfo.dot}`} />
+    <div className={`flex items-center gap-[8px] text-[12px] ${badge.color} ${className}`}>
+      <span className={`w-2 h-2 rounded-full shrink-0 ${badge.dot}`} />
 
-      {/* Status Label */}
-      <span className="ios-subheadline font-medium">
+      <span className="font-medium">
         {agentStatusLabels[status]}
       </span>
 
-      {/* Uptime or Last Heartbeat */}
       {(uptimeSeconds || lastHeartbeat) && (
-        <span className="ios-caption-1 opacity-75">
+        <span className="text-text-tertiary">
           {uptimeText}
         </span>
       )}
 
-      {/* Current Task */}
       {currentTask && (
-        <span className="ios-caption-1 opacity-75" title={currentTask.description}>
+        <span className="text-text-tertiary" title={currentTask.description}>
           · Task #{currentTask.id}
         </span>
       )}
 
-      {/* Error Count */}
       {status === 'error' && errorCount > 0 && (
-        <span className="bg-red-500/20 text-red-800 dark:bg-red-900/40 dark:text-red-200 px-1.5 py-0.5 rounded text-[11px] font-medium">
-          {errorCount} error{errorCount > 1 ? 's' : ''}
+        <span className="text-status-error font-medium">
+          · {errorCount} error{errorCount > 1 ? 's' : ''}
         </span>
       )}
 
-      {/* Stale Warning */}
       {isStale && lastHeartbeat && (
-        <span className="flex items-center gap-1 text-amber-700 dark:text-amber-300 ios-caption-1">
+        <span className="flex items-center gap-[4px] text-status-warning">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="12" cy="12" r="10" />
             <line x1="12" y1="8" x2="12" y2="12" />
@@ -83,17 +83,16 @@ export function AgentStatusPanel({ agentStatus, className = '' }: AgentStatusPan
   );
 }
 
-// Compact version for sidebar cards
 export function CompactAgentStatus({ status }: { status: AgentStatus }) {
-  const statusInfo = agentStatusColors[status];
+  const badge = statusBadgeStyles[status] || statusBadgeStyles.idle;
 
   return (
     <div
-      className={`flex items-center gap-1.5 px-2 py-1 rounded-ios-xl ios-caption-1 font-medium ${statusInfo.bg} ${statusInfo.text}`}
+      className={`flex items-center gap-[6px] text-[12px] ${badge.color}`}
       title={agentStatusLabels[status]}
     >
-      <div className={`ios-status-dot ${statusInfo.dot}`} />
-      <span className="capitalize">{status === 'running' ? 'Running' : status}</span>
+      <span className={`w-2 h-2 rounded-full shrink-0 ${badge.dot}`} />
+      <span className="capitalize font-medium">{status === 'running' ? 'Running' : status}</span>
     </div>
   );
 }

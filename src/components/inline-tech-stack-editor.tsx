@@ -77,13 +77,13 @@ export function InlineTechStackEditor({
   };
 
   return (
-    <div className="ios-card shadow-sm p-6">
+    <div className="bg-bg-elevated border border-border-default rounded-[8px] shadow-sm p-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="ios-title-3 text-ios-primary ios-font-display">Tech Stack</h2>
+        <h2 className="text-[16px] font-semibold text-ios-primary ">Tech Stack</h2>
         {!isEditing && (
           <button
             onClick={() => setIsEditing(true)}
-            className="px-3 py-1 ios-footnote font-medium text-ios-blue bg-ios-secondary border border-ios ios-radius ios-font-text transition-colors"
+            className="px-3 py-1 text-[11px] text-text-tertiary font-medium text-accent bg-ios-secondary border border-ios rounded-[8px]  transition-colors"
           >
             Edit
           </button>
@@ -91,8 +91,8 @@ export function InlineTechStackEditor({
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-opacity-10 border ios-radius" style={{ backgroundColor: 'var(--ios-red)', borderColor: 'var(--ios-separator)' }}>
-          <p className="ios-footnote text-ios-red ios-font-text">{error}</p>
+        <div className="mb-4 p-3 bg-opacity-10 border rounded-[8px]" style={{ backgroundColor: 'var(--status-error)', borderColor: 'var(--ios-separator)' }}>
+          <p className="text-[11px] text-text-tertiary text-status-error ">{error}</p>
         </div>
       )}
 
@@ -117,7 +117,7 @@ export function InlineTechStackEditor({
                 />
                 <button
                   onClick={() => handleRemoveEntry(entry.id)}
-                  className="px-3 py-2 ios-footnote font-medium text-ios-red bg-ios-secondary border border-ios ios-radius ios-font-text transition-colors"
+                  className="px-3 py-2 text-[11px] text-text-tertiary font-medium text-status-error bg-ios-secondary border border-ios rounded-[8px]  transition-colors"
                 >
                   ×
                 </button>
@@ -126,22 +126,22 @@ export function InlineTechStackEditor({
           </div>
           <button
             onClick={handleAddEntry}
-            className="px-4 py-2 ios-footnote font-medium text-ios-blue bg-ios-secondary border border-ios ios-radius ios-font-text transition-colors"
+            className="px-4 py-2 text-[11px] text-text-tertiary font-medium text-accent bg-ios-secondary border border-ios rounded-[8px]  transition-colors"
           >
             + Add Technology
           </button>
           <div className="flex justify-end space-x-3 pt-4 border-t border-ios">
             <button
               onClick={handleCancel}
-              className="px-4 py-2 ios-footnote font-medium text-ios-blue bg-ios-secondary border border-ios ios-radius ios-font-text transition-colors"
+              className="px-4 py-2 text-[11px] text-text-tertiary font-medium text-accent bg-ios-secondary border border-ios rounded-[8px]  transition-colors"
               disabled={isSubmitting}
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
-              className="px-4 py-2 ios-footnote font-medium text-white ios-radius ios-font-text transition-colors disabled:opacity-50"
-              style={{ backgroundColor: 'var(--ios-blue)' }}
+              className="px-4 py-2 text-[11px] text-text-tertiary font-medium text-white rounded-[8px]  transition-colors disabled:opacity-50"
+              style={{ backgroundColor: 'var(--accent)' }}
               disabled={isSubmitting || entries.every(e => !e.key.trim())}
             >
               {isSubmitting ? 'Saving...' : 'Save'}
@@ -155,7 +155,7 @@ export function InlineTechStackEditor({
               {Object.entries(techStack).map(([key, value]) => (
                 <span
                   key={key}
-                  className="inline-flex items-center px-3 py-1 rounded-ios-xl ios-footnote bg-ios-blue/10 text-ios-blue ios-font-text"
+                  className="inline-flex items-center px-3 py-1 rounded-ios-xl text-[11px] text-text-tertiary bg-accent/10 text-accent "
                 >
                   <span className="font-medium">{key}:</span>
                   <span className="ml-1">{String(value)}</span>
@@ -163,7 +163,7 @@ export function InlineTechStackEditor({
               ))}
             </div>
           ) : (
-            <span className="ios-body text-ios-placeholder italic ios-font-text">No technologies defined. Click Edit to add some.</span>
+            <span className="text-[13px] text-text-tertiary italic ">No technologies defined. Click Edit to add some.</span>
           )}
         </div>
       )}

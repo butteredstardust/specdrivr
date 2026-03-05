@@ -95,7 +95,7 @@ export function TaskDetailModal({
         size="large"
         footer={
           <div className="flex items-center justify-between flex-wrap gap-3">
-            <div className="ios-body text-ios-text-secondary">
+            <div className="text-[13px] text-text-secondary">
               Created {formatDateTime(task.createdAt)}
             </div>
             <div className="flex items-center gap-2">
@@ -128,13 +128,13 @@ export function TaskDetailModal({
           {/* Status Section */}
           <div className="flex items-center justify-between">
             <div>
-              <span className="ios-caption-1 uppercase tracking-wide">
+              <span className="text-[11px] uppercase tracking-wide">
                 Status
               </span>
               <div className="flex items-center gap-2 mt-1">
                 <span
                   className={clsx(
-                    'inline-flex items-center gap-1 px-2.5 py-1 rounded-ios-md ios-body font-medium',
+                    'inline-flex items-center gap-1 px-2.5 py-1 rounded-ios-md text-[13px] font-medium',
                     statusInfo.bg,
                     statusInfo.text,
                     statusInfo.border,
@@ -144,7 +144,7 @@ export function TaskDetailModal({
                   {task.status.replace('_', ' ').toUpperCase()}
                 </span>
                 {task.retryCount > 0 && (
-                  <span className="ios-caption-1 text-ios-text-secondary">
+                  <span className="text-[11px] text-text-secondary">
                     (Retried {task.retryCount} time{task.retryCount > 1 ? 's' : ''})
                   </span>
                 )}
@@ -152,10 +152,10 @@ export function TaskDetailModal({
             </div>
             {uptime !== null && (
               <div className="text-right">
-                <span className="ios-caption-1 text-ios-text-secondary uppercase tracking-wide">
+                <span className="text-[11px] text-text-secondary uppercase tracking-wide">
                   In Progress For
                 </span>
-                <div className="ios-callout text-ios-text-primary mt-1">
+                <div className="text-[13px] font-medium text-text-primary mt-1">
                   {formatDuration(uptime)}
                 </div>
               </div>
@@ -164,17 +164,17 @@ export function TaskDetailModal({
 
           {/* Description */}
           <div>
-            <span className="ios-caption-1 text-ios-text-secondary uppercase tracking-wide block mb-2">
+            <span className="text-[11px] text-text-secondary uppercase tracking-wide block mb-2">
               Description
             </span>
-            <p className="ios-body text-ios-text-primary">
+            <p className="text-[13px] text-text-primary">
               {task.description || 'No description provided.'}
             </p>
           </div>
 
           {/* Priority */}
           <div>
-            <span className="ios-caption-1 text-ios-text-secondary uppercase tracking-wide block mb-2">
+            <span className="text-[11px] text-text-secondary uppercase tracking-wide block mb-2">
               Priority
             </span>
             <div className="flex items-center gap-2">
@@ -186,12 +186,12 @@ export function TaskDetailModal({
                       'w-3 h-3 rounded-ios-xl',
                       p <= Math.min(task.priority, 5)
                         ? `bg-${['gray', 'yellow', 'orange', 'red', 'red'][p - 1]}-${400 + (p === 5 ? 200 : 100)}`
-                        : 'bg-ios-gray-5'
+                        : 'bg-status-idle-5'
                     )}
                   />
                 ))}
               </div>
-              <span className="ios-callout text-ios-text-primary">
+              <span className="text-[13px] font-medium text-text-primary">
                 P{task.priority}
               </span>
             </div>
@@ -200,7 +200,7 @@ export function TaskDetailModal({
           {/* Status Control (for manual override) */}
           {onStatusChange && (
             <div>
-              <span className="ios-caption-1 text-ios-text-secondary uppercase tracking-wide block mb-2">
+              <span className="text-[11px] text-text-secondary uppercase tracking-wide block mb-2">
                 Change Status
               </span>
               <div className="flex flex-wrap gap-2">
@@ -211,10 +211,10 @@ export function TaskDetailModal({
                     disabled={status === task.status || isSubmitting}
                     data-testid={`task-status-${status}`}
                     className={clsx(
-                      'px-3 py-1.5 rounded-ios-md ios-footnote font-medium border transition-colors',
+                      'px-3 py-1.5 rounded-ios-md text-[11px] text-text-tertiary font-medium border transition-colors',
                       status === task.status
                         ? `${taskStatusColors[status].text} ${taskStatusColors[status].bg} ${taskStatusColors[status].border}`
-                        : 'text-ios-text-secondary bg-ios-bg-card border-ios-border hover:bg-ios-gray-5'
+                        : 'text-text-secondary bg-bg-elevated border-border-default hover:bg-status-idle-5'
                     )}
                   >
                     {status.replace('_', ' ').toUpperCase()}
@@ -227,12 +227,12 @@ export function TaskDetailModal({
           {/* Files Involved */}
           {filesInvolved.length > 0 && (
             <div>
-              <span className="ios-caption-1 text-ios-text-secondary uppercase tracking-wide block mb-2">
+              <span className="text-[11px] text-text-secondary uppercase tracking-wide block mb-2">
                 Files Involved
               </span>
-              <div className="ios-card bg-ios-secondary p-3 space-y-1">
+              <div className="bg-bg-elevated border border-border-default rounded-[8px] bg-ios-secondary p-3 space-y-1">
                 {filesInvolved.map((file, index) => (
-                  <div key={index} className="flex items-center gap-2 ios-footnote">
+                  <div key={index} className="flex items-center gap-2 text-[11px] text-text-tertiary">
                     <svg
                       width="16"
                       height="16"
@@ -240,12 +240,12 @@ export function TaskDetailModal({
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="2"
-                      className="text-ios-text-tertiary flex-shrink-0"
+                      className="text-text-tertiary flex-shrink-0"
                     >
                       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                       <polyline points="14 2 14 8 20 8" />
                     </svg>
-                    <code className="text-ios-text-primary">{file}</code>
+                    <code className="text-text-primary">{file}</code>
                   </div>
                 ))}
               </div>
@@ -255,12 +255,12 @@ export function TaskDetailModal({
           {/* Dependencies */}
           {task.dependencies && task.dependencies.length > 0 && (
             <div>
-              <span className="ios-caption-1 text-ios-text-secondary uppercase tracking-wide block mb-2">
+              <span className="text-[11px] text-text-secondary uppercase tracking-wide block mb-2">
                 Dependencies
               </span>
               <div className="flex flex-wrap gap-2">
                 {task.dependencies.map((dep) => (
-                  <span key={dep.id} className="ios-badge bg-ios-gray-100 text-ios-text-secondary">
+                  <span key={dep.id} className="ios-badge bg-status-idle-100 text-text-secondary">
                     #{dep.id} {dep.description?.slice(0, 30)}...
                   </span>
                 ))}
@@ -270,11 +270,11 @@ export function TaskDetailModal({
 
           {/* Verify Command */}
           <div>
-            <span className="ios-caption-1 text-ios-text-secondary uppercase tracking-wide block mb-2">
+            <span className="text-[11px] text-text-secondary uppercase tracking-wide block mb-2">
               Verify Command
             </span>
             <div className="flex items-center gap-2">
-              <code className="flex-1 ios-card p-3 ios-footnote text-ios-text-primary bg-ios-gray-6">
+              <code className="flex-1 bg-bg-elevated border border-border-default rounded-[8px] p-3 text-[11px] text-text-tertiary text-text-primary bg-status-idle-6">
                 verify-task --id {task.id}
               </code>
               <Button
@@ -302,10 +302,10 @@ export function TaskDetailModal({
           {/* Notes (Agent Notes) */}
           {task.notes && (
             <div>
-              <span className="ios-caption-1 text-ios-text-secondary uppercase tracking-wide block mb-2">
+              <span className="text-[11px] text-text-secondary uppercase tracking-wide block mb-2">
                 Notes
               </span>
-              <div className="ios-card p-3 ios-footnote text-ios-text-secondary">
+              <div className="bg-bg-elevated border border-border-default rounded-[8px] p-3 text-[11px] text-text-tertiary text-text-secondary">
                 {task.notes}
               </div>
             </div>
@@ -314,10 +314,10 @@ export function TaskDetailModal({
           {/* Test Results */}
           {task.testResults && task.testResults.length > 0 && (
             <div>
-              <span className="ios-caption-1 text-ios-text-secondary uppercase tracking-wide block mb-2">
+              <span className="text-[11px] text-text-secondary uppercase tracking-wide block mb-2">
                 Test Results
               </span>
-              <div className="ios-card p-3 space-y-2">
+              <div className="bg-bg-elevated border border-border-default rounded-[8px] p-3 space-y-2">
                 {task.testResults.map((result, index) => (
                   <div
                     key={index}
@@ -330,15 +330,15 @@ export function TaskDetailModal({
                       {result.success ? '✓' : '✗'}
                     </span>
                     <div className="flex-1">
-                      <div className="ios-footnote font-medium text-ios-text-primary mb-1">
+                      <div className="text-[11px] text-text-tertiary font-medium text-text-primary mb-1">
                         {result.success ? 'Passed' : 'Failed'}
                       </div>
                       {result.logs && (
-                        <pre className="ios-caption-1 text-ios-text-secondary whitespace-pre-wrap">
+                        <pre className="text-[11px] text-text-secondary whitespace-pre-wrap">
                           {result.logs}
                         </pre>
                       )}
-                      <div className="ios-caption-1 text-ios-text-tertiary mt-1">
+                      <div className="text-[11px] text-text-tertiary mt-1">
                         {formatDateTime(result.timestamp)}
                       </div>
                     </div>
@@ -351,19 +351,19 @@ export function TaskDetailModal({
           {/* Agent Logs */}
           {task.agentLogs && task.agentLogs.length > 0 && (
             <div>
-              <span className="ios-caption-1 text-ios-text-secondary uppercase tracking-wide block mb-2">
+              <span className="text-[11px] text-text-secondary uppercase tracking-wide block mb-2">
                 Agent Logs
               </span>
-              <div className="ios-card p-3 max-h-48 overflow-y-auto ios-scrollbar">
+              <div className="bg-bg-elevated border border-border-default rounded-[8px] p-3 max-h-48 overflow-y-auto linear-scrollbar">
                 {task.agentLogs.map((log, index) => (
-                  <div key={index} className="flex items-start gap-3 py-1 border-b border-ios-border last:border-0">
-                    <span className="ios-caption-1 text-ios-text-tertiary font-mono flex-shrink-0 w-12">
+                  <div key={index} className="flex items-start gap-3 py-1 border-b border-border-default last:border-0">
+                    <span className="text-[11px] text-text-tertiary font-mono flex-shrink-0 w-12">
                       {log.level.toUpperCase()}
                     </span>
-                    <span className="ios-caption-1 text-ios-text-primary flex-1">
+                    <span className="text-[11px] text-text-primary flex-1">
                       {log.message}
                     </span>
-                    <span className="ios-caption-1 text-ios-text-tertiary flex-shrink-0">
+                    <span className="text-[11px] text-text-tertiary flex-shrink-0">
                       {formatDateTime(log.timestamp)}
                     </span>
                   </div>
@@ -373,29 +373,29 @@ export function TaskDetailModal({
           )}
 
           {/* Timestamps */}
-          <div className="grid grid-cols-2 gap-4 ios-footnote">
+          <div className="grid grid-cols-2 gap-4 text-[11px] text-text-tertiary">
             <div>
-              <span className="ios-caption-1 text-ios-text-secondary block">
+              <span className="text-[11px] text-text-secondary block">
                 Created
               </span>
-              <span className="ios-callout text-ios-text-primary">
+              <span className="text-[13px] font-medium text-text-primary">
                 {formatDateTime(task.createdAt)}
               </span>
             </div>
             <div>
-              <span className="ios-caption-1 text-ios-text-secondary block">
+              <span className="text-[11px] text-text-secondary block">
                 Updated
               </span>
-              <span className="ios-callout text-ios-text-primary">
+              <span className="text-[13px] font-medium text-text-primary">
                 {formatDateTime(task.updatedAt)}
               </span>
             </div>
             {task.completedAt && (
               <div>
-                <span className="ios-caption-1 text-ios-text-secondary block">
+                <span className="text-[11px] text-text-secondary block">
                   Completed
                 </span>
-                <span className="ios-callout text-ios-text-primary">
+                <span className="text-[13px] font-medium text-text-primary">
                   {formatDateTime(task.completedAt)}
                 </span>
               </div>

@@ -209,16 +209,16 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-ios-bg-primary ios-font-text">
+    <div className="min-h-screen bg-bg-primary ">
       {/* Header */}
-      <header className="sticky top-0 z-30 ios-header border-b border-ios-border">
+      <header className="sticky top-0 z-30 ios-header border-b border-border-default">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-3">
           <div className="flex items-center justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => router.push('/')}
-                  className="ios-callout text-ios-blue hover:text-ios-blue-dark transition-colors"
+                  className="text-[13px] font-medium text-accent hover:text-accent-dark transition-colors"
                 >
                   ← Dashboard
                 </button>
@@ -229,15 +229,15 @@ export default function AdminUsersPage() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto ios-scrollbar bg-ios-bg-primary">
+      <main className="flex-1 overflow-y-auto linear-scrollbar bg-bg-primary">
         <div className="max-w-6xl mx-auto px-6 py-6">
           {/* Page Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="ios-title-1 text-ios-text-primary ios-font-display">
+              <h1 className="text-[24px] font-semibold text-text-primary ">
                 Users
               </h1>
-              <p className="ios-body text-ios-text-secondary mt-1">
+              <p className="text-[13px] text-text-secondary mt-1">
                 Manage team members and access permissions
               </p>
             </div>
@@ -248,9 +248,9 @@ export default function AdminUsersPage() {
 
           {/* Loading State */}
           {loading && (
-            <div className="ios-card p-12 text-center">
-              <div className="inline-flex items-center gap-3 ios-body text-ios-text-secondary">
-                <div className="w-5 h-5 rounded-full border-2 border-ios-gray-400 border-t-ios-blue animate-spin" />
+            <div className="bg-bg-elevated border border-border-default rounded-[8px] p-12 text-center">
+              <div className="inline-flex items-center gap-3 text-[13px] text-text-secondary">
+                <div className="w-5 h-5 rounded-full border-2 border-status-idle-400 border-t-accent animate-spin" />
                 Loading users...
               </div>
             </div>
@@ -258,8 +258,8 @@ export default function AdminUsersPage() {
 
           {/* Error State */}
           {error && !loading && (
-            <div className="ios-card p-6">
-              <div className="flex items-center gap-3 p-3 rounded-md bg-ios-red/10 text-ios-red">
+            <div className="bg-bg-elevated border border-border-default rounded-[8px] p-6">
+              <div className="flex items-center gap-3 p-3 rounded-md bg-status-error/10 text-status-error">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="12" cy="12" r="10" />
                   <line x1="12" y1="8" x2="12" y2="12" />
@@ -272,23 +272,23 @@ export default function AdminUsersPage() {
 
           {/* Users Table */}
           {!loading && !error && users.length > 0 && (
-            <div className="ios-card overflow-hidden">
+            <div className="bg-bg-elevated border border-border-default rounded-[8px] overflow-hidden">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-ios-border bg-ios-gray-5">
-                    <th className="text-left px-6 py-3 ios-subheadline font-semibold text-ios-text-primary">
+                  <tr className="border-b border-border-default bg-status-idle-5">
+                    <th className="text-left px-6 py-3 text-[12px] font-semibold text-text-primary">
                       User
                     </th>
-                    <th className="text-left px-6 py-3 ios-subheadline font-semibold text-ios-text-primary">
+                    <th className="text-left px-6 py-3 text-[12px] font-semibold text-text-primary">
                       Role
                     </th>
-                    <th className="text-left px-6 py-3 ios-subheadline font-semibold text-ios-text-primary">
+                    <th className="text-left px-6 py-3 text-[12px] font-semibold text-text-primary">
                       Status
                     </th>
-                    <th className="text-left px-6 py-3 ios-subheadline font-semibold text-ios-text-primary">
+                    <th className="text-left px-6 py-3 text-[12px] font-semibold text-text-primary">
                       Last Login
                     </th>
-                    <th className="text-right px-6 py-3 ios-subheadline font-semibold text-ios-text-primary">
+                    <th className="text-right px-6 py-3 text-[12px] font-semibold text-text-primary">
                       Actions
                     </th>
                   </tr>
@@ -298,17 +298,17 @@ export default function AdminUsersPage() {
                     const roleInfo = userRoleColors[user.role];
 
                     return (
-                      <tr key={user.id} className="border-b border-ios-border last:border-0 hover:bg-ios-gray-5 transition-colors">
+                      <tr key={user.id} className="border-b border-border-default last:border-0 hover:bg-status-idle-5 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-ios-blue flex items-center justify-center text-white ios-subheadline font-semibold flex-shrink-0">
+                            <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-white text-[12px] font-semibold flex-shrink-0">
                               {getInitials(user.username)}
                             </div>
                             <div>
-                              <div className="ios-body text-ios-text-primary font-medium">
+                              <div className="text-[13px] text-text-primary font-medium">
                                 {user.username}
                               </div>
-                              <div className="ios-caption-1 text-ios-text-secondary">
+                              <div className="text-[11px] text-text-secondary">
                                 ID: {user.id}
                               </div>
                             </div>
@@ -324,18 +324,18 @@ export default function AdminUsersPage() {
                         </td>
                         <td className="px-6 py-4">
                           {user.isActive ? (
-                            <span className="inline-flex items-center gap-1.5 text-ios-green">
-                              <span className="w-2 h-2 rounded-full bg-ios-green" />
+                            <span className="inline-flex items-center gap-1.5 text-status-success">
+                              <span className="w-2 h-2 rounded-full bg-status-success" />
                               Active
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1.5 text-ios-text-secondary">
-                              <span className="w-2 h-2 rounded-full bg-ios-gray" />
+                            <span className="inline-flex items-center gap-1.5 text-text-secondary">
+                              <span className="w-2 h-2 rounded-full bg-status-idle" />
                               Inactive
                             </span>
                           )}
                         </td>
-                        <td className="px-6 py-4 ios-body text-ios-text-secondary">
+                        <td className="px-6 py-4 text-[13px] text-text-secondary">
                           {formatDate(user.lastLoginAt)}
                         </td>
                         <td className="px-6 py-4">
@@ -366,8 +366,8 @@ export default function AdminUsersPage() {
 
           {/* Empty State */}
           {!loading && !error && users.length === 0 && (
-            <div className="ios-card p-12 text-center">
-              <div className="text-ios-gray-400 mb-3">
+            <div className="bg-bg-elevated border border-border-default rounded-[8px] p-12 text-center">
+              <div className="text-status-idle-400 mb-3">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="mx-auto">
                   <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                   <circle cx="9" cy="7" r="4" />
@@ -375,8 +375,8 @@ export default function AdminUsersPage() {
                   <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                 </svg>
               </div>
-              <h3 className="ios-title-3 text-ios-text-primary mb-2">No users found</h3>
-              <p className="ios-body text-ios-text-secondary">Create your first user to get started</p>
+              <h3 className="text-[16px] font-semibold text-text-primary mb-2">No users found</h3>
+              <p className="text-[13px] text-text-secondary">Create your first user to get started</p>
             </div>
           )}
         </div>
@@ -401,35 +401,35 @@ export default function AdminUsersPage() {
       >
         <div className="space-y-4">
           <div>
-            <label className="ios-caption-1 text-ios-text-primary uppercase tracking-wide block mb-2">
+            <label className="text-[11px] text-text-primary uppercase tracking-wide block mb-2">
               Username
             </label>
             <input
               type="text"
               placeholder="username"
-              className="ios-input ios-body w-full"
+              className="h-[30px] bg-bg-elevated border border-border-default rounded-[6px] text-text-primary text-[12px] px-[10px] outline-none focus:border-border-strong placeholder:text-text-tertiary transition-colors text-[13px] w-full"
               value={newUsername}
               onChange={(e) => setNewUsername(e.target.value)}
             />
           </div>
           <div>
-            <label className="ios-caption-1 text-ios-text-primary uppercase tracking-wide block mb-2">
+            <label className="text-[11px] text-text-primary uppercase tracking-wide block mb-2">
               Password
             </label>
             <input
               type="password"
               placeholder="••••••••"
-              className="ios-input ios-body w-full"
+              className="h-[30px] bg-bg-elevated border border-border-default rounded-[6px] text-text-primary text-[12px] px-[10px] outline-none focus:border-border-strong placeholder:text-text-tertiary transition-colors text-[13px] w-full"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
             />
           </div>
           <div>
-            <label className="ios-caption-1 text-ios-text-primary uppercase tracking-wide block mb-2">
+            <label className="text-[11px] text-text-primary uppercase tracking-wide block mb-2">
               Role
             </label>
             <select
-              className="ios-select ios-body w-full"
+              className="ios-select text-[13px] w-full"
               value={newUserRole}
               onChange={(e) => setNewUserRole(e.target.value as UserRole)}
             >
@@ -438,7 +438,7 @@ export default function AdminUsersPage() {
               <option value="admin">Admin</option>
             </select>
           </div>
-          <p className="ios-caption-1 text-ios-text-secondary mt-4">
+          <p className="text-[11px] text-text-secondary mt-4">
             The user can log in immediately after their account is created. Give them their password directly.
           </p>
         </div>
@@ -464,21 +464,21 @@ export default function AdminUsersPage() {
         <div className="space-y-4">
           {selectedUser && (
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-ios-blue flex items-center justify-center text-white ios-subheadline font-semibold">
+              <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-white text-[12px] font-semibold">
                 {getInitials(selectedUser.username)}
               </div>
               <div>
-                <div className="ios-body text-ios-text-primary font-medium">
+                <div className="text-[13px] text-text-primary font-medium">
                   {selectedUser.username}
                 </div>
-                <div className="ios-caption-1 text-ios-text-secondary">
+                <div className="text-[11px] text-text-secondary">
                   Current role: {userRoleLabels[selectedUser.role]}
                 </div>
               </div>
             </div>
           )}
           <div>
-            <label className="ios-caption-1 text-ios-text-primary uppercase tracking-wide block mb-2">
+            <label className="text-[11px] text-text-primary uppercase tracking-wide block mb-2">
               New Role
             </label>
             <div className="space-y-2">
@@ -490,11 +490,11 @@ export default function AdminUsersPage() {
                     type="button"
                     onClick={() => setNewRole(role)}
                     className={`w-full flex items-center justify-between px-4 py-3 rounded-md border transition-colors ${newRole === role
-                        ? `${roleInfo.bg} ${roleInfo.text} border-ios-blue border-2`
-                        : 'bg-ios-bg-card border-ios-border text-ios-text-primary hover:bg-ios-gray-5'
+                        ? `${roleInfo.bg} ${roleInfo.text} border-accent border-2`
+                        : 'bg-bg-elevated border-border-default text-text-primary hover:bg-status-idle-5'
                       }`}
                   >
-                    <span className="ios-body font-medium">{userRoleLabels[role]}</span>
+                    <span className="text-[13px] font-medium">{userRoleLabels[role]}</span>
                     {newRole === role && (
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <polyline points="20 6 9 17 4 12" />

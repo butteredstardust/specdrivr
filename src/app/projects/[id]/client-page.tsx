@@ -52,7 +52,7 @@ function SpecTabContent({ specification, allSpecs }: { specification: Specificat
   if (!specification) {
     return (
       <div className="text-center py-12">
-        <p className="ios-body text-ios-placeholder ios-font-text">No specification yet</p>
+        <p className="text-[13px] text-text-tertiary ">No specification yet</p>
       </div>
     );
   }
@@ -68,7 +68,7 @@ function PlanTabContent({ specification, plans }: { specification: Specification
   if (!specification || plans.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="ios-body text-ios-placeholder ios-font-text">No plans yet</p>
+        <p className="text-[13px] text-text-tertiary ">No plans yet</p>
       </div>
     );
   }
@@ -189,82 +189,49 @@ export function ProjectDetailClient({
   };
 
   return (
-    <div className="min-h-screen bg-ios-bg-primary ios-font-text">
-      {/* Header */}
-      <header className="sticky top-0 z-30 ios-header border-b border-ios-border">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-3">
-                <Link
-                  href="/"
-                  className="ios-callout text-ios-blue hover:text-ios-blue-dark transition-colors"
-                >
-                  ← Dashboard
-                </Link>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              {/* Agent Status Panel */}
-              <AgentStatusPanel agentStatus={statusData} />
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="flex h-screen w-full bg-bg-primary overflow-hidden text-text-primary">
+      {/* Sidebar */}
+      <aside className="hidden md:flex flex-col h-full shrink-0">
+        <ProjectSidebarWrapper
+          projects={projects}
+          currentProjectId={projectId}
+        />
+      </aside>
 
-      {/* Main Layout */}
-      <div className="flex h-[calc(100vh-57px)]">
-        {/* Sidebar */}
-        <aside className="w-60 flex-shrink-0 border-r border-ios-border bg-ios-bg-card ios-scrollbar overflow-y-auto">
-          <ProjectSidebarWrapper
-            projects={projects}
-            currentProjectId={projectId}
-          />
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex-1 overflow-y-auto ios-scrollbar bg-ios-bg-primary">
-          {/* Project Title Section */}
-          <div className="px-6 py-4 bg-ios-bg-card border-b border-ios-border">
-            <div className="max-w-6xl">
-              <h1 className="ios-title-1 text-ios-text-primary ios-font-display">
-                {project.name}
-              </h1>
-              {techStack.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {techStack.slice(0, 4).map((tech) => (
-                    <span
-                      key={tech}
-                      className="ios-badge bg-ios-secondary ios-text-secondary border border-ios-border"
-                    >
-                      {tech}
-                    </span>
-                  ))}
-                  {techStack.length > 4 && (
-                    <span className="ios-caption-1 text-ios-text-secondary">
-                      +{techStack.length - 4} more
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col min-w-0 h-full bg-bg-primary">
+        <header className="h-[48px] border-b border-border-subtle flex items-center justify-between px-[24px] shrink-0 bg-bg-primary">
+          <div className="text-[13px] font-semibold text-text-primary flex items-center gap-2 max-w-[60%]">
+            <Link
+              href="/"
+              className="text-text-secondary hover:text-text-primary transition-colors inline-flex"
+            >
+              ←
+            </Link>
+            <span className="truncate">{project.name}</span>
           </div>
+          <div className="flex items-center gap-[8px]">
+            <AgentStatusPanel agentStatus={statusData} />
+          </div>
+        </header>
+
+        <div className="flex-1 overflow-y-auto bg-bg-primary">
 
 
           {/* Tabs */}
-          <div className="border-b border-ios-border bg-ios-bg-card sticky top-0 z-10">
-            <nav className="flex space-x-0 ios-scrollbar overflow-x-auto max-w-6xl mx-auto">
+          <div className="border-b border-border-default bg-bg-elevated sticky top-0 z-10">
+            <nav className="flex space-x-0 linear-scrollbar overflow-x-auto max-w-6xl mx-auto">
               {tabs.map((tab) => {
                 // Route-based tabs (separate pages) must use <a>, not button
                 const isRouteBased = tab.href && !tab.href.includes('?tab=') && tab.href !== `/projects/${projectId}`;
                 const isActive = activeTabId === tab.id;
-                const sharedClass = `relative flex items-center gap-2 px-4 py-3 ios-body font-medium transition-colors whitespace-nowrap ${isActive
-                  ? 'text-ios-blue border-b-2 border-ios-blue'
-                  : 'text-ios-text-secondary hover:text-ios-text-primary border-b-2 border-transparent'
+                const sharedClass = `relative flex items-center gap-2 px-4 py-3 text-[13px] font-medium transition-colors whitespace-nowrap ${isActive
+                  ? 'text-accent border-b-2 border-accent'
+                  : 'text-text-secondary hover:text-text-primary border-b-2 border-transparent'
                   }`;
                 const badge = tab.badge && (
                   <span
-                    className={`ios-badge px-2 py-0.5 rounded-full text-[11px] ${isActive ? 'bg-ios-blue text-white' : 'bg-ios-gray-5 text-ios-text-secondary'
+                    className={`ios-badge px-2 py-0.5 rounded-full text-[11px] ${isActive ? 'bg-accent text-white' : 'bg-status-idle-5 text-text-secondary'
                       }`}
                   >
                     {typeof tab.badge === 'number' && tab.badge > 99 ? '99+' : tab.badge}
@@ -298,8 +265,8 @@ export function ProjectDetailClient({
               {renderTabContent()}
             </div>
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }

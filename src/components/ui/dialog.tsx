@@ -82,9 +82,9 @@ export function Dialog({
   if (!isOpen) return null;
 
   const sizeClasses = {
-    small: 'max-w-md',
-    medium: 'max-w-lg',
-    large: 'max-w-2xl',
+    small: 'max-w-[400px]',
+    medium: 'max-w-[500px]',
+    large: 'max-w-[600px]',
     full: 'max-w-4xl',
   };
 
@@ -105,15 +105,15 @@ export function Dialog({
       {/* Dialog */}
       <div
         ref={dialogRef}
-        className={`relative w-full ${sizeClasses[size]} bg-ios-bg-card rounded-ios-xl shadow-ios-modal border border-ios-border animate-in fade-in zoom-in-95 duration-200`}
+        className={`relative w-full ${sizeClasses[size]} bg-bg-elevated rounded-[8px] border border-border-default animate-in fade-in zoom-in-95 duration-[150ms]`}
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-ios-border">
+          <div className="flex items-center justify-between px-[24px] py-[16px] border-b border-border-subtle">
             {title && (
               <h2
                 id="dialog-title"
-                className="ios-title-3 text-ios-text-primary ios-font-display"
+                className="text-[14px] font-semibold text-text-primary"
               >
                 {title}
               </h2>
@@ -121,17 +121,10 @@ export function Dialog({
             {showCloseButton && (
               <Button
                 variant="ghost"
-                size="small"
+                size="icon"
                 onClick={onClose}
                 icon={
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <line x1="18" y1="6" x2="6" y2="18" />
                     <line x1="6" y1="6" x2="18" y2="18" />
                   </svg>
@@ -145,13 +138,13 @@ export function Dialog({
         )}
 
         {/* Content */}
-        <div className="px-6 py-4 ios-scrollbar overflow-y-auto max-h-[70vh]">
+        <div className="px-[24px] py-[24px] overflow-y-auto max-h-[70vh]">
           {children}
         </div>
 
         {/* Footer */}
         {footer && (
-          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-ios-border">
+          <div className="flex items-center justify-end gap-[8px] px-[24px] py-[16px] border-t border-border-subtle bg-bg-secondary rounded-b-[8px]">
             {footer}
           </div>
         )}
@@ -207,7 +200,7 @@ export function ConfirmDialog({
         ) : null
       }
     >
-      <p className="ios-body text-ios-text-secondary">{message}</p>
+      <p className="text-[13px] text-text-secondary">{message}</p>
     </Dialog>
   );
 }

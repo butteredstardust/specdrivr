@@ -9,7 +9,7 @@ export function SpecificationViewer({ content }: SpecificationViewerProps) {
   const renderContent = () => {
     if (!content) {
       return (
-        <div className="text-center py-8 ios-text-secondary">
+        <div className="text-center py-8 text-text-secondary">
           <p>No specification provided yet</p>
         </div>
       );
@@ -25,32 +25,32 @@ export function SpecificationViewer({ content }: SpecificationViewerProps) {
 
       if (trimmed.startsWith('# ')) {
         elements.push(
-          <h1 key={i} className="ios-title-1 text-ios-primary mb-4">
+          <h1 key={i} className="text-[24px] font-semibold text-ios-primary mb-4">
             {trimmed.substring(2)}
           </h1>
         );
       } else if (trimmed.startsWith('## ')) {
         elements.push(
-          <h2 key={i} className="ios-title-2 text-ios-primary mb-3 mt-6">
+          <h2 key={i} className="text-[20px] font-semibold text-ios-primary mb-3 mt-6">
             {trimmed.substring(3)}
           </h2>
         );
       } else if (trimmed.startsWith('### ')) {
         elements.push(
-          <h3 key={i} className="ios-title-3 text-ios-primary mb-2 mt-4">
+          <h3 key={i} className="text-[16px] font-semibold text-ios-primary mb-2 mt-4">
             {trimmed.substring(4)}
           </h3>
         );
       } else if (trimmed.startsWith('- ')) {
         elements.push(
-          <li key={i} className="ml-4 mb-1 ios-text-secondary">
+          <li key={i} className="ml-4 mb-1 text-text-secondary">
             {trimmed.substring(2)}
           </li>
         );
       } else if (trimmed.startsWith('**') && trimmed.endsWith('**')) {
         elements.push(
           <p key={i} className="mb-3">
-            <strong className="ios-text-primary">
+            <strong className="text-text-primary">
               {trimmed.substring(2, trimmed.length - 2)}
             </strong>
           </p>
@@ -59,7 +59,7 @@ export function SpecificationViewer({ content }: SpecificationViewerProps) {
         elements.push(<br key={i} />);
       } else if (trimmed) {
         elements.push(
-          <p key={i} className="mb-3 ios-text-secondary">
+          <p key={i} className="mb-3 text-text-secondary">
             {trimmed}
           </p>
         );

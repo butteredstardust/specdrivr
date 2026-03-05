@@ -23,8 +23,8 @@ export function Tabs({ tabs, activeTab, className = '' }: TabsProps) {
   const currentTab = activeTab || getCurrentTabFromPath(pathname, tabs);
 
   return (
-    <div className={`border-b border-ios-border ${className}`}>
-      <nav className="flex space-x-0 ios-scrollbar overflow-x-auto">
+    <div className={`border-b border-border-default ${className}`}>
+      <nav className="flex space-x-0 linear-scrollbar overflow-x-auto">
         {tabs.map((tab) => {
           const isActive = currentTab === tab.id;
           return (
@@ -45,10 +45,10 @@ function TabItem({ tab, isActive }: { tab: TabData; isActive: boolean }) {
     <Link href={tab.href}>
       <div
         className={`
-          relative flex items-center gap-2 px-4 py-3 ios-body font-medium transition-colors whitespace-nowrap
+          relative flex items-center gap-2 px-4 py-3 text-[13px] font-medium transition-colors whitespace-nowrap
           ${isActive
-            ? 'text-ios-blue ios-tab-active'
-            : 'text-ios-text-secondary ios-tab-inactive'
+            ? 'text-accent ios-tab-active'
+            : 'text-text-secondary ios-tab-inactive'
           }
         `}
       >
@@ -59,8 +59,8 @@ function TabItem({ tab, isActive }: { tab: TabData; isActive: boolean }) {
             className={`
               ios-badge px-2 py-0.5 rounded-full text-[11px]
               ${isActive
-                ? 'bg-ios-blue text-white'
-                : 'bg-ios-gray-5 text-ios-text-secondary'
+                ? 'bg-accent text-white'
+                : 'bg-status-idle-5 text-text-secondary'
               }
             `}
           >

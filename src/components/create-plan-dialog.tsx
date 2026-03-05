@@ -12,8 +12,8 @@ interface CreatePlanDialogProps {
 const iosInputStyle = {
   width: '100%',
   padding: '8px 12px',
-  backgroundColor: 'var(--ios-bg-primary)',
-  color: 'var(--ios-text-primary)',
+  backgroundColor: 'var(--bg-bg-primary)',
+  color: 'var(--text-text-primary)',
   borderColor: 'var(--ios-separator)',
   borderRadius: '8px',
   fontSize: '17px',
@@ -91,7 +91,7 @@ export function CreatePlanDialog({ specId, onPlanCreated }: CreatePlanDialogProp
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="px-4 py-2 ios-body text-ios-blue bg-ios-secondary border border-ios ios-radius ios-font-text"
+        className="px-4 py-2 text-[13px] text-accent bg-ios-secondary border border-ios rounded-[8px] "
       >
         Create Plan
       </button>
@@ -105,27 +105,27 @@ export function CreatePlanDialog({ specId, onPlanCreated }: CreatePlanDialogProp
         onClick={handleCancel}
       />
 
-      <div className="ios-card shadow-xl w-full max-w-lg mx-4 overflow-hidden ios relative z-10">
+      <div className="bg-bg-elevated border border-border-default rounded-[8px] shadow-xl w-full max-w-lg mx-4 overflow-hidden ios relative z-10">
         <div className="p-6">
-          <h2 className="ios-title-2 text-ios-primary mb-6 ios-font-display">
+          <h2 className="text-[20px] font-semibold text-ios-primary mb-6 ">
             Create New Plan
           </h2>
 
           {error && (
-            <div className="mb-4 p-3 bg-opacity-10 border ios-radius" style={{ backgroundColor: 'var(--ios-red)', borderColor: 'var(--ios-separator)' }}>
-              <p className="ios-footnote text-ios-red" style={iosFontStyle}>{error}</p>
+            <div className="mb-4 p-3 bg-opacity-10 border rounded-[8px]" style={{ backgroundColor: 'var(--status-error)', borderColor: 'var(--ios-separator)' }}>
+              <p className="text-[11px] text-text-tertiary text-status-error" style={iosFontStyle}>{error}</p>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4" style={iosFontStyle}>
             <div>
-              <p className="ios-body text-ios-secondary mb-4">
+              <p className="text-[13px] text-text-secondary mb-4">
                 Creating plan for specification #{specId}
               </p>
             </div>
 
             <div>
-              <label htmlFor="architectureDecisions" className="block ios-subheadline text-ios-primary mb-2">
+              <label htmlFor="architectureDecisions" className="block text-[12px] text-ios-primary mb-2">
                 Architecture Decisions
               </label>
               <textarea
@@ -136,13 +136,13 @@ export function CreatePlanDialog({ specId, onPlanCreated }: CreatePlanDialogProp
                 rows={6}
                 style={{ ...iosInputStyle, resize: 'none', fontFamily: 'monospace, Menlo, Monaco, Consolas, monospace' }}
               />
-              <p className="mt-1 ios-caption text-ios-placeholder">
+              <p className="mt-1 ios-caption text-text-tertiary">
                 Enter architecture decisions as JSON object
               </p>
             </div>
 
             <div>
-              <label htmlFor="status" className="block ios-subheadline text-ios-primary mb-2">
+              <label htmlFor="status" className="block text-[12px] text-ios-primary mb-2">
                 Status
               </label>
               <select
@@ -161,15 +161,15 @@ export function CreatePlanDialog({ specId, onPlanCreated }: CreatePlanDialogProp
                 type="button"
                 onClick={handleCancel}
                 disabled={isSubmitting}
-                className="px-4 py-2 ios-body text-ios-blue bg-ios-secondary border border-ios ios-radius ios-font-text disabled:opacity-50"
+                className="px-4 py-2 text-[13px] text-accent bg-ios-secondary border border-ios rounded-[8px]  disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-4 py-2 ios-body text-white ios-radius ios-font-text transition-colors disabled:opacity-50"
-                style={{ backgroundColor: 'var(--ios-blue)' }}
+                className="px-4 py-2 text-[13px] text-white rounded-[8px]  transition-colors disabled:opacity-50"
+                style={{ backgroundColor: 'var(--accent)' }}
               >
                 {isSubmitting ? 'Creating...' : 'Create'}
               </button>
