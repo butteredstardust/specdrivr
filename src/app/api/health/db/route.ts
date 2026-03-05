@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
+import { sql } from 'drizzle-orm';
 
 export async function GET() {
   try {
     // Simple query to check database connection
-    await db.execute(`
-      SELECT 1 as ping
-    `);
+    await db.execute(sql`SELECT 1 as ping`);
 
     return NextResponse.json({
       success: true,
