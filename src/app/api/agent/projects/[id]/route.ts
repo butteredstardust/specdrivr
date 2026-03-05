@@ -39,6 +39,9 @@ export async function PATCH(
       tech_stack: z.record(z.string(), z.unknown()).optional(),
       instructions: z.string().optional(),
       base_path: z.string().optional(),
+      git_branch: z.string().optional(),
+      git_strategy: z.string().optional(),
+      status: z.enum(['active', 'archived']).optional(),
       // Optionally update specification by creating new version
       spec_content: z.string().optional(),
     });
@@ -78,6 +81,15 @@ export async function PATCH(
     }
     if (parsedBody.base_path !== undefined) {
       updateData.base_path = parsedBody.base_path;
+    }
+    if (parsedBody.git_branch !== undefined) {
+      updateData.gitBranch = parsedBody.git_branch;
+    }
+    if (parsedBody.git_strategy !== undefined) {
+      updateData.gitStrategy = parsedBody.git_strategy;
+    }
+    if (parsedBody.status !== undefined) {
+      updateData.status = parsedBody.status;
     }
 
     let updatedProjectId = projectId;

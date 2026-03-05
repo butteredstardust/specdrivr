@@ -2,54 +2,46 @@ import Link from 'next/link';
 
 export default function ForbiddenPage() {
   return (
-    <div className="min-h-screen bg-ios-bg-primary ios-font-text flex items-center justify-center p-4">
+    <div className="min-h-screen bg-ios-bg-primary ios-font-text flex items-center justify-center px-4">
       <div className="text-center max-w-md">
-        {/* Error Code */}
-        <div className="text-ios-red ios-font-display text-8xl font-bold mb-4">403</div>
-
-        {/* Title */}
-        <h1 className="ios-font-display text-4xl text-ios-text-primary mb-4">
-          Access Denied
+        <div className="mb-6 flex justify-center">
+          <div className="w-32 h-32 rounded-full bg-ios-red/10 flex items-center justify-center">
+            <span className="ios-title-1 text-ios-red ios-font-display">403</span>
+          </div>
+        </div>
+        
+        <h1 className="ios-title-1 text-ios-text-primary ios-font-display mb-3">
+          Access Forbidden
         </h1>
-
-        {/* Message */}
-        <p className="ios-body text-ios-text-secondary mb-8 leading-relaxed">
-          You don't have permission to access this page. If you believe this is an error, please contact an administrator.
+        
+        <p className="ios-body text-ios-text-secondary mb-8">
+          You don't have permission to access this resource.
         </p>
-
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link
-            href="/"
-            className="ios-button-primary px-6 py-3 rounded-md text-ios-white inline-flex items-center justify-center gap-2 text-sm"
+        
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Link 
+            href="/" 
+            className="px-6 py-3 ios-body text-white ios-radius ios-font-text transition-colors text-center"
+            style={{ backgroundColor: 'var(--ios-blue)' }}
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="ios-white"
-            >
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-              <polyline points="9 22 9 12 15 12 15 22" />
-            </svg>
             Go to Dashboard
           </Link>
-
-          <Link
-            href="/auth/login"
-            className="ios-button-secondary px-6 py-3 rounded-md text-sm"
+          <Link 
+            href="/projects" 
+            className="px-6 py-3 ios-body text-ios-blue bg-ios-secondary border border-ios ios-radius ios-font-text transition-colors text-center"
           >
-            Sign in as different user
+            View Projects
           </Link>
         </div>
-
-        {/* Security Note */}
-        <div className="mt-12 pt-6 border-t border-ios-border">
-          <p className="ios-caption-1 text-ios-text-secondary">
-            This event has been logged for security purposes.
+        
+        <div className="mt-8 p-4 ios-card bg-ios-bg-card">
+          <p className="ios-callout text-ios-text-secondary ios-font-text flex items-center justify-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            Contact an administrator if you need access
           </p>
         </div>
       </div>
