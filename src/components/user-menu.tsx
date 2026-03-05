@@ -117,7 +117,14 @@ export function UserMenu() {
   }
 
   if (!user) {
-    return null;
+    return (
+      <a
+        href="/auth/login"
+        className="ios-button-primary px-4 py-2 text-sm"
+      >
+        Sign In
+      </a>
+    );
   }
 
   return (

@@ -3,8 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Logo } from '@/components/logo';
-import { Dialog, ConfirmDialog } from '@/components/ui/dialog';
-import type { ConfirmDialogProps } from '@/components/ui/dialog';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -13,7 +11,6 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,13 +44,11 @@ export default function LoginPage() {
         return;
       }
 
-      setShowSuccessDialog(true);
-
-      // Redirect after dialog closes
+      // Wait for session cookie to stabilize then redirect
       setTimeout(() => {
         router.push('/');
         router.refresh();
-      }, 1500);
+      }, 500);
     } catch (err) {
       setError('An error occurred. Please try again.');
     } finally {
@@ -185,17 +180,6 @@ export default function LoginPage() {
 
         </div>
       </div>
-
-      {/* Success Dialog */}
-      <ConfirmDialog
-        isOpen={showSuccessDialog}
-        onClose={() => {}}
-        onConfirm={() => {}}
-        title="Welcome!"
-        message={`Signed in as ${username}`}
-        confirmText="Continue"
-        hideConfirm
-      />
     </div>
   );
 }
