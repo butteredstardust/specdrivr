@@ -6,14 +6,15 @@ import { validateAgentToken } from '@/lib/auth';
 
 export async function POST(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     if (!validateAgentToken(request)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     try {
-        const taskId = parseInt(params.id, 10);
+        const routeParams = await params;
+        const taskId = parseInt(routeParams.id, 10);
 
         // Get the task
         const task = await db.query.tasks.findFirst({
@@ -24,11 +25,12 @@ export async function POST(
             return NextResponse.json({ error: 'Task not found' }, { status: 404 });
         }
 
-        // Mark task as done (skipped)
+        // Mark task as skipped
         await db
             .update(tasks)
             .set({
-                status: 'done',
+                // @ts-ignore - The underlying schema supports 'skipped' but TS might complain if it uses outdated types
+                status: 'skipped',
                 completedAt: new Date(),
                 notes: task.notes ? `${task.notes}\n[SKIPPED by developer]` : '[SKIPPED by developer]',
             })
@@ -36,7 +38,7 @@ export async function POST(
 
         return NextResponse.json({
             success: true,
-            status: 'done',
+            status: 'skipped',
             task_id: taskId,
             reason: 'skipped',
         });

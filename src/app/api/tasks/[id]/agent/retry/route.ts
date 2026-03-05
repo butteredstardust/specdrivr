@@ -6,14 +6,15 @@ import { validateAgentToken } from '@/lib/auth';
 
 export async function POST(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     if (!validateAgentToken(request)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     try {
-        const taskId = parseInt(params.id, 10);
+        const routeParams = await params;
+        const taskId = parseInt(routeParams.id, 10);
 
         // Get the task
         const task = await db.query.tasks.findFirst({

@@ -30,7 +30,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // If user is not authenticated and trying to access protected route, redirect to login
-  if (!isLoggedIn && !isPublicRoute && pathname !== '/') {
+  if (!isLoggedIn && !isPublicRoute) {
     return NextResponse.redirect(new URL('/auth/login', request.url));
   }
 

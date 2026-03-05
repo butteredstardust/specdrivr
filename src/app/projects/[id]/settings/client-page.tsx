@@ -26,11 +26,39 @@ export function ProjectSettingsClient({
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
   const [showTokenDialog, setShowTokenDialog] = useState(false);
   const [projectNameInput, setProjectNameInput] = useState(project.name);
+  const [projectDescriptionInput, setProjectDescriptionInput] = useState(project.description || '');
+  const [projectMissionInput, setProjectMissionInput] = useState(project.mission || '');
+  const [isSavingDetails, setIsSavingDetails] = useState(false);
+  const [detailsMessage, setDetailsMessage] = useState<string | null>(null);
+
   const [repoUrl, setRepoUrl] = useState(project.basePath || '');
   const [gitBranch, setGitBranch] = useState(project.gitBranch as string || 'main');
   const [gitStrategy, setGitStrategy] = useState(project.gitStrategy as string || 'merge');
   const [isSavingGitConfig, setIsSavingGitConfig] = useState(false);
   const [gitConfigMessage, setGitConfigMessage] = useState<string | null>(null);
+
+  const handleSaveDetails = async () => {
+    setIsSavingDetails(true);
+    setDetailsMessage(null);
+    try {
+      const { updateProjectDetailsDev } = await import('@/lib/actions');
+      const result = await updateProjectDetailsDev(projectId, {
+        name: projectNameInput,
+        description: projectDescriptionInput,
+        mission: projectMissionInput
+      });
+      if (result.success) {
+        setDetailsMessage('Project details saved successfully');
+      } else {
+        setDetailsMessage(result.error || 'Failed to save details');
+      }
+    } catch (e) {
+      setDetailsMessage('An unexpected error occurred');
+    } finally {
+      setIsSavingDetails(false);
+      setTimeout(() => setDetailsMessage(null), 3000);
+    }
+  };
 
   const tabs: TabData[] = [
     {
@@ -198,17 +226,59 @@ export function ProjectSettingsClient({
                 </h2>
 
                 <div className="space-y-4">
-                  {/* Project Name */}
-                  <div>
-                    <label className="ios-callout block text-ios-text-secondary mb-2">
-                      Name
-                    </label>
-                    <input
-                      type="text"
-                      value={projectNameInput}
-                      onChange={(e) => setProjectNameInput(e.target.value)}
-                      className="ios-input"
-                    />
+                  {/* Project Details */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="ios-callout block text-ios-text-secondary mb-2">
+                        Name
+                      </label>
+                      <input
+                        type="text"
+                        value={projectNameInput}
+                        onChange={(e) => setProjectNameInput(e.target.value)}
+                        className="ios-input w-full"
+                      />
+                    </div>
+                    <div>
+                      <label className="ios-callout block text-ios-text-secondary mb-2">
+                        Description
+                      </label>
+                      <input
+                        type="text"
+                        value={projectDescriptionInput}
+                        onChange={(e) => setProjectDescriptionInput(e.target.value)}
+                        placeholder="A brief summary of what this project is"
+                        className="ios-input w-full"
+                      />
+                    </div>
+                    <div>
+                      <label className="ios-callout block text-ios-text-secondary mb-2">
+                        Mission
+                      </label>
+                      <textarea
+                        value={projectMissionInput}
+                        onChange={(e) => setProjectMissionInput(e.target.value)}
+                        placeholder="The core goal or purpose of the project"
+                        className="ios-input w-full min-h-[80px]"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2">
+                      <div>
+                        {detailsMessage && (
+                          <span className={`ios-caption-1 ${detailsMessage.includes('saved') ? 'text-ios-green' : 'text-ios-red'}`}>
+                            {detailsMessage}
+                          </span>
+                        )}
+                      </div>
+                      <Button
+                        onClick={handleSaveDetails}
+                        disabled={isSavingDetails}
+                        variant="secondary"
+                      >
+                        {isSavingDetails ? 'Saving...' : 'Save Details'}
+                      </Button>
+                    </div>
                   </div>
 
                   {/* Constitution */}

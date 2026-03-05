@@ -152,8 +152,8 @@ export async function GET(request: NextRequest) {
       .filter((task) => {
         // Include tasks that are todo, paused, or blocked (for retry)
         if (
-!['todo', 'paused', 'blocked'].includes(task.status)
-) {
+          !['todo', 'paused', 'blocked'].includes(task.status)
+        ) {
           return false;
         }
 
@@ -188,12 +188,12 @@ export async function GET(request: NextRequest) {
     const wave_id = `wave_${btoa(taskIds)}`;
 
     // Git configuration
-    // These would come from project.git_config in a real implementation
+    // Fall back to main and commit-direct if tracking fields are empty/null
     const git_config = {
       repoUrl: project.basePath || null,
-      branch: 'main',
-      strategy: null,
-      webhookUrl: `${process.env.NEXTAUTH_URL}/api/webhooks/git`,
+      branch: project.gitBranch || 'main',
+      strategy: project.gitStrategy || 'commit-direct',
+      webhookUrl: `${process.env.APP_URL || 'http://localhost:3000'}/api/webhooks/git`,
     };
 
     return NextResponse.json({

@@ -60,7 +60,7 @@ export function useAgentStatus({
         status: json.status,
         currentTask: json.current_task,
         uptimeSeconds: json.uptime_seconds,
-        lastHeartbeat: json.last_heartbeat_at,
+        lastHeartbeat: json.last_heartbeat_at || (json as any).last_update, // Catch legacy prop if API returned it incorrectly
         isStale: json.is_stale,
         staleSince: json.stale_since,
         errorCount: json.error_count,
