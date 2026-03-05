@@ -3,6 +3,7 @@ import { UserSelect } from '@/db/schema';
 import { db } from '@/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { auth } from '@/auth';
 
 const COOKIE_NAME = 'specdrivr_session';
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
@@ -28,12 +29,23 @@ export async function getSessionUser(): Promise<UserSelect | null> {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get(COOKIE_NAME);
 
-  if (!sessionCookie) {
+  let userId: number | null = null;
+
+  if (sessionCookie) {
+    userId = parseInt(sessionCookie.value);
+  } else {
+    // Fallback to NextAuth session
+    const session = await auth();
+    if (session?.user?.id) {
+      userId = parseInt(session.user.id);
+    }
+  }
+
+  if (!userId || isNaN(userId)) {
     return null;
   }
 
   try {
-    const userId = parseInt(sessionCookie.value);
     const [user] = await db
       .select()
       .from(users)
