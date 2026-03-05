@@ -14,7 +14,6 @@ import { AgentStatusPanel, type AgentStatusData } from '@/components/agent-statu
 import { WaveManager } from '@/components/wave-manager';
 import { type TabData } from '@/components/ui/tabs';
 import { useAgentStatus } from '@/hooks/use-agent-status';
-import { ProjectSidebarWrapper } from '@/components/project-sidebar-wrapper';
 import Link from 'next/link';
 
 interface ProjectDetailClientProps {
@@ -189,84 +188,59 @@ export function ProjectDetailClient({
   };
 
   return (
-    <div className="flex h-screen w-full bg-bg-primary overflow-hidden text-text-primary">
-      {/* Sidebar */}
-      <aside className="hidden md:flex flex-col h-full shrink-0">
-        <ProjectSidebarWrapper
-          projects={projects}
-          currentProjectId={projectId}
-        />
-      </aside>
+    <div className="flex-1 flex flex-col min-w-0">
+      <div className="mb-6">
+        <div className="text-[12px] font-bold text-[var(--color-text-tertiary)] uppercase tracking-wider mb-1">Project</div>
+        <h1 className="text-[20px] font-semibold text-[var(--color-text-primary)]">{project.name}</h1>
+      </div>
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 h-full bg-bg-primary">
-        <header className="h-[48px] border-b border-border-subtle flex items-center justify-between px-[24px] shrink-0 bg-bg-primary">
-          <div className="text-[13px] font-semibold text-text-primary flex items-center gap-2 max-w-[60%]">
-            <Link
-              href="/"
-              className="text-text-secondary hover:text-text-primary transition-colors inline-flex"
-            >
-              ←
-            </Link>
-            <span className="truncate">{project.name}</span>
-          </div>
-          <div className="flex items-center gap-[8px]">
-            <AgentStatusPanel agentStatus={statusData} />
-          </div>
-        </header>
-
-        <div className="flex-1 overflow-y-auto bg-bg-primary">
-
-
-          {/* Tabs */}
-          <div className="border-b border-border-default bg-bg-elevated sticky top-0 z-10">
-            <nav className="flex space-x-0 linear-scrollbar overflow-x-auto max-w-6xl mx-auto">
-              {tabs.map((tab) => {
-                // Route-based tabs (separate pages) must use <a>, not button
-                const isRouteBased = tab.href && !tab.href.includes('?tab=') && tab.href !== `/projects/${projectId}`;
-                const isActive = activeTabId === tab.id;
-                const sharedClass = `relative flex items-center gap-2 px-4 py-3 text-[13px] font-medium transition-colors whitespace-nowrap ${isActive
-                  ? 'text-accent border-b-2 border-accent'
-                  : 'text-text-secondary hover:text-text-primary border-b-2 border-transparent'
-                  }`;
-                const badge = tab.badge && (
-                  <span
-                    className={`ios-badge px-2 py-0.5 rounded-full text-[11px] ${isActive ? 'bg-accent text-white' : 'bg-status-idle-5 text-text-secondary'
-                      }`}
-                  >
-                    {typeof tab.badge === 'number' && tab.badge > 99 ? '99+' : tab.badge}
-                  </span>
-                );
-                if (isRouteBased) {
-                  return (
-                    <a key={tab.id} href={tab.href} className={sharedClass}>
-                      {tab.label}
-                      {badge}
-                    </a>
-                  );
-                }
+      <div className="flex-1 bg-bg-primary">
+        {/* Tabs */}
+        <div className="border-b border-border-default bg-bg-elevated sticky top-[-24px] z-10 mx-[-24px] px-[24px]">
+          <nav className="flex space-x-0 linear-scrollbar overflow-x-auto">
+            {tabs.map((tab) => {
+              // Route-based tabs (separate pages) must use <a>, not button
+              const isRouteBased = tab.href && !tab.href.includes('?tab=') && tab.href !== `/projects/${projectId}`;
+              const isActive = activeTabId === tab.id;
+              const sharedClass = `relative flex items-center gap-2 px-4 py-3 text-[13px] font-medium transition-colors whitespace-nowrap ${isActive
+                ? 'text-accent border-b-2 border-accent'
+                : 'text-text-secondary hover:text-text-primary border-b-2 border-transparent'
+                }`;
+              const badge = tab.badge && (
+                <span
+                  className={`ios-badge px-2 py-0.5 rounded-full text-[11px] ${isActive ? 'bg-accent text-white' : 'bg-status-idle-5 text-text-secondary'
+                    }`}
+                >
+                  {typeof tab.badge === 'number' && tab.badge > 99 ? '99+' : tab.badge}
+                </span>
+              );
+              if (isRouteBased) {
                 return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTabId(tab.id)}
-                    className={sharedClass}
-                  >
+                  <a key={tab.id} href={tab.href} className={sharedClass}>
                     {tab.label}
                     {badge}
-                  </button>
+                  </a>
                 );
-              })}
-            </nav>
-          </div>
-
-          {/* Tab Content */}
-          <div className="px-6 py-4">
-            <div className="max-w-6xl">
-              {renderTabContent()}
-            </div>
-          </div>
+              }
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTabId(tab.id)}
+                  className={sharedClass}
+                >
+                  {tab.label}
+                  {badge}
+                </button>
+              );
+            })}
+          </nav>
         </div>
-      </main>
+
+        {/* Tab Content */}
+        <div className="py-[var(--sp-6)]">
+          {renderTabContent()}
+        </div>
+      </div>
     </div>
   );
 }
