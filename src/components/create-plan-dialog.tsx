@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { db } from '@/db';
-import { plans } from '@/db/schema';
+import { createPlanDev } from '@/lib/actions';
 
 interface CreatePlanDialogProps {
   specId: number;
@@ -30,6 +29,7 @@ export function CreatePlanDialog({ specId, onPlanCreated }: CreatePlanDialogProp
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
     architectureDecisions: '',
+    intent: '',
     status: 'draft',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -52,25 +52,24 @@ export function CreatePlanDialog({ specId, onPlanCreated }: CreatePlanDialogProp
         }
       }
 
-      const [plan] = await db
-        .insert(plans)
-        .values({
-          specId,
-          architectureDecisions,
-          status: formData.status as any,
-        })
-        .returning();
+      const result = await createPlanDev({
+        specId,
+        architectureDecisions,
+        intent: formData.intent,
+        status: formData.status as any,
+      });
 
-      if (!plan) {
-        throw new Error('Failed to create plan');
+      if (!result.success || !result.plan) {
+        throw new Error(result.error || 'Failed to create plan');
       }
 
       setIsOpen(false);
       setFormData({
         architectureDecisions: '',
+        intent: '',
         status: 'draft',
       });
-      onPlanCreated?.(plan);
+      onPlanCreated?.(result.plan);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
     } finally {
@@ -82,6 +81,7 @@ export function CreatePlanDialog({ specId, onPlanCreated }: CreatePlanDialogProp
     setIsOpen(false);
     setFormData({
       architectureDecisions: '',
+      intent: '',
       status: 'draft',
     });
     setError('');
@@ -138,6 +138,24 @@ export function CreatePlanDialog({ specId, onPlanCreated }: CreatePlanDialogProp
               />
               <p className="mt-1 ios-caption text-text-tertiary">
                 Enter architecture decisions as JSON object
+              </p>
+            </div>
+
+            <div>
+              <label htmlFor="intent" className="block text-[12px] text-ios-primary mb-2">
+                What is your intent with this plan? <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                id="intent"
+                value={formData.intent}
+                onChange={(e) => setFormData({ ...formData, intent: e.target.value })}
+                placeholder="E.g., Implement the core authentication flow safely, following best practices."
+                rows={3}
+                required
+                style={{ ...iosInputStyle, resize: 'none' }}
+              />
+              <p className="mt-1 ios-caption text-text-tertiary">
+                Provide overarching guidance or a specific goal.
               </p>
             </div>
 

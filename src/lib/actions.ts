@@ -449,6 +449,7 @@ export async function updateGitConfigDev(
 export async function createPlanDev(planData: {
   specId: number;
   architectureDecisions?: Record<string, unknown>;
+  intent?: string;
   status?: 'draft' | 'active' | 'completed' | 'archived';
 }) {
   try {
@@ -467,6 +468,7 @@ export async function createPlanDev(planData: {
       .values({
         specId: planData.specId,
         architectureDecisions: planData.architectureDecisions || {},
+        intent: planData.intent || null,
         status: planData.status || 'draft',
       })
       .returning();

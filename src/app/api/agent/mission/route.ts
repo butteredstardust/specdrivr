@@ -10,6 +10,9 @@ import {
   getProjectContext,
   getNextTask,
 } from '@/lib/agent-memory';
+import { db } from '@/db';
+import { tasks } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 /**
  * GET /api/agent/mission
@@ -55,12 +58,38 @@ export async function GET(request: NextRequest) {
     // Get the next available task
     const nextTask = await getNextTask(projectId);
 
+    // Compute unblocked tasks
+    let unblocked_tasks: any[] = [];
+    if (projectContext.plan) {
+      const allTasks = await db.query.tasks.findMany({
+        where: eq(tasks.planId, projectContext.plan.id),
+      });
+
+      const completedTaskIds = new Set(
+        allTasks.filter((t) => t.status === 'done' || t.status === 'skipped').map((t) => t.id)
+      );
+
+      unblocked_tasks = allTasks
+        .filter((task) => {
+          if (!['todo', 'paused', 'blocked'].includes(task.status)) return false;
+          if (task.dependencyTaskId && !completedTaskIds.has(task.dependencyTaskId)) return false;
+          return true;
+        })
+        .map((task) => ({
+          id: task.id,
+          description: task.description || '',
+          priority: task.priority,
+          recommended_model: task.recommendedModel,
+          estimate_hours: task.estimateHours,
+        }));
+    }
+
     // Calculate stats
     const completedTasks = projectContext.tasks.filter(
-      t => t.status === 'done'
+      (t: any) => t.status === 'done'
     ).length;
     const pendingTasks = projectContext.tasks.filter(
-      t => t.status !== 'done'
+      (t: any) => t.status !== 'done'
     ).length;
 
     // Construct response
@@ -69,16 +98,9 @@ export async function GET(request: NextRequest) {
       data: {
         project: projectContext.project,
         specification: projectContext.specification,
-        plan: projectContext.plan,
-        nextTask,
-        context: {
-          hasSpec: !!projectContext.specification,
-          hasPlan: !!projectContext.plan,
-          hasTasks: projectContext.tasks.length > 0,
-          totalTasks: projectContext.tasks.length,
-          completedTasks,
-          pendingTasks,
-        },
+        active_plan: projectContext.plan,
+        next_task: nextTask,
+        unblocked_tasks,
       },
     };
 
