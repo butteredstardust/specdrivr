@@ -99,8 +99,12 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
   // Sort tasks within each column by priority (highest first) and created time
   Object.keys(groupedTasks).forEach((status) => {
     groupedTasks[status].sort((a: TaskSelect, b: TaskSelect) => {
-      if (a.priority !== b.priority) {
-        return b.priority - a.priority;
+      // Convert priority to number in case it's a string (type safety)
+      const priorityA = typeof a.priority === 'string' ? parseInt(a.priority, 10) : a.priority;
+      const priorityB = typeof b.priority === 'string' ? parseInt(b.priority, 10) : b.priority;
+
+      if (priorityA !== priorityB) {
+        return priorityB - priorityA;
       }
       return (
         new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
@@ -199,6 +203,7 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
                 key={column.id}
                 id={column.id}
                 role="column"
+                data-testid={`column-${column.id}`}
                 className={`rounded-lg p-4 min-h-96 ${column.bgColor}`}
               >
                 <div
@@ -207,7 +212,10 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
                   <h3 className="font-semibold text-lg text-gray-800">
                     {column.title}
                   </h3>
-                  <span className="bg-white px-2 py-1 rounded-full text-sm font-medium text-gray-600">
+                  <span
+                    data-testid={`count-${column.id}`}
+                    className="bg-white px-2 py-1 rounded-full text-sm font-medium text-gray-600"
+                  >
                     {columnTasks.length}
                   </span>
                 </div>
