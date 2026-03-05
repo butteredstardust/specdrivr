@@ -52,7 +52,7 @@ export async function getProjects(includeArchived: boolean = false) {
   try {
     const allProjects = includeArchived
       ? await db.select().from(projects)
-      : await db.select().from(projects).where(eq(projects.isArchived, false));
+      : await db.select().from(projects).where(eq(projects.status, 'active'));
 
     return { success: true, projects: allProjects };
   } catch (error) {
@@ -573,11 +573,13 @@ export async function archiveProjectDev(projectId: number, archive: boolean) {
       return { success: false, error: 'Admin privileges required' };
     }
 
-    // Update project archive status
+    const newStatus = archive ? 'archived' : 'active';
+
+    // Update project status
     const [updatedProject] = await db
       .update(projects)
       .set({
-        isArchived: archive,
+        status: newStatus,
         updatedAt: new Date(),
       })
       .where(eq(projects.id, projectId))
