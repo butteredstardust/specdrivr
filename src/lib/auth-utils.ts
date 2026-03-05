@@ -92,6 +92,7 @@ export async function ensureAdminUser(): Promise<UserSelect> {
       avatarId: 1,
       isActive: true,
       isAdmin: true,
+      role: 'admin',
       lastLoginAt: new Date(),
     })
     .returning();

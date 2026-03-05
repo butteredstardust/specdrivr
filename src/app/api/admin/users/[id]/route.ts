@@ -63,6 +63,15 @@ export async function PATCH(
       updatedAt: new Date(),
     };
 
+    // Ensure isAdmin is consistent with role
+    if (result.data.role !== undefined) {
+      updateData.isAdmin = result.data.role === 'admin';
+    } else if (result.data.isAdmin !== undefined) {
+      // If only isAdmin is provided, leave it as-is
+      // This allows direct isAdmin updates if role isn't changing
+      updateData.isAdmin = result.data.isAdmin;
+    }
+
     // Apply the update
     const [updatedUser] = await db
       .update(users)

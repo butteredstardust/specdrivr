@@ -8,6 +8,11 @@ const publicRoutes = ['/auth/login'];
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Allow API routes to use their own authentication (X-Agent-Token, etc.)
+  if (pathname.startsWith('/api/')) {
+    return NextResponse.next();
+  }
+
   // Check if the route is public
   const isPublicRoute = publicRoutes.some((route) =>
     pathname.startsWith(route)
