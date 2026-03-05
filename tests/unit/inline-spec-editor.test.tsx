@@ -61,8 +61,8 @@ describe('InlineSpecEditor - Core Functionality', () => {
 
       render(<InlineSpecEditor specification={spec} />);
 
-      const heading = screen.getByRole('heading', { level: 3 });
-      expect(heading).toHaveTextContent('Heading 3');
+      const heading = screen.getByRole('heading', { level: 3, name: 'Heading 3' });
+      expect(heading).toBeInTheDocument();
     });
 
     test('renders bold text correctly', () => {
@@ -165,8 +165,8 @@ describe('InlineSpecEditor - Core Functionality', () => {
       expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
       expect(screen.getByRole('heading', { level: 2 })).toBeInTheDocument();
       expect(screen.getAllByRole('listitem')).toHaveLength(2);
-      expect(screen.getByText('bold')).toBeInTheDocument();
-      expect(screen.getByText('italic')).toBeInTheDocument();
+      expect(screen.getByText(/bold/)).toBeInTheDocument();
+      expect(screen.getByText(/italic/)).toBeInTheDocument();
     });
   });
 
@@ -175,7 +175,7 @@ describe('InlineSpecEditor - Core Functionality', () => {
       render(<InlineSpecEditor specification={mockSpec} />);
 
       expect(screen.getByLabelText('Edit')).toBeInTheDocument();
-      expect(screen.queryByRole('textarea')).not.toBeInTheDocument();
+      expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
     });
 
     test('clicking Edit button enters edit mode', () => {
@@ -184,7 +184,7 @@ describe('InlineSpecEditor - Core Functionality', () => {
       const editButton = screen.getByLabelText('Edit');
       fireEvent.click(editButton);
 
-      expect(screen.getByRole('textarea')).toBeInTheDocument();
+      expect(screen.getByRole('textbox')).toBeInTheDocument();
       expect(screen.getByLabelText('Save')).toBeInTheDocument();
       expect(screen.getByLabelText('Cancel')).toBeInTheDocument();
     });
@@ -194,7 +194,7 @@ describe('InlineSpecEditor - Core Functionality', () => {
 
       fireEvent.click(screen.getByText('Edit'));
 
-      const textarea = screen.getByRole('textarea') as HTMLTextAreaElement;
+      const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
       expect(textarea.value).toBe(mockSpec.content);
     });
 
@@ -203,7 +203,7 @@ describe('InlineSpecEditor - Core Functionality', () => {
 
       fireEvent.click(screen.getByText('Edit'));
 
-      const textarea = screen.getByRole('textarea');
+      const textarea = screen.getByRole('textbox');
       fireEvent.change(textarea, { target: { value: '# Updated content' } });
 
       expect((textarea as HTMLTextAreaElement).value).toBe('# Updated content');
@@ -214,7 +214,7 @@ describe('InlineSpecEditor - Core Functionality', () => {
 
       fireEvent.click(screen.getByText('Edit'));
 
-      const textarea = screen.getByRole('textarea');
+      const textarea = screen.getByRole('textbox');
       fireEvent.change(textarea, { target: { value: '' } });
 
       const saveButton = screen.getByText('Save');
@@ -226,7 +226,7 @@ describe('InlineSpecEditor - Core Functionality', () => {
 
       fireEvent.click(screen.getByText('Edit'));
 
-      const textarea = screen.getByRole('textarea');
+      const textarea = screen.getByRole('textbox');
       fireEvent.change(textarea, { target: { value: '   \n  ' } });
 
       const saveButton = screen.getByText('Save');
@@ -238,7 +238,7 @@ describe('InlineSpecEditor - Core Functionality', () => {
 
       // Enter edit mode and change content
       fireEvent.click(screen.getByText('Edit'));
-      const textarea = screen.getByRole('textarea');
+      const textarea = screen.getByRole('textbox');
       fireEvent.change(textarea, { target: { value: 'Modified content' } });
 
       // Cancel
@@ -246,10 +246,10 @@ describe('InlineSpecEditor - Core Functionality', () => {
 
       // Should be back in view mode with original content
       expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Test Specification');
-      expect(screen.queryByRole('textarea')).not.toBeInTheDocument();
+      expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
     });
 
-    test('clicking Cancel clears error messages', () => {
+    test('clicking Cancel clears error messages', async () => {
       const mockOnSpecUpdated = jest.fn();
       mockUpdateSpecificationDev.mockResolvedValue({
         success: false,
@@ -260,12 +260,12 @@ describe('InlineSpecEditor - Core Functionality', () => {
 
       // Enter edit mode, make a change, and save
       fireEvent.click(screen.getByText('Edit'));
-      const textarea = screen.getByRole('textarea');
+      const textarea = screen.getByRole('textbox');
       fireEvent.change(textarea, { target: { value: 'Modified content' } });
       fireEvent.click(screen.getByLabelText('Save'));
 
       // Wait for error
-      waitFor(() => {
+      await waitFor(() => {
         expect(screen.getByText('Save failed')).toBeInTheDocument();
       });
 
@@ -286,7 +286,7 @@ describe('InlineSpecEditor - Core Functionality', () => {
       render(<InlineSpecEditor specification={mockSpec} onSpecUpdated={mockOnSpecUpdated} />);
 
       fireEvent.click(screen.getByText('Edit'));
-      fireEvent.change(screen.getByRole('textarea'), { target: { value: 'Updated content' } });
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Updated content' } });
       fireEvent.click(screen.getByLabelText('Save'));
 
       await waitFor(() => {
@@ -304,11 +304,11 @@ describe('InlineSpecEditor - Core Functionality', () => {
       render(<InlineSpecEditor specification={mockSpec} onSpecUpdated={mockOnSpecUpdated} />);
 
       fireEvent.click(screen.getByText('Edit'));
-      fireEvent.change(screen.getByRole('textarea'), { target: { value: 'Updated content' } });
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Updated content' } });
       fireEvent.click(screen.getByLabelText('Save'));
 
       await waitFor(() => {
-        expect(screen.queryByRole('textarea')).not.toBeInTheDocument();
+        expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
         expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Test Specification');
       });
     });
@@ -324,7 +324,7 @@ describe('InlineSpecEditor - Core Functionality', () => {
       render(<InlineSpecEditor specification={mockSpec} onSpecUpdated={mockOnSpecUpdated} />);
 
       fireEvent.click(screen.getByText('Edit'));
-      fireEvent.change(screen.getByRole('textarea'), { target: { value: 'Updated content' } });
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Updated content' } });
       fireEvent.click(screen.getByLabelText('Save'));
 
       await waitFor(() => {
@@ -341,7 +341,7 @@ describe('InlineSpecEditor - Core Functionality', () => {
       render(<InlineSpecEditor specification={mockSpec} />);
 
       fireEvent.click(screen.getByText('Edit'));
-      fireEvent.change(screen.getByRole('textarea'), { target: { value: 'Updated content' } });
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Updated content' } });
       fireEvent.click(screen.getByLabelText('Save'));
 
       await waitFor(() => {
@@ -358,11 +358,11 @@ describe('InlineSpecEditor - Core Functionality', () => {
       render(<InlineSpecEditor specification={mockSpec} />);
 
       fireEvent.click(screen.getByText('Edit'));
-      fireEvent.change(screen.getByRole('textarea'), { target: { value: 'Updated content' } });
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Updated content' } });
       fireEvent.click(screen.getByLabelText('Save'));
 
       await waitFor(() => {
-        expect(screen.queryByRole('textarea')).toBeInTheDocument();
+        expect(screen.queryByRole('textbox')).toBeInTheDocument();
       });
     });
 
@@ -374,7 +374,7 @@ describe('InlineSpecEditor - Core Functionality', () => {
       render(<InlineSpecEditor specification={mockSpec} />);
 
       fireEvent.click(screen.getByText('Edit'));
-      fireEvent.change(screen.getByRole('textarea'), { target: { value: 'Updated content' } });
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Updated content' } });
       fireEvent.click(screen.getByLabelText('Save'));
 
       expect(screen.getByText('Saving...')).toBeInTheDocument();
@@ -411,7 +411,8 @@ describe('InlineSpecEditor - Core Functionality', () => {
 
       expect(screen.getByText('Version History (2 versions)')).toBeInTheDocument();
       expect(screen.getByText('v2')).toBeInTheDocument();
-      expect(screen.getByText('v1')).toBeInTheDocument();
+      // After clicking, both the button and dropdown show v1, so use getAllByText and expect at least 2
+      expect(screen.getAllByText('v1').length).toBeGreaterThanOrEqual(2);
     });
 
     test('clicking version button again hides version history', () => {
@@ -451,8 +452,8 @@ describe('InlineSpecEditor - Core Functionality', () => {
       fireEvent.click(screen.getByText(/v1/));
       fireEvent.click(screen.getByText('Restore')); // Restore v2
 
-      expect(screen.getByRole('textarea')).toBeInTheDocument();
-      const textarea = screen.getByRole('textarea') as HTMLTextAreaElement;
+      expect(screen.getByRole('textbox')).toBeInTheDocument();
+      const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
       expect(textarea.value).toContain('Version 2');
     });
 
@@ -476,7 +477,7 @@ describe('InlineSpecEditor - Core Functionality', () => {
       render(<InlineSpecEditor specification={mockSpec} />);
 
       fireEvent.click(screen.getByText('Edit'));
-      fireEvent.change(screen.getByRole('textarea'), { target: { value: 'Updated' } });
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Updated' } });
       fireEvent.click(screen.getByLabelText('Save'));
 
       await waitFor(() => {
@@ -493,7 +494,7 @@ describe('InlineSpecEditor - Core Functionality', () => {
       render(<InlineSpecEditor specification={mockSpec} />);
 
       fireEvent.click(screen.getByText('Edit'));
-      fireEvent.change(screen.getByRole('textarea'), { target: { value: 'Updated' } });
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Updated' } });
       fireEvent.click(screen.getByLabelText('Save'));
 
       await waitFor(() => {
@@ -512,7 +513,7 @@ describe('InlineSpecEditor - Core Functionality', () => {
       render(<InlineSpecEditor specification={mockSpec} />);
 
       fireEvent.click(screen.getByText('Edit'));
-      fireEvent.change(screen.getByRole('textarea'), { target: { value: 'Updated' } });
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Updated' } });
       fireEvent.click(screen.getByLabelText('Save'));
 
       await waitFor(() => {

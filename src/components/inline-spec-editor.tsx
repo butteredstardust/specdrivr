@@ -70,6 +70,7 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
     setContent(spec.content);
     setIsEditing(true);
     setShowHistory(false);
+    setViewingSpecId(spec.id);
   };
 
   const handleViewVersion = (specId: number) => {
@@ -218,6 +219,7 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
             onClick={() => setIsEditing(true)}
             className="px-4 py-2 ios-body text-white ios-radius ios-font-text transition-colors"
             style={{ backgroundColor: 'var(--ios-blue)' }}
+            aria-label="Edit"
           >
             Edit
           </button>
@@ -235,6 +237,7 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
               onClick={handleCancel}
               disabled={isSubmitting}
               className="px-4 py-2 ios-body text-ios-blue bg-ios-secondary border border-ios ios-radius ios-font-text transition-colors disabled:opacity-50"
+              aria-label="Cancel"
             >
               Cancel
             </button>
@@ -243,6 +246,7 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
               disabled={isSubmitting || !content.trim()}
               className="px-4 py-2 ios-body text-white ios-radius ios-font-text transition-colors disabled:opacity-50"
               style={{ backgroundColor: 'var(--ios-blue)' }}
+              aria-label="Save"
             >
               {isSubmitting ? 'Saving...' : 'Save'}
             </button>
