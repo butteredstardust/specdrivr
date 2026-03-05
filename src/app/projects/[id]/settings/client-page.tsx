@@ -3,14 +3,27 @@
 import { useState } from 'react';
 import { ProjectSelect } from '@/db/schema';
 import { Button } from '@/components/ui/button';
-import { ConfirmDialog } from '@/components/ui/dialog';
-import { ProjectSidebarWrapper } from '@/components/project-sidebar-wrapper';
+import { AppShell } from '@/components/app-shell';
+import { Tabs } from '@/components/ui/tabs';
 import { InlineConstitutionEditor } from '@/components/inline-constitution-editor';
 import { InlineTechStackEditor } from '@/components/inline-tech-stack-editor';
 import { GenerateTokenDialog } from '@/components/generate-token-dialog';
 import { ArchiveProjectDialog } from '@/components/archive-project-dialog';
 import { updateGitConfigDev as updateGitConfig, archiveProjectDev } from '@/lib/actions';
-import type { TabData } from '@/components/ui/tabs';
+import {
+  Settings,
+  GitBranch,
+  Key,
+  AlertTriangle,
+  Save,
+  ChevronDown,
+  Globe,
+  Database,
+  ShieldAlert,
+  Archive,
+  ArrowLeft
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ProjectSettingsClientProps {
   projectId: number;
@@ -29,13 +42,16 @@ export function ProjectSettingsClient({
   const [projectDescriptionInput, setProjectDescriptionInput] = useState(project.description || '');
   const [projectMissionInput, setProjectMissionInput] = useState(project.mission || '');
   const [isSavingDetails, setIsSavingDetails] = useState(false);
-  const [detailsMessage, setDetailsMessage] = useState<string | null>(null);
+  const [detailsMessage, setDetailsMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
 
   const [repoUrl, setRepoUrl] = useState(project.basePath || '');
   const [gitBranch, setGitBranch] = useState(project.gitBranch as string || 'main');
   const [gitStrategy, setGitStrategy] = useState(project.gitStrategy as string || 'merge');
   const [isSavingGitConfig, setIsSavingGitConfig] = useState(false);
-  const [gitConfigMessage, setGitConfigMessage] = useState<string | null>(null);
+  const [gitConfigMessage, setGitConfigMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
+
+  const [isArchiving, setIsArchiving] = useState(false);
+  const [archiveMessage, setArchiveMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
 
   const handleSaveDetails = async () => {
     setIsSavingDetails(true);
@@ -48,401 +64,315 @@ export function ProjectSettingsClient({
         mission: projectMissionInput
       });
       if (result.success) {
-        setDetailsMessage('Project details saved successfully');
+        setDetailsMessage({ text: 'Project details saved successfully', type: 'success' });
       } else {
-        setDetailsMessage(result.error || 'Failed to save details');
+        setDetailsMessage({ text: result.error || 'Failed to save details', type: 'error' });
       }
     } catch (e) {
-      setDetailsMessage('An unexpected error occurred');
+      setDetailsMessage({ text: 'An unexpected error occurred', type: 'error' });
     } finally {
       setIsSavingDetails(false);
       setTimeout(() => setDetailsMessage(null), 3000);
     }
   };
 
-  const tabs: TabData[] = [
-    {
-      id: 'kanban',
-      label: 'Kanban',
-      href: `/projects/${projectId}`,
-    },
-    {
-      id: 'spec',
-      label: 'Spec',
-      href: `/projects/${projectId}?tab=spec`,
-    },
-    {
-      id: 'plan',
-      label: 'Plan',
-      href: `/projects/${projectId}?tab=plan`,
-    },
-    {
-      id: 'commits',
-      label: 'Commits',
-      href: `/projects/${projectId}/commits`,
-    },
-    {
-      id: 'test-results',
-      label: 'Test Results',
-      href: `/projects/${projectId}?tab=test-results`,
-    },
-    {
-      id: 'logs',
-      label: 'Logs',
-      href: `/projects/${projectId}?tab=logs`,
-    },
-    {
-      id: 'settings',
-      label: 'Settings',
-      href: `/projects/${projectId}/settings`,
-    },
-  ];
-
-  // Extract tech stack
-  const techStack = Array.isArray(project.techStack)
-    ? (project.techStack as string[])
-    : typeof project.techStack === 'string'
-      ? [project.techStack]
-      : [];
-
-  const [isArchiving, setIsArchiving] = useState(false);
-  const [archiveMessage, setArchiveMessage] = useState<string | null>(null);
-
   const handleArchive = async () => {
     setIsArchiving(true);
     setArchiveMessage(null);
-
     try {
       const result = await archiveProjectDev(projectId, project.status === 'archived');
-
       if (result.success) {
-        setArchiveMessage(result.message || 'Operation completed');
+        setArchiveMessage({ text: result.message || 'Operation completed', type: 'success' });
         setShowArchiveConfirm(false);
-        setProjectNameInput('');
-        // Clear message after 3 seconds
-        setTimeout(() => setArchiveMessage(null), 3000);
       } else {
-        setArchiveMessage(result.error || 'Failed to update project');
+        setArchiveMessage({ text: result.error || 'Failed to update project', type: 'error' });
       }
     } catch (error) {
-      setArchiveMessage('An unexpected error occurred');
+      setArchiveMessage({ text: 'An unexpected error occurred', type: 'error' });
     } finally {
       setIsArchiving(false);
+      setTimeout(() => setArchiveMessage(null), 3000);
     }
   };
 
   const handleSaveGitConfig = async () => {
     setIsSavingGitConfig(true);
     setGitConfigMessage(null);
-
     try {
       const result = await updateGitConfig(projectId, {
         basePath: repoUrl,
         gitBranch,
         gitStrategy,
       });
-
       if (result.success) {
-        setGitConfigMessage('Git configuration saved successfully');
+        setGitConfigMessage({ text: 'Git configuration saved successfully', type: 'success' });
       } else {
-        setGitConfigMessage(result.error || 'Failed to save git configuration');
+        setGitConfigMessage({ text: result.error || 'Failed to save git configuration', type: 'error' });
       }
     } catch (error) {
-      setGitConfigMessage('An unexpected error occurred');
+      setGitConfigMessage({ text: 'An unexpected error occurred', type: 'error' });
     } finally {
       setIsSavingGitConfig(false);
-      // Clear message after 3 seconds
       setTimeout(() => setGitConfigMessage(null), 3000);
     }
   };
 
+  const tabs = [
+    { id: 'kanban', label: 'Kanban', href: `/projects/${projectId}` },
+    { id: 'spec', label: 'Spec', href: `/projects/${projectId}?tab=spec` },
+    { id: 'plan', label: 'Plan', href: `/projects/${projectId}?tab=plan` },
+    { id: 'commits', label: 'Commits', href: `/projects/${projectId}/commits` },
+    { id: 'test-results', label: 'Test Results', href: `/projects/${projectId}?tab=test-results` },
+    { id: 'logs', label: 'Logs', href: `/projects/${projectId}?tab=logs` },
+    { id: 'settings', label: 'Settings', href: `/projects/${projectId}/settings` },
+  ];
+
   return (
-    <div className="flex h-screen w-full bg-bg-primary overflow-hidden text-text-primary">
-      <aside className="hidden md:flex flex-col h-full shrink-0">
-        <ProjectSidebarWrapper
-          projects={projects}
-          currentProjectId={projectId}
-        />
-      </aside>
-
-      <main className="flex-1 flex flex-col min-w-0 h-full bg-bg-primary">
-        <header className="h-[48px] border-b border-border-subtle flex items-center justify-between px-[24px] shrink-0 bg-bg-primary">
-          <div className="text-[13px] font-semibold text-text-primary flex items-center gap-2 max-w-[60%]">
-            <a
-              href="/"
-              className="text-text-secondary hover:text-text-primary transition-colors inline-flex"
-            >
-              ←
-            </a>
-            <span className="truncate">{project.name}</span>
+    <AppShell sidebarProjects={projects} currentProjectId={projectId}>
+      <div className="flex flex-col h-full bg-[var(--color-bg-primary)]">
+        {/* Project Header */}
+        <div className="px-[var(--sp-6)] pt-[var(--sp-6)] pb-[var(--sp-2)]">
+          <div className="flex items-center gap-[var(--sp-2)] text-[12px] text-[var(--color-text-tertiary)] mb-[var(--sp-2)]">
+            <a href="/" className="hover:text-[var(--color-brand-bold)] transition-colors">Projects</a>
+            <span>/</span>
+            <span className="text-[var(--color-text-secondary)]">{project.name}</span>
           </div>
-          <div className="flex items-center gap-[8px]"></div>
-        </header>
-
-        <div className="flex-1 overflow-y-auto bg-bg-primary">
-
-          {/* Settings Tabs */}
-          <div className="border-b border-border-default bg-bg-elevated sticky top-0 z-10">
-            <nav className="flex space-x-0 linear-scrollbar overflow-x-auto max-w-6xl mx-auto">
-              {tabs.map((tab) => (
-                <a
-                  key={tab.id}
-                  href={tab.href}
-                  className={`
-                    relative flex items-center gap-2 px-4 py-3 text-[13px] font-medium transition-colors whitespace-nowrap
-                    ${tab.id === 'settings'
-                      ? 'text-accent border-b-2 border-accent'
-                      : 'text-text-secondary hover:text-text-primary border-b-2 border-transparent'
-                    }
-                  `}
-                >
-                  {tab.label}
-                </a>
-              ))}
-            </nav>
+          <div className="flex items-center justify-between mb-[var(--sp-6)]">
+            <h1 className="text-[24px] font-semibold text-[var(--color-text-primary)] tracking-tight">Project Settings</h1>
           </div>
 
-          {/* Settings Content */}
-          <div className="px-6 py-6">
-            <div className="max-w-3xl space-y-6">
-              {/* General Section */}
-              <section className="bg-bg-elevated border border-border-default rounded-[8px] p-6">
-                <h2 className="text-[16px] font-semibold text-text-primary mb-4 ">
-                  General
-                </h2>
+          <Tabs tabs={tabs} activeTab="settings" />
+        </div>
 
-                <div className="space-y-4">
-                  {/* Project Details */}
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-[13px] font-medium block text-text-secondary mb-2">
-                        Name
-                      </label>
-                      <input
-                        type="text"
-                        value={projectNameInput}
-                        onChange={(e) => setProjectNameInput(e.target.value)}
-                        className="h-[30px] bg-bg-elevated border border-border-default rounded-[6px] text-text-primary text-[12px] px-[10px] outline-none focus:border-border-strong placeholder:text-text-tertiary transition-colors w-full"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[13px] font-medium block text-text-secondary mb-2">
-                        Description
-                      </label>
-                      <input
-                        type="text"
-                        value={projectDescriptionInput}
-                        onChange={(e) => setProjectDescriptionInput(e.target.value)}
-                        placeholder="A brief summary of what this project is"
-                        className="h-[30px] bg-bg-elevated border border-border-default rounded-[6px] text-text-primary text-[12px] px-[10px] outline-none focus:border-border-strong placeholder:text-text-tertiary transition-colors w-full"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[13px] font-medium block text-text-secondary mb-2">
-                        Mission
-                      </label>
-                      <textarea
-                        value={projectMissionInput}
-                        onChange={(e) => setProjectMissionInput(e.target.value)}
-                        placeholder="The core goal or purpose of the project"
-                        className="h-[30px] bg-bg-elevated border border-border-default rounded-[6px] text-text-primary text-[12px] px-[10px] outline-none focus:border-border-strong placeholder:text-text-tertiary transition-colors w-full min-h-[80px]"
-                      />
-                    </div>
+        {/* Content Area */}
+        <div className="flex-1 overflow-y-auto px-[var(--sp-6)] py-[var(--sp-8)]">
+          <div className="max-w-4xl space-y-[var(--sp-10)]">
+            {/* General Settings */}
+            <section className="space-y-[var(--sp-6)]">
+              <div className="flex items-center gap-[var(--sp-3)] border-b border-[var(--color-border-default)] pb-[var(--sp-3)]">
+                <Globe size={18} className="text-[var(--color-brand-bold)]" />
+                <h2 className="text-[14px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">General Details</h2>
+              </div>
 
-                    <div className="flex items-center justify-between pt-2">
-                      <div>
-                        {detailsMessage && (
-                          <span className={`text-[11px] ${detailsMessage.includes('saved') ? 'text-status-success' : 'text-status-error'}`}>
-                            {detailsMessage}
-                          </span>
-                        )}
-                      </div>
-                      <Button
-                        onClick={handleSaveDetails}
-                        disabled={isSavingDetails}
-                        variant="secondary"
-                      >
-                        {isSavingDetails ? 'Saving...' : 'Save Details'}
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Constitution */}
-                  <div>
-                    <label className="text-[13px] font-medium block text-text-secondary mb-2">
-                      Constitution
-                    </label>
-                    <InlineConstitutionEditor
-                      projectId={projectId}
-                      constitution={project.constitution as string | null}
+              <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] p-[var(--sp-6)] shadow-[var(--shadow-card)] space-y-[var(--sp-6)]">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-[var(--sp-6)]">
+                  <div className="space-y-[var(--sp-2)]">
+                    <label className="block text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Project Name</label>
+                    <input
+                      type="text"
+                      value={projectNameInput}
+                      onChange={(e) => setProjectNameInput(e.target.value)}
+                      className="w-full h-[40px] px-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--color-border-selected)] transition-all"
                     />
                   </div>
-
-                  {/* Tech Stack */}
-                  <div>
-                    <label className="text-[13px] font-medium block text-text-secondary mb-2">
-                      Tech Stack
-                    </label>
-                    <InlineTechStackEditor
-                      projectId={projectId}
-                      techStack={project.techStack as Record<string, unknown> || {}}
+                  <div className="space-y-[var(--sp-2)]">
+                    <label className="block text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Short Description</label>
+                    <input
+                      type="text"
+                      value={projectDescriptionInput}
+                      onChange={(e) => setProjectDescriptionInput(e.target.value)}
+                      className="w-full h-[40px] px-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--color-border-selected)] transition-all"
                     />
                   </div>
                 </div>
+
+                <div className="space-y-[var(--sp-2)]">
+                  <label className="block text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Core Mission</label>
+                  <textarea
+                    value={projectMissionInput}
+                    onChange={(e) => setProjectMissionInput(e.target.value)}
+                    rows={3}
+                    className="w-full p-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--color-border-selected)] transition-all"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between pt-[var(--sp-2)]">
+                  <div>
+                    {detailsMessage && (
+                      <span className={cn("text-[12px] font-medium", detailsMessage.type === 'success' ? "text-[var(--status-success-text)]" : "text-[var(--color-text-danger)]")}>
+                        {detailsMessage.text}
+                      </span>
+                    )}
+                  </div>
+                  <Button variant="primary" onClick={handleSaveDetails} loading={isSavingDetails} icon={<Save size={14} />}>
+                    Save Details
+                  </Button>
+                </div>
+              </div>
+            </section>
+
+            {/* Constitution & Tech Stack */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-[var(--sp-10)]">
+              <section className="space-y-[var(--sp-6)]">
+                <div className="flex items-center gap-[var(--sp-3)] border-b border-[var(--color-border-default)] pb-[var(--sp-3)]">
+                  <ShieldAlert size={18} className="text-[var(--color-brand-bold)]" />
+                  <h2 className="text-[14px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Constitution</h2>
+                </div>
+                <InlineConstitutionEditor
+                  projectId={projectId}
+                  constitution={project.constitution as string | null}
+                />
               </section>
 
-              {/* Git Integration Section */}
-              <section className="bg-bg-elevated border border-border-default rounded-[8px] p-6">
-                <h2 className="text-[16px] font-semibold text-text-primary mb-4 ">
-                  Git Integration
-                </h2>
+              <section className="space-y-[var(--sp-6)]">
+                <div className="flex items-center gap-[var(--sp-3)] border-b border-[var(--color-border-default)] pb-[var(--sp-3)]">
+                  <Database size={18} className="text-[var(--color-brand-bold)]" />
+                  <h2 className="text-[14px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Tech Stack</h2>
+                </div>
+                <InlineTechStackEditor
+                  projectId={projectId}
+                  techStack={project.techStack as Record<string, unknown> || {}}
+                />
+              </section>
+            </div>
 
-                <p className="text-[13px] text-text-secondary mb-4">
-                  Connect a repository to track agent commits automatically.
-                </p>
+            {/* Git Integration */}
+            <section className="space-y-[var(--sp-6)]">
+              <div className="flex items-center gap-[var(--sp-3)] border-b border-[var(--color-border-default)] pb-[var(--sp-3)]">
+                <GitBranch size={18} className="text-[var(--color-brand-bold)]" />
+                <h2 className="text-[14px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Git Integration</h2>
+              </div>
 
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-[13px] font-medium block text-text-secondary mb-2">
-                      Repository URL
-                    </label>
-                    <input
-                      type="text"
-                      value={repoUrl}
-                      onChange={(e) => setRepoUrl(e.target.value)}
-                      placeholder="https://github.com/org/repo"
-                      className="h-[30px] bg-bg-elevated border border-border-default rounded-[6px] text-text-primary text-[12px] px-[10px] outline-none focus:border-border-strong placeholder:text-text-tertiary transition-colors"
-                    />
-                  </div>
+              <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] p-[var(--sp-6)] shadow-[var(--shadow-card)] space-y-[var(--sp-6)]">
+                <div className="space-y-[var(--sp-2)]">
+                  <label className="block text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Repository Path / URL</label>
+                  <input
+                    type="text"
+                    value={repoUrl}
+                    onChange={(e) => setRepoUrl(e.target.value)}
+                    placeholder="/path/to/repo or git@github.com:org/repo.git"
+                    className="w-full h-[40px] px-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[14px] font-mono focus:outline-none focus:border-[var(--color-border-selected)] transition-all"
+                  />
+                </div>
 
-                  <div className="flex items-center gap-4">
-                    <div className="flex-1">
-                      <label className="text-[13px] font-medium block text-text-secondary mb-2">
-                        Default Branch
-                      </label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-[var(--sp-6)]">
+                  <div className="space-y-[var(--sp-2)]">
+                    <label className="block text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Default Branch</label>
+                    <div className="relative">
                       <select
                         value={gitBranch}
                         onChange={(e) => setGitBranch(e.target.value)}
-                        className="ios-select"
+                        className="w-full h-[40px] pl-[var(--sp-3)] pr-[var(--sp-10)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--color-border-selected)] transition-all appearance-none cursor-pointer"
                       >
                         <option value="main">main</option>
                         <option value="master">master</option>
                         <option value="develop">develop</option>
-                        <option value="staging">staging</option>
                       </select>
+                      <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-text-tertiary)]" />
                     </div>
-
-                    <div className="flex-1">
-                      <label className="text-[13px] font-medium block text-text-secondary mb-2">
-                        Merge Strategy
-                      </label>
+                  </div>
+                  <div className="space-y-[var(--sp-2)]">
+                    <label className="block text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Merge Strategy</label>
+                    <div className="relative">
                       <select
                         value={gitStrategy}
                         onChange={(e) => setGitStrategy(e.target.value)}
-                        className="ios-select"
+                        className="w-full h-[40px] pl-[var(--sp-3)] pr-[var(--sp-10)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--color-border-selected)] transition-all appearance-none cursor-pointer"
                       >
                         <option value="merge">Merge</option>
                         <option value="rebase">Rebase</option>
                         <option value="squash">Squash</option>
                       </select>
+                      <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-text-tertiary)]" />
                     </div>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-2">
-                    <div>
-                      {gitConfigMessage && (
-                        <span className={`text-[11px] ${gitConfigMessage.includes('saved') ? 'text-status-success' : 'text-status-error'}`}>
-                          {gitConfigMessage}
-                        </span>
-                      )}
-                    </div>
-                    <Button
-                      onClick={handleSaveGitConfig}
-                      disabled={isSavingGitConfig}
-                      variant="secondary"
-                    >
-                      {isSavingGitConfig ? 'Saving...' : 'Save Git Config'}
-                    </Button>
                   </div>
                 </div>
-              </section>
 
-              {/* Agent Tokens Section */}
-              <section className="bg-bg-elevated border border-border-default rounded-[8px] p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-[16px] font-semibold text-text-primary ">
-                    Agent Tokens
-                  </h2>
-                  <Button variant="secondary" size="small" onClick={() => setShowTokenDialog(true)}>
-                    + Generate New Token
+                <div className="flex items-center justify-between pt-[var(--sp-2)]">
+                  <div>
+                    {gitConfigMessage && (
+                      <span className={cn("text-[12px] font-medium", gitConfigMessage.type === 'success' ? "text-[var(--status-success-text)]" : "text-[var(--color-text-danger)]")}>
+                        {gitConfigMessage.text}
+                      </span>
+                    )}
+                  </div>
+                  <Button variant="secondary" onClick={handleSaveGitConfig} loading={isSavingGitConfig} icon={<Save size={14} />}>
+                    Save Config
                   </Button>
                 </div>
+              </div>
+            </section>
 
-                <div className="text-center py-8 bg-ios-secondary rounded-ios-lg border border-border-default">
-                  <p className="text-[13px] text-text-secondary">
-                    No agent tokens configured yet.
-                  </p>
-                  <p className="text-[11px] text-text-tertiary mt-2">
-                    Generate a token to allow agents to access this project.
-                  </p>
+            {/* Agent Access Tokens */}
+            <section className="space-y-[var(--sp-6)]">
+              <div className="flex items-center justify-between border-b border-[var(--color-border-default)] pb-[var(--sp-3)]">
+                <div className="flex items-center gap-[var(--sp-3)]">
+                  <Key size={18} className="text-[var(--color-brand-bold)]" />
+                  <h2 className="text-[14px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Agent Access Tokens</h2>
                 </div>
-              </section>
+                <Button variant="primary" size="small" onClick={() => setShowTokenDialog(true)} icon={<Plus size={16} />}>Generate New</Button>
+              </div>
 
-              {/* Danger Zone */}
-              <section className="bg-bg-elevated border border-border-default rounded-[8px] p-6 border-2 border-status-error">
-                <h2 className="text-[16px] font-semibold text-status-error mb-4 ">
-                  Danger Zone
-                </h2>
+              <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] p-[var(--sp-10)] shadow-[var(--shadow-card)] flex flex-col items-center justify-center text-center">
+                <div className="w-12 h-12 rounded-full bg-[var(--color-bg-sunken)] flex items-center justify-center mb-[var(--sp-4)]">
+                  <Key size={24} className="text-[var(--color-text-tertiary)]" />
+                </div>
+                <p className="text-[14px] text-[var(--color-text-secondary)] mb-[var(--sp-2)]">No active agent tokens.</p>
+                <p className="text-[12px] text-[var(--color-text-tertiary)] max-w-xs">Generate a token to allow the Spec-Drivr agent to interact with this repository.</p>
+              </div>
+            </section>
 
+            {/* Danger Zone */}
+            <section className="space-y-[var(--sp-6)]">
+              <div className="flex items-center gap-[var(--sp-3)] border-b border-[var(--color-text-danger)] pb-[var(--sp-3)] opacity-80">
+                <AlertTriangle size={18} className="text-[var(--color-text-danger)]" />
+                <h2 className="text-[14px] font-bold text-[var(--color-text-danger)] uppercase tracking-wider">Danger Zone</h2>
+              </div>
+
+              <div className="bg-[var(--color-bg-surface)] border border-[var(--color-text-danger)] border-opacity-20 rounded-[var(--radius-lg)] p-[var(--sp-6)] shadow-[var(--shadow-card)]">
                 {archiveMessage && (
-                  <div className="mb-4 p-3 rounded-md"
-                    style={{
-                      backgroundColor: archiveMessage.includes('success') ? 'rgba(52, 199, 89, 0.1)' : 'rgba(255, 69, 58, 0.1)',
-                      borderColor: 'var(--ios-separator)',
-                    }}>
-                    <p className={`text-[11px] ${archiveMessage.includes('success') ? 'text-status-success' : 'text-status-error'}`}>
-                      {archiveMessage}
-                    </p>
+                  <div className={cn("mb-[var(--sp-4)] p-[var(--sp-3)] rounded-[var(--radius-sm)] border-l-4", archiveMessage.type === 'success' ? "bg-[var(--status-success-bg)] border-[var(--status-success-text)] text-[var(--status-success-text)]" : "bg-[var(--color-bg-sunken)] border-[var(--color-text-danger)] text-[var(--color-text-danger)]")}>
+                    <p className="text-[12px] font-medium">{archiveMessage.text}</p>
                   </div>
                 )}
 
-                <p className="text-[13px] text-text-secondary mb-4">
-                  {project.status === 'archived'
-                    ? 'This project is currently archived and hidden from the dashboard.'
-                    : 'Archiving a project will hide it from the dashboard but preserve all data.'}
-                </p>
-
-                <Button
-                  variant={project.status === 'archived' ? "secondary" : "danger"}
-                  size="small"
-                  onClick={() => setShowArchiveConfirm(true)}
-                  disabled={isArchiving}
-                >
-                  {isArchiving ? 'Processing...' : (project.status === 'archived' ? 'Unarchive Project' : 'Archive Project')}
-                </Button>
-              </section>
-            </div>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <h3 className="text-[15px] font-bold text-[var(--color-text-primary)]">
+                      {project.status === 'archived' ? 'Unarchive Project' : 'Archive Project'}
+                    </h3>
+                    <p className="text-[13px] text-[var(--color-text-tertiary)]">
+                      {project.status === 'archived'
+                        ? 'Make this project active and visible on the dashboard again.'
+                        : 'Hides the project from the dashboard. Data is preserved but agent will stop.'}
+                    </p>
+                  </div>
+                  <Button
+                    variant={project.status === 'archived' ? 'secondary' : 'danger'}
+                    onClick={() => setShowArchiveConfirm(true)}
+                    loading={isArchiving}
+                    icon={project.status === 'archived' ? <Archive size={14} /> : <AlertTriangle size={14} />}
+                  >
+                    {project.status === 'archived' ? 'Unarchive' : 'Archive'}
+                  </Button>
+                </div>
+              </div>
+            </section>
           </div>
         </div>
-      </main>
+      </div>
 
-      {/* Archive/Unarchive Confirmation Dialog */}
       <ArchiveProjectDialog
         isOpen={showArchiveConfirm}
-        onClose={() => {
-          setShowArchiveConfirm(false);
-          setProjectNameInput('');
-        }}
+        onClose={() => setShowArchiveConfirm(false)}
         onConfirm={handleArchive}
         projectName={project.name}
         isArchived={project.status === 'archived'}
       />
 
-      {/* Generate Token Dialog */}
       <GenerateTokenDialog
         isOpen={showTokenDialog}
         onClose={() => setShowTokenDialog(false)}
       />
-    </div>
+    </AppShell>
+  );
+}
+
+function Plus({ size }: { size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
   );
 }

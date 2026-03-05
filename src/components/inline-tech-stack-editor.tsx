@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { updateTechStackDev } from '@/lib/actions';
+import { Button } from '@/components/ui/button';
+import { Save, Plus, Trash2, Edit2 } from 'lucide-react';
 
 interface InlineTechStackEditorProps {
   projectId: number;
@@ -77,93 +79,103 @@ export function InlineTechStackEditor({
   };
 
   return (
-    <div className="bg-bg-elevated border border-border-default rounded-[8px] shadow-sm p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-[16px] font-semibold text-ios-primary ">Tech Stack</h2>
+    <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] p-[var(--sp-6)] shadow-[var(--shadow-card)]">
+      <div className="flex items-center justify-between mb-[var(--sp-4)]">
+        <h3 className="text-[14px] font-bold text-[var(--color-text-secondary)] uppercase tracking-[0.05em]">Tech Stack</h3>
         {!isEditing && (
-          <button
+          <Button
+            variant="ghost"
+            size="small"
             onClick={() => setIsEditing(true)}
-            className="px-3 py-1 text-[11px] text-text-tertiary font-medium text-accent bg-ios-secondary border border-ios rounded-[8px]  transition-colors"
           >
             Edit
-          </button>
+          </Button>
         )}
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-opacity-10 border rounded-[8px]" style={{ backgroundColor: 'var(--status-error)', borderColor: 'var(--ios-separator)' }}>
-          <p className="text-[11px] text-text-tertiary text-status-error ">{error}</p>
+        <div className="mb-[var(--sp-4)] p-[var(--sp-3)] bg-[var(--color-bg-sunken)] border-l-4 border-[var(--color-text-danger)] text-[var(--color-text-danger)] text-[12px] font-medium rounded-r-[var(--radius-sm)]">
+          {error}
         </div>
       )}
 
       {isEditing ? (
-        <div className="space-y-4">
-          <div className="space-y-3">
-            {entries.map((entry, index) => (
-              <div key={entry.id} className="flex items-center gap-2">
+        <div className="space-y-[var(--sp-6)]">
+          <div className="space-y-[var(--sp-3)]">
+            {entries.length === 0 && (
+              <p className="text-[13px] text-[var(--color-text-tertiary)] italic py-[var(--sp-2)]">No tech stack items. Add one below.</p>
+            )}
+            {entries.map((entry) => (
+              <div key={entry.id} className="flex items-center gap-[var(--sp-2)] group">
                 <input
                   type="text"
                   value={entry.key}
                   onChange={(e) => handleUpdateEntry(entry.id, 'key', e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., frontend"
+                  className="flex-1 h-[36px] px-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[13px] focus:outline-none focus:border-[var(--color-border-selected)] transition-all"
+                  placeholder="Key (e.g. frontend)"
                 />
                 <input
                   type="text"
                   value={entry.value}
                   onChange={(e) => handleUpdateEntry(entry.id, 'value', e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., React"
+                  className="flex-1 h-[36px] px-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[13px] focus:outline-none focus:border-[var(--color-border-selected)] transition-all"
+                  placeholder="Value (e.g. Next.js)"
                 />
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => handleRemoveEntry(entry.id)}
-                  className="px-3 py-2 text-[11px] text-text-tertiary font-medium text-status-error bg-ios-secondary border border-ios rounded-[8px]  transition-colors"
-                >
-                  ×
-                </button>
+                  className="text-[var(--color-text-danger)] opacity-0 group-hover:opacity-100 transition-opacity"
+                  icon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>}
+                />
               </div>
             ))}
           </div>
-          <button
+
+          <Button
+            variant="ghost"
+            size="small"
             onClick={handleAddEntry}
-            className="px-4 py-2 text-[11px] text-text-tertiary font-medium text-accent bg-ios-secondary border border-ios rounded-[8px]  transition-colors"
+            className="text-[var(--color-brand-bold)] font-bold"
+            icon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>}
           >
-            + Add Technology
-          </button>
-          <div className="flex justify-end space-x-3 pt-4 border-t border-ios">
-            <button
+            Add New Technology
+          </Button>
+
+          <div className="flex justify-end gap-[var(--sp-2)] pt-[var(--sp-6)] border-t border-[var(--color-border-subtle)]">
+            <Button
+              variant="secondary"
               onClick={handleCancel}
-              className="px-4 py-2 text-[11px] text-text-tertiary font-medium text-accent bg-ios-secondary border border-ios rounded-[8px]  transition-colors"
               disabled={isSubmitting}
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="primary"
               onClick={handleSave}
-              className="px-4 py-2 text-[11px] text-text-tertiary font-medium text-white rounded-[8px]  transition-colors disabled:opacity-50"
-              style={{ backgroundColor: 'var(--accent)' }}
               disabled={isSubmitting || entries.every(e => !e.key.trim())}
+              loading={isSubmitting}
             >
-              {isSubmitting ? 'Saving...' : 'Save'}
-            </button>
+              Save Tech Stack
+            </Button>
           </div>
         </div>
       ) : (
         <div>
           {techStack && Object.keys(techStack).length > 0 ? (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-[var(--sp-2)]">
               {Object.entries(techStack).map(([key, value]) => (
-                <span
+                <div
                   key={key}
-                  className="inline-flex items-center px-3 py-1 rounded-ios-xl text-[11px] text-text-tertiary bg-accent/10 text-accent "
+                  className="inline-flex items-center px-[var(--sp-2)] py-[var(--sp-1)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[12px] shadow-sm"
                 >
-                  <span className="font-medium">{key}:</span>
-                  <span className="ml-1">{String(value)}</span>
-                </span>
+                  <span className="font-bold text-[var(--color-text-secondary)] mr-1.5 uppercase text-[10px] tracking-wider">{key}</span>
+                  <span className="text-[var(--color-text-primary)] font-medium">{String(value)}</span>
+                </div>
               ))}
             </div>
           ) : (
-            <span className="text-[13px] text-text-tertiary italic ">No technologies defined. Click Edit to add some.</span>
+            <span className="text-[13px] text-[var(--color-text-tertiary)] italic">No specific tech stack defined yet.</span>
           )}
         </div>
       )}

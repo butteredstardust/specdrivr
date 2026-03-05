@@ -3,117 +3,177 @@
 @tailwind utilities;
 
 :root {
-  --color-bg-primary:       #0F0F0F;
-  --color-bg-secondary:     #141414;
-  --color-bg-elevated:      #1A1A1A;
-  --color-bg-hover:         #1F1F1F;
-  --color-bg-active:        #242424;
+  /* BACKGROUNDS */
+  --color-bg-page: #F7F8F9;
+  --color-bg-surface: #FFFFFF;
+  --color-bg-sunken: #F1F2F4;
+  --color-bg-overlay: #FFFFFF;
+  --color-bg-selected: #E9F2FF;
+  --color-bg-hovered: #F1F2F4;
 
-  --color-border-subtle:    #1F1F1F;
-  --color-border-default:   #2A2A2A;
-  --color-border-strong:    #3A3A3A;
+  /* BORDERS */
+  --color-border-default: #DFE1E6;
+  --color-border-bold: #B3B9C4;
+  --color-border-selected: #0C66E4;
 
-  --color-text-primary:     #E5E5E5;
-  --color-text-secondary:   #8A8A8A;
-  --color-text-tertiary:    #555555;
-  --color-text-link:        #E5E5E5;
+  /* TEXT */
+  --color-text-primary: #172B4D;
+  --color-text-secondary: #44546F;
+  --color-text-tertiary: #8590A2;
+  --color-text-disabled: #B3B9C4;
+  --color-text-inverse: #FFFFFF;
+  --color-text-link: #0C66E4;
+  --color-text-danger: #AE2A19;
 
-  --color-accent:           #5E6AD2;
-  --color-accent-hover:     #6872D9;
-  --color-accent-subtle:    rgba(94, 106, 210, 0.12);
+  /* ACCENT */
+  --color-brand-bold: #0C66E4;
+  --color-brand-bolder: #0055CC;
+  --color-brand-subtle: #E9F2FF;
 
-  --color-success:          #4CB782;
-  --color-warning:          #F4C430;
-  --color-danger:           #CD4B4B;
+  /* STATUS */
+  --status-todo-bg: #F1F2F4;
+  --status-todo-text: #44546F;
+  --status-inprogress-bg: #E9F2FF;
+  --status-inprogress-text: #0C66E4;
+  --status-done-bg: #DCFFF1;
+  --status-done-text: #216E4E;
+  --status-blocked-bg: #FFECEB;
+  --status-blocked-text: #AE2A19;
+  --status-paused-bg: #FFF7D6;
+  --status-paused-text: #7F5F01;
+  --status-skipped-bg: #F1F2F4;
+  --status-skipped-text: #626F86;
 
-  --color-status-idle:      #555555;
-  --color-status-running:   #4CB782;
-  --color-status-error:     #CD4B4B;
+  /* LOG LEVELS */
+  --log-info-bg: #E9F2FF;
+  --log-info-text: #0C66E4;
+  --log-warn-bg: #FFF7D6;
+  --log-warn-text: #7F5F01;
+  --log-error-bg: #FFECEB;
+  --log-error-text: #AE2A19;
+  --log-debug-bg: #F1F2F4;
+  --log-debug-text: #44546F;
+  --log-success-bg: #DCFFF1;
+  --log-success-text: #216E4E;
 
-  --font-family:            'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-size-xs:           11px;
-  --font-size-sm:           12px;
-  --font-size-base:         13px;
-  --font-size-md:           14px;
-  --font-size-lg:           16px;
-  --font-size-xl:           20px;
-  --font-size-2xl:          24px;
+  /* TYPOGRAPHY */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-base: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 20px;
+  --font-size-xl: 24px;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
 
-  --font-weight-normal:     400;
-  --font-weight-medium:     500;
-  --font-weight-semibold:   600;
+  /* SPACING */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
 
-  --line-height-tight:      1.2;
-  --line-height-base:       1.5;
-  --line-height-relaxed:    1.6;
-
-  --space-1:   4px;
-  --space-2:   8px;
-  --space-3:   12px;
-  --space-4:   16px;
-  --space-5:   20px;
-  --space-6:   24px;
-  --space-8:   32px;
-  --space-10:  40px;
-  --space-12:  48px;
-
-  --radius-sm:   4px;
-  --radius-md:   6px;
-  --radius-lg:   8px;
+  /* SHAPE */
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
   --radius-full: 9999px;
 
-  --shadow-none: none;
+  /* ELEVATION */
+  --shadow-card: 0 1px 1px rgba(9, 30, 66, 0.25), 0 0 1px rgba(9, 30, 66, 0.31);
+  --shadow-overlay: 0 8px 16px rgba(9, 30, 66, 0.15), 0 0 1px rgba(9, 30, 66, 0.31);
+  --shadow-modal: 0 20px 32px rgba(9, 30, 66, 0.20), 0 0 1px rgba(9, 30, 66, 0.31);
+
+  /* TRANSITIONS */
+  --transition-fast: 80ms ease;
+  --transition-base: 150ms ease;
 }
 
-@layer base {
-  body {
-    background-color: var(--color-bg-primary);
-    color: var(--color-text-primary);
-    font-family: var(--font-family);
-    font-size: var(--font-size-base);
-    line-height: var(--line-height-base);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  h1 {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-semibold);
-  }
-
-  h2 {
-    font-size: var(--font-size-base);
-    font-weight: var(--font-weight-semibold);
-  }
-
-  * {
-    box-shadow: none !important;
-  }
+[data-theme="dark"] {
+  --color-bg-page: #1D2125;
+  --color-bg-surface: #22272B;
+  --color-bg-sunken: #161A1D;
+  --color-bg-hovered: #282E33;
+  --color-bg-selected: #1C2B41;
+  --color-border-default: #3B4045;
+  --color-border-bold: #596773;
+  --color-text-primary: #C7D1DB;
+  --color-text-secondary: #8C9BAB;
+  --color-text-tertiary: #596773;
 }
 
-@layer components {
-  /* Scrollbar Styling */
-  ::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-  }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
+html,
+body {
+  background: var(--color-bg-page);
+  color: var(--color-text-primary);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  line-height: 1.42857;
+  -webkit-font-smoothing: antialiased;
+}
 
-  ::-webkit-scrollbar-thumb {
-    background: var(--color-border-strong);
-    border-radius: var(--radius-full);
-  }
+/* Kill ALL default link styling globally */
+a {
+  color: inherit;
+  text-decoration: none;
+}
 
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-text-tertiary);
-  }
-  
-  hr {
-    border: none;
-    border-top: 1px solid var(--color-border-subtle);
-    margin: 0;
-  }
+a:hover {
+  text-decoration: none;
+}
+
+/* Only .link class gets blue */
+.link {
+  color: var(--color-text-link);
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+/* Remove ALL backdrop-filter from the entire codebase */
+* {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C1C7D0;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #A5ADBA;
 }

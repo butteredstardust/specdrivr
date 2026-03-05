@@ -1,6 +1,8 @@
 'use client';
 
 import { agentStatusLabels, formatRelativeTime, formatDuration, type AgentStatus } from '@/lib/ios-styles';
+import { cn } from '@/lib/utils';
+import { AlertCircle } from 'lucide-react';
 
 export interface AgentStatusData {
   status: AgentStatus;
@@ -15,13 +17,13 @@ export interface AgentStatusPanelProps {
   className?: string;
 }
 
-const statusBadgeStyles: Record<AgentStatus, { color: string; dot: string }> = {
-  running: { color: 'text-text-primary', dot: 'bg-status-success' },
-  paused: { color: 'text-text-secondary', dot: 'bg-status-warning' },
-  stopped: { color: 'text-text-secondary', dot: 'bg-status-idle' },
-  idle: { color: 'text-text-secondary', dot: 'bg-status-idle' },
-  error: { color: 'text-status-error', dot: 'bg-status-error' },
-  stale: { color: 'text-status-warning', dot: 'bg-status-warning' },
+const statusBadgeClasses: Record<AgentStatus, string> = {
+  running: 'bg-[var(--status-inprogress-bg)] text-[var(--status-inprogress-text)]',
+  paused: 'bg-[var(--status-paused-bg)] text-[var(--status-paused-text)]',
+  stopped: 'bg-[var(--status-todo-bg)] text-[var(--status-todo-text)]',
+  idle: 'bg-[var(--status-todo-bg)] text-[var(--status-todo-text)]',
+  error: 'bg-[var(--status-blocked-bg)] text-[var(--status-blocked-text)]',
+  stale: 'bg-[var(--status-todo-bg)] text-[var(--status-todo-text)] border border-[var(--color-border-default)]',
 };
 
 export function AgentStatusPanel({ agentStatus, className = '' }: AgentStatusPanelProps) {
@@ -33,49 +35,46 @@ export function AgentStatusPanel({ agentStatus, className = '' }: AgentStatusPan
     errorCount = 0,
   } = agentStatus;
 
-  const badge = statusBadgeStyles[status] || statusBadgeStyles.idle;
+  const badgeClass = statusBadgeClasses[status] || statusBadgeClasses.idle;
   const isStale = status === 'stale';
 
   let uptimeText = '';
   if (uptimeSeconds) {
-    uptimeText = `· ${formatDuration(uptimeSeconds * 1000)}`;
+    uptimeText = formatDuration(uptimeSeconds * 1000);
   } else if (lastHeartbeat) {
-    uptimeText = `· Last heartbeat ${formatRelativeTime(lastHeartbeat)}`;
+    uptimeText = formatRelativeTime(lastHeartbeat);
   }
 
   return (
-    <div className={`flex items-center gap-[8px] text-[12px] ${badge.color} ${className}`}>
-      <span className={`w-2 h-2 rounded-full shrink-0 ${badge.dot}`} />
-
-      <span className="font-medium">
+    <div className={cn("flex items-center flex-wrap gap-[var(--sp-2)] text-[12px]", className)}>
+      <span className={cn(
+        "px-1.5 py-0.5 rounded-[var(--radius-sm)] text-[11px] font-bold uppercase tracking-wide shrink-0",
+        badgeClass
+      )}>
         {agentStatusLabels[status]}
       </span>
 
       {(uptimeSeconds || lastHeartbeat) && (
-        <span className="text-text-tertiary">
+        <span className="text-[var(--color-text-tertiary)] ml-1">
           {uptimeText}
         </span>
       )}
 
       {currentTask && (
-        <span className="text-text-tertiary" title={currentTask.description}>
-          · Task #{currentTask.id}
+        <span className="text-[var(--color-text-tertiary)] px-2 py-0.5 bg-[var(--color-bg-sunken)] rounded-[var(--radius-sm)] border border-[var(--color-border-default)] text-[11px]" title={currentTask.description}>
+          Task #{currentTask.id}
         </span>
       )}
 
       {status === 'error' && errorCount > 0 && (
-        <span className="text-status-error font-medium">
-          · {errorCount} error{errorCount > 1 ? 's' : ''}
+        <span className="text-[var(--color-text-danger)] font-medium flex items-center gap-1">
+          <AlertCircle size={12} />
+          {errorCount} error{errorCount > 1 ? 's' : ''}
         </span>
       )}
 
       {isStale && lastHeartbeat && (
-        <span className="flex items-center gap-[4px] text-status-warning">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="12" y1="8" x2="12" y2="12" />
-            <line x1="12" y1="16" x2="12.01" y2="16" />
-          </svg>
+        <span className="flex items-center gap-[4px] text-[var(--status-paused-text)] text-[11px]">
           Last seen {formatRelativeTime(lastHeartbeat)}
         </span>
       )}
@@ -84,15 +83,13 @@ export function AgentStatusPanel({ agentStatus, className = '' }: AgentStatusPan
 }
 
 export function CompactAgentStatus({ status }: { status: AgentStatus }) {
-  const badge = statusBadgeStyles[status] || statusBadgeStyles.idle;
-
+  const badgeClass = statusBadgeClasses[status] || statusBadgeClasses.idle;
   return (
-    <div
-      className={`flex items-center gap-[6px] text-[12px] ${badge.color}`}
-      title={agentStatusLabels[status]}
-    >
-      <span className={`w-2 h-2 rounded-full shrink-0 ${badge.dot}`} />
-      <span className="capitalize font-medium">{status === 'running' ? 'Running' : status}</span>
-    </div>
+    <span className={cn(
+      "px-1.5 py-0.5 rounded-[var(--radius-sm)] text-[10px] font-bold uppercase tracking-wide",
+      badgeClass
+    )}>
+      {status === 'running' ? 'Running' : agentStatusLabels[status]}
+    </span>
   );
 }

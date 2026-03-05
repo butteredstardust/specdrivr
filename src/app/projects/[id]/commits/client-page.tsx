@@ -2,8 +2,11 @@
 
 import { useState, useMemo } from 'react';
 import { ProjectSelect, GitCommitSelect } from '@/db/schema';
-import { ProjectSidebarWrapper } from '@/components/project-sidebar-wrapper';
-import type { TabData } from '@/components/ui/tabs';
+import { AppShell } from '@/components/app-shell';
+import { Tabs } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { GitBranch, User, Clock, CheckSquare, Layout, ArrowLeft, Search, ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ProjectCommitsClientProps {
   projectId: number;
@@ -20,7 +23,6 @@ export function ProjectCommitsClient({
 }: ProjectCommitsClientProps) {
   const [selectedBranch, setSelectedBranch] = useState<string>('all');
 
-  // Get unique branches from commits
   const branches = useMemo(() => {
     const branchSet = new Set<string>();
     commits.forEach((commit) => {
@@ -29,110 +31,49 @@ export function ProjectCommitsClient({
     return ['all', ...Array.from(branchSet).sort()];
   }, [commits]);
 
-  // Filter commits by branch
   const filteredCommits = useMemo(() => {
-    if (selectedBranch === 'all') {
-      return commits;
-    }
+    if (selectedBranch === 'all') return commits;
     return commits.filter((commit) => commit.branch === selectedBranch);
   }, [commits, selectedBranch]);
-  const tabs: TabData[] = [
-    {
-      id: 'kanban',
-      label: 'Kanban',
-      href: `/projects/${projectId}`,
-    },
-    {
-      id: 'spec',
-      label: 'Spec',
-      href: `/projects/${projectId}?tab=spec`,
-    },
-    {
-      id: 'plan',
-      label: 'Plan',
-      href: `/projects/${projectId}?tab=plan`,
-    },
-    {
-      id: 'commits',
-      label: 'Commits',
-      href: `/projects/${projectId}/commits`,
-    },
-    {
-      id: 'test-results',
-      label: 'Test Results',
-      href: `/projects/${projectId}?tab=test-results`,
-    },
-    {
-      id: 'logs',
-      label: 'Logs',
-      href: `/projects/${projectId}?tab=logs`,
-    },
-    {
-      id: 'settings',
-      label: 'Settings',
-      href: `/projects/${projectId}/settings`,
-    },
+
+  const tabs = [
+    { id: 'kanban', label: 'Kanban', href: `/projects/${projectId}` },
+    { id: 'spec', label: 'Spec', href: `/projects/${projectId}?tab=spec` },
+    { id: 'plan', label: 'Plan', href: `/projects/${projectId}?tab=plan` },
+    { id: 'commits', label: 'Commits', href: `/projects/${projectId}/commits` },
+    { id: 'test-results', label: 'Test Results', href: `/projects/${projectId}?tab=test-results` },
+    { id: 'logs', label: 'Logs', href: `/projects/${projectId}?tab=logs` },
+    { id: 'settings', label: 'Settings', href: `/projects/${projectId}/settings` },
   ];
 
   return (
-    <div className="flex h-screen w-full bg-bg-primary overflow-hidden text-text-primary">
-      <aside className="hidden md:flex flex-col h-full shrink-0">
-        <ProjectSidebarWrapper
-          projects={projects}
-          currentProjectId={projectId}
-        />
-      </aside>
-
-      <main className="flex-1 flex flex-col min-w-0 h-full bg-bg-primary">
-        <header className="h-[48px] border-b border-border-subtle flex items-center justify-between px-[24px] shrink-0 bg-bg-primary">
-          <div className="text-[13px] font-semibold text-text-primary flex items-center gap-2 max-w-[60%]">
-            <a
-              href="/"
-              className="text-text-secondary hover:text-text-primary transition-colors inline-flex"
-            >
-              ←
-            </a>
-            <span className="truncate">{project.name} Commits</span>
+    <AppShell sidebarProjects={projects} currentProjectId={projectId}>
+      <div className="flex flex-col h-full bg-[var(--color-bg-primary)]">
+        {/* Project Header */}
+        <div className="px-[var(--sp-6)] pt-[var(--sp-6)] pb-[var(--sp-2)]">
+          <div className="flex items-center gap-[var(--sp-2)] text-[12px] text-[var(--color-text-tertiary)] mb-[var(--sp-2)]">
+            <a href="/" className="hover:text-[var(--color-brand-bold)] transition-colors">Projects</a>
+            <span>/</span>
+            <span className="text-[var(--color-text-secondary)]">{project.name}</span>
           </div>
-          <div className="flex items-center gap-[8px]"></div>
-        </header>
-
-        <div className="flex-1 overflow-y-auto bg-bg-primary">
-
-          {/* Tabs */}
-          <div className="border-b border-border-default bg-bg-elevated sticky top-0 z-10">
-            <nav className="flex space-x-0 linear-scrollbar overflow-x-auto max-w-6xl mx-auto">
-              {tabs.map((tab) => (
-                <a
-                  key={tab.id}
-                  href={tab.href}
-                  className={`
-                    relative flex items-center gap-2 px-4 py-3 text-[13px] font-medium transition-colors whitespace-nowrap
-                    ${tab.id === 'commits'
-                      ? 'text-accent border-b-2 border-accent'
-                      : 'text-text-secondary hover:text-text-primary border-b-2 border-transparent'
-                    }
-                  `}
-                >
-                  {tab.label}
-                </a>
-              ))}
-            </nav>
+          <div className="flex items-center justify-between mb-[var(--sp-6)]">
+            <h1 className="text-[24px] font-semibold text-[var(--color-text-primary)] tracking-tight">Commits</h1>
           </div>
 
-          {/* Commits Content */}
-          <div className="px-6 py-6">
-            <div className="max-w-4xl">
-              {/* Filters */}
-              <div className="flex flex-wrap items-center gap-4 mb-6">
-                <div className="flex-1 min-w-[200px]">
-                  <label className="text-[13px] font-medium block text-text-secondary mb-2">
-                    Branch
-                  </label>
+          <Tabs tabs={tabs} activeTab="commits" />
+        </div>
+
+        {/* Content Area */}
+        <div className="flex-1 overflow-y-auto px-[var(--sp-6)] py-[var(--sp-6)]">
+          <div className="max-w-5xl">
+            {/* Toolbar */}
+            <div className="flex flex-wrap items-center justify-between gap-[var(--sp-4)] mb-[var(--sp-6)]">
+              <div className="flex items-center gap-[var(--sp-4)]">
+                <div className="relative group">
                   <select
                     value={selectedBranch}
                     onChange={(e) => setSelectedBranch(e.target.value)}
-                    className="ios-select text-[11px]"
+                    className="appearance-none bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] h-[32px] pl-3 pr-8 rounded-[var(--radius-sm)] text-[13px] font-medium text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-selected)] transition-all cursor-pointer hover:bg-[var(--color-bg-hovered)]"
                   >
                     {branches.map((branch) => (
                       <option key={branch} value={branch}>
@@ -140,170 +81,84 @@ export function ProjectCommitsClient({
                       </option>
                     ))}
                   </select>
+                  <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-text-tertiary)]" />
                 </div>
-                <div className="flex items-end pb-2">
-                  <span className="text-[11px] text-text-secondary ">
-                    {filteredCommits.length} commit{filteredCommits.length !== 1 ? 's' : ''}
-                  </span>
-                </div>
+                <span className="text-[12px] font-bold text-[var(--color-text-tertiary)] uppercase tracking-wider">
+                  {filteredCommits.length} commit{filteredCommits.length !== 1 ? 's' : ''}
+                </span>
               </div>
+            </div>
 
-              {/* Empty State - No commits */}
-              {commits.length === 0 ? (
-                <div className="bg-bg-elevated border border-border-default rounded-[8px] p-8 text-center">
-                  <div className="mb-4 flex justify-center">
-                    <svg
-                      width="64"
-                      height="64"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      className="text-text-tertiary"
-                    >
-                      <line x1="6" y1="3" x2="6" y2="15" />
-                      <circle cx="18" cy="6" r="3" />
-                      <path d="M6 9a9 9 0 0 1 9 9" />
-                    </svg>
-                  </div>
-                  <h3 className="text-[16px] font-semibold text-text-primary mb-2 ">
-                    No commits yet
-                  </h3>
-                  <p className="text-[13px] text-text-secondary mb-4">
-                    Commits will appear here as the agent makes changes.
-                  </p>
-                  <a
-                    href={`/projects/${projectId}/settings`}
-                    className="inline-flex items-center gap-2 text-accent hover:text-accent-dark text-[13px] font-medium"
+            {commits.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-[var(--sp-12)] border-2 border-dashed border-[var(--color-border-default)] rounded-[var(--radius-lg)] opacity-60">
+                <GitBranch size={48} className="text-[var(--color-border-default)] mb-[var(--sp-4)]" />
+                <h3 className="text-[18px] font-semibold text-[var(--color-text-primary)] mb-[var(--sp-2)]">No commits yet</h3>
+                <p className="text-[14px] text-[var(--color-text-secondary)] mb-[var(--sp-6)]">Commits will appear here once the agent starts working.</p>
+                <Button variant="primary" onClick={() => window.location.href = `/projects/${projectId}/settings`}>Configure Git Integration</Button>
+              </div>
+            ) : filteredCommits.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-[var(--sp-12)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] opacity-60">
+                <Search size={32} className="text-[var(--color-text-tertiary)] mb-[var(--sp-3)]" />
+                <p className="text-[14px] text-[var(--color-text-secondary)] italic">No commits on "{selectedBranch}" branch.</p>
+              </div>
+            ) : (
+              <div className="space-y-[var(--sp-3)]">
+                {filteredCommits.map((commit) => (
+                  <div
+                    key={commit.id}
+                    className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] p-[var(--sp-4)] hover:border-[var(--color-border-selected)] transition-all shadow-[var(--shadow-card)]"
                   >
-                    Configure Git →
-                  </a>
-                </div>
-              ) : filteredCommits.length === 0 ? (
-                <div className="bg-bg-elevated border border-border-default rounded-[8px] p-8 text-center">
-                  <h3 className="text-[16px] font-semibold text-text-primary mb-2 ">
-                    No commits on this branch
-                  </h3>
-                  <p className="text-[13px] text-text-secondary">
-                    Select "All Branches" to see commits from other branches.
-                  </p>
-                </div>
-              ) : (
-                /* Commit Cards */
-                <div className="space-y-3">
-                  {filteredCommits.map((commit) => (
-                    <div
-                      key={commit.id}
-                      className="bg-bg-elevated border border-border-default rounded-[8px] p-4 hover:shadow-md transition-shadow ios"
-                    >
-                      <div className="flex items-start gap-4">
-                        {/* Commit Icon */}
-                        <div className="flex-shrink-0 mt-1">
-                          <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
-                            <svg
-                              width="20"
-                              height="20"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              className="text-accent"
-                            >
-                              <line x1="6" y1="3" x2="6" y2="15" />
-                              <circle cx="18" cy="6" r="3" />
-                              <path d="M6 9a9 9 0 0 1 9 9" />
-                            </svg>
+                    <div className="flex items-start gap-[var(--sp-4)]">
+                      <div className="w-8 h-8 rounded-full bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] flex items-center justify-center shrink-0">
+                        <GitBranch size={16} className="text-[var(--color-brand-bold)]" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <h4 className="text-[15px] font-bold text-[var(--color-text-primary)] truncate flex-1 mr-4">{commit.message}</h4>
+                          <span className="px-2 py-0.5 bg-[var(--color-bg-sunken)] text-[var(--color-text-tertiary)] rounded-[var(--radius-sm)] text-[10px] font-mono border border-[var(--color-border-default)]">
+                            {commit.commitSha?.substring(0, 7)}
+                          </span>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-x-[var(--sp-4)] gap-y-[var(--sp-1)] text-[12px] font-medium text-[var(--color-text-tertiary)] mb-3">
+                          <div className="flex items-center gap-1.5 px-1.5 py-0.5 bg-[var(--status-inprogress-bg)] text-[var(--status-inprogress-text)] rounded-[var(--radius-sm)] font-bold text-[10px] uppercase">
+                            <GitBranch size={10} />
+                            {commit.branch}
+                          </div>
+                          {commit.author && (
+                            <div className="flex items-center gap-1.5">
+                              <User size={12} />
+                              <span>{commit.author}</span>
+                            </div>
+                          )}
+                          <div className="flex items-center gap-1.5">
+                            <Clock size={12} />
+                            <span>{new Date(commit.timestamp).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span>
                           </div>
                         </div>
 
-                        {/* Commit Details */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start gap-3 mb-2">
-                            <h4 className="text-[16px] font-semibold text-text-primary  break-words flex-1">
-                              {commit.message}
-                            </h4>
-                            <span
-                              className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-accent/10 text-accent  whitespace-nowrap"
-                            >
-                              {commit.branch}
-                            </span>
-                          </div>
-
-                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mb-3">
-                            <span className="text-[11px] text-text-secondary  font-mono">
-                              {commit.sha}
-                            </span>
-                            {commit.authorName && (
-                              <span className="text-[11px] text-text-secondary ">
-                                <svg
-                                  width="12"
-                                  height="12"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  className="inline-block mr-1"
-                                >
-                                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                                  <circle cx="12" cy="7" r="4" />
-                                </svg>
-                                {commit.authorName}
-                              </span>
-                            )}
-                            <span className="text-[11px] text-text-tertiary ">
-                              {new Date(commit.timestamp).toLocaleString()}
-                            </span>
-                          </div>
-
-                          {/* Associated Task & Plan Links */}
-                          <div className="flex items-center gap-3">
-                            {commit.taskId && (
-                              <a
-                                href={`/projects/${projectId}?tab=kanban`}
-                                className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-status-idle-5 text-text-secondary text-[11px] hover:bg-status-idle-10 transition-colors "
-                              >
-                                <svg
-                                  width="12"
-                                  height="12"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                >
-                                  <path d="M9 11l3 3L22 4" />
-                                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-                                </svg>
-                                Task #{commit.taskId}
-                              </a>
-                            )}
-                            {commit.planId && (
-                              <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-status-idle-5 text-text-secondary text-[11px] ">
-                                <svg
-                                  width="12"
-                                  height="12"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                >
-                                  <rect x="3" y="3" width="18" height="18" rx="2" />
-                                  <path d="M9 3v18" />
-                                  <path d="M15 9h6" />
-                                </svg>
-                                Plan {commit.planId}
-                              </span>
-                            )}
-                          </div>
+                        <div className="flex items-center gap-[var(--sp-2)]">
+                          {commit.taskId && (
+                            <Button variant="secondary" size="small" onClick={() => window.location.href = `/projects/${projectId}?tab=kanban`} icon={<CheckSquare size={12} />}>
+                              Task SD-{commit.taskId}
+                            </Button>
+                          )}
+                          {commit.planId && (
+                            <div className="flex items-center gap-1 px-2 py-1 bg-[var(--color-bg-sunken)] rounded-[var(--radius-sm)] text-[11px] font-bold text-[var(--color-text-tertiary)]">
+                              <Layout size={12} />
+                              Plan #{commit.planId}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </AppShell>
   );
 }

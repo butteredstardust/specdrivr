@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { updateConstitutionDev } from '@/lib/actions';
+import { Button } from '@/components/ui/button';
+import { Save, Edit2 } from 'lucide-react';
 
 interface InlineConstitutionEditorProps {
   projectId: number;
@@ -46,55 +48,56 @@ export function InlineConstitutionEditor({
   };
 
   return (
-    <div className="bg-bg-elevated border border-border-default rounded-[8px] p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-[20px] font-semibold text-text-primary">Project Constitution</h2>
+    <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] p-[var(--sp-6)] shadow-[var(--shadow-card)]">
+      <div className="flex items-center justify-between mb-[var(--sp-4)]">
+        <h3 className="text-[14px] font-bold text-[var(--color-text-secondary)] uppercase tracking-[0.05em]">Project Constitution</h3>
         {!isEditing && (
-          <button
+          <Button
+            variant="ghost"
+            size="small"
             onClick={() => setIsEditing(true)}
-            className="px-3 py-1 text-[11px] text-text-tertiary font-medium ios-button-secondary"
           >
             Edit
-          </button>
+          </Button>
         )}
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-opacity-10 border rounded-[8px]" style={{ backgroundColor: 'var(--status-error)', borderColor: 'var(--ios-separator)' }}>
-          <p className="text-[11px] text-text-tertiary status-error">{error}</p>
+        <div className="mb-[var(--sp-4)] p-[var(--sp-3)] bg-[var(--color-bg-sunken)] border-l-4 border-[var(--color-text-danger)] text-[var(--color-text-danger)] text-[12px] font-medium rounded-r-[var(--radius-sm)]">
+          {error}
         </div>
       )}
 
       {isEditing ? (
-        <div className="space-y-4">
+        <div className="space-y-[var(--sp-4)]">
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="w-full px-3 py-2 border rounded-[8px] shadow-sm focus:outline-none"
-            rows={8}
-            placeholder="Enter project constitution..."
+            className="w-full p-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--color-border-selected)] transition-all min-h-[200px]"
+            placeholder="Outline the rules and guidelines for this project..."
           />
-          <div className="flex justify-end space-x-3">
-            <button
+          <div className="flex justify-end gap-[var(--sp-2)]">
+            <Button
+              variant="secondary"
               onClick={handleCancel}
-              className="px-4 py-2 text-[11px] text-text-tertiary font-medium ios-button-secondary"
               disabled={isSubmitting}
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="primary"
               onClick={handleSave}
-              className="px-4 py-2 text-[11px] text-text-tertiary font-medium ios-button-primary disabled:opacity-50"
               disabled={isSubmitting || !content.trim()}
+              loading={isSubmitting}
             >
-              {isSubmitting ? 'Saving...' : 'Save'}
-            </button>
+              Save Constitution
+            </Button>
           </div>
         </div>
       ) : (
-        <div className="text-text-primary whitespace-pre-wrap">
+        <div className="text-[14px] text-[var(--color-text-primary)] whitespace-pre-wrap leading-relaxed">
           {content.trim() ? content : (
-            <span className="text-text-secondary italic">No constitution defined. Click Edit to add one.</span>
+            <span className="text-[var(--color-text-tertiary)] italic">No constitution defined yet.</span>
           )}
         </div>
       )}

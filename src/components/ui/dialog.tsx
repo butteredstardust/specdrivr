@@ -90,30 +90,30 @@ export function Dialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-[200] flex items-center justify-center p-[var(--sp-4)]"
       role="dialog"
       aria-modal="true"
       aria-labelledby={title ? 'dialog-title' : undefined}
     >
-      {/* Backdrop */}
+      {/* Backdrop - Jira uses a semi-transparent gray/dark overlay */}
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-[#091E427D] transition-opacity duration-300"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Dialog */}
+      {/* Dialog Container */}
       <div
         ref={dialogRef}
-        className={`relative w-full ${sizeClasses[size]} bg-bg-elevated rounded-[8px] border border-border-default animate-in fade-in zoom-in-95 duration-[150ms]`}
+        className={`relative w-full ${sizeClasses[size]} bg-[var(--color-bg-surface)] rounded-[var(--radius-sm)] shadow-[var(--shadow-modal)] border border-[var(--color-border-default)] flex flex-col animate-in fade-in zoom-in-95 duration-[150ms] overflow-hidden`}
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between px-[24px] py-[16px] border-b border-border-subtle">
+          <div className="flex items-center justify-between px-[var(--sp-6)] py-[var(--sp-4)] shrink-0">
             {title && (
               <h2
                 id="dialog-title"
-                className="text-[14px] font-semibold text-text-primary"
+                className="text-[18px] font-semibold text-[var(--color-text-primary)] tracking-tight"
               >
                 {title}
               </h2>
@@ -124,27 +124,25 @@ export function Dialog({
                 size="icon"
                 onClick={onClose}
                 icon={
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18" />
                     <line x1="6" y1="6" x2="18" y2="18" />
                   </svg>
                 }
                 aria-label="Close"
-              >
-                <span className="sr-only">Close</span>
-              </Button>
+              />
             )}
           </div>
         )}
 
-        {/* Content */}
-        <div className="px-[24px] py-[24px] overflow-y-auto max-h-[70vh]">
+        {/* Content Area */}
+        <div className="px-[var(--sp-6)] pb-[var(--sp-6)] overflow-y-auto max-h-[75vh]">
           {children}
         </div>
 
         {/* Footer */}
         {footer && (
-          <div className="flex items-center justify-end gap-[8px] px-[24px] py-[16px] border-t border-border-subtle bg-bg-secondary rounded-b-[8px]">
+          <div className="flex items-center justify-end gap-[var(--sp-2)] px-[var(--sp-6)] py-[var(--sp-4)] border-t border-[var(--color-border-subtle)] shrink-0">
             {footer}
           </div>
         )}

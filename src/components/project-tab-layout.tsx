@@ -8,6 +8,7 @@ import { AgentButtons } from './agent-buttons';
 import { Tabs, type TabData } from './ui/tabs';
 import { useAgentActions } from '@/hooks/use-agent-status';
 import type { AgentStatus as AgentStatusType } from '@/lib/ios-styles';
+import { ChevronLeft, RefreshCw } from 'lucide-react';
 
 export interface ProjectTabLayoutProps {
   projectId: number;
@@ -42,28 +43,15 @@ export function ProjectTabLayout({
   const handleAgentAction = async (action: 'start' | 'pause' | 'stop' | 'retry') => {
     let result;
     switch (action) {
-      case 'start':
-        result = await start();
-        break;
-      case 'pause':
-        result = await pause();
-        break;
-      case 'stop':
-        result = await stop();
-        break;
-      case 'retry':
-        result = await retry();
-        break;
+      case 'start': result = await start(); break;
+      case 'pause': result = await pause(); break;
+      case 'stop': result = await stop(); break;
+      case 'retry': result = await retry(); break;
     }
-
     if (result.success && onAgentStatusChange) {
       onAgentStatusChange(agentStatus.status);
     }
-
-    // Trigger refresh of all data
-    if (onRefresh) {
-      onRefresh();
-    }
+    onRefresh?.();
   };
 
   const handleRefresh = () => {
@@ -71,173 +59,98 @@ export function ProjectTabLayout({
     onRefresh?.();
   };
 
-  // Format relative time for last synced
   const formatLastSynced = () => {
     const now = new Date();
     const diffMs = now.getTime() - refreshTime.getTime();
     const diffSec = Math.floor(diffMs / 1000);
-
     if (diffSec < 60) return `${diffSec}s ago`;
     if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
     return `${Math.floor(diffSec / 3600)}h ago`;
   };
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      {/* Breadcrumb Bar */}
-      <div className="px-6 py-3 border-b border-border-default bg-bg-elevated linear-scrollbar overflow-x-auto">
-        <Link
-          href="/"
-          className="text-[13px] font-medium text-accent hover:text-accent-dark transition-colors inline-flex items-center gap-1"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
+    <div className="flex flex-col h-full">
+      {/* Breadcrumbs */}
+      <div className="flex items-center gap-[var(--sp-2)] mb-[var(--sp-4)] text-[12px]">
+        <Link href="/" className="text-[var(--color-text-link)] hover:underline flex items-center gap-1">
+          <ChevronLeft size={14} />
           Dashboard
         </Link>
-        <span className="text-[13px] font-medium text-text-secondary"> / </span>
-        <span className="text-[13px] font-medium text-text-primary font-medium">{projectName}</span>
+        <span className="text-[var(--color-text-tertiary)]">/</span>
+        <span className="text-[var(--color-text-primary)] font-medium">{projectName}</span>
       </div>
 
-      {/* Project Header */}
-      <div className="px-6 py-4 border-b border-border-default bg-bg-elevated">
-        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-          {/* Left side - Project info and agent status */}
-          <div className="flex-1">
-            <h1 className="text-[20px] font-semibold text-text-primary ">
-              {projectName}
-            </h1>
+      {/* Header Container */}
+      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-[var(--sp-4)] mb-[var(--sp-6)]">
+        <div>
+          <h1 className="text-[20px] font-semibold text-[var(--color-text-primary)] mb-[var(--sp-2)]">
+            {projectName}
+          </h1>
 
-            {/* Tech Stack */}
+          <div className="flex flex-wrap items-center gap-[var(--sp-3)] text-[11px]">
             {techStack.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-2">
-                {techStack.slice(0, 4).map((tech) => (
-                  <span
-                    key={tech}
-                    className="ios-badge bg-ios-secondary text-text-secondary border border-border-default"
-                  >
+              <div className="flex gap-[var(--sp-1)]">
+                {techStack.slice(0, 3).map(tech => (
+                  <span key={tech} className="px-2 py-0.5 bg-[var(--color-bg-sunken)] text-[var(--color-text-secondary)] rounded-[var(--radius-sm)] border border-[var(--color-border-default)]">
                     {tech}
                   </span>
                 ))}
-                {techStack.length > 4 && (
-                  <span className="text-[11px] text-text-secondary">
-                    +{techStack.length - 4} more
-                  </span>
-                )}
               </div>
             )}
-
-            {/* Base Path */}
             {basePath && (
-              <div className="mt-2 flex items-center gap-2">
-                <span className="text-[11px] text-text-secondary">Path:</span>
-                <code
-                  className="text-[11px] bg-ios-secondary px-2 py-0.5 rounded  text-text-secondary truncate max-w-md block"
-                  title={basePath}
-                >
-                  {basePath}
-                </code>
+              <div className="text-[var(--color-text-tertiary)] flex items-center gap-1">
+                <span className="opacity-70">Path:</span>
+                <code className="bg-[var(--color-bg-sunken)] px-1 rounded">{basePath}</code>
               </div>
             )}
-
-            {/* Agent Status */}
-            <div className="mt-3">
-              <AgentStatusPanel agentStatus={agentStatus} />
-            </div>
           </div>
 
-          {/* Right side - Agent controls */}
-          <div className="flex flex-col items-end gap-3">
-            {/* Agent Buttons */}
-            <AgentButtons
-              projectId={projectId}
-              status={agentStatus.status}
-              hasActivePlan={hasActivePlan}
-              onStart={() => handleAgentAction('start')}
-              onPause={() => handleAgentAction('pause')}
-              onStop={() => handleAgentAction('stop')}
-              onRetry={() => handleAgentAction('retry')}
-              disabled={actionsLoading !== null}
-            />
-
-            {/* Refresh button */}
-            <Button
-              variant="secondary"
-              size="small"
-              onClick={handleRefresh}
-              icon={
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="23 4 23 10 17 10" />
-                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-                </svg>
-              }
-            >
-              {formatLastSynced()}
-            </Button>
+          <div className="mt-[var(--sp-4)]">
+            <AgentStatusPanel agentStatus={agentStatus} />
           </div>
+        </div>
+
+        <div className="flex flex-col items-end gap-[var(--sp-3)]">
+          <AgentButtons
+            projectId={projectId}
+            status={agentStatus.status}
+            hasActivePlan={hasActivePlan}
+            onStart={() => handleAgentAction('start')}
+            onPause={() => handleAgentAction('pause')}
+            onStop={() => handleAgentAction('stop')}
+            onRetry={() => handleAgentAction('retry')}
+            disabled={actionsLoading !== null}
+          />
+          <Button
+            variant="ghost"
+            size="small"
+            onClick={handleRefresh}
+            className="text-[11px] text-[var(--color-text-tertiary)]"
+            icon={<RefreshCw size={12} />}
+          >
+            {formatLastSynced()}
+          </Button>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="bg-bg-elevated border-b border-border-default">
+      <div className="mb-[var(--sp-6)]">
         <Tabs tabs={tabs} />
       </div>
 
       {/* Tab Content */}
-      <div className="flex-1 overflow-y-auto linear-scrollbar bg-bg-primary">
-        <div className="p-6">
-          {children}
-        </div>
+      <div className="flex-1 min-h-0 bg-[var(--color-bg-surface)] p-[var(--sp-6)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)]">
+        {children}
       </div>
     </div>
   );
 }
 
-// Simple header-only version for use without full tab layout
-export interface ProjectHeaderProps {
-  projectName: string;
-  techStack?: string[];
-  basePath?: string;
-  lastSynced?: string;
-}
-
-export function ProjectHeader({ projectName, techStack, basePath, lastSynced }: ProjectHeaderProps) {
+export function ProjectHeader({ projectName, techStack, basePath }: { projectName: string, techStack?: string[], basePath?: string }) {
   return (
-    <div className="px-6 py-4 border-b border-border-default bg-bg-elevated">
-      <div className="flex flex-col gap-3">
-        <h1 className="text-[20px] font-semibold text-text-primary ">
-          {projectName}
-        </h1>
-
-        {techStack && techStack.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {techStack.slice(0, 4).map((tech) => (
-              <span
-                key={tech}
-                className="ios-badge bg-ios-secondary text-text-secondary border border-border-default"
-              >
-                {tech}
-              </span>
-            ))}
-            {techStack.length > 4 && (
-              <span className="text-[11px] text-text-secondary">
-                +{techStack.length - 4} more
-              </span>
-            )}
-          </div>
-        )}
-
-        {basePath && (
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] text-text-secondary">Path:</span>
-            <code
-              className="text-[11px] bg-ios-secondary px-2 py-0.5 rounded  text-text-secondary truncate max-w-md block"
-            >
-              {basePath}
-            </code>
-          </div>
-        )}
-      </div>
+    <div className="mb-[var(--sp-4)]">
+      <h1 className="text-[20px] font-semibold text-[var(--color-text-primary)]">{projectName}</h1>
+      {basePath && <p className="text-[12px] text-[var(--color-text-tertiary)] mt-1">{basePath}</p>}
     </div>
   );
 }

@@ -3,6 +3,10 @@
 import { useState } from 'react';
 import { createProject } from '@/lib/actions';
 import { ProjectSelect } from '@/db/schema';
+import { Dialog } from './ui/dialog';
+import { Button } from './ui/button';
+import { Plus } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface CreateProjectDialogProps {
   onProjectCreated?: (project: ProjectSelect) => void;
@@ -45,12 +49,7 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
 
       if (result.success && result.project) {
         setIsOpen(false);
-        setFormData({
-          name: '',
-          constitution: '',
-          techStack: '',
-          basePath: '',
-        });
+        setFormData({ name: '', constitution: '', techStack: '', basePath: '' });
         onProjectCreated?.(result.project);
       } else {
         setError(result.error || 'Failed to create project');
@@ -64,116 +63,94 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
 
   const handleCancel = () => {
     setIsOpen(false);
-    setFormData({
-      name: '',
-      constitution: '',
-      techStack: '',
-      basePath: '',
-    });
+    setFormData({ name: '', constitution: '', techStack: '', basePath: '' });
     setError('');
   };
 
-  if (!isOpen) {
-    return (
-      <button
-        onClick={() => setIsOpen(true)}
-        className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white rounded-lg transition-colors hover:opacity-90 active:opacity-80"
-        style={{ backgroundColor: '#0071E3' }}
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-          <line x1="12" y1="5" x2="12" y2="19" />
-          <line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
-        New Project
-      </button>
-    );
-  }
+  const inputClasses = "w-full px-[var(--sp-3)] py-[var(--sp-2)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[var(--color-text-primary)] text-[14px] focus:outline-none focus:border-[var(--color-border-selected)] transition-colors placeholder:text-[var(--color-text-tertiary)]";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center ios-font">
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={handleCancel}
-      />
+    <>
+      <Button
+        variant="primary"
+        onClick={() => setIsOpen(true)}
+        icon={<Plus size={14} />}
+        className="w-full justify-start"
+      >
+        New Project
+      </Button>
 
-      {/* Dialog Content */}
-      <div className="bg-bg-elevated border border-border-default rounded-[8px] shadow-xl w-full max-w-md mx-4 overflow-hidden ios">
-        <div className="p-6">
-          <h2 className="text-[20px] font-semibold text-ios-primary mb-6 ">
-            Create New Project
-          </h2>
-
+      <Dialog
+        isOpen={isOpen}
+        onClose={handleCancel}
+        title="Create New Project"
+        size="medium"
+        footer={
+          <>
+            <Button variant="ghost" onClick={handleCancel} disabled={isSubmitting}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleSubmit}
+              disabled={isSubmitting || !formData.name.trim()}
+              loading={isSubmitting}
+            >
+              Create
+            </Button>
+          </>
+        }
+      >
+        <form onSubmit={handleSubmit} className="space-y-[var(--sp-4)]">
           {error && (
-            <div className="mb-4 p-3 bg-opacity-10 border rounded-[8px]" style={{ backgroundColor: 'var(--status-error)', borderColor: 'var(--ios-separator)' }}>
-              <p className="text-[11px] text-text-tertiary text-status-error ">{error}</p>
+            <div className="p-[var(--sp-3)] bg-[var(--color-bg-sunken)] border-l-4 border-[var(--color-text-danger)] rounded-[var(--radius-sm)]">
+              <p className="text-[12px] text-[var(--color-text-danger)] font-medium">{error}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4 ">
-            <div>
-              <label htmlFor="name" className="block text-[12px] text-ios-primary mb-1">
-                Project Name
-              </label>
-              <input
-                type="text"
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 rounded-[8px] border border-ios bg-ios-primary text-ios-primary  focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-shadow"
-                placeholder="My Awesome Project"
-                required
-                style={{
-                  backgroundColor: 'var(--bg-bg-primary)',
-                  color: 'var(--text-text-primary)',
-                  borderColor: 'var(--ios-separator)',
-                }}
-              />
-            </div>
+          <div>
+            <label htmlFor="name" className="block text-[12px] font-semibold text-[var(--color-text-secondary)] mb-[var(--sp-1)]">
+              Project Name
+            </label>
+            <input
+              type="text"
+              id="name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className={inputClasses}
+              placeholder="e.g. My Website Migration"
+              required
+            />
+          </div>
 
-            <div>
-              <label htmlFor="constitution" className="block text-[12px] text-ios-primary mb-1">
-                Project Constitution
-              </label>
-              <textarea
-                id="constitution"
-                value={formData.constitution}
-                onChange={(e) => setFormData({ ...formData, constitution: e.target.value })}
-                className="w-full px-3 py-2 rounded-[8px] border border-ios bg-ios-primary text-ios-primary  focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-shadow resize-none"
-                placeholder="Brief description of the project's purpose..."
-                rows={3}
-                style={{
-                  backgroundColor: 'var(--bg-bg-primary)',
-                  color: 'var(--text-text-primary)',
-                  borderColor: 'var(--ios-separator)',
-                }}
-              />
-            </div>
+          <div>
+            <label htmlFor="constitution" className="block text-[12px] font-semibold text-[var(--color-text-secondary)] mb-[var(--sp-1)]">
+              Project Constitution (Instructions)
+            </label>
+            <textarea
+              id="constitution"
+              value={formData.constitution}
+              onChange={(e) => setFormData({ ...formData, constitution: e.target.value })}
+              className={cn(inputClasses, "resize-none h-[80px]")}
+              placeholder="Provide high-level guidelines for the agent..."
+            />
+          </div>
 
+          <div className="grid grid-cols-2 gap-[var(--sp-4)]">
             <div>
-              <label htmlFor="techStack" className="block text-[12px] text-ios-primary mb-1">
+              <label htmlFor="techStack" className="block text-[12px] font-semibold text-[var(--color-text-secondary)] mb-[var(--sp-1)]">
                 Tech Stack (JSON)
               </label>
               <textarea
                 id="techStack"
                 value={formData.techStack}
                 onChange={(e) => setFormData({ ...formData, techStack: e.target.value })}
-                className="w-full px-3 py-2 rounded-[8px] border border-ios bg-ios-primary text-ios-primary  font-mono text-[11px] text-text-tertiary focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-shadow resize-none"
-                placeholder='{"language": "TypeScript", "framework": "Next.js"}'
-                rows={3}
-                style={{
-                  backgroundColor: 'var(--bg-bg-primary)',
-                  color: 'var(--text-text-primary)',
-                  borderColor: 'var(--ios-separator)',
-                }}
+                className={cn(inputClasses, "resize-none h-[120px] font-mono text-[12px]")}
+                placeholder='{"lang": "TS"}'
               />
-              <p className="mt-1 ios-caption text-text-tertiary">
-                Optional: Enter tech stack as JSON object
-              </p>
             </div>
-
             <div>
-              <label htmlFor="basePath" className="block text-[12px] text-ios-primary mb-1">
+              <label htmlFor="basePath" className="block text-[12px] font-semibold text-[var(--color-text-secondary)] mb-[var(--sp-1)]">
                 Base Path
               </label>
               <input
@@ -181,37 +158,16 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
                 id="basePath"
                 value={formData.basePath}
                 onChange={(e) => setFormData({ ...formData, basePath: e.target.value })}
-                className="w-full px-3 py-2 rounded-[8px] border border-ios bg-ios-primary text-ios-primary  font-mono text-[11px] text-text-tertiary focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-shadow"
-                placeholder="/path/to/project"
-                style={{
-                  backgroundColor: 'var(--bg-bg-primary)',
-                  color: 'var(--text-text-primary)',
-                  borderColor: 'var(--ios-separator)',
-                }}
+                className={inputClasses}
+                placeholder="/Users/dev/project"
               />
+              <p className="text-[11px] text-[var(--color-text-tertiary)] mt-1.5 leading-relaxed">
+                Absolute path where the agent will perform operations.
+              </p>
             </div>
-
-            <div className="flex justify-end gap-3 pt-4">
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="px-4 py-2 text-[17px] font-medium text-accent bg-ios-secondary border border-ios rounded-[8px] transition-colors  disabled:opacity-50"
-                disabled={isSubmitting}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 text-[17px] font-medium text-white rounded-[8px] transition-colors  disabled:opacity-50"
-                disabled={isSubmitting || !formData.name.trim()}
-                style={{ backgroundColor: 'var(--accent)' }}
-              >
-                {isSubmitting ? 'Creating...' : 'Create'}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+          </div>
+        </form>
+      </Dialog>
+    </>
   );
 }

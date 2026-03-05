@@ -1,12 +1,14 @@
 'use client';
 
 import { ButtonHTMLAttributes, forwardRef } from 'react';
+import { cn } from '@/lib/utils';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
   size?: 'small' | 'medium' | 'large' | 'icon';
   loading?: boolean;
   icon?: React.ReactNode;
+  iconRight?: React.ReactNode;
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -16,6 +18,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       size = 'medium',
       loading = false,
       icon,
+      iconRight,
       children,
       disabled,
       className = '',
@@ -23,23 +26,29 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
-    const baseClasses = 'inline-flex items-center justify-center gap-[6px] font-medium rounded-[6px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed outline-none border cursor-pointer';
+    const baseClasses = 'inline-flex items-center justify-center gap-[var(--sp-2)] font-medium rounded-[var(--radius-md)] transition-[background,color] disabled:opacity-50 disabled:cursor-not-allowed outline-none border-none cursor-pointer text-[12px]';
 
     const variantClasses = {
-      primary: 'bg-accent text-white border-transparent hover:bg-accent-hover',
-      secondary: 'bg-transparent text-text-secondary border-border-default hover:bg-bg-hover hover:text-text-primary hover:border-border-strong',
-      danger: 'bg-status-error text-white border-transparent hover:opacity-90',
-      ghost: 'bg-transparent text-text-secondary border-transparent hover:bg-bg-hover hover:text-text-primary',
+      primary: 'bg-[var(--color-brand-bold)] text-white hover:bg-[var(--color-brand-bolder)]',
+      secondary: 'bg-[var(--color-bg-surface)] text-[var(--color-text-secondary)] border border-[var(--color-border-default)] hover:bg-[var(--color-bg-hovered)] hover:border-[var(--color-border-bold)] border-solid',
+      danger: 'bg-[#CA3521] text-white hover:bg-[var(--color-text-danger)]',
+      ghost: 'bg-transparent text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hovered)] hover:text-[var(--color-text-primary)]',
     };
 
     const sizeClasses = {
-      small: 'h-[24px] px-[8px] text-[11px]',
-      medium: 'h-[28px] px-[10px] text-[12px]',
-      large: 'h-[32px] px-[12px] text-[13px]',
-      icon: 'w-[28px] h-[28px] p-0',
+      small: 'h-[28px] px-[var(--sp-2)]',
+      medium: 'h-[32px] px-[var(--sp-3)]',
+      large: 'h-[36px] px-[var(--sp-4)] text-[14px]',
+      icon: 'w-[32px] h-[32px] p-0',
     };
 
-    const classes = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`.trim();
+    // Special case for secondary border since base has border-none
+    const classes = cn(
+      baseClasses,
+      variantClasses[variant],
+      sizeClasses[size],
+      className
+    );
 
     return (
       <button
@@ -57,6 +66,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           icon && <span className="flex-shrink-0 flex items-center">{icon}</span>
         )}
         {children}
+        {!loading && iconRight && <span className="flex-shrink-0 flex items-center">{iconRight}</span>}
       </button>
     );
   }

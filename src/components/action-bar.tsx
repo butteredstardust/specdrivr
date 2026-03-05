@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CreateTaskDialog } from './create-task-dialog';
 import { PlanSelect, TaskSelect } from '@/db/schema';
+import { Button } from './ui/button';
+import { Plus, Filter, Search } from 'lucide-react';
 
 interface ActionBarProps {
   projectId: number;
@@ -17,24 +19,29 @@ export function ActionBar({ projectId, plans, existingTasks, onTaskCreated }: Ac
   const [showCreateTask, setShowCreateTask] = useState(false);
 
   return (
-    <div className="mb-6 bg-bg-elevated border border-border-default rounded-[8px] shadow-sm">
-      <div className="px-6 py-4">
-        <div className="flex items-center justify-between ios-font">
-          <h2 className="text-[16px] font-semibold text-ios-primary ">
-            Project Actions
-          </h2>
-          <button
-            onClick={() => setShowCreateTask(true)}
-            className="px-4 py-2 text-[13px] text-white rounded-[8px] transition-colors flex items-center gap-1.5 "
-            style={{ backgroundColor: 'var(--accent)' }}
-          >
-            <span className="text-[20px] font-semibold">+</span>
-            <span>Add Task</span>
-          </button>
+    <div className="flex items-center justify-between mb-[var(--sp-6)]">
+      <div className="flex items-center gap-[var(--sp-2)]">
+        <div className="relative">
+          <Search size={14} className="absolute left-[var(--sp-2)] top-1/2 -translate-y-1/2 text-[var(--color-text-tertiary)]" />
+          <input
+            type="text"
+            placeholder="Search tasks..."
+            className="h-[32px] pl-[32px] pr-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--color-border-selected)] transition-colors w-[200px]"
+          />
         </div>
+        <Button variant="secondary" size="small" icon={<Filter size={14} />}>
+          Filter
+        </Button>
       </div>
 
-      {/* Create Task Dialog */}
+      <Button
+        variant="primary"
+        onClick={() => setShowCreateTask(true)}
+        icon={<Plus size={16} />}
+      >
+        Create Task
+      </Button>
+
       {showCreateTask && (
         <CreateTaskDialog
           projectId={projectId}

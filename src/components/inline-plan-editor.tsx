@@ -4,6 +4,9 @@ import { useState } from 'react';
 import { PlanSelect } from '@/db/schema';
 import { createPlanDev, updatePlanDev } from '@/lib/actions';
 import type { PlanStatus } from '@/db/schema';
+import { Button } from './ui/button';
+import { Plus, Edit, Save, X, Code, ChevronDown, CheckCircle2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface InlinePlanEditorProps {
   specId: number;
@@ -11,23 +14,11 @@ interface InlinePlanEditorProps {
   onCreated?: () => void;
 }
 
-const iosInputStyle = {
-  width: '100%',
-  padding: '8px 12px',
-  backgroundColor: 'var(--bg-bg-primary)',
-  color: 'var(--text-text-primary)',
-  borderColor: 'var(--ios-separator)',
-  borderRadius: '8px',
-  fontSize: '17px',
-  outline: 'none',
-  transition: 'box-shadow 0.2s',
-};
-
-const statusColors: Record<PlanStatus, { bg: string; text: string; border: string }> = {
-  draft: { bg: 'bg-status-idle-6', text: 'text-text-secondary', border: 'border-status-idle-4' },
-  active: { bg: 'bg-accent/10', text: 'text-accent', border: 'border-accent/20' },
-  completed: { bg: 'bg-status-success/10', text: 'text-status-success', border: 'border-status-success/20' },
-  archived: { bg: 'bg-status-idle-6', text: 'text-text-secondary', border: 'border-status-idle-4' },
+const statusLozengeStyles: Record<PlanStatus, string> = {
+  draft: 'bg-[var(--status-todo-bg)] text-[var(--status-todo-text)]',
+  active: 'bg-[var(--status-inprogress-bg)] text-[var(--status-inprogress-text)]',
+  completed: 'bg-[var(--status-success-bg)] text-[var(--status-success-text)]',
+  archived: 'bg-[var(--color-bg-sunken)] text-[var(--color-text-tertiary)]',
 };
 
 export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorProps) {
@@ -60,20 +51,17 @@ export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorP
   const handleSave = async () => {
     setIsSubmitting(true);
     setError('');
-
     try {
-      // Validate JSON
       let parsedJson;
       try {
         parsedJson = JSON.parse(editedJson);
-      } catch (e) {
+      } catch {
         setError('Invalid JSON format');
         setIsSubmitting(false);
         return;
       }
 
       if (editingPlanId) {
-        // Update existing plan
         const result = await updatePlanDev(editingPlanId, parsedJson, selectedStatus);
         if (result.success) {
           setEditingPlanId(null);
@@ -82,7 +70,6 @@ export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorP
           setError(result.error || 'Failed to update plan');
         }
       } else {
-        // Create new plan
         const result = await createPlanDev({
           specId,
           architectureDecisions: parsedJson,
@@ -97,7 +84,7 @@ export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorP
         }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setIsSubmitting(false);
     }
@@ -107,7 +94,6 @@ export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorP
     setIsCreating(false);
     setEditingPlanId(null);
     setError('');
-
     if (activePlan?.architectureDecisions) {
       try {
         setEditedJson(JSON.stringify(activePlan.architectureDecisions, null, 2));
@@ -133,188 +119,146 @@ export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorP
     }
   };
 
-  const formatJson = () => {
-    try {
-      const parsed = JSON.parse(editedJson);
-      setEditedJson(JSON.stringify(parsed, null, 2));
-      setError('');
-    } catch (e) {
-      setError('Cannot format invalid JSON');
-    }
-  };
-
   const isCreatingOrEditing = isCreating || editingPlanId !== null;
 
   return (
-    <div className="bg-bg-elevated border border-border-default rounded-[8px] shadow-sm">
-      <div className="px-6 py-4">
-        <div className="flex items-center justify-between ios-font">
-          <h2 className="text-[16px] font-semibold text-ios-primary">Plan</h2>
-          <div className="flex items-center gap-2">
-            {!isCreatingOrEditing && plans.length > 1 && (
+    <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] overflow-hidden">
+      <div className="px-[var(--sp-6)] py-[var(--sp-3)] border-b border-[var(--color-border-default)] flex items-center justify-between bg-[var(--color-bg-primary)]">
+        <div className="flex items-center gap-[var(--sp-4)]">
+          <h3 className="text-[14px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Plan</h3>
+          {!isCreatingOrEditing && plans.length > 1 && (
+            <div className="relative group">
               <select
                 value={activePlan?.id || ''}
                 onChange={(e) => {
                   const planId = parseInt(e.target.value);
-                  if (planId) {
-                    handleEdit(planId);
-                    setEditingPlanId(null);
-                  }
+                  if (planId) { handleEdit(planId); setEditingPlanId(null); }
                 }}
-                className="px-3 py-1.5 text-[11px] text-text-tertiary rounded-[8px] bg-ios-secondary border border-ios text-ios-primary"
+                className="appearance-none bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] h-[28px] pl-3 pr-8 rounded-[var(--radius-sm)] text-[12px] font-bold text-[var(--color-brand-bold)] focus:outline-none focus:border-[var(--color-border-selected)] transition-all cursor-pointer"
               >
                 {plans.map((plan) => (
-                  <option key={plan.id} value={plan.id}>
-                    Plan #{plan.id} ({plan.status})
-                  </option>
+                  <option key={plan.id} value={plan.id}>Plan #{plan.id}</option>
                 ))}
               </select>
-            )}
-            {!isCreatingOrEditing && (
-              <>
-                {activePlan && (
-                  <button
-                    onClick={() => handleEdit(activePlan.id)}
-                    className="px-4 py-2 text-[13px] text-accent bg-ios-secondary border border-ios rounded-[8px] transition-colors"
-                  >
-                    Edit
-                  </button>
-                )}
-                <button
-                  onClick={() => setIsCreating(true)}
-                  className="px-4 py-2 text-[13px] text-white rounded-[8px] transition-colors"
-                  style={{ backgroundColor: 'var(--accent)' }}
-                >
-                  + New
-                </button>
-              </>
-            )}
-          </div>
+              <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-brand-bold)]" />
+            </div>
+          )}
         </div>
 
+        <div className="flex items-center gap-[var(--sp-2)]">
+          {!isCreatingOrEditing ? (
+            <>
+              {activePlan && (
+                <Button variant="secondary" size="small" onClick={() => handleEdit(activePlan.id)} icon={<Edit size={14} />}>
+                  Edit
+                </Button>
+              )}
+              <Button variant="primary" size="small" onClick={() => setIsCreating(true)} icon={<Plus size={16} />}>
+                New Plan
+              </Button>
+            </>
+          ) : (
+            <div className="flex items-center gap-[var(--sp-2)]">
+              <Button variant="ghost" size="small" onClick={handleCancel} disabled={isSubmitting} icon={<X size={14} />}>
+                Cancel
+              </Button>
+              <Button variant="primary" size="small" onClick={handleSave} loading={isSubmitting} icon={<Save size={14} />}>
+                {editingPlanId ? 'Update' : 'Create'}
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="p-[var(--sp-6)]">
         {error && (
-          <div className="mt-4 p-3 bg-opacity-10 border rounded-[8px]"
-            style={{ backgroundColor: 'var(--status-error)', borderColor: 'var(--ios-separator)' }}
-          >
-            <p className="text-[11px] text-status-error">{error}</p>
+          <div className="mb-[var(--sp-4)] p-[var(--sp-3)] bg-[var(--color-bg-sunken)] border-l-4 border-[var(--color-text-danger)] rounded-[var(--radius-sm)]">
+            <p className="text-[12px] text-[var(--color-text-danger)] font-medium">{error}</p>
           </div>
         )}
 
         {isCreatingOrEditing ? (
-          <div className="mt-4 space-y-4">
+          <div className="space-y-[var(--sp-5)] max-w-4xl">
             {isCreating && (
               <div>
-                <label htmlFor="intent-input" className="block text-[12px] text-ios-primary mb-2">Intent</label>
+                <label className="block text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-[var(--sp-2)]">Intent</label>
                 <input
-                  id="intent-input"
                   type="text"
                   value={intent}
                   onChange={(e) => setIntent(e.target.value)}
                   placeholder="e.g. Implement user authentication"
-                  style={{ ...iosInputStyle, fontFamily: 'inherit' }}
+                  className="w-full h-[40px] px-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--color-border-selected)] transition-all"
                 />
               </div>
             )}
 
             <div>
-              <label className="block text-[12px] text-ios-primary mb-2">Status</label>
-              <div className="flex gap-2">
-                {(Object.keys(statusColors) as PlanStatus[]).map((status) => {
-                  const colors = statusColors[status];
-                  return (
-                    <button
-                      key={status}
-                      type="button"
-                      onClick={() => setSelectedStatus(status)}
-                      className={`px-4 py-2 rounded-ios-lg text-[11px] font-medium transition-colors ${selectedStatus === status
-                        ? `${colors.bg} ${colors.text} ${colors.border} border-2`
-                        : 'bg-status-idle-6 text-text-secondary border border-status-idle-4 hover:bg-status-idle-5'
-                        }`}
-                    >
-                      {status.charAt(0).toUpperCase() + status.slice(1)}
-                    </button>
-                  );
-                })}
+              <label className="block text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-[var(--sp-2)]">Status</label>
+              <div className="flex gap-[var(--sp-2)]">
+                {(Object.keys(statusLozengeStyles) as PlanStatus[]).map((status) => (
+                  <button
+                    key={status}
+                    type="button"
+                    onClick={() => setSelectedStatus(status)}
+                    className={cn(
+                      "px-[var(--sp-4)] py-[var(--sp-2)] rounded-[var(--radius-sm)] text-[12px] font-bold uppercase transition-all border",
+                      selectedStatus === status
+                        ? cn("border-[var(--color-border-selected)] ring-2 ring-[var(--color-border-selected)] ring-opacity-20", statusLozengeStyles[status])
+                        : "bg-[var(--color-bg-sunken)] border-[var(--color-border-default)] text-[var(--color-text-tertiary)] hover:bg-[var(--color-bg-hovered)]"
+                    )}
+                  >
+                    {status}
+                  </button>
+                ))}
               </div>
             </div>
 
             <div>
-              <label className="block text-[12px] text-ios-primary mb-2">Architecture Decisions (JSON)</label>
+              <div className="flex items-center justify-between mb-[var(--sp-2)]">
+                <label className="block text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Architecture Decisions (JSON)</label>
+                <Button variant="ghost" size="small" onClick={() => { try { setEditedJson(JSON.stringify(JSON.parse(editedJson), null, 2)); } catch { setError('Cannot format invalid JSON'); } }} icon={<Code size={14} />}>
+                  Format
+                </Button>
+              </div>
               <textarea
                 value={editedJson}
                 onChange={(e) => setEditedJson(e.target.value)}
-                rows={16}
-                className="font-mono text-[11px]"
-                style={{
-                  ...iosInputStyle,
-                  fontFamily: "'SF Mono', Monaco, 'Andale Mono', 'Ubuntu Mono', monospace",
-                }}
+                rows={12}
+                className="w-full p-[var(--sp-4)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] font-mono text-[12px] focus:outline-none focus:border-[var(--color-border-selected)] transition-all"
                 spellCheck={false}
               />
             </div>
-
-            <div className="flex justify-between items-center pt-4">
-              <button
-                type="button"
-                onClick={formatJson}
-                className="px-4 py-2 text-[13px] text-accent bg-ios-secondary border border-ios rounded-[8px]"
-              >
-                Format JSON
-              </button>
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={handleCancel}
-                  disabled={isSubmitting}
-                  className="px-4 py-2 text-[13px] text-accent bg-ios-secondary border border-ios rounded-[8px]"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSave}
-                  disabled={isSubmitting}
-                  className="px-4 py-2 text-[13px] text-white rounded-[8px]"
-                  style={{ backgroundColor: 'var(--accent)' }}
-                >
-                  {isSubmitting ? 'Saving...' : (editingPlanId ? 'Update' : 'Create')}
-                </button>
-              </div>
-            </div>
           </div>
         ) : (
-          <div className="mt-4">
+          <div className="space-y-[var(--sp-6)]">
+            <div className="flex items-center gap-[var(--sp-3)]">
+              <span className={cn("px-2 py-0.5 rounded-[var(--radius-sm)] text-[11px] font-bold uppercase", statusLozengeStyles[activePlan.status as PlanStatus])}>
+                {activePlan.status}
+              </span>
+              <span className="text-[13px] font-bold text-[var(--color-text-tertiary)] uppercase tracking-tighter">Plan #{activePlan.id}</span>
+            </div>
+
+            {activePlan.intent && (
+              <div className="p-[var(--sp-4)] bg-[var(--color-bg-sunken)] border-l-4 border-[var(--color-brand-bold)] rounded-[var(--radius-sm)]">
+                <p className="text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1">Intent</p>
+                <p className="text-[14px] text-[var(--color-text-primary)] leading-relaxed">{activePlan.intent}</p>
+              </div>
+            )}
+
             {activePlan?.architectureDecisions ? (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <span className={`inline-flex items-center px-3 py-1 rounded-ios-xl text-[11px] font-medium ${statusColors[activePlan.status as PlanStatus].bg} ${statusColors[activePlan.status as PlanStatus].text}`}>
-                    {activePlan.status.charAt(0).toUpperCase() + activePlan.status.slice(1)}
-                  </span>
-                  <span className="text-[12px] text-text-tertiary">
-                    Plan #{activePlan.id}
-                  </span>
-                </div>
-
-                {activePlan.intent && (
-                  <div className="bg-ios-secondary rounded-ios-lg p-3">
-                    <p className="text-[12px] font-semibold text-text-primary mb-1">Intent</p>
-                    <p className="text-[13px] text-text-secondary">{activePlan.intent}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-[var(--sp-4)]">
+                {Object.entries(activePlan.architectureDecisions as Record<string, unknown>).map(([key, value]) => (
+                  <div key={key} className="p-[var(--sp-4)] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] shadow-[var(--shadow-card)]">
+                    <p className="text-[11px] font-bold text-[var(--color-text-tertiary)] uppercase tracking-wider mb-1">{key}</p>
+                    <p className="text-[14px] font-medium text-[var(--color-text-primary)]">{String(value)}</p>
                   </div>
-                )}
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {Object.entries(activePlan.architectureDecisions as Record<string, unknown>).map(([key, value]) => (
-                    <div key={key} className="bg-ios-secondary rounded-ios-lg p-3">
-                      <p className="font-medium text-text-primary text-[13px]">{key}</p>
-                      <p className="text-[11px] text-text-tertiary mt-1">{String(value)}</p>
-                    </div>
-                  ))}
-                </div>
+                ))}
               </div>
             ) : (
-              <span className="text-text-secondary italic text-[13px]">
-                No plan defined. Create one to define architecture decisions.
-              </span>
+              <div className="flex flex-col items-center justify-center py-[var(--sp-12)] border-2 border-dashed border-[var(--color-border-default)] rounded-[var(--radius-lg)] opacity-60">
+                <CheckCircle2 size={32} className="text-[var(--color-border-default)] mb-[var(--sp-3)]" />
+                <p className="text-[14px] text-[var(--color-text-secondary)] italic">No plan defined yet.</p>
+              </div>
             )}
           </div>
         )}

@@ -19,7 +19,7 @@ export function BottomTabs() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-bg-elevated/95 backdrop-blur-ios border-t border-border-default md:hidden pb-[env(safe-area-inset-bottom)]">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-bg-elevated/95 backdrop-blur-ios border-t border-border-default lg:hidden pb-[env(safe-area-inset-bottom)] translate-y-0">
       <div className="flex justify-around items-center h-20">
         {tabs.map((tab) => {
           const isActive = pathname === tab.href;
