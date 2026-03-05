@@ -50,14 +50,10 @@ export async function createProject(projectData: {
  */
 export async function getProjects(includeArchived: boolean = false) {
   try {
-    const query = db.select().from(projects);
+    const allProjects = includeArchived
+      ? await db.select().from(projects)
+      : await db.select().from(projects).where(eq(projects.isArchived, false));
 
-    if (!includeArchived) {
-      // @ts-expect-error - drizzle doesn't type where clauses perfectly
-      query.where(eq(projects.isArchived, false));
-    }
-
-    const allProjects = await query;
     return { success: true, projects: allProjects };
   } catch (error) {
     console.error('Error getting projects:', error);

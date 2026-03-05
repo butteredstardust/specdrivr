@@ -77,7 +77,7 @@ export function ProjectSettingsClient({
       const result = await archiveProjectDev(projectId, !project.isArchived);
 
       if (result.success) {
-        setArchiveMessage(result.message);
+        setArchiveMessage(result.message || 'Operation completed');
         setShowArchiveConfirm(false);
         // Clear message after 3 seconds
         setTimeout(() => setArchiveMessage(null), 3000);
@@ -367,7 +367,7 @@ export function ProjectSettingsClient({
         message={project.isArchived ? "This will restore the project to the dashboard and make it visible again." : "This will archive the project and hide it from the dashboard. You can unarchive it later from settings."}
         confirmText={project.isArchived ? "Unarchive" : "Archive"}
         cancelText="Cancel"
-        variant={project.isArchived ? "secondary" : "danger"}
+        variant={project.isArchived ? "primary" : "danger"}
       />
 
       {/* Generate Token Dialog */}
