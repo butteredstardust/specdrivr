@@ -89,8 +89,8 @@ export function CreateTaskDialog({
       const parsed = parseQuickDescription(value);
       setFormData((prev) => ({
         ...prev,
-        priority: parsed.priority,
-        filesInvolved: parsed.files.join(', '),
+        priority: parsed.priority.toString(),
+        filesInvolved: parsed.filesInvolved.join(', '),
       }));
     }
   };
@@ -102,8 +102,8 @@ export function CreateTaskDialog({
       const parsed = parseQuickDescription(formData.description);
       setFormData((prev) => ({
         ...prev,
-        priority: parsed.priority,
-        filesInvolved: parsed.files.join(', '),
+        priority: parsed.priority.toString(),
+        filesInvolved: parsed.filesInvolved.join(', '),
       }));
     }
   };
@@ -224,15 +224,13 @@ export function CreateTaskDialog({
             <button
               type="button"
               onClick={() => handleQuickModeToggle(!isQuickMode)}
-              className={`w-12 h-7 rounded-ios-xl p-1 transition-colors ${
-                isQuickMode ? 'bg-ios-blue' : 'bg-ios-gray-5'
-              }`}
+              className={`w-12 h-7 rounded-ios-xl p-1 transition-colors ${isQuickMode ? 'bg-ios-blue' : 'bg-ios-gray-5'
+                }`}
               aria-pressed={isQuickMode}
             >
               <span
-                className={`block w-5 h-5 rounded-full transition-transform ${
-                  isQuickMode ? 'translate-x-5 ios-bg-card' : 'translate-x-0 ios-bg-card'
-                }`}
+                className={`block w-5 h-5 rounded-full transition-transform ${isQuickMode ? 'translate-x-5 ios-bg-card' : 'translate-x-0 ios-bg-card'
+                  }`}
               />
             </button>
           </div>
