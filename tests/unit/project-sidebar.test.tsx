@@ -373,7 +373,7 @@ describe('ProjectSidebar - Core Functionality', () => {
       render(<ProjectSidebar projects={longNameProject} />);
 
       const projectName = screen.getByText(longNameProject[0].name);
-      expect(projectName).toHaveStyle('max-width: 150px');
+      expect(projectName.parentElement).toHaveClass('max-w-[150px]');
     });
 
     test('shows project name with max width class', () => {
