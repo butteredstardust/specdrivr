@@ -210,7 +210,7 @@ export function AddLogDialog({
               </button>
               <button
                 type="submit"
-                disabled={isSubmitting || !message.trim()}
+                disabled={isSubmitting}
                 className="px-4 py-2 ios-body text-white ios-radius ios-font-text transition-colors disabled:opacity-50"
                 style={{ backgroundColor: 'var(--ios-blue)' }}
               >
