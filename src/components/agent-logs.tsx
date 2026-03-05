@@ -69,8 +69,9 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
         new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
       )
       .filter((log) => {
-        // Filter by level
-        if (!levelFilters[log.level as LogLevel]) {
+        // Filter by level - allow unknown levels by default
+        const levelInFilters = log.level in levelFilters;
+        if (levelInFilters && !levelFilters[log.level as LogLevel]) {
           return false;
         }
 

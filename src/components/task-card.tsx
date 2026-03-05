@@ -76,7 +76,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
         </div>
 
         {Array.isArray(task.filesInvolved) && task.filesInvolved.length > 0 && (
-          <div className="mb-2">
+          <div className="mb-2" data-testid={`task-files-${task.id}`}>
             <p className="ios-caption-1 text-ios-text-secondary mb-1">Files:</p>
             <div className="flex flex-wrap gap-1">
               {task.filesInvolved.map((file: string, idx: number) => (
@@ -93,7 +93,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
 
         <div className="flex items-center justify-between mt-3 pt-2 border-t border-ios-border">
           <div className="ios-caption-1 text-ios-text-secondary flex items-center gap-3">
-            <span>P{priority}</span>
+            <span data-testid={`priority-indicator-${task.priority || 'medium'}`}>P{priority}</span>
             <span>#{task.id}</span>
           </div>
           <button
