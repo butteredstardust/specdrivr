@@ -2,6 +2,7 @@ import { pgTable, serial, text, timestamp, boolean, jsonb, integer, pgEnum } fro
 
 // Status enums
 export const planStatusEnum = pgEnum('plan_status', ['draft', 'active', 'completed', 'archived']);
+export const projectStatusEnum = pgEnum('project_status', ['active', 'archived']);
 export const taskStatusEnum = pgEnum('task_status', ['todo', 'in_progress', 'done', 'blocked', 'paused', 'skipped']);
 export const logLevelEnum = pgEnum('log_level', ['debug', 'info', 'warn', 'error']);
 export const agentStatusEnum = pgEnum('agent_status', ['idle', 'running', 'paused', 'stopped', 'error']);
@@ -25,8 +26,8 @@ export const projects = pgTable('projects', {
   agentStartedAt: timestamp('agent_started_at', { withTimezone: true }),
   agentStoppedAt: timestamp('agent_stopped_at', { withTimezone: true }),
   createdByUserId: integer('created_by_user_id').references(() => users.id),
-  // Archive status
-  isArchived: boolean('is_archived').notNull().default(false),
+  // Project status
+  status: projectStatusEnum('status').notNull().default('active'),
 });
 
 // Specifications table

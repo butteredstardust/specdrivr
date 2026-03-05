@@ -8,6 +8,7 @@ import { ProjectSidebarWrapper } from '@/components/project-sidebar-wrapper';
 import { InlineConstitutionEditor } from '@/components/inline-constitution-editor';
 import { InlineTechStackEditor } from '@/components/inline-tech-stack-editor';
 import { GenerateTokenDialog } from '@/components/generate-token-dialog';
+import { ArchiveProjectDialog } from '@/components/archive-project-dialog';
 import { updateGitConfigDev as updateGitConfig, archiveProjectDev } from '@/lib/actions';
 import type { TabData } from '@/components/ui/tabs';
 
@@ -74,11 +75,12 @@ export function ProjectSettingsClient({
     setArchiveMessage(null);
 
     try {
-      const result = await archiveProjectDev(projectId, !project.isArchived);
+      const result = await archiveProjectDev(projectId, project.status === 'archived');
 
       if (result.success) {
         setArchiveMessage(result.message || 'Operation completed');
         setShowArchiveConfirm(false);
+        setProjectNameInput('');
         // Clear message after 3 seconds
         setTimeout(() => setArchiveMessage(null), 3000);
       } else {
@@ -339,18 +341,18 @@ export function ProjectSettingsClient({
                 )}
 
                 <p className="ios-body text-ios-text-secondary mb-4">
-                  {project.isArchived
+                  {project.status === 'archived'
                     ? 'This project is currently archived and hidden from the dashboard.'
                     : 'Archiving a project will hide it from the dashboard but preserve all data.'}
                 </p>
 
                 <Button
-                  variant={project.isArchived ? "secondary" : "danger"}
+                  variant={project.status === 'archived' ? "secondary" : "danger"}
                   size="small"
                   onClick={() => setShowArchiveConfirm(true)}
                   disabled={isArchiving}
                 >
-                  {isArchiving ? 'Processing...' : (project.isArchived ? 'Unarchive Project' : 'Archive Project')}
+                  {isArchiving ? 'Processing...' : (project.status === 'archived' ? 'Unarchive Project' : 'Archive Project')}
                 </Button>
               </section>
             </div>
@@ -359,15 +361,22 @@ export function ProjectSettingsClient({
       </div>
 
       {/* Archive/Unarchive Confirmation Dialog */}
-      <ConfirmDialog
+      <ArchiveProjectDialog
         isOpen={showArchiveConfirm}
-        onClose={() => setShowArchiveConfirm(false)}
+        onClose={() => {
+          setShowArchiveConfirm(false);
+          setProjectNameInput('');
+        }}
         onConfirm={handleArchive}
-        title={project.isArchived ? "Unarchive Project?" : "Archive Project?"}
-        message={project.isArchived ? "This will restore the project to the dashboard and make it visible again." : "This will archive the project and hide it from the dashboard. You can unarchive it later from settings."}
-        confirmText={project.isArchived ? "Unarchive" : "Archive"}
-        cancelText="Cancel"
-        variant={project.isArchived ? "primary" : "danger"}
+        projectName={project.name}
+        isArchived={project.status === 'archived'}
+      />
+
+      {/* Archive confirmation state */}
+      <input
+        type="hidden"
+        value={projectNameInput}
+        onChange={(e) => setProjectNameInput(e.target.value)}
       />
 
       {/* Generate Token Dialog */}
