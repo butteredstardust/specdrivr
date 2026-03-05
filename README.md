@@ -177,6 +177,25 @@ Always use SQL queries to retrieve state rather than relying on conversation con
 - `npm run db:generate` - Generate migrations
 - `npm run lint` - Run linter
 
+## Documentation
+
+### For Different Use Cases
+
+**New to the project?**
+- Start with [specification.md](specification.md) for project vision and high-level requirements
+- Read [claude.md](claude.md) for comprehensive developer guide
+- Check out [plan.md](plan.md) for architecture and implementation roadmap
+
+**Working on UI/UX?**
+- See [ui_plan.md](ui_plan.md) for detailed UI specifications
+
+**Setting up testing?**
+- See [testing/README.md](testing/README.md) for comprehensive testing guide
+- Check [TESTING_SUMMARY.md](TESTING_SUMMARY.md) for testing infrastructure overview
+
+**Historical context:**
+- See [documentation/progress/](documentation/progress/) for project progress tracking
+
 ## Project Structure
 
 ```

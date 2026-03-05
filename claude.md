@@ -8,6 +8,20 @@
 
 ## 🎯 Project Overview
 
+**Table of Contents**
+- [Quick Reference](#📚-quick-reference)
+- [Directory Structure](#📁-directory-structure)
+- [Key Files & Their Purpose](#🗂️-key-files--their-purpose)
+- [Data Flow & Workflows](#🔄-data-flow--workflows)
+- [Agent Control & Visibility Panel](#🎮-agent-control--visibility-panel-implemented)
+- [Implementation Status](#📊-implementation-status)
+- [Critical Path](#🎯-critical-path-to-fully-autonomous-agent)
+- [Testing](#🧪-testing)
+- [Environment Variables](#🔐-environment-variables)
+- [Component & API Quick Reference](#🎨-component--api-quick-reference)
+- [Known Issues & Limitations](#⚠️-known-issues--limitations)
+- [When You're Stuck](#📞-when-youre-stuck)
+
 Spec-Drivr is an **Autonomous Development Platform** that uses PostgreSQL as a state machine to enable AI agents (like Claude) to execute complex software engineering tasks autonomously while maintaining persistent memory across sessions.
 
 **Key Innovation:** Instead of relying on chat history, the system uses a database as the "source of truth." The AI queries its current state rather than remembering it from previous conversations.
@@ -675,7 +689,21 @@ Final result: Feature complete, fully tested, fully documented
 
 ---
 
-## 🧪 Testing & Validation
+## 🧪 Testing
+
+**See `testing/README.md` for comprehensive testing guide (APIs, UI flows, infrastructure, quick start, and systematic workflow).**
+
+### Quick Start
+```bash
+./tests/quickstart.sh  # One-time setup
+npm run dev            # Terminal 1
+npm run test:e2e       # Terminal 2
+```
+
+### Testing Files
+- `testing/README.md` - Full testing guide with APIs, UI flows, and systematic approach
+- `TESTING_SUMMARY.md` - Testing infrastructure overview
+- `tests/` - Test code
 
 ### Manual Testing Checklist
 - [x] Database connection works: `npm run db:studio`
