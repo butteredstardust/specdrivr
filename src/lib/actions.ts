@@ -4,9 +4,10 @@ import { db } from '@/db';
 import { projects, specifications, plans, tasks, testResults, agentLogs, gitCommits } from '@/db/schema';
 import { revalidatePath } from 'next/cache';
 import { eq, desc, inArray } from 'drizzle-orm';
+import { getSessionUser } from '@/lib/auth-utils';
 
 /**
- * Create a new project
+ * Create a new project (authenticated)
  */
 export async function createProject(projectData: {
   name: string;
@@ -15,6 +16,12 @@ export async function createProject(projectData: {
   basePath?: string;
 }) {
   try {
+    // Verify authentication
+    const user = await getSessionUser();
+    if (!user) {
+      return { success: false, error: 'Authentication required' };
+    }
+
     const [newProject] = await db
       .insert(projects)
       .values({
@@ -22,6 +29,7 @@ export async function createProject(projectData: {
         constitution: projectData.constitution || '',
         techStack: projectData.techStack || {},
         basePath: projectData.basePath || '',
+        createdByUserId: user.id,
       })
       .returning();
 
@@ -51,10 +59,16 @@ export async function getProjects() {
 }
 
 /**
- * Update task status
+ * Update task status (authenticated)
  */
 export async function updateTaskStatus(taskId: number, status: string) {
   try {
+    // Verify authentication
+    const user = await getSessionUser();
+    if (!user) {
+      return { success: false, error: 'Authentication required' };
+    }
+
     const [updatedTask] = await db
       .update(tasks)
       .set({
@@ -167,6 +181,12 @@ export async function updateSpecificationDev(
   content: string
 ) {
   try {
+    // Verify authentication
+    const user = await getSessionUser();
+    if (!user) {
+      return { success: false, error: 'Authentication required' };
+    }
+
     if (!content.trim()) {
       throw new Error('Content cannot be empty');
     }
@@ -223,6 +243,12 @@ export async function updateConstitutionDev(
   constitution: string
 ) {
   try {
+    // Verify authentication
+    const user = await getSessionUser();
+    if (!user) {
+      return { success: false, error: 'Authentication required' };
+    }
+
     // Update the project constitution
     await db
       .update(projects)
@@ -250,6 +276,12 @@ export async function updateTechStackDev(
   techStack: Record<string, unknown>
 ) {
   try {
+    // Verify authentication
+    const user = await getSessionUser();
+    if (!user) {
+      return { success: false, error: 'Authentication required' };
+    }
+
     // Update the project tech stack
     await db
       .update(projects)
@@ -281,6 +313,12 @@ export async function updateGitConfigDev(
   }
 ) {
   try {
+    // Verify authentication
+    const user = await getSessionUser();
+    if (!user) {
+      return { success: false, error: 'Authentication required' };
+    }
+
     await db
       .update(projects)
       .set({
@@ -309,6 +347,12 @@ export async function createPlanDev(planData: {
   status?: 'draft' | 'active' | 'completed' | 'archived';
 }) {
   try {
+    // Verify authentication
+    const user = await getSessionUser();
+    if (!user) {
+      return { success: false, error: 'Authentication required' };
+    }
+
     if (!planData.specId) {
       throw new Error('specId is required');
     }
@@ -345,6 +389,12 @@ export async function updatePlanDev(
   status?: 'draft' | 'active' | 'completed' | 'archived'
 ) {
   try {
+    // Verify authentication
+    const user = await getSessionUser();
+    if (!user) {
+      return { success: false, error: 'Authentication required' };
+    }
+
     const [updatedPlan] = await db
       .update(plans)
       .set({
@@ -377,6 +427,12 @@ export async function logTestResultDev(testData: {
   logs?: string;
 }) {
   try {
+    // Verify authentication
+    const user = await getSessionUser();
+    if (!user) {
+      return { success: false, error: 'Authentication required' };
+    }
+
     const { logTestResult } = await import('@/lib/agent-memory');
     const resultId = await logTestResult(
       testData.taskId,
@@ -438,6 +494,12 @@ export async function addAgentLogDev(logData: {
 
 }) {
   try {
+    // Verify authentication
+    const user = await getSessionUser();
+    if (!user) {
+      return { success: false, error: 'Authentication required' };
+    }
+
     const { addAgentLog } = await import('@/lib/agent-memory');
     const logId = await addAgentLog(
       logData.taskId,
