@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { updateConstitutionDev } from '@/lib/actions';
 import { Button } from '@/components/ui/button';
 import { Save, Edit2 } from 'lucide-react';
+import DOMPurify from 'isomorphic-dompurify';
+
 
 function renderMarkdown(text: string) {
   let inList = false;
@@ -130,7 +132,7 @@ export function InlineConstitutionEditor({
       ) : content.trim() ? (
         <div
           className="text-[14px] text-[var(--color-text-primary)] leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(renderMarkdown(content)) }}
         />
       ) : (
         <div className="text-[14px] text-[var(--color-text-primary)] leading-relaxed">
