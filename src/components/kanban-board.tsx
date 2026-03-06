@@ -128,7 +128,7 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
             <div
               key={column.id}
               id={column.id}
-              className="flex flex-col w-[272px] shrink-0 bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] p-[var(--sp-3)]"
+              className="flex flex-col w-[272px] shrink-0 bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] p-[var(--sp-3)]"
             >
               <div className="flex items-center justify-between mb-[var(--sp-4)] px-[var(--sp-1)]">
                 <div className="flex items-center gap-[var(--sp-2)]">

@@ -51,7 +51,7 @@ function SpecTabContent({ specification, allSpecs }: { specification: Specificat
   if (!specification) {
     return (
       <div className="text-center py-12">
-        <p className="text-[13px] text-text-tertiary ">No specification yet</p>
+        <p className="text-[var(--font-size-sm)] text-[var(--color-text-tertiary)]">No specification yet</p>
       </div>
     );
   }
@@ -67,7 +67,7 @@ function PlanTabContent({ specification, plans }: { specification: Specification
   if (!specification || plans.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-[13px] text-text-tertiary ">No plans yet</p>
+        <p className="text-[var(--font-size-sm)] text-[var(--color-text-tertiary)]">No plans yet</p>
       </div>
     );
   }
@@ -194,21 +194,21 @@ export function ProjectDetailClient({
         <h1 className="text-[20px] font-semibold text-[var(--color-text-primary)]">{project.name}</h1>
       </div>
 
-      <div className="flex-1 bg-bg-primary">
+      <div className="flex-1 bg-[var(--color-bg-page)]">
         {/* Tabs */}
-        <div className="border-b border-border-default bg-bg-elevated sticky top-[-24px] z-10 mx-[-24px] px-[24px]">
-          <nav className="flex space-x-0 linear-scrollbar overflow-x-auto">
+        <div className="border-b border-[var(--color-border-default)] bg-[var(--color-bg-surface)] sticky top-[-24px] z-10 mx-[-24px] px-[var(--sp-6)]">
+          <nav className="flex gap-0 overflow-x-auto">
             {tabs.map((tab) => {
               // Route-based tabs (separate pages) must use <a>, not button
               const isRouteBased = tab.href && !tab.href.includes('?tab=') && tab.href !== `/projects/${projectId}`;
               const isActive = activeTabId === tab.id;
-              const sharedClass = `relative flex items-center gap-2 px-4 py-3 text-[13px] font-medium transition-colors whitespace-nowrap ${isActive
-                ? 'text-accent border-b-2 border-accent'
-                : 'text-text-secondary hover:text-text-primary border-b-2 border-transparent'
+              const sharedClass = `relative flex items-center gap-[var(--sp-2)] h-[40px] px-[var(--sp-3)] text-[var(--font-size-sm)] font-medium transition-colors whitespace-nowrap mb-[-1px] ${isActive
+                ? 'text-[var(--color-brand-bold)] border-b-2 border-[var(--color-brand-bold)]'
+                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] border-b-2 border-transparent'
                 }`;
               const badge = tab.badge && (
                 <span
-                  className={`ios-badge px-2 py-0.5 rounded-full text-[11px] ${isActive ? 'bg-accent text-white' : 'bg-status-idle-5 text-text-secondary'
+                  className={`min-w-[16px] h-[16px] px-[var(--sp-1)] rounded-full text-[10px] flex items-center justify-center font-bold ${isActive ? 'bg-[var(--color-brand-bold)] text-white' : 'bg-[var(--color-bg-sunken)] text-[var(--color-text-secondary)]'
                     }`}
                 >
                   {typeof tab.badge === 'number' && tab.badge > 99 ? '99+' : tab.badge}

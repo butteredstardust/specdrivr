@@ -198,7 +198,7 @@ export function ConfirmDialog({
         ) : null
       }
     >
-      <p className="text-[13px] text-text-secondary">{message}</p>
+      <p className="text-[13px] text-[var(--color-text-secondary)]">{message}</p>
     </Dialog>
   );
 }

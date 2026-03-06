@@ -1,6 +1,7 @@
 'use client';
 
 import { useTheme } from '@/components/theme-provider';
+import { Sun, Moon } from 'lucide-react';
 
 export function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
@@ -9,21 +10,24 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/50 focus:ring-offset-2"
+      className="relative inline-flex items-center h-[22px] w-[40px] rounded-[var(--radius-full)] transition-colors duration-[var(--transition-base)]"
       style={{
-        backgroundColor: isDark ? 'var(--status-success-active)' : 'var(--ios-separator)',
+        backgroundColor: isDark ? 'var(--color-brand-bold)' : 'var(--color-border-default)',
       }}
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
     >
       <span
-        className="inline-block h-6 w-6 transform rounded-ios-md bg-bg-elevated shadow-ios-elevated transition-transform duration-200"
+        className="inline-flex items-center justify-center h-[18px] w-[18px] rounded-full bg-white shadow-[var(--shadow-card)]"
         style={{
-          transform: isDark ? 'translateX(6px)' : 'translateX(-6px)',
+          transform: isDark ? 'translateX(20px)' : 'translateX(2px)',
+          transition: 'transform 150ms ease',
         }}
       >
-        <span className="flex h-full w-full items-center justify-center text-[14px] font-semibold">
-          {isDark ? '🌙' : '☀️'}
-        </span>
+        {isDark ? (
+          <Moon size={11} className="text-[var(--color-brand-bold)]" />
+        ) : (
+          <Sun size={11} className="text-[var(--color-text-tertiary)]" />
+        )}
       </span>
     </button>
   );

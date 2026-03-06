@@ -73,7 +73,7 @@ export function AppShell({
         {/* Content Area */}
         <main className={`flex-1 min-h-[calc(100vh-56px)] bg-[var(--color-bg-page)] ${showSidebar ? 'ml-[240px]' : ''}`}>
           {isOffline && (
-            <div className="bg-amber-500/20 border-b border-amber-500/30 py-2 px-4 text-center text-amber-800 text-[13px] font-medium">
+            <div className="bg-[var(--status-paused-bg)] border-b border-[var(--color-border-default)] py-[var(--sp-2)] px-[var(--sp-4)] text-center text-[var(--status-paused-text)] text-[13px] font-medium">
               You&apos;re offline — changes won&apos;t save until connection is restored
             </div>
           )}

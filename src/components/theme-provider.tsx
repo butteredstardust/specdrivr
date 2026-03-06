@@ -10,12 +10,11 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<string>('dark');
+  const [theme, setTheme] = useState<string>('light');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Load theme from localStorage after component mounts (client-side only)
-    const savedTheme = localStorage.getItem('theme') || 'dark';
+    const savedTheme = localStorage.getItem('theme') || 'light';
     setTheme(savedTheme);
     setMounted(true);
   }, []);
@@ -23,18 +22,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!mounted) return;
 
-    // Apply theme to document element
     const root = document.documentElement;
-    console.log('Setting theme to:', theme, 'dark class present:', root.classList.contains('dark'));
-
     if (theme === 'dark') {
-      root.classList.add('dark');
-      console.log('Added dark class, now contains:', root.classList.contains('dark'));
+      root.setAttribute('data-theme', 'dark');
     } else {
-      root.classList.remove('dark');
-      console.log('Removed dark class, now contains:', root.classList.contains('dark'));
+      root.removeAttribute('data-theme');
     }
-    // Persist to localStorage
     localStorage.setItem('theme', theme);
   }, [theme, mounted]);
 

@@ -118,87 +118,69 @@ export default async function SettingsPage({ }: SettingsPageProps) {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-[20px] font-semibold text-[var(--color-text-primary)]">Settings</h1>
-        <p className="text-[13px] text-text-secondary">
+      <div className="mb-[var(--sp-8)]">
+        <h1 className="text-[var(--font-size-lg)] font-semibold text-[var(--color-text-primary)]">Settings</h1>
+        <p className="text-[var(--font-size-sm)] text-[var(--color-text-secondary)]">
           Manage your application configuration
         </p>
       </div>
 
-      {settingsGroups.map((group, groupIndex) => (
-        <div key={group.title} className="mb-6">
-          <h2 className="text-[11px] text-text-tertiary text-text-tertiary mb-2 px-4 uppercase tracking-wide ">
+      {settingsGroups.map((group) => (
+        <div key={group.title} className="mb-[var(--sp-6)]">
+          <h2 className="text-[var(--font-size-xs)] text-[var(--color-text-tertiary)] mb-[var(--sp-2)] px-[var(--sp-4)] uppercase tracking-wider font-semibold">
             {group.title}
           </h2>
 
-          <div className="bg-bg-elevated border border-border-default rounded-[8px] shadow-sm ios overflow-hidden">
+          <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] overflow-hidden">
             {group.items.map((item, itemIndex) => (
               <div
                 key={item.label}
                 className={`
-                  flex items-center px-4 py-[13px] 
+                  flex items-center px-[var(--sp-4)] py-[var(--sp-3)]
                   ${itemIndex < group.items.length - 1
-                    ? 'border-b border-opacity-12 border-ios'
+                    ? 'border-b border-[var(--color-border-default)]'
                     : ''
                   }
-                  ${item.label === 'Appearance' ? 'cursor-pointer hover:bg-opacity-50 hover:bg-blue-500/10' : ''}
+                  ${item.label === 'Appearance' ? 'cursor-pointer hover:bg-[var(--color-bg-hovered)]' : ''}
                 `}
               >
-                <div className="flex-shrink-0 w-8 h-8 rounded-[4px] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] flex items-center justify-center text-[var(--color-text-tertiary)]" >
+                <div className="flex-shrink-0 w-[32px] h-[32px] rounded-[var(--radius-sm)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] flex items-center justify-center text-[var(--color-text-tertiary)]" >
                   {item.icon}
                 </div>
 
-                <div className="flex-1 min-w-0 ml-3">
+                <div className="flex-1 min-w-0 ml-[var(--sp-3)]">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-[13px] text-ios-primary font-medium">
+                    <h3 className="text-[var(--font-size-sm)] text-[var(--color-text-primary)] font-medium">
                       {item.label}
                     </h3>
 
                     {item.label === 'Appearance' ? (
-                      <div className="ml-2">
+                      <div className="ml-[var(--sp-2)]">
                         <ThemeToggle />
                       </div>
                     ) : (
-                      <span className="text-[13px] text-text-tertiary ml-2">
+                      <span className="text-[var(--font-size-sm)] text-[var(--color-text-tertiary)] ml-[var(--sp-2)]">
                         {item.value}
                       </span>
                     )}
                   </div>
                   {item.description && (
-                    <p className="text-[12px] text-text-tertiary mt-0.5">
+                    <p className="text-[var(--font-size-sm)] text-[var(--color-text-tertiary)] mt-[2px]">
                       {item.description}
                     </p>
                   )}
                 </div>
-
-                {item.label !== 'Appearance' && (
-                  <div className="ml-2">
-                    <svg
-                      className="w-5 h-5 text-text-tertiary"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
-                  </div>
-                )}
               </div>
             ))}
           </div>
         </div>
       ))}
 
-      <div className="mt-8 text-center px-6">
-        <p className="text-[11px] text-text-tertiary">
-          Spec-Drivr v{appVersion} • Built with Next.js
+      <div className="mt-[var(--sp-8)] text-center px-[var(--sp-6)]">
+        <p className="text-[var(--font-size-xs)] text-[var(--color-text-tertiary)]">
+          Spec-Drivr v{appVersion} &bull; Built with Next.js
         </p>
-        <p className="text-[11px] text-text-tertiary mt-1">
+        <p className="text-[var(--font-size-xs)] text-[var(--color-text-tertiary)] mt-[var(--sp-1)]">
           Configuration loaded from .env.local
         </p>
       </div>

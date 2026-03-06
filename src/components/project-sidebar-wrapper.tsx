@@ -14,16 +14,10 @@ interface ProjectSidebarWrapperProps {
 export function ProjectSidebarWrapper({ projects, currentProjectId }: ProjectSidebarWrapperProps) {
   const router = useRouter();
 
-  const handleProjectSelect = (project: ProjectSelect) => {
-    // Navigate immediately - layout is fixed so we don't need to close anything
-    // Link itself handles the navigation, this is just a callback if needed
-  };
-
   return (
     <ProjectSidebar
       projects={projects}
       currentProjectId={currentProjectId}
-      onProjectSelect={handleProjectSelect}
     />
   );
 }

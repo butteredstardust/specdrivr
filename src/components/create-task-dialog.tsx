@@ -45,20 +45,9 @@ export const parseQuickDescription = (text: string) => {
   };
 };
 
-const iosInputStyle = {
-  width: '100%',
-  padding: '8px 12px',
-  backgroundColor: 'var(--bg-bg-primary)',
-  color: 'var(--text-text-primary)',
-  borderColor: 'var(--ios-separator)',
-  borderRadius: '8px',
-  fontSize: '17px',
-  outline: 'none',
-  transition: 'box-shadow 0.2s',
-};
-const iosInputFocusStyle = {
-  boxShadow: '0 0 0 2px var(--accent)',
-};
+const inputClass = "w-full h-[40px] px-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[var(--font-size-base)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-selected)] transition-all";
+const textareaClass = "w-full p-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[var(--font-size-base)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-selected)] transition-all resize-none";
+const labelClass = "block text-[var(--font-size-xs)] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-[var(--sp-2)]";
 
 export function CreateTaskDialog({
   projectId,
@@ -187,7 +176,7 @@ export function CreateTaskDialog({
   if (!isOpen) {
     return (
       <button
-        className="text-text-tertiary hover:text-ios-primary font-medium transition-colors  text-2xl"
+        className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] font-medium transition-colors text-2xl"
         onClick={() => {
           if (controlledIsOpen === undefined) {
             setIsOpenInternal(true);
@@ -201,58 +190,56 @@ export function CreateTaskDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center ios-font">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+        className="fixed inset-0 bg-black/50"
         onClick={handleCancel}
       />
 
-      <div className="bg-bg-elevated border border-border-default rounded-[8px] shadow-xl w-full max-w-lg mx-4 overflow-hidden ios relative z-10">
-        <div className="p-6">
-          <h2 className="text-[20px] font-semibold text-ios-primary mb-6 ">
+      <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-overlay)] w-full max-w-lg mx-[var(--sp-4)] overflow-hidden relative z-10">
+        <div className="p-[var(--sp-6)]">
+          <h2 className="text-[var(--font-size-lg)] font-semibold text-[var(--color-text-primary)] mb-[var(--sp-6)]">
             Create New Task
           </h2>
 
           {/* Quick Mode Toggle */}
-          <div className="mb-6 flex items-center justify-between bg-bg-elevated border border-border-default rounded-[8px] p-3 border-border-default">
+          <div className="mb-[var(--sp-6)] flex items-center justify-between bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] p-[var(--sp-3)]">
             <div>
-              <span className="text-[13px] text-ios-primary font-medium">Quick Mode</span>
-              <p className="text-[11px] text-text-secondary">
+              <span className="text-[var(--font-size-sm)] text-[var(--color-text-primary)] font-medium">Quick Mode</span>
+              <p className="text-[var(--font-size-xs)] text-[var(--color-text-secondary)]">
                 Auto-parse priority and files from description
               </p>
             </div>
             <button
               type="button"
               onClick={() => handleQuickModeToggle(!isQuickMode)}
-              className={`w-12 h-7 rounded-ios-xl p-1 transition-colors ${isQuickMode ? 'bg-accent' : 'bg-status-idle-5'
+              className={`w-[40px] h-[22px] rounded-full p-[2px] transition-colors ${isQuickMode ? 'bg-[var(--color-brand-bold)]' : 'bg-[var(--color-border-default)]'
                 }`}
               aria-pressed={isQuickMode}
             >
               <span
-                className={`block w-5 h-5 rounded-full transition-transform ${isQuickMode ? 'translate-x-5 bg-bg-elevated' : 'translate-x-0 bg-bg-elevated'
+                className={`block w-[18px] h-[18px] rounded-full bg-white shadow-sm transition-transform ${isQuickMode ? 'translate-x-[18px]' : 'translate-x-0'
                   }`}
               />
             </button>
           </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-opacity-10 border rounded-[8px]" style={{ backgroundColor: 'var(--status-error)', borderColor: 'var(--ios-separator)' }}>
-              <p className="text-[11px] text-text-tertiary text-status-error ">{error}</p>
+            <div className="mb-[var(--sp-4)] p-[var(--sp-3)] bg-[var(--status-blocked-bg)] border border-[var(--status-blocked-text)] rounded-[var(--radius-sm)]">
+              <p className="text-[var(--font-size-xs)] text-[var(--status-blocked-text)]">{error}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4 ">
+          <form onSubmit={handleSubmit} className="space-y-[var(--sp-4)]">
             {!isQuickMode && (
               <div>
-                <label htmlFor="planId" className="block text-[12px] text-ios-primary mb-2">
-                  Plan
-                </label>
+                <label htmlFor="planId" className={labelClass}>Plan</label>
                 <select
                   id="planId"
                   value={formData.planId}
                   onChange={(e) => setFormData({ ...formData, planId: parseInt(e.target.value, 10) })}
                   required={!isQuickMode}
-                  style={iosInputStyle}
+                  className={inputClass}
                 >
                   {plans.map((plan) => (
                     <option key={plan.id} value={plan.id}>Plan #{plan.id}</option>
@@ -262,9 +249,7 @@ export function CreateTaskDialog({
             )}
 
             <div>
-              <label htmlFor="description" className="block text-[12px] text-ios-primary mb-2">
-                Description
-              </label>
+              <label htmlFor="description" className={labelClass}>Description</label>
               <textarea
                 id="description"
                 value={formData.description}
@@ -276,37 +261,33 @@ export function CreateTaskDialog({
                 }
                 rows={3}
                 required
-                style={{ ...iosInputStyle, resize: 'none' }}
+                className={textareaClass}
               />
               {isQuickMode && (
-                <p className="mt-1 ios-caption text-text-secondary">
-                  Tips: Use [P1-P10] for priority, quote files like "src/api/auth.ts"
+                <p className="mt-[var(--sp-1)] text-[var(--font-size-xs)] text-[var(--color-text-secondary)]">
+                  Tips: Use [P1-P10] for priority, quote files like &quot;src/api/auth.ts&quot;
                 </p>
               )}
             </div>
 
             {!isQuickMode && (
               <div>
-                <label htmlFor="filesInvolved" className="block text-[12px] text-ios-primary mb-2">
-                  Files
-                </label>
+                <label htmlFor="filesInvolved" className={labelClass}>Files</label>
                 <input
                   type="text"
                   id="filesInvolved"
                   value={formData.filesInvolved}
                   onChange={(e) => setFormData({ ...formData, filesInvolved: e.target.value })}
                   placeholder="src/api/auth.ts, tests/auth.test.ts"
-                  style={iosInputStyle}
+                  className={inputClass}
                 />
-                <p className="mt-1 ios-caption text-text-tertiary">Separate files with commas</p>
+                <p className="mt-[var(--sp-1)] text-[var(--font-size-xs)] text-[var(--color-text-tertiary)]">Separate files with commas</p>
               </div>
             )}
 
             {!isQuickMode && (
               <div>
-                <label htmlFor="priority" className="block text-[12px] text-ios-primary mb-2">
-                  Priority (1-10)
-                </label>
+                <label htmlFor="priority" className={labelClass}>Priority (1-10)</label>
                 <input
                   type="number"
                   id="priority"
@@ -314,20 +295,18 @@ export function CreateTaskDialog({
                   max="10"
                   value={formData.priority}
                   onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-                  style={iosInputStyle}
+                  className={inputClass}
                 />
               </div>
             )}
 
             <div>
-              <label htmlFor="dependencyTaskId" className="block text-[12px] text-ios-primary mb-2">
-                Depends on Task
-              </label>
+              <label htmlFor="dependencyTaskId" className={labelClass}>Depends on Task</label>
               <select
                 id="dependencyTaskId"
                 value={formData.dependencyTaskId}
                 onChange={(e) => setFormData({ ...formData, dependencyTaskId: e.target.value })}
-                style={iosInputStyle}
+                className={inputClass}
               >
                 <option value="">No dependencies</option>
                 {existingTasks.map((task) => (
@@ -339,20 +318,19 @@ export function CreateTaskDialog({
               </select>
             </div>
 
-            <div className="flex justify-end gap-3 pt-4">
+            <div className="flex justify-end gap-[var(--sp-3)] pt-[var(--sp-4)]">
               <button
                 type="button"
                 onClick={handleCancel}
                 disabled={isSubmitting}
-                className="px-4 py-2 text-[13px] text-accent bg-ios-secondary border border-ios rounded-[8px]  disabled:opacity-50"
+                className="px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-[var(--color-brand-bold)] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] hover:bg-[var(--color-bg-hovered)] disabled:opacity-50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting || !formData.description.trim()}
-                className="px-4 py-2 text-[13px] text-white rounded-[8px]  transition-colors disabled:opacity-50"
-                style={{ backgroundColor: 'var(--accent)' }}
+                className="px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-white bg-[var(--color-brand-bold)] rounded-[var(--radius-sm)] hover:bg-[var(--color-brand-bold-hovered)] transition-colors disabled:opacity-50"
               >
                 {isSubmitting ? 'Creating...' : 'Create'}
               </button>
