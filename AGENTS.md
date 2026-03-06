@@ -1,6 +1,6 @@
-# Spec-Drivr: AI Agent Development Platform
+# Specdrivr: AI Agent Development Platform
 
-Spec-Drivr is an AI-native orchestration platform designed to operationalize the Spec-Driven Development (SDD) cycle. It transforms static technical specifications into executable agent workflows by using PostgreSQL not just as a database, but as a central state machine that governs the transition of features from "intent" to "verified code." The distinctive architecture relies on "persistent memory," where the entire project context—including specifications, architecture decisions, and task history—is stored in a structured relational format, allowing AI agents to maintain high-fidelity context across discontinuous execution sessions. Agents in this system are autonomous entities that fetch "missions" via a REST API, execute tasks against a codebase, and report results back to the state machine, enabling a closed-loop development cycle.
+specdrivr is an AI-native orchestration platform designed to operationalize the Spec-Driven Development (SDD) cycle. It transforms static technical specifications into executable agent workflows by using PostgreSQL not just as a database, but as a central state machine that governs the transition of features from "intent" to "verified code." The distinctive architecture relies on "persistent memory," where the entire project context—including specifications, architecture decisions, and task history—is stored in a structured relational format, allowing AI agents to maintain high-fidelity context across discontinuous execution sessions. Agents in this system are autonomous entities that fetch "missions" via a REST API, execute tasks against a codebase, and report results back to the state machine, enabling a closed-loop development cycle.
 
 ## Architecture
 
@@ -146,7 +146,7 @@ PostgreSQL serves as the source of truth for all agent states and project contex
 
 ## Agent System
 
-An **Agent** is an external worker that interacts with Spec-Drivr to fulfill specifications. Its behavior is dictated by the database state:
+An **Agent** is an external worker that interacts with specdrivr to fulfill specifications. Its behavior is dictated by the database state:
 1. **Lifecycle**: Started via `/api/projects/[id]/agent/start` (updates `agent_status` to `running`).
 2. **Context**: Agents read their "mission" (Spec + Plan + State) from `/api/agent/mission`.
 3. **Execution**: Agents iterate through `todo` tasks. Completion requires a SQL update through the API which triggers a status change based on test results.

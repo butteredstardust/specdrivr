@@ -3,7 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from '@/components/theme-provider';
 
 export const metadata: Metadata = {
-  title: "Spec-Drivr",
+  title: "specdrivr",
   description: "AI Agent Development Platform",
   icons: {
     icon: "/brand/icon.svg",

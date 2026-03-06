@@ -1,8 +1,8 @@
-# Spec-Drivr Testing Guide
+# Specdrivr Testing Guide
 
 ## 📋 Overview
 
-Comprehensive testing infrastructure for Spec-Drivr using Playwright (E2E) and Jest (unit tests).
+Comprehensive testing infrastructure for specdrivr using Playwright (E2E) and Jest (unit tests).
 
 ## 🏗️ Testing Infrastructure
 

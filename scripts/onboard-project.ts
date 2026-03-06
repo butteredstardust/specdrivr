@@ -3,13 +3,13 @@ import { projects, specifications, plans, tasks, type TaskStatus } from '../src/
 import { eq } from 'drizzle-orm';
 
 async function onboardSpecDrivr() {
-  console.log('🚀 Onboarding Spec-Drivr into its own platform...\n');
+  console.log('🚀 Onboarding specdrivr into its own platform...\n');
 
   // Create Project
   console.log('1. Creating project...');
   const [project] = await db.insert(projects).values({
-    name: 'Spec-Drivr',
-    constitution: `# Spec-Drivr Project Constitution\n\n## Governing Principles\n- **Spec-First**: Prohibited from writing feature code without entries in specifications and plans\n- **Atomic Commits**: Each task must correspond to a single, testable change\n- **Verification Loop**: After every implementation step, execute tests and update test_results\n- **Lean Context**: Use SQL queries to retrieve only information required for task_id\n\n## Objective\nBuild an Autonomous Development Platform operationalizing the "Spec-Driven Development" cycle using PostgreSQL as a structured State Machine. Enable an AI agent (Claude) to execute complex engineering tasks while maintaining lean context window and persistent memory across sessions.\n\n## Key Pillars\n- **Relational Memory vs. Context Bloat**: Shift "source of truth" to Postgres tables\n- **Spec-Driven Rigor**: Enforce strict causality: Specification → Plan → Tasks → Implementation → Verification\n- **Agentic Feedback Loop**: Establish closed loop with test result logging to database\n- **Developer-in-the-Loop UI**: Human control via Kanban-style dashboard`,
+    name: 'specdrivr',
+    constitution: `# specdrivr Project Constitution\n\n## Governing Principles\n- **Spec-First**: Prohibited from writing feature code without entries in specifications and plans\n- **Atomic Commits**: Each task must correspond to a single, testable change\n- **Verification Loop**: After every implementation step, execute tests and update test_results\n- **Lean Context**: Use SQL queries to retrieve only information required for task_id\n\n## Objective\nBuild an Autonomous Development Platform operationalizing the "Spec-Driven Development" cycle using PostgreSQL as a structured State Machine. Enable an AI agent (Claude) to execute complex engineering tasks while maintaining lean context window and persistent memory across sessions.\n\n## Key Pillars\n- **Relational Memory vs. Context Bloat**: Shift "source of truth" to Postgres tables\n- **Spec-Driven Rigor**: Enforce strict causality: Specification → Plan → Tasks → Implementation → Verification\n- **Agentic Feedback Loop**: Establish closed loop with test result logging to database\n- **Developer-in-the-Loop UI**: Human control via Kanban-style dashboard`,
     techStack: {
       language: 'TypeScript',
       framework: 'Next.js 14',
@@ -27,7 +27,7 @@ async function onboardSpecDrivr() {
   console.log('2. Creating specification...');
   const [spec] = await db.insert(specifications).values({
     projectId: project.id,
-    content: `# Spec-Drivr Platform Specification\n\n## What is Spec-Drivr?\nAn Autonomous Development Platform that operationalizes the "Spec-Driven Development" cycle using PostgreSQL as a structured State Machine to enable AI agents to execute complex engineering tasks while maintaining persistent memory across sessions.\n\n## Core Features\n\n### 1. PostgreSQL as State Machine\n- Store projects, specifications, plans, tasks\n- Persist test results and agent logs\n- Enable multi-session resumes without context loss\n\n### 2. Agentic API Layer\n- Context Hydration Protocol (GET /api/agent/mission)\n- State Persistence endpoints for plans, tasks, logs\n- X-Agent-Token authentication\n\n### 3. Kanban Dashboard UI\n- Real-time task tracking\n- Drag-and-drop status updates\n- Live agent logs viewer\n- Test results panel\n\n### 4. Spec-Driven Workflow\n**Required sequence:**\n1. Create project and constitution\n2. Create functional specification (What/Why)\n3. Create technical plan (How - folders, APIs, schema)\n4. Decompose into atomic tasks\n5. Implement → Test → Verify loop\n6. Log all activity to agent_logs\n\n### 5. Type Safety & Validation\n- TypeScript strict mode\n- Drizzle ORM for type-safe DB access\n- Zod schemas for runtime validation\n- Standardized error handling\n\n## Technology Stack\n- **Frontend**: Next.js 14 (App Router), TypeScript, Tailwind CSS, Shadcn/UI\n- **Backend**: API Routes, Drizzle ORM, Zod validation\n- **Database**: PostgreSQL 16+ with Drizzle Kit\n- **Development**: Git, Docker, Drizzle Studio\n\n## Success Metrics\n- Agent can query mission context from empty DB\n- Tasks can be created and updated via API\n- Dashboard renders real-time data\n- Full workflow cycle tested end-to-end`,
+    content: `# specdrivr Platform Specification\n\n## What is specdrivr?\nAn Autonomous Development Platform that operationalizes the "Spec-Driven Development" cycle using PostgreSQL as a structured State Machine to enable AI agents to execute complex engineering tasks while maintaining persistent memory across sessions.\n\n## Core Features\n\n### 1. PostgreSQL as State Machine\n- Store projects, specifications, plans, tasks\n- Persist test results and agent logs\n- Enable multi-session resumes without context loss\n\n### 2. Agentic API Layer\n- Context Hydration Protocol (GET /api/agent/mission)\n- State Persistence endpoints for plans, tasks, logs\n- X-Agent-Token authentication\n\n### 3. Kanban Dashboard UI\n- Real-time task tracking\n- Drag-and-drop status updates\n- Live agent logs viewer\n- Test results panel\n\n### 4. Spec-Driven Workflow\n**Required sequence:**\n1. Create project and constitution\n2. Create functional specification (What/Why)\n3. Create technical plan (How - folders, APIs, schema)\n4. Decompose into atomic tasks\n5. Implement → Test → Verify loop\n6. Log all activity to agent_logs\n\n### 5. Type Safety & Validation\n- TypeScript strict mode\n- Drizzle ORM for type-safe DB access\n- Zod schemas for runtime validation\n- Standardized error handling\n\n## Technology Stack\n- **Frontend**: Next.js 14 (App Router), TypeScript, Tailwind CSS, Shadcn/UI\n- **Backend**: API Routes, Drizzle ORM, Zod validation\n- **Database**: PostgreSQL 16+ with Drizzle Kit\n- **Development**: Git, Docker, Drizzle Studio\n\n## Success Metrics\n- Agent can query mission context from empty DB\n- Tasks can be created and updated via API\n- Dashboard renders real-time data\n- Full workflow cycle tested end-to-end`,
     version: '1.0',
     isActive: true
   }).returning();
@@ -308,7 +308,7 @@ async function onboardSpecDrivr() {
 
 onboardSpecDrivr()
   .then(() => {
-    console.log('\n🎉 Spec-Drivr has been successfully onboarded into itself!');
+    console.log('\n🎉 specdrivr has been successfully onboarded into itself!');
     console.log('\nNext steps:');
     console.log('1. Run: npm run db:studio');
     console.log('2. Test mission endpoint');
