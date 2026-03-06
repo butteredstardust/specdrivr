@@ -63,19 +63,19 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
         {...attributes}
         {...listeners}
         className={cn(
-          "bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] shadow-[var(--shadow-card)] p-[var(--sp-3)] hover:border-l-[2px] hover:border-l-[#6366F1] hover:pl-[10px] cursor-pointer hover:bg-[var(--color-bg-hovered)] transition-all group",
+          "bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-lg)] p-[10px] px-[12px] mb-[6px] shadow-[var(--shadow-card)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.10)] hover:border-l-[2px] hover:border-l-[var(--brand-primary)] hover:pl-[10px] cursor-pointer transition-all group",
           isDragging && "z-50 shadow-2xl scale-[1.02]"
         )}
         onClick={() => onClick?.(task)}
       >
-        <p className="text-[14px] text-[var(--color-text-primary)] leading-tight mb-[var(--sp-3)] line-clamp-2 group-hover:text-[var(--color-brand-bold)] transition-colors">
+        <p className="text-[13px] font-[500] text-[var(--text-primary)] leading-tight mb-[var(--sp-3)] line-clamp-3 transition-colors">
           {task.description || 'Untitled Task'}
         </p>
 
         <div className="flex items-center justify-between mt-auto">
           <div className="flex items-center gap-[var(--sp-2)]">
             {getPriorityIcon(priority)}
-            <span className="text-[11px] font-bold text-[var(--color-text-tertiary)] uppercase leading-none">
+            <span className="text-[11px] font-[400] text-[var(--text-tertiary)] font-mono leading-none">
               SD-{task.id}
             </span>
           </div>

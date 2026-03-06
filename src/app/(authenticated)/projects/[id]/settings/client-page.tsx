@@ -223,7 +223,7 @@ export function ProjectSettingsClient({
 
               <div className="p-[var(--sp-6)]">
                 <div className="flex items-center gap-[var(--sp-2)] mb-[var(--sp-4)]">
-                  <Database size={14} color="#94A3B8" />
+                  <Database size={12} className="!text-[#94A3B8]" />
                   <h3 className="text-[#94A3B8] text-[12px] font-bold">Tech Stack</h3>
                 </div>
                 <InlineTechStackEditor
@@ -237,7 +237,7 @@ export function ProjectSettingsClient({
           {/* Git Integration */}
           <section className="space-y-[var(--sp-6)]">
             <div className="flex items-center h-[28px] pb-[8px] mt-[24px] mb-[var(--sp-4)] gap-[var(--sp-2)] border-b border-[var(--color-border-default)]">
-              <GitBranch size={14} color="#94A3B8" />
+              <GitBranch size={12} className="!text-[#94A3B8]" />
               <h2 className="text-[#94A3B8] text-[11px] font-[600] uppercase tracking-[0.08em]">Git Integration</h2>
             </div>
 
@@ -305,7 +305,7 @@ export function ProjectSettingsClient({
           <section className="space-y-[var(--sp-6)]">
             <div className="flex items-center justify-between h-[28px] pb-[8px] mt-[24px] mb-[var(--sp-4)] border-b border-[var(--color-border-default)]">
               <div className="flex items-center gap-[var(--sp-2)]">
-                <Key size={14} className="text-[var(--color-text-secondary)]" />
+                <Key size={12} className="!text-[#94A3B8]" />
                 <h2 className="text-[11px] font-[600] text-[var(--color-text-tertiary)] uppercase tracking-[0.08em]">Access Controls</h2>
               </div>
               <Button variant="primary" size="small" onClick={() => setShowTokenDialog(true)} icon={<Plus size={16} />}>Generate Token</Button>

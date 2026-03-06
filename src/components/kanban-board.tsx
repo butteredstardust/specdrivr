@@ -130,12 +130,12 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
               key={column.id}
               id={column.id}
               data-testid={`column-${column.id}`}
-              className="flex flex-col w-[272px] shrink-0 bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] p-[var(--sp-3)]"
+              className="flex flex-col w-[272px] shrink-0 bg-[var(--bg-hovered)] border border-[var(--border-default)] rounded-[var(--radius-lg)] p-[10px] pb-2"
             >
               <div className="flex items-center justify-between mb-[var(--sp-4)] px-[var(--sp-1)]">
                 <div className="flex items-center gap-[var(--sp-2)]">
                   <span className={cn(
-                    "px-[6px] flex items-center h-[20px] rounded-[3px] text-[11px] font-bold uppercase tracking-[0.04em] whitespace-nowrap",
+                    "px-[6px] flex items-center h-[20px] rounded-[3px] text-[11px] font-bold uppercase tracking-[0.04em] whitespace-nowrap border-none",
                     taskStatusColors[column.id as keyof typeof taskStatusColors]?.bg || "bg-[var(--status-todo-bg)]",
                     taskStatusColors[column.id as keyof typeof taskStatusColors]?.text || "text-[var(--status-todo-text)]"
                   )}>

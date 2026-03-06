@@ -176,7 +176,7 @@ export function CreateTaskDialog({
   if (!isOpen) {
     return (
       <button
-        className="w-full flex items-center justify-start gap-2 px-[var(--sp-2)] py-[var(--sp-2)] rounded-[var(--radius-sm)] text-[14px] font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hovered)] hover:text-[#172B4D] transition-colors"
+        className="w-full h-[32px] flex items-center justify-start gap-2 px-[8px] rounded-[var(--radius-md)] text-[12px] text-[var(--text-tertiary)] bg-transparent border-none cursor-pointer hover:bg-[var(--border-default)] hover:text-[var(--text-secondary)] transition-colors"
         onClick={() => {
           if (controlledIsOpen === undefined) {
             setIsOpenInternal(true);

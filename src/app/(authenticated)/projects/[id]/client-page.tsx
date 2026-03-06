@@ -199,15 +199,15 @@ export function ProjectDetailClient({
   return (
     <div className="flex-1 flex flex-col min-w-0 bg-[var(--color-bg-page)]">
       {/* Page Header */}
-      <div className="px-[24px] pt-[24px] pb-0 bg-[#FFFFFF] border-b border-[#DFE1E6]">
+      <div className="px-[24px] pt-[24px] pb-0 bg-[var(--bg-surface)] border-b border-[var(--border-default)]">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-[8px] text-[13px] text-[#8590A2] mb-[4px]">
-          <Link href="/" className="text-[#8590A2] hover:text-[#172B4D] no-underline transition-colors">Projects</Link>
-          <span className="text-[#DFE1E6]">/</span>
+        <div className="flex items-center gap-[8px] text-[13px] text-[var(--text-tertiary)] mb-[4px]">
+          <Link href="/" className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] no-underline transition-colors">Projects</Link>
+          <span className="text-[var(--border-strong)]">/</span>
           <span>{project.name}</span>
         </div>
         {/* Title */}
-        <h1 className="text-[22px] font-bold text-[#172B4D] m-0 mb-[16px] leading-[1.2]">
+        <h1 className="text-[22px] font-bold text-[var(--text-primary)] m-0 mb-[16px] leading-[1.2]">
           {tabTitles[activeTabId] || 'Kanban Board'}
         </h1>
 
@@ -217,10 +217,7 @@ export function ProjectDetailClient({
             // Route-based tabs (separate pages) must use <a>, not button
             const isRouteBased = tab.href && !tab.href.includes('?tab=') && tab.href !== `/projects/${projectId}`;
             const isActive = activeTabId === tab.id;
-            const sharedClass = `relative flex items-center gap-[var(--sp-2)] h-[40px] px-[var(--sp-3)] text-[var(--font-size-sm)] font-medium transition-colors whitespace-nowrap mb-[-1px] ${isActive
-              ? 'text-[var(--color-brand-bold)] border-b-2 border-[var(--color-brand-bold)]'
-              : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] border-b-2 border-transparent'
-              }`;
+            const sharedClass = `relative flex items-center gap-[6px] h-[36px] px-[12px] text-[13px] font-medium transition-colors whitespace-nowrap mb-[-1px] ${isActive ? 'text-[var(--brand-primary)] border-b-2 border-[var(--brand-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-b-2 border-transparent'}`;
             const badge = tab.badge && (
               <span
                 className={`min-w-[16px] h-[16px] px-[var(--sp-1)] rounded-full text-[10px] flex items-center justify-center font-bold ${isActive ? 'bg-[var(--color-brand-bold)] text-white' : 'bg-[var(--color-bg-sunken)] text-[var(--color-text-secondary)]'

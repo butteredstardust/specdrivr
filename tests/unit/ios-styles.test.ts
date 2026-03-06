@@ -29,8 +29,8 @@ describe('ios-styles', () => {
 
     it('should have correct values for specific statuses', () => {
       expect(taskStatusColors.todo).toEqual({
-        bg: 'bg-[#F1F5F9]',
-        text: 'text-[#475569]'
+        bg: 'bg-[var(--status-todo-bg)]',
+        text: 'text-[var(--status-todo-text)]'
       });
 
       expect(taskStatusColors.in_progress).toEqual({

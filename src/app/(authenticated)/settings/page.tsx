@@ -127,38 +127,38 @@ export default async function SettingsPage({ }: SettingsPageProps) {
 
       {settingsGroups.map((group) => (
         <div key={group.title} style={{ marginBottom: '20px' }}>
-          <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', fontWeight: 700, color: '#44546F', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px', marginTop: '20px' }}>
-            <span style={{ width: '3px', height: '12px', background: '#6366F1', borderRadius: '2px' }} />
+          <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px', marginTop: '20px' }}>
+            <span style={{ width: '3px', height: '12px', background: 'var(--brand-primary)', borderRadius: '2px', flexShrink: 0 }} />
             {group.title}
           </h2>
 
-          <div style={{ background: '#FFFFFF', border: '1px solid #DFE1E6', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 2px rgba(9,30,66,0.10)' }}>
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: 'var(--shadow-card)', marginBottom: '8px' }}>
             {group.items.map((item, itemIndex) => (
               <div
                 key={item.label}
-                className={item.label === 'Appearance' ? 'cursor-pointer hover:bg-[#F8F9FF]' : ''}
+
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   minHeight: '52px',
                   padding: '0 16px',
                   gap: '12px',
-                  borderBottom: itemIndex < group.items.length - 1 ? '1px solid #F1F2F4' : 'none',
-                  background: item.label === 'Appearance' ? '' : '#FFFFFF'
+                  borderBottom: itemIndex < group.items.length - 1 ? '1px solid var(--bg-hovered)' : 'none',
+
                 }}
               >
-                <div className="flex-shrink-0 w-[32px] h-[32px] rounded-[var(--radius-sm)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] flex items-center justify-center text-[var(--color-text-tertiary)]" >
+                <div className="flex-shrink-0 w-[32px] h-[32px] rounded-[var(--radius-sm)] bg-[var(--bg-hovered)] flex items-center justify-center text-[var(--text-tertiary)]" >
                   {item.icon}
                 </div>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-[14px] text-[var(--color-text-primary)] font-medium">
+                      <h3 className="text-[14px] text-[var(--text-primary)] font-medium">
                         {item.label}
                       </h3>
                       {item.description && (
-                        <p className="text-[12px] text-[var(--color-text-tertiary)] mt-[2px]">
+                        <p className="text-[12px] text-[var(--text-tertiary)] mt-[2px]">
                           {item.description}
                         </p>
                       )}
@@ -168,7 +168,7 @@ export default async function SettingsPage({ }: SettingsPageProps) {
                         <ThemeToggle />
                       </div>
                     ) : (
-                      <span className="text-[13px] text-[var(--color-text-tertiary)] font-medium ml-[var(--sp-2)]">
+                      <span className="text-[13px] text-[var(--text-tertiary)] ml-[var(--sp-2)] font-mono text-right">
                         {item.value}
                       </span>
                     )}

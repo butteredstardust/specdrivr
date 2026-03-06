@@ -2,9 +2,7 @@ import { getProjects, getTasksDoneToday } from '@/lib/actions';
 import { DashboardSummaryCard } from '@/components/project-card';
 import { DashboardProjectList } from '@/components/dashboard-project-list';
 import { AppShell } from '@/components/app-shell';
-import { Layout, Radio, CheckSquare, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { CreateProjectDialog } from '@/components/create-project-dialog';
+import { Layout, Radio, CheckSquare } from 'lucide-react';
 
 export default async function Home() {
   const result = await getProjects();
@@ -27,12 +25,12 @@ export default async function Home() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-[12px] mb-[20px]">
+      <div className="grid grid-cols-3 gap-[16px] mb-[20px]">
         <DashboardSummaryCard
           value={totalProjects}
           label="Projects"
           icon={<Layout size={20} />}
-          accentColor="#2563EB"
+          accentColor="#4F46E5"
         />
         <DashboardSummaryCard
           value={agentsRunning}
