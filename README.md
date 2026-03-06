@@ -1,118 +1,129 @@
-# Specdrivr
+<div align="center">
+  <h1>Specdrivr</h1>
+  <p><strong>Transform Specifications into Code with Autonomous AI Agents.</strong></p>
+</div>
 
-**Transform Specifications into Code with Autonomous AI Agents.**
-
-specdrivr is an orchestration platform designed for "Spec-Driven Development." It allows developers to define features through markdown specifications, which are then autonomously planned, executed, and verified by AI agents. By utilizing PostgreSQL as a persistent state machine, specdrivr ensures that agents maintain full context and high-fidelity memory across long-running development sessions.
+---
 
 ## What is Specdrivr?
 
-In traditional development, AI context is often lost between prompts or sessions. **specdrivr** solves this by operationalizing the development cycle.
-- **Spec-Driven Development**: You write a "Spec," and the system handles the rest.
-- **Persistent State**: Unlike stateless chat interfaces, specdrivr stores every decision, task, and log in a relational database.
-- **Autonomous Agents**: Agents fetch their "mission" from the platform, work on the local codebase, and report results back to the UI.
-- **Session Continuity**: An agent can pick up exactly where it (or another agent) left off, with complete access to the project's history.
+In traditional AI coding, context is fragile. You write a prompt, the AI writes some code, you lose track, the AI hallucinates, everything breaks.
 
-## Features
+**Specdrivr fixes this.** It operationalizes the Spec-Driven Development (SDD) cycle. You write a Markdown specification. Specdrivr handles the rest.
 
-- **Project Dashboard**: Real-time monitoring of agent activity and task progress.
-- **Kanban Task Management**: Visualize the agent's work queue and dependency graph.
-- **Live Agent Logs**: Stream events directly from the agent's execution loop.
-- **Versioned Specifications**: Track how requirements evolve over time.
-- **Architecture Planning**: Agents generate structured plans before writing a single line of code.
-- **Integrated Verification**: Automatic status updates based on test results.
+We use PostgreSQL not just as a database, but as a rigid state machine and persistent memory bank. Every decision, architecture choice, and task is stored relationally. Agents fetch their "mission," execute tasks against your codebase, and report results back. If a session dies, the next agent picks up exactly where the last one left off—with full, high-fidelity context.
+
+**The result:** You focus on the "what" and "why." The agents handle the "how."
+
+---
+
+## Why Specdrivr?
+
+- **Zero Context Loss:** Persistent state means agents never forget the architecture decisions made 10 steps ago.
+- **Autonomous Execution:** Agents generate plans, slice them into atomic tasks, and execute them.
+- **Dependency Graphing:** Tasks are executed in the right order. Task B doesn't start until Task A is verified.
+- **Integrated Verification:** Agents write code, run tests, and report back. Success moves the state machine forward; failure blocks the task for review.
+
+---
 
 ## Tech Stack
 
-| Component     | Technology              | Why it was chosen                 |
-|---------------|-------------------------|-----------------------------------|
-| **Framework** | Next.js 14 (App Router) | For a fast, modern, and unified React experience. |
-| **Language**  | TypeScript              | To ensure reliability with strict type safety. |
-| **Database**  | PostgreSQL              | For robust ACID compliance and relational state storage. |
-| **ORM**       | Drizzle ORM             | Modern SQL toolkit that feels like writing raw SQL but with types. |
-| **Validation**| Zod                     | To guarantee data integrity at every API boundary. |
-| **Styling**   | Tailwind CSS            | To build a premium, Linear-inspired dark UI. |
+| Layer | Tech | Why |
+|-------|------|-----|
+| **Core** | Next.js 14 (App Router) | Fast, unified React experience |
+| **Language** | TypeScript (Strict) | If it compiles, it probably works |
+| **State** | PostgreSQL | Robust ACID compliance for the state machine |
+| **ORM** | Drizzle | Type-safe SQL that doesn't hide the database |
+| **Validation** | Zod | Impermeable boundary between the wild west and our DB |
+| **Styling** | Tailwind CSS | Premium, Linear-inspired dark UI |
 
-## Prerequisites
-
-- **Node.js**: 18.17+ (LTS recommended)
-- **PostgreSQL**: 14+
-- **npm**: 9.x+
+---
 
 ## Getting Started
 
-Follow these steps to get your local development environment running in under 5 minutes:
+Get your local environment running in under 5 minutes.
 
-1. **Clone the repository**:
+### Prerequisites
+
+- **Node.js**: 18.17+
+- **PostgreSQL**: 14+
+- **npm**: 9.x+
+
+### Setup
+
+1. **Clone & Install**
    ```bash
    git clone https://github.com/your-org/specdrivr.git
    cd specdrivr
-   ```
-
-2. **Install dependencies**:
-   ```bash
    npm install
    ```
 
-3. **Set up environment variables**:
-   Copy the example file and fill in your details (refer to `.env.example` for guidance).
+2. **Configure Environment**
    ```bash
    cp .env.example .env.local
    ```
+   *Edit `.env.local` to include your `DATABASE_URL`, `AUTH_SECRET`, and `AGENT_TOKEN`.*
 
-4. **Initialize the database**:
-   Ensure PostgreSQL is running and your `DATABASE_URL` is correct, then run:
+3. **Initialize & Seed**
+   We have a unified command to wipe, migrate, seed demo data, and start the dev server:
    ```bash
-   npm run db:push
-   npm run db:seed
+   npm run dev:seed
    ```
 
-5. **Start the development server**:
-   ```bash
-   npm run dev
-   ```
+4. **Verify**
+   Open [http://localhost:3000](http://localhost:3000).
+   *Demo Login: Username `Admin`, Password `demo`.*
 
-6. **Confirm it's working**:
-   Visit [http://localhost:3000](http://localhost:3000) to see the dashboard.
+---
 
-## Project Structure
+## Commands
 
-- `src/app`: UI pages and API endpoints. Look here for routing logic.
-- `src/components`: UI elements (Buttons, Cards, Panels).
-- `src/db`: Schema definitions and database configuration.
-- `src/lib`: The "brains" of the app (Agent memory, shared actions, validation logic).
-- `tests`: Our test suite for ensuring reliability.
+| Command | What it does |
+|---------|--------------|
+| `npm run dev:seed` | Wipes DB, seeds test data, starts dev server |
+| `npm run dev` | Starts Next.js dev server |
+| `npm run db:generate` | Generates Drizzle migrations |
+| `npm run db:migrate` | Applies migrations to the DB |
+| `npm run db:studio` | Opens visual DB explorer |
+| `npm run test` | Runs Vitest unit tests |
+| `npm run test:e2e` | Runs Playwright browser tests (requires port 3001) |
+| `npm run test:all` | Runs both test suites |
 
-## Development
+---
 
-Day-to-day commands you'll need:
+## Architecture: The Stateful Orchestrator
 
-- **Generate Migrations**: `npm run db:generate`
-- **Apply Migrations**: `npm run db:migrate`
-- **Database Studio**: `npm run db:studio` (Visual DB explorer)
-- **Run Tests**: `npm run test` (Unit) or `npm run test:e2e` (Browser)
+Specdrivr relies on a strict data flow:
+
+**UI -> API (Zod) -> PostgreSQL (Drizzle) -> AI Agent**
+
+1. **Specification:** You define the requirements.
+2. **Planning:** An agent reads the spec and generates an execution `plan` and architecture decisions.
+3. **Task Slicing:** The plan is broken into atomic `tasks` with explicit dependencies.
+4. **Execution:** An agent fetches a `todo` task, executes it, and runs verifications.
+5. **State Update:** Success transitions the task to `done`, unlocking dependents. Failure marks it `blocked`.
+
+*For detailed API references and database schemas, see [AGENTS.md](./AGENTS.md).*
+
+---
 
 ## Contributing
 
-We use a standard Git flow:
-1. Create a feature branch (`feat/your-feature`).
-2. Follow our coding conventions: kebab-case files, PascalCase components.
-3. Ensure all tests pass (`npm run test:all`).
-4. Open a PR for review.
+1. Branch off `main` (`feat/your-feature`).
+2. Follow conventions: kebab-case files, PascalCase components, strict TypeScript.
+3. Validate all API inputs with Zod.
+4. Ensure tests pass (`npm run test:all`).
+5. PR.
 
-Detailed technical guidelines are available in [CLAUDE.md](./claude.md).
+*See [CLAUDE.md](./CLAUDE.md) for strict AI persona and coding constraints.*
 
-## Architecture
-
-specdrivr is built around the concept of a **Stateful Orchestrator**. The Next.js API layer serves as a Zod-validated boundary between the UI, the PostgreSQL state machine, and external agents.
-
-When a spec is created, an agent generates a **Plan** consisting of **Tasks**. Each task has dependencies and status flags. The agent's memory is persisted in PostgreSQL, allowing for complex branching and long-running workflows that traditional AI assistants cannot handle.
-
-## Troubleshooting
-
-- **DB Connection Issues**: Verify your `DATABASE_URL` in `.env.local` and ensure your Postgres instance is reachable.
-- **Migration Errors**: If the schema is out of sync, try `npm run db:push` in development to force synchronization.
-- **Auth Failures**: Ensure `AUTH_SECRET` is set correctly in your environment.
+---
 
 ## License
 
-This project is licensed under the MIT License.
+MIT License. See [LICENSE](LICENSE) for details.
+
+<div align="center">
+  <br/>
+  <strong>Write the Spec. We'll write the Code.</strong>
+</div>
