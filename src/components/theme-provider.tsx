@@ -14,7 +14,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'light';
+    const savedTheme = localStorage.getItem('app-theme') || 'light';
     setTheme(savedTheme);
     setMounted(true);
   }, []);
@@ -28,7 +28,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } else {
       root.removeAttribute('data-theme');
     }
-    localStorage.setItem('theme', theme);
+    localStorage.setItem('app-theme', theme);
   }, [theme, mounted]);
 
   const toggleTheme = () => {

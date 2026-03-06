@@ -5,6 +5,39 @@ import { updateConstitutionDev } from '@/lib/actions';
 import { Button } from '@/components/ui/button';
 import { Save, Edit2 } from 'lucide-react';
 
+function renderMarkdown(text: string) {
+  let inList = false;
+  const lines = text.split('\n');
+  let result = '';
+
+  for (let line of lines) {
+    if (line.trim().startsWith('- ')) {
+      if (!inList) {
+        result += '<ul class="list-disc ml-6 my-2">';
+        inList = true;
+      }
+      let lineContent = line.trim().substring(2).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      result += `<li class="mb-1">${lineContent}</li>`;
+    } else {
+      if (inList) {
+        result += '</ul>';
+        inList = false;
+      }
+      if (line.startsWith('## ')) {
+        result += `<h3 class="text-[16px] font-bold mt-[16px] mb-[8px]">${line.substring(3).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</h3>`;
+      } else if (line.startsWith('# ')) {
+        result += `<h2 class="text-[18px] font-bold mt-[20px] mb-[12px]">${line.substring(2).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</h2>`;
+      } else if (line.trim() === '') {
+        result += '<br/>';
+      } else {
+        result += `<span class="block mb-[8px]">${line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</span>`;
+      }
+    }
+  }
+  if (inList) result += '</ul>';
+  return result;
+}
+
 interface InlineConstitutionEditorProps {
   projectId: number;
   constitution: string | null;
@@ -94,11 +127,14 @@ export function InlineConstitutionEditor({
             </Button>
           </div>
         </div>
+      ) : content.trim() ? (
+        <div
+          className="text-[14px] text-[var(--color-text-primary)] leading-relaxed"
+          dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
+        />
       ) : (
-        <div className="text-[14px] text-[var(--color-text-primary)] whitespace-pre-wrap leading-relaxed">
-          {content.trim() ? content : (
-            <span className="text-[var(--color-text-tertiary)] italic">No constitution defined yet.</span>
-          )}
+        <div className="text-[14px] text-[var(--color-text-primary)] leading-relaxed">
+          <span className="text-[var(--color-text-tertiary)] italic">No constitution defined yet.</span>
         </div>
       )}
     </div>

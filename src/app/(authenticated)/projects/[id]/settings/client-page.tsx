@@ -147,9 +147,9 @@ export function ProjectSettingsClient({
         <div className="max-w-4xl space-y-[var(--sp-10)]">
           {/* General Settings */}
           <section className="space-y-[var(--sp-6)]">
-            <div className="flex items-center gap-[var(--sp-3)] border-b border-[var(--color-border-default)] pb-[var(--sp-3)]">
-              <Globe size={18} className="text-[var(--color-brand-bold)]" />
-              <h2 className="text-[14px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">General Details</h2>
+            <div className="flex items-center h-[28px] pb-[8px] mt-[24px] mb-[var(--sp-4)] gap-[var(--sp-2)] border-b border-[var(--color-border-default)]">
+              <Globe size={14} className="text-[var(--color-text-tertiary)]" />
+              <h2 className="text-[11px] font-[600] text-[var(--color-text-tertiary)] uppercase tracking-[0.08em]">General Details</h2>
             </div>
 
             <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] p-[var(--sp-6)] shadow-[var(--shadow-card)] space-y-[var(--sp-6)]">
@@ -202,9 +202,9 @@ export function ProjectSettingsClient({
           {/* Constitution & Tech Stack */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-[var(--sp-10)]">
             <section className="space-y-[var(--sp-6)]">
-              <div className="flex items-center gap-[var(--sp-3)] border-b border-[var(--color-border-default)] pb-[var(--sp-3)]">
-                <ShieldAlert size={18} className="text-[var(--color-brand-bold)]" />
-                <h2 className="text-[14px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Constitution</h2>
+              <div className="flex items-center h-[28px] pb-[8px] mt-[24px] mb-[var(--sp-4)] gap-[var(--sp-2)] border-b border-[var(--color-border-default)]">
+                <ShieldAlert size={14} className="text-[var(--color-text-tertiary)]" />
+                <h2 className="text-[11px] font-[600] text-[var(--color-text-tertiary)] uppercase tracking-[0.08em]">Constitution</h2>
               </div>
               <InlineConstitutionEditor
                 projectId={projectId}
@@ -213,9 +213,9 @@ export function ProjectSettingsClient({
             </section>
 
             <section className="space-y-[var(--sp-6)]">
-              <div className="flex items-center gap-[var(--sp-3)] border-b border-[var(--color-border-default)] pb-[var(--sp-3)]">
-                <Database size={18} className="text-[var(--color-brand-bold)]" />
-                <h2 className="text-[14px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Tech Stack</h2>
+              <div className="flex items-center h-[28px] pb-[8px] mt-[24px] mb-[var(--sp-4)] gap-[var(--sp-2)] border-b border-[var(--color-border-default)]">
+                <Database size={14} className="text-[var(--color-text-tertiary)]" />
+                <h2 className="text-[11px] font-[600] text-[var(--color-text-tertiary)] uppercase tracking-[0.08em]">Tech Stack</h2>
               </div>
               <InlineTechStackEditor
                 projectId={projectId}
@@ -226,9 +226,9 @@ export function ProjectSettingsClient({
 
           {/* Git Integration */}
           <section className="space-y-[var(--sp-6)]">
-            <div className="flex items-center gap-[var(--sp-3)] border-b border-[var(--color-border-default)] pb-[var(--sp-3)]">
-              <GitBranch size={18} className="text-[var(--color-brand-bold)]" />
-              <h2 className="text-[14px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Git Integration</h2>
+            <div className="flex items-center h-[28px] pb-[8px] mt-[24px] mb-[var(--sp-4)] gap-[var(--sp-2)] border-b border-[var(--color-border-default)]">
+              <GitBranch size={14} className="text-[var(--color-text-tertiary)]" />
+              <h2 className="text-[11px] font-[600] text-[var(--color-text-tertiary)] uppercase tracking-[0.08em]">Git Integration</h2>
             </div>
 
             <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] p-[var(--sp-6)] shadow-[var(--shadow-card)] space-y-[var(--sp-6)]">
@@ -293,10 +293,10 @@ export function ProjectSettingsClient({
 
           {/* Agent Access Tokens */}
           <section className="space-y-[var(--sp-6)]">
-            <div className="flex items-center justify-between border-b border-[var(--color-border-default)] pb-[var(--sp-3)]">
-              <div className="flex items-center gap-[var(--sp-3)]">
-                <Key size={18} className="text-[var(--color-brand-bold)]" />
-                <h2 className="text-[14px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Agent Access Tokens</h2>
+            <div className="flex items-center justify-between h-[28px] pb-[8px] mt-[24px] mb-[var(--sp-4)] border-b border-[var(--color-border-default)]">
+              <div className="flex items-center gap-[var(--sp-2)]">
+                <Key size={14} className="text-[var(--color-text-tertiary)]" />
+                <h2 className="text-[11px] font-[600] text-[var(--color-text-tertiary)] uppercase tracking-[0.08em]">Agent Access Tokens</h2>
               </div>
               <Button variant="primary" size="small" onClick={() => setShowTokenDialog(true)} icon={<Plus size={16} />}>Generate New</Button>
             </div>

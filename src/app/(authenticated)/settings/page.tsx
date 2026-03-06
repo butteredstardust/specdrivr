@@ -127,7 +127,7 @@ export default async function SettingsPage({ }: SettingsPageProps) {
 
       {settingsGroups.map((group) => (
         <div key={group.title} className="mb-[var(--sp-6)]">
-          <h2 className="text-[var(--font-size-xs)] text-[var(--color-text-tertiary)] mb-[var(--sp-2)] px-[var(--sp-4)] uppercase tracking-wider font-semibold">
+          <h2 className="text-[14px] font-[600] text-[var(--color-text-primary)] uppercase tracking-[0.04em] mt-[24px] mb-[8px] px-[var(--sp-4)]">
             {group.title}
           </h2>
 

@@ -139,7 +139,6 @@ export function TaskDetailModal({
                     'inline-flex items-center gap-[var(--sp-1)] px-[var(--sp-2)] py-[var(--sp-1)] rounded-[var(--radius-sm)] text-[var(--font-size-sm)] font-bold',
                     statusInfo.bg,
                     statusInfo.text,
-                    statusInfo.border,
                     'border'
                   )}
                 >

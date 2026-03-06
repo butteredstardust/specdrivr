@@ -23,7 +23,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{
           __html: `
             (function() {
-              var theme = localStorage.getItem('theme') || 'light';
+              var theme = localStorage.getItem('app-theme') || 'light';
               if (theme === 'dark') {
                 document.documentElement.setAttribute('data-theme', 'dark');
               }

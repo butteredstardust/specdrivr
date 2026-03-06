@@ -6,7 +6,7 @@ import { type UserRole, userRoleColors, userRoleLabels } from '@/lib/ios-styles'
 import { Dialog } from '@/components/ui/dialog';
 import { ConfirmDialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Plus, MoreHorizontal, User as UserIcon, Shield, Search } from 'lucide-react';
+import { Plus, MoreHorizontal, User as UserIcon, Shield, Search, Pencil, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface User {
@@ -157,18 +157,18 @@ export default function AdminUsersPage() {
                 </td>
                 <td className="px-[var(--sp-4)] py-[var(--sp-4)]">
                   <span className={cn(
-                    "px-1.5 py-0.5 rounded-[var(--radius-sm)] text-[11px] font-bold uppercase tracking-wide",
-                    user.role === 'admin' ? "bg-[var(--status-blocked-bg)] text-[var(--status-blocked-text)]" : "bg-[var(--status-todo-bg)] text-[var(--status-todo-text)]"
+                    "inline-flex items-center h-[20px] px-[6px] rounded-[3px] border-none text-[11px] font-bold uppercase tracking-[0.04em] whitespace-nowrap",
+                    userRoleColors[user.role].bg,
+                    userRoleColors[user.role].text
                   )}>
-                    {user.role}
+                    {userRoleLabels[user.role]}
                   </span>
                 </td>
                 <td className="px-[var(--sp-4)] py-[var(--sp-4)]">
                   <span className={cn(
-                    "inline-flex items-center gap-1.5 text-[12px] font-medium",
-                    user.isActive ? "text-[var(--status-inprogress-text)]" : "text-[var(--color-text-tertiary)]"
+                    "inline-flex items-center h-[20px] px-[6px] rounded-[3px] border-none text-[11px] font-bold uppercase tracking-[0.04em] whitespace-nowrap",
+                    user.isActive ? "bg-[var(--status-done-bg)] text-[var(--status-done-text)]" : "bg-[var(--status-todo-bg)] text-[var(--status-todo-text)]"
                   )}>
-                    <span className={cn("w-2 h-2 rounded-full", user.isActive ? "bg-[var(--status-inprogress-text)]" : "bg-[var(--color-text-tertiary)]")} />
                     {user.isActive ? 'Active' : 'Inactive'}
                   </span>
                 </td>
@@ -176,13 +176,21 @@ export default function AdminUsersPage() {
                   {formatDate(user.lastLoginAt)}
                 </td>
                 <td className="px-[var(--sp-4)] py-[var(--sp-4)] text-right">
-                  <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button variant="ghost" size="small" onClick={() => { setSelectedUser(user); setNewRole(user.role); setShowRoleDialog(true); }}>
-                      Edit Role
-                    </Button>
-                    <Button variant={user.isActive ? 'ghost' : 'secondary'} size="small" onClick={() => { setSelectedUser(user); setShowDeactivateDialog(true); }}>
-                      {user.isActive ? 'Deactivate' : 'Activate'}
-                    </Button>
+                  <div className="flex items-center justify-end gap-[4px] opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      title="Edit"
+                      onClick={() => { setSelectedUser(user); setNewRole(user.role); setShowRoleDialog(true); }}
+                      className="w-[28px] h-[28px] rounded-[4px] bg-transparent border-none text-[var(--color-text-secondary)] flex items-center justify-center cursor-pointer hover:bg-[var(--color-bg-hovered)] transition-colors"
+                    >
+                      <Pencil size={14} />
+                    </button>
+                    <button
+                      title={user.isActive ? "Deactivate" : "Activate"}
+                      onClick={() => { setSelectedUser(user); setShowDeactivateDialog(true); }}
+                      className="w-[28px] h-[28px] rounded-[4px] bg-transparent border-none text-[var(--color-text-secondary)] flex items-center justify-center cursor-pointer hover:bg-[#FFECEB] hover:text-[#AE2A19] transition-colors"
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </div>
                 </td>
               </tr>

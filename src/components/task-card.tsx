@@ -82,7 +82,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
 
           <div className="flex items-center gap-[var(--sp-2)]">
             <span className={cn(
-              "px-1.5 py-0.5 rounded-[var(--radius-sm)] text-[10px] font-bold uppercase tracking-tight",
+              "px-[6px] flex items-center h-[20px] rounded-[3px] border-none text-[11px] font-bold uppercase tracking-[0.04em] whitespace-nowrap",
               statusInfo.bg, statusInfo.text
             )}>
               {status.replace('_', ' ')}

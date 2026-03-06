@@ -115,7 +115,17 @@ export function DashboardSummaryCard({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] p-[var(--sp-4)] px-[var(--sp-5)] relative h-[88px] flex flex-col justify-end overflow-hidden">
+    <div
+      className="relative flex flex-col justify-end overflow-hidden"
+      style={{
+        background: '#FFFFFF',
+        border: '1px solid #DFE1E6',
+        borderRadius: '8px',
+        boxShadow: '0 1px 1px rgba(9,30,66,0.25), 0 0 1px rgba(9,30,66,0.31)',
+        padding: '16px 20px',
+        height: '88px'
+      }}
+    >
       <div className="absolute top-[var(--sp-4)] right-[var(--sp-4)] text-[var(--color-text-tertiary)] opacity-50">
         {React.cloneElement(icon as React.ReactElement, { size: 16 })}
       </div>

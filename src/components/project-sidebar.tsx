@@ -4,15 +4,12 @@ import { ProjectSelect } from '@/db/schema';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
-  Home,
-  Settings,
   Plus,
   Layout,
   Database,
   Search
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { CreateProjectDialog } from './create-project-dialog';
 
 interface ProjectSidebarProps {
   projects: ProjectSelect[];
@@ -41,22 +38,6 @@ export function ProjectSidebar({ projects, currentProjectId, onProjectCreated }:
 
   return (
     <div className="flex flex-col h-full">
-      {/* Global Navigation Section */}
-      <div className="space-y-0.5">
-        <NavItem
-          href="/"
-          icon={Home}
-          label="Dashboard"
-          active={pathname === '/'}
-        />
-        <NavItem
-          href="/settings"
-          icon={Settings}
-          label="Settings"
-          active={pathname === '/settings'}
-        />
-      </div>
-
       {/* Projects Section Label */}
       <div className="mt-[var(--sp-4)] mb-[var(--sp-1)] px-[var(--sp-2)] py-[var(--sp-2)]">
         <span className="text-[11px] font-bold text-[var(--color-text-tertiary)] uppercase tracking-wider">
@@ -101,8 +82,20 @@ export function ProjectSidebar({ projects, currentProjectId, onProjectCreated }:
       </div>
 
       {/* Create Project Button */}
-      <div className="mt-auto pt-[var(--sp-4)] px-[var(--sp-1)]">
-        <CreateProjectDialog onProjectCreated={onProjectCreated} />
+      <div className="mt-auto pt-[var(--sp-4)] pb-[var(--sp-2)] px-0 border-t border-[var(--color-border-default)]">
+        <button
+          onClick={() => {
+            if (pathname !== '/') {
+              window.location.href = '/?newProject=true';
+            } else {
+              window.dispatchEvent(new CustomEvent('open-new-project-modal'));
+            }
+          }}
+          className="bg-[var(--color-brand-bold)] text-[#FFFFFF] h-[32px] w-[calc(100%-16px)] mx-[8px] my-0 rounded-[4px] border-none text-[12px] font-medium flex items-center justify-center gap-[6px] cursor-pointer hover:bg-[#0055CC] transition-colors"
+        >
+          <Plus size={14} />
+          <span className="font-medium mt-[1px]">New Project</span>
+        </button>
       </div>
     </div>
   );

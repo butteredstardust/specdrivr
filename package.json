@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "dev:clean": "npm run killall && next dev",
+    "dev:seed": "npm run killall && npm run seed:demo && next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
