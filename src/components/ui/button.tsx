@@ -26,20 +26,20 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
-    const baseClasses = 'inline-flex items-center justify-center gap-[var(--sp-2)] font-medium rounded-[var(--radius-md)] transition-[background,color] disabled:opacity-50 disabled:cursor-not-allowed outline-none border-none cursor-pointer text-[12px]';
+    const baseClasses = 'inline-flex items-center justify-center gap-[var(--sp-2)] font-medium transition-[background,color] disabled:!bg-[#C7D2FE] disabled:!text-[#4338CA] disabled:!opacity-100 disabled:cursor-not-allowed outline-none border-none cursor-pointer text-[13px] rounded-[var(--radius-md)]';
 
     const variantClasses = {
-      primary: 'bg-[var(--color-brand-bold)] text-white hover:bg-[var(--color-brand-bolder)]',
-      secondary: 'bg-[var(--color-bg-surface)] text-[var(--color-text-secondary)] border border-[var(--color-border-default)] hover:bg-[var(--color-bg-hovered)] hover:border-[var(--color-border-bold)] border-solid',
+      primary: 'bg-[var(--brand-primary)] text-[#fff] hover:bg-[var(--brand-primary-hover)]',
+      secondary: 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border border-[var(--border-default)] hover:bg-[var(--bg-hovered)] border-solid',
       danger: 'bg-[#CA3521] text-white hover:bg-[var(--color-text-danger)]',
-      ghost: 'bg-transparent text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hovered)] hover:text-[var(--color-text-primary)]',
+      ghost: 'bg-transparent text-[var(--text-tertiary)] hover:bg-[var(--bg-hovered)] hover:text-[var(--text-primary)]',
     };
 
     const sizeClasses = {
-      small: 'h-[28px] px-[var(--sp-2)]',
-      medium: 'h-[32px] px-[var(--sp-3)]',
-      large: 'h-[36px] px-[var(--sp-4)] text-[14px]',
-      icon: 'w-[32px] h-[32px] p-0',
+      small: 'h-[28px] px-[14px]',
+      medium: 'h-[32px] px-[14px]',
+      large: 'h-[36px] px-[14px] text-[14px]',
+      icon: 'w-[28px] h-[28px] p-0 rounded-[var(--radius-sm)]',
     };
 
     // Special case for secondary border since base has border-none

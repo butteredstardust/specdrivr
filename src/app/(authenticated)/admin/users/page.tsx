@@ -136,7 +136,7 @@ export default function AdminUsersPage() {
       <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] overflow-hidden">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="border-b border-[var(--color-border-default)]">
+            <tr className="border-b border-[var(--border-default)] bg-[var(--bg-hovered)] h-[36px]">
               <th className="text-left px-[var(--sp-4)] py-[var(--sp-3)] text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">User</th>
               <th className="text-left px-[var(--sp-4)] py-[var(--sp-3)] text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Role</th>
               <th className="text-left px-[var(--sp-4)] py-[var(--sp-3)] text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Status</th>
@@ -146,10 +146,10 @@ export default function AdminUsersPage() {
           </thead>
           <tbody>
             {users.map(user => (
-              <tr key={user.id} className="border-b border-[var(--color-border-default)] last:border-0 hover:bg-[var(--color-bg-hovered)] group transition-colors">
+              <tr key={user.id} className="h-[48px] border-b border-[var(--border-default)] last:border-0 hover:bg-[var(--bg-hovered)] transition-colors">
                 <td className="px-[var(--sp-4)] py-[var(--sp-4)]">
                   <div className="flex items-center gap-[var(--sp-3)]">
-                    <div className="w-[28px] h-[28px] shrink-0 rounded-full bg-[#E9F2FF] flex items-center justify-center text-[#0C66E4] text-[11px] font-semibold uppercase">
+                    <div className="w-[28px] h-[28px] shrink-0 rounded-full bg-[var(--brand-subtle)] flex items-center justify-center text-[var(--brand-primary)] text-[11px] font-semibold uppercase">
                       {getInitials(user.username)}
                     </div>
                     <span className="text-[14px] font-medium text-[var(--color-text-primary)]">{user.username}</span>
@@ -167,7 +167,7 @@ export default function AdminUsersPage() {
                 <td className="px-[var(--sp-4)] py-[var(--sp-4)]">
                   <span className={cn(
                     "inline-flex items-center h-[20px] px-[6px] rounded-[3px] border-none text-[11px] font-bold uppercase tracking-[0.04em] whitespace-nowrap",
-                    user.isActive ? "bg-[#DCFFF1] text-[#216E4E]" : "bg-[#F1F2F4] text-[#44546F]"
+                    user.isActive ? "bg-[var(--status-done-bg)] text-[var(--status-done-text)]" : "bg-[var(--status-todo-bg)] text-[var(--status-todo-text)]"
                   )}>
                     {user.isActive ? 'Active' : 'Inactive'}
                   </span>
@@ -176,31 +176,9 @@ export default function AdminUsersPage() {
                   {formatDate(user.lastLoginAt)}
                 </td>
                 <td style={{ textAlign: 'right', paddingRight: '16px' }}>
-                  <div style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end' }}>
-                    <button
-                      title="Edit user"
-                      onClick={() => { setSelectedUser(user); setNewRole(user.role); setShowRoleDialog(true); }}
-                      style={{ width: '28px', height: '28px', borderRadius: '4px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8590A2' }}
-                      onMouseEnter={e => e.currentTarget.style.background = '#F1F2F4'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                    >
-                      <Pencil size={14} />
-                    </button>
-                    <button
-                      title={user.isActive ? "Deactivate user" : "Activate user"}
-                      onClick={() => { setSelectedUser(user); setShowDeactivateDialog(true); }}
-                      style={{ width: '28px', height: '28px', borderRadius: '4px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8590A2' }}
-                      onMouseEnter={e => {
-                        e.currentTarget.style.background = '#FEE2E2';
-                        e.currentTarget.style.color = '#DC2626';
-                      }}
-                      onMouseLeave={e => {
-                        e.currentTarget.style.background = 'transparent';
-                        e.currentTarget.style.color = '#8590A2';
-                      }}
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                  <div style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end', opacity: 1 }}>
+                    <Button variant="ghost" size="icon" title="Edit user" onClick={() => { setSelectedUser(user); setNewRole(user.role); setShowRoleDialog(true); }} icon={<Pencil size={14} />} />
+                    <Button variant="ghost" size="icon" title={user.isActive ? "Deactivate user" : "Activate user"} onClick={() => { setSelectedUser(user); setShowDeactivateDialog(true); }} className="hover:!bg-[#FEE2E2] hover:!text-[#DC2626]" icon={<Trash2 size={14} />} />
                   </div>
                 </td>
               </tr>

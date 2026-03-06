@@ -51,7 +51,7 @@ export function ProjectCard({
   return (
     <Link
       href={`/projects/${project.id}`}
-      className="group flex items-center min-h-[48px] px-[16px] border-b border-[var(--color-border-default)] hover:bg-[#F8F9FF] hover:border-l-[2px] hover:border-l-[#2563EB] hover:pl-[14px] transition-all last:border-b-0"
+      className="group flex items-center h-[44px] px-[16px] border-b border-[var(--border-default)] hover:bg-[var(--bg-hovered)] hover:border-l-[2px] hover:border-l-[var(--brand-primary)] hover:pl-[14px] transition-all last:border-b-0"
     >
       {/* Name */}
       <div className="flex-1 min-w-0 pr-[var(--sp-4)] flex items-center h-full">
@@ -70,7 +70,7 @@ export function ProjectCard({
       {/* Status */}
       <div className="w-[140px] flex items-center shrink-0">
         {agentStatus === 'idle' ? (
-          <div className="flex items-center text-[#8590A2] text-[12px] font-[400]">
+          <div className="flex items-center text-[var(--text-tertiary)] text-[12px] font-[400]">
             <span style={{
               width: '6px',
               height: '6px',
@@ -83,7 +83,7 @@ export function ProjectCard({
           </div>
         ) : (
           <div className="flex items-center gap-[var(--sp-2)] text-[var(--font-size-sm)] font-medium text-[var(--color-text-secondary)]">
-            <span className={cn("w-[8px] h-[8px] rounded-full flex-shrink-0", dotColor)} />
+            <span className={cn("w-[6px] h-[6px] rounded-full flex-shrink-0", dotColor)} />
             <span>{agentStatusLabels[agentStatus]}</span>
           </div>
         )}
@@ -136,18 +136,18 @@ export function DashboardSummaryCard({
     <div
       className="relative flex flex-col justify-center overflow-hidden"
       style={{
-        background: '#FFFFFF',
-        border: '1px solid #DFE1E6',
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border-default)',
         borderRadius: '8px',
-        boxShadow: '0 1px 2px rgba(9,30,66,0.20), 0 0 1px rgba(9,30,66,0.25)',
+        boxShadow: 'var(--shadow-card)',
         padding: '20px 24px',
         height: '96px'
       }}
     >
       {accentColor && (
         <div
-          className="absolute left-0 top-0 bottom-0 w-[3px]"
-          style={{ background: accentColor, borderRadius: '8px 0 0 8px' }}
+          className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-[8px]"
+          style={{ background: accentColor }}
         />
       )}
       <div
@@ -163,10 +163,10 @@ export function DashboardSummaryCard({
       >
         {React.cloneElement(icon as React.ReactElement, { size: 20 })}
       </div>
-      <p style={{ fontSize: '28px', fontWeight: 700, color: '#172B4D', lineHeight: 1 }}>
+      <p style={{ fontSize: '28px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1 }}>
         {value}
       </p>
-      <p style={{ fontSize: '11px', fontWeight: 600, color: '#8590A2', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '4px' }}>
+      <p style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '4px' }}>
         {label}
       </p>
     </div>
