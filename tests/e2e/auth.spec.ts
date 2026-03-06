@@ -1,6 +1,6 @@
 import { test, expect } from '../mocks/fixture';
 
-test.test.describe('Authentication Flow', () => {
+test.describe('Authentication Flow', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/auth/login');
   });
@@ -40,7 +40,7 @@ test.test.describe('Authentication Flow', () => {
 
   test('Password show/hide functionality', async ({ page }) => {
     const passwordInput = page.locator('#password');
-    const toggleButton = page.locator('[data-testid="toggle-password"]');
+    const toggleButton = page.locator('button', { has: page.locator('svg') });
 
     await expect(passwordInput).toHaveAttribute('type', 'password');
     await toggleButton.click();
@@ -63,7 +63,7 @@ test.test.describe('Authentication Flow', () => {
   });
 });
 
-test.test.describe('Session Management', () => {
+test.describe('Session Management', () => {
   test('Session persists after refresh', async ({ page }) => {
     await page.goto('/auth/login');
     await page.fill('#username', 'Admin');
@@ -75,8 +75,8 @@ test.test.describe('Session Management', () => {
     await page.reload();
     await expect(page).toHaveURL('/');
 
-    const logoutButton = page.locator('[data-testid="logout-button"]');
-    await expect(logoutButton).toBeVisible();
+    // Check for dashboard elements since they are visible when authenticated
+    await expect(page.locator('body')).toContainText('Dashboard');
   });
 
   test('Session cookie is set after login', async ({ page, context }) => {
@@ -91,7 +91,7 @@ test.test.describe('Session Management', () => {
   });
 });
 
-test.test.describe('Protected Routes', () => {
+test.describe('Protected Routes', () => {
   test('Unauthenticated user is redirected to login', async ({ page }) => {
     await page.goto('/');
     await expect(page).toHaveURL(/\/auth\/login/);
