@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, vi } from 'vitest';
-import { getAgentLogs, updateProjectDetailsDev, createPlanDev } from '@/lib/actions';
+import { getAgentLogs, updateProjectDetailsDev, createPlanDev, getTasksDoneToday } from '@/lib/actions';
 import { db } from '@/db';
 
 // Mock the db and auth session
@@ -65,9 +65,31 @@ describe('Server Actions', () => {
 
     describe('getAgentLogs', () => {
         test('should return success for valid query', async () => {
-            const result = await getAgentLogs({ projectId: 1, limit: 10 });
+            const result = await getAgentLogs(1, 1, 10);
             expect(result.success).toBe(true);
             expect(result.logs).toBeDefined();
+        });
+    });
+
+    describe('getTasksDoneToday', () => {
+        test('should correctly count tasks completed today', async () => {
+            const today = new Date();
+            today.setHours(12, 0, 0, 0);
+
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+
+            // Mock database response
+            // getTasksDoneToday calls db.select({ id: tasks.id, updatedAt: tasks.updatedAt })
+            // we need to mock the resolved value of the query chain
+            vi.mocked(db.where).mockResolvedValueOnce([
+                { id: 1, updatedAt: today },
+                { id: 2, updatedAt: yesterday },
+                { id: 3, updatedAt: today }
+            ]);
+
+            const result = await getTasksDoneToday();
+            expect(result).toBe(2);
         });
     });
 });

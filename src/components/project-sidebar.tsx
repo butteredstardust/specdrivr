@@ -21,7 +21,7 @@ export function ProjectSidebar({ projects, currentProjectId, onProjectCreated }:
   const pathname = usePathname();
   const activeId = currentProjectId;
 
-  const NavItem = ({ href, icon: Icon, label, active }: { href: string, icon: any, label: string, active: boolean }) => (
+  const NavItem = ({ href, icon: Icon, label, active }: { href: string, icon: React.ElementType, label: string, active: boolean }) => (
     <Link
       href={href}
       className={cn(
