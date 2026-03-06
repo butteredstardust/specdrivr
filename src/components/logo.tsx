@@ -18,25 +18,24 @@ export function Logo({ size = 'medium', className }: LogoProps) {
   const sizeClass = sizeClasses[size];
 
   if (size === 'icon' || size === 'small') {
-    // Icon-only version with gradient background
     return (
       <div
         className={cn(
           sizeClass,
-          'rounded-ios-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center font-bold text-white text-[11px] text-text-tertiary',
+          'rounded-[var(--radius-md)] bg-[var(--color-brand-bold)] flex items-center justify-center font-bold text-white text-[var(--font-size-xs)]',
           className
         )}
         aria-label="Spec-Drivr Logo"
       >
-        sd
+        SD
       </div>
     );
   }
 
   // Full logo with text
   return (
-    <div className={cn('flex items-center pl-2.5', className)}>
-      <span className="text-3xl font-bold bg-gradient-to-r from-purple-500 to-blue-500 bg-clip-text text-transparent tracking-tight lowercase">
+    <div className={cn('flex items-center pl-[var(--sp-2)]', className)}>
+      <span className="text-[var(--font-size-lg)] font-bold text-[var(--color-brand-bold)] tracking-tight lowercase">
         specdrivr
       </span>
     </div>

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, Layout, Cog } from 'lucide-react';
+import { Layout, Settings } from 'lucide-react';
 
 interface BottomTab {
   href: string;
@@ -11,29 +11,29 @@ interface BottomTab {
 }
 
 const tabs: BottomTab[] = [
-  { href: '/', label: 'Dashboard', icon: <Layout className="w-6 h-6" /> },
-  { href: '/settings', label: 'Settings', icon: <Cog className="w-6 h-6" /> },
+  { href: '/', label: 'Dashboard', icon: <Layout size={20} /> },
+  { href: '/settings', label: 'Settings', icon: <Settings size={20} /> },
 ];
 
 export function BottomTabs() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-bg-elevated/95 backdrop-blur-ios border-t border-border-default lg:hidden pb-[env(safe-area-inset-bottom)] translate-y-0">
-      <div className="flex justify-around items-center h-20">
+    <nav className="fixed bottom-0 left-0 right-0 z-[100] bg-[var(--color-bg-surface)] border-t border-[var(--color-border-default)] lg:hidden pb-[env(safe-area-inset-bottom)]">
+      <div className="flex justify-around items-center h-[56px]">
         {tabs.map((tab) => {
           const isActive = pathname === tab.href;
           return (
             <Link
               key={tab.href}
               href={tab.href}
-              className={`flex flex-col items-center justify-center w-16 h-16 min-w-[44px] min-h-[44px] mx-1 rounded-ios-md transition-all ${isActive
-                ? 'text-accent'
-                : 'text-text-secondary hover:text-text-primary'
+              className={`flex flex-col items-center justify-center w-[56px] h-[44px] rounded-[var(--radius-md)] transition-colors ${isActive
+                ? 'text-[var(--color-brand-bold)]'
+                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
                 }`}
             >
-              <div className="mb-1">{tab.icon}</div>
-              <span className="text-[11px] font-medium">{tab.label}</span>
+              <div className="mb-[var(--sp-1)]">{tab.icon}</div>
+              <span className="text-[var(--font-size-xs)] font-medium">{tab.label}</span>
             </Link>
           );
         })}

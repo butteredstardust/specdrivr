@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { addAgentLogDev } from '@/lib/actions';
 import { TaskSelect } from '@/db/schema';
 import type { LogLevel } from '@/db/schema';
+import { Plus } from 'lucide-react';
 
 interface AddLogDialogProps {
   tasks: TaskSelect[];
@@ -13,23 +14,15 @@ interface AddLogDialogProps {
   defaultTaskId?: number;
 }
 
-const iosInputStyle = {
-  width: '100%',
-  padding: '8px 12px',
-  backgroundColor: 'var(--bg-bg-primary)',
-  color: 'var(--text-text-primary)',
-  borderColor: 'var(--ios-separator)',
-  borderRadius: '8px',
-  fontSize: '17px',
-  outline: 'none',
-  transition: 'box-shadow 0.2s',
-};
+const inputClass = "w-full h-[40px] px-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[var(--font-size-base)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-selected)] transition-all";
+const textareaClass = "w-full p-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[var(--font-size-base)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-selected)] transition-all resize-none";
+const labelClass = "block text-[var(--font-size-xs)] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-[var(--sp-2)]";
 
 const levelColors: Record<LogLevel, { bg: string; text: string; border: string }> = {
-  debug: { bg: 'bg-status-idle-6', text: 'text-status-idle-2', border: 'border-status-idle-4' },
-  info: { bg: 'bg-accent/10', text: 'text-accent', border: 'border-accent/20' },
-  warn: { bg: 'bg-ios-yellow/10', text: 'text-ios-yellow', border: 'border-ios-yellow/20' },
-  error: { bg: 'bg-status-error/10', text: 'text-status-error', border: 'border-status-error/20' },
+  debug: { bg: 'bg-[var(--log-debug-bg)]', text: 'text-[var(--log-debug-text)]', border: 'border-[var(--log-debug-text)]' },
+  info: { bg: 'bg-[var(--log-info-bg)]', text: 'text-[var(--log-info-text)]', border: 'border-[var(--log-info-text)]' },
+  warn: { bg: 'bg-[var(--log-warn-bg)]', text: 'text-[var(--log-warn-text)]', border: 'border-[var(--log-warn-text)]' },
+  error: { bg: 'bg-[var(--log-error-bg)]', text: 'text-[var(--log-error-text)]', border: 'border-[var(--log-error-text)]' },
 };
 
 export function AddLogDialog({
@@ -66,11 +59,11 @@ export function AddLogDialog({
     }
 
     try {
-      const result = await addAgentLogDev({
+      const result = await addAgentLogDev(({
         taskId: selectedTaskId,
         level,
         message: message.trim(),
-      });
+      }));
 
       if (result.success) {
         setMessage('');
@@ -103,53 +96,44 @@ export function AddLogDialog({
             setIsOpenInternal(true);
           }
         }}
-        className="flex items-center gap-2 px-4 py-2 text-[13px] text-white rounded-[8px]  transition-colors"
-        style={{ backgroundColor: 'var(--accent)' }}
+        className="flex items-center gap-[var(--sp-2)] px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-white bg-[var(--color-brand-bold)] rounded-[var(--radius-sm)] hover:bg-[var(--color-brand-bold-hovered)] transition-colors"
       >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M12 5v14"/>
-          <path d="M5 12h14"/>
-        </svg>
+        <Plus size={16} />
         Add Log
       </button>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center ios-font">
-      {/* Backdrop */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+        className="fixed inset-0 bg-black/50"
         onClick={handleCancel}
       />
 
-      {/* Dialog */}
-      <div className="bg-bg-elevated border border-border-default rounded-[8px] shadow-xl w-full max-w-md mx-4 overflow-hidden ios relative z-10">
-        <div className="p-6">
-          <h2 className="text-[20px] font-semibold text-ios-primary mb-6 ">
+      <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-overlay)] w-full max-w-md mx-[var(--sp-4)] overflow-hidden relative z-10">
+        <div className="p-[var(--sp-6)]">
+          <h2 className="text-[var(--font-size-lg)] font-semibold text-[var(--color-text-primary)] mb-[var(--sp-6)]">
             Add Agent Log
           </h2>
 
           {error && (
-            <div className="mb-4 p-3 bg-opacity-10 border rounded-[8px]"
-              style={{ backgroundColor: 'var(--status-error)', borderColor: 'var(--ios-separator)' }}
+            <div className="mb-[var(--sp-4)] p-[var(--sp-3)] bg-[var(--status-blocked-bg)] border border-[var(--status-blocked-text)] rounded-[var(--radius-sm)]"
               data-testid="error-message"
             >
-              <p className="text-[11px] text-text-tertiary text-status-error ">{error}</p>
+              <p className="text-[var(--font-size-xs)] text-[var(--status-blocked-text)]">{error}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4 ">
+          <form onSubmit={handleSubmit} className="space-y-[var(--sp-4)]">
             <div>
-              <label htmlFor="taskId" className="block text-[12px] text-ios-primary mb-2">
-                Task
-              </label>
+              <label htmlFor="taskId" className={labelClass}>Task</label>
               <select
                 id="taskId"
                 value={selectedTaskId}
                 onChange={(e) => setSelectedTaskId(parseInt(e.target.value, 10))}
                 required
-                style={iosInputStyle}
+                className={inputClass}
               >
                 <option value={0}>Select a task...</option>
                 {tasks.map((task) => (
@@ -161,10 +145,8 @@ export function AddLogDialog({
             </div>
 
             <div>
-              <label className="block text-[12px] text-ios-primary mb-2">
-                Level
-              </label>
-              <div className="grid grid-cols-4 gap-2">
+              <label className={labelClass}>Level</label>
+              <div className="grid grid-cols-4 gap-[var(--sp-2)]">
                 {(Object.keys(levelColors) as LogLevel[]).map((lvl) => {
                   const colors = levelColors[lvl];
                   return (
@@ -172,11 +154,10 @@ export function AddLogDialog({
                       key={lvl}
                       type="button"
                       onClick={() => setLevel(lvl)}
-                      className={`px-3 py-2 rounded-ios-md text-[11px] font-medium font-medium transition-colors  ${
-                        level === lvl
+                      className={`px-[var(--sp-3)] py-[var(--sp-2)] rounded-[var(--radius-sm)] text-[var(--font-size-xs)] font-bold transition-colors ${level === lvl
                           ? `${colors.bg} ${colors.text} ${colors.border} border-2`
-                          : 'bg-bg-elevated text-text-secondary border-2 border-border-default hover:border-ios-separator/50'
-                      }`}
+                          : 'bg-[var(--color-bg-surface)] text-[var(--color-text-secondary)] border-2 border-[var(--color-border-default)] hover:bg-[var(--color-bg-hovered)]'
+                        }`}
                     >
                       {lvl.toUpperCase()}
                     </button>
@@ -186,9 +167,7 @@ export function AddLogDialog({
             </div>
 
             <div>
-              <label htmlFor="message" className="block text-[12px] text-ios-primary mb-2">
-                Message
-              </label>
+              <label htmlFor="message" className={labelClass}>Message</label>
               <textarea
                 id="message"
                 value={message}
@@ -196,24 +175,23 @@ export function AddLogDialog({
                 placeholder="Describe what happened..."
                 rows={4}
                 required
-                style={{ ...iosInputStyle, resize: 'none' }}
+                className={textareaClass}
               />
             </div>
 
-            <div className="flex justify-end gap-3 pt-4">
+            <div className="flex justify-end gap-[var(--sp-3)] pt-[var(--sp-4)]">
               <button
                 type="button"
                 onClick={handleCancel}
                 disabled={isSubmitting}
-                className="px-4 py-2 text-[13px] text-accent bg-ios-secondary border border-ios rounded-[8px]  disabled:opacity-50"
+                className="px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-[var(--color-brand-bold)] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] hover:bg-[var(--color-bg-hovered)] disabled:opacity-50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-4 py-2 text-[13px] text-white rounded-[8px]  transition-colors disabled:opacity-50"
-                style={{ backgroundColor: 'var(--accent)' }}
+                className="px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-white bg-[var(--color-brand-bold)] rounded-[var(--radius-sm)] hover:bg-[var(--color-brand-bold-hovered)] transition-colors disabled:opacity-50"
               >
                 {isSubmitting ? 'Adding...' : 'Add Log'}
               </button>

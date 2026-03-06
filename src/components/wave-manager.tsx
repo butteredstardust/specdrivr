@@ -59,9 +59,9 @@ export function WaveManager({ projectId }: WaveManagerProps) {
 
     if (isLoading) {
         return (
-            <div className="bg-bg-elevated border border-border-default rounded-[8px] p-12 text-center text-text-secondary">
-                <div className="inline-flex items-center gap-3 text-[13px]">
-                    <div className="w-5 h-5 rounded-full border-2 border-status-idle-400 border-t-accent animate-spin" />
+            <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] p-[var(--sp-12)] text-center text-[var(--color-text-secondary)]">
+                <div className="inline-flex items-center gap-[var(--sp-3)] text-[var(--font-size-sm)]">
+                    <div className="w-[20px] h-[20px] rounded-full border-2 border-[var(--color-border-default)] border-t-[var(--color-brand-bold)] animate-spin" />
                     Loading wave data...
                 </div>
             </div>
@@ -70,9 +70,9 @@ export function WaveManager({ projectId }: WaveManagerProps) {
 
     if (error) {
         return (
-            <div className="bg-bg-elevated border border-border-default rounded-[8px] p-6 border-l-4 border-status-error">
-                <p className="text-[13px] text-status-error">{error}</p>
-                <Button onClick={fetchWave} variant="secondary" size="small" className="mt-3">
+            <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] p-[var(--sp-6)] border-l-4 border-l-[var(--status-blocked-text)]">
+                <p className="text-[var(--font-size-sm)] text-[var(--status-blocked-text)]">{error}</p>
+                <Button onClick={fetchWave} variant="secondary" size="small" className="mt-[var(--sp-3)]">
                     Retry
                 </Button>
             </div>
@@ -81,9 +81,9 @@ export function WaveManager({ projectId }: WaveManagerProps) {
 
     if (!waveData || waveData.tasks.length === 0) {
         return (
-            <div className="bg-bg-elevated border border-border-default rounded-[8px] p-12 text-center text-text-secondary border border-dashed border-border-default">
-                <h3 className="text-[16px] font-semibold text-text-primary mb-2">No active wave</h3>
-                <p className="text-[13px] mb-4">
+            <div className="bg-[var(--color-bg-surface)] border-2 border-dashed border-[var(--color-border-default)] rounded-[var(--radius-lg)] p-[var(--sp-12)] text-center text-[var(--color-text-secondary)]">
+                <h3 className="text-[var(--font-size-md)] font-semibold text-[var(--color-text-primary)] mb-[var(--sp-2)]">No active wave</h3>
+                <p className="text-[var(--font-size-sm)] mb-[var(--sp-4)]">
                     All tasks are blocked by dependencies or the plan is fully complete.
                 </p>
                 <Button onClick={fetchWave} variant="secondary" size="small">
@@ -93,76 +93,82 @@ export function WaveManager({ projectId }: WaveManagerProps) {
         );
     }
 
+    const statusColor = (status: string) => {
+        switch (status) {
+            case 'in_progress': return 'bg-[var(--status-inprogress-bg)] text-[var(--status-inprogress-text)]';
+            case 'done':
+            case 'skipped': return 'bg-[var(--status-done-bg)] text-[var(--status-done-text)]';
+            case 'blocked': return 'bg-[var(--status-paused-bg)] text-[var(--status-paused-text)]';
+            default: return 'bg-[var(--status-todo-bg)] text-[var(--status-todo-text)]';
+        }
+    };
+
     return (
-        <div className="space-y-6">
+        <div className="space-y-[var(--sp-6)]">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-[20px] font-semibold text-text-primary">Current Wave</h2>
-                    <p className="ios-caption text-text-secondary font-mono mt-1">
+                    <h2 className="text-[var(--font-size-lg)] font-semibold text-[var(--color-text-primary)]">Current Wave</h2>
+                    <p className="text-[var(--font-size-sm)] text-[var(--color-text-secondary)] font-mono mt-[var(--sp-1)]">
                         {waveData.wave_id}
                     </p>
                 </div>
                 <div>
                     {waveData.wave_complete ? (
-                        <span className="inline-flex items-center px-3 py-1 rounded-full bg-status-success/10 text-status-success border border-status-success/20 text-sm font-medium">
+                        <span className="inline-flex items-center px-[var(--sp-3)] py-[var(--sp-1)] rounded-full bg-[var(--status-done-bg)] text-[var(--status-done-text)] border border-[var(--status-done-text)] text-[var(--font-size-sm)] font-medium">
                             Wave Complete
                         </span>
                     ) : (
-                        <span className="inline-flex items-center px-3 py-1 rounded-full bg-accent/10 text-accent border border-accent/20 text-sm font-medium">
+                        <span className="inline-flex items-center px-[var(--sp-3)] py-[var(--sp-1)] rounded-full bg-[var(--status-inprogress-bg)] text-[var(--status-inprogress-text)] border border-[var(--status-inprogress-text)] text-[var(--font-size-sm)] font-medium">
                             Executing
                         </span>
                     )}
                 </div>
             </div>
 
-            <div className="bg-bg-elevated border border-border-default rounded-[8px] border border-border-default p-4">
-                <h3 className="text-[12px] text-text-primary mb-3">Git Configuration</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] p-[var(--sp-4)]">
+                <h3 className="text-[var(--font-size-sm)] text-[var(--color-text-primary)] font-semibold mb-[var(--sp-3)]">Git Configuration</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-[var(--sp-4)]">
                     <div>
-                        <p className="text-[11px] text-text-secondary uppercase mb-1">Repo URL</p>
-                        <p className="text-[13px] font-mono text-sm truncate">{waveData.git_config.repoUrl || 'None'}</p>
+                        <p className="text-[var(--font-size-xs)] text-[var(--color-text-secondary)] uppercase mb-[var(--sp-1)] font-bold">Repo URL</p>
+                        <p className="text-[var(--font-size-sm)] font-mono truncate">{waveData.git_config.repoUrl || 'None'}</p>
                     </div>
                     <div>
-                        <p className="text-[11px] text-text-secondary uppercase mb-1">Branch</p>
-                        <p className="text-[13px] text-sm">{waveData.git_config.branch}</p>
+                        <p className="text-[var(--font-size-xs)] text-[var(--color-text-secondary)] uppercase mb-[var(--sp-1)] font-bold">Branch</p>
+                        <p className="text-[var(--font-size-sm)]">{waveData.git_config.branch}</p>
                     </div>
                     <div>
-                        <p className="text-[11px] text-text-secondary uppercase mb-1">Strategy</p>
-                        <p className="text-[13px] text-sm capitalize">{waveData.git_config.strategy || 'None'}</p>
+                        <p className="text-[var(--font-size-xs)] text-[var(--color-text-secondary)] uppercase mb-[var(--sp-1)] font-bold">Strategy</p>
+                        <p className="text-[var(--font-size-sm)] capitalize">{waveData.git_config.strategy || 'None'}</p>
                     </div>
                     <div>
-                        <p className="text-[11px] text-text-secondary uppercase mb-1">Webhook</p>
-                        <p className="text-[13px] font-mono text-[10px] break-all text-accent">{waveData.git_config.webhookUrl}</p>
+                        <p className="text-[var(--font-size-xs)] text-[var(--color-text-secondary)] uppercase mb-[var(--sp-1)] font-bold">Webhook</p>
+                        <p className="text-[10px] font-mono break-all text-[var(--color-brand-bold)]">{waveData.git_config.webhookUrl}</p>
                     </div>
                 </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-[var(--sp-4)]">
                 <div className="flex items-center justify-between">
-                    <h3 className="text-[12px] text-text-primary">Parallel Tasks ({waveData.tasks.length})</h3>
+                    <h3 className="text-[var(--font-size-sm)] text-[var(--color-text-primary)] font-semibold">Parallel Tasks ({waveData.tasks.length})</h3>
                     <Button onClick={fetchWave} variant="secondary" size="small">
                         Refresh
                     </Button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-[var(--sp-4)]">
                     {waveData.tasks.map(task => (
-                        <div key={task.id} className="bg-bg-elevated border border-border-default rounded-[8px] border border-border-default p-4 hover:border-accent/30 transition-colors">
-                            <div className="flex items-start justify-between mb-2">
-                                <span className="ios-caption font-mono text-text-secondary">Task #{task.id}</span>
-                                <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium capitalize ${task.status === 'in_progress' ? 'bg-accent/10 text-accent' :
-                                        task.status === 'done' || task.status === 'skipped' ? 'bg-status-success/10 text-status-success' :
-                                            task.status === 'blocked' ? 'bg-ios-yellow/10 text-ios-yellow' :
-                                                'bg-status-idle-6 text-text-secondary'
-                                    }`}>
+                        <div key={task.id} className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] p-[var(--sp-4)] hover:border-[var(--color-border-selected)] transition-colors">
+                            <div className="flex items-start justify-between mb-[var(--sp-2)]">
+                                <span className="text-[var(--font-size-xs)] font-mono text-[var(--color-text-secondary)]">Task #{task.id}</span>
+                                <span className={`inline-flex items-center px-[var(--sp-2)] py-[2px] rounded-[var(--radius-sm)] text-[var(--font-size-xs)] font-bold capitalize ${statusColor(task.status)}`}>
                                     {task.status.replace('_', ' ')}
                                 </span>
                             </div>
-                            <p className="text-[13px] font-medium text-text-primary mb-3">
+                            <p className="text-[var(--font-size-sm)] font-medium text-[var(--color-text-primary)] mb-[var(--sp-3)]">
                                 {task.description}
                             </p>
 
                             <div className="flex items-center justify-between mt-auto">
-                                <div className="flex gap-2 text-text-[11px] font-medium text-text-secondary">
+                                <div className="flex gap-[var(--sp-2)] text-[var(--font-size-xs)] font-medium text-[var(--color-text-secondary)]">
                                     <span>Priority: {task.priority}</span>
                                     {task.files_involved?.length > 0 && (
                                         <span>• {task.files_involved.length} file(s)</span>

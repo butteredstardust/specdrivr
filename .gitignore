@@ -89,3 +89,9 @@ pids
 
 # vercel
 .vercel
+
+# Build info
+*.tsbuildinfo
+
+# QA Screenshots
+screenshots/qa/

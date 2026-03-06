@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { logTestResultDev } from '@/lib/actions';
 import { TaskSelect } from '@/db/schema';
+import { CheckCircle2, XCircle } from 'lucide-react';
 
 interface LogTestResultDialogProps {
   task: TaskSelect;
@@ -11,17 +12,8 @@ interface LogTestResultDialogProps {
   onResultLogged?: () => void;
 }
 
-const iosInputStyle = {
-  width: '100%',
-  padding: '8px 12px',
-  backgroundColor: 'var(--bg-bg-primary)',
-  color: 'var(--text-text-primary)',
-  borderColor: 'var(--ios-separator)',
-  borderRadius: '8px',
-  fontSize: '17px',
-  outline: 'none',
-  transition: 'box-shadow 0.2s',
-};
+const textareaClass = "w-full p-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[var(--font-size-base)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-selected)] transition-all resize-none";
+const labelClass = "block text-[var(--font-size-xs)] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-[var(--sp-2)]";
 
 export function LogTestResultDialog({
   task,
@@ -86,85 +78,69 @@ export function LogTestResultDialog({
             setIsOpenInternal(true);
           }
         }}
-        className="text-text-tertiary hover:text-ios-primary transition-colors "
+        className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-colors"
         title="Log Test Result"
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-          <polyline points="22 4 12 14.01 9 11.01" />
-        </svg>
+        <CheckCircle2 size={16} />
       </button>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center ios-font">
-      {/* Backdrop */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+        className="fixed inset-0 bg-black/50"
         onClick={handleCancel}
       />
 
-      {/* Dialog */}
-      <div className="bg-bg-elevated border border-border-default rounded-[8px] shadow-xl w-full max-w-lg mx-4 overflow-hidden ios relative z-10">
-        <div className="p-6">
-          <h2 className="text-[20px] font-semibold text-ios-primary mb-4 ">
+      <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-overlay)] w-full max-w-lg mx-[var(--sp-4)] overflow-hidden relative z-10">
+        <div className="p-[var(--sp-6)]">
+          <h2 className="text-[var(--font-size-lg)] font-semibold text-[var(--color-text-primary)] mb-[var(--sp-4)]">
             Log Test Result
           </h2>
 
           {/* Task Info */}
-          <div className="mb-4 p-3 bg-ios-secondary rounded-lg">
-            <p className="ios-caption text-text-tertiary mb-1 ">Task</p>
-            <p className="text-[13px] text-ios-primary ">
+          <div className="mb-[var(--sp-4)] p-[var(--sp-3)] bg-[var(--color-bg-sunken)] rounded-[var(--radius-sm)]">
+            <p className="text-[var(--font-size-xs)] text-[var(--color-text-tertiary)] mb-[var(--sp-1)]">Task</p>
+            <p className="text-[var(--font-size-sm)] text-[var(--color-text-primary)]">
               #{task.id}: {task.description?.substring(0, 80)}
               {task.description && task.description.length > 80 ? '...' : ''}
             </p>
           </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-opacity-10 border rounded-[8px]"
-              style={{ backgroundColor: 'var(--status-error)', borderColor: 'var(--ios-separator)' }}
-            >
-              <p className="text-[11px] text-text-tertiary text-status-error ">{error}</p>
+            <div className="mb-[var(--sp-4)] p-[var(--sp-3)] bg-[var(--status-blocked-bg)] border border-[var(--status-blocked-text)] rounded-[var(--radius-sm)]">
+              <p className="text-[var(--font-size-xs)] text-[var(--status-blocked-text)]">{error}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4 ">
+          <form onSubmit={handleSubmit} className="space-y-[var(--sp-4)]">
             <div>
-              <label className="block text-[12px] text-ios-primary mb-3">
-                Test Result
-              </label>
-              <div className="grid grid-cols-2 gap-3">
+              <label className={`${labelClass} mb-[var(--sp-3)]`}>Test Result</label>
+              <div className="grid grid-cols-2 gap-[var(--sp-3)]">
                 <button
                   type="button"
                   onClick={() => setSuccess(true)}
-                  className={`p-4 rounded-lg text-[13px]  transition-all ${success === true
-                    ? 'bg-status-success/15 text-status-success border-2 border-status-success'
-                    : 'bg-ios-secondary text-text-secondary border-2 border-border-default hover:border-status-success'
+                  className={`p-[var(--sp-4)] rounded-[var(--radius-sm)] text-[var(--font-size-sm)] transition-all ${success === true
+                    ? 'bg-[var(--status-done-bg)] text-[var(--status-done-text)] border-2 border-[var(--status-done-text)]'
+                    : 'bg-[var(--color-bg-sunken)] text-[var(--color-text-secondary)] border-2 border-[var(--color-border-default)] hover:border-[var(--status-done-text)]'
                     }`}
                 >
-                  <div className="flex flex-col items-center gap-2">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={success === true ? 'text-status-success' : 'text-text-tertiary'}>
-                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                      <polyline points="22 4 12 14.01 9 11.01" />
-                    </svg>
+                  <div className="flex flex-col items-center gap-[var(--sp-2)]">
+                    <CheckCircle2 size={32} className={success === true ? 'text-[var(--status-done-text)]' : 'text-[var(--color-text-tertiary)]'} />
                     <span className="font-semibold">Passed</span>
                   </div>
                 </button>
                 <button
                   type="button"
                   onClick={() => setSuccess(false)}
-                  className={`p-4 rounded-lg text-[13px]  transition-all ${success === false
-                    ? 'bg-status-error/15 text-status-error border-2 border-status-error'
-                    : 'bg-ios-secondary text-text-secondary border-2 border-border-default hover:border-status-error'
+                  className={`p-[var(--sp-4)] rounded-[var(--radius-sm)] text-[var(--font-size-sm)] transition-all ${success === false
+                    ? 'bg-[var(--status-blocked-bg)] text-[var(--status-blocked-text)] border-2 border-[var(--status-blocked-text)]'
+                    : 'bg-[var(--color-bg-sunken)] text-[var(--color-text-secondary)] border-2 border-[var(--color-border-default)] hover:border-[var(--status-blocked-text)]'
                     }`}
                 >
-                  <div className="flex flex-col items-center gap-2">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={success === false ? 'text-red-600' : 'text-gray-400'}>
-                      <circle cx="12" cy="12" r="10" />
-                      <line x1="15" y1="9" x2="9" y2="15" />
-                      <line x1="9" y1="9" x2="15" y2="15" />
-                    </svg>
+                  <div className="flex flex-col items-center gap-[var(--sp-2)]">
+                    <XCircle size={32} className={success === false ? 'text-[var(--status-blocked-text)]' : 'text-[var(--color-text-tertiary)]'} />
                     <span className="font-semibold">Failed</span>
                   </div>
                 </button>
@@ -172,37 +148,33 @@ export function LogTestResultDialog({
             </div>
 
             <div>
-              <label htmlFor="logs" className="block text-[12px] text-ios-primary mb-2">
-                Test Logs
-              </label>
+              <label htmlFor="logs" className={labelClass}>Test Logs</label>
               <textarea
                 id="logs"
                 value={logs}
                 onChange={(e) => setLogs(e.target.value)}
                 placeholder="Paste test output, error messages, or verification details..."
                 rows={6}
-                className="font-mono text-[11px] text-text-tertiary "
-                style={{ ...iosInputStyle, resize: 'none' }}
+                className={`${textareaClass} font-mono text-[var(--font-size-xs)]`}
               />
-              <p className="mt-1 ios-caption text-text-tertiary ">
+              <p className="mt-[var(--sp-1)] text-[var(--font-size-xs)] text-[var(--color-text-tertiary)]">
                 Optional but recommended for tracking
               </p>
             </div>
 
-            <div className="flex justify-end gap-3 pt-4">
+            <div className="flex justify-end gap-[var(--sp-3)] pt-[var(--sp-4)]">
               <button
                 type="button"
                 onClick={handleCancel}
                 disabled={isSubmitting}
-                className="px-4 py-2 text-[13px] text-accent bg-ios-secondary border border-ios rounded-[8px]  disabled:opacity-50"
+                className="px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-[var(--color-brand-bold)] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] hover:bg-[var(--color-bg-hovered)] disabled:opacity-50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting || success === null}
-                className="px-4 py-2 text-[13px] text-white rounded-[8px]  transition-colors disabled:opacity-50"
-                style={{ backgroundColor: 'var(--accent)' }}
+                className="px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-white bg-[var(--color-brand-bold)] rounded-[var(--radius-sm)] hover:bg-[var(--color-brand-bold-hovered)] transition-colors disabled:opacity-50"
               >
                 {isSubmitting ? 'Saving...' : 'Save Result'}
               </button>

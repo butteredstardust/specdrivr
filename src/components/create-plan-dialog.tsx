@@ -8,22 +8,9 @@ interface CreatePlanDialogProps {
   onPlanCreated?: (plan: any) => void;
 }
 
-const iosInputStyle = {
-  width: '100%',
-  padding: '8px 12px',
-  backgroundColor: 'var(--bg-bg-primary)',
-  color: 'var(--text-text-primary)',
-  borderColor: 'var(--ios-separator)',
-  borderRadius: '8px',
-  fontSize: '17px',
-  outline: 'none',
-  transition: 'box-shadow 0.2s',
-  fontFamily: '-apple-system, BlinkMacSystemFont, SF Pro Text, Helvetica, sans-serif',
-};
-
-const iosFontStyle = {
-  fontFamily: '-apple-system, BlinkMacSystemFont, SF Pro Display, Helvetica, sans-serif',
-};
+const inputClass = "w-full h-[40px] px-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[var(--font-size-base)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-selected)] transition-all";
+const textareaClass = "w-full p-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[var(--font-size-base)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-selected)] transition-all resize-none";
+const labelClass = "block text-[var(--font-size-xs)] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-[var(--sp-2)]";
 
 export function CreatePlanDialog({ specId, onPlanCreated }: CreatePlanDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -91,7 +78,7 @@ export function CreatePlanDialog({ specId, onPlanCreated }: CreatePlanDialogProp
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="px-4 py-2 text-[13px] text-accent bg-ios-secondary border border-ios rounded-[8px] "
+        className="px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-[var(--color-brand-bold)] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] hover:bg-[var(--color-bg-hovered)] transition-colors"
       >
         Create Plan
       </button>
@@ -99,51 +86,49 @@ export function CreatePlanDialog({ specId, onPlanCreated }: CreatePlanDialogProp
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center ios-font">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+        className="fixed inset-0 bg-black/50"
         onClick={handleCancel}
       />
 
-      <div className="bg-bg-elevated border border-border-default rounded-[8px] shadow-xl w-full max-w-lg mx-4 overflow-hidden ios relative z-10">
-        <div className="p-6">
-          <h2 className="text-[20px] font-semibold text-ios-primary mb-6 ">
+      <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-overlay)] w-full max-w-lg mx-[var(--sp-4)] overflow-hidden relative z-10">
+        <div className="p-[var(--sp-6)]">
+          <h2 className="text-[var(--font-size-lg)] font-semibold text-[var(--color-text-primary)] mb-[var(--sp-6)]">
             Create New Plan
           </h2>
 
           {error && (
-            <div className="mb-4 p-3 bg-opacity-10 border rounded-[8px]" style={{ backgroundColor: 'var(--status-error)', borderColor: 'var(--ios-separator)' }}>
-              <p className="text-[11px] text-text-tertiary text-status-error" style={iosFontStyle}>{error}</p>
+            <div className="mb-[var(--sp-4)] p-[var(--sp-3)] bg-[var(--status-blocked-bg)] border border-[var(--status-blocked-text)] rounded-[var(--radius-sm)]">
+              <p className="text-[var(--font-size-xs)] text-[var(--status-blocked-text)]">{error}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4" style={iosFontStyle}>
+          <form onSubmit={handleSubmit} className="space-y-[var(--sp-4)]">
             <div>
-              <p className="text-[13px] text-text-secondary mb-4">
+              <p className="text-[var(--font-size-sm)] text-[var(--color-text-secondary)] mb-[var(--sp-4)]">
                 Creating plan for specification #{specId}
               </p>
             </div>
 
             <div>
-              <label htmlFor="architectureDecisions" className="block text-[12px] text-ios-primary mb-2">
-                Architecture Decisions
-              </label>
+              <label htmlFor="architectureDecisions" className={labelClass}>Architecture Decisions</label>
               <textarea
                 id="architectureDecisions"
                 value={formData.architectureDecisions}
                 onChange={(e) => setFormData({ ...formData, architectureDecisions: e.target.value })}
                 placeholder='{"frontend": "Next.js 14", "backend": "API Routes"}'
                 rows={6}
-                style={{ ...iosInputStyle, resize: 'none', fontFamily: 'monospace, Menlo, Monaco, Consolas, monospace' }}
+                className={`${textareaClass} font-mono`}
               />
-              <p className="mt-1 ios-caption text-text-tertiary">
+              <p className="mt-[var(--sp-1)] text-[var(--font-size-xs)] text-[var(--color-text-tertiary)]">
                 Enter architecture decisions as JSON object
               </p>
             </div>
 
             <div>
-              <label htmlFor="intent" className="block text-[12px] text-ios-primary mb-2">
-                What is your intent with this plan? <span className="text-red-500">*</span>
+              <label htmlFor="intent" className={labelClass}>
+                What is your intent with this plan? <span className="text-[var(--status-blocked-text)]">*</span>
               </label>
               <textarea
                 id="intent"
@@ -152,42 +137,39 @@ export function CreatePlanDialog({ specId, onPlanCreated }: CreatePlanDialogProp
                 placeholder="E.g., Implement the core authentication flow safely, following best practices."
                 rows={3}
                 required
-                style={{ ...iosInputStyle, resize: 'none' }}
+                className={textareaClass}
               />
-              <p className="mt-1 ios-caption text-text-tertiary">
+              <p className="mt-[var(--sp-1)] text-[var(--font-size-xs)] text-[var(--color-text-tertiary)]">
                 Provide overarching guidance or a specific goal.
               </p>
             </div>
 
             <div>
-              <label htmlFor="status" className="block text-[12px] text-ios-primary mb-2">
-                Status
-              </label>
+              <label htmlFor="status" className={labelClass}>Status</label>
               <select
                 id="status"
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                style={iosInputStyle}
+                className={inputClass}
               >
                 <option value="draft">Draft</option>
                 <option value="active">Active</option>
               </select>
             </div>
 
-            <div className="flex justify-end gap-3 pt-4">
+            <div className="flex justify-end gap-[var(--sp-3)] pt-[var(--sp-4)]">
               <button
                 type="button"
                 onClick={handleCancel}
                 disabled={isSubmitting}
-                className="px-4 py-2 text-[13px] text-accent bg-ios-secondary border border-ios rounded-[8px]  disabled:opacity-50"
+                className="px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-[var(--color-brand-bold)] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] hover:bg-[var(--color-bg-hovered)] disabled:opacity-50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-4 py-2 text-[13px] text-white rounded-[8px]  transition-colors disabled:opacity-50"
-                style={{ backgroundColor: 'var(--accent)' }}
+                className="px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-white bg-[var(--color-brand-bold)] rounded-[var(--radius-sm)] hover:bg-[var(--color-brand-bold-hovered)] transition-colors disabled:opacity-50"
               >
                 {isSubmitting ? 'Creating...' : 'Create'}
               </button>

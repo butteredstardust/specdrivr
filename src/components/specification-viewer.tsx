@@ -7,7 +7,7 @@ interface SpecificationViewerProps {
 export function SpecificationViewer({ content }: SpecificationViewerProps) {
   if (!content) {
     return (
-      <div className="text-center py-8 text-text-secondary">
+      <div className="text-center py-8 text-[var(--color-text-secondary)]">
         <p>No specification provided yet</p>
       </div>
     );

@@ -8,6 +8,7 @@ import { ConfirmDialog } from '@/components/ui/dialog';
 import { taskStatusColors, type TaskStatus } from '@/lib/ios-styles';
 import { formatDateTime, formatDuration } from '@/lib/ios-styles';
 import { clsx } from 'clsx';
+import { FileText, Copy, Check } from 'lucide-react';
 
 interface TaskDetailModalProps {
   isOpen: boolean;
@@ -86,6 +87,9 @@ export function TaskDetailModal({
     ? Date.now() - new Date(task.updatedAt).getTime()
     : null;
 
+  const sectionLabel = "text-[var(--font-size-xs)] text-[var(--color-text-secondary)] uppercase tracking-wider font-semibold block mb-[var(--sp-2)]";
+  const infoBox = "bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] p-[var(--sp-3)]";
+
   return (
     <>
       <Dialog
@@ -94,11 +98,11 @@ export function TaskDetailModal({
         title={`Task #${task.id}`}
         size="large"
         footer={
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <div className="text-[13px] text-text-secondary">
+          <div className="flex items-center justify-between flex-wrap gap-[var(--sp-3)]">
+            <div className="text-[var(--font-size-sm)] text-[var(--color-text-secondary)]">
               Created {formatDateTime(task.createdAt)}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-[var(--sp-2)]">
               {task.status === 'blocked' && onRetry && (
                 <Button
                   variant="secondary"
@@ -124,17 +128,15 @@ export function TaskDetailModal({
           </div>
         }
       >
-        <div className="space-y-6">
+        <div className="space-y-[var(--sp-6)]">
           {/* Status Section */}
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[11px] uppercase tracking-wide">
-                Status
-              </span>
-              <div className="flex items-center gap-2 mt-1">
+              <span className={sectionLabel}>Status</span>
+              <div className="flex items-center gap-[var(--sp-2)] mt-[var(--sp-1)]">
                 <span
                   className={clsx(
-                    'inline-flex items-center gap-1 px-2.5 py-1 rounded-ios-md text-[13px] font-medium',
+                    'inline-flex items-center gap-[var(--sp-1)] px-[var(--sp-2)] py-[var(--sp-1)] rounded-[var(--radius-sm)] text-[var(--font-size-sm)] font-bold',
                     statusInfo.bg,
                     statusInfo.text,
                     statusInfo.border,
@@ -144,7 +146,7 @@ export function TaskDetailModal({
                   {task.status.replace('_', ' ').toUpperCase()}
                 </span>
                 {task.retryCount > 0 && (
-                  <span className="text-[11px] text-text-secondary">
+                  <span className="text-[var(--font-size-xs)] text-[var(--color-text-secondary)]">
                     (Retried {task.retryCount} time{task.retryCount > 1 ? 's' : ''})
                   </span>
                 )}
@@ -152,10 +154,10 @@ export function TaskDetailModal({
             </div>
             {uptime !== null && (
               <div className="text-right">
-                <span className="text-[11px] text-text-secondary uppercase tracking-wide">
+                <span className="text-[var(--font-size-xs)] text-[var(--color-text-secondary)] uppercase tracking-wider font-semibold">
                   In Progress For
                 </span>
-                <div className="text-[13px] font-medium text-text-primary mt-1">
+                <div className="text-[var(--font-size-sm)] font-medium text-[var(--color-text-primary)] mt-[var(--sp-1)]">
                   {formatDuration(uptime)}
                 </div>
               </div>
@@ -164,34 +166,30 @@ export function TaskDetailModal({
 
           {/* Description */}
           <div>
-            <span className="text-[11px] text-text-secondary uppercase tracking-wide block mb-2">
-              Description
-            </span>
-            <p className="text-[13px] text-text-primary">
+            <span className={sectionLabel}>Description</span>
+            <p className="text-[var(--font-size-sm)] text-[var(--color-text-primary)]">
               {task.description || 'No description provided.'}
             </p>
           </div>
 
           {/* Priority */}
           <div>
-            <span className="text-[11px] text-text-secondary uppercase tracking-wide block mb-2">
-              Priority
-            </span>
-            <div className="flex items-center gap-2">
-              <div className="flex gap-0.5">
+            <span className={sectionLabel}>Priority</span>
+            <div className="flex items-center gap-[var(--sp-2)]">
+              <div className="flex gap-[2px]">
                 {[1, 2, 3, 4, 5].map((p) => (
                   <div
                     key={p}
                     className={clsx(
-                      'w-3 h-3 rounded-ios-xl',
+                      'w-[12px] h-[12px] rounded-full',
                       p <= Math.min(task.priority, 5)
-                        ? `bg-${['gray', 'yellow', 'orange', 'red', 'red'][p - 1]}-${400 + (p === 5 ? 200 : 100)}`
-                        : 'bg-status-idle-5'
+                        ? 'bg-[var(--status-blocked-text)]'
+                        : 'bg-[var(--color-bg-sunken)]'
                     )}
                   />
                 ))}
               </div>
-              <span className="text-[13px] font-medium text-text-primary">
+              <span className="text-[var(--font-size-sm)] font-medium text-[var(--color-text-primary)]">
                 P{task.priority}
               </span>
             </div>
@@ -200,10 +198,8 @@ export function TaskDetailModal({
           {/* Status Control (for manual override) */}
           {onStatusChange && (
             <div>
-              <span className="text-[11px] text-text-secondary uppercase tracking-wide block mb-2">
-                Change Status
-              </span>
-              <div className="flex flex-wrap gap-2">
+              <span className={sectionLabel}>Change Status</span>
+              <div className="flex flex-wrap gap-[var(--sp-2)]">
                 {(Object.keys(taskStatusColors) as TaskStatus[]).map((status) => (
                   <button
                     key={status}
@@ -211,10 +207,10 @@ export function TaskDetailModal({
                     disabled={status === task.status || isSubmitting}
                     data-testid={`task-status-${status}`}
                     className={clsx(
-                      'px-3 py-1.5 rounded-ios-md text-[11px] text-text-tertiary font-medium border transition-colors',
+                      'px-[var(--sp-3)] py-[6px] rounded-[var(--radius-sm)] text-[var(--font-size-xs)] font-bold border transition-colors',
                       status === task.status
                         ? `${taskStatusColors[status].text} ${taskStatusColors[status].bg} ${taskStatusColors[status].border}`
-                        : 'text-text-secondary bg-bg-elevated border-border-default hover:bg-status-idle-5'
+                        : 'text-[var(--color-text-secondary)] bg-[var(--color-bg-surface)] border-[var(--color-border-default)] hover:bg-[var(--color-bg-hovered)]'
                     )}
                   >
                     {status.replace('_', ' ').toUpperCase()}
@@ -227,25 +223,12 @@ export function TaskDetailModal({
           {/* Files Involved */}
           {filesInvolved.length > 0 && (
             <div>
-              <span className="text-[11px] text-text-secondary uppercase tracking-wide block mb-2">
-                Files Involved
-              </span>
-              <div className="bg-bg-elevated border border-border-default rounded-[8px] bg-ios-secondary p-3 space-y-1">
+              <span className={sectionLabel}>Files Involved</span>
+              <div className={clsx(infoBox, 'space-y-[var(--sp-1)]')}>
                 {filesInvolved.map((file, index) => (
-                  <div key={index} className="flex items-center gap-2 text-[11px] text-text-tertiary">
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      className="text-text-tertiary flex-shrink-0"
-                    >
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                      <polyline points="14 2 14 8 20 8" />
-                    </svg>
-                    <code className="text-text-primary">{file}</code>
+                  <div key={index} className="flex items-center gap-[var(--sp-2)] text-[var(--font-size-xs)]">
+                    <FileText size={14} className="text-[var(--color-text-tertiary)] flex-shrink-0" />
+                    <code className="text-[var(--color-text-primary)]">{file}</code>
                   </div>
                 ))}
               </div>
@@ -255,12 +238,10 @@ export function TaskDetailModal({
           {/* Dependencies */}
           {task.dependencies && task.dependencies.length > 0 && (
             <div>
-              <span className="text-[11px] text-text-secondary uppercase tracking-wide block mb-2">
-                Dependencies
-              </span>
-              <div className="flex flex-wrap gap-2">
+              <span className={sectionLabel}>Dependencies</span>
+              <div className="flex flex-wrap gap-[var(--sp-2)]">
                 {task.dependencies.map((dep) => (
-                  <span key={dep.id} className="ios-badge bg-status-idle-100 text-text-secondary">
+                  <span key={dep.id} className="px-[var(--sp-2)] py-[var(--sp-1)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[var(--font-size-xs)] text-[var(--color-text-secondary)] font-medium">
                     #{dep.id} {dep.description?.slice(0, 30)}...
                   </span>
                 ))}
@@ -270,29 +251,16 @@ export function TaskDetailModal({
 
           {/* Verify Command */}
           <div>
-            <span className="text-[11px] text-text-secondary uppercase tracking-wide block mb-2">
-              Verify Command
-            </span>
-            <div className="flex items-center gap-2">
-              <code className="flex-1 bg-bg-elevated border border-border-default rounded-[8px] p-3 text-[11px] text-text-tertiary text-text-primary bg-status-idle-6">
+            <span className={sectionLabel}>Verify Command</span>
+            <div className="flex items-center gap-[var(--sp-2)]">
+              <code className={clsx(infoBox, 'flex-1 text-[var(--font-size-xs)] text-[var(--color-text-primary)] font-mono')}>
                 verify-task --id {task.id}
               </code>
               <Button
                 variant="secondary"
                 size="small"
                 onClick={handleCopyVerifyCommand}
-                icon={
-                  copied ? (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  ) : (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                    </svg>
-                  )
-                }
+                icon={copied ? <Check size={14} /> : <Copy size={14} />}
               >
                 {copied ? 'Copied' : 'Copy'}
               </Button>
@@ -302,10 +270,8 @@ export function TaskDetailModal({
           {/* Notes (Agent Notes) */}
           {task.notes && (
             <div>
-              <span className="text-[11px] text-text-secondary uppercase tracking-wide block mb-2">
-                Notes
-              </span>
-              <div className="bg-bg-elevated border border-border-default rounded-[8px] p-3 text-[11px] text-text-tertiary text-text-secondary">
+              <span className={sectionLabel}>Notes</span>
+              <div className={clsx(infoBox, 'text-[var(--font-size-xs)] text-[var(--color-text-secondary)]')}>
                 {task.notes}
               </div>
             </div>
@@ -314,31 +280,29 @@ export function TaskDetailModal({
           {/* Test Results */}
           {task.testResults && task.testResults.length > 0 && (
             <div>
-              <span className="text-[11px] text-text-secondary uppercase tracking-wide block mb-2">
-                Test Results
-              </span>
-              <div className="bg-bg-elevated border border-border-default rounded-[8px] p-3 space-y-2">
+              <span className={sectionLabel}>Test Results</span>
+              <div className={clsx(infoBox, 'space-y-[var(--sp-2)]')}>
                 {task.testResults.map((result, index) => (
                   <div
                     key={index}
                     className={clsx(
-                      'flex items-start gap-3 p-2 rounded-md',
-                      result.success ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'
+                      'flex items-start gap-[var(--sp-3)] p-[var(--sp-2)] rounded-[var(--radius-sm)]',
+                      result.success ? 'bg-[var(--status-done-bg)]' : 'bg-[var(--status-blocked-bg)]'
                     )}
                   >
-                    <span className={result.success ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
+                    <span className={result.success ? 'text-[var(--status-done-text)]' : 'text-[var(--status-blocked-text)]'}>
                       {result.success ? '✓' : '✗'}
                     </span>
                     <div className="flex-1">
-                      <div className="text-[11px] text-text-tertiary font-medium text-text-primary mb-1">
+                      <div className="text-[var(--font-size-xs)] font-medium text-[var(--color-text-primary)] mb-[var(--sp-1)]">
                         {result.success ? 'Passed' : 'Failed'}
                       </div>
                       {result.logs && (
-                        <pre className="text-[11px] text-text-secondary whitespace-pre-wrap">
+                        <pre className="text-[var(--font-size-xs)] text-[var(--color-text-secondary)] whitespace-pre-wrap">
                           {result.logs}
                         </pre>
                       )}
-                      <div className="text-[11px] text-text-tertiary mt-1">
+                      <div className="text-[var(--font-size-xs)] text-[var(--color-text-tertiary)] mt-[var(--sp-1)]">
                         {formatDateTime(result.timestamp)}
                       </div>
                     </div>
@@ -351,19 +315,17 @@ export function TaskDetailModal({
           {/* Agent Logs */}
           {task.agentLogs && task.agentLogs.length > 0 && (
             <div>
-              <span className="text-[11px] text-text-secondary uppercase tracking-wide block mb-2">
-                Agent Logs
-              </span>
-              <div className="bg-bg-elevated border border-border-default rounded-[8px] p-3 max-h-48 overflow-y-auto linear-scrollbar">
+              <span className={sectionLabel}>Agent Logs</span>
+              <div className={clsx(infoBox, 'max-h-[192px] overflow-y-auto')}>
                 {task.agentLogs.map((log, index) => (
-                  <div key={index} className="flex items-start gap-3 py-1 border-b border-border-default last:border-0">
-                    <span className="text-[11px] text-text-tertiary font-mono flex-shrink-0 w-12">
+                  <div key={index} className="flex items-start gap-[var(--sp-3)] py-[var(--sp-1)] border-b border-[var(--color-border-default)] last:border-0">
+                    <span className="text-[var(--font-size-xs)] text-[var(--color-text-tertiary)] font-mono flex-shrink-0 w-[48px]">
                       {log.level.toUpperCase()}
                     </span>
-                    <span className="text-[11px] text-text-primary flex-1">
+                    <span className="text-[var(--font-size-xs)] text-[var(--color-text-primary)] flex-1">
                       {log.message}
                     </span>
-                    <span className="text-[11px] text-text-tertiary flex-shrink-0">
+                    <span className="text-[var(--font-size-xs)] text-[var(--color-text-tertiary)] flex-shrink-0">
                       {formatDateTime(log.timestamp)}
                     </span>
                   </div>
@@ -373,29 +335,29 @@ export function TaskDetailModal({
           )}
 
           {/* Timestamps */}
-          <div className="grid grid-cols-2 gap-4 text-[11px] text-text-tertiary">
+          <div className="grid grid-cols-2 gap-[var(--sp-4)] text-[var(--font-size-xs)] text-[var(--color-text-tertiary)]">
             <div>
-              <span className="text-[11px] text-text-secondary block">
+              <span className="text-[var(--font-size-xs)] text-[var(--color-text-secondary)] block">
                 Created
               </span>
-              <span className="text-[13px] font-medium text-text-primary">
+              <span className="text-[var(--font-size-sm)] font-medium text-[var(--color-text-primary)]">
                 {formatDateTime(task.createdAt)}
               </span>
             </div>
             <div>
-              <span className="text-[11px] text-text-secondary block">
+              <span className="text-[var(--font-size-xs)] text-[var(--color-text-secondary)] block">
                 Updated
               </span>
-              <span className="text-[13px] font-medium text-text-primary">
+              <span className="text-[var(--font-size-sm)] font-medium text-[var(--color-text-primary)]">
                 {formatDateTime(task.updatedAt)}
               </span>
             </div>
             {task.completedAt && (
               <div>
-                <span className="text-[11px] text-text-secondary block">
+                <span className="text-[var(--font-size-xs)] text-[var(--color-text-secondary)] block">
                   Completed
                 </span>
-                <span className="text-[13px] font-medium text-text-primary">
+                <span className="text-[var(--font-size-sm)] font-medium text-[var(--color-text-primary)]">
                   {formatDateTime(task.completedAt)}
                 </span>
               </div>

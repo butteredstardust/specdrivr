@@ -23,9 +23,9 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{
           __html: `
             (function() {
-              const theme = localStorage.getItem('theme') || 'dark';
+              var theme = localStorage.getItem('theme') || 'light';
               if (theme === 'dark') {
-                document.documentElement.classList.add('dark');
+                document.documentElement.setAttribute('data-theme', 'dark');
               }
             })();
           `

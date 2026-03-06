@@ -1,83 +1,53 @@
 import { Skeleton } from '@/components/skeleton';
 
-export default function SettingsPageLoading() {
+export default function SettingsLoading() {
   return (
-    <div className="min-h-screen bg-bg-primary ">
-      {/* Header Skeleton */}
-      <header className="sticky top-0 z-30 ios-header border-b border-border-default">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-3">
+    <div className="min-h-screen bg-[var(--color-bg-page)]">
+      <header className="sticky top-0 z-30 h-[56px] bg-[var(--color-brand-bold)] border-b border-[var(--color-border-default)]">
+        <div className="max-w-7xl mx-auto px-[var(--sp-4)] md:px-[var(--sp-6)] py-[var(--sp-3)]">
           <div className="flex items-center justify-between">
             <Skeleton className="h-5 w-24" />
+            <div className="flex items-center gap-[var(--sp-3)]">
+              <Skeleton className="h-10 w-10 rounded-full" />
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Main Layout Skeleton */}
       <div className="flex h-[calc(100vh-57px)]">
-        {/* Sidebar Skeleton */}
-        <aside className="w-60 flex-shrink-0 border-r border-border-default bg-bg-elevated linear-scrollbar overflow-y-auto p-4">
-          <Skeleton className="h-8 w-32 mb-4" />
-          <div className="space-y-2">
+        <aside className="w-[240px] flex-shrink-0 border-r border-[var(--color-border-default)] bg-[var(--color-bg-surface)] overflow-y-auto p-[var(--sp-4)]">
+          <Skeleton className="h-8 w-32 mb-[var(--sp-4)]" />
+          <div className="space-y-[var(--sp-2)]">
             {Array.from({ length: 3 }).map((_, i) => (
               <Skeleton key={i} className="h-14 w-full" />
             ))}
           </div>
         </aside>
 
-        {/* Main Content Skeleton */}
-        <main className="flex-1 overflow-y-auto linear-scrollbar bg-bg-primary">
-          {/* Project Title Section */}
-          <div className="px-6 py-4 bg-bg-elevated border-b border-border-default">
-            <Skeleton className="h-8 w-40 mb-2" />
-            <Skeleton className="h-5 w-64" />
+        <main className="flex-1 overflow-y-auto bg-[var(--color-bg-page)]">
+          <div className="px-[var(--sp-6)] py-[var(--sp-4)] bg-[var(--color-bg-surface)] border-b border-[var(--color-border-default)]">
+            <Skeleton className="h-8 w-48 mb-[var(--sp-2)]" />
           </div>
 
-          {/* Tabs */}
-          <div className="border-b border-border-default bg-bg-elevated px-6 py-3">
-            <div className="flex gap-2">
+          <div className="border-b border-[var(--color-border-default)] bg-[var(--color-bg-surface)] px-[var(--sp-6)] py-[var(--sp-3)]">
+            <div className="flex gap-[var(--sp-2)]">
               {Array.from({ length: 6 }).map((_, i) => (
                 <Skeleton key={i} className="h-10 w-20" />
               ))}
             </div>
           </div>
 
-          {/* Settings Content Skeleton */}
-          <div className="px-6 py-6">
-            <div className="max-w-3xl space-y-6">
-              {/* Project Info Section */}
-              <div className="bg-bg-elevated border border-border-default rounded-[8px] p-6">
-                <Skeleton className="h-6 w-40 mb-4" />
-                <div className="space-y-4">
-                  <Skeleton className="h-10 w-full" />
-                  <Skeleton className="h-32 w-full" />
+          <div className="max-w-4xl px-[var(--sp-6)] py-[var(--sp-8)] space-y-[var(--sp-10)]">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="space-y-[var(--sp-6)]">
+                <Skeleton className="h-6 w-40" />
+                <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] p-[var(--sp-6)]">
+                  <Skeleton className="h-10 w-full mb-[var(--sp-4)]" />
+                  <Skeleton className="h-10 w-full mb-[var(--sp-4)]" />
+                  <Skeleton className="h-10 w-1/3" />
                 </div>
               </div>
-
-              {/* Git Integration Section */}
-              <div className="bg-bg-elevated border border-border-default rounded-[8px] p-6">
-                <Skeleton className="h-6 w-40 mb-4" />
-                <div className="space-y-4">
-                  <Skeleton className="h-10 w-full" />
-                  <div className="flex gap-4">
-                    <Skeleton className="h-10 flex-1" />
-                    <Skeleton className="h-10 flex-1" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Agent Tokens Section */}
-              <div className="bg-bg-elevated border border-border-default rounded-[8px] p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <Skeleton className="h-6 w-32" />
-                  <Skeleton className="h-10 w-24" />
-                </div>
-                <div className="space-y-2">
-                  {Array.from({ length: 2 }).map((_, i) => (
-                    <Skeleton key={i} className="h-12 w-full" />
-                  ))}
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </main>
       </div>
