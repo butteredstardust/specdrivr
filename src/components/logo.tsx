@@ -22,7 +22,7 @@ export function Logo({ size = 'medium', className }: LogoProps) {
       <div
         className={cn(
           sizeClass,
-          'rounded-[var(--radius-md)] bg-[var(--color-brand-bold)] flex items-center justify-center font-bold text-white text-[var(--font-size-xs)]',
+          'rounded-[var(--radius-md)] bg-[var(--brand-primary)] flex items-center justify-center font-bold text-white text-[var(--font-size-xs)]',
           className
         )}
         aria-label="specdrivr Logo"
@@ -35,7 +35,7 @@ export function Logo({ size = 'medium', className }: LogoProps) {
   // Full logo with text
   return (
     <div className={cn('flex items-center pl-[var(--sp-2)]', className)}>
-      <span className="text-[var(--font-size-lg)] font-bold text-[var(--color-brand-bold)] tracking-tight lowercase">
+      <span className="text-[var(--font-size-lg)] font-bold text-[var(--brand-primary)] tracking-tight lowercase">
         specdrivr
       </span>
     </div>

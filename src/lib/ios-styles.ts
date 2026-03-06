@@ -24,10 +24,10 @@ export type TaskStatus = keyof typeof taskStatusColors;
 export type AgentStatus = 'idle' | 'running' | 'paused' | 'stopped' | 'error' | 'stale';
 
 export const agentStatusColors: Record<AgentStatus, { dot: string; bg: string; text: string }> = {
-  idle: { dot: 'bg-[var(--color-border-default)]', bg: 'bg-[var(--status-todo-bg)]', text: 'text-[var(--status-todo-text)]' },
+  idle: { dot: 'bg-[var(--border-default)]', bg: 'bg-[var(--status-todo-bg)]', text: 'text-[var(--status-todo-text)]' },
   running: { dot: 'bg-[#4ADE80]', bg: 'bg-[var(--status-done-bg)]', text: 'text-[var(--status-done-text)]' },
   paused: { dot: 'bg-[#F87171]', bg: 'bg-[var(--status-paused-bg)]', text: 'text-[var(--status-paused-text)]' },
-  stopped: { dot: 'bg-[var(--color-border-bold)]', bg: 'bg-[var(--status-todo-bg)]', text: 'text-[var(--status-todo-text)]' },
+  stopped: { dot: 'bg-[var(--border-strong)]', bg: 'bg-[var(--status-todo-bg)]', text: 'text-[var(--status-todo-text)]' },
   error: { dot: 'bg-[var(--status-blocked-text)]', bg: 'bg-[var(--status-blocked-bg)]', text: 'text-[var(--status-blocked-text)]' },
   stale: { dot: 'bg-[var(--status-paused-text)]', bg: 'bg-[var(--status-paused-bg)]', text: 'text-[var(--status-paused-text)]' },
 };

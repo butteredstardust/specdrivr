@@ -103,7 +103,7 @@ export function GenerateTokenDialog({ isOpen, onClose, onTokenGenerated }: Gener
             <div className="space-y-[var(--sp-2)]">
               <label
                 htmlFor="token-name"
-                className="text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-[0.05em]"
+                className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-[0.05em]"
               >
                 Token Name
               </label>
@@ -113,11 +113,11 @@ export function GenerateTokenDialog({ isOpen, onClose, onTokenGenerated }: Gener
                 value={tokenName}
                 onChange={(e) => setTokenName(e.target.value)}
                 placeholder="e.g. Production CI/CD"
-                className="w-full h-[40px] px-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--color-border-selected)] transition-all"
+                className="w-full h-[40px] px-[var(--sp-3)] bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--border-focus)] transition-all"
                 disabled={isGenerating}
                 maxLength={100}
               />
-              <p className="text-[12px] text-[var(--color-text-tertiary)] italic">
+              <p className="text-[12px] text-[var(--text-tertiary)] italic">
                 A descriptive name to identify where this token is used.
               </p>
             </div>
@@ -125,7 +125,7 @@ export function GenerateTokenDialog({ isOpen, onClose, onTokenGenerated }: Gener
             <div className="space-y-[var(--sp-2)]">
               <label
                 htmlFor="model-hint"
-                className="text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-[0.05em]"
+                className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-[0.05em]"
               >
                 Primary Model (Optional)
               </label>
@@ -134,7 +134,7 @@ export function GenerateTokenDialog({ isOpen, onClose, onTokenGenerated }: Gener
                   id="model-hint"
                   value={modelHint}
                   onChange={(e) => setModelHint(e.target.value)}
-                  className="w-full h-[40px] pl-[var(--sp-3)] pr-[var(--sp-10)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--color-border-selected)] transition-all appearance-none cursor-pointer"
+                  className="w-full h-[40px] pl-[var(--sp-3)] pr-[var(--sp-10)] bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--border-focus)] transition-all appearance-none cursor-pointer"
                   disabled={isGenerating}
                 >
                   {modelOptions.map((option) => (
@@ -143,7 +143,7 @@ export function GenerateTokenDialog({ isOpen, onClose, onTokenGenerated }: Gener
                     </option>
                   ))}
                 </select>
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-text-tertiary)]">
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
                 </div>
               </div>
@@ -157,11 +157,11 @@ export function GenerateTokenDialog({ isOpen, onClose, onTokenGenerated }: Gener
             </div>
 
             <div className="space-y-[var(--sp-2)]">
-              <label className="text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">
+              <label className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">
                 Access Token
               </label>
               <div className="flex gap-[var(--sp-2)]">
-                <div className="flex-1 bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] p-[var(--sp-3)] font-mono text-[12px] text-[var(--color-text-primary)] break-all select-all">
+                <div className="flex-1 bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-sm)] p-[var(--sp-3)] font-mono text-[12px] text-[var(--text-primary)] break-all select-all">
                   {generatedToken}
                 </div>
                 <Button variant="secondary" size="small" onClick={handleCopyToken}>
@@ -170,20 +170,20 @@ export function GenerateTokenDialog({ isOpen, onClose, onTokenGenerated }: Gener
               </div>
             </div>
 
-            <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] p-[var(--sp-4)] space-y-[var(--sp-2)] shadow-[var(--shadow-card)]">
+            <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-sm)] p-[var(--sp-4)] space-y-[var(--sp-2)] shadow-[var(--shadow-card)]">
               <div className="flex justify-between items-center text-[12px]">
-                <span className="text-[var(--color-text-tertiary)] font-bold uppercase tracking-wide">Name</span>
-                <span className="text-[var(--color-text-primary)] font-semibold">{tokenName}</span>
+                <span className="text-[var(--text-tertiary)] font-bold uppercase tracking-wide">Name</span>
+                <span className="text-[var(--text-primary)] font-semibold">{tokenName}</span>
               </div>
               <div className="flex justify-between items-center text-[12px]">
-                <span className="text-[var(--color-text-tertiary)] font-bold uppercase tracking-wide">Model</span>
-                <span className="text-[var(--color-text-primary)]">
+                <span className="text-[var(--text-tertiary)] font-bold uppercase tracking-wide">Model</span>
+                <span className="text-[var(--text-primary)]">
                   {modelOptions.find((o) => o.value === modelHint)?.label}
                 </span>
               </div>
               <div className="flex justify-between items-center text-[12px]">
-                <span className="text-[var(--color-text-tertiary)] font-bold uppercase tracking-wide">Created</span>
-                <span className="text-[var(--color-text-primary)]">Now</span>
+                <span className="text-[var(--text-tertiary)] font-bold uppercase tracking-wide">Created</span>
+                <span className="text-[var(--text-primary)]">Now</span>
               </div>
             </div>
           </div>

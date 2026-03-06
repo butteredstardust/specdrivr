@@ -3,61 +3,80 @@
 @tailwind utilities;
 
 :root {
-  /* BACKGROUNDS */
-  --color-bg-page: #F7F8F9;
-  --color-bg-surface: #FFFFFF;
-  --color-bg-sunken: #F1F2F4;
-  --color-bg-overlay: #FFFFFF;
-  --color-bg-selected: #E9F2FF;
-  --color-bg-hovered: #F1F2F4;
 
-  /* BORDERS */
-  --color-border-default: #DFE1E6;
-  --color-border-bold: #B3B9C4;
-  --color-border-selected: #0C66E4;
-
-  /* TEXT */
-  --color-text-primary: #172B4D;
-  --color-text-secondary: #44546F;
-  --color-text-tertiary: #8590A2;
-  --color-text-disabled: #B3B9C4;
-  --color-text-inverse: #FFFFFF;
-  --color-text-link: #0C66E4;
-  --color-text-danger: #AE2A19;
-
-  /* ACCENT */
-  --color-brand-bold: #0C66E4;
-  --color-brand-bolder: #0055CC;
-  --color-brand-subtle: #E9F2FF;
-
-  /* STATUS */
-  --status-todo-bg: #F1F2F4;
-  --status-todo-text: #44546F;
-  --status-inprogress-bg: #E9F2FF;
-  --status-inprogress-text: #0C66E4;
-  --status-done-bg: #DCFFF1;
-  --status-done-text: #216E4E;
-  --status-blocked-bg: #FFECEB;
-  --status-blocked-text: #AE2A19;
-  --status-paused-bg: #FFF7D6;
-  --status-paused-text: #7F5F01;
-  --status-skipped-bg: #F1F2F4;
-  --status-skipped-text: #626F86;
-
-  /* LOG LEVELS */
-  --log-info-bg: #E9F2FF;
-  --log-info-text: #0C66E4;
-  --log-warn-bg: #FFF7D6;
-  --log-warn-text: #7F5F01;
-  --log-error-bg: #FFECEB;
-  --log-error-text: #AE2A19;
-  --log-debug-bg: #F1F2F4;
-  --log-debug-text: #44546F;
+  /* Brand */
+  --brand-primary:     #4F46E5;
+  --brand-primary-hover:#4338CA;
+  --brand-subtle:      #EEF2FF;
+  --brand-accent:      #A78BFA;
+  --brand-accent-end:  #60A5FA;
+  /* Backgrounds */
+  --bg-page:           #F1F5F9;
+  --bg-surface:        #FFFFFF;
+  --bg-sunken:         #F8FAFC;
+  --bg-hovered:        #F1F5F9;
+  --bg-selected:       #EEF2FF;
+  /* Borders */
+  --border-default:    #E2E8F0;
+  --border-strong:     #CBD5E1;
+  --border-focus:      #4F46E5;
+  /* Text */
+  --text-primary:      #0F172A;
+  --text-secondary:    #475569;
+  --text-tertiary:     #94A3B8;
+  --text-disabled:     #CBD5E1;
+  /* Nav */
+  --nav-bg:            #1E1B4B;
+  --nav-text:          rgba(255,255,255,0.75);
+  --nav-text-active:   #FFFFFF;
+  --nav-accent:        #A78BFA;
+  /* Status */
+  --status-todo-bg: #F1F5F9;
+  --status-todo-text: #475569;
+  --status-progress-bg: #DBEAFE;
+  --status-progress-text: #1D4ED8;
+  --status-inprogress-bg: #DBEAFE;
+  --status-inprogress-text: #1D4ED8;
+  --status-done-bg: #DCFCE7;
+  --status-done-text: #166534;
+  --status-blocked-bg: #FEE2E2;
+  --status-blocked-text: #DC2626;
+  --status-paused-bg: #FEF9C3;
+  --status-paused-text: #854D0E;
+  --status-skipped-bg: #F3F4F6;
+  --status-skipped-text: #6B7280;
+  /* Roles */
+  --role-admin-bg: #FEE2E2;
+  --role-admin-text: #DC2626;
+  --role-dev-bg: #DBEAFE;
+  --role-dev-text: #1D4ED8;
+  --role-viewer-bg: #EEF2FF;
+  --role-viewer-text: #4338CA;
+  /* Logs */
+  --log-info-bg: #DBEAFE;
+  --log-info-text: #1D4ED8;
+  --log-debug-bg: #F1F5F9;
+  --log-debug-text: #475569;
+  --log-warn-bg: #FEF9C3;
+  --log-warn-text: #854D0E;
+  --log-error-bg: #FEE2E2;
+  --log-error-text: #DC2626;
   --log-success-bg: #DCFFF1;
   --log-success-text: #216E4E;
-
-  /* TYPOGRAPHY */
-  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* Elevation */
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-modal: 0 20px 60px rgba(0,0,0,0.15), 0 4px 16px rgba(0,0,0,0.10);
+  --shadow-dropdown: 0 4px 16px rgba(0,0,0,0.12);
+  --shadow-overlay: 0 20px 60px rgba(0,0,0,0.15), 0 4px 16px rgba(0,0,0,0.10);
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-full: 9999px;
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-family: var(--font-sans);
   --font-size-xs: 11px;
   --font-size-sm: 12px;
   --font-size-base: 14px;
@@ -68,6 +87,7 @@
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
+
 
   /* SPACING */
   --sp-1: 4px;
@@ -97,16 +117,69 @@
 }
 
 [data-theme="dark"] {
-  --color-bg-page: #1D2125;
-  --color-bg-surface: #22272B;
-  --color-bg-sunken: #161A1D;
-  --color-bg-hovered: #282E33;
-  --color-bg-selected: #1C2B41;
-  --color-border-default: #3B4045;
-  --color-border-bold: #596773;
-  --color-text-primary: #C7D1DB;
-  --color-text-secondary: #8C9BAB;
-  --color-text-tertiary: #596773;
+  --brand-primary:     #6366f1;
+  --brand-primary-hover:#818cf8;
+  --brand-subtle:      #312e81;
+  --brand-accent:      #c4b5fd;
+  --brand-accent-end:  #93c5fd;
+
+  --bg-page:           #0f172a;
+  --bg-surface:        #1e293b;
+  --bg-sunken:         #020617;
+  --bg-hovered:        #334155;
+  --bg-selected:       #1e1b4b;
+
+  --border-default:    #334155;
+  --border-strong:     #475569;
+  --border-focus:      #6366f1;
+
+  --text-primary:      #f8fafc;
+  --text-secondary:    #cbd5e1;
+  --text-tertiary:     #64748b;
+  --text-disabled:     #475569;
+
+  --nav-bg:            #020617;
+  --nav-text:          rgba(255,255,255,0.6);
+  --nav-text-active:   #ffffff;
+  --nav-accent:        #c4b5fd;
+
+  --status-todo-bg: #1e293b;
+  --status-todo-text: #94a3b8;
+  --status-progress-bg: #1e3a8a;
+  --status-progress-text: #60a5fa;
+  --status-inprogress-bg: #1e3a8a;
+  --status-inprogress-text: #60a5fa;
+  --status-done-bg: #064e3b;
+  --status-done-text: #34d399;
+  --status-blocked-bg: #7f1d1d;
+  --status-blocked-text: #f87171;
+  --status-paused-bg: #713f12;
+  --status-paused-text: #facc15;
+  --status-skipped-bg: #334155;
+  --status-skipped-text: #cbd5e1;
+
+  --role-admin-bg: #7f1d1d;
+  --role-admin-text: #f87171;
+  --role-dev-bg: #1e3a8a;
+  --role-dev-text: #60a5fa;
+  --role-viewer-bg: #312e81;
+  --role-viewer-text: #818cf8;
+
+  --log-info-bg: #1e3a8a;
+  --log-info-text: #60a5fa;
+  --log-debug-bg: #1e293b;
+  --log-debug-text: #94a3b8;
+  --log-warn-bg: #713f12;
+  --log-warn-text: #facc15;
+  --log-error-bg: #7f1d1d;
+  --log-error-text: #f87171;
+  --log-success-bg: #064e3b;
+  --log-success-text: #34d399;
+
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-modal: 0 20px 60px rgba(0,0,0,0.5), 0 4px 16px rgba(0,0,0,0.4);
+  --shadow-dropdown: 0 4px 16px rgba(0,0,0,0.4);
+  --shadow-overlay: 0 20px 60px rgba(0,0,0,0.5), 0 4px 16px rgba(0,0,0,0.4);
 }
 
 *,
@@ -119,8 +192,8 @@
 
 html,
 body {
-  background: var(--color-bg-page);
-  color: var(--color-text-primary);
+  background: var(--bg-page);
+  color: var(--text-primary);
   font-family: var(--font-family);
   font-size: var(--font-size-base);
   line-height: 1.42857;
@@ -139,7 +212,7 @@ a:hover {
 
 /* Only .link class gets blue */
 .link {
-  color: var(--color-text-link);
+  color: var(--brand-primary);
 }
 
 .link:hover {

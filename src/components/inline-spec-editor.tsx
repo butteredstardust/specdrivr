@@ -55,17 +55,17 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
   };
 
   return (
-    <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] overflow-hidden">
+    <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] overflow-hidden">
       {/* Header */}
-      <div className="px-[var(--sp-6)] py-[var(--sp-3)] border-b border-[var(--color-border-default)] flex items-center justify-between bg-[var(--color-bg-primary)]">
+      <div className="px-[var(--sp-6)] py-[var(--sp-3)] border-b border-[var(--border-default)] flex items-center justify-between bg-[var(--color-bg-primary)]">
         <div className="flex items-center gap-[var(--sp-4)]">
-          <h3 className="text-[14px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">
+          <h3 className="text-[14px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">
             Specification
           </h3>
           {allVersions.length > 1 && (
             <button
               onClick={() => setShowHistory(!showHistory)}
-              className="flex items-center gap-1.5 px-[var(--sp-2)] py-1 text-[12px] font-semibold text-[var(--color-brand-bold)] hover:bg-[var(--color-bg-sunken)] rounded-[var(--radius-sm)] transition-colors"
+              className="flex items-center gap-1.5 px-[var(--sp-2)] py-1 text-[12px] font-semibold text-[var(--brand-primary)] hover:bg-[var(--bg-sunken)] rounded-[var(--radius-sm)] transition-colors"
             >
               <History size={14} />
               <span>v{currentSpec.version}</span>
@@ -104,8 +104,8 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
 
       {/* History List */}
       {showHistory && (
-        <div className="bg-[var(--color-bg-sunken)] border-b border-[var(--color-border-default)] p-[var(--sp-4)]">
-          <p className="text-[11px] font-bold text-[var(--color-text-tertiary)] uppercase tracking-wider mb-[var(--sp-3)]">Version History</p>
+        <div className="bg-[var(--bg-sunken)] border-b border-[var(--border-default)] p-[var(--sp-4)]">
+          <p className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider mb-[var(--sp-3)]">Version History</p>
           <div className="space-y-1 max-h-[300px] overflow-y-auto pr-2 linear-scrollbar">
             {allVersions.map((spec) => (
               <button
@@ -114,8 +114,8 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
                 className={cn(
                   "w-full flex items-center justify-between p-[var(--sp-3)] border rounded-[var(--radius-sm)] transition-all text-left",
                   currentSpec.id === spec.id
-                    ? "bg-[var(--color-bg-selected)] border-[var(--color-border-selected)] text-[var(--color-brand-bold)]"
-                    : "bg-[var(--color-bg-surface)] border-[var(--color-border-default)] hover:border-[var(--color-border-selected)]"
+                    ? "bg-[var(--bg-selected)] border-[var(--border-focus)] text-[var(--brand-primary)]"
+                    : "bg-[var(--bg-surface)] border-[var(--border-default)] hover:border-[var(--border-focus)]"
                 )}
               >
                 <div>
@@ -123,12 +123,12 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
                     <span className="text-[13px] font-bold">v{spec.version}</span>
                     {spec.isActive && <span className="px-1.5 py-0.5 bg-[var(--status-inprogress-bg)] text-[var(--status-inprogress-text)] text-[10px] font-bold rounded-full">ACTIVE</span>}
                   </div>
-                  <div className="flex items-center gap-1 text-[11px] text-[var(--color-text-tertiary)] mt-1">
+                  <div className="flex items-center gap-1 text-[11px] text-[var(--text-tertiary)] mt-1">
                     <Clock size={10} />
                     {new Date(spec.createdAt).toLocaleString()}
                   </div>
                 </div>
-                <ChevronRight size={14} className="text-[var(--color-text-tertiary)]" />
+                <ChevronRight size={14} className="text-[var(--text-tertiary)]" />
               </button>
             ))}
           </div>
@@ -138,17 +138,17 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
       {/* Editor Content */}
       <div className="p-[var(--sp-6)]">
         {error && (
-          <div className="mb-[var(--sp-4)] p-[var(--sp-3)] bg-[var(--color-bg-sunken)] border-l-4 border-[var(--color-text-danger)] rounded-[var(--radius-sm)]">
-            <p className="text-[12px] text-[var(--color-text-danger)] font-medium">{error}</p>
+          <div className="mb-[var(--sp-4)] p-[var(--sp-3)] bg-[var(--bg-sunken)] border-l-4 border-[var(--status-blocked-text)] rounded-[var(--radius-sm)]">
+            <p className="text-[12px] text-[var(--status-blocked-text)] font-medium">{error}</p>
           </div>
         )}
 
         {isEditing ? (
           <div className="space-y-[var(--sp-4)]">
             {isViewingHistorical && (
-              <div className="p-[var(--sp-3)] bg-[var(--color-bg-sunken)] border-l-4 border-[var(--color-status-inprogress-text)] rounded-[var(--radius-sm)] flex items-center gap-3">
+              <div className="p-[var(--sp-3)] bg-[var(--bg-sunken)] border-l-4 border-[var(--color-status-inprogress-text)] rounded-[var(--radius-sm)] flex items-center gap-3">
                 <CheckCircle2 size={16} className="text-[var(--status-inprogress-text)]" />
-                <p className="text-[12px] text-[var(--color-text-primary)]">
+                <p className="text-[12px] text-[var(--text-primary)]">
                   Restoring version <strong>v{currentSpec.version}</strong>. Saving will create a new current version.
                 </p>
               </div>
@@ -166,7 +166,7 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
           <div data-color-mode="light" className="prose prose-sm max-w-none">
             <MDEditor.Markdown
               source={currentSpec.content}
-              style={{ backgroundColor: 'transparent', color: 'var(--color-text-primary)' }}
+              style={{ backgroundColor: 'transparent', color: 'var(--text-primary)' }}
             />
           </div>
         )}

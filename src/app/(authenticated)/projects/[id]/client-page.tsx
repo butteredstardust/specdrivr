@@ -51,7 +51,7 @@ function SpecTabContent({ specification, allSpecs }: { specification: Specificat
   if (!specification) {
     return (
       <div className="text-center py-12">
-        <p className="text-[var(--font-size-sm)] text-[var(--color-text-tertiary)]">No specification yet</p>
+        <p className="text-[var(--font-size-sm)] text-[var(--text-tertiary)]">No specification yet</p>
       </div>
     );
   }
@@ -67,7 +67,7 @@ function PlanTabContent({ specification, plans }: { specification: Specification
   if (!specification || plans.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-[var(--font-size-sm)] text-[var(--color-text-tertiary)]">No plans yet</p>
+        <p className="text-[var(--font-size-sm)] text-[var(--text-tertiary)]">No plans yet</p>
       </div>
     );
   }
@@ -197,7 +197,7 @@ export function ProjectDetailClient({
   };
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 bg-[var(--color-bg-page)]">
+    <div className="flex-1 flex flex-col min-w-0 bg-[var(--bg-page)]">
       {/* Page Header */}
       <div className="px-[24px] pt-[24px] pb-0 bg-[var(--bg-surface)] border-b border-[var(--border-default)]">
         {/* Breadcrumb */}
@@ -220,7 +220,7 @@ export function ProjectDetailClient({
             const sharedClass = `relative flex items-center gap-[6px] h-[36px] px-[12px] text-[13px] font-medium transition-colors whitespace-nowrap mb-[-1px] ${isActive ? 'text-[var(--brand-primary)] border-b-2 border-[var(--brand-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-b-2 border-transparent'}`;
             const badge = tab.badge && (
               <span
-                className={`min-w-[16px] h-[16px] px-[var(--sp-1)] rounded-full text-[10px] flex items-center justify-center font-bold ${isActive ? 'bg-[var(--color-brand-bold)] text-white' : 'bg-[var(--color-bg-sunken)] text-[var(--color-text-secondary)]'
+                className={`min-w-[16px] h-[16px] px-[var(--sp-1)] rounded-full text-[10px] flex items-center justify-center font-bold ${isActive ? 'bg-[var(--brand-primary)] text-white' : 'bg-[var(--bg-sunken)] text-[var(--text-secondary)]'
                   }`}
               >
                 {typeof tab.badge === 'number' && tab.badge > 99 ? '99+' : tab.badge}

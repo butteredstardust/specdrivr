@@ -27,8 +27,8 @@ export function ProjectSidebar({ projects, currentProjectId, onProjectCreated }:
       className={cn(
         "flex items-center h-[32px] px-[var(--sp-2)] rounded-[var(--radius-md)] gap-[var(--sp-2)] text-[12px] font-medium transition-all duration-80",
         active
-          ? "bg-[var(--color-bg-selected)] text-[var(--color-brand-bold)]"
-          : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hovered)] hover:text-[var(--color-text-primary)]"
+          ? "bg-[var(--bg-selected)] text-[var(--brand-primary)]"
+          : "text-[var(--text-secondary)] hover:bg-[var(--bg-hovered)] hover:text-[var(--text-primary)]"
       )}
     >
       <Icon size={16} className="shrink-0" />
@@ -40,7 +40,7 @@ export function ProjectSidebar({ projects, currentProjectId, onProjectCreated }:
     <div className="flex flex-col h-full">
       {/* Projects Section Label */}
       <div className="mt-[var(--sp-4)] mb-[var(--sp-1)] px-[var(--sp-2)] py-[var(--sp-2)]">
-        <span className="text-[11px] font-bold text-[var(--color-text-tertiary)] uppercase tracking-wider">
+        <span className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">
           Projects
         </span>
       </div>
@@ -52,7 +52,7 @@ export function ProjectSidebar({ projects, currentProjectId, onProjectCreated }:
           const agentStatus = (project as any).agentStatus || 'idle';
 
           const statusColors: Record<string, string> = {
-            running: 'bg-[#57D9A3]',
+            running: 'bg-[#4ADE80]',
             paused: 'bg-[#FFAB00]',
             error: 'bg-[#AE2A19]',
             idle: 'bg-[#DFE1E6]',
@@ -65,12 +65,12 @@ export function ProjectSidebar({ projects, currentProjectId, onProjectCreated }:
               className={cn(
                 "flex items-center h-[32px] px-[var(--sp-2)] rounded-[var(--radius-md)] gap-[var(--sp-2)] text-[12px] transition-all duration-80 relative",
                 isActive
-                  ? "bg-[#EEF2FF] text-[#4338CA] font-semibold"
-                  : "text-[var(--color-text-secondary)] font-medium hover:bg-[var(--color-bg-hovered)] hover:text-[var(--color-text-primary)]"
+                  ? "bg-[var(--bg-selected)] text-[var(--brand-primary)] font-semibold"
+                  : "text-[var(--text-secondary)] font-medium hover:bg-[var(--bg-hovered)] hover:text-[var(--text-primary)]"
               )}
             >
               {isActive && (
-                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#6366F1]" />
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[var(--brand-primary)]" />
               )}
               <div
                 className={cn("w-[8px] h-[8px] rounded-full shrink-0", statusColors[agentStatus] || 'bg-[#DFE1E6]')}
@@ -82,7 +82,7 @@ export function ProjectSidebar({ projects, currentProjectId, onProjectCreated }:
       </div>
 
       {/* Create Project Button */}
-      <div className="mt-auto pt-[var(--sp-4)] pb-[var(--sp-2)] px-0 border-t border-[var(--color-border-default)]">
+      <div className="mt-auto pt-[var(--sp-4)] pb-[var(--sp-2)] px-0 border-t border-[var(--border-default)]">
         <button
           onClick={() => {
             if (pathname !== '/') {
@@ -91,8 +91,7 @@ export function ProjectSidebar({ projects, currentProjectId, onProjectCreated }:
               window.dispatchEvent(new CustomEvent('open-new-project-modal'));
             }
           }}
-          style={{ background: 'linear-gradient(135deg, #6366F1, #2563EB)' }}
-          className="text-[#FFFFFF] h-[32px] w-[calc(100%-16px)] mx-[8px] my-0 rounded-[4px] border-none text-[12px] font-semibold flex items-center justify-center gap-[6px] cursor-pointer transition-all hover:brightness-110"
+          className="bg-[var(--brand-primary)] text-[#FFFFFF] h-[32px] w-[calc(100%-16px)] mx-[8px] my-0 rounded-[var(--radius-md)] border-none text-[13px] font-medium flex items-center justify-center gap-[6px] cursor-pointer hover:bg-[var(--brand-primary-hover)]"
         >
           <Plus size={14} />
           <span className="mt-[1px]">New Project</span>

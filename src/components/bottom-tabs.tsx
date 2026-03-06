@@ -19,7 +19,7 @@ export function BottomTabs() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-[100] bg-[var(--color-bg-surface)] border-t border-[var(--color-border-default)] lg:hidden pb-[env(safe-area-inset-bottom)]">
+    <nav className="fixed bottom-0 left-0 right-0 z-[100] bg-[var(--bg-surface)] border-t border-[var(--border-default)] lg:hidden pb-[env(safe-area-inset-bottom)]">
       <div className="flex justify-around items-center h-[56px]">
         {tabs.map((tab) => {
           const isActive = pathname === tab.href;
@@ -28,8 +28,8 @@ export function BottomTabs() {
               key={tab.href}
               href={tab.href}
               className={`flex flex-col items-center justify-center w-[56px] h-[44px] rounded-[var(--radius-md)] transition-colors ${isActive
-                ? 'text-[var(--color-brand-bold)]'
-                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+                ? 'text-[var(--brand-primary)]'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 }`}
             >
               <div className="mb-[var(--sp-1)]">{tab.icon}</div>

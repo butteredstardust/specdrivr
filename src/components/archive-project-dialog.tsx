@@ -46,21 +46,21 @@ export function ArchiveProjectDialog({
       }
     >
       <div className="space-y-[var(--sp-6)]">
-        <p className="text-[14px] text-[var(--color-text-secondary)] leading-relaxed">{message}</p>
+        <p className="text-[14px] text-[var(--text-secondary)] leading-relaxed">{message}</p>
 
         <div className="space-y-[var(--sp-2)]">
-          <label className="block text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">
+          <label className="block text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">
             Type "{projectName}" to confirm
           </label>
           <input
             type="text"
             value={projectNameInput}
             onChange={(e) => setProjectNameInput(e.target.value)}
-            className="w-full h-[40px] px-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--color-border-selected)] transition-all placeholder:text-[var(--color-text-tertiary)]"
+            className="w-full h-[40px] px-[var(--sp-3)] bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--border-focus)] transition-all placeholder:text-[var(--text-tertiary)]"
             placeholder={projectName}
           />
           {!isNameMatch && projectNameInput && (
-            <p className="text-[12px] font-medium text-[var(--color-text-danger)] mt-[var(--sp-1)]">
+            <p className="text-[12px] font-medium text-[var(--status-blocked-text)] mt-[var(--sp-1)]">
               Project name does not match
             </p>
           )}

@@ -22,11 +22,11 @@ export function ActionBar({ projectId, plans, existingTasks, onTaskCreated }: Ac
     <div className="flex items-center justify-between mb-[var(--sp-6)]">
       <div className="flex items-center gap-[var(--sp-2)]">
         <div className="relative">
-          <Search size={14} className="absolute left-[var(--sp-2)] top-1/2 -translate-y-1/2 text-[var(--color-text-tertiary)]" />
+          <Search size={14} className="absolute left-[var(--sp-2)] top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]" />
           <input
             type="text"
             placeholder="Search tasks..."
-            className="h-[32px] pl-[32px] pr-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--color-border-selected)] transition-colors w-[200px]"
+            className="h-[32px] pl-[32px] pr-[var(--sp-3)] bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--border-focus)] transition-colors w-[200px]"
           />
         </div>
         <Button variant="secondary" size="small" icon={<Filter size={14} />}>

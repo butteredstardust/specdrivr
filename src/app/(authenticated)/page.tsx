@@ -20,8 +20,8 @@ export default async function Home() {
     <>
       <div className="mb-6">
         <div>
-          <h1 className="text-[20px] font-semibold text-[var(--color-text-primary)]">Dashboard</h1>
-          <p className="text-[14px] text-[var(--color-text-secondary)] mt-1">Overview of all your architectural projects</p>
+          <h1 className="text-[20px] font-semibold text-[var(--text-primary)]">Dashboard</h1>
+          <p className="text-[14px] text-[var(--text-secondary)] mt-1">Overview of all your architectural projects</p>
         </div>
       </div>
 

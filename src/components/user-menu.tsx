@@ -76,20 +76,20 @@ export function UserMenu() {
         <>
           <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
           <div
-            className="absolute right-0 top-full mt-[var(--sp-2)] w-56 bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-overlay)] z-20 overflow-hidden animate-in fade-in zoom-in-95 duration-100"
+            className="absolute right-0 top-full mt-[var(--sp-2)] w-56 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-overlay)] z-20 overflow-hidden animate-in fade-in zoom-in-95 duration-100"
           >
-            <div className="px-[var(--sp-4)] py-[var(--sp-3)] border-b border-[var(--color-border-default)]">
-              <div className="text-[14px] font-semibold text-[var(--color-text-primary)]">
+            <div className="px-[var(--sp-4)] py-[var(--sp-3)] border-b border-[var(--border-default)]">
+              <div className="text-[14px] font-semibold text-[var(--text-primary)]">
                 {user.username}
               </div>
-              <div className="text-[12px] text-[var(--color-text-secondary)] mt-0.5">
+              <div className="text-[12px] text-[var(--text-secondary)] mt-0.5">
                 {user.isAdmin ? 'Administrator' : 'Viewer'}
               </div>
             </div>
 
             <button
               onClick={handleLogout}
-              className="w-full px-[var(--sp-4)] py-[var(--sp-3)] text-left text-[13px] text-[var(--color-text-danger)] hover:bg-[var(--color-bg-hovered)] transition-colors flex items-center gap-[var(--sp-2)]"
+              className="w-full px-[var(--sp-4)] py-[var(--sp-3)] text-left text-[13px] text-[var(--status-blocked-text)] hover:bg-[var(--bg-hovered)] transition-colors flex items-center gap-[var(--sp-2)]"
             >
               <LogOut size={14} />
               <span>Sign Out</span>

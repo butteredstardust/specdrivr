@@ -47,7 +47,7 @@ export function ProjectCommitsClient({
   ];
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 bg-[var(--color-bg-page)]">
+    <div className="flex-1 flex flex-col min-w-0 bg-[var(--bg-page)]">
       {/* Page Header */}
       <div className="px-[24px] pt-[24px] pb-0 bg-[var(--bg-surface)] border-b border-[var(--border-default)]">
         {/* Breadcrumb */}
@@ -74,7 +74,7 @@ export function ProjectCommitsClient({
                 <select
                   value={selectedBranch}
                   onChange={(e) => setSelectedBranch(e.target.value)}
-                  className="appearance-none bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] h-[32px] pl-3 pr-8 rounded-[var(--radius-sm)] text-[13px] font-medium text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-selected)] transition-all cursor-pointer hover:bg-[var(--color-bg-hovered)]"
+                  className="appearance-none bg-[var(--bg-sunken)] border border-[var(--border-default)] h-[32px] pl-3 pr-8 rounded-[var(--radius-sm)] text-[13px] font-medium text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-focus)] transition-all cursor-pointer hover:bg-[var(--bg-hovered)]"
                 >
                   {branches.map((branch) => (
                     <option key={branch} value={branch}>
@@ -82,46 +82,46 @@ export function ProjectCommitsClient({
                     </option>
                   ))}
                 </select>
-                <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-text-tertiary)]" />
+                <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
               </div>
-              <span className="text-[12px] font-bold text-[var(--color-text-tertiary)] uppercase tracking-wider">
+              <span className="text-[12px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">
                 {filteredCommits.length} commit{filteredCommits.length !== 1 ? 's' : ''}
               </span>
             </div>
           </div>
 
           {commits.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-[var(--sp-12)] border-2 border-dashed border-[var(--color-border-default)] rounded-[var(--radius-lg)] opacity-60">
-              <GitBranch size={48} className="text-[var(--color-border-default)] mb-[var(--sp-4)]" />
-              <h3 className="text-[18px] font-semibold text-[var(--color-text-primary)] mb-[var(--sp-2)]">No commits yet</h3>
-              <p className="text-[14px] text-[var(--color-text-secondary)] mb-[var(--sp-6)]">Commits will appear here once the agent starts working.</p>
+            <div className="flex flex-col items-center justify-center py-[var(--sp-12)] border-2 border-dashed border-[var(--border-default)] rounded-[var(--radius-lg)] opacity-60">
+              <GitBranch size={48} className="text-[var(--border-default)] mb-[var(--sp-4)]" />
+              <h3 className="text-[18px] font-semibold text-[var(--text-primary)] mb-[var(--sp-2)]">No commits yet</h3>
+              <p className="text-[14px] text-[var(--text-secondary)] mb-[var(--sp-6)]">Commits will appear here once the agent starts working.</p>
               <Button variant="primary" className="!bg-[var(--brand-primary)] !text-[#FFFFFF] !opacity-100 font-medium text-[13px] h-[32px] px-[14px] border-none rounded-[var(--radius-md)] hover:!bg-[var(--brand-primary-hover)]" onClick={() => window.location.href = `/projects/${projectId}/settings`}>Configure Git Integration</Button>
             </div>
           ) : filteredCommits.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-[var(--sp-12)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] opacity-60">
-              <Search size={32} className="text-[var(--color-text-tertiary)] mb-[var(--sp-3)]" />
-              <p className="text-[14px] text-[var(--color-text-secondary)] italic">No commits on "{selectedBranch}" branch.</p>
+            <div className="flex flex-col items-center justify-center py-[var(--sp-12)] bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-lg)] opacity-60">
+              <Search size={32} className="text-[var(--text-tertiary)] mb-[var(--sp-3)]" />
+              <p className="text-[14px] text-[var(--text-secondary)] italic">No commits on "{selectedBranch}" branch.</p>
             </div>
           ) : (
             <div className="space-y-[var(--sp-3)]">
               {filteredCommits.map((commit) => (
                 <div
                   key={commit.id}
-                  className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] p-[var(--sp-4)] hover:border-[var(--color-border-selected)] transition-all shadow-[var(--shadow-card)]"
+                  className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-sm)] p-[var(--sp-4)] hover:border-[var(--border-focus)] transition-all shadow-[var(--shadow-card)]"
                 >
                   <div className="flex items-start gap-[var(--sp-4)]">
-                    <div className="w-8 h-8 rounded-full bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] flex items-center justify-center shrink-0">
-                      <GitBranch size={16} className="text-[var(--color-brand-bold)]" />
+                    <div className="w-8 h-8 rounded-full bg-[var(--bg-sunken)] border border-[var(--border-default)] flex items-center justify-center shrink-0">
+                      <GitBranch size={16} className="text-[var(--brand-primary)]" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
-                        <h4 className="text-[15px] font-bold text-[var(--color-text-primary)] truncate flex-1 mr-4">{commit.message}</h4>
-                        <span className="px-2 py-0.5 bg-[var(--color-bg-sunken)] text-[var(--color-text-tertiary)] rounded-[var(--radius-sm)] text-[10px] font-mono border border-[var(--color-border-default)]">
+                        <h4 className="text-[15px] font-bold text-[var(--text-primary)] truncate flex-1 mr-4">{commit.message}</h4>
+                        <span className="px-2 py-0.5 bg-[var(--bg-sunken)] text-[var(--text-tertiary)] rounded-[var(--radius-sm)] text-[10px] font-mono border border-[var(--border-default)]">
                           {commit.commitSha?.substring(0, 7)}
                         </span>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-x-[var(--sp-4)] gap-y-[var(--sp-1)] text-[12px] font-medium text-[var(--color-text-tertiary)] mb-3">
+                      <div className="flex flex-wrap items-center gap-x-[var(--sp-4)] gap-y-[var(--sp-1)] text-[12px] font-medium text-[var(--text-tertiary)] mb-3">
                         <div className="flex items-center gap-1.5 px-1.5 py-0.5 bg-[var(--status-inprogress-bg)] text-[var(--status-inprogress-text)] rounded-[var(--radius-sm)] font-bold text-[10px] uppercase">
                           <GitBranch size={10} />
                           {commit.branch}
@@ -145,7 +145,7 @@ export function ProjectCommitsClient({
                           </Button>
                         )}
                         {commit.planId && (
-                          <div className="flex items-center gap-1 px-2 py-1 bg-[var(--color-bg-sunken)] rounded-[var(--radius-sm)] text-[11px] font-bold text-[var(--color-text-tertiary)]">
+                          <div className="flex items-center gap-1 px-2 py-1 bg-[var(--bg-sunken)] rounded-[var(--radius-sm)] text-[11px] font-bold text-[var(--text-tertiary)]">
                             <Layout size={12} />
                             Plan #{commit.planId}
                           </div>

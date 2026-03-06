@@ -119,29 +119,29 @@ export default function AdminUsersPage() {
     }
   };
 
-  const inputClasses = "w-full h-[32px] px-[var(--sp-2)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[var(--color-text-primary)] text-[14px] focus:outline-none focus:border-[var(--color-border-selected)] transition-colors placeholder:text-[var(--color-text-tertiary)]";
+  const inputClasses = "w-full h-[32px] px-[var(--sp-2)] bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-sm)] text-[var(--text-primary)] text-[14px] focus:outline-none focus:border-[var(--border-focus)] transition-colors placeholder:text-[var(--text-tertiary)]";
 
   return (
     <>
       <div className="flex items-center justify-between mb-[var(--sp-6)]">
         <div>
-          <h1 className="text-[20px] font-semibold text-[var(--color-text-primary)]">User Management</h1>
-          <p className="text-[14px] text-[var(--color-text-secondary)] mt-1">Add users and manage their roles</p>
+          <h1 className="text-[20px] font-semibold text-[var(--text-primary)]">User Management</h1>
+          <p className="text-[14px] text-[var(--text-secondary)] mt-1">Add users and manage their roles</p>
         </div>
         <Button variant="primary" onClick={() => setShowCreateDialog(true)} icon={<Plus size={16} />}>
           Add User
         </Button>
       </div>
 
-      <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] overflow-hidden">
+      <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] overflow-hidden">
         <table className="w-full border-collapse">
           <thead>
             <tr className="border-b border-[var(--border-default)] bg-[var(--bg-hovered)] h-[36px]">
-              <th className="text-left px-[var(--sp-4)] py-[var(--sp-3)] text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">User</th>
-              <th className="text-left px-[var(--sp-4)] py-[var(--sp-3)] text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Role</th>
-              <th className="text-left px-[var(--sp-4)] py-[var(--sp-3)] text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Status</th>
-              <th className="text-left px-[var(--sp-4)] py-[var(--sp-3)] text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Last Login</th>
-              <th className="text-right px-[var(--sp-4)] py-[var(--sp-3)] text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Actions</th>
+              <th className="text-left px-[var(--sp-4)] py-[var(--sp-3)] text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">User</th>
+              <th className="text-left px-[var(--sp-4)] py-[var(--sp-3)] text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Role</th>
+              <th className="text-left px-[var(--sp-4)] py-[var(--sp-3)] text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Status</th>
+              <th className="text-left px-[var(--sp-4)] py-[var(--sp-3)] text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Last Login</th>
+              <th className="text-right px-[var(--sp-4)] py-[var(--sp-3)] text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -152,7 +152,7 @@ export default function AdminUsersPage() {
                     <div className="w-[28px] h-[28px] shrink-0 rounded-full bg-[var(--brand-subtle)] flex items-center justify-center text-[var(--brand-primary)] text-[11px] font-semibold uppercase">
                       {getInitials(user.username)}
                     </div>
-                    <span className="text-[14px] font-medium text-[var(--color-text-primary)]">{user.username}</span>
+                    <span className="text-[14px] font-medium text-[var(--text-primary)]">{user.username}</span>
                   </div>
                 </td>
                 <td className="px-[var(--sp-4)] py-[var(--sp-4)]">
@@ -172,13 +172,13 @@ export default function AdminUsersPage() {
                     {user.isActive ? 'Active' : 'Inactive'}
                   </span>
                 </td>
-                <td className="px-[var(--sp-4)] py-[var(--sp-4)] text-[12px] text-[var(--color-text-tertiary)]">
+                <td className="px-[var(--sp-4)] py-[var(--sp-4)] text-[12px] text-[var(--text-tertiary)]">
                   {formatDate(user.lastLoginAt)}
                 </td>
                 <td style={{ textAlign: 'right', paddingRight: '16px' }}>
                   <div style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end', opacity: 1 }}>
                     <Button variant="ghost" size="icon" title="Edit user" onClick={() => { setSelectedUser(user); setNewRole(user.role); setShowRoleDialog(true); }} icon={<Pencil size={14} />} />
-                    <Button variant="ghost" size="icon" title={user.isActive ? "Deactivate user" : "Activate user"} onClick={() => { setSelectedUser(user); setShowDeactivateDialog(true); }} className="hover:!bg-[#FEE2E2] hover:!text-[#DC2626]" icon={<Trash2 size={14} />} />
+                    <Button variant="ghost" size="icon" title={user.isActive ? "Deactivate user" : "Activate user"} onClick={() => { setSelectedUser(user); setShowDeactivateDialog(true); }} className="hover:!bg-[#FEE2E2] hover:!text-[var(--status-blocked-text)]" icon={<Trash2 size={14} />} />
                   </div>
                 </td>
               </tr>
@@ -200,15 +200,15 @@ export default function AdminUsersPage() {
       >
         <div className="space-y-[var(--sp-4)]">
           <div>
-            <label className="block text-[12px] font-bold text-[var(--color-text-secondary)] uppercase mb-1.5">Username</label>
+            <label className="block text-[12px] font-bold text-[var(--text-secondary)] uppercase mb-1.5">Username</label>
             <input className={inputClasses} value={newUsername} onChange={e => setNewUsername(e.target.value)} placeholder="e.g. jdoe" />
           </div>
           <div>
-            <label className="block text-[12px] font-bold text-[var(--color-text-secondary)] uppercase mb-1.5">Password</label>
+            <label className="block text-[12px] font-bold text-[var(--text-secondary)] uppercase mb-1.5">Password</label>
             <input type="password" className={inputClasses} value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="••••••••" />
           </div>
           <div>
-            <label className="block text-[12px] font-bold text-[var(--color-text-secondary)] uppercase mb-1.5">Role</label>
+            <label className="block text-[12px] font-bold text-[var(--text-secondary)] uppercase mb-1.5">Role</label>
             <select className={inputClasses} value={newUserRole} onChange={e => setNewUserRole(e.target.value as UserRole)}>
               <option value="viewer">Viewer</option>
               <option value="developer">Developer</option>
@@ -232,8 +232,8 @@ export default function AdminUsersPage() {
               className={cn(
                 "flex items-center justify-between p-[var(--sp-3)] border rounded-[var(--radius-sm)] transition-all",
                 newRole === r
-                  ? "bg-[var(--color-bg-selected)] border-[var(--color-border-selected)] text-[var(--color-brand-bold)] font-semibold"
-                  : "bg-[var(--color-bg-sunken)] border-[var(--color-border-default)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hovered)]"
+                  ? "bg-[var(--bg-selected)] border-[var(--border-focus)] text-[var(--brand-primary)] font-semibold"
+                  : "bg-[var(--bg-sunken)] border-[var(--border-default)] text-[var(--text-secondary)] hover:bg-[var(--bg-hovered)]"
               )}
             >
               <span className="capitalize">{r}</span>

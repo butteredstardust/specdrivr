@@ -12,7 +12,7 @@ export function ThemeToggle() {
       onClick={toggleTheme}
       className="relative inline-flex items-center h-[22px] w-[40px] rounded-[var(--radius-full)] transition-colors duration-[var(--transition-base)]"
       style={{
-        backgroundColor: isDark ? 'var(--color-brand-bold)' : 'var(--color-border-default)',
+        backgroundColor: isDark ? 'var(--brand-primary)' : 'var(--border-default)',
       }}
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
     >
@@ -24,9 +24,9 @@ export function ThemeToggle() {
         }}
       >
         {isDark ? (
-          <Moon size={11} className="text-[var(--color-brand-bold)]" />
+          <Moon size={11} className="text-[var(--brand-primary)]" />
         ) : (
-          <Sun size={11} className="text-[var(--color-text-tertiary)]" />
+          <Sun size={11} className="text-[var(--text-tertiary)]" />
         )}
       </span>
     </button>

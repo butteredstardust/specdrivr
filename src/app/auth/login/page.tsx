@@ -45,7 +45,7 @@ export default function LoginPage() {
     }
   };
 
-  const inputClasses = "w-full h-[40px] px-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[var(--color-text-primary)] text-[14px] focus:outline-none focus:border-[var(--color-border-selected)] transition-colors placeholder:text-[var(--color-text-tertiary)]";
+  const inputClasses = "w-full h-[40px] px-[var(--sp-3)] bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-sm)] text-[var(--text-primary)] text-[14px] focus:outline-none focus:border-[var(--border-focus)] transition-colors placeholder:text-[var(--text-tertiary)]";
 
   return (
     <div className="min-h-screen bg-[var(--color-bg-primary)] flex flex-col items-center justify-center p-[var(--sp-4)]">
@@ -53,18 +53,18 @@ export default function LoginPage() {
         {/* Branding */}
         <div className="text-center mb-[var(--sp-8)]">
           <Logo size="large" className="mx-auto mb-[var(--sp-2)]" />
-          <h1 className="text-[24px] font-bold text-[var(--color-text-primary)] tracking-tight">specdrivr</h1>
-          <p className="text-[14px] text-[var(--color-text-secondary)]">Autonomous Development Platform</p>
+          <h1 className="text-[24px] font-bold text-[var(--text-primary)] tracking-tight">specdrivr</h1>
+          <p className="text-[14px] text-[var(--text-secondary)]">Autonomous Development Platform</p>
         </div>
 
         {/* Login Card */}
-        <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] p-[var(--sp-8)]">
-          <h2 className="text-[18px] font-semibold text-[var(--color-text-primary)] mb-[var(--sp-6)]">Log in to your account</h2>
+        <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] p-[var(--sp-8)]">
+          <h2 className="text-[18px] font-semibold text-[var(--text-primary)] mb-[var(--sp-6)]">Log in to your account</h2>
 
           <form onSubmit={handleSubmit} className="space-y-[var(--sp-5)]">
             {/* Username */}
             <div>
-              <label htmlFor="username" className="block text-[12px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-[var(--sp-2)]">
+              <label htmlFor="username" className="block text-[12px] font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-[var(--sp-2)]">
                 Username
               </label>
               <div className="relative">
@@ -82,7 +82,7 @@ export default function LoginPage() {
 
             {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-[12px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-[var(--sp-2)]">
+              <label htmlFor="password" className="block text-[12px] font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-[var(--sp-2)]">
                 Password
               </label>
               <div className="relative">
@@ -98,7 +98,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-[12px] top-1/2 -translate-y-1/2 text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]"
+                  className="absolute right-[12px] top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -107,8 +107,8 @@ export default function LoginPage() {
 
             {/* Error Message */}
             {error && (
-              <div className="p-[var(--sp-3)] bg-[var(--color-bg-sunken)] border-l-4 border-[var(--color-text-danger)] rounded-[var(--radius-sm)]">
-                <p className="text-[12px] text-[var(--color-text-danger)] font-medium">{error}</p>
+              <div className="p-[var(--sp-3)] bg-[var(--bg-sunken)] border-l-4 border-[var(--status-blocked-text)] rounded-[var(--radius-sm)]">
+                <p className="text-[12px] text-[var(--status-blocked-text)] font-medium">{error}</p>
               </div>
             )}
 
@@ -123,8 +123,8 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="mt-[var(--sp-8)] pt-[var(--sp-6)] border-t border-[var(--color-border-default)] text-center">
-            <p className="text-[12px] text-[var(--color-text-tertiary)]">
+          <div className="mt-[var(--sp-8)] pt-[var(--sp-6)] border-t border-[var(--border-default)] text-center">
+            <p className="text-[12px] text-[var(--text-tertiary)]">
               &copy; {new Date().getFullYear()} specdrivr
             </p>
           </div>

@@ -121,13 +121,13 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
       >
         <form onSubmit={handleSubmit} className="space-y-[var(--sp-4)]">
           {error && (
-            <div className="p-[var(--sp-3)] bg-[var(--color-bg-sunken)] border-l-4 border-[var(--color-text-danger)] rounded-[var(--radius-sm)]">
-              <p className="text-[12px] text-[var(--color-text-danger)] font-medium">{error}</p>
+            <div className="p-[var(--sp-3)] bg-[var(--bg-sunken)] border-l-4 border-[var(--status-blocked-text)] rounded-[var(--radius-sm)]">
+              <p className="text-[12px] text-[var(--status-blocked-text)] font-medium">{error}</p>
             </div>
           )}
 
           <div>
-            <label htmlFor="name" className="block text-[12px] font-semibold text-[var(--color-text-secondary)] mb-[var(--sp-1)]">
+            <label htmlFor="name" className="block text-[12px] font-semibold text-[var(--text-secondary)] mb-[var(--sp-1)]">
               Project Name
             </label>
             <input
@@ -142,7 +142,7 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
           </div>
 
           <div>
-            <label htmlFor="constitution" className="block text-[12px] font-semibold text-[var(--color-text-secondary)] mb-[var(--sp-1)]">
+            <label htmlFor="constitution" className="block text-[12px] font-semibold text-[var(--text-secondary)] mb-[var(--sp-1)]">
               Project Constitution (Instructions)
             </label>
             <textarea
@@ -156,7 +156,7 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
 
           <div className="grid grid-cols-2 gap-[var(--sp-4)]">
             <div>
-              <label htmlFor="techStack" className="block text-[12px] font-semibold text-[var(--color-text-secondary)] mb-[var(--sp-1)]">
+              <label htmlFor="techStack" className="block text-[12px] font-semibold text-[var(--text-secondary)] mb-[var(--sp-1)]">
                 Tech Stack (JSON)
               </label>
               <textarea
@@ -168,7 +168,7 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
               />
             </div>
             <div>
-              <label htmlFor="basePath" className="block text-[12px] font-semibold text-[var(--color-text-secondary)] mb-[var(--sp-1)]">
+              <label htmlFor="basePath" className="block text-[12px] font-semibold text-[var(--text-secondary)] mb-[var(--sp-1)]">
                 Base Path
               </label>
               <input
@@ -179,7 +179,7 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
                 className={inputClasses}
                 placeholder="/Users/dev/project"
               />
-              <p className="text-[11px] text-[var(--color-text-tertiary)] mt-1.5 leading-relaxed">
+              <p className="text-[11px] text-[var(--text-tertiary)] mt-1.5 leading-relaxed">
                 Absolute path where the agent will perform operations.
               </p>
             </div>
