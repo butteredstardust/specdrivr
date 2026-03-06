@@ -41,7 +41,7 @@ export function WaveManager({ projectId }: WaveManagerProps) {
         try {
             const response = await fetch(`/api/agent/wave?project_id=${projectId}`);
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
+                const errorData = await response.json().catch((err) => { console.error('Failed to parse error response:', err); return {}; });
                 throw new Error(errorData.error?.message || 'Failed to load wave data');
             }
             const data = await response.json();
