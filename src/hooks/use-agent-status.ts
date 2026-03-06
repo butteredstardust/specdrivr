@@ -155,7 +155,7 @@ export function useAgentActions(projectId: number) {
       const response = await fetch(endpoint, { method: 'POST' });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+        const errorData = await response.json().catch((err) => { console.error('Failed to parse error response:', err); return {}; });
         throw new Error(errorData.error || `Failed to ${action} agent: ${response.statusText}`);
       }
 
