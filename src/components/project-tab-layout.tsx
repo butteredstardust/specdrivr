@@ -76,14 +76,14 @@ export function ProjectTabLayout({
           <ChevronLeft size={14} />
           Dashboard
         </Link>
-        <span className="text-[var(--color-text-tertiary)]">/</span>
-        <span className="text-[var(--color-text-primary)] font-medium">{projectName}</span>
+        <span className="text-[var(--text-tertiary)]">/</span>
+        <span className="text-[var(--text-primary)] font-medium">{projectName}</span>
       </div>
 
       {/* Header Container */}
       <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-[var(--sp-4)] mb-[var(--sp-6)]">
         <div>
-          <h1 className="text-[20px] font-semibold text-[var(--color-text-primary)] mb-[var(--sp-2)]">
+          <h1 className="text-[20px] font-semibold text-[var(--text-primary)] mb-[var(--sp-2)]">
             {projectName}
           </h1>
 
@@ -91,16 +91,16 @@ export function ProjectTabLayout({
             {techStack.length > 0 && (
               <div className="flex gap-[var(--sp-1)]">
                 {techStack.slice(0, 3).map(tech => (
-                  <span key={tech} className="px-2 py-0.5 bg-[var(--color-bg-sunken)] text-[var(--color-text-secondary)] rounded-[var(--radius-sm)] border border-[var(--color-border-default)]">
+                  <span key={tech} className="px-2 py-0.5 bg-[var(--bg-sunken)] text-[var(--text-secondary)] rounded-[var(--radius-sm)] border border-[var(--border-default)]">
                     {tech}
                   </span>
                 ))}
               </div>
             )}
             {basePath && (
-              <div className="text-[var(--color-text-tertiary)] flex items-center gap-1">
+              <div className="text-[var(--text-tertiary)] flex items-center gap-1">
                 <span className="opacity-70">Path:</span>
-                <code className="bg-[var(--color-bg-sunken)] px-1 rounded">{basePath}</code>
+                <code className="bg-[var(--bg-sunken)] px-1 rounded">{basePath}</code>
               </div>
             )}
           </div>
@@ -125,7 +125,7 @@ export function ProjectTabLayout({
             variant="ghost"
             size="small"
             onClick={handleRefresh}
-            className="text-[11px] text-[var(--color-text-tertiary)]"
+            className="text-[11px] text-[var(--text-tertiary)]"
             icon={<RefreshCw size={12} />}
           >
             {formatLastSynced()}
@@ -139,7 +139,7 @@ export function ProjectTabLayout({
       </div>
 
       {/* Tab Content */}
-      <div className="flex-1 min-h-0 bg-[var(--color-bg-surface)] p-[var(--sp-6)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)]">
+      <div className="flex-1 min-h-0 bg-[var(--bg-surface)] p-[var(--sp-6)] border border-[var(--border-default)] rounded-[var(--radius-lg)]">
         {children}
       </div>
     </div>
@@ -149,8 +149,8 @@ export function ProjectTabLayout({
 export function ProjectHeader({ projectName, techStack, basePath }: { projectName: string, techStack?: string[], basePath?: string }) {
   return (
     <div className="mb-[var(--sp-4)]">
-      <h1 className="text-[20px] font-semibold text-[var(--color-text-primary)]">{projectName}</h1>
-      {basePath && <p className="text-[12px] text-[var(--color-text-tertiary)] mt-1">{basePath}</p>}
+      <h1 className="text-[20px] font-semibold text-[var(--text-primary)]">{projectName}</h1>
+      {basePath && <p className="text-[12px] text-[var(--text-tertiary)] mt-1">{basePath}</p>}
     </div>
   );
 }

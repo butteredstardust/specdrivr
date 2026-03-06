@@ -53,7 +53,7 @@ export function Avatar({
       className={cn(
         'flex items-center justify-center rounded-full font-semibold',
         sizeClass,
-        'bg-[var(--color-brand-subtle)] text-[var(--color-brand-bold)]',
+        'bg-[var(--color-brand-subtle)] text-[var(--brand-primary)]',
         className
       )}
       title={username || `User ${avatarId}`}
@@ -84,12 +84,12 @@ export function AvatarPicker({
               'flex items-center justify-center w-[40px] h-[40px] rounded-full transition-all',
               'hover:scale-105',
               selectedId === id
-                ? 'ring-2 ring-[var(--color-brand-bold)] bg-[var(--color-brand-subtle)]'
-                : 'bg-[var(--color-bg-sunken)] hover:bg-[var(--color-bg-hovered)]'
+                ? 'ring-2 ring-[var(--brand-primary)] bg-[var(--color-brand-subtle)]'
+                : 'bg-[var(--bg-sunken)] hover:bg-[var(--bg-hovered)]'
             )}
             title={`Avatar ${id}`}
           >
-            <span className="text-[var(--font-size-base)] font-semibold select-none text-[var(--color-brand-bold)]">
+            <span className="text-[var(--font-size-base)] font-semibold select-none text-[var(--brand-primary)]">
               {letter}
             </span>
           </button>

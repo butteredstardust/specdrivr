@@ -26,12 +26,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
-    const baseClasses = 'inline-flex items-center justify-center gap-[var(--sp-2)] font-medium transition-[background,color] disabled:!bg-[#C7D2FE] disabled:!text-[#4338CA] disabled:!opacity-100 disabled:cursor-not-allowed outline-none border-none cursor-pointer text-[13px] rounded-[var(--radius-md)]';
+    const baseClasses = 'inline-flex items-center justify-center gap-[var(--sp-2)] font-medium transition-[background,color] disabled:!bg-[#C7D2FE] disabled:!text-[var(--brand-primary)] disabled:!opacity-100 disabled:cursor-not-allowed outline-none border-none cursor-pointer text-[13px] rounded-[var(--radius-md)]';
 
     const variantClasses = {
       primary: 'bg-[var(--brand-primary)] text-[#fff] hover:bg-[var(--brand-primary-hover)]',
       secondary: 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border border-[var(--border-default)] hover:bg-[var(--bg-hovered)] border-solid',
-      danger: 'bg-[#CA3521] text-white hover:bg-[var(--color-text-danger)]',
+      danger: 'bg-[var(--log-error-text)] text-white hover:bg-[var(--status-blocked-text)]',
       ghost: 'bg-transparent text-[var(--text-tertiary)] hover:bg-[var(--bg-hovered)] hover:text-[var(--text-primary)]',
     };
 

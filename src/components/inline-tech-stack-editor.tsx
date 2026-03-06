@@ -79,9 +79,9 @@ export function InlineTechStackEditor({
   };
 
   return (
-    <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] p-[var(--sp-6)] shadow-[var(--shadow-card)]">
+    <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-lg)] p-[var(--sp-6)] shadow-[var(--shadow-card)]">
       <div className="flex items-center justify-between mb-[var(--sp-4)]">
-        <h3 className="text-[14px] font-bold text-[var(--color-text-secondary)] uppercase tracking-[0.05em]">Tech Stack</h3>
+        <h3 className="text-[14px] font-bold text-[var(--text-secondary)] uppercase tracking-[0.05em]">Tech Stack</h3>
         {!isEditing && (
           <Button
             variant="ghost"
@@ -94,7 +94,7 @@ export function InlineTechStackEditor({
       </div>
 
       {error && (
-        <div className="mb-[var(--sp-4)] p-[var(--sp-3)] bg-[var(--color-bg-sunken)] border-l-4 border-[var(--color-text-danger)] text-[var(--color-text-danger)] text-[12px] font-medium rounded-r-[var(--radius-sm)]">
+        <div className="mb-[var(--sp-4)] p-[var(--sp-3)] bg-[var(--bg-sunken)] border-l-4 border-[var(--status-blocked-text)] text-[var(--status-blocked-text)] text-[12px] font-medium rounded-r-[var(--radius-sm)]">
           {error}
         </div>
       )}
@@ -103,7 +103,7 @@ export function InlineTechStackEditor({
         <div className="space-y-[var(--sp-6)]">
           <div className="space-y-[var(--sp-3)]">
             {entries.length === 0 && (
-              <p className="text-[13px] text-[var(--color-text-tertiary)] italic py-[var(--sp-2)]">No tech stack items. Add one below.</p>
+              <p className="text-[13px] text-[var(--text-tertiary)] italic py-[var(--sp-2)]">No tech stack items. Add one below.</p>
             )}
             {entries.map((entry) => (
               <div key={entry.id} className="flex items-center gap-[var(--sp-2)] group">
@@ -111,21 +111,21 @@ export function InlineTechStackEditor({
                   type="text"
                   value={entry.key}
                   onChange={(e) => handleUpdateEntry(entry.id, 'key', e.target.value)}
-                  className="flex-1 h-[36px] px-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[13px] focus:outline-none focus:border-[var(--color-border-selected)] transition-all"
+                  className="flex-1 h-[36px] px-[var(--sp-3)] bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-sm)] text-[13px] focus:outline-none focus:border-[var(--border-focus)] transition-all"
                   placeholder="Key (e.g. frontend)"
                 />
                 <input
                   type="text"
                   value={entry.value}
                   onChange={(e) => handleUpdateEntry(entry.id, 'value', e.target.value)}
-                  className="flex-1 h-[36px] px-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[13px] focus:outline-none focus:border-[var(--color-border-selected)] transition-all"
+                  className="flex-1 h-[36px] px-[var(--sp-3)] bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-sm)] text-[13px] focus:outline-none focus:border-[var(--border-focus)] transition-all"
                   placeholder="Value (e.g. Next.js)"
                 />
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => handleRemoveEntry(entry.id)}
-                  className="text-[var(--color-text-danger)] opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="text-[var(--status-blocked-text)] opacity-0 group-hover:opacity-100 transition-opacity"
                   icon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>}
                 />
               </div>
@@ -136,7 +136,7 @@ export function InlineTechStackEditor({
             variant="ghost"
             size="small"
             onClick={handleAddEntry}
-            className="text-[var(--color-brand-bold)] font-bold"
+            className="text-[var(--brand-primary)] font-bold"
             icon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>}
           >
             Add New Technology
@@ -167,15 +167,15 @@ export function InlineTechStackEditor({
               {Object.entries(techStack).map(([key, value]) => (
                 <div
                   key={key}
-                  className="inline-flex items-center px-[var(--sp-2)] py-[var(--sp-1)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[12px] shadow-sm"
+                  className="inline-flex items-center px-[var(--sp-2)] py-[var(--sp-1)] bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-sm)] text-[12px] shadow-sm"
                 >
-                  <span className="font-bold text-[var(--color-text-secondary)] mr-1.5 uppercase text-[10px] tracking-wider">{key}</span>
-                  <span className="text-[var(--color-text-primary)] font-medium">{String(value)}</span>
+                  <span className="font-bold text-[var(--text-secondary)] mr-1.5 uppercase text-[10px] tracking-wider">{key}</span>
+                  <span className="text-[var(--text-primary)] font-medium">{String(value)}</span>
                 </div>
               ))}
             </div>
           ) : (
-            <span className="text-[13px] text-[var(--color-text-tertiary)] italic">No specific tech stack defined yet.</span>
+            <span className="text-[13px] text-[var(--text-tertiary)] italic">No specific tech stack defined yet.</span>
           )}
         </div>
       )}

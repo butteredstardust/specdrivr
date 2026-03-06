@@ -105,7 +105,7 @@ export function Dialog({
       {/* Dialog Container */}
       <div
         ref={dialogRef}
-        className={`relative w-full ${sizeClasses[size]} bg-[var(--color-bg-surface)] rounded-[var(--radius-sm)] shadow-[var(--shadow-modal)] border border-[var(--color-border-default)] flex flex-col animate-in fade-in zoom-in-95 duration-[150ms] overflow-hidden`}
+        className={`relative w-full ${sizeClasses[size]} bg-[var(--bg-surface)] rounded-[var(--radius-sm)] shadow-[var(--shadow-modal)] border border-[var(--border-default)] flex flex-col animate-in fade-in zoom-in-95 duration-[150ms] overflow-hidden`}
       >
         {/* Header */}
         {(title || showCloseButton) && (
@@ -113,7 +113,7 @@ export function Dialog({
             {title && (
               <h2
                 id="dialog-title"
-                className="text-[18px] font-semibold text-[var(--color-text-primary)] tracking-tight"
+                className="text-[18px] font-semibold text-[var(--text-primary)] tracking-tight"
               >
                 {title}
               </h2>
@@ -198,7 +198,7 @@ export function ConfirmDialog({
         ) : null
       }
     >
-      <p className="text-[13px] text-[var(--color-text-secondary)]">{message}</p>
+      <p className="text-[13px] text-[var(--text-secondary)]">{message}</p>
     </Dialog>
   );
 }

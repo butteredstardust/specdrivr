@@ -14,9 +14,9 @@ interface AddLogDialogProps {
   defaultTaskId?: number;
 }
 
-const inputClass = "w-full h-[40px] px-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[var(--font-size-base)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-selected)] transition-all";
-const textareaClass = "w-full p-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[var(--font-size-base)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-selected)] transition-all resize-none";
-const labelClass = "block text-[var(--font-size-xs)] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-[var(--sp-2)]";
+const inputClass = "w-full h-[40px] px-[var(--sp-3)] bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-sm)] text-[var(--font-size-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-focus)] transition-all";
+const textareaClass = "w-full p-[var(--sp-3)] bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-sm)] text-[var(--font-size-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-focus)] transition-all resize-none";
+const labelClass = "block text-[var(--font-size-xs)] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-[var(--sp-2)]";
 
 const levelColors: Record<LogLevel, { bg: string; text: string; border: string }> = {
   debug: { bg: 'bg-[var(--log-debug-bg)]', text: 'text-[var(--log-debug-text)]', border: 'border-[var(--log-debug-text)]' },
@@ -96,7 +96,7 @@ export function AddLogDialog({
             setIsOpenInternal(true);
           }
         }}
-        className="flex items-center gap-[var(--sp-2)] px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-white bg-[var(--color-brand-bold)] rounded-[var(--radius-sm)] hover:bg-[var(--color-brand-bold-hovered)] transition-colors"
+        className="flex items-center gap-[var(--sp-2)] px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-white bg-[var(--brand-primary)] rounded-[var(--radius-sm)] hover:bg-[var(--color-brand-bold-hovered)] transition-colors"
       >
         <Plus size={16} />
         Add Log
@@ -111,9 +111,9 @@ export function AddLogDialog({
         onClick={handleCancel}
       />
 
-      <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-overlay)] w-full max-w-md mx-[var(--sp-4)] overflow-hidden relative z-10">
+      <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-overlay)] w-full max-w-md mx-[var(--sp-4)] overflow-hidden relative z-10">
         <div className="p-[var(--sp-6)]">
-          <h2 className="text-[var(--font-size-lg)] font-semibold text-[var(--color-text-primary)] mb-[var(--sp-6)]">
+          <h2 className="text-[var(--font-size-lg)] font-semibold text-[var(--text-primary)] mb-[var(--sp-6)]">
             Add Agent Log
           </h2>
 
@@ -156,7 +156,7 @@ export function AddLogDialog({
                       onClick={() => setLevel(lvl)}
                       className={`px-[var(--sp-3)] py-[var(--sp-2)] rounded-[var(--radius-sm)] text-[var(--font-size-xs)] font-bold transition-colors ${level === lvl
                           ? `${colors.bg} ${colors.text} ${colors.border} border-2`
-                          : 'bg-[var(--color-bg-surface)] text-[var(--color-text-secondary)] border-2 border-[var(--color-border-default)] hover:bg-[var(--color-bg-hovered)]'
+                          : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-2 border-[var(--border-default)] hover:bg-[var(--bg-hovered)]'
                         }`}
                     >
                       {lvl.toUpperCase()}
@@ -184,14 +184,14 @@ export function AddLogDialog({
                 type="button"
                 onClick={handleCancel}
                 disabled={isSubmitting}
-                className="px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-[var(--color-brand-bold)] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] hover:bg-[var(--color-bg-hovered)] disabled:opacity-50 transition-colors"
+                className="px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-[var(--brand-primary)] bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-sm)] hover:bg-[var(--bg-hovered)] disabled:opacity-50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-white bg-[var(--color-brand-bold)] rounded-[var(--radius-sm)] hover:bg-[var(--color-brand-bold-hovered)] transition-colors disabled:opacity-50"
+                className="px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-white bg-[var(--brand-primary)] rounded-[var(--radius-sm)] hover:bg-[var(--color-brand-bold-hovered)] transition-colors disabled:opacity-50"
               >
                 {isSubmitting ? 'Adding...' : 'Add Log'}
               </button>

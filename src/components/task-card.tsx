@@ -44,11 +44,11 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
 
   const getPriorityIcon = (p: number) => {
     switch (p) {
-      case 5: return <ChevronsUp size={14} className="text-[var(--color-text-danger)]" />;
-      case 4: return <ChevronUp size={14} className="text-[var(--color-text-danger)]" />;
+      case 5: return <ChevronsUp size={14} className="text-[var(--status-blocked-text)]" />;
+      case 4: return <ChevronUp size={14} className="text-[var(--status-blocked-text)]" />;
       case 3: return <Minus size={14} className="text-[var(--status-inprogress-text)]" />;
-      case 2: return <ChevronDown size={14} className="text-[var(--color-brand-bold)]" />;
-      case 1: return <ChevronsDown size={14} className="text-[var(--color-brand-bold)]" />;
+      case 2: return <ChevronDown size={14} className="text-[var(--brand-primary)]" />;
+      case 1: return <ChevronsDown size={14} className="text-[var(--brand-primary)]" />;
       default: return <Minus size={14} />;
     }
   };
@@ -89,7 +89,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
             </span>
             <button
               onClick={(e) => { e.stopPropagation(); setShowLogDialog(true); }}
-              className="p-1 text-[var(--color-text-tertiary)] hover:text-[var(--color-brand-bold)] hover:bg-[var(--color-bg-sunken)] rounded transition-all"
+              className="p-1 text-[var(--text-tertiary)] hover:text-[var(--brand-primary)] hover:bg-[var(--bg-sunken)] rounded transition-all"
               title="Log Test Result"
             >
               <CheckCircle size={14} />

@@ -12,8 +12,8 @@ interface LogTestResultDialogProps {
   onResultLogged?: () => void;
 }
 
-const textareaClass = "w-full p-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[var(--font-size-base)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-selected)] transition-all resize-none";
-const labelClass = "block text-[var(--font-size-xs)] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-[var(--sp-2)]";
+const textareaClass = "w-full p-[var(--sp-3)] bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-sm)] text-[var(--font-size-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-focus)] transition-all resize-none";
+const labelClass = "block text-[var(--font-size-xs)] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-[var(--sp-2)]";
 
 export function LogTestResultDialog({
   task,
@@ -78,7 +78,7 @@ export function LogTestResultDialog({
             setIsOpenInternal(true);
           }
         }}
-        className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-colors"
+        className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
         title="Log Test Result"
       >
         <CheckCircle2 size={16} />
@@ -93,16 +93,16 @@ export function LogTestResultDialog({
         onClick={handleCancel}
       />
 
-      <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-overlay)] w-full max-w-lg mx-[var(--sp-4)] overflow-hidden relative z-10">
+      <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-overlay)] w-full max-w-lg mx-[var(--sp-4)] overflow-hidden relative z-10">
         <div className="p-[var(--sp-6)]">
-          <h2 className="text-[var(--font-size-lg)] font-semibold text-[var(--color-text-primary)] mb-[var(--sp-4)]">
+          <h2 className="text-[var(--font-size-lg)] font-semibold text-[var(--text-primary)] mb-[var(--sp-4)]">
             Log Test Result
           </h2>
 
           {/* Task Info */}
-          <div className="mb-[var(--sp-4)] p-[var(--sp-3)] bg-[var(--color-bg-sunken)] rounded-[var(--radius-sm)]">
-            <p className="text-[var(--font-size-xs)] text-[var(--color-text-tertiary)] mb-[var(--sp-1)]">Task</p>
-            <p className="text-[var(--font-size-sm)] text-[var(--color-text-primary)]">
+          <div className="mb-[var(--sp-4)] p-[var(--sp-3)] bg-[var(--bg-sunken)] rounded-[var(--radius-sm)]">
+            <p className="text-[var(--font-size-xs)] text-[var(--text-tertiary)] mb-[var(--sp-1)]">Task</p>
+            <p className="text-[var(--font-size-sm)] text-[var(--text-primary)]">
               #{task.id}: {task.description?.substring(0, 80)}
               {task.description && task.description.length > 80 ? '...' : ''}
             </p>
@@ -123,11 +123,11 @@ export function LogTestResultDialog({
                   onClick={() => setSuccess(true)}
                   className={`p-[var(--sp-4)] rounded-[var(--radius-sm)] text-[var(--font-size-sm)] transition-all ${success === true
                     ? 'bg-[var(--status-done-bg)] text-[var(--status-done-text)] border-2 border-[var(--status-done-text)]'
-                    : 'bg-[var(--color-bg-sunken)] text-[var(--color-text-secondary)] border-2 border-[var(--color-border-default)] hover:border-[var(--status-done-text)]'
+                    : 'bg-[var(--bg-sunken)] text-[var(--text-secondary)] border-2 border-[var(--border-default)] hover:border-[var(--status-done-text)]'
                     }`}
                 >
                   <div className="flex flex-col items-center gap-[var(--sp-2)]">
-                    <CheckCircle2 size={32} className={success === true ? 'text-[var(--status-done-text)]' : 'text-[var(--color-text-tertiary)]'} />
+                    <CheckCircle2 size={32} className={success === true ? 'text-[var(--status-done-text)]' : 'text-[var(--text-tertiary)]'} />
                     <span className="font-semibold">Passed</span>
                   </div>
                 </button>
@@ -136,11 +136,11 @@ export function LogTestResultDialog({
                   onClick={() => setSuccess(false)}
                   className={`p-[var(--sp-4)] rounded-[var(--radius-sm)] text-[var(--font-size-sm)] transition-all ${success === false
                     ? 'bg-[var(--status-blocked-bg)] text-[var(--status-blocked-text)] border-2 border-[var(--status-blocked-text)]'
-                    : 'bg-[var(--color-bg-sunken)] text-[var(--color-text-secondary)] border-2 border-[var(--color-border-default)] hover:border-[var(--status-blocked-text)]'
+                    : 'bg-[var(--bg-sunken)] text-[var(--text-secondary)] border-2 border-[var(--border-default)] hover:border-[var(--status-blocked-text)]'
                     }`}
                 >
                   <div className="flex flex-col items-center gap-[var(--sp-2)]">
-                    <XCircle size={32} className={success === false ? 'text-[var(--status-blocked-text)]' : 'text-[var(--color-text-tertiary)]'} />
+                    <XCircle size={32} className={success === false ? 'text-[var(--status-blocked-text)]' : 'text-[var(--text-tertiary)]'} />
                     <span className="font-semibold">Failed</span>
                   </div>
                 </button>
@@ -157,7 +157,7 @@ export function LogTestResultDialog({
                 rows={6}
                 className={`${textareaClass} font-mono text-[var(--font-size-xs)]`}
               />
-              <p className="mt-[var(--sp-1)] text-[var(--font-size-xs)] text-[var(--color-text-tertiary)]">
+              <p className="mt-[var(--sp-1)] text-[var(--font-size-xs)] text-[var(--text-tertiary)]">
                 Optional but recommended for tracking
               </p>
             </div>
@@ -167,14 +167,14 @@ export function LogTestResultDialog({
                 type="button"
                 onClick={handleCancel}
                 disabled={isSubmitting}
-                className="px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-[var(--color-brand-bold)] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] hover:bg-[var(--color-bg-hovered)] disabled:opacity-50 transition-colors"
+                className="px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-[var(--brand-primary)] bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-sm)] hover:bg-[var(--bg-hovered)] disabled:opacity-50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting || success === null}
-                className="px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-white bg-[var(--color-brand-bold)] rounded-[var(--radius-sm)] hover:bg-[var(--color-brand-bold-hovered)] transition-colors disabled:opacity-50"
+                className="px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-white bg-[var(--brand-primary)] rounded-[var(--radius-sm)] hover:bg-[var(--color-brand-bold-hovered)] transition-colors disabled:opacity-50"
               >
                 {isSubmitting ? 'Saving...' : 'Save Result'}
               </button>

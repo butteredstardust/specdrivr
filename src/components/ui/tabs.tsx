@@ -24,7 +24,7 @@ export function Tabs({ tabs, activeTab, className = '' }: TabsProps) {
   const currentTab = activeTab || getCurrentTabFromPath(pathname, tabs);
 
   return (
-    <div className={cn("border-b border-[var(--color-border-default)]", className)}>
+    <div className={cn("border-b border-[var(--border-default)]", className)}>
       <nav className="flex items-center gap-[var(--sp-4)] overflow-x-auto scrollbar-hide">
         {tabs.map((tab) => {
           const isActive = currentTab === tab.id;
@@ -48,8 +48,8 @@ function TabItem({ tab, isActive }: { tab: TabData; isActive: boolean }) {
         className={cn(
           "relative flex items-center gap-[var(--sp-2)] h-[40px] px-[var(--sp-1)] text-[12px] font-medium transition-colors whitespace-nowrap outline-none",
           isActive
-            ? "text-[#4338CA]"
-            : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+            ? "text-[var(--brand-primary)]"
+            : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
         )}
       >
         {tab.icon && <span className="flex-shrink-0 opacity-70 group-hover:opacity-100 transition-opacity">{tab.icon}</span>}
@@ -59,8 +59,8 @@ function TabItem({ tab, isActive }: { tab: TabData; isActive: boolean }) {
             className={cn(
               "min-w-[16px] h-[16px] px-1 rounded-full text-[10px] flex items-center justify-center font-bold",
               isActive
-                ? "bg-[#6366F1] text-white"
-                : "bg-[var(--color-bg-sunken)] text-[var(--color-text-secondary)]"
+                ? "bg-[var(--brand-primary)] text-white"
+                : "bg-[var(--bg-sunken)] text-[var(--text-secondary)]"
             )}
           >
             {typeof tab.badge === 'number' && tab.badge > 99 ? '99+' : tab.badge}
@@ -69,7 +69,7 @@ function TabItem({ tab, isActive }: { tab: TabData; isActive: boolean }) {
 
         {/* Underline Indicator */}
         {isActive && (
-          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#6366F1] rounded-t-sm" />
+          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[var(--brand-primary)] rounded-t-sm" />
         )}
       </div>
     </Link>
