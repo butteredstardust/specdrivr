@@ -1,13 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { ProjectCard, DashboardEmptyState } from '@/components/project-card';
+import { ProjectCard, DashboardEmptyState, type ProjectCardProps } from '@/components/project-card';
 import { Button } from '@/components/ui/button';
 import { Search } from 'lucide-react';
 
 import { GlassCard } from './ui/glass-card';
 
-export function DashboardProjectList({ projects }: { projects: any[] }) {
+export function DashboardProjectList({ projects }: { projects: ProjectCardProps['project'][] }) {
     const [searchQuery, setSearchQuery] = useState('');
 
     const filteredProjects = projects.filter((project) =>
