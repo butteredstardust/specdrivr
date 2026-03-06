@@ -181,8 +181,9 @@ export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorP
           <div className="space-y-[var(--sp-5)] max-w-4xl">
             {isCreating && (
               <div>
-                <label className="block text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-[var(--sp-2)]">Intent</label>
+                <label htmlFor="intent" className="block text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-[var(--sp-2)]">Intent</label>
                 <input
+                  id="intent"
                   type="text"
                   value={intent}
                   onChange={(e) => setIntent(e.target.value)}
@@ -229,7 +230,7 @@ export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorP
               />
             </div>
           </div>
-        ) : (
+        ) : activePlan && activePlan.status ? (
           <div className="space-y-[var(--sp-6)]">
             <div className="flex items-center gap-[var(--sp-3)]">
               <span className={cn("px-2 py-0.5 rounded-[var(--radius-sm)] text-[11px] font-bold uppercase", statusLozengeStyles[activePlan.status as PlanStatus])}>
@@ -261,7 +262,7 @@ export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorP
               </div>
             )}
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

@@ -208,7 +208,7 @@ export function TaskDetailModal({
                     className={clsx(
                       'px-[var(--sp-3)] py-[6px] rounded-[var(--radius-sm)] text-[var(--font-size-xs)] font-bold border transition-colors',
                       status === task.status
-                        ? `${taskStatusColors[status].text} ${taskStatusColors[status].bg} ${taskStatusColors[status].border}`
+                        ? `${taskStatusColors[status].text} ${taskStatusColors[status].bg} ${'border' in taskStatusColors[status] ? taskStatusColors[status].border : ''}`
                         : 'text-[var(--color-text-secondary)] bg-[var(--color-bg-surface)] border-[var(--color-border-default)] hover:bg-[var(--color-bg-hovered)]'
                     )}
                   >

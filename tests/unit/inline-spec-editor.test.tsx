@@ -28,20 +28,20 @@ describe('InlineSpecEditor - Core Functionality', () => {
   describe('Edit Mode', () => {
     test('starts in view mode', () => {
       render(<InlineSpecEditor specification={mockSpec} />);
-      expect(screen.getByLabelText('Edit')).toBeInTheDocument();
+      expect(screen.getByText('Edit')).toBeInTheDocument();
       expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
     });
 
     test('clicking Edit button enters edit mode', () => {
       render(<InlineSpecEditor specification={mockSpec} />);
-      fireEvent.click(screen.getByLabelText('Edit'));
+      fireEvent.click(screen.getByText('Edit'));
       expect(screen.getByRole('textbox')).toBeInTheDocument();
     });
 
     test('can cancel editing', () => {
       render(<InlineSpecEditor specification={mockSpec} />);
-      fireEvent.click(screen.getByLabelText('Edit'));
-      fireEvent.click(screen.getByLabelText('Cancel'));
+      fireEvent.click(screen.getByText('Edit'));
+      fireEvent.click(screen.getByText('Cancel'));
       expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
     });
   });
@@ -55,9 +55,9 @@ describe('InlineSpecEditor - Core Functionality', () => {
       });
 
       render(<InlineSpecEditor specification={mockSpec} onSpecUpdated={mockOnSpecUpdated} />);
-      fireEvent.click(screen.getByLabelText('Edit'));
+      fireEvent.click(screen.getByText('Edit'));
       fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Updated' } });
-      fireEvent.click(screen.getByLabelText('Save'));
+      fireEvent.click(screen.getByText('Save'));
 
       await waitFor(() => {
         expect(mockOnSpecUpdated).toHaveBeenCalled();

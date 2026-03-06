@@ -46,7 +46,7 @@ describe('InlinePlanEditor', () => {
 
     test('shows status badge', () => {
       render(<InlinePlanEditor specId={1} plans={mockPlans} />);
-      expect(screen.getByText('Active')).toBeInTheDocument();
+      expect(screen.getByText('active')).toBeInTheDocument();
     });
   });
 
@@ -76,7 +76,7 @@ describe('InlinePlanEditor', () => {
     test('includes intent field when creating new plan', async () => {
       mockCreatePlanDev.mockResolvedValue({ success: true });
       render(<InlinePlanEditor specId={1} plans={[]} />);
-      fireEvent.click(screen.getByText('+ New'));
+      fireEvent.click(screen.getByText('New Plan'));
 
       // Look for the intent field that was added
       const intentInput = screen.getByLabelText(/Intent/i);

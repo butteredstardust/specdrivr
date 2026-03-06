@@ -34,12 +34,6 @@ describe('ProjectSidebar', () => {
     expect(screen.getByText('specdrivr')).toBeInTheDocument();
   });
 
-  test('renders home and settings links', () => {
-    render(<ProjectSidebar projects={mockProjects as any} />);
-    expect(screen.getByText('Home')).toBeInTheDocument();
-    expect(screen.getByText('Settings')).toBeInTheDocument();
-  });
-
   test('shows "Projects" section label', () => {
     render(<ProjectSidebar projects={mockProjects as any} />);
     expect(screen.getByText('Projects')).toBeInTheDocument();

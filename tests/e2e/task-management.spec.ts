@@ -21,7 +21,7 @@ test.describe('Task Management', () => {
     await waitForPageLoad(page);
   });
 
-  describe('Kanban Board Display', () => {
+  test.describe('Kanban Board Display', () => {
     test('displays all task columns', async ({ page }) => {
       const columns = ['todo', 'in_progress', 'done', 'blocked'];
 
@@ -91,7 +91,7 @@ test.describe('Task Management', () => {
     });
   });
 
-  describe('Drag and Drop', () => {
+  test.describe('Drag and Drop', () => {
     test('drags task from todo to in_progress', async ({ page }) => {
       const todoColumn = page.locator('[data-testid="column-todo"]');
       const inProgressColumn = page.locator('[data-testid="column-in_progress"]');
@@ -209,7 +209,7 @@ test.describe('Task Management', () => {
     });
   });
 
-  describe('Task Creation', () => {
+  test.describe('Task Creation', () => {
     test('opens create task dialog', async ({ page }) => {
       const createButton = page.locator('[data-testid="create-task-button"]');
       await expect(createButton).toBeVisible();
@@ -282,7 +282,7 @@ test.describe('Task Management', () => {
     });
   });
 
-  describe('Task Detail Modal', () => {
+  test.describe('Task Detail Modal', () => {
     test('opens task detail modal on click', async ({ page }) => {
       const firstTask = page.locator('[data-testid="task-card"]').first();
       await firstTask.click();
@@ -339,7 +339,7 @@ test.describe('Task Management', () => {
     });
   });
 
-  describe('Task Filtering and Sorting', () => {
+  test.describe('Task Filtering and Sorting', () => {
     test('filters tasks by priority', async ({ page }) => {
       const filterButton = page.locator('[data-testid="priority-filter"]');
       await filterButton.click();
@@ -389,7 +389,7 @@ test.describe('Task Management', () => {
     });
   });
 
-  describe('Task Priority Display', () => {
+  test.describe('Task Priority Display', () => {
     test('priority displayed as colored border', async ({ page }) => {
       const taskCard = page.locator('[data-testid="task-card"]').first();
       const priorityBorder = taskCard.locator('[data-testid="priority-indicator"]');
@@ -429,7 +429,7 @@ test.describe('Task Management', () => {
     });
   });
 
-  describe('Real-time Updates', () => {
+  test.describe('Real-time Updates', () => {
     test('task counts update when tasks are moved', async ({ page }) => {
       const todoColumn = page.locator('[data-testid="column-todo"]');
       const inProgressColumn = page.locator('[data-testid="column-in_progress"]');
