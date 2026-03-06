@@ -160,7 +160,7 @@ export async function getTasksDoneToday() {
     today.setHours(0, 0, 0, 0);
 
     const result = await db
-      .select({ id: tasks.id })
+      .select({ id: tasks.id, updatedAt: tasks.updatedAt })
       .from(tasks)
       .where(
         inArray(tasks.status, ['done', 'skipped'])
@@ -169,23 +169,10 @@ export async function getTasksDoneToday() {
     // In Drizzle we can't easily do a date comparison without raw SQL in SQLite/Postgres seamlessly
     // so we filter the returned completed tasks by their updatedAt timestamp
     const completedToday = result.filter(t => {
-      // Find the task again to get the date since we only selected id above, 
-      // or we can select updatedAt above. Let's fix that.
-      return true;
+      return t.updatedAt && t.updatedAt >= today;
     });
 
-    // Better Drizzle query with SQL for postgres date > today
-    const countResult = await db
-      .select({ count: sql<number>`cast(count(${tasks.id}) as integer)` })
-      .from(tasks)
-      .where(
-        and(
-          inArray(tasks.status, ['done', 'skipped']),
-          sql`${tasks.updatedAt} >= ${today.toISOString()}`
-        )
-      );
-
-    return countResult[0].count || 0;
+    return completedToday.length;
   } catch (error) {
     console.error('Error getting tasks done today:', error);
     return 0;
