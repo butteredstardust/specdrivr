@@ -1,14 +1,14 @@
-# Spec-Drivr
+# Specdrivr
 
 **Transform Specifications into Code with Autonomous AI Agents.**
 
-Spec-Drivr is an orchestration platform designed for "Spec-Driven Development." It allows developers to define features through markdown specifications, which are then autonomously planned, executed, and verified by AI agents. By utilizing PostgreSQL as a persistent state machine, Spec-Drivr ensures that agents maintain full context and high-fidelity memory across long-running development sessions.
+specdrivr is an orchestration platform designed for "Spec-Driven Development." It allows developers to define features through markdown specifications, which are then autonomously planned, executed, and verified by AI agents. By utilizing PostgreSQL as a persistent state machine, specdrivr ensures that agents maintain full context and high-fidelity memory across long-running development sessions.
 
-## What is Spec-Drivr?
+## What is Specdrivr?
 
-In traditional development, AI context is often lost between prompts or sessions. **Spec-Drivr** solves this by operationalizing the development cycle. 
+In traditional development, AI context is often lost between prompts or sessions. **specdrivr** solves this by operationalizing the development cycle.
 - **Spec-Driven Development**: You write a "Spec," and the system handles the rest.
-- **Persistent State**: Unlike stateless chat interfaces, Spec-Drivr stores every decision, task, and log in a relational database.
+- **Persistent State**: Unlike stateless chat interfaces, specdrivr stores every decision, task, and log in a relational database.
 - **Autonomous Agents**: Agents fetch their "mission" from the platform, work on the local codebase, and report results back to the UI.
 - **Session Continuity**: An agent can pick up exactly where it (or another agent) left off, with complete access to the project's history.
 
@@ -103,7 +103,7 @@ Detailed technical guidelines are available in [CLAUDE.md](./claude.md).
 
 ## Architecture
 
-Spec-Drivr is built around the concept of a **Stateful Orchestrator**. The Next.js API layer serves as a Zod-validated boundary between the UI, the PostgreSQL state machine, and external agents. 
+specdrivr is built around the concept of a **Stateful Orchestrator**. The Next.js API layer serves as a Zod-validated boundary between the UI, the PostgreSQL state machine, and external agents.
 
 When a spec is created, an agent generates a **Plan** consisting of **Tasks**. Each task has dependencies and status flags. The agent's memory is persisted in PostgreSQL, allowing for complex branching and long-running workflows that traditional AI assistants cannot handle.
 
@@ -115,4 +115,4 @@ When a spec is created, an agent generates a **Plan** consisting of **Tasks**. E
 
 ## License
 
-This project is currently **Proprietary**. All rights reserved.
+This project is licensed under the MIT License.

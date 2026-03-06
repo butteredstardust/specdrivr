@@ -24,7 +24,7 @@ vi.mock('./create-project-dialog', () => ({
 }));
 
 const mockProjects = [
-  { id: 1, name: 'Spec-Drivr' },
+  { id: 1, name: 'specdrivr' },
   { id: 2, name: 'Website Redesign' },
 ];
 
@@ -47,7 +47,7 @@ describe('ProjectSidebar', () => {
 
   test('shows all project names in list', () => {
     render(<ProjectSidebar projects={mockProjects as any} />);
-    expect(screen.getByText('Spec-Drivr')).toBeInTheDocument();
+    expect(screen.getByText('specdrivr')).toBeInTheDocument();
     expect(screen.getByText('Website Redesign')).toBeInTheDocument();
   });
 

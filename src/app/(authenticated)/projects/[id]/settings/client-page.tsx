@@ -319,7 +319,7 @@ export function ProjectSettingsClient({
                   </div>
                   <div>
                     <p className="text-[14px] font-medium text-[var(--color-text-primary)]">Agent Access Tokens</p>
-                    <p className="text-[12px] text-[var(--color-text-tertiary)] max-w-sm">Active tokens required for Spec-Drivr agents to interact with this repository.</p>
+                    <p className="text-[12px] text-[var(--color-text-tertiary)] max-w-sm">Active tokens required for specdrivr agents to interact with this repository.</p>
                   </div>
                 </div>
                 <div className="text-[13px] text-[var(--color-text-secondary)] font-medium bg-[var(--color-bg-sunken)] px-3 py-1 rounded-[var(--radius-sm)] border border-[var(--color-border-default)]">

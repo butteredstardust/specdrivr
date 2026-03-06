@@ -25,7 +25,7 @@ export function Logo({ size = 'medium', className }: LogoProps) {
           'rounded-[var(--radius-md)] bg-[var(--color-brand-bold)] flex items-center justify-center font-bold text-white text-[var(--font-size-xs)]',
           className
         )}
-        aria-label="Spec-Drivr Logo"
+        aria-label="specdrivr Logo"
       >
         SD
       </div>

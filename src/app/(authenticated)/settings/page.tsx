@@ -182,7 +182,7 @@ export default async function SettingsPage({ }: SettingsPageProps) {
 
       <div className="mt-[var(--sp-8)] text-center px-[var(--sp-6)]">
         <p className="text-[var(--font-size-xs)] text-[var(--color-text-tertiary)]">
-          Spec-Drivr v{appVersion} &bull; Built with Next.js
+          specdrivr v{appVersion} &bull; Built with Next.js
         </p>
         <p className="text-[var(--font-size-xs)] text-[var(--color-text-tertiary)] mt-[var(--sp-1)]">
           Configuration loaded from .env.local
