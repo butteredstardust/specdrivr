@@ -22,6 +22,7 @@ import { updateTaskStatus } from '@/lib/actions';
 import { CreateTaskDialog } from './create-task-dialog';
 import { TaskDetailModal } from './task-detail-modal';
 import { cn } from '@/lib/utils';
+import { taskStatusColors } from '@/lib/ios-styles';
 
 interface KanbanBoardProps {
   projectId?: number;
@@ -132,10 +133,14 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
             >
               <div className="flex items-center justify-between mb-[var(--sp-4)] px-[var(--sp-1)]">
                 <div className="flex items-center gap-[var(--sp-2)]">
-                  <h3 className="text-[12px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">
+                  <span className={cn(
+                    "px-[6px] flex items-center h-[20px] rounded-[3px] text-[11px] font-bold uppercase tracking-[0.04em] whitespace-nowrap",
+                    taskStatusColors[column.id as keyof typeof taskStatusColors]?.bg || "bg-[var(--status-todo-bg)]",
+                    taskStatusColors[column.id as keyof typeof taskStatusColors]?.text || "text-[var(--status-todo-text)]"
+                  )}>
                     {column.title}
-                  </h3>
-                  <span className="bg-[var(--color-bg-sunken)] px-[var(--sp-2)] py-0.5 rounded-full text-[11px] font-bold text-[var(--color-text-secondary)]">
+                  </span>
+                  <span className="bg-[var(--color-bg-sunken)] px-[var(--sp-2)] py-0.5 rounded-full text-[11px] font-bold text-[var(--color-text-secondary)] ml-1">
                     {columnTasks.length}
                   </span>
                 </div>
@@ -165,7 +170,7 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
               </div>
 
               {projectId && plans.length > 0 && (
-                <div className="mt-[var(--sp-4)] pt-[var(--sp-3)] border-t border-[var(--color-border-default)]">
+                <div className="mt-[var(--sp-2)]">
                   <CreateTaskDialog
                     projectId={projectId}
                     plans={plans}
@@ -188,34 +193,36 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
         ) : null}
       </DragOverlay>
 
-      {selectedTask && (
-        <TaskDetailModal
-          isOpen={true}
-          onClose={() => setSelectedTask(null)}
-          task={selectedTask}
-          onStatusChange={async (taskId, status) => {
-            const result = await updateTaskStatus(taskId, status);
-            if (result.success) {
-              setTasksState((prev) =>
-                prev.map((t) => t.id === taskId ? { ...t, status: status as TaskSelect['status'] } : t)
-              );
-              router.refresh();
-            }
-          }}
-          onRetry={async (taskId) => {
-            try {
-              const response = await fetch(`/api/tasks/${taskId}/agent/retry`, { method: 'POST' });
-              if (response.ok) router.refresh();
-            } catch (error) { console.error('Failed to retry task:', error); }
-          }}
-          onSkip={async (taskId) => {
-            try {
-              const response = await fetch(`/api/tasks/${taskId}/agent/skip`, { method: 'POST' });
-              if (response.ok) router.refresh();
-            } catch (error) { console.error('Failed to skip task:', error); }
-          }}
-        />
-      )}
+      {
+        selectedTask && (
+          <TaskDetailModal
+            isOpen={true}
+            onClose={() => setSelectedTask(null)}
+            task={selectedTask}
+            onStatusChange={async (taskId, status) => {
+              const result = await updateTaskStatus(taskId, status);
+              if (result.success) {
+                setTasksState((prev) =>
+                  prev.map((t) => t.id === taskId ? { ...t, status: status as TaskSelect['status'] } : t)
+                );
+                router.refresh();
+              }
+            }}
+            onRetry={async (taskId) => {
+              try {
+                const response = await fetch(`/api/tasks/${taskId}/agent/retry`, { method: 'POST' });
+                if (response.ok) router.refresh();
+              } catch (error) { console.error('Failed to retry task:', error); }
+            }}
+            onSkip={async (taskId) => {
+              try {
+                const response = await fetch(`/api/tasks/${taskId}/agent/skip`, { method: 'POST' });
+                if (response.ok) router.refresh();
+              } catch (error) { console.error('Failed to skip task:', error); }
+            }}
+          />
+        )
+      }
     </DndContext>
   );
 }

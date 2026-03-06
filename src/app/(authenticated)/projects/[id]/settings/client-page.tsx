@@ -23,6 +23,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 interface ProjectSettingsClientProps {
   projectId: number;
@@ -127,17 +128,19 @@ export function ProjectSettingsClient({
   ];
 
   return (
-    <div className="flex flex-col h-full bg-[var(--color-bg-primary)]">
-      {/* Project Header */}
-      <div className="px-[var(--sp-6)] pt-[var(--sp-6)] pb-[var(--sp-2)]">
-        <div className="flex items-center gap-[var(--sp-2)] text-[12px] text-[var(--color-text-tertiary)] mb-[var(--sp-2)]">
-          <a href="/" className="hover:text-[var(--color-brand-bold)] transition-colors">Projects</a>
-          <span>/</span>
-          <span className="text-[var(--color-text-secondary)]">{project.name}</span>
+    <div className="flex-1 flex flex-col min-w-0 bg-[var(--color-bg-page)]">
+      {/* Page Header */}
+      <div className="px-[24px] pt-[24px] pb-0 bg-[#FFFFFF] border-b border-[#DFE1E6]">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-[8px] text-[13px] text-[#8590A2] mb-[4px]">
+          <Link href="/" className="text-[#8590A2] hover:text-[#172B4D] no-underline transition-colors">Projects</Link>
+          <span className="text-[#DFE1E6]">/</span>
+          <span>{project.name}</span>
         </div>
-        <div className="flex items-center justify-between mb-[var(--sp-6)]">
-          <h1 className="text-[24px] font-semibold text-[var(--color-text-primary)] tracking-tight">Project Settings</h1>
-        </div>
+        {/* Title */}
+        <h1 className="text-[22px] font-bold text-[#172B4D] m-0 mb-[16px] leading-[1.2]">
+          Project Settings
+        </h1>
 
         <Tabs tabs={tabs} activeTab="settings" />
       </div>
@@ -148,8 +151,8 @@ export function ProjectSettingsClient({
           {/* General Settings */}
           <section className="space-y-[var(--sp-6)]">
             <div className="flex items-center h-[28px] pb-[8px] mt-[24px] mb-[var(--sp-4)] gap-[var(--sp-2)] border-b border-[var(--color-border-default)]">
-              <Globe size={14} className="text-[var(--color-text-tertiary)]" />
-              <h2 className="text-[11px] font-[600] text-[var(--color-text-tertiary)] uppercase tracking-[0.08em]">General Details</h2>
+              <Globe size={14} color="#94A3B8" />
+              <h2 className="text-[#94A3B8] text-[11px] font-[600] uppercase tracking-[0.08em]">General Details</h2>
             </div>
 
             <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] p-[var(--sp-6)] shadow-[var(--shadow-card)] space-y-[var(--sp-6)]">
@@ -187,7 +190,7 @@ export function ProjectSettingsClient({
               <div className="flex items-center justify-between pt-[var(--sp-2)]">
                 <div>
                   {detailsMessage && (
-                    <span className={cn("text-[12px] font-medium", detailsMessage.type === 'success' ? "text-[var(--status-success-text)]" : "text-[var(--color-text-danger)]")}>
+                    <span className={cn("text-[12px] font-medium", detailsMessage.type === 'success' ? "text-[var(--status-done-text)]" : "text-[var(--color-text-danger)]")}>
                       {detailsMessage.text}
                     </span>
                   )}
@@ -200,35 +203,42 @@ export function ProjectSettingsClient({
           </section>
 
           {/* Constitution & Tech Stack */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-[var(--sp-10)]">
-            <section className="space-y-[var(--sp-6)]">
-              <div className="flex items-center h-[28px] pb-[8px] mt-[24px] mb-[var(--sp-4)] gap-[var(--sp-2)] border-b border-[var(--color-border-default)]">
-                <ShieldAlert size={14} className="text-[var(--color-text-tertiary)]" />
-                <h2 className="text-[11px] font-[600] text-[var(--color-text-tertiary)] uppercase tracking-[0.08em]">Constitution</h2>
-              </div>
-              <InlineConstitutionEditor
-                projectId={projectId}
-                constitution={project.constitution as string | null}
-              />
-            </section>
+          <section className="space-y-[var(--sp-6)]">
+            <div className="flex items-center h-[28px] pb-[8px] mt-[24px] mb-[var(--sp-4)] gap-[var(--sp-2)] border-b border-[var(--color-border-default)]">
+              <ShieldAlert size={14} color="#94A3B8" />
+              <h2 className="text-[#94A3B8] text-[11px] font-[600] uppercase tracking-[0.08em]">Project Intelligence</h2>
+            </div>
 
-            <section className="space-y-[var(--sp-6)]">
-              <div className="flex items-center h-[28px] pb-[8px] mt-[24px] mb-[var(--sp-4)] gap-[var(--sp-2)] border-b border-[var(--color-border-default)]">
-                <Database size={14} className="text-[var(--color-text-tertiary)]" />
-                <h2 className="text-[11px] font-[600] text-[var(--color-text-tertiary)] uppercase tracking-[0.08em]">Tech Stack</h2>
+            <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] overflow-hidden">
+              <div className="p-[var(--sp-6)] border-b border-[var(--color-border-default)]">
+                <div className="flex items-center gap-[var(--sp-2)] mb-[var(--sp-4)]">
+                  <ShieldAlert size={14} color="#94A3B8" />
+                  <h3 className="text-[#94A3B8] text-[12px] font-bold">Constitution</h3>
+                </div>
+                <InlineConstitutionEditor
+                  projectId={projectId}
+                  constitution={project.constitution as string | null}
+                />
               </div>
-              <InlineTechStackEditor
-                projectId={projectId}
-                techStack={project.techStack as Record<string, unknown> || {}}
-              />
-            </section>
-          </div>
+
+              <div className="p-[var(--sp-6)]">
+                <div className="flex items-center gap-[var(--sp-2)] mb-[var(--sp-4)]">
+                  <Database size={14} color="#94A3B8" />
+                  <h3 className="text-[#94A3B8] text-[12px] font-bold">Tech Stack</h3>
+                </div>
+                <InlineTechStackEditor
+                  projectId={projectId}
+                  techStack={project.techStack as Record<string, unknown> || {}}
+                />
+              </div>
+            </div>
+          </section>
 
           {/* Git Integration */}
           <section className="space-y-[var(--sp-6)]">
             <div className="flex items-center h-[28px] pb-[8px] mt-[24px] mb-[var(--sp-4)] gap-[var(--sp-2)] border-b border-[var(--color-border-default)]">
-              <GitBranch size={14} className="text-[var(--color-text-tertiary)]" />
-              <h2 className="text-[11px] font-[600] text-[var(--color-text-tertiary)] uppercase tracking-[0.08em]">Git Integration</h2>
+              <GitBranch size={14} color="#94A3B8" />
+              <h2 className="text-[#94A3B8] text-[11px] font-[600] uppercase tracking-[0.08em]">Git Integration</h2>
             </div>
 
             <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] p-[var(--sp-6)] shadow-[var(--shadow-card)] space-y-[var(--sp-6)]">
@@ -279,7 +289,7 @@ export function ProjectSettingsClient({
               <div className="flex items-center justify-between pt-[var(--sp-2)]">
                 <div>
                   {gitConfigMessage && (
-                    <span className={cn("text-[12px] font-medium", gitConfigMessage.type === 'success' ? "text-[var(--status-success-text)]" : "text-[var(--color-text-danger)]")}>
+                    <span className={cn("text-[12px] font-medium", gitConfigMessage.type === 'success' ? "text-[var(--status-done-text)]" : "text-[var(--color-text-danger)]")}>
                       {gitConfigMessage.text}
                     </span>
                   )}
@@ -295,25 +305,34 @@ export function ProjectSettingsClient({
           <section className="space-y-[var(--sp-6)]">
             <div className="flex items-center justify-between h-[28px] pb-[8px] mt-[24px] mb-[var(--sp-4)] border-b border-[var(--color-border-default)]">
               <div className="flex items-center gap-[var(--sp-2)]">
-                <Key size={14} className="text-[var(--color-text-tertiary)]" />
-                <h2 className="text-[11px] font-[600] text-[var(--color-text-tertiary)] uppercase tracking-[0.08em]">Agent Access Tokens</h2>
+                <Key size={14} className="text-[var(--color-text-secondary)]" />
+                <h2 className="text-[11px] font-[600] text-[var(--color-text-tertiary)] uppercase tracking-[0.08em]">Access Controls</h2>
               </div>
-              <Button variant="primary" size="small" onClick={() => setShowTokenDialog(true)} icon={<Plus size={16} />}>Generate New</Button>
+              <Button variant="primary" size="small" onClick={() => setShowTokenDialog(true)} icon={<Plus size={16} />}>Generate Token</Button>
             </div>
 
-            <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] p-[var(--sp-10)] shadow-[var(--shadow-card)] flex flex-col items-center justify-center text-center">
-              <div className="w-12 h-12 rounded-full bg-[var(--color-bg-sunken)] flex items-center justify-center mb-[var(--sp-4)]">
-                <Key size={24} className="text-[var(--color-text-tertiary)]" />
+            <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] overflow-hidden">
+              <div className="p-[var(--sp-6)] flex items-center justify-between">
+                <div className="flex items-center gap-[var(--sp-4)]">
+                  <div className="w-10 h-10 rounded-full bg-[var(--color-bg-sunken)] flex items-center justify-center">
+                    <Key size={20} className="text-[var(--color-text-tertiary)]" />
+                  </div>
+                  <div>
+                    <p className="text-[14px] font-medium text-[var(--color-text-primary)]">Agent Access Tokens</p>
+                    <p className="text-[12px] text-[var(--color-text-tertiary)] max-w-sm">Active tokens required for Spec-Drivr agents to interact with this repository.</p>
+                  </div>
+                </div>
+                <div className="text-[13px] text-[var(--color-text-secondary)] font-medium bg-[var(--color-bg-sunken)] px-3 py-1 rounded-[var(--radius-sm)] border border-[var(--color-border-default)]">
+                  No active tokens
+                </div>
               </div>
-              <p className="text-[14px] text-[var(--color-text-secondary)] mb-[var(--sp-2)]">No active agent tokens.</p>
-              <p className="text-[12px] text-[var(--color-text-tertiary)] max-w-xs">Generate a token to allow the Spec-Drivr agent to interact with this repository.</p>
             </div>
           </section>
 
           {/* Danger Zone */}
           <section className="space-y-[var(--sp-6)]">
             <div className="flex items-center gap-[var(--sp-3)] border-b border-[var(--color-text-danger)] pb-[var(--sp-3)] opacity-80">
-              <AlertTriangle size={18} className="text-[var(--color-text-danger)]" />
+              <AlertTriangle size={18} className="text-[var(--color-text-secondary)]" />
               <h2 className="text-[14px] font-bold text-[var(--color-text-danger)] uppercase tracking-wider">Danger Zone</h2>
             </div>
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { ReactNode, useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { Logo } from './logo';
 import { DatabaseStatus } from './database-status';
 import { UserMenu } from './user-menu';
@@ -34,21 +35,58 @@ export function AppShell({
     };
   }, []);
 
+  const pathname = usePathname();
+
+  const NavLink = ({ href, children, exact = false }: { href: string; children: ReactNode; exact?: boolean }) => {
+    const isActive = exact ? pathname === href : pathname?.startsWith(href);
+    return (
+      <Link
+        href={href}
+        style={{
+          fontSize: '13px',
+          fontWeight: 500,
+          color: isActive ? '#FFFFFF' : 'rgba(255, 255, 255, 0.75)',
+          padding: '0 12px',
+          height: '56px',
+          display: 'inline-flex',
+          alignItems: 'center',
+          textDecoration: 'none',
+          borderBottom: isActive ? '2px solid #A78BFA' : '2px solid transparent',
+          transition: 'color 120ms ease'
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.color = '#FFFFFF'; }}
+        onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.color = 'rgba(255, 255, 255, 0.75)'; }}
+      >
+        {children}
+      </Link>
+    );
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-[var(--color-bg-page)] font-sans">
       {/* Top Nav - 56px fixed */}
-      <header className="fixed top-0 left-0 right-0 w-full h-[56px] bg-[var(--color-brand-bold)] z-[100] px-[var(--sp-4)] flex items-center gap-[var(--sp-2)]">
-        <Link href="/" className="flex items-center gap-[var(--sp-2)]">
-          <div className="text-[14px] font-bold text-white uppercase tracking-tight">Spec-Drivr</div>
+      <header className="fixed top-0 left-0 right-0 w-full h-[56px] z-[100] px-[var(--sp-4)] flex items-center" style={{ background: '#1E1B4B' }}>
+        <Link href="/" className="flex items-center">
+          <span style={{
+            fontFamily: "'Inter', sans-serif",
+            fontSize: '20px',
+            fontWeight: 800,
+            letterSpacing: '-0.03em',
+            background: 'linear-gradient(135deg, #A78BFA 0%, #60A5FA 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            lineHeight: 1,
+            userSelect: 'none',
+            textTransform: 'lowercase'
+          }}>
+            specdrivr
+          </span>
         </Link>
 
-        <nav className="flex items-center gap-[var(--sp-2)]">
-          <Link href="/" className="text-[12px] font-medium text-white/85 px-[var(--sp-2)] py-[var(--sp-1)] rounded-[var(--radius-md)] hover:bg-white/12 hover:text-white transition-colors">
-            Dashboard
-          </Link>
-          <Link href="/settings" className="text-[12px] font-medium text-white/85 px-[var(--sp-2)] py-[var(--sp-1)] rounded-[var(--radius-md)] hover:bg-white/12 hover:text-white transition-colors">
-            Settings
-          </Link>
+        <nav className="flex items-center" style={{ marginLeft: '24px' }}>
+          <NavLink href="/" exact>Dashboard</NavLink>
+          <NavLink href="/settings">Settings</NavLink>
         </nav>
 
         <div className="ml-auto flex items-center gap-[var(--sp-2)]">

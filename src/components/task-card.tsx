@@ -63,7 +63,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
         {...attributes}
         {...listeners}
         className={cn(
-          "bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] shadow-[var(--shadow-card)] p-[var(--sp-3)] cursor-pointer hover:bg-[var(--color-bg-hovered)] transition-all group",
+          "bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] shadow-[var(--shadow-card)] p-[var(--sp-3)] hover:border-l-[2px] hover:border-l-[#6366F1] hover:pl-[10px] cursor-pointer hover:bg-[var(--color-bg-hovered)] transition-all group",
           isDragging && "z-50 shadow-2xl scale-[1.02]"
         )}
         onClick={() => onClick?.(task)}

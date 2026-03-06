@@ -63,14 +63,14 @@ export function ProjectSidebar({ projects, currentProjectId, onProjectCreated }:
               key={project.id}
               href={`/projects/${project.id}`}
               className={cn(
-                "flex items-center h-[32px] px-[var(--sp-2)] rounded-[var(--radius-md)] gap-[var(--sp-2)] text-[12px] font-medium transition-all duration-80 relative",
+                "flex items-center h-[32px] px-[var(--sp-2)] rounded-[var(--radius-md)] gap-[var(--sp-2)] text-[12px] transition-all duration-80 relative",
                 isActive
-                  ? "bg-[var(--color-bg-selected)] text-[var(--color-brand-bold)] font-semibold"
-                  : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hovered)] hover:text-[var(--color-text-primary)]"
+                  ? "bg-[#EEF2FF] text-[#4338CA] font-semibold"
+                  : "text-[var(--color-text-secondary)] font-medium hover:bg-[var(--color-bg-hovered)] hover:text-[var(--color-text-primary)]"
               )}
             >
               {isActive && (
-                <div className="absolute left-0 top-[var(--sp-2)] bottom-[var(--sp-2)] w-[2px] bg-[var(--color-brand-bold)] rounded-sm" />
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#6366F1]" />
               )}
               <div
                 className={cn("w-[8px] h-[8px] rounded-full shrink-0", statusColors[agentStatus] || 'bg-[#DFE1E6]')}
@@ -91,10 +91,11 @@ export function ProjectSidebar({ projects, currentProjectId, onProjectCreated }:
               window.dispatchEvent(new CustomEvent('open-new-project-modal'));
             }
           }}
-          className="bg-[var(--color-brand-bold)] text-[#FFFFFF] h-[32px] w-[calc(100%-16px)] mx-[8px] my-0 rounded-[4px] border-none text-[12px] font-medium flex items-center justify-center gap-[6px] cursor-pointer hover:bg-[#0055CC] transition-colors"
+          style={{ background: 'linear-gradient(135deg, #6366F1, #2563EB)' }}
+          className="text-[#FFFFFF] h-[32px] w-[calc(100%-16px)] mx-[8px] my-0 rounded-[4px] border-none text-[12px] font-semibold flex items-center justify-center gap-[6px] cursor-pointer transition-all hover:brightness-110"
         >
           <Plus size={14} />
-          <span className="font-medium mt-[1px]">New Project</span>
+          <span className="mt-[1px]">New Project</span>
         </button>
       </div>
     </div>

@@ -6,6 +6,7 @@ import { Tabs } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { GitBranch, User, Clock, CheckSquare, Layout, ArrowLeft, Search, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 interface ProjectCommitsClientProps {
   projectId: number;
@@ -46,23 +47,25 @@ export function ProjectCommitsClient({
   ];
 
   return (
-    <div className="flex flex-col h-full bg-[var(--color-bg-primary)]">
-      {/* Project Header */}
-      <div className="px-[var(--sp-6)] pt-[var(--sp-6)] pb-[var(--sp-2)]">
-        <div className="flex items-center gap-[var(--sp-2)] text-[12px] text-[var(--color-text-tertiary)] mb-[var(--sp-2)]">
-          <a href="/" className="hover:text-[var(--color-brand-bold)] transition-colors">Projects</a>
-          <span>/</span>
-          <span className="text-[var(--color-text-secondary)]">{project.name}</span>
+    <div className="flex-1 flex flex-col min-w-0 bg-[var(--color-bg-page)]">
+      {/* Page Header */}
+      <div className="px-[24px] pt-[24px] pb-0 bg-[#FFFFFF] border-b border-[#DFE1E6]">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-[8px] text-[13px] text-[#8590A2] mb-[4px]">
+          <Link href="/" className="text-[#8590A2] hover:text-[#172B4D] no-underline transition-colors">Projects</Link>
+          <span className="text-[#DFE1E6]">/</span>
+          <span>{project.name}</span>
         </div>
-        <div className="flex items-center justify-between mb-[var(--sp-6)]">
-          <h1 className="text-[24px] font-semibold text-[var(--color-text-primary)] tracking-tight">Commits</h1>
-        </div>
+        {/* Title */}
+        <h1 className="text-[22px] font-bold text-[#172B4D] m-0 mb-[16px] leading-[1.2]">
+          Commits
+        </h1>
 
         <Tabs tabs={tabs} activeTab="commits" />
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-y-auto px-[var(--sp-6)] py-[var(--sp-6)]">
+      <div className="flex-1 overflow-y-auto px-[24px] py-[24px]">
         <div className="max-w-5xl">
           {/* Toolbar */}
           <div className="flex flex-wrap items-center justify-between gap-[var(--sp-4)] mb-[var(--sp-6)]">
@@ -92,7 +95,7 @@ export function ProjectCommitsClient({
               <GitBranch size={48} className="text-[var(--color-border-default)] mb-[var(--sp-4)]" />
               <h3 className="text-[18px] font-semibold text-[var(--color-text-primary)] mb-[var(--sp-2)]">No commits yet</h3>
               <p className="text-[14px] text-[var(--color-text-secondary)] mb-[var(--sp-6)]">Commits will appear here once the agent starts working.</p>
-              <Button variant="primary" onClick={() => window.location.href = `/projects/${projectId}/settings`}>Configure Git Integration</Button>
+              <Button variant="primary" className="!bg-[#2563EB] !text-[#FFFFFF] !opacity-100 font-medium text-[14px] h-[34px] px-[16px] border-none rounded-[6px] hover:!bg-[#1D4ED8]" onClick={() => window.location.href = `/projects/${projectId}/settings`}>Configure Git Integration</Button>
             </div>
           ) : filteredCommits.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-[var(--sp-12)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] opacity-60">

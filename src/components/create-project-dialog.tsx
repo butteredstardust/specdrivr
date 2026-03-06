@@ -91,7 +91,8 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
         variant="primary"
         onClick={() => setIsOpen(true)}
         icon={<Plus size={14} />}
-        className="h-8 px-3 whitespace-nowrap"
+        style={{ background: 'linear-gradient(135deg, #6366F1, #2563EB)', color: '#FFFFFF', border: 'none' }}
+        className="h-8 px-3 whitespace-nowrap transition-all hover:brightness-110"
       >
         New Project
       </Button>
@@ -111,6 +112,7 @@ export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogPro
               onClick={handleSubmit}
               disabled={isSubmitting || !formData.name.trim()}
               loading={isSubmitting}
+              className="!bg-[#4F46E5] !text-[#FFFFFF] !opacity-100 font-medium text-[14px] h-[32px] px-[16px] border-none rounded-[4px] hover:!bg-[#4338CA] disabled:!bg-[#BFDBFE] disabled:!text-[#1D4ED8] disabled:cursor-not-allowed"
             >
               Create
             </Button>
