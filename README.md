@@ -1,6 +1,10 @@
 <div align="center">
   <h1>Specdrivr</h1>
   <p><strong>Transform Specifications into Code with Autonomous AI Agents.</strong></p>
+  <p>
+    <a href="https://github.com/butteredstardust/specdrivr/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/butteredstardust/specdrivr/test.yml?branch=main" alt="Build Status"></a>
+    <a href="https://github.com/butteredstardust/specdrivr/blob/main/LICENSE"><img src="https://img.shields.io/github/license/butteredstardust/specdrivr" alt="License"></a>
+  </p>
 </div>
 
 ---
