@@ -129,6 +129,7 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
             <div
               key={column.id}
               id={column.id}
+              data-testid={`column-${column.id}`}
               className="flex flex-col w-[272px] shrink-0 bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] p-[var(--sp-3)]"
             >
               <div className="flex items-center justify-between mb-[var(--sp-4)] px-[var(--sp-1)]">
@@ -140,7 +141,7 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
                   )}>
                     {column.title}
                   </span>
-                  <span className="bg-[var(--color-bg-sunken)] px-[var(--sp-2)] py-0.5 rounded-full text-[11px] font-bold text-[var(--color-text-secondary)] ml-1">
+                  <span data-testid={`count-${column.id}`} className="bg-[var(--color-bg-sunken)] px-[var(--sp-2)] py-0.5 rounded-full text-[11px] font-bold text-[var(--color-text-secondary)] ml-1">
                     {columnTasks.length}
                   </span>
                 </div>

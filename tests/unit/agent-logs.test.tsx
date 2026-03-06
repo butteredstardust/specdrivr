@@ -27,7 +27,7 @@ const mockTasks = [
 describe('AgentLogs', () => {
   test('renders component with logs', () => {
     render(<AgentLogs logs={mockLogs} tasks={mockTasks} />);
-    expect(screen.getByText(/2 of 2 logs/)).toBeInTheDocument();
+    expect(screen.getByText(/Agent Activity \(2\)/)).toBeInTheDocument();
     expect(screen.getByText('Starting task execution')).toBeInTheDocument();
   });
 
@@ -35,8 +35,8 @@ describe('AgentLogs', () => {
     render(<AgentLogs logs={mockLogs} tasks={mockTasks} />);
     fireEvent.click(screen.getByText('Filters'));
 
-    const infoCheckbox = screen.getByRole('checkbox', { name: /info/i });
-    fireEvent.click(infoCheckbox);
+    const infoCheckboxes = screen.getAllByText('info');
+    fireEvent.click(infoCheckboxes[0]);
 
     expect(screen.queryByText('Starting task execution')).not.toBeInTheDocument();
     expect(screen.getByText('Error occurred')).toBeInTheDocument();

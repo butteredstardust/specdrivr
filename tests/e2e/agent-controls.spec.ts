@@ -1,9 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login, testUsers, waitForPageLoad } from '../utils/test-helpers';
 
-test.describe('Agent Control Panel', () => {
-  test.describe.serial.configure()
-
+test.describe.serial('Agent Control Panel', () => {
   test.beforeEach(async ({ page, context }) => {
     await login(page, testUsers.admin);
     context.addCookies([
