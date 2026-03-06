@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../mocks/fixture';
 
 test.describe('Authentication Flow', () => {
   test.beforeEach(async ({ page }) => {
@@ -7,12 +7,12 @@ test.describe('Authentication Flow', () => {
 
   test('User can access login page', async ({ page }) => {
     await expect(page).toHaveURL('/auth/login');
-    await expect(page.locator('h1')).toContainText('Login');
+    await expect(page.locator('h2')).toContainText('Log in to your account');
   });
 
   test('Login form should be visible', async ({ page }) => {
-    const usernameInput = page.locator('input[name="username"]');
-    const passwordInput = page.locator('input[name="password"]');
+    const usernameInput = page.locator('#username');
+    const passwordInput = page.locator('#password');
     const submitButton = page.locator('button[type="submit"]');
 
     await expect(usernameInput).toBeVisible();
@@ -21,17 +21,17 @@ test.describe('Authentication Flow', () => {
   });
 
   test('Failed login shows error message', async ({ page }) => {
-    await page.fill('input[name="username"]', 'wronguser');
-    await page.fill('input[name="password"]', 'wrongpass');
+    await page.fill('#username', 'wronguser');
+    await page.fill('#password', 'wrongpass');
     await page.click('button[type="submit"]');
 
-    const errorMessage = page.locator('[data-testid="error-message"]');
+    const errorMessage = page.locator('text="Invalid credentials"');
     await expect(errorMessage).toBeVisible();
   });
 
   test('Successful login with test credentials', async ({ page }) => {
-    await page.fill('input[name="username"]', 'Admin');
-    await page.fill('input[name="password"]', 'demo');
+    await page.fill('#username', 'Admin');
+    await page.fill('#password', 'demo');
     await page.click('button[type="submit"]');
 
     await expect(page).toHaveURL('/');
@@ -39,7 +39,7 @@ test.describe('Authentication Flow', () => {
   });
 
   test('Password show/hide functionality', async ({ page }) => {
-    const passwordInput = page.locator('input[name="password"]');
+    const passwordInput = page.locator('#password');
     const toggleButton = page.locator('[data-testid="toggle-password"]');
 
     await expect(passwordInput).toHaveAttribute('type', 'password');
@@ -50,14 +50,14 @@ test.describe('Authentication Flow', () => {
   });
 
   test('Username field should be focused on load', async ({ page }) => {
-    const usernameInput = page.locator('input[name="username"]');
+    const usernameInput = page.locator('#username');
     await expect(usernameInput).toBeFocused();
   });
 
   test('Login with Enter key', async ({ page }) => {
-    await page.fill('input[name="username"]', 'Admin');
-    await page.fill('input[name="password"]', 'demo');
-    await page.press('input[name="password"]', 'Enter');
+    await page.fill('#username', 'Admin');
+    await page.fill('#password', 'demo');
+    await page.press('#password', 'Enter');
 
     await expect(page).toHaveURL('/');
   });
@@ -66,8 +66,8 @@ test.describe('Authentication Flow', () => {
 test.describe('Session Management', () => {
   test('Session persists after refresh', async ({ page }) => {
     await page.goto('/auth/login');
-    await page.fill('input[name="username"]', 'Admin');
-    await page.fill('input[name="password"]', 'demo');
+    await page.fill('#username', 'Admin');
+    await page.fill('#password', 'demo');
     await page.click('button[type="submit"]');
 
     await expect(page).toHaveURL('/');
@@ -81,8 +81,8 @@ test.describe('Session Management', () => {
 
   test('Session cookie is set after login', async ({ page, context }) => {
     await page.goto('/auth/login');
-    await page.fill('input[name="username"]', 'Admin');
-    await page.fill('input[name="password"]', 'demo');
+    await page.fill('#username', 'Admin');
+    await page.fill('#password', 'demo');
     await page.click('button[type="submit"]');
 
     const cookies = await context.cookies();
@@ -99,8 +99,8 @@ test.describe('Protected Routes', () => {
 
   test('Authenticated user can access protected routes', async ({ page }) => {
     await page.goto('/auth/login');
-    await page.fill('input[name="username"]', 'Admin');
-    await page.fill('input[name="password"]', 'demo');
+    await page.fill('#username', 'Admin');
+    await page.fill('#password', 'demo');
     await page.click('button[type="submit"]');
 
     await page.goto('/');
