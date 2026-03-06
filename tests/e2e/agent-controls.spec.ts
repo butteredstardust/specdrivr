@@ -177,7 +177,7 @@ test.describe.serial('Agent Control Panel', () => {
   });
 });
 
-test.describe('Agent Logs Management', () => {
+test.test.describe('Agent Logs Management', () => {
   test.beforeEach(async ({ page, context }) => {
     await login(page, testUsers.admin);
     context.addCookies([
