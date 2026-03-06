@@ -62,11 +62,11 @@ export function DashboardProjectList({ projects }: { projects: ProjectCardProps[
             <div
                 className="flex flex-col"
                 style={{
-                    background: '#FFFFFF',
-                    border: '1px solid #DFE1E6',
+                    background: 'var(--bg-surface)',
+                    border: '1px solid var(--border-default)',
                     borderRadius: '8px',
                     overflow: 'hidden',
-                    boxShadow: '0 1px 2px rgba(9,30,66,0.15)'
+                    boxShadow: 'var(--shadow-card)'
                 }}
             >
                 {filteredProjects.map((project) => (

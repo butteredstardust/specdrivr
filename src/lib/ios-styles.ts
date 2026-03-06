@@ -7,7 +7,7 @@
 // ============================================================================
 
 export const taskStatusColors = {
-  todo: { bg: 'bg-[#F1F5F9]', text: 'text-[#475569]' },
+  todo: { bg: 'bg-[var(--status-todo-bg)]', text: 'text-[var(--status-todo-text)]' },
   in_progress: { bg: 'bg-[var(--status-inprogress-bg)]', text: 'text-[var(--status-inprogress-text)]' },
   paused: { bg: 'bg-[var(--status-paused-bg)]', text: 'text-[var(--status-paused-text)]' },
   blocked: { bg: 'bg-[var(--status-blocked-bg)]', text: 'text-[var(--status-blocked-text)]' },
@@ -25,8 +25,8 @@ export type AgentStatus = 'idle' | 'running' | 'paused' | 'stopped' | 'error' | 
 
 export const agentStatusColors: Record<AgentStatus, { dot: string; bg: string; text: string }> = {
   idle: { dot: 'bg-[var(--color-border-default)]', bg: 'bg-[var(--status-todo-bg)]', text: 'text-[var(--status-todo-text)]' },
-  running: { dot: 'bg-[#57D9A3]', bg: 'bg-[var(--status-done-bg)]', text: 'text-[var(--status-done-text)]' },
-  paused: { dot: 'bg-[#FFAB00]', bg: 'bg-[var(--status-paused-bg)]', text: 'text-[var(--status-paused-text)]' },
+  running: { dot: 'bg-[#4ADE80]', bg: 'bg-[var(--status-done-bg)]', text: 'text-[var(--status-done-text)]' },
+  paused: { dot: 'bg-[#F87171]', bg: 'bg-[var(--status-paused-bg)]', text: 'text-[var(--status-paused-text)]' },
   stopped: { dot: 'bg-[var(--color-border-bold)]', bg: 'bg-[var(--status-todo-bg)]', text: 'text-[var(--status-todo-text)]' },
   error: { dot: 'bg-[var(--status-blocked-text)]', bg: 'bg-[var(--status-blocked-bg)]', text: 'text-[var(--status-blocked-text)]' },
   stale: { dot: 'bg-[var(--status-paused-text)]', bg: 'bg-[var(--status-paused-bg)]', text: 'text-[var(--status-paused-text)]' },
@@ -68,9 +68,9 @@ export const logLevelLabels: Record<LogLevel, string> = {
 export type UserRole = 'admin' | 'developer' | 'viewer';
 
 export const userRoleColors: Record<UserRole, { bg: string; text: string }> = {
-  admin: { bg: 'bg-[#FEE2E2]', text: 'text-[#DC2626]' },
-  developer: { bg: 'bg-[#DBEAFE]', text: 'text-[#1D4ED8]' },
-  viewer: { bg: 'bg-[#EEF2FF]', text: 'text-[#4338CA]' },
+  admin: { bg: 'bg-[var(--role-admin-bg)]', text: 'text-[var(--role-admin-text)]' },
+  developer: { bg: 'bg-[var(--role-dev-bg)]', text: 'text-[var(--role-dev-text)]' },
+  viewer: { bg: 'bg-[var(--role-viewer-bg)]', text: 'text-[var(--role-viewer-text)]' },
 };
 
 export const userRoleLabels: Record<UserRole, string> = {
