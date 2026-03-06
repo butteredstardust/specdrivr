@@ -176,7 +176,7 @@ export function CreateTaskDialog({
   if (!isOpen) {
     return (
       <button
-        className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] font-medium transition-colors text-2xl"
+        className="w-full flex items-center justify-start gap-2 px-[var(--sp-2)] py-[var(--sp-2)] rounded-[var(--radius-sm)] text-[14px] font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hovered)] hover:text-[#172B4D] transition-colors"
         onClick={() => {
           if (controlledIsOpen === undefined) {
             setIsOpenInternal(true);
@@ -184,7 +184,8 @@ export function CreateTaskDialog({
         }}
         title="Add Task"
       >
-        +
+        <span>+</span>
+        <span>Add task</span>
       </button>
     );
   }

@@ -22,14 +22,15 @@ export function DashboardProjectList({ projects }: { projects: any[] }) {
         <>
             <style>{`
                 .dashboard-search-input {
-                    background: #F1F2F4;
-                    border: 2px solid transparent;
-                    border-radius: 4px;
+                    background: #FFFFFF;
+                    border: 1px solid #DFE1E6;
+                    border-radius: 6px;
                     height: 32px;
                     padding: 0 12px 0 32px;
+                    margin-bottom: 8px;
                     width: 100%;
+                    font-size: 13px;
                     color: #172B4D;
-                    font-size: 14px;
                     outline: none;
                     transition: all 0.2s ease;
                 }
@@ -37,17 +38,16 @@ export function DashboardProjectList({ projects }: { projects: any[] }) {
                     color: #8590A2;
                 }
                 .dashboard-search-input:focus {
-                    background: #FFFFFF;
-                    border-color: #0C66E4;
-                    box-shadow: 0 0 0 1px #0C66E4;
+                    border-color: #2563EB;
+                    box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
                 }
             `}</style>
-            <div className="flex items-center justify-between" style={{ marginBottom: '8px', marginTop: 0 }}>
+            <div className="flex items-center justify-between" style={{ marginTop: '20px', marginBottom: '8px', paddingLeft: 0 }}>
                 <h2 style={{ fontSize: '11px', fontWeight: 600, color: '#8590A2', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>Projects</h2>
             </div>
 
-            <div className="relative mb-[var(--sp-6)]">
-                <div className="absolute inset-y-0 flex items-center pointer-events-none" style={{ left: '10px' }}>
+            <div className="relative">
+                <div className="absolute inset-y-0 flex items-center pointer-events-none" style={{ left: '10px', top: '-8px' }}>
                     <Search size={14} color="#8590A2" />
                 </div>
                 <input
@@ -59,7 +59,16 @@ export function DashboardProjectList({ projects }: { projects: any[] }) {
                 />
             </div>
 
-            <GlassCard className="flex flex-col overflow-hidden" intensity="low">
+            <div
+                className="flex flex-col"
+                style={{
+                    background: '#FFFFFF',
+                    border: '1px solid #DFE1E6',
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    boxShadow: '0 1px 2px rgba(9,30,66,0.15)'
+                }}
+            >
                 {filteredProjects.map((project) => (
                     <ProjectCard key={project.id} project={project} />
                 ))}
@@ -68,7 +77,7 @@ export function DashboardProjectList({ projects }: { projects: any[] }) {
                         No projects found matching &quot;{searchQuery}&quot;
                     </div>
                 )}
-            </GlassCard>
+            </div>
         </>
     );
 }

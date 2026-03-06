@@ -149,7 +149,7 @@ export default function AdminUsersPage() {
               <tr key={user.id} className="border-b border-[var(--color-border-default)] last:border-0 hover:bg-[var(--color-bg-hovered)] group transition-colors">
                 <td className="px-[var(--sp-4)] py-[var(--sp-4)]">
                   <div className="flex items-center gap-[var(--sp-3)]">
-                    <div className="w-[32px] h-[32px] rounded-full bg-[var(--color-brand-bold)] flex items-center justify-center text-white text-[12px] font-bold">
+                    <div className="w-[28px] h-[28px] shrink-0 rounded-full bg-[#E9F2FF] flex items-center justify-center text-[#0C66E4] text-[11px] font-semibold uppercase">
                       {getInitials(user.username)}
                     </div>
                     <span className="text-[14px] font-medium text-[var(--color-text-primary)]">{user.username}</span>
@@ -167,7 +167,7 @@ export default function AdminUsersPage() {
                 <td className="px-[var(--sp-4)] py-[var(--sp-4)]">
                   <span className={cn(
                     "inline-flex items-center h-[20px] px-[6px] rounded-[3px] border-none text-[11px] font-bold uppercase tracking-[0.04em] whitespace-nowrap",
-                    user.isActive ? "bg-[var(--status-done-bg)] text-[var(--status-done-text)]" : "bg-[var(--status-todo-bg)] text-[var(--status-todo-text)]"
+                    user.isActive ? "bg-[#DCFFF1] text-[#216E4E]" : "bg-[#F1F2F4] text-[#44546F]"
                   )}>
                     {user.isActive ? 'Active' : 'Inactive'}
                   </span>
@@ -175,19 +175,29 @@ export default function AdminUsersPage() {
                 <td className="px-[var(--sp-4)] py-[var(--sp-4)] text-[12px] text-[var(--color-text-tertiary)]">
                   {formatDate(user.lastLoginAt)}
                 </td>
-                <td className="px-[var(--sp-4)] py-[var(--sp-4)] text-right">
-                  <div className="flex items-center justify-end gap-[4px] opacity-0 group-hover:opacity-100 transition-opacity">
+                <td style={{ textAlign: 'right', paddingRight: '16px' }}>
+                  <div style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end' }}>
                     <button
-                      title="Edit"
+                      title="Edit user"
                       onClick={() => { setSelectedUser(user); setNewRole(user.role); setShowRoleDialog(true); }}
-                      className="w-[28px] h-[28px] rounded-[4px] bg-transparent border-none text-[var(--color-text-secondary)] flex items-center justify-center cursor-pointer hover:bg-[var(--color-bg-hovered)] transition-colors"
+                      style={{ width: '28px', height: '28px', borderRadius: '4px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8590A2' }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#F1F2F4'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                     >
                       <Pencil size={14} />
                     </button>
                     <button
-                      title={user.isActive ? "Deactivate" : "Activate"}
+                      title={user.isActive ? "Deactivate user" : "Activate user"}
                       onClick={() => { setSelectedUser(user); setShowDeactivateDialog(true); }}
-                      className="w-[28px] h-[28px] rounded-[4px] bg-transparent border-none text-[var(--color-text-secondary)] flex items-center justify-center cursor-pointer hover:bg-[#FFECEB] hover:text-[#AE2A19] transition-colors"
+                      style={{ width: '28px', height: '28px', borderRadius: '4px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8590A2' }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.background = '#FEE2E2';
+                        e.currentTarget.style.color = '#DC2626';
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.color = '#8590A2';
+                      }}
                     >
                       <Trash2 size={14} />
                     </button>

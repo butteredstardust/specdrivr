@@ -48,7 +48,7 @@ function TabItem({ tab, isActive }: { tab: TabData; isActive: boolean }) {
         className={cn(
           "relative flex items-center gap-[var(--sp-2)] h-[40px] px-[var(--sp-1)] text-[12px] font-medium transition-colors whitespace-nowrap outline-none",
           isActive
-            ? "text-[var(--color-brand-bold)]"
+            ? "text-[#4338CA]"
             : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
         )}
       >
@@ -59,7 +59,7 @@ function TabItem({ tab, isActive }: { tab: TabData; isActive: boolean }) {
             className={cn(
               "min-w-[16px] h-[16px] px-1 rounded-full text-[10px] flex items-center justify-center font-bold",
               isActive
-                ? "bg-[var(--color-brand-bold)] text-white"
+                ? "bg-[#6366F1] text-white"
                 : "bg-[var(--color-bg-sunken)] text-[var(--color-text-secondary)]"
             )}
           >
@@ -69,7 +69,7 @@ function TabItem({ tab, isActive }: { tab: TabData; isActive: boolean }) {
 
         {/* Underline Indicator */}
         {isActive && (
-          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[var(--color-brand-bold)] rounded-t-sm" />
+          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#6366F1] rounded-t-sm" />
         )}
       </div>
     </Link>

@@ -126,49 +126,53 @@ export default async function SettingsPage({ }: SettingsPageProps) {
       </div>
 
       {settingsGroups.map((group) => (
-        <div key={group.title} className="mb-[var(--sp-6)]">
-          <h2 className="text-[14px] font-[600] text-[var(--color-text-primary)] uppercase tracking-[0.04em] mt-[24px] mb-[8px] px-[var(--sp-4)]">
+        <div key={group.title} style={{ marginBottom: '20px' }}>
+          <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', fontWeight: 700, color: '#44546F', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px', marginTop: '20px' }}>
+            <span style={{ width: '3px', height: '12px', background: '#6366F1', borderRadius: '2px' }} />
             {group.title}
           </h2>
 
-          <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] overflow-hidden">
+          <div style={{ background: '#FFFFFF', border: '1px solid #DFE1E6', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 2px rgba(9,30,66,0.10)' }}>
             {group.items.map((item, itemIndex) => (
               <div
                 key={item.label}
-                className={`
-                  flex items-center px-[var(--sp-4)] py-[var(--sp-3)]
-                  ${itemIndex < group.items.length - 1
-                    ? 'border-b border-[var(--color-border-default)]'
-                    : ''
-                  }
-                  ${item.label === 'Appearance' ? 'cursor-pointer hover:bg-[var(--color-bg-hovered)]' : ''}
-                `}
+                className={item.label === 'Appearance' ? 'cursor-pointer hover:bg-[#F8F9FF]' : ''}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  minHeight: '52px',
+                  padding: '0 16px',
+                  gap: '12px',
+                  borderBottom: itemIndex < group.items.length - 1 ? '1px solid #F1F2F4' : 'none',
+                  background: item.label === 'Appearance' ? '' : '#FFFFFF'
+                }}
               >
                 <div className="flex-shrink-0 w-[32px] h-[32px] rounded-[var(--radius-sm)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] flex items-center justify-center text-[var(--color-text-tertiary)]" >
                   {item.icon}
                 </div>
 
-                <div className="flex-1 min-w-0 ml-[var(--sp-3)]">
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-[var(--font-size-sm)] text-[var(--color-text-primary)] font-medium">
-                      {item.label}
-                    </h3>
-
+                    <div>
+                      <h3 className="text-[14px] text-[var(--color-text-primary)] font-medium">
+                        {item.label}
+                      </h3>
+                      {item.description && (
+                        <p className="text-[12px] text-[var(--color-text-tertiary)] mt-[2px]">
+                          {item.description}
+                        </p>
+                      )}
+                    </div>
                     {item.label === 'Appearance' ? (
                       <div className="ml-[var(--sp-2)]">
                         <ThemeToggle />
                       </div>
                     ) : (
-                      <span className="text-[var(--font-size-sm)] text-[var(--color-text-tertiary)] ml-[var(--sp-2)]">
+                      <span className="text-[13px] text-[var(--color-text-tertiary)] font-medium ml-[var(--sp-2)]">
                         {item.value}
                       </span>
                     )}
                   </div>
-                  {item.description && (
-                    <p className="text-[var(--font-size-sm)] text-[var(--color-text-tertiary)] mt-[2px]">
-                      {item.description}
-                    </p>
-                  )}
                 </div>
               </div>
             ))}

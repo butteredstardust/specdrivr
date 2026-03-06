@@ -20,29 +20,31 @@ export default async function Home() {
 
   return (
     <>
-      <div className="flex items-start justify-between mb-6">
+      <div className="mb-6">
         <div>
           <h1 className="text-[20px] font-semibold text-[var(--color-text-primary)]">Dashboard</h1>
           <p className="text-[14px] text-[var(--color-text-secondary)] mt-1">Overview of all your architectural projects</p>
         </div>
-        <CreateProjectDialog />
       </div>
 
-      <div className="grid grid-cols-3 gap-3 mb-6">
+      <div className="grid grid-cols-3 gap-[12px] mb-[20px]">
         <DashboardSummaryCard
           value={totalProjects}
           label="Projects"
-          icon={<Layout size={16} />}
+          icon={<Layout size={20} />}
+          accentColor="#2563EB"
         />
         <DashboardSummaryCard
           value={agentsRunning}
           label="Agents Running"
-          icon={<Radio size={16} />}
+          icon={<Radio size={20} />}
+          accentColor="#7C3AED"
         />
         <DashboardSummaryCard
           value={tasksDoneToday}
           label="Tasks Done Today"
-          icon={<CheckSquare size={16} />}
+          icon={<CheckSquare size={20} />}
+          accentColor="#059669"
         />
       </div>
 

@@ -7,7 +7,7 @@
 // ============================================================================
 
 export const taskStatusColors = {
-  todo: { bg: 'bg-[var(--status-todo-bg)]', text: 'text-[var(--status-todo-text)]' },
+  todo: { bg: 'bg-[#F1F5F9]', text: 'text-[#475569]' },
   in_progress: { bg: 'bg-[var(--status-inprogress-bg)]', text: 'text-[var(--status-inprogress-text)]' },
   paused: { bg: 'bg-[var(--status-paused-bg)]', text: 'text-[var(--status-paused-text)]' },
   blocked: { bg: 'bg-[var(--status-blocked-bg)]', text: 'text-[var(--status-blocked-text)]' },
@@ -68,9 +68,9 @@ export const logLevelLabels: Record<LogLevel, string> = {
 export type UserRole = 'admin' | 'developer' | 'viewer';
 
 export const userRoleColors: Record<UserRole, { bg: string; text: string }> = {
-  admin: { bg: 'bg-[var(--status-blocked-bg)]', text: 'text-[var(--status-blocked-text)]' },
-  developer: { bg: 'bg-[var(--status-inprogress-bg)]', text: 'text-[var(--status-inprogress-text)]' },
-  viewer: { bg: 'bg-[var(--status-todo-bg)]', text: 'text-[var(--status-todo-text)]' },
+  admin: { bg: 'bg-[#FEE2E2]', text: 'text-[#DC2626]' },
+  developer: { bg: 'bg-[#DBEAFE]', text: 'text-[#1D4ED8]' },
+  viewer: { bg: 'bg-[#EEF2FF]', text: 'text-[#4338CA]' },
 };
 
 export const userRoleLabels: Record<UserRole, string> = {

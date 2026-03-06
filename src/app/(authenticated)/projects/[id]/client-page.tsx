@@ -187,59 +187,73 @@ export function ProjectDetailClient({
     }
   };
 
-  return (
-    <div className="flex-1 flex flex-col min-w-0">
-      <div className="mb-6">
-        <div className="text-[12px] font-bold text-[var(--color-text-tertiary)] uppercase tracking-wider mb-1">Project</div>
-        <h1 className="text-[20px] font-semibold text-[var(--color-text-primary)]">{project.name}</h1>
-      </div>
+  const tabTitles: Record<string, string> = {
+    'kanban': 'Kanban Board',
+    'spec': 'Specification',
+    'plan': 'Plan',
+    'wave': 'Wave Execution',
+    'test-results': 'Test Results',
+    'logs': 'Logs',
+  };
 
-      <div className="flex-1 bg-[var(--color-bg-page)]">
+  return (
+    <div className="flex-1 flex flex-col min-w-0 bg-[var(--color-bg-page)]">
+      {/* Page Header */}
+      <div className="px-[24px] pt-[24px] pb-0 bg-[#FFFFFF] border-b border-[#DFE1E6]">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-[8px] text-[13px] text-[#8590A2] mb-[4px]">
+          <Link href="/" className="text-[#8590A2] hover:text-[#172B4D] no-underline transition-colors">Projects</Link>
+          <span className="text-[#DFE1E6]">/</span>
+          <span>{project.name}</span>
+        </div>
+        {/* Title */}
+        <h1 className="text-[22px] font-bold text-[#172B4D] m-0 mb-[16px] leading-[1.2]">
+          {tabTitles[activeTabId] || 'Kanban Board'}
+        </h1>
+
         {/* Tabs */}
-        <div className="border-b border-[var(--color-border-default)] bg-[var(--color-bg-surface)] sticky top-[-24px] z-10 mx-[-24px] px-[var(--sp-6)]">
-          <nav className="flex gap-0 overflow-x-auto">
-            {tabs.map((tab) => {
-              // Route-based tabs (separate pages) must use <a>, not button
-              const isRouteBased = tab.href && !tab.href.includes('?tab=') && tab.href !== `/projects/${projectId}`;
-              const isActive = activeTabId === tab.id;
-              const sharedClass = `relative flex items-center gap-[var(--sp-2)] h-[40px] px-[var(--sp-3)] text-[var(--font-size-sm)] font-medium transition-colors whitespace-nowrap mb-[-1px] ${isActive
-                ? 'text-[var(--color-brand-bold)] border-b-2 border-[var(--color-brand-bold)]'
-                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] border-b-2 border-transparent'
-                }`;
-              const badge = tab.badge && (
-                <span
-                  className={`min-w-[16px] h-[16px] px-[var(--sp-1)] rounded-full text-[10px] flex items-center justify-center font-bold ${isActive ? 'bg-[var(--color-brand-bold)] text-white' : 'bg-[var(--color-bg-sunken)] text-[var(--color-text-secondary)]'
-                    }`}
-                >
-                  {typeof tab.badge === 'number' && tab.badge > 99 ? '99+' : tab.badge}
-                </span>
-              );
-              if (isRouteBased) {
-                return (
-                  <a key={tab.id} href={tab.href} className={sharedClass}>
-                    {tab.label}
-                    {badge}
-                  </a>
-                );
-              }
+        <nav className="flex gap-0 overflow-x-auto">
+          {tabs.map((tab) => {
+            // Route-based tabs (separate pages) must use <a>, not button
+            const isRouteBased = tab.href && !tab.href.includes('?tab=') && tab.href !== `/projects/${projectId}`;
+            const isActive = activeTabId === tab.id;
+            const sharedClass = `relative flex items-center gap-[var(--sp-2)] h-[40px] px-[var(--sp-3)] text-[var(--font-size-sm)] font-medium transition-colors whitespace-nowrap mb-[-1px] ${isActive
+              ? 'text-[var(--color-brand-bold)] border-b-2 border-[var(--color-brand-bold)]'
+              : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] border-b-2 border-transparent'
+              }`;
+            const badge = tab.badge && (
+              <span
+                className={`min-w-[16px] h-[16px] px-[var(--sp-1)] rounded-full text-[10px] flex items-center justify-center font-bold ${isActive ? 'bg-[var(--color-brand-bold)] text-white' : 'bg-[var(--color-bg-sunken)] text-[var(--color-text-secondary)]'
+                  }`}
+              >
+                {typeof tab.badge === 'number' && tab.badge > 99 ? '99+' : tab.badge}
+              </span>
+            );
+            if (isRouteBased) {
               return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTabId(tab.id)}
-                  className={sharedClass}
-                >
+                <a key={tab.id} href={tab.href} className={sharedClass}>
                   {tab.label}
                   {badge}
-                </button>
+                </a>
               );
-            })}
-          </nav>
-        </div>
+            }
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTabId(tab.id)}
+                className={sharedClass}
+              >
+                {tab.label}
+                {badge}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
 
-        {/* Tab Content */}
-        <div className="py-[var(--sp-6)]">
-          {renderTabContent()}
-        </div>
+      {/* Tab Content */}
+      <div className="flex-1 px-[24px] py-[24px]">
+        {renderTabContent()}
       </div>
     </div>
   );
