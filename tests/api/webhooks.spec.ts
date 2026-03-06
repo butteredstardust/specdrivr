@@ -2,12 +2,12 @@ import { test, expect } from '@playwright/test';
 
 const AGENT_TOKEN = process.env.AGENT_TOKEN || 'dev-agent-token-12345';
 
-test.describe('Webhooks & Agent Control', () => {
+test.test.describe('Webhooks & Agent Control', () => {
     let projectId: number;
     let taskId: number;
     let planId: number;
 
-    test.beforeAll(async ({ request }) => {
+    test.test.beforeAll(async ({ request }) => {
         // Setup a project for testing
         const projectRes = await request.post('/api/agent/projects', {
             headers: { 'X-Agent-Token': AGENT_TOKEN },
@@ -25,7 +25,7 @@ test.describe('Webhooks & Agent Control', () => {
         taskId = missionData.data.unblocked_tasks[0].id;
     });
 
-    test.describe('POST /api/webhooks/git', () => {
+    test.test.describe('POST /api/webhooks/git', () => {
         test('successfully logs a git commit', async ({ request }) => {
             const payload = {
                 project_id: projectId,
@@ -63,7 +63,7 @@ test.describe('Webhooks & Agent Control', () => {
         });
     });
 
-    test.describe('POST /api/agent/pause', () => {
+    test.test.describe('POST /api/agent/pause', () => {
         test('pauses an in-progress task', async ({ request }) => {
             // 1. Move task to in_progress first
             await request.patch(`/api/agent/tasks/${taskId}`, {

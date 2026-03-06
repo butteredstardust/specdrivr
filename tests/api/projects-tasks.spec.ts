@@ -2,9 +2,9 @@ import { test, expect } from '@playwright/test';
 
 const AGENT_TOKEN = process.env.AGENT_TOKEN || 'dev-agent-token-12345';
 
-test.describe('Projects & Tasks Management', () => {
+test.test.describe('Projects & Tasks Management', () => {
 
-  test.describe('POST /api/agent/projects', () => {
+  test.test.describe('POST /api/agent/projects', () => {
     test('creates project, spec, and plan in a single transaction', async ({ request }) => {
       const payload = {
         name: 'Automated Test Project',
@@ -78,7 +78,7 @@ test.describe('Projects & Tasks Management', () => {
     });
   });
 
-  test.describe('GET /api/projects', () => {
+  test.test.describe('GET /api/projects', () => {
     test('returns list of projects', async ({ request }) => {
       const response = await request.get('/api/projects');
       expect(response.status()).toBe(200);

@@ -6,7 +6,7 @@
 import { test, expect } from '@playwright/test';
 import { login, testUsers, waitForPageLoad } from '../utils/test-helpers';
 
-test.describe('Project Management', () => {
+test.test.describe('Project Management', () => {
   test.beforeEach(async ({ page, context }) => {
     await login(page, testUsers.admin);
     context.addCookies([
@@ -18,7 +18,7 @@ test.describe('Project Management', () => {
     ]);
   });
 
-  test.describe('Project Creation', () => {
+  test.test.describe('Project Creation', () => {
     test('opens create project dialog from sidebar', async ({ page }) => {
       await page.goto('/');
       await waitForPageLoad(page);
@@ -89,7 +89,7 @@ test.describe('Project Management', () => {
     });
   });
 
-  test.describe('Project Navigation', () => {
+  test.test.describe('Project Navigation', () => {
     test('navigates to project detail page', async ({ page }) => {
       await page.goto('/');
       await waitForPageLoad(page);
@@ -125,7 +125,7 @@ test.describe('Project Management', () => {
     });
   });
 
-  test.describe('Project Details Display', () => {
+  test.test.describe('Project Details Display', () => {
     test('displays project information correctly', async ({ page }) => {
       await page.goto('/projects/1');
       await waitForPageLoad(page);
@@ -170,7 +170,7 @@ test.describe('Project Management', () => {
     });
   });
 
-  test.describe('Specification Management', () => {
+  test.test.describe('Specification Management', () => {
     test('opens specification editor', async ({ page }) => {
       await page.goto('/projects/1');
       await waitForPageLoad(page);
@@ -245,7 +245,7 @@ test.describe('Project Management', () => {
     });
   });
 
-  test.describe('Plan Management', () => {
+  test.test.describe('Plan Management', () => {
     test('displays active plan', async ({ page }) => {
       await page.goto('/projects/1');
       await waitForPageLoad(page);
@@ -311,7 +311,7 @@ test.describe('Project Management', () => {
     });
   });
 
-  test.describe('Project Archiving', () => {
+  test.test.describe('Project Archiving', () => {
     test('archives project from project page', async ({ page }) => {
       await page.goto('/projects/1');
       await waitForPageLoad(page);
@@ -395,7 +395,7 @@ test.describe('Project Management', () => {
     });
   });
 
-  test.describe('Error Handling', () => {
+  test.test.describe('Error Handling', () => {
     test('shows error for non-existent project', async ({ page }) => {
       await page.goto('/projects/99999');
 

@@ -3,7 +3,7 @@
  * Tests all CRUD operations for admin user management
  */
 
-import { describe, test, expect, beforeAll } from '@jest/globals';
+import { test, expect } from '@playwright/test';
 
 const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3001';
 const ADMIN_CREDENTIALS = {
@@ -37,13 +37,13 @@ const loginAsAdmin = async () => {
   return response;
 };
 
-describe('Admin User Management APIs', () => {
-  beforeAll(async () => {
+test.describe('Admin User Management APIs', () => {
+  test.beforeAll(async () => {
     // Login as admin and get session
     await loginAsAdmin();
   });
 
-  describe('GET /api/admin/users', () => {
+  test.describe('GET /api/admin/users', () => {
     test('requires authentication', async () => {
       const response = await fetch(`${API_BASE_URL}/api/admin/users`);
 
@@ -107,7 +107,7 @@ describe('Admin User Management APIs', () => {
     });
   });
 
-  describe('POST /api/admin/users', () => {
+  test.describe('POST /api/admin/users', () => {
     test('requires authentication', async () => {
       const response = await fetch(`${API_BASE_URL}/api/admin/users`, {
         method: 'POST',
@@ -240,11 +240,11 @@ describe('Admin User Management APIs', () => {
     });
   });
 
-  describe('PATCH /api/admin/users/:id', () => {
+  test.describe('PATCH /api/admin/users/:id', () => {
     let testUserId: number;
     let testUsername: string;
 
-    beforeAll(async () => {
+    test.beforeAll(async () => {
       // Create a test user to update
       testUsername = `test-update-${Date.now()}`;
       const response = await fetch(`${API_BASE_URL}/api/admin/users`, {
@@ -379,11 +379,11 @@ describe('Admin User Management APIs', () => {
     });
   });
 
-  describe('DELETE /api/admin/users/:id', () => {
+  test.describe('DELETE /api/admin/users/:id', () => {
     let testUserId: number;
     let testUsername: string;
 
-    beforeAll(async () => {
+    test.beforeAll(async () => {
       // Create a test user to delete
       testUsername = `test-delete-${Date.now()}`;
       const response = await fetch(`${API_BASE_URL}/api/admin/users`, {
@@ -480,7 +480,7 @@ describe('Admin User Management APIs', () => {
     });
   });
 
-  describe('Security validations', () => {
+  test.describe('Security validations', () => {
     test('cannot create user without required fields', async () => {
       const response = await fetch(`${API_BASE_URL}/api/admin/users`, {
         method: 'POST',

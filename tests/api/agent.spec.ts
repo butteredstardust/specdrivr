@@ -7,8 +7,8 @@ import { test, expect } from '@playwright/test';
 
 const AGENT_TOKEN = process.env.AGENT_TOKEN || 'dev-agent-token-12345';
 
-test.describe('Agent Core APIs', () => {
-  test.describe('GET /api/agent/mission', () => {
+test.test.describe('Agent Core APIs', () => {
+  test.test.describe('GET /api/agent/mission', () => {
     test('returns complete project context in snake_case', async ({ request }) => {
       const response = await request.get('/api/agent/mission?project_id=1', {
         headers: { 'X-Agent-Token': AGENT_TOKEN },
@@ -53,7 +53,7 @@ test.describe('Agent Core APIs', () => {
     });
   });
 
-  test.describe('POST /api/agent/tasks', () => {
+  test.test.describe('POST /api/agent/tasks', () => {
     test('creates new task successfully', async ({ request }) => {
       const taskData = {
         planId: 1,
@@ -81,7 +81,7 @@ test.describe('Agent Core APIs', () => {
     });
   });
 
-  test.describe('POST /api/agent/verify', () => {
+  test.test.describe('POST /api/agent/verify', () => {
     test('logs successful test result', async ({ request }) => {
       const verifyData = {
         taskId: 1, // camelCase to match Zod schema

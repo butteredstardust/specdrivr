@@ -5,7 +5,7 @@
 
 import { test, expect } from '@playwright/test';
 
-test.describe('Health API', () => {
+test.test.describe('Health API', () => {
   test('GET /api/health/db returns database health status', async ({ request }) => {
     const response = await request.get('http://localhost:3000/api/health/db');
 

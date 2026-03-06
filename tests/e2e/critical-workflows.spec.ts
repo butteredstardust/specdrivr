@@ -5,12 +5,12 @@
 
 import { test, expect } from '@playwright/test';
 
-test.describe('Critical Workflows - Silent Failure Detection', () => {
+test.test.describe('Critical Workflows - Silent Failure Detection', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('http://localhost:3000');
   });
 
-  test.describe('Project Creation Workflow', () => {
+  test.test.describe('Project Creation Workflow', () => {
     test('New Project button opens dialog and project creation works', async ({ page }) => {
       // Click New Project button
       await page.click('button:has-text("New Project")');
@@ -62,7 +62,7 @@ test.describe('Critical Workflows - Silent Failure Detection', () => {
     });
   });
 
-  test.describe('Task Management - Kanban Board', () => {
+  test.test.describe('Task Management - Kanban Board', () => {
     test('Clicking task card opens detail modal', async ({ page }) => {
       // Navigate to a project with tasks
       await page.click('a[href*="/projects/1"]');
@@ -149,7 +149,7 @@ test.describe('Critical Workflows - Silent Failure Detection', () => {
     });
   });
 
-  test.describe('Project Sidebar Navigation', () => {
+  test.test.describe('Project Sidebar Navigation', () => {
     test('Clicking project in sidebar navigates to project page', async ({ page }) => {
       // Get first project link
       const projectLink = page.locator('a[href*="/projects/"]').first();
@@ -182,7 +182,7 @@ test.describe('Critical Workflows - Silent Failure Detection', () => {
     });
   });
 
-  test.describe('Add Log Dialog', () => {
+  test.test.describe('Add Log Dialog', () => {
     test('Add Log button opens dialog and submitting creates log', async ({ page }) => {
       await page.goto('http://localhost:3000/projects/1');
 
@@ -208,7 +208,7 @@ test.describe('Critical Workflows - Silent Failure Detection', () => {
     });
   });
 
-  test.describe('Settings Navigation', () => {
+  test.test.describe('Settings Navigation', () => {
     test('Settings button in sidebar navigates to settings page', async ({ page }) => {
       // Click Settings
       await page.click('a[href="/settings"]');
@@ -221,7 +221,7 @@ test.describe('Critical Workflows - Silent Failure Detection', () => {
     });
   });
 
-  test.describe('Error Handling - Button Clicks With Network Issues', () => {
+  test.test.describe('Error Handling - Button Clicks With Network Issues', () => {
     test('Submitting form shows error when API fails', async ({ page }) => {
       await page.goto('http://localhost:3000/projects/1');
 

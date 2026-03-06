@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Auth API (NextAuth)', () => {
+test.test.describe('Auth API (NextAuth)', () => {
   const BASE_URL = 'http://localhost:3001';
 
   test('GET /api/auth/csrf returns a CSRF token', async ({ request }) => {
