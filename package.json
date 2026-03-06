@@ -17,7 +17,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "db:seed": "psql $DATABASE_URL < db/seed-comprehensive.sql",
-    "seed:demo": "node scripts/seed-demo-drizzle.js",
+    "seed:demo": "npx tsx scripts/seed-demo-drizzle.ts",
     "setup": "npm run db:push && npm run db:seed",
     "fkillall": "fkill -f \"npm run dev\"",
     "test": "vitest run",
@@ -50,6 +50,7 @@
     "zod": "^3.22.0"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.3.0",
     "@playwright/test": "^1.42.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
