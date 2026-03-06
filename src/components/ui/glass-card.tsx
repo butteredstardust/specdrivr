@@ -12,7 +12,7 @@ export const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
             <div
                 ref={ref}
                 className={cn(
-                    'bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] overflow-hidden',
+                    'bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] overflow-hidden',
                     className
                 )}
                 {...props}

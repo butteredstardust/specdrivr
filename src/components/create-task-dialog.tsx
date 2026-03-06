@@ -45,9 +45,9 @@ export const parseQuickDescription = (text: string) => {
   };
 };
 
-const inputClass = "w-full h-[40px] px-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[var(--font-size-base)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-selected)] transition-all";
-const textareaClass = "w-full p-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[var(--font-size-base)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-selected)] transition-all resize-none";
-const labelClass = "block text-[var(--font-size-xs)] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-[var(--sp-2)]";
+const inputClass = "w-full h-[40px] px-[var(--sp-3)] bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-sm)] text-[var(--font-size-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-focus)] transition-all";
+const textareaClass = "w-full p-[var(--sp-3)] bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-sm)] text-[var(--font-size-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-focus)] transition-all resize-none";
+const labelClass = "block text-[var(--font-size-xs)] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-[var(--sp-2)]";
 
 export function CreateTaskDialog({
   projectId,
@@ -197,24 +197,24 @@ export function CreateTaskDialog({
         onClick={handleCancel}
       />
 
-      <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-overlay)] w-full max-w-lg mx-[var(--sp-4)] overflow-hidden relative z-10">
+      <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-overlay)] w-full max-w-lg mx-[var(--sp-4)] overflow-hidden relative z-10">
         <div className="p-[var(--sp-6)]">
-          <h2 className="text-[var(--font-size-lg)] font-semibold text-[var(--color-text-primary)] mb-[var(--sp-6)]">
+          <h2 className="text-[var(--font-size-lg)] font-semibold text-[var(--text-primary)] mb-[var(--sp-6)]">
             Create New Task
           </h2>
 
           {/* Quick Mode Toggle */}
-          <div className="mb-[var(--sp-6)] flex items-center justify-between bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] p-[var(--sp-3)]">
+          <div className="mb-[var(--sp-6)] flex items-center justify-between bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-sm)] p-[var(--sp-3)]">
             <div>
-              <span className="text-[var(--font-size-sm)] text-[var(--color-text-primary)] font-medium">Quick Mode</span>
-              <p className="text-[var(--font-size-xs)] text-[var(--color-text-secondary)]">
+              <span className="text-[var(--font-size-sm)] text-[var(--text-primary)] font-medium">Quick Mode</span>
+              <p className="text-[var(--font-size-xs)] text-[var(--text-secondary)]">
                 Auto-parse priority and files from description
               </p>
             </div>
             <button
               type="button"
               onClick={() => handleQuickModeToggle(!isQuickMode)}
-              className={`w-[40px] h-[22px] rounded-full p-[2px] transition-colors ${isQuickMode ? 'bg-[var(--color-brand-bold)]' : 'bg-[var(--color-border-default)]'
+              className={`w-[40px] h-[22px] rounded-full p-[2px] transition-colors ${isQuickMode ? 'bg-[var(--brand-primary)]' : 'bg-[var(--border-default)]'
                 }`}
               aria-pressed={isQuickMode}
             >
@@ -265,7 +265,7 @@ export function CreateTaskDialog({
                 className={textareaClass}
               />
               {isQuickMode && (
-                <p className="mt-[var(--sp-1)] text-[var(--font-size-xs)] text-[var(--color-text-secondary)]">
+                <p className="mt-[var(--sp-1)] text-[var(--font-size-xs)] text-[var(--text-secondary)]">
                   Tips: Use [P1-P10] for priority, quote files like &quot;src/api/auth.ts&quot;
                 </p>
               )}
@@ -282,7 +282,7 @@ export function CreateTaskDialog({
                   placeholder="src/api/auth.ts, tests/auth.test.ts"
                   className={inputClass}
                 />
-                <p className="mt-[var(--sp-1)] text-[var(--font-size-xs)] text-[var(--color-text-tertiary)]">Separate files with commas</p>
+                <p className="mt-[var(--sp-1)] text-[var(--font-size-xs)] text-[var(--text-tertiary)]">Separate files with commas</p>
               </div>
             )}
 
@@ -324,14 +324,14 @@ export function CreateTaskDialog({
                 type="button"
                 onClick={handleCancel}
                 disabled={isSubmitting}
-                className="px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-[var(--color-brand-bold)] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] hover:bg-[var(--color-bg-hovered)] disabled:opacity-50 transition-colors"
+                className="px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-[var(--brand-primary)] bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-sm)] hover:bg-[var(--bg-hovered)] disabled:opacity-50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting || !formData.description.trim()}
-                className="px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-white bg-[var(--color-brand-bold)] rounded-[var(--radius-sm)] hover:bg-[var(--color-brand-bold-hovered)] transition-colors disabled:opacity-50"
+                className="px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-white bg-[var(--brand-primary)] rounded-[var(--radius-sm)] hover:bg-[var(--color-brand-bold-hovered)] transition-colors disabled:opacity-50"
               >
                 {isSubmitting ? 'Creating...' : 'Create'}
               </button>

@@ -128,17 +128,17 @@ export function ProjectSettingsClient({
   ];
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 bg-[var(--color-bg-page)]">
+    <div className="flex-1 flex flex-col min-w-0 bg-[var(--bg-page)]">
       {/* Page Header */}
-      <div className="px-[24px] pt-[24px] pb-0 bg-[#FFFFFF] border-b border-[#DFE1E6]">
+      <div className="px-[24px] pt-[24px] pb-0 bg-[var(--bg-surface)] border-b border-[var(--border-default)]">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-[8px] text-[13px] text-[#8590A2] mb-[4px]">
-          <Link href="/" className="text-[#8590A2] hover:text-[#172B4D] no-underline transition-colors">Projects</Link>
-          <span className="text-[#DFE1E6]">/</span>
+        <div className="flex items-center gap-[8px] text-[13px] text-[var(--text-tertiary)] mb-[4px]">
+          <Link href="/" className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] no-underline transition-colors">Projects</Link>
+          <span className="text-[var(--border-strong)]">/</span>
           <span>{project.name}</span>
         </div>
         {/* Title */}
-        <h1 className="text-[22px] font-bold text-[#172B4D] m-0 mb-[16px] leading-[1.2]">
+        <h1 className="text-[22px] font-bold text-[var(--text-primary)] m-0 mb-[16px] leading-[1.2]">
           Project Settings
         </h1>
 
@@ -150,47 +150,47 @@ export function ProjectSettingsClient({
         <div className="max-w-4xl space-y-[var(--sp-10)]">
           {/* General Settings */}
           <section className="space-y-[var(--sp-6)]">
-            <div className="flex items-center h-[28px] pb-[8px] mt-[24px] mb-[var(--sp-4)] gap-[var(--sp-2)] border-b border-[var(--color-border-default)]">
+            <div className="flex items-center h-[28px] pb-[8px] mt-[24px] mb-[var(--sp-4)] gap-[var(--sp-2)] border-b border-[var(--border-default)]">
               <Globe size={14} color="#94A3B8" />
               <h2 className="text-[#94A3B8] text-[11px] font-[600] uppercase tracking-[0.08em]">General Details</h2>
             </div>
 
-            <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] p-[var(--sp-6)] shadow-[var(--shadow-card)] space-y-[var(--sp-6)]">
+            <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-lg)] p-[var(--sp-6)] shadow-[var(--shadow-card)] space-y-[var(--sp-6)]">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-[var(--sp-6)]">
                 <div className="space-y-[var(--sp-2)]">
-                  <label className="block text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Project Name</label>
+                  <label className="block text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Project Name</label>
                   <input
                     type="text"
                     value={projectNameInput}
                     onChange={(e) => setProjectNameInput(e.target.value)}
-                    className="w-full h-[40px] px-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--color-border-selected)] transition-all"
+                    className="w-full h-[40px] px-[var(--sp-3)] bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--border-focus)] transition-all"
                   />
                 </div>
                 <div className="space-y-[var(--sp-2)]">
-                  <label className="block text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Short Description</label>
+                  <label className="block text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Short Description</label>
                   <input
                     type="text"
                     value={projectDescriptionInput}
                     onChange={(e) => setProjectDescriptionInput(e.target.value)}
-                    className="w-full h-[40px] px-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--color-border-selected)] transition-all"
+                    className="w-full h-[40px] px-[var(--sp-3)] bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--border-focus)] transition-all"
                   />
                 </div>
               </div>
 
               <div className="space-y-[var(--sp-2)]">
-                <label className="block text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Core Mission</label>
+                <label className="block text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Core Mission</label>
                 <textarea
                   value={projectMissionInput}
                   onChange={(e) => setProjectMissionInput(e.target.value)}
                   rows={3}
-                  className="w-full p-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--color-border-selected)] transition-all"
+                  className="w-full p-[var(--sp-3)] bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--border-focus)] transition-all"
                 />
               </div>
 
               <div className="flex items-center justify-between pt-[var(--sp-2)]">
                 <div>
                   {detailsMessage && (
-                    <span className={cn("text-[12px] font-medium", detailsMessage.type === 'success' ? "text-[var(--status-done-text)]" : "text-[var(--color-text-danger)]")}>
+                    <span className={cn("text-[12px] font-medium", detailsMessage.type === 'success' ? "text-[var(--status-done-text)]" : "text-[var(--status-blocked-text)]")}>
                       {detailsMessage.text}
                     </span>
                   )}
@@ -204,13 +204,13 @@ export function ProjectSettingsClient({
 
           {/* Constitution & Tech Stack */}
           <section className="space-y-[var(--sp-6)]">
-            <div className="flex items-center h-[28px] pb-[8px] mt-[24px] mb-[var(--sp-4)] gap-[var(--sp-2)] border-b border-[var(--color-border-default)]">
+            <div className="flex items-center h-[28px] pb-[8px] mt-[24px] mb-[var(--sp-4)] gap-[var(--sp-2)] border-b border-[var(--border-default)]">
               <ShieldAlert size={14} color="#94A3B8" />
               <h2 className="text-[#94A3B8] text-[11px] font-[600] uppercase tracking-[0.08em]">Project Intelligence</h2>
             </div>
 
-            <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] overflow-hidden">
-              <div className="p-[var(--sp-6)] border-b border-[var(--color-border-default)]">
+            <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] overflow-hidden">
+              <div className="p-[var(--sp-6)] border-b border-[var(--border-default)]">
                 <div className="flex items-center gap-[var(--sp-2)] mb-[var(--sp-4)]">
                   <ShieldAlert size={14} color="#94A3B8" />
                   <h3 className="text-[#94A3B8] text-[12px] font-bold">Constitution</h3>
@@ -236,52 +236,52 @@ export function ProjectSettingsClient({
 
           {/* Git Integration */}
           <section className="space-y-[var(--sp-6)]">
-            <div className="flex items-center h-[28px] pb-[8px] mt-[24px] mb-[var(--sp-4)] gap-[var(--sp-2)] border-b border-[var(--color-border-default)]">
+            <div className="flex items-center h-[28px] pb-[8px] mt-[24px] mb-[var(--sp-4)] gap-[var(--sp-2)] border-b border-[var(--border-default)]">
               <GitBranch size={12} className="!text-[#94A3B8]" />
               <h2 className="text-[#94A3B8] text-[11px] font-[600] uppercase tracking-[0.08em]">Git Integration</h2>
             </div>
 
-            <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] p-[var(--sp-6)] shadow-[var(--shadow-card)] space-y-[var(--sp-6)]">
+            <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-lg)] p-[var(--sp-6)] shadow-[var(--shadow-card)] space-y-[var(--sp-6)]">
               <div className="space-y-[var(--sp-2)]">
-                <label className="block text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Repository Path / URL</label>
+                <label className="block text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Repository Path / URL</label>
                 <input
                   type="text"
                   value={repoUrl}
                   onChange={(e) => setRepoUrl(e.target.value)}
                   placeholder="/path/to/repo or git@github.com:org/repo.git"
-                  className="w-full h-[40px] px-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[14px] font-mono focus:outline-none focus:border-[var(--color-border-selected)] transition-all"
+                  className="w-full h-[40px] px-[var(--sp-3)] bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-sm)] text-[14px] font-mono focus:outline-none focus:border-[var(--border-focus)] transition-all"
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-[var(--sp-6)]">
                 <div className="space-y-[var(--sp-2)]">
-                  <label className="block text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Default Branch</label>
+                  <label className="block text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Default Branch</label>
                   <div className="relative">
                     <select
                       value={gitBranch}
                       onChange={(e) => setGitBranch(e.target.value)}
-                      className="w-full h-[40px] pl-[var(--sp-3)] pr-[var(--sp-10)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--color-border-selected)] transition-all appearance-none cursor-pointer"
+                      className="w-full h-[40px] pl-[var(--sp-3)] pr-[var(--sp-10)] bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--border-focus)] transition-all appearance-none cursor-pointer"
                     >
                       <option value="main">main</option>
                       <option value="master">master</option>
                       <option value="develop">develop</option>
                     </select>
-                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-text-tertiary)]" />
+                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
                   </div>
                 </div>
                 <div className="space-y-[var(--sp-2)]">
-                  <label className="block text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">Merge Strategy</label>
+                  <label className="block text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Merge Strategy</label>
                   <div className="relative">
                     <select
                       value={gitStrategy}
                       onChange={(e) => setGitStrategy(e.target.value)}
-                      className="w-full h-[40px] pl-[var(--sp-3)] pr-[var(--sp-10)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--color-border-selected)] transition-all appearance-none cursor-pointer"
+                      className="w-full h-[40px] pl-[var(--sp-3)] pr-[var(--sp-10)] bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--border-focus)] transition-all appearance-none cursor-pointer"
                     >
                       <option value="merge">Merge</option>
                       <option value="rebase">Rebase</option>
                       <option value="squash">Squash</option>
                     </select>
-                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--color-text-tertiary)]" />
+                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-tertiary)]" />
                   </div>
                 </div>
               </div>
@@ -289,7 +289,7 @@ export function ProjectSettingsClient({
               <div className="flex items-center justify-between pt-[var(--sp-2)]">
                 <div>
                   {gitConfigMessage && (
-                    <span className={cn("text-[12px] font-medium", gitConfigMessage.type === 'success' ? "text-[var(--status-done-text)]" : "text-[var(--color-text-danger)]")}>
+                    <span className={cn("text-[12px] font-medium", gitConfigMessage.type === 'success' ? "text-[var(--status-done-text)]" : "text-[var(--status-blocked-text)]")}>
                       {gitConfigMessage.text}
                     </span>
                   )}
@@ -303,26 +303,26 @@ export function ProjectSettingsClient({
 
           {/* Agent Access Tokens */}
           <section className="space-y-[var(--sp-6)]">
-            <div className="flex items-center justify-between h-[28px] pb-[8px] mt-[24px] mb-[var(--sp-4)] border-b border-[var(--color-border-default)]">
+            <div className="flex items-center justify-between h-[28px] pb-[8px] mt-[24px] mb-[var(--sp-4)] border-b border-[var(--border-default)]">
               <div className="flex items-center gap-[var(--sp-2)]">
                 <Key size={12} className="!text-[#94A3B8]" />
-                <h2 className="text-[11px] font-[600] text-[var(--color-text-tertiary)] uppercase tracking-[0.08em]">Access Controls</h2>
+                <h2 className="text-[11px] font-[600] text-[var(--text-tertiary)] uppercase tracking-[0.08em]">Access Controls</h2>
               </div>
               <Button variant="primary" size="small" onClick={() => setShowTokenDialog(true)} icon={<Plus size={16} />}>Generate Token</Button>
             </div>
 
-            <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] overflow-hidden">
+            <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] overflow-hidden">
               <div className="p-[var(--sp-6)] flex items-center justify-between">
                 <div className="flex items-center gap-[var(--sp-4)]">
-                  <div className="w-10 h-10 rounded-full bg-[var(--color-bg-sunken)] flex items-center justify-center">
-                    <Key size={20} className="text-[var(--color-text-tertiary)]" />
+                  <div className="w-10 h-10 rounded-full bg-[var(--bg-sunken)] flex items-center justify-center">
+                    <Key size={20} className="text-[var(--text-tertiary)]" />
                   </div>
                   <div>
-                    <p className="text-[14px] font-medium text-[var(--color-text-primary)]">Agent Access Tokens</p>
-                    <p className="text-[12px] text-[var(--color-text-tertiary)] max-w-sm">Active tokens required for specdrivr agents to interact with this repository.</p>
+                    <p className="text-[14px] font-medium text-[var(--text-primary)]">Agent Access Tokens</p>
+                    <p className="text-[12px] text-[var(--text-tertiary)] max-w-sm">Active tokens required for specdrivr agents to interact with this repository.</p>
                   </div>
                 </div>
-                <div className="text-[13px] text-[var(--color-text-secondary)] font-medium bg-[var(--color-bg-sunken)] px-3 py-1 rounded-[var(--radius-sm)] border border-[var(--color-border-default)]">
+                <div className="text-[13px] text-[var(--text-secondary)] font-medium bg-[var(--bg-sunken)] px-3 py-1 rounded-[var(--radius-sm)] border border-[var(--border-default)]">
                   No active tokens
                 </div>
               </div>
@@ -331,24 +331,24 @@ export function ProjectSettingsClient({
 
           {/* Danger Zone */}
           <section className="space-y-[var(--sp-6)]">
-            <div className="flex items-center gap-[var(--sp-3)] border-b border-[var(--color-text-danger)] pb-[var(--sp-3)] opacity-80">
-              <AlertTriangle size={18} className="text-[var(--color-text-secondary)]" />
-              <h2 className="text-[14px] font-bold text-[var(--color-text-danger)] uppercase tracking-wider">Danger Zone</h2>
+            <div className="flex items-center gap-[var(--sp-3)] border-b border-[var(--status-blocked-text)] pb-[var(--sp-3)] opacity-80">
+              <AlertTriangle size={18} className="text-[var(--text-secondary)]" />
+              <h2 className="text-[14px] font-bold text-[var(--status-blocked-text)] uppercase tracking-wider">Danger Zone</h2>
             </div>
 
-            <div className="bg-[var(--color-bg-surface)] border border-[var(--color-text-danger)] border-opacity-20 rounded-[var(--radius-lg)] p-[var(--sp-6)] shadow-[var(--shadow-card)]">
+            <div className="bg-[var(--bg-surface)] border border-[var(--status-blocked-text)] border-opacity-20 rounded-[var(--radius-lg)] p-[var(--sp-6)] shadow-[var(--shadow-card)]">
               {archiveMessage && (
-                <div className={cn("mb-[var(--sp-4)] p-[var(--sp-3)] rounded-[var(--radius-sm)] border-l-4", archiveMessage.type === 'success' ? "bg-[var(--status-success-bg)] border-[var(--status-success-text)] text-[var(--status-success-text)]" : "bg-[var(--color-bg-sunken)] border-[var(--color-text-danger)] text-[var(--color-text-danger)]")}>
+                <div className={cn("mb-[var(--sp-4)] p-[var(--sp-3)] rounded-[var(--radius-sm)] border-l-4", archiveMessage.type === 'success' ? "bg-[var(--status-success-bg)] border-[var(--status-success-text)] text-[var(--status-success-text)]" : "bg-[var(--bg-sunken)] border-[var(--status-blocked-text)] text-[var(--status-blocked-text)]")}>
                   <p className="text-[12px] font-medium">{archiveMessage.text}</p>
                 </div>
               )}
 
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                  <h3 className="text-[15px] font-bold text-[var(--color-text-primary)]">
+                  <h3 className="text-[15px] font-bold text-[var(--text-primary)]">
                     {project.status === 'archived' ? 'Unarchive Project' : 'Archive Project'}
                   </h3>
-                  <p className="text-[13px] text-[var(--color-text-tertiary)]">
+                  <p className="text-[13px] text-[var(--text-tertiary)]">
                     {project.status === 'archived'
                       ? 'Make this project active and visible on the dashboard again.'
                       : 'Hides the project from the dashboard. Data is preserved but agent will stop.'}

@@ -119,8 +119,8 @@ export default async function SettingsPage({ }: SettingsPageProps) {
   return (
     <div className="max-w-3xl mx-auto">
       <div className="mb-[var(--sp-8)]">
-        <h1 className="text-[var(--font-size-lg)] font-semibold text-[var(--color-text-primary)]">Settings</h1>
-        <p className="text-[var(--font-size-sm)] text-[var(--color-text-secondary)]">
+        <h1 className="text-[var(--font-size-lg)] font-semibold text-[var(--text-primary)]">Settings</h1>
+        <p className="text-[var(--font-size-sm)] text-[var(--text-secondary)]">
           Manage your application configuration
         </p>
       </div>
@@ -181,10 +181,10 @@ export default async function SettingsPage({ }: SettingsPageProps) {
       ))}
 
       <div className="mt-[var(--sp-8)] text-center px-[var(--sp-6)]">
-        <p className="text-[var(--font-size-xs)] text-[var(--color-text-tertiary)]">
+        <p className="text-[var(--font-size-xs)] text-[var(--text-tertiary)]">
           specdrivr v{appVersion} &bull; Built with Next.js
         </p>
-        <p className="text-[var(--font-size-xs)] text-[var(--color-text-tertiary)] mt-[var(--sp-1)]">
+        <p className="text-[var(--font-size-xs)] text-[var(--text-tertiary)] mt-[var(--sp-1)]">
           Configuration loaded from .env.local
         </p>
       </div>

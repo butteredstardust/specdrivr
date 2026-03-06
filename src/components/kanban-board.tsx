@@ -141,7 +141,7 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
                   )}>
                     {column.title}
                   </span>
-                  <span data-testid={`count-${column.id}`} className="bg-[var(--color-bg-sunken)] px-[var(--sp-2)] py-0.5 rounded-full text-[11px] font-bold text-[var(--color-text-secondary)] ml-1">
+                  <span data-testid={`count-${column.id}`} className="bg-[var(--bg-sunken)] px-[var(--sp-2)] py-0.5 rounded-full text-[11px] font-bold text-[var(--text-secondary)] ml-1">
                     {columnTasks.length}
                   </span>
                 </div>
@@ -164,8 +164,8 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
                   ))}
                 </SortableContext>
                 {columnTasks.length === 0 && (
-                  <div className="flex-1 border-2 border-dashed border-[var(--color-border-default)] rounded-[var(--radius-sm)] flex items-center justify-center py-[var(--sp-8)]">
-                    <p className="text-[11px] text-[var(--color-text-tertiary)] italic">No tasks yet</p>
+                  <div className="flex-1 border-2 border-dashed border-[var(--border-default)] rounded-[var(--radius-sm)] flex items-center justify-center py-[var(--sp-8)]">
+                    <p className="text-[11px] text-[var(--text-tertiary)] italic">No tasks yet</p>
                   </div>
                 )}
               </div>

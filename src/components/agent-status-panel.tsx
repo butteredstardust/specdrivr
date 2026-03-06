@@ -23,7 +23,7 @@ const statusBadgeClasses: Record<AgentStatus, string> = {
   stopped: 'bg-[var(--status-todo-bg)] text-[var(--status-todo-text)]',
   idle: 'bg-[var(--status-todo-bg)] text-[var(--status-todo-text)]',
   error: 'bg-[var(--status-blocked-bg)] text-[var(--status-blocked-text)]',
-  stale: 'bg-[var(--status-todo-bg)] text-[var(--status-todo-text)] border border-[var(--color-border-default)]',
+  stale: 'bg-[var(--status-todo-bg)] text-[var(--status-todo-text)] border border-[var(--border-default)]',
 };
 
 export function AgentStatusPanel({ agentStatus, className = '' }: AgentStatusPanelProps) {
@@ -55,19 +55,19 @@ export function AgentStatusPanel({ agentStatus, className = '' }: AgentStatusPan
       </span>
 
       {(uptimeSeconds || lastHeartbeat) && (
-        <span className="text-[var(--color-text-tertiary)] ml-1">
+        <span className="text-[var(--text-tertiary)] ml-1">
           {uptimeText}
         </span>
       )}
 
       {currentTask && (
-        <span className="text-[var(--color-text-tertiary)] px-2 py-0.5 bg-[var(--color-bg-sunken)] rounded-[var(--radius-sm)] border border-[var(--color-border-default)] text-[11px]" title={currentTask.description}>
+        <span className="text-[var(--text-tertiary)] px-2 py-0.5 bg-[var(--bg-sunken)] rounded-[var(--radius-sm)] border border-[var(--border-default)] text-[11px]" title={currentTask.description}>
           Task #{currentTask.id}
         </span>
       )}
 
       {status === 'error' && errorCount > 0 && (
-        <span className="text-[var(--color-text-danger)] font-medium flex items-center gap-1">
+        <span className="text-[var(--status-blocked-text)] font-medium flex items-center gap-1">
           <AlertCircle size={12} />
           {errorCount} error{errorCount > 1 ? 's' : ''}
         </span>

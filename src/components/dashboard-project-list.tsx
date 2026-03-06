@@ -48,7 +48,7 @@ export function DashboardProjectList({ projects }: { projects: ProjectCardProps[
 
             <div className="relative">
                 <div className="absolute inset-y-0 flex items-center pointer-events-none" style={{ left: '10px', top: '-8px' }}>
-                    <Search size={14} color="#8590A2" />
+                    <Search size={14} className="text-[var(--text-tertiary)]" />
                 </div>
                 <input
                     type="search"
@@ -73,7 +73,7 @@ export function DashboardProjectList({ projects }: { projects: ProjectCardProps[
                     <ProjectCard key={project.id} project={project} />
                 ))}
                 {filteredProjects.length === 0 && searchQuery && (
-                    <div className="py-[var(--sp-12)] text-center text-[var(--font-size-base)] text-[var(--color-text-secondary)]">
+                    <div className="py-[var(--sp-12)] text-center text-[var(--font-size-base)] text-[var(--text-secondary)]">
                         No projects found matching &quot;{searchQuery}&quot;
                     </div>
                 )}

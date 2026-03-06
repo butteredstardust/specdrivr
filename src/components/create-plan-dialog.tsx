@@ -8,9 +8,9 @@ interface CreatePlanDialogProps {
   onPlanCreated?: (plan: any) => void;
 }
 
-const inputClass = "w-full h-[40px] px-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[var(--font-size-base)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-selected)] transition-all";
-const textareaClass = "w-full p-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[var(--font-size-base)] text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-border-selected)] transition-all resize-none";
-const labelClass = "block text-[var(--font-size-xs)] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider mb-[var(--sp-2)]";
+const inputClass = "w-full h-[40px] px-[var(--sp-3)] bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-sm)] text-[var(--font-size-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-focus)] transition-all";
+const textareaClass = "w-full p-[var(--sp-3)] bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-sm)] text-[var(--font-size-base)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--border-focus)] transition-all resize-none";
+const labelClass = "block text-[var(--font-size-xs)] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-[var(--sp-2)]";
 
 export function CreatePlanDialog({ specId, onPlanCreated }: CreatePlanDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -78,7 +78,7 @@ export function CreatePlanDialog({ specId, onPlanCreated }: CreatePlanDialogProp
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-[var(--color-brand-bold)] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] hover:bg-[var(--color-bg-hovered)] transition-colors"
+        className="px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-[var(--brand-primary)] bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-sm)] hover:bg-[var(--bg-hovered)] transition-colors"
       >
         Create Plan
       </button>
@@ -92,9 +92,9 @@ export function CreatePlanDialog({ specId, onPlanCreated }: CreatePlanDialogProp
         onClick={handleCancel}
       />
 
-      <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-overlay)] w-full max-w-lg mx-[var(--sp-4)] overflow-hidden relative z-10">
+      <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-overlay)] w-full max-w-lg mx-[var(--sp-4)] overflow-hidden relative z-10">
         <div className="p-[var(--sp-6)]">
-          <h2 className="text-[var(--font-size-lg)] font-semibold text-[var(--color-text-primary)] mb-[var(--sp-6)]">
+          <h2 className="text-[var(--font-size-lg)] font-semibold text-[var(--text-primary)] mb-[var(--sp-6)]">
             Create New Plan
           </h2>
 
@@ -106,7 +106,7 @@ export function CreatePlanDialog({ specId, onPlanCreated }: CreatePlanDialogProp
 
           <form onSubmit={handleSubmit} className="space-y-[var(--sp-4)]">
             <div>
-              <p className="text-[var(--font-size-sm)] text-[var(--color-text-secondary)] mb-[var(--sp-4)]">
+              <p className="text-[var(--font-size-sm)] text-[var(--text-secondary)] mb-[var(--sp-4)]">
                 Creating plan for specification #{specId}
               </p>
             </div>
@@ -121,7 +121,7 @@ export function CreatePlanDialog({ specId, onPlanCreated }: CreatePlanDialogProp
                 rows={6}
                 className={`${textareaClass} font-mono`}
               />
-              <p className="mt-[var(--sp-1)] text-[var(--font-size-xs)] text-[var(--color-text-tertiary)]">
+              <p className="mt-[var(--sp-1)] text-[var(--font-size-xs)] text-[var(--text-tertiary)]">
                 Enter architecture decisions as JSON object
               </p>
             </div>
@@ -139,7 +139,7 @@ export function CreatePlanDialog({ specId, onPlanCreated }: CreatePlanDialogProp
                 required
                 className={textareaClass}
               />
-              <p className="mt-[var(--sp-1)] text-[var(--font-size-xs)] text-[var(--color-text-tertiary)]">
+              <p className="mt-[var(--sp-1)] text-[var(--font-size-xs)] text-[var(--text-tertiary)]">
                 Provide overarching guidance or a specific goal.
               </p>
             </div>
@@ -162,14 +162,14 @@ export function CreatePlanDialog({ specId, onPlanCreated }: CreatePlanDialogProp
                 type="button"
                 onClick={handleCancel}
                 disabled={isSubmitting}
-                className="px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-[var(--color-brand-bold)] bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] hover:bg-[var(--color-bg-hovered)] disabled:opacity-50 transition-colors"
+                className="px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-[var(--brand-primary)] bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-sm)] hover:bg-[var(--bg-hovered)] disabled:opacity-50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-white bg-[var(--color-brand-bold)] rounded-[var(--radius-sm)] hover:bg-[var(--color-brand-bold-hovered)] transition-colors disabled:opacity-50"
+                className="px-[var(--sp-4)] py-[var(--sp-2)] text-[var(--font-size-sm)] text-white bg-[var(--brand-primary)] rounded-[var(--radius-sm)] hover:bg-[var(--color-brand-bold-hovered)] transition-colors disabled:opacity-50"
               >
                 {isSubmitting ? 'Creating...' : 'Create'}
               </button>

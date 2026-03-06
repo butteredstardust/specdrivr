@@ -27,8 +27,8 @@ export interface ProjectCardProps {
 const statusDotColors: Record<AgentStatus, string> = {
   running: 'bg-[#57D9A3]',
   paused: 'bg-[#FFAB00]',
-  stopped: 'bg-[var(--color-border-default)]',
-  idle: 'bg-[var(--color-border-default)]',
+  stopped: 'bg-[var(--border-default)]',
+  idle: 'bg-[var(--border-default)]',
   error: 'bg-[var(--status-blocked-text)]',
   stale: 'bg-[var(--status-paused-text)]',
 };
@@ -55,14 +55,14 @@ export function ProjectCard({
     >
       {/* Name */}
       <div className="flex-1 min-w-0 pr-[var(--sp-4)] flex items-center h-full">
-        <span className="text-[var(--font-size-base)] font-medium text-[var(--color-text-primary)] group-hover:text-[var(--color-brand-bold)] transition-colors">
+        <span className="text-[var(--font-size-base)] font-medium text-[var(--text-primary)] group-hover:text-[var(--brand-primary)] transition-colors">
           {project.name}
         </span>
       </div>
 
       {/* Progress */}
       {totalTasks > 0 && (
-        <div className="w-[120px] flex items-center justify-end text-[var(--font-size-sm)] text-[var(--color-text-tertiary)] pr-[var(--sp-6)] shrink-0 font-medium">
+        <div className="w-[120px] flex items-center justify-end text-[var(--font-size-sm)] text-[var(--text-tertiary)] pr-[var(--sp-6)] shrink-0 font-medium">
           <span>{doneTasks}/{totalTasks} tasks</span>
         </div>
       )}
@@ -82,7 +82,7 @@ export function ProjectCard({
             {agentStatusLabels[agentStatus]}
           </div>
         ) : (
-          <div className="flex items-center gap-[var(--sp-2)] text-[var(--font-size-sm)] font-medium text-[var(--color-text-secondary)]">
+          <div className="flex items-center gap-[var(--sp-2)] text-[var(--font-size-sm)] font-medium text-[var(--text-secondary)]">
             <span className={cn("w-[6px] h-[6px] rounded-full flex-shrink-0", dotColor)} />
             <span>{agentStatusLabels[agentStatus]}</span>
           </div>
@@ -90,7 +90,7 @@ export function ProjectCard({
       </div>
 
       {/* Last Activity */}
-      <div className="w-[120px] flex items-center justify-end text-[var(--font-size-sm)] text-[var(--color-text-tertiary)] shrink-0 font-medium">
+      <div className="w-[120px] flex items-center justify-end text-[var(--font-size-sm)] text-[var(--text-tertiary)] shrink-0 font-medium">
         {lastActivity}
       </div>
     </Link>
@@ -109,14 +109,14 @@ export function DashboardEmptyState() {
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"
-          className="text-[var(--color-text-tertiary)]"
+          className="text-[var(--text-tertiary)]"
         >
           <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
           <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
         </svg>
       </div>
-      <h3 className="text-[var(--font-size-md)] font-semibold text-[var(--color-text-primary)] mb-[var(--sp-2)]">No projects yet</h3>
-      <p className="text-[var(--font-size-base)] text-[var(--color-text-secondary)]">Create your first project to get started</p>
+      <h3 className="text-[var(--font-size-md)] font-semibold text-[var(--text-primary)] mb-[var(--sp-2)]">No projects yet</h3>
+      <p className="text-[var(--font-size-base)] text-[var(--text-secondary)]">Create your first project to get started</p>
     </GlassCard>
   );
 }

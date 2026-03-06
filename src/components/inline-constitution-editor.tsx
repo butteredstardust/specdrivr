@@ -83,9 +83,9 @@ export function InlineConstitutionEditor({
   };
 
   return (
-    <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border-default)] rounded-[var(--radius-lg)] p-[var(--sp-6)] shadow-[var(--shadow-card)]">
+    <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-lg)] p-[var(--sp-6)] shadow-[var(--shadow-card)]">
       <div className="flex items-center justify-between mb-[var(--sp-4)]">
-        <h3 className="text-[14px] font-bold text-[var(--color-text-secondary)] uppercase tracking-[0.05em]">Project Constitution</h3>
+        <h3 className="text-[14px] font-bold text-[var(--text-secondary)] uppercase tracking-[0.05em]">Project Constitution</h3>
         {!isEditing && (
           <Button
             variant="ghost"
@@ -98,7 +98,7 @@ export function InlineConstitutionEditor({
       </div>
 
       {error && (
-        <div className="mb-[var(--sp-4)] p-[var(--sp-3)] bg-[var(--color-bg-sunken)] border-l-4 border-[var(--color-text-danger)] text-[var(--color-text-danger)] text-[12px] font-medium rounded-r-[var(--radius-sm)]">
+        <div className="mb-[var(--sp-4)] p-[var(--sp-3)] bg-[var(--bg-sunken)] border-l-4 border-[var(--status-blocked-text)] text-[var(--status-blocked-text)] text-[12px] font-medium rounded-r-[var(--radius-sm)]">
           {error}
         </div>
       )}
@@ -108,7 +108,7 @@ export function InlineConstitutionEditor({
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="w-full p-[var(--sp-3)] bg-[var(--color-bg-sunken)] border border-[var(--color-border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--color-border-selected)] transition-all min-h-[200px]"
+            className="w-full p-[var(--sp-3)] bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-sm)] text-[14px] focus:outline-none focus:border-[var(--border-focus)] transition-all min-h-[200px]"
             placeholder="Outline the rules and guidelines for this project..."
           />
           <div className="flex justify-end gap-[var(--sp-2)]">
@@ -131,12 +131,12 @@ export function InlineConstitutionEditor({
         </div>
       ) : content.trim() ? (
         <div
-          className="text-[14px] text-[var(--color-text-primary)] leading-relaxed"
+          className="text-[14px] text-[var(--text-primary)] leading-relaxed"
           dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(renderMarkdown(content)) }}
         />
       ) : (
-        <div className="text-[14px] text-[var(--color-text-primary)] leading-relaxed">
-          <span className="text-[var(--color-text-tertiary)] italic">No constitution defined yet.</span>
+        <div className="text-[14px] text-[var(--text-primary)] leading-relaxed">
+          <span className="text-[var(--text-tertiary)] italic">No constitution defined yet.</span>
         </div>
       )}
     </div>
