@@ -53,7 +53,7 @@ export default function LoginPage() {
         {/* Branding */}
         <div className="text-center mb-[var(--sp-8)]">
           <Logo size="large" className="mx-auto mb-[var(--sp-2)]" />
-          <h1 className="text-[24px] font-bold text-[var(--color-text-primary)] tracking-tight">Spec-Drivr</h1>
+          <h1 className="text-[24px] font-bold text-[var(--color-text-primary)] tracking-tight">specdrivr</h1>
           <p className="text-[14px] text-[var(--color-text-secondary)]">Autonomous Development Platform</p>
         </div>
 
@@ -125,7 +125,7 @@ export default function LoginPage() {
 
           <div className="mt-[var(--sp-8)] pt-[var(--sp-6)] border-t border-[var(--color-border-default)] text-center">
             <p className="text-[12px] text-[var(--color-text-tertiary)]">
-              &copy; {new Date().getFullYear()} Spec-Drivr. All rights reserved.
+              &copy; {new Date().getFullYear()} specdrivr
             </p>
           </div>
         </div>
