@@ -7,12 +7,12 @@
 // ============================================================================
 
 export const taskStatusColors = {
-  todo: { bg: 'bg-[var(--status-todo-bg)]', text: 'text-[var(--status-todo-text)]', border: 'border-[var(--status-todo-text)]' },
-  in_progress: { bg: 'bg-[var(--status-inprogress-bg)]', text: 'text-[var(--status-inprogress-text)]', border: 'border-[var(--status-inprogress-text)]' },
-  paused: { bg: 'bg-[var(--status-paused-bg)]', text: 'text-[var(--status-paused-text)]', border: 'border-[var(--status-paused-text)]' },
-  blocked: { bg: 'bg-[var(--status-blocked-bg)]', text: 'text-[var(--status-blocked-text)]', border: 'border-[var(--status-blocked-text)]' },
-  done: { bg: 'bg-[var(--status-done-bg)]', text: 'text-[var(--status-done-text)]', border: 'border-[var(--status-done-text)]' },
-  skipped: { bg: 'bg-[var(--status-skipped-bg)]', text: 'text-[var(--status-skipped-text)]', border: 'border-[var(--status-skipped-text)]' },
+  todo: { bg: 'bg-[var(--status-todo-bg)]', text: 'text-[var(--status-todo-text)]' },
+  in_progress: { bg: 'bg-[var(--status-inprogress-bg)]', text: 'text-[var(--status-inprogress-text)]' },
+  paused: { bg: 'bg-[var(--status-paused-bg)]', text: 'text-[var(--status-paused-text)]' },
+  blocked: { bg: 'bg-[var(--status-blocked-bg)]', text: 'text-[var(--status-blocked-text)]' },
+  done: { bg: 'bg-[var(--status-done-bg)]', text: 'text-[var(--status-done-text)]' },
+  skipped: { bg: 'bg-[var(--status-skipped-bg)]', text: 'text-[var(--status-skipped-text)]' },
 } as const;
 
 export type TaskStatus = keyof typeof taskStatusColors;
@@ -47,11 +47,11 @@ export const agentStatusLabels: Record<AgentStatus, string> = {
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
-export const logLevelColors: Record<LogLevel, { bg: string; text: string; border: string }> = {
-  debug: { bg: 'bg-[var(--log-debug-bg)]', text: 'text-[var(--log-debug-text)]', border: 'border-[var(--log-debug-text)]' },
-  info: { bg: 'bg-[var(--log-info-bg)]', text: 'text-[var(--log-info-text)]', border: 'border-[var(--log-info-text)]' },
-  warn: { bg: 'bg-[var(--log-warn-bg)]', text: 'text-[var(--log-warn-text)]', border: 'border-[var(--log-warn-text)]' },
-  error: { bg: 'bg-[var(--log-error-bg)]', text: 'text-[var(--log-error-text)]', border: 'border-[var(--log-error-text)]' },
+export const logLevelColors: Record<LogLevel, { bg: string; text: string }> = {
+  debug: { bg: 'bg-[var(--log-debug-bg)]', text: 'text-[var(--log-debug-text)]' },
+  info: { bg: 'bg-[var(--log-info-bg)]', text: 'text-[var(--log-info-text)]' },
+  warn: { bg: 'bg-[var(--log-warn-bg)]', text: 'text-[var(--log-warn-text)]' },
+  error: { bg: 'bg-[var(--log-error-bg)]', text: 'text-[var(--log-error-text)]' },
 };
 
 export const logLevelLabels: Record<LogLevel, string> = {

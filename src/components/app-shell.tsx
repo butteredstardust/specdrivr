@@ -5,7 +5,6 @@ import { Logo } from './logo';
 import { DatabaseStatus } from './database-status';
 import { UserMenu } from './user-menu';
 import { ProjectSidebarWrapper } from './project-sidebar-wrapper';
-import { BottomTabs } from './bottom-tabs';
 import Link from 'next/link';
 
 export interface AppShellProps {
@@ -38,7 +37,7 @@ export function AppShell({
   return (
     <div className="min-h-screen flex flex-col bg-[var(--color-bg-page)] font-sans">
       {/* Top Nav - 56px fixed */}
-      <header className="fixed top-0 left-0 right-0 h-[56px] bg-[var(--color-brand-bold)] z-[100] px-[var(--sp-4)] flex items-center gap-[var(--sp-2)]">
+      <header className="fixed top-0 left-0 right-0 w-full h-[56px] bg-[var(--color-brand-bold)] z-[100] px-[var(--sp-4)] flex items-center gap-[var(--sp-2)]">
         <Link href="/" className="flex items-center gap-[var(--sp-2)]">
           <div className="text-[14px] font-bold text-white uppercase tracking-tight">Spec-Drivr</div>
         </Link>
@@ -83,8 +82,6 @@ export function AppShell({
         </main>
       </div>
 
-      {/* Mobile Bottom Tabs */}
-      <BottomTabs />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createProject } from '@/lib/actions';
 import { ProjectSelect } from '@/db/schema';
 import { Dialog } from './ui/dialog';
@@ -14,6 +14,22 @@ interface CreateProjectDialogProps {
 
 export function CreateProjectDialog({ onProjectCreated }: CreateProjectDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    const handleOpen = () => setIsOpen(true);
+    window.addEventListener('open-new-project-modal', handleOpen);
+
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('newProject') === 'true') {
+        setIsOpen(true);
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
+
+    return () => window.removeEventListener('open-new-project-modal', handleOpen);
+  }, []);
+
   const [formData, setFormData] = useState({
     name: '',
     constitution: '',
