@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm"
 import bcrypt from "bcryptjs"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+    secret: process.env.AUTH_SECRET || "fakesecret123",
     providers: [
         Credentials({
             credentials: {

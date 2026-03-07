@@ -10,7 +10,9 @@ export default auth((req) => {
 
   if (req.nextUrl.pathname.startsWith('/projects') || req.nextUrl.pathname === '/') {
     const customSession = req.cookies.get('specdrivr_session');
-    if (!req.auth && !customSession && !isAuthPage) {
+    const authSession = req.cookies.get('authjs.session-token') || req.cookies.get('__Secure-authjs.session-token');
+
+    if (!req.auth && !customSession && !authSession && !isAuthPage) {
       return NextResponse.redirect(new URL('/auth/login', req.url))
     }
   }

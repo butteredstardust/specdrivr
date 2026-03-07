@@ -1,168 +1,122 @@
-'use client';
+"use client"
 
-import { useEffect, useRef } from 'react';
-import { Button } from './button';
+import * as React from "react"
+import * as DialogPrimitive from "@radix-ui/react-dialog"
+import { X } from "lucide-react"
 
-export interface DialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title?: string;
-  children: React.ReactNode;
-  footer?: React.ReactNode;
-  size?: 'small' | 'medium' | 'large' | 'full';
-  showCloseButton?: boolean;
-}
+import { cn } from "@/lib/utils"
 
-export function Dialog({
-  isOpen,
-  onClose,
-  title,
-  children,
-  footer,
-  size = 'medium',
-  showCloseButton = true,
-}: DialogProps) {
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const previousActiveElement = useRef<HTMLElement | null>(null);
+const Dialog = DialogPrimitive.Root
 
-  // Handle Escape key and focus management
-  useEffect(() => {
-    if (!isOpen) return;
+const DialogTrigger = DialogPrimitive.Trigger
 
-    // Store previous active element to restore focus later
-    previousActiveElement.current = document.activeElement as HTMLElement;
+const DialogPortal = DialogPrimitive.Portal
 
-    // Trap focus within dialog
-    const focusableElements = dialogRef.current?.querySelectorAll<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    const firstElement = focusableElements?.[0];
-    const lastElement = focusableElements?.[focusableElements.length - 1];
+const DialogClose = DialogPrimitive.Close
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-      if (e.key === 'Tab') {
-        if (e.shiftKey) {
-          if (document.activeElement === firstElement) {
-            e.preventDefault();
-            lastElement?.focus();
-          }
-        } else {
-          if (document.activeElement === lastElement) {
-            e.preventDefault();
-            firstElement?.focus();
-          }
-        }
-      }
-    };
+const DialogOverlay = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Overlay>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Overlay
+    ref={ref}
+    className={cn(
+      "fixed inset-0 z-50 bg-black/80  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      className
+    )}
+    {...props}
+  />
+))
+DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
-    document.addEventListener('keydown', handleKeyDown);
-    firstElement?.focus();
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      previousActiveElement.current?.focus();
-    };
-  }, [isOpen, onClose]);
-
-  // Prevent body scroll when dialog is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
-
-  if (!isOpen) return null;
-
-  const sizeClasses = {
-    small: 'max-w-[400px]',
-    medium: 'max-w-[500px]',
-    large: 'max-w-[600px]',
-    full: 'max-w-4xl',
-  };
-
-  return (
-    <div
-      className="fixed inset-0 z-[200] flex items-center justify-center p-[var(--sp-4)]"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={title ? 'dialog-title' : undefined}
+const DialogContent = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
+>(({ className, children, ...props }, ref) => (
+  <DialogPortal>
+    <DialogOverlay />
+    <DialogPrimitive.Content
+      ref={ref}
+      className={cn(
+        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
+        className
+      )}
+      {...props}
     >
-      {/* Backdrop - Jira uses a semi-transparent gray/dark overlay */}
-      <div
-        className="absolute inset-0 bg-[#091E427D] transition-opacity duration-300"
-        onClick={onClose}
-        aria-hidden="true"
-      />
+      {children}
+      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+        <X className="h-4 w-4" />
+        <span className="sr-only">Close</span>
+      </DialogPrimitive.Close>
+    </DialogPrimitive.Content>
+  </DialogPortal>
+))
+DialogContent.displayName = DialogPrimitive.Content.displayName
 
-      {/* Dialog Container */}
-      <div
-        ref={dialogRef}
-        className={`relative w-full ${sizeClasses[size]} bg-[var(--bg-surface)] rounded-[var(--radius-sm)] shadow-[var(--shadow-modal)] border border-[var(--border-default)] flex flex-col animate-in fade-in zoom-in-95 duration-[150ms] overflow-hidden`}
-      >
-        {/* Header */}
-        {(title || showCloseButton) && (
-          <div className="flex items-center justify-between px-[var(--sp-6)] py-[var(--sp-4)] shrink-0">
-            {title && (
-              <h2
-                id="dialog-title"
-                className="text-[18px] font-semibold text-[var(--text-primary)] tracking-tight"
-              >
-                {title}
-              </h2>
-            )}
-            {showCloseButton && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onClose}
-                icon={
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </svg>
-                }
-                aria-label="Close"
-              />
-            )}
-          </div>
-        )}
+const DialogHeader = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col space-y-1.5 text-center sm:text-left",
+      className
+    )}
+    {...props}
+  />
+)
+DialogHeader.displayName = "DialogHeader"
 
-        {/* Content Area */}
-        <div className="px-[var(--sp-6)] pb-[var(--sp-6)] overflow-y-auto max-h-[75vh]">
-          {children}
-        </div>
+const DialogFooter = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+      className
+    )}
+    {...props}
+  />
+)
+DialogFooter.displayName = "DialogFooter"
 
-        {/* Footer */}
-        {footer && (
-          <div className="flex items-center justify-end gap-[var(--sp-2)] px-[var(--sp-6)] py-[var(--sp-4)] border-t border-[var(--color-border-subtle)] shrink-0">
-            {footer}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+const DialogTitle = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Title>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Title
+    ref={ref}
+    className={cn(
+      "text-lg font-semibold leading-none tracking-tight",
+      className
+    )}
+    {...props}
+  />
+))
+DialogTitle.displayName = DialogPrimitive.Title.displayName
 
-// Convenience wrapper for confirmation dialogs
+const DialogDescription = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Description>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Description
+    ref={ref}
+    className={cn("text-sm text-muted-foreground", className)}
+    {...props}
+  />
+))
+DialogDescription.displayName = DialogPrimitive.Description.displayName
+
 export interface ConfirmDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm?: () => void;
+  onConfirm: () => void;
   title: string;
   message: string;
   confirmText?: string;
   cancelText?: string;
   variant?: 'primary' | 'danger';
-  hideConfirm?: boolean;
-  showCloseButton?: boolean;
 }
 
 export function ConfirmDialog({
@@ -174,31 +128,34 @@ export function ConfirmDialog({
   confirmText = 'Confirm',
   cancelText = 'Cancel',
   variant = 'primary',
-  hideConfirm = false,
-  showCloseButton = true,
 }: ConfirmDialogProps) {
   return (
-    <Dialog
-      isOpen={isOpen}
-      onClose={onClose}
-      title={title}
-      showCloseButton={showCloseButton}
-      footer={
-        !hideConfirm ? (
-          <>
-            <Button variant="secondary" onClick={onClose} data-testid="confirm-cancel-button">
-              {cancelText}
-            </Button>
-            {onConfirm && (
-              <Button variant={variant} onClick={onConfirm} data-testid="confirm-confirm-button">
-                {confirmText}
-              </Button>
-            )}
-          </>
-        ) : null
-      }
-    >
-      <p className="text-[13px] text-[var(--text-secondary)]">{message}</p>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{message}</DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <button onClick={onClose}>{cancelText}</button>
+          <button onClick={onConfirm} className={variant === 'danger' ? 'text-destructive' : ''}>
+            {confirmText}
+          </button>
+        </DialogFooter>
+      </DialogContent>
     </Dialog>
   );
+}
+
+export {
+  Dialog,
+  DialogPortal,
+  DialogOverlay,
+  DialogTrigger,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
 }
