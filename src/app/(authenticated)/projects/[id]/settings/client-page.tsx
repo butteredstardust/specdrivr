@@ -117,35 +117,8 @@ export function ProjectSettingsClient({
     }
   };
 
-  const tabs = [
-    { id: 'kanban', label: 'Kanban', href: `/projects/${projectId}` },
-    { id: 'spec', label: 'Spec', href: `/projects/${projectId}?tab=spec` },
-    { id: 'plan', label: 'Plan', href: `/projects/${projectId}?tab=plan` },
-    { id: 'commits', label: 'Commits', href: `/projects/${projectId}/commits` },
-    { id: 'test-results', label: 'Test Results', href: `/projects/${projectId}?tab=test-results` },
-    { id: 'logs', label: 'Logs', href: `/projects/${projectId}?tab=logs` },
-    { id: 'settings', label: 'Settings', href: `/projects/${projectId}/settings` },
-  ];
-
   return (
-    <div className="flex-1 flex flex-col min-w-0 bg-[var(--bg-page)]">
-      {/* Page Header */}
-      <div className="px-[24px] pt-[24px] pb-0 bg-[var(--bg-surface)] border-b border-[var(--border-default)]">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-[8px] text-[13px] text-[var(--text-tertiary)] mb-[4px]">
-          <Link href="/" className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] no-underline transition-colors">Projects</Link>
-          <span className="text-[var(--border-strong)]">/</span>
-          <span>{project.name}</span>
-        </div>
-        {/* Title */}
-        <h1 className="text-[22px] font-bold text-[var(--text-primary)] m-0 mb-[16px] leading-[1.2]">
-          Project Settings
-        </h1>
-
-        <Tabs tabs={tabs} activeTab="settings" />
-      </div>
-
-      {/* Content Area */}
+    <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
       <div className="flex-1 overflow-y-auto px-[var(--sp-6)] py-[var(--sp-8)]">
         <div className="max-w-4xl space-y-[var(--sp-10)]">
           {/* General Settings */}
