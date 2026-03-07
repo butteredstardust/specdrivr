@@ -217,6 +217,7 @@ export function CreateTaskDialog({
               className={`w-[40px] h-[22px] rounded-full p-[2px] transition-colors ${isQuickMode ? 'bg-[var(--brand-primary)]' : 'bg-[var(--border-default)]'
                 }`}
               aria-pressed={isQuickMode}
+              aria-label="Toggle quick mode"
             >
               <span
                 className={`block w-[18px] h-[18px] rounded-full bg-white shadow-sm transition-transform ${isQuickMode ? 'translate-x-[18px]' : 'translate-x-0'
