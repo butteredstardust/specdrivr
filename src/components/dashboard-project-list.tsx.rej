@@ -1,0 +1,26 @@
+--- dashboard-project-list.tsx
++++ dashboard-project-list.tsx
+@@ -21,17 +21,17 @@
+         <>
+             <style>{`
+                 .dashboard-search-input {
+-                    background: #FFFFFF;
+-                    border: 1px solid #DFE1E6;
++                    background: var(--bg-surface);
++                    border: 1px solid var(--border-default);
+                     border-radius: 6px;
+                     height: 32px;
+                     padding: 0 12px 0 32px;
+-                    margin-bottom: 8px;
+                     width: 100%;
+                     font-size: 13px;
+-                    color: #172B4D;
++                    color: var(--text-primary);
+                     outline: none;
+                     transition: all 0.2s ease;
++                    margin-bottom: 8px;
+                 }
+-                .dashboard-search-input::placeholder {
+-                    color: #8590A2;
++                .dashboard-search-input::placeholder {
++                    color: var(--text-tertiary);

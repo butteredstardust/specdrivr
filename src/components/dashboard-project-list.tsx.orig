@@ -22,31 +22,32 @@ export function DashboardProjectList({ projects }: { projects: ProjectCardProps[
         <>
             <style>{`
                 .dashboard-search-input {
-                    background: var(--bg-surface);
-                    border: 1px solid var(--border-default);
+                    background: #FFFFFF;
+                    border: 1px solid #DFE1E6;
                     border-radius: 6px;
                     height: 32px;
                     padding: 0 12px 0 32px;
+                    margin-bottom: 8px;
                     width: 100%;
                     font-size: 13px;
-                    color: var(--text-primary);
+                    color: #172B4D;
                     outline: none;
                     transition: all 0.2s ease;
                 }
                 .dashboard-search-input::placeholder {
-                    color: var(--text-tertiary);
+                    color: #8590A2;
                 }
                 .dashboard-search-input:focus {
-                    border-color: var(--border-focus);
-                    box-shadow: 0 0 0 2px var(--brand-subtle);
+                    border-color: #2563EB;
+                    box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
                 }
             `}</style>
             <div className="flex items-center justify-between" style={{ marginTop: '20px', marginBottom: '8px', paddingLeft: 0 }}>
-                <h2 style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>Projects</h2>
+                <h2 style={{ fontSize: '11px', fontWeight: 600, color: '#8590A2', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>Projects</h2>
             </div>
 
-            <div className="relative" style={{ marginBottom: '8px' }}>
-                <div className="absolute inset-y-0 flex items-center pointer-events-none" style={{ left: '10px' }}>
+            <div className="relative">
+                <div className="absolute inset-y-0 flex items-center pointer-events-none" style={{ left: '10px', top: '-8px' }}>
                     <Search size={14} className="text-[var(--text-tertiary)]" />
                 </div>
                 <input
