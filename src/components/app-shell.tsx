@@ -6,6 +6,7 @@ import { Logo } from './logo';
 import { DatabaseStatus } from './database-status';
 import { UserMenu } from './user-menu';
 import { ProjectSidebarWrapper } from './project-sidebar-wrapper';
+import { CreateProjectDialog } from './create-project-dialog';
 import Link from 'next/link';
 
 export interface AppShellProps {
@@ -66,7 +67,7 @@ export function AppShell({
       </header>
 
       {/* Main Container */}
-      <div className="flex-1 flex mt-[56px] items-stretch min-h-[100vh]">
+      <div className="flex-1 flex mt-[56px] items-stretch min-h-[calc(100vh-56px)]">
         {/* Sidebar */}
         {showSidebar && (
           <ProjectSidebarWrapper
@@ -88,6 +89,7 @@ export function AppShell({
         </main>
       </div>
 
+      <CreateProjectDialog />
     </div>
   );
 }
