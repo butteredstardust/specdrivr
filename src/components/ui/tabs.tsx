@@ -1,8 +1,8 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { ReactNode } from 'react';
+import { ReactNode, Suspense } from 'react';
 import { cn } from '@/lib/utils';
 
 export interface TabData {
@@ -19,9 +19,24 @@ export interface TabsProps {
   className?: string;
 }
 
-export function Tabs({ tabs, activeTab, className = '' }: TabsProps) {
+function TabsContent({ tabs, activeTab, className }: TabsProps) {
   const pathname = usePathname();
-  const currentTab = activeTab || getCurrentTabFromPath(pathname, tabs);
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab');
+
+  // If activeTab is explicitly provided, use it.
+  // Otherwise, if tab param exists, look for a tab whose href includes `?tab=${tabParam}`
+  // Otherwise fallback to path matching
+  let currentTab = activeTab;
+  if (!currentTab) {
+    if (tabParam) {
+      const match = tabs.find(t => t.href.includes(`tab=${tabParam}`));
+      if (match) currentTab = match.id;
+    }
+    if (!currentTab) {
+      currentTab = getCurrentTabFromPath(pathname, tabs);
+    }
+  }
 
   return (
     <div className={cn("border-b border-[var(--border-default)]", className)}>
@@ -41,15 +56,23 @@ export function Tabs({ tabs, activeTab, className = '' }: TabsProps) {
   );
 }
 
+export function Tabs(props: TabsProps) {
+  return (
+    <Suspense fallback={<div className={cn("border-b border-[var(--border-default)] h-[41px]", props.className)} />}>
+      <TabsContent {...props} />
+    </Suspense>
+  );
+}
+
 function TabItem({ tab, isActive }: { tab: TabData; isActive: boolean }) {
   return (
     <Link href={tab.href} className="group outline-none">
       <div
         className={cn(
-          "relative flex items-center gap-[var(--sp-2)] h-[40px] px-[var(--sp-1)] text-[12px] font-medium transition-colors whitespace-nowrap outline-none",
+          "relative flex items-center gap-[6px] h-[36px] px-[12px] text-[13px] font-medium transition-colors whitespace-nowrap mb-[-1px] outline-none border-b-2",
           isActive
-            ? "text-[var(--brand-primary)]"
-            : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+            ? "text-[var(--brand-primary)] border-[var(--brand-primary)]"
+            : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-transparent"
         )}
       >
         {tab.icon && <span className="flex-shrink-0 opacity-70 group-hover:opacity-100 transition-opacity">{tab.icon}</span>}
@@ -65,11 +88,6 @@ function TabItem({ tab, isActive }: { tab: TabData; isActive: boolean }) {
           >
             {typeof tab.badge === 'number' && tab.badge > 99 ? '99+' : tab.badge}
           </span>
-        )}
-
-        {/* Underline Indicator */}
-        {isActive && (
-          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[var(--brand-primary)] rounded-t-sm" />
         )}
       </div>
     </Link>

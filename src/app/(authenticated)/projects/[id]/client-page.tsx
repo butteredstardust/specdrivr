@@ -12,9 +12,9 @@ import { TestResultsPanel } from '@/components/test-results-panel';
 import { AgentLogs } from '@/components/agent-logs';
 import { AgentStatusPanel, type AgentStatusData } from '@/components/agent-status-panel';
 import { WaveManager } from '@/components/wave-manager';
-import { type TabData } from '@/components/ui/tabs';
 import { useAgentStatus } from '@/hooks/use-agent-status';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 interface ProjectDetailClientProps {
   projectId: number;
@@ -108,7 +108,8 @@ export function ProjectDetailClient({
   testResults = [],
   agentLogs = [],
 }: ProjectDetailClientProps) {
-  const [activeTabId, setActiveTabId] = useState('kanban');
+  const searchParams = useSearchParams();
+  const activeTabId = searchParams.get('tab') || 'kanban';
   const { data: agentStatus } = useAgentStatus({ projectId });
 
   // Extract tech stack as array
@@ -117,52 +118,6 @@ export function ProjectDetailClient({
     : typeof project.techStack === 'string'
       ? [project.techStack]
       : [];
-
-  // Create tabs configuration
-  const tabs: TabData[] = [
-    {
-      id: 'kanban',
-      label: 'Kanban',
-      href: `/projects/${projectId}`,
-    },
-    {
-      id: 'spec',
-      label: 'Spec',
-      href: `/projects/${projectId}?tab=spec`,
-    },
-    {
-      id: 'plan',
-      label: 'Plan',
-      href: `/projects/${projectId}?tab=plan`,
-    },
-    {
-      id: 'wave',
-      label: 'Wave Execution',
-      href: `/projects/${projectId}?tab=wave`,
-    },
-    {
-      id: 'commits',
-      label: 'Commits',
-      href: `/projects/${projectId}/commits`,
-    },
-    {
-      id: 'test-results',
-      label: 'Test Results',
-      href: `/projects/${projectId}?tab=test-results`,
-      badge: testResults.length > 0 ? testResults.length : undefined,
-    },
-    {
-      id: 'logs',
-      label: 'Logs',
-      href: `/projects/${projectId}?tab=logs`,
-      badge: agentLogs.length > 0 ? agentLogs.length : undefined,
-    },
-    {
-      id: 'settings',
-      label: 'Settings',
-      href: `/projects/${projectId}/settings`,
-    },
-  ];
 
   const statusData: AgentStatusData = agentStatus || {
     status: 'idle',
@@ -187,69 +142,9 @@ export function ProjectDetailClient({
     }
   };
 
-  const tabTitles: Record<string, string> = {
-    'kanban': 'Kanban Board',
-    'spec': 'Specification',
-    'plan': 'Plan',
-    'wave': 'Wave Execution',
-    'test-results': 'Test Results',
-    'logs': 'Logs',
-  };
-
   return (
-    <div className="flex-1 flex flex-col min-w-0 bg-[var(--bg-page)]">
-      {/* Page Header */}
-      <div className="px-[24px] pt-[24px] pb-0 bg-[var(--bg-surface)] border-b border-[var(--border-default)]">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-[8px] text-[13px] text-[var(--text-tertiary)] mb-[4px]">
-          <Link href="/" className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] no-underline transition-colors">Projects</Link>
-          <span className="text-[var(--border-strong)]">/</span>
-          <span>{project.name}</span>
-        </div>
-        {/* Title */}
-        <h1 className="text-[22px] font-bold text-[var(--text-primary)] m-0 mb-[16px] leading-[1.2]">
-          {tabTitles[activeTabId] || 'Kanban Board'}
-        </h1>
-
-        {/* Tabs */}
-        <nav className="flex gap-0 overflow-x-auto">
-          {tabs.map((tab) => {
-            // Route-based tabs (separate pages) must use <a>, not button
-            const isRouteBased = tab.href && !tab.href.includes('?tab=') && tab.href !== `/projects/${projectId}`;
-            const isActive = activeTabId === tab.id;
-            const sharedClass = `relative flex items-center gap-[6px] h-[36px] px-[12px] text-[13px] font-medium transition-colors whitespace-nowrap mb-[-1px] ${isActive ? 'text-[var(--brand-primary)] border-b-2 border-[var(--brand-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-b-2 border-transparent'}`;
-            const badge = tab.badge && (
-              <span
-                className={`min-w-[16px] h-[16px] px-[var(--sp-1)] rounded-full text-[10px] flex items-center justify-center font-bold ${isActive ? 'bg-[var(--brand-primary)] text-white' : 'bg-[var(--bg-sunken)] text-[var(--text-secondary)]'
-                  }`}
-              >
-                {typeof tab.badge === 'number' && tab.badge > 99 ? '99+' : tab.badge}
-              </span>
-            );
-            if (isRouteBased) {
-              return (
-                <a key={tab.id} href={tab.href} className={sharedClass}>
-                  {tab.label}
-                  {badge}
-                </a>
-              );
-            }
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTabId(tab.id)}
-                className={sharedClass}
-              >
-                {tab.label}
-                {badge}
-              </button>
-            );
-          })}
-        </nav>
-      </div>
-
-      {/* Tab Content */}
-      <div className="flex-1 px-[24px] py-[24px]">
+    <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div className="flex-1 px-[24px] py-[24px] overflow-y-auto">
         {renderTabContent()}
       </div>
     </div>
