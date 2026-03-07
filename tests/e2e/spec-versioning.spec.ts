@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.test.describe('Specification Versioning E2E', () => {
+test.describe('Specification Versioning E2E', () => {
     test('should properly handle specification edits and version history', async ({ page }) => {
         // Navigate and login
         await page.goto('/auth/login');
