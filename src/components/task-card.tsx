@@ -13,7 +13,9 @@ import {
   ChevronDown,
   ChevronsDown,
   CheckCircle,
-  FileText
+  FileText,
+  RotateCcw,
+  Check
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -43,14 +45,27 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
   };
 
   const getPriorityIcon = (p: number) => {
+    let iconClass = "";
     switch (p) {
-      case 5: return <ChevronsUp size={14} className="text-[var(--status-blocked-text)]" />;
-      case 4: return <ChevronUp size={14} className="text-[var(--status-blocked-text)]" />;
-      case 3: return <Minus size={14} className="text-[var(--status-inprogress-text)]" />;
-      case 2: return <ChevronDown size={14} className="text-[var(--brand-primary)]" />;
-      case 1: return <ChevronsDown size={14} className="text-[var(--brand-primary)]" />;
-      default: return <Minus size={14} />;
+      case 5: iconClass = "text-[var(--status-blocked-text)] border-red-500"; break;
+      case 4: iconClass = "text-[var(--status-blocked-text)] border-orange-500"; break;
+      case 3: iconClass = "text-[var(--status-inprogress-text)] border-yellow-500"; break;
+      case 2: iconClass = "text-[var(--brand-primary)] border-blue-500"; break;
+      case 1: iconClass = "text-[var(--brand-primary)] border-green-500"; break;
+      default: iconClass = "border-gray-500";
     }
+
+    const innerIcon = () => {
+        switch (p) {
+            case 5: return <ChevronsUp size={14} />;
+            case 4: return <ChevronUp size={14} />;
+            case 3: return <Minus size={14} />;
+            case 2: return <ChevronDown size={14} />;
+            case 1: return <ChevronsDown size={14} />;
+            default: return <Minus size={14} />;
+        }
+    };
+    return <span data-testid="priority-indicator" className={cn("border-2 rounded", iconClass)}>{innerIcon()}</span>;
   };
 
   const statusInfo = taskStatusColors[status as keyof typeof taskStatusColors] || taskStatusColors.todo;
@@ -62,15 +77,27 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
         style={style}
         {...attributes}
         {...listeners}
+        data-testid="task-card"
+        data-task-id={task.id}
         className={cn(
           "bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-lg)] p-[10px] px-[12px] mb-[6px] shadow-[var(--shadow-card)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.10)] hover:border-l-[2px] hover:border-l-[var(--brand-primary)] hover:pl-[10px] cursor-pointer transition-all group",
           isDragging && "z-50 shadow-2xl scale-[1.02]"
         )}
         onClick={() => onClick?.(task)}
       >
-        <p className="text-[13px] font-[500] text-[var(--text-primary)] leading-tight mb-[var(--sp-3)] line-clamp-3 transition-colors">
+        <p className="text-[13px] font-[500] text-[var(--text-primary)] leading-tight mb-[var(--sp-3)] line-clamp-3 transition-colors" data-testid="task-description">
           {task.description || 'Untitled Task'}
         </p>
+
+        {task.filesInvolved && task.filesInvolved.length > 0 && (
+            <div data-testid="task-files" className="hidden">
+                {task.filesInvolved.join(',')}
+            </div>
+        )}
+
+        <div data-testid="retry-count" className="hidden">
+            {task.retries || 0}
+        </div>
 
         <div className="flex items-center justify-between mt-auto">
           <div className="flex items-center gap-[var(--sp-2)]">
@@ -87,6 +114,24 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
             )}>
               {status.replace('_', ' ')}
             </span>
+            <div className="hidden group-hover:flex items-center">
+                <button
+                data-testid="retry-task"
+                onClick={(e) => { e.stopPropagation(); /* TODO */ }}
+                className="p-1 text-[var(--text-tertiary)] hover:text-[var(--brand-primary)] hover:bg-[var(--bg-sunken)] rounded transition-all"
+                title="Retry Task"
+                >
+                <RotateCcw size={14} />
+                </button>
+                <button
+                data-testid="mark-done"
+                onClick={(e) => { e.stopPropagation(); /* TODO */ }}
+                className="p-1 text-[var(--text-tertiary)] hover:text-[var(--brand-primary)] hover:bg-[var(--bg-sunken)] rounded transition-all"
+                title="Mark Done"
+                >
+                <Check size={14} />
+                </button>
+            </div>
             <button
               onClick={(e) => { e.stopPropagation(); setShowLogDialog(true); }}
               className="p-1 text-[var(--text-tertiary)] hover:text-[var(--brand-primary)] hover:bg-[var(--bg-sunken)] rounded transition-all"
