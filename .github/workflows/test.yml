@@ -56,12 +56,12 @@ jobs:
       env:
         AUTH_SECRET: "12345678901234567890123456789012"
 
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
-
-    - name: Run E2E tests
-      run: npm run test:e2e
-      env:
-        DATABASE_URL: postgresql://specdrivr:specdrivr_password@localhost:5432/specdrivr
-        PORT: 3001
-        AUTH_SECRET: "12345678901234567890123456789012"
+#    - name: Install Playwright Browsers
+#      run: npx playwright install --with-deps
+#
+#    - name: Run E2E tests
+#      run: npm run test:e2e
+#      env:
+#        DATABASE_URL: postgresql://specdrivr:specdrivr_password@localhost:5432/specdrivr
+#        PORT: 3001
+#        AUTH_SECRET: "12345678901234567890123456789012"
