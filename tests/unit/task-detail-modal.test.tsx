@@ -54,7 +54,7 @@ describe('TaskDetailModal', () => {
       />
     );
 
-    const todoButton = screen.getByTestId('task-status-todo');
+    const todoButton = screen.getByTestId('status-option-todo');
     fireEvent.click(todoButton);
 
     await waitFor(() => {
