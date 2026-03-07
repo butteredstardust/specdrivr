@@ -89,14 +89,14 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
           {task.description || 'Untitled Task'}
         </p>
 
-        {task.filesInvolved && task.filesInvolved.length > 0 && (
+        {Array.isArray(task.filesInvolved) && task.filesInvolved.length > 0 && (
             <div data-testid="task-files" className="hidden">
-                {task.filesInvolved.join(',')}
+                {(task.filesInvolved as string[]).join(',')}
             </div>
         )}
 
         <div data-testid="retry-count" className="hidden">
-            {task.retries || 0}
+            {(task as any).retries || 0}
         </div>
 
         <div className="flex items-center justify-between mt-auto">

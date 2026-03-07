@@ -24,7 +24,7 @@ export function ActionBar({ projectId, plans = [], existingTasks = [], onFilterC
         <div className="relative">
           <Button
             variant="ghost"
-            size="sm"
+            size="small"
             onClick={() => setShowFilters(!showFilters)}
             className="flex items-center gap-[var(--sp-2)]"
             data-testid="priority-filter"
