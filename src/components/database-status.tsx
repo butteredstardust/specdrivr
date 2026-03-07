@@ -34,19 +34,19 @@ export function DatabaseStatus() {
 
   const statusConfig = {
     connecting: {
-      dot: 'bg-[#FFAB00]', // Yellow for connecting
+      dot: 'bg-amber-500', // Yellow
       label: 'Connecting...',
     },
     connected: {
-      dot: 'bg-[#57D9A3]', // Mint for connected
+      dot: 'bg-emerald-500', // Mint
       label: 'Connected',
     },
     disconnected: {
-      dot: 'bg-[#FF8F73]', // Red/Peach for disconnected
+      dot: 'bg-rose-500', // Red
       label: 'Disconnected',
     },
     error: {
-      dot: 'bg-[#AE2A19]', // Dark red for error
+      dot: 'bg-red-600', // Dark red
       label: 'Error',
     },
   };
@@ -55,7 +55,7 @@ export function DatabaseStatus() {
 
   return (
     <div
-      className="flex items-center gap-[5px] px-[8px] py-[3px] bg-white/15 text-white font-medium text-[11px] rounded-[var(--radius-full)]"
+      className="flex items-center gap-[5px] px-[8px] py-[3px] bg-[var(--bg-sunken)] text-[var(--text-secondary)] border border-[var(--border-default)] font-medium text-[11px] rounded-[var(--radius-full)]"
       title="PostgreSQL database connection status"
     >
       <span
