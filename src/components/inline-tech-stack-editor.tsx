@@ -85,7 +85,7 @@ export function InlineTechStackEditor({
         {!isEditing && (
           <Button
             variant="ghost"
-            size="small"
+            size="sm"
             onClick={() => setIsEditing(true)}
           >
             Edit
@@ -126,7 +126,6 @@ export function InlineTechStackEditor({
                   size="icon"
                   onClick={() => handleRemoveEntry(entry.id)}
                   className="text-[var(--status-blocked-text)] opacity-0 group-hover:opacity-100 transition-opacity"
-                  icon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>}
                 />
               </div>
             ))}
@@ -134,10 +133,9 @@ export function InlineTechStackEditor({
 
           <Button
             variant="ghost"
-            size="small"
+            size="sm"
             onClick={handleAddEntry}
             className="text-[var(--brand-primary)] font-bold"
-            icon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>}
           >
             Add New Technology
           </Button>
@@ -151,7 +149,7 @@ export function InlineTechStackEditor({
               Cancel
             </Button>
             <Button
-              variant="primary"
+              variant="default"
               onClick={handleSave}
               disabled={isSubmitting || entries.every(e => !e.key.trim())}
               loading={isSubmitting}

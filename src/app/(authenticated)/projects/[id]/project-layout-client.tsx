@@ -4,7 +4,8 @@ import { ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { ProjectSelect } from '@/db/schema';
-import { Tabs, TabData } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+export interface TabData { id: string; label: string; href: string; }
 
 interface ProjectLayoutClientProps {
     children: ReactNode;
@@ -25,7 +26,7 @@ export function ProjectLayoutClient({
     const searchParams = useSearchParams();
     const tabParam = searchParams.get('tab');
 
-    const tabs: TabData[] = [
+    const tabs: any[] = [
         { id: 'kanban', label: 'Kanban', href: `/projects/${projectId}` },
         { id: 'spec', label: 'Spec', href: `/projects/${projectId}?tab=spec` },
         { id: 'plan', label: 'Plan', href: `/projects/${projectId}?tab=plan` },
@@ -73,7 +74,7 @@ export function ProjectLayoutClient({
                 </h1>
 
                 {/* Tabs */}
-                <Tabs tabs={tabs} />
+                <Tabs value={tabs[0]?.id} />
             </div>
 
             {/* Content Area */}

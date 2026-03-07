@@ -109,35 +109,35 @@ const DialogDescription = React.forwardRef<
 DialogDescription.displayName = DialogPrimitive.Description.displayName
 
 export interface ConfirmDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
+  onOpenChange?: (open: boolean) => void;
+  open: boolean;
   onConfirm: () => void;
   title: string;
   message: string;
   confirmText?: string;
   cancelText?: string;
-  variant?: 'primary' | 'danger';
+  variant?: "default" | "destructive" | "primary" | "danger" | "primary" | "danger";
 }
 
 export function ConfirmDialog({
-  isOpen,
-  onClose,
+  open,
+  onOpenChange,
   onConfirm,
   title,
   message,
   confirmText = 'Confirm',
   cancelText = 'Cancel',
-  variant = 'primary',
+  variant = 'default',
 }: ConfirmDialogProps) {
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{message}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <button onClick={onClose}>{cancelText}</button>
+          <button onClick={() => onOpenChange?.(false)}>{cancelText}</button>
           <button onClick={onConfirm} className={variant === 'danger' ? 'text-destructive' : ''}>
             {confirmText}
           </button>
@@ -158,4 +158,49 @@ export {
   DialogFooter,
   DialogTitle,
   DialogDescription,
+}
+
+export interface CustomDialogProps {
+  onOpenChange?: (open: boolean) => void;
+  open?: boolean;
+
+  title?: string;
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  showCloseButton?: boolean;
+  children: React.ReactNode;
+  footer?: React.ReactNode;
+}
+
+export function CustomDialog({
+  open,
+  onOpenChange,
+  title,
+  size = 'md',
+  showCloseButton = true,
+  children,
+  footer
+}: CustomDialogProps) {
+  const maxWidthClass = {
+    'sm': 'max-w-sm',
+    'md': 'max-w-md',
+    'lg': 'max-w-lg',
+    'xl': 'max-w-xl',
+    'full': 'max-w-[90vw]'
+  }[size];
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className={maxWidthClass}>
+        {title && (
+          <DialogHeader>
+            <DialogTitle>{title}</DialogTitle>
+          </DialogHeader>
+        )}
+        <div className="py-4">
+          {children}
+        </div>
+        {footer && <DialogFooter>{footer}</DialogFooter>}
+      </DialogContent>
+    </Dialog>
+  );
 }

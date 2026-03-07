@@ -89,7 +89,7 @@ export function InlineConstitutionEditor({
         {!isEditing && (
           <Button
             variant="ghost"
-            size="small"
+            size="sm"
             onClick={() => setIsEditing(true)}
           >
             Edit
@@ -120,7 +120,7 @@ export function InlineConstitutionEditor({
               Cancel
             </Button>
             <Button
-              variant="primary"
+              variant="default"
               onClick={handleSave}
               disabled={isSubmitting || !content.trim()}
               loading={isSubmitting}

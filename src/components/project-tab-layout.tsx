@@ -5,11 +5,13 @@ import Link from 'next/link';
 import { Button } from './ui/button';
 import { AgentStatusPanel, type AgentStatusData } from './agent-status-panel';
 import { AgentButtons } from './agent-buttons';
-import { Tabs, type TabData } from './ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from './ui/tabs';
+export interface TabData { id: string; label: string; href: string; }
 import { useAgentActions } from '@/hooks/use-agent-status';
 import type { AgentStatus as AgentStatusType } from '@/lib/ios-styles';
 import { ChevronLeft, RefreshCw } from 'lucide-react';
 
+export interface TabData { id: string; label: string; href: string; }
 export interface ProjectTabLayoutProps {
   projectId: number;
   projectName: string;
@@ -123,10 +125,9 @@ export function ProjectTabLayout({
           />
           <Button
             variant="ghost"
-            size="small"
+            size="sm"
             onClick={handleRefresh}
             className="text-[11px] text-[var(--text-tertiary)]"
-            icon={<RefreshCw size={12} />}
           >
             {formatLastSynced()}
           </Button>
@@ -135,7 +136,15 @@ export function ProjectTabLayout({
 
       {/* Tabs */}
       <div className="mb-[var(--sp-6)]">
-        <Tabs tabs={tabs} />
+        <Tabs value={tabs.find(t => typeof window !== 'undefined' && window.location.pathname.includes(t.href))?.id || tabs[0]?.id}>
+          <TabsList>
+            {tabs.map((tab) => (
+              <TabsTrigger key={tab.id} value={tab.id} asChild>
+                <Link href={tab.href}>{tab.label}</Link>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
       </div>
 
       {/* Tab Content */}

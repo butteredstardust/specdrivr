@@ -146,7 +146,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
       {showLogDialog && (
         <LogTestResultDialog
           task={task}
-          isOpen={true}
+          open={true}
           onClose={() => setShowLogDialog(false)}
           onResultLogged={() => setShowLogDialog(false)}
         />
