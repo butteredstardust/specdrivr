@@ -83,18 +83,17 @@ export function InlineSpecEditor({ specification, allSpecs = [], onSpecUpdated }
           {!isEditing ? (
             <Button
               variant="secondary"
-              size="small"
+              size="sm"
               onClick={() => setIsEditing(true)}
-              icon={<Edit size={14} />}
             >
               {isViewingHistorical ? 'Restore & Edit' : 'Edit'}
             </Button>
           ) : (
             <>
-              <Button variant="ghost" size="small" onClick={handleCancel} disabled={isSubmitting} icon={<X size={14} />}>
+              <Button variant="ghost" size="sm" onClick={handleCancel} disabled={isSubmitting}>
                 Cancel
               </Button>
-              <Button variant="primary" size="small" onClick={handleSave} loading={isSubmitting} disabled={!content.trim()} icon={<Save size={14} />}>
+              <Button variant="default" size="sm" onClick={handleSave} loading={isSubmitting} disabled={!content.trim()}>
                 Save
               </Button>
             </>

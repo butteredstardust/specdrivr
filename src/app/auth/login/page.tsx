@@ -114,7 +114,7 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              variant="primary"
+              variant="default"
               className="w-full h-[40px] text-[14px] font-bold"
               loading={isLoading}
               disabled={isLoading || !username.trim() || !password}

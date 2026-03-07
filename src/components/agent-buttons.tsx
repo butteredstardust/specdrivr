@@ -85,15 +85,10 @@ export function AgentButtons({
       {/* Start Button */}
       <Button
         variant="secondary"
-        size="small"
+        size="sm"
         onClick={handleStart}
         loading={loading === 'running'}
         disabled={disabled || isRunning || !hasActivePlan}
-        icon={
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-            <polygon points="5,3 19,12 5,21" />
-          </svg>
-        }
       >
         Start
       </Button>
@@ -101,32 +96,21 @@ export function AgentButtons({
       {/* Pause Button */}
       <Button
         variant="secondary"
-        size="small"
+        size="sm"
         onClick={handlePause}
         loading={loading === 'paused'}
         disabled={disabled || !isRunning && !isPaused}
-        icon={
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-            <rect x="6" y="4" width="4" height="16" />
-            <rect x="14" y="4" width="4" height="16" />
-          </svg>
-        }
       >
         {isRunning ? 'Pause' : 'Resume'}
       </Button>
 
       {/* Stop Button */}
       <Button
-        variant={isRunning || isPaused ? 'primary' : 'secondary'}
-        size="small"
+        variant={isRunning || isPaused ? 'default' : 'secondary'}
+        size="sm"
         onClick={() => setShowStopConfirm(true)}
         loading={loading === 'stopped'}
         disabled={disabled || isIdle && !isError && !isStale}
-        icon={
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-            <rect x="4" y="4" width="16" height="16" rx="2" />
-          </svg>
-        }
       >
         Stop
       </Button>
@@ -135,17 +119,10 @@ export function AgentButtons({
       {(isError || isStale) && onRetry && (
         <Button
           variant="secondary"
-          size="small"
+          size="sm"
           onClick={handleRetry}
           loading={loading === 'running'}
           disabled={disabled}
-          icon={
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M23 4v6h-6" />
-              <path d="M1 20v-6h6" />
-              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-            </svg>
-          }
         >
           Retry
         </Button>
@@ -153,14 +130,14 @@ export function AgentButtons({
 
       {/* Stop Confirmation Dialog */}
       <ConfirmDialog
-        isOpen={showStopConfirm}
-        onClose={() => setShowStopConfirm(false)}
+        open={showStopConfirm}
+        onOpenChange={() => setShowStopConfirm(false)}
         onConfirm={handleStopConfirm}
         title="Stop Agent?"
         message="This will immediately stop the agent work and mark the current task as blocked. Are you sure?"
         confirmText="Stop Agent"
         cancelText="Cancel"
-        variant="danger"
+        variant="destructive"
       />
     </div>
   );

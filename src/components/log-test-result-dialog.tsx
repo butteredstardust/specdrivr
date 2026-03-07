@@ -7,7 +7,7 @@ import { CheckCircle2, XCircle } from 'lucide-react';
 
 interface LogTestResultDialogProps {
   task: TaskSelect;
-  isOpen?: boolean;
+  open?: boolean;
   onClose?: () => void;
   onResultLogged?: () => void;
 }
@@ -17,12 +17,12 @@ const labelClass = "block text-[var(--font-size-xs)] font-semibold text-[var(--t
 
 export function LogTestResultDialog({
   task,
-  isOpen: controlledIsOpen,
+  open: controlledIsOpen,
   onClose,
   onResultLogged,
 }: LogTestResultDialogProps) {
-  const [isOpenInternal, setIsOpenInternal] = useState(false);
-  const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : isOpenInternal;
+  const [openInternal, setIsOpenInternal] = useState(false);
+  const open = controlledIsOpen !== undefined ? controlledIsOpen : openInternal;
 
   const [success, setSuccess] = useState<boolean | null>(null);
   const [logs, setLogs] = useState('');
@@ -70,7 +70,7 @@ export function LogTestResultDialog({
   };
 
   // Trigger button
-  if (!isOpen) {
+  if (!open) {
     return (
       <button
         onClick={() => {

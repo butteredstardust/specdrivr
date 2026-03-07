@@ -72,7 +72,7 @@ export function WaveManager({ projectId }: WaveManagerProps) {
         return (
             <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-lg)] p-[var(--sp-6)] border-l-4 border-l-[var(--status-blocked-text)]">
                 <p className="text-[var(--font-size-sm)] text-[var(--status-blocked-text)]">{error}</p>
-                <Button onClick={fetchWave} variant="secondary" size="small" className="mt-[var(--sp-3)]">
+                <Button onClick={fetchWave} variant="secondary" size="sm" className="mt-[var(--sp-3)]">
                     Retry
                 </Button>
             </div>
@@ -86,7 +86,7 @@ export function WaveManager({ projectId }: WaveManagerProps) {
                 <p className="text-[var(--font-size-sm)] mb-[var(--sp-4)]">
                     All tasks are blocked by dependencies or the plan is fully complete.
                 </p>
-                <Button onClick={fetchWave} variant="secondary" size="small">
+                <Button onClick={fetchWave} variant="secondary" size="sm">
                     Refresh
                 </Button>
             </div>
@@ -150,7 +150,7 @@ export function WaveManager({ projectId }: WaveManagerProps) {
             <div className="space-y-[var(--sp-4)]">
                 <div className="flex items-center justify-between">
                     <h3 className="text-[var(--font-size-sm)] text-[var(--text-primary)] font-semibold">Parallel Tasks ({waveData.tasks.length})</h3>
-                    <Button onClick={fetchWave} variant="secondary" size="small">
+                    <Button onClick={fetchWave} variant="secondary" size="sm">
                         Refresh
                     </Button>
                 </div>
