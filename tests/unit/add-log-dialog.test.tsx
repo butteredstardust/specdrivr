@@ -34,7 +34,7 @@ describe('AddLogDialog', () => {
     const mockAdd = vi.mocked(actions.addAgentLogDev);
     mockAdd.mockResolvedValue({ success: true } as any);
 
-    render(<AddLogDialog tasks={mockTasks} isOpen={true} />);
+    render(<AddLogDialog tasks={mockTasks} open={true} />);
 
     const select = screen.getByRole('combobox');
     fireEvent.change(select, { target: { value: '1' } });
