@@ -149,20 +149,20 @@ export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorP
           {!isCreatingOrEditing ? (
             <>
               {activePlan && (
-                <Button variant="secondary" size="small" onClick={() => handleEdit(activePlan.id)} icon={<Edit size={14} />}>
+                <Button variant="secondary" size="sm" onClick={() => handleEdit(activePlan.id)}>
                   Edit
                 </Button>
               )}
-              <Button variant="primary" size="small" onClick={() => setIsCreating(true)} icon={<Plus size={16} />}>
+              <Button variant="default" size="sm" onClick={() => setIsCreating(true)}>
                 New Plan
               </Button>
             </>
           ) : (
             <div className="flex items-center gap-[var(--sp-2)]">
-              <Button variant="ghost" size="small" onClick={handleCancel} disabled={isSubmitting} icon={<X size={14} />}>
+              <Button variant="ghost" size="sm" onClick={handleCancel} disabled={isSubmitting}>
                 Cancel
               </Button>
-              <Button variant="primary" size="small" onClick={handleSave} loading={isSubmitting} icon={<Save size={14} />}>
+              <Button variant="default" size="sm" onClick={handleSave} loading={isSubmitting}>
                 {editingPlanId ? 'Update' : 'Create'}
               </Button>
             </div>
@@ -217,7 +217,7 @@ export function InlinePlanEditor({ specId, plans, onCreated }: InlinePlanEditorP
             <div>
               <div className="flex items-center justify-between mb-[var(--sp-2)]">
                 <label className="block text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Architecture Decisions (JSON)</label>
-                <Button variant="ghost" size="small" onClick={() => { try { setEditedJson(JSON.stringify(JSON.parse(editedJson), null, 2)); } catch { setError('Cannot format invalid JSON'); } }} icon={<Code size={14} />}>
+                <Button variant="ghost" size="sm" onClick={() => { try { setEditedJson(JSON.stringify(JSON.parse(editedJson), null, 2)); } catch { setError('Cannot format invalid JSON'); } }}>
                   Format
                 </Button>
               </div>

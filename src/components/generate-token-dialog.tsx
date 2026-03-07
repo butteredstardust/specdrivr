@@ -1,17 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { Dialog, ConfirmDialog } from '@/components/ui/dialog';
+import { CustomDialog, ConfirmDialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, AlertCircle, Copy, Key, ChevronDown } from 'lucide-react';
 
 interface GenerateTokenDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
+  open: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onClose?: () => void;
   onTokenGenerated?: (name: string, model?: string) => Promise<void>;
 }
 
-export function GenerateTokenDialog({ isOpen, onClose, onTokenGenerated }: GenerateTokenDialogProps) {
+export function GenerateTokenDialog({ open, onClose, onTokenGenerated }: GenerateTokenDialogProps) {
   const [tokenName, setTokenName] = useState('');
   const [modelHint, setModelHint] = useState('claude-opus-4');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -49,7 +50,7 @@ export function GenerateTokenDialog({ isOpen, onClose, onTokenGenerated }: Gener
       return;
     }
     handleReset();
-    onClose();
+    onClose?.();
   };
 
   const handleReset = () => {
@@ -75,18 +76,18 @@ export function GenerateTokenDialog({ isOpen, onClose, onTokenGenerated }: Gener
 
   return (
     <>
-      <Dialog
-        isOpen={isOpen}
-        onClose={handleClose}
+      <CustomDialog
+        open={open}
+        onOpenChange={handleClose}
         title={generatedToken ? 'Token Created' : 'Generate Agent Token'}
-        size="small"
+        size="sm"
         footer={
           <div className="flex items-center justify-end gap-[var(--sp-2)]">
             <Button variant="secondary" onClick={handleClose}>
               {generatedToken ? 'Done' : 'Cancel'}
             </Button>
             {!generatedToken && (
-              <Button variant="primary" onClick={handleGenerate} disabled={!tokenName.trim() || isGenerating} loading={isGenerating}>
+              <Button variant="default" onClick={handleGenerate} disabled={!tokenName.trim() || isGenerating} loading={isGenerating}>
                 Generate Token
               </Button>
             )}
@@ -164,7 +165,7 @@ export function GenerateTokenDialog({ isOpen, onClose, onTokenGenerated }: Gener
                 <div className="flex-1 bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-sm)] p-[var(--sp-3)] font-mono text-[12px] text-[var(--text-primary)] break-all select-all">
                   {generatedToken}
                 </div>
-                <Button variant="secondary" size="small" onClick={handleCopyToken}>
+                <Button variant="secondary" size="sm" onClick={handleCopyToken}>
                   Copy
                 </Button>
               </div>
@@ -188,21 +189,21 @@ export function GenerateTokenDialog({ isOpen, onClose, onTokenGenerated }: Gener
             </div>
           </div>
         )}
-      </Dialog>
+      </CustomDialog>
 
       <ConfirmDialog
-        isOpen={showConfirmDialog}
-        onClose={() => setShowConfirmDialog(false)}
+        open={showConfirmDialog}
+        onOpenChange={(o: boolean) => setShowConfirmDialog(false)}
         onConfirm={() => {
           setShowConfirmDialog(false);
           handleReset();
-          onClose();
+          onClose?.();
         }}
         title="Discard Generated Token?"
         message="You have a generated token that you haven't copied. If you close this dialog without copying, you'll need to generate a new token."
         confirmText="Discard & Close"
         cancelText="Cancel"
-        variant="danger"
+        variant="destructive"
       />
     </>
   );

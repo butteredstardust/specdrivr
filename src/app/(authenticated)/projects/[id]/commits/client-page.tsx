@@ -68,7 +68,7 @@ export function ProjectCommitsClient({
               <GitBranch size={48} className="text-[var(--border-default)] mb-[var(--sp-4)]" />
               <h3 className="text-[18px] font-semibold text-[var(--text-primary)] mb-[var(--sp-2)]">No commits yet</h3>
               <p className="text-[14px] text-[var(--text-secondary)] mb-[var(--sp-6)]">Commits will appear here once the agent starts working.</p>
-              <Button variant="primary" className="!bg-[var(--brand-primary)] !text-[#FFFFFF] !opacity-100 font-medium text-[13px] h-[32px] px-[14px] border-none rounded-[var(--radius-md)] hover:!bg-[var(--brand-primary-hover)]" onClick={() => window.location.href = `/projects/${projectId}/settings`}>Configure Git Integration</Button>
+              <Button variant="default" className="!bg-[var(--brand-primary)] !text-[#FFFFFF] !opacity-100 font-medium text-[13px] h-[32px] px-[14px] border-none rounded-[var(--radius-md)] hover:!bg-[var(--brand-primary-hover)]" onClick={() => window.location.href = `/projects/${projectId}/settings`}>Configure Git Integration</Button>
             </div>
           ) : filteredCommits.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-[var(--sp-12)] bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-lg)] opacity-60">
@@ -113,7 +113,7 @@ export function ProjectCommitsClient({
 
                       <div className="flex items-center gap-[var(--sp-2)]">
                         {commit.taskId && (
-                          <Button variant="secondary" size="small" onClick={() => window.location.href = `/projects/${projectId}?tab=kanban`} icon={<CheckSquare size={12} />}>
+                          <Button variant="secondary" size="sm" onClick={() => window.location.href = `/projects/${projectId}?tab=kanban`}>
                             Task SD-{commit.taskId}
                           </Button>
                         )}

@@ -2,7 +2,7 @@
 
 import { ReactNode, useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { Logo } from './logo';
+import { Logo } from '@/components/logo';
 import { DatabaseStatus } from './database-status';
 import { UserMenu } from './user-menu';
 import { ProjectSidebarWrapper } from './project-sidebar-wrapper';

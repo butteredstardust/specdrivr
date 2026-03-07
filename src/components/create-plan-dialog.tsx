@@ -13,7 +13,7 @@ const textareaClass = "w-full p-[var(--sp-3)] bg-[var(--bg-sunken)] border borde
 const labelClass = "block text-[var(--font-size-xs)] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-[var(--sp-2)]";
 
 export function CreatePlanDialog({ specId, onPlanCreated }: CreatePlanDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [open, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
     architectureDecisions: '',
     intent: '',
@@ -74,7 +74,7 @@ export function CreatePlanDialog({ specId, onPlanCreated }: CreatePlanDialogProp
     setError('');
   };
 
-  if (!isOpen) {
+  if (!open) {
     return (
       <button
         onClick={() => setIsOpen(true)}
