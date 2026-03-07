@@ -37,31 +37,6 @@ export function AppShell({
 
   const pathname = usePathname();
 
-  const NavLink = ({ href, children, exact = false }: { href: string; children: ReactNode; exact?: boolean }) => {
-    const isActive = exact ? pathname === href : pathname?.startsWith(href);
-    return (
-      <Link
-        href={href}
-        style={{
-          fontSize: '13px',
-          fontWeight: 500,
-          color: isActive ? 'var(--nav-text-active)' : 'var(--nav-text)',
-          padding: '0 12px',
-          height: '56px',
-          display: 'inline-flex',
-          alignItems: 'center',
-          textDecoration: 'none',
-          borderBottom: isActive ? '2px solid var(--nav-accent)' : '2px solid transparent',
-          transition: 'color 120ms ease'
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--nav-text-active)'; }}
-        onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.color = 'var(--nav-text)'; }}
-      >
-        {children}
-      </Link>
-    );
-  };
-
   return (
     <div className="min-h-screen flex flex-col bg-[var(--bg-page)] font-sans">
       {/* Top Nav - 56px fixed */}
@@ -69,7 +44,7 @@ export function AppShell({
         <Link href="/" className="flex items-center">
           <span style={{
             fontFamily: "'Inter', sans-serif",
-            fontSize: '20px',
+            fontSize: '30px',
             fontWeight: 800,
             letterSpacing: '-0.03em',
             background: 'linear-gradient(135deg, var(--brand-accent) 0%, var(--brand-accent-end) 100%)',
@@ -84,11 +59,6 @@ export function AppShell({
           </span>
         </Link>
 
-        <nav className="flex items-center" style={{ marginLeft: '24px' }}>
-          <NavLink href="/" exact>Dashboard</NavLink>
-          <NavLink href="/settings">Settings</NavLink>
-        </nav>
-
         <div className="ml-auto flex items-center gap-[var(--sp-2)]">
           <DatabaseStatus />
           <UserMenu />
@@ -96,25 +66,23 @@ export function AppShell({
       </header>
 
       {/* Main Container */}
-      <div className="flex-1 flex pt-[56px]">
-        {/* Sidebar - 240px fixed */}
+      <div className="flex-1 flex mt-[56px] items-stretch min-h-[100vh]">
+        {/* Sidebar */}
         {showSidebar && (
-          <aside className="fixed top-[56px] left-0 bottom-0 w-[240px] bg-[var(--bg-surface)] border-r border-[var(--border-default)] overflow-y-auto p-[var(--sp-3)] p-[var(--sp-2)]">
-            <ProjectSidebarWrapper
-              projects={sidebarProjects}
-              currentProjectId={currentProjectId}
-            />
-          </aside>
+          <ProjectSidebarWrapper
+            projects={sidebarProjects}
+            currentProjectId={currentProjectId}
+          />
         )}
 
         {/* Content Area */}
-        <main className={`flex-1 min-h-[calc(100vh-56px)] bg-[var(--bg-page)] ${showSidebar ? 'ml-[240px]' : ''}`}>
+        <main className="flex-1 min-w-0 flex flex-col bg-[var(--bg-page)]">
           {isOffline && (
             <div className="bg-[var(--status-paused-bg)] border-b border-[var(--border-default)] py-[var(--sp-2)] px-[var(--sp-4)] text-center text-[var(--status-paused-text)] text-[13px] font-medium">
               You&apos;re offline — changes won&apos;t save until connection is restored
             </div>
           )}
-          <div className="p-[var(--sp-6)]">
+          <div className="p-[var(--sp-6)] flex-1">
             {children}
           </div>
         </main>
