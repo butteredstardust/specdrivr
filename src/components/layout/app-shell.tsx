@@ -6,7 +6,7 @@ import { Logo } from './logo';
 import { DatabaseStatus } from './database-status';
 import { UserMenu } from './user-menu';
 import { ProjectSidebarWrapper } from './project-sidebar-wrapper';
-import { CreateProjectDialog } from './create-project-dialog';
+import { CreateProjectDialog } from '@/components/features/projects/create-project-dialog';
 import Link from 'next/link';
 
 export interface AppShellProps {
@@ -39,7 +39,7 @@ export function AppShell({
   const pathname = usePathname();
 
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--bg-page)] font-sans">
+    <div className="min-h-screen flex flex-col bg-[var(--bg-page)]">
       {/* Top Nav - 56px fixed */}
       <header className="fixed top-0 left-0 right-0 w-full h-[56px] z-[100] px-[var(--sp-4)] flex items-center" style={{ background: 'var(--nav-bg)' }}>
         <Link href="/" className="flex items-center">

@@ -1,75 +1,63 @@
-'use client';
+import * as React from "react"
+import { Slot } from "@radix-ui/react-slot"
+import { cva, type VariantProps } from "class-variance-authority"
+import { Loader2 } from "lucide-react"
 
-import { ButtonHTMLAttributes, forwardRef } from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils"
 
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
-  size?: 'small' | 'medium' | 'large' | 'icon';
-  loading?: boolean;
-  icon?: React.ReactNode;
-  iconRight?: React.ReactNode;
+const buttonVariants = cva(
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  {
+    variants: {
+      variant: {
+        default:
+          "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+        destructive:
+          "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
+        outline:
+          "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
+        secondary:
+          "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
+      },
+      size: {
+        default: "h-9 px-4 py-2",
+        sm: "h-8 rounded-md px-3 text-xs",
+        lg: "h-10 rounded-md px-8",
+        icon: "h-9 w-9",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean
+  loading?: boolean
 }
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  (
-    {
-      variant = 'primary',
-      size = 'medium',
-      loading = false,
-      icon,
-      iconRight,
-      children,
-      disabled,
-      className = '',
-      ...props
-    },
-    ref
-  ) => {
-    const baseClasses = 'inline-flex items-center justify-center gap-[var(--sp-2)] font-medium transition-[background,color] disabled:!bg-[#C7D2FE] disabled:!text-[var(--brand-primary)] disabled:!opacity-100 disabled:cursor-not-allowed outline-none border-none cursor-pointer text-[13px] rounded-[var(--radius-md)]';
-
-    const variantClasses = {
-      primary: 'bg-[var(--brand-primary)] text-[#fff] hover:bg-[var(--brand-primary-hover)]',
-      secondary: 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border border-[var(--border-default)] hover:bg-[var(--bg-hovered)] border-solid',
-      danger: 'bg-[var(--log-error-text)] text-white hover:bg-[var(--status-blocked-text)]',
-      ghost: 'bg-transparent text-[var(--text-tertiary)] hover:bg-[var(--bg-hovered)] hover:text-[var(--text-primary)]',
-    };
-
-    const sizeClasses = {
-      small: 'h-[28px] px-[14px]',
-      medium: 'h-[32px] px-[14px]',
-      large: 'h-[36px] px-[14px] text-[14px]',
-      icon: 'w-[28px] h-[28px] p-0 rounded-[var(--radius-sm)]',
-    };
-
-    // Special case for secondary border since base has border-none
-    const classes = cn(
-      baseClasses,
-      variantClasses[variant],
-      sizeClasses[size],
-      className
-    );
-
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, loading, children, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button"
     return (
-      <button
+      <Comp
+        className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
-        className={classes}
-        disabled={disabled || loading}
+        disabled={props.disabled || loading}
         {...props}
       >
-        {loading ? (
-          <svg className="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-          </svg>
-        ) : (
-          icon && <span className="flex-shrink-0 flex items-center">{icon}</span>
-        )}
+        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         {children}
-        {!loading && iconRight && <span className="flex-shrink-0 flex items-center">{iconRight}</span>}
-      </button>
-    );
+      </Comp>
+    )
   }
-);
+)
+Button.displayName = "Button"
 
-Button.displayName = 'Button';
+export { Button, buttonVariants }

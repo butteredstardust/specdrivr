@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { ProjectSidebar } from '@/components/project-sidebar';
+import { ProjectSidebar } from '@/components/layout/project-sidebar';
 import '@testing-library/jest-dom';
 import { describe, test, expect, vi } from 'vitest';
 
