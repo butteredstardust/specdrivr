@@ -25,7 +25,7 @@ test.describe('Authentication Flow', () => {
     await page.fill('#password', 'wrongpass');
     await page.click('button[type="submit"]');
 
-    const errorMessage = page.locator('text="Invalid credentials"');
+    const errorMessage = page.locator('text="Invalid username or password"');
     await expect(errorMessage).toBeVisible();
   });
 
@@ -85,8 +85,9 @@ test.describe('Session Management', () => {
     await page.fill('#password', 'demo');
     await page.click('button[type="submit"]');
 
+    await expect(page).toHaveURL('/');
     const cookies = await context.cookies();
-    const sessionCookie = cookies.find(cookie => cookie.name.includes('session'));
+    const sessionCookie = cookies.find(cookie => cookie.name.includes('session-token') || cookie.name.includes('specdrivr_session'));
     expect(sessionCookie).toBeDefined();
   });
 });
@@ -102,6 +103,7 @@ test.describe('Protected Routes', () => {
     await page.fill('#username', 'Admin');
     await page.fill('#password', 'demo');
     await page.click('button[type="submit"]');
+    await expect(page).toHaveURL('/');
 
     await page.goto('/');
     await expect(page).not.toHaveURL(/\/auth\/login/);

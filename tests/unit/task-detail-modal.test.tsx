@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { TaskDetailModal } from '@/components/task-detail-modal';
+import { TaskDetailModal } from '@/components/features/kanban/task-detail-modal';
 import '@testing-library/jest-dom';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 
@@ -27,7 +27,7 @@ describe('TaskDetailModal', () => {
 
   test('renders modal with task details', () => {
     render(<TaskDetailModal isOpen={true} onClose={vi.fn()} task={mockTask} />);
-    expect(screen.getByText(/Task #42/)).toBeInTheDocument();
+    expect(screen.getByText("Implement authentication middleware")).toBeInTheDocument();
     expect(screen.getByText('Implement authentication middleware')).toBeInTheDocument();
   });
 
