@@ -104,19 +104,17 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
           </span>
           <Button
             variant="secondary"
-            size="small"
+            size="sm"
             onClick={() => setShowFilters(!showFilters)}
-            icon={<Filter size={14} />}
             className={cn(showFilters && "bg-[var(--bg-selected)] text-[var(--brand-primary)] border-[var(--border-focus)]")}
           >
             Filters
           </Button>
         </div>
         <Button
-          variant="primary"
-          size="small"
+          variant="default"
+          size="sm"
           onClick={() => setShowAddDialog(true)}
-          icon={<Plus size={16} />}
         >
           Add Log
         </Button>
@@ -127,7 +125,7 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
         <div className="bg-[var(--bg-sunken)] border border-[var(--border-default)] rounded-[var(--radius-lg)] p-[var(--sp-5)] space-y-[var(--sp-4)] animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="flex items-center justify-between">
             <h4 className="text-[12px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">Active Filters</h4>
-            <Button variant="ghost" size="small" onClick={clearFilters} icon={<X size={14} />} className="text-[var(--status-blocked-text)] hover:text-[var(--status-blocked-text)]">
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="text-[var(--status-blocked-text)] hover:text-[var(--status-blocked-text)]">
               Clear All
             </Button>
           </div>
@@ -244,10 +242,10 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
         <div className="flex items-center justify-between pt-[var(--sp-4)] border-t border-[var(--border-default)]">
           <span className="text-[12px] text-[var(--text-tertiary)] font-medium">Page {currentPage} of {totalPages}</span>
           <div className="flex gap-[var(--sp-2)]">
-            <Button variant="secondary" size="small" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} icon={<ChevronLeft size={14} />}>
+            <Button variant="secondary" size="sm" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>
               Previous
             </Button>
-            <Button variant="secondary" size="small" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} iconRight={<ChevronRight size={14} />}>
+            <Button variant="secondary" size="sm" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>
               Next
             </Button>
           </div>
@@ -257,7 +255,7 @@ export function AgentLogs({ logs, tasks, onLogAdded }: AgentLogsProps) {
       {showAddDialog && (
         <AddLogDialog
           tasks={tasks}
-          isOpen={true}
+          open={true}
           onClose={() => setShowAddDialog(false)}
           onLogAdded={() => { setShowAddDialog(false); onLogAdded?.(); }}
         />

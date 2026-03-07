@@ -20,7 +20,7 @@ import {
 import { useState } from 'react';
 import { updateTaskStatus } from '@/lib/actions';
 import { CreateTaskDialog } from './create-task-dialog';
-import { TaskDetailModal } from './task-detail-modal';
+import { TaskDetailModal } from '@/components/features/kanban/task-detail-modal';
 import { cn } from '@/lib/utils';
 import { taskStatusColors } from '@/lib/ios-styles';
 
@@ -197,7 +197,7 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
       {
         selectedTask && (
           <TaskDetailModal
-            isOpen={true}
+            open={true}
             onClose={() => setSelectedTask(null)}
             task={selectedTask}
             onStatusChange={async (taskId, status) => {

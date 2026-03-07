@@ -10,7 +10,7 @@ interface CreateTaskDialogProps {
   plans: PlanSelect[];
   existingTasks: TaskSelect[];
   prefilledStatus?: string;
-  isOpen?: boolean;
+  open?: boolean;
   onClose?: () => void;
   onTaskCreated?: (task: TaskSelect) => void;
 }
@@ -54,12 +54,12 @@ export function CreateTaskDialog({
   plans,
   existingTasks,
   prefilledStatus = 'todo',
-  isOpen: controlledIsOpen,
+  open: controlledIsOpen,
   onClose,
   onTaskCreated,
 }: CreateTaskDialogProps) {
-  const [isOpenInternal, setIsOpenInternal] = useState(false);
-  const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : isOpenInternal;
+  const [openInternal, setIsOpenInternal] = useState(false);
+  const open = controlledIsOpen !== undefined ? controlledIsOpen : openInternal;
   const [isQuickMode, setIsQuickMode] = useState(false);
   const [formData, setFormData] = useState({
     planId: plans[0]?.id || 0,
@@ -173,7 +173,7 @@ export function CreateTaskDialog({
     onClose?.();
   };
 
-  if (!isOpen) {
+  if (!open) {
     return (
       <button
         className="w-full h-[32px] flex items-center justify-start gap-2 px-[8px] rounded-[var(--radius-md)] text-[12px] text-[var(--text-tertiary)] bg-transparent border-none cursor-pointer hover:bg-[var(--border-default)] hover:text-[var(--text-secondary)] transition-colors"
