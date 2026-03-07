@@ -1,17 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { Dialog } from '@/components/ui/dialog';
+import { CustomDialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 interface ArchiveProjectDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
+  open: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onClose?: () => void;
   onConfirm: () => void;
   projectName: string;
   isArchived: boolean;
 }
 export function ArchiveProjectDialog({
-  isOpen,
+  open,
   onClose,
   onConfirm,
   projectName,
@@ -25,9 +26,9 @@ export function ArchiveProjectDialog({
     : "This will archive the project and hide it from the dashboard. You can unarchive it later from settings.";
 
   return (
-    <Dialog
-      isOpen={isOpen}
-      onClose={onClose}
+    <CustomDialog
+      open={open}
+      onOpenChange={(o: boolean) => { if (!o && onClose) onClose(); }}
       title={title}
       showCloseButton={true}
       footer={
@@ -66,6 +67,6 @@ export function ArchiveProjectDialog({
           )}
         </div>
       </div>
-    </Dialog>
+    </CustomDialog>
   );
 }

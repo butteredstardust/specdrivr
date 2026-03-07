@@ -197,7 +197,7 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
       {
         selectedTask && (
           <TaskDetailModal
-            isOpen={true}
+            open={true}
             onClose={() => setSelectedTask(null)}
             task={selectedTask}
             onStatusChange={async (taskId, status) => {

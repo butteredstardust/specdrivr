@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Avatar } from './avatar';
+import { Avatar } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { LogOut } from 'lucide-react';
 
@@ -17,7 +17,7 @@ interface User {
 export function UserMenu() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isOpen, setIsOpen] = useState(false);
+  const [open, setIsOpen] = useState(false);
 
   useEffect(() => {
     fetchUser();
@@ -63,16 +63,16 @@ export function UserMenu() {
   return (
     <div className="relative">
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => setIsOpen(!open)}
         className={cn(
           'w-[32px] h-[32px] rounded-full flex items-center justify-center bg-[var(--bg-sunken)] hover:bg-[var(--bg-hovered)] border border-[var(--border-default)] text-[var(--text-secondary)] text-[12px] font-semibold transition-colors',
-          isOpen && 'bg-[var(--bg-hovered)]'
+          open && 'bg-[var(--bg-hovered)]'
         )}
       >
         <span className="uppercase">{user.username.charAt(0)}</span>
       </button>
 
-      {isOpen && (
+      {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
           <div

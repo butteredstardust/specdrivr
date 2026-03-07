@@ -1,7 +1,7 @@
 import { getProjects, getTasksDoneToday } from '@/lib/actions';
 import { DashboardSummaryCard } from '@/components/project-card';
 import { DashboardProjectList } from '@/components/dashboard-project-list';
-import { AppShell } from '@/components/app-shell';
+import { AppShell } from '@/components/layout/app-shell';
 import { Layout, Radio, CheckSquare } from 'lucide-react';
 
 export default async function Home() {
