@@ -168,7 +168,7 @@ export function ProjectSettingsClient({
                     </span>
                   )}
                 </div>
-                <Button variant="primary" onClick={handleSaveDetails} loading={isSavingDetails} icon={<Save size={14} />}>
+                <Button variant="default" onClick={handleSaveDetails} loading={isSavingDetails}>
                   Save Details
                 </Button>
               </div>
@@ -267,7 +267,7 @@ export function ProjectSettingsClient({
                     </span>
                   )}
                 </div>
-                <Button variant="secondary" onClick={handleSaveGitConfig} loading={isSavingGitConfig} icon={<Save size={14} />}>
+                <Button variant="secondary" onClick={handleSaveGitConfig} loading={isSavingGitConfig}>
                   Save Config
                 </Button>
               </div>
@@ -281,7 +281,7 @@ export function ProjectSettingsClient({
                 <Key size={12} className="!text-[#94A3B8]" />
                 <h2 className="text-[11px] font-[600] text-[var(--text-tertiary)] uppercase tracking-[0.08em]">Access Controls</h2>
               </div>
-              <Button variant="primary" size="small" onClick={() => setShowTokenDialog(true)} icon={<Plus size={16} />}>Generate Token</Button>
+              <Button variant="default" size="sm" onClick={() => setShowTokenDialog(true)}>Generate Token</Button>
             </div>
 
             <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] overflow-hidden">
@@ -331,7 +331,6 @@ export function ProjectSettingsClient({
                   variant={project.status === 'archived' ? 'secondary' : 'danger'}
                   onClick={() => setShowArchiveConfirm(true)}
                   loading={isArchiving}
-                  icon={project.status === 'archived' ? <Archive size={14} /> : <AlertTriangle size={14} />}
                 >
                   {project.status === 'archived' ? 'Unarchive' : 'Archive'}
                 </Button>
@@ -342,7 +341,7 @@ export function ProjectSettingsClient({
       </div>
 
       <ArchiveProjectDialog
-        isOpen={showArchiveConfirm}
+        open={showArchiveConfirm}
         onClose={() => setShowArchiveConfirm(false)}
         onConfirm={handleArchive}
         projectName={project.name}
@@ -350,7 +349,7 @@ export function ProjectSettingsClient({
       />
 
       <GenerateTokenDialog
-        isOpen={showTokenDialog}
+        open={showTokenDialog}
         onClose={() => setShowTokenDialog(false)}
       />
     </div>

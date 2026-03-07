@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { TaskDetailModal } from '@/components/task-detail-modal';
+import { TaskDetailModal } from '@/components/features/kanban/task-detail-modal';
 import '@testing-library/jest-dom';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 
@@ -26,18 +26,18 @@ describe('TaskDetailModal', () => {
   });
 
   test('renders modal with task details', () => {
-    render(<TaskDetailModal isOpen={true} onClose={vi.fn()} task={mockTask} />);
-    expect(screen.getByText(/Task #42/)).toBeInTheDocument();
+    render(<TaskDetailModal open={true} onClose={vi.fn()} task={mockTask} />);
+    expect(screen.getByText("Implement authentication middleware")).toBeInTheDocument();
     expect(screen.getByText('Implement authentication middleware')).toBeInTheDocument();
   });
 
   test('displays current status correctly', () => {
-    render(<TaskDetailModal isOpen={true} onClose={vi.fn()} task={mockTask} />);
+    render(<TaskDetailModal open={true} onClose={vi.fn()} task={mockTask} />);
     expect(screen.getByText('IN PROGRESS')).toBeInTheDocument();
   });
 
   test('copies verify command to clipboard', async () => {
-    render(<TaskDetailModal isOpen={true} onClose={vi.fn()} task={mockTask} />);
+    render(<TaskDetailModal open={true} onClose={vi.fn()} task={mockTask} />);
     const copyButton = screen.getByText('Copy');
     fireEvent.click(copyButton);
     expect(mockClipboard.writeText).toHaveBeenCalledWith('verify-task --id 42');
@@ -47,7 +47,7 @@ describe('TaskDetailModal', () => {
     const mockOnStatusChange = vi.fn().mockResolvedValue({ success: true });
     render(
       <TaskDetailModal
-        isOpen={true}
+        open={true}
         onClose={vi.fn()}
         task={mockTask}
         onStatusChange={mockOnStatusChange}

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { type UserRole, userRoleColors, userRoleLabels } from '@/lib/ios-styles';
-import { Dialog } from '@/components/ui/dialog';
+import { CustomDialog, Dialog } from '@/components/ui/dialog';
 import { ConfirmDialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Plus, MoreHorizontal, User as UserIcon, Shield, Search, Pencil, Trash2 } from 'lucide-react';
@@ -128,7 +128,7 @@ export default function AdminUsersPage() {
           <h1 className="text-[20px] font-semibold text-[var(--text-primary)]">User Management</h1>
           <p className="text-[14px] text-[var(--text-secondary)] mt-1">Add users and manage their roles</p>
         </div>
-        <Button variant="primary" onClick={() => setShowCreateDialog(true)} icon={<Plus size={16} />}>
+        <Button variant="default" onClick={() => setShowCreateDialog(true)} icon={<Plus size={16} />}>
           Add User
         </Button>
       </div>
@@ -187,14 +187,14 @@ export default function AdminUsersPage() {
         </table>
       </div>
 
-      <Dialog
-        isOpen={showCreateDialog}
-        onClose={() => setShowCreateDialog(false)}
+      <CustomDialog
+        open={showCreateDialog}
+        onOpenChange={(o: boolean) => setShowCreateDialog(false)}
         title="Invite New User"
         footer={
           <>
             <Button variant="ghost" onClick={() => setShowCreateDialog(false)}>Cancel</Button>
-            <Button variant="primary" onClick={handleCreateUser} disabled={creatingUser || !newUsername || !newPassword}>Create User</Button>
+            <Button variant="default" onClick={handleCreateUser} disabled={creatingUser || !newUsername || !newPassword}>Create User</Button>
           </>
         }
       >
@@ -216,13 +216,13 @@ export default function AdminUsersPage() {
             </select>
           </div>
         </div>
-      </Dialog>
+      </CustomDialog>
 
-      <Dialog
-        isOpen={showRoleDialog}
-        onClose={() => setShowRoleDialog(false)}
+      <CustomDialog
+        open={showRoleDialog}
+        onOpenChange={(o: boolean) => setShowRoleDialog(false)}
         title="Update User Role"
-        footer={<Button variant="primary" onClick={handleRoleChange}>Save Changes</Button>}
+        footer={<Button variant="default" onClick={handleRoleChange}>Save Changes</Button>}
       >
         <div className="flex flex-col gap-[var(--sp-3)]">
           {(['viewer', 'developer', 'admin'] as UserRole[]).map(r => (
@@ -241,11 +241,11 @@ export default function AdminUsersPage() {
             </button>
           ))}
         </div>
-      </Dialog>
+      </CustomDialog>
 
       <ConfirmDialog
-        isOpen={showDeactivateDialog}
-        onClose={() => setShowDeactivateDialog(false)}
+        open={showDeactivateDialog}
+        onOpenChange={(o: boolean) => setShowDeactivateDialog(false)}
         onConfirm={handleToggleActive}
         title={selectedUser?.isActive ? "Deactivate User?" : "Activate User?"}
         message={`Are you sure you want to ${selectedUser?.isActive ? 'deactivate' : 'activate'} ${selectedUser?.username}?`}

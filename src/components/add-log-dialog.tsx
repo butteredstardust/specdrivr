@@ -8,7 +8,7 @@ import { Plus } from 'lucide-react';
 
 interface AddLogDialogProps {
   tasks: TaskSelect[];
-  isOpen?: boolean;
+  open?: boolean;
   onClose?: () => void;
   onLogAdded?: () => void;
   defaultTaskId?: number;
@@ -27,13 +27,13 @@ const levelColors: Record<LogLevel, { bg: string; text: string; border: string }
 
 export function AddLogDialog({
   tasks,
-  isOpen: controlledIsOpen,
+  open: controlledIsOpen,
   onClose,
   onLogAdded,
   defaultTaskId,
 }: AddLogDialogProps) {
-  const [isOpenInternal, setIsOpenInternal] = useState(false);
-  const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : isOpenInternal;
+  const [openInternal, setIsOpenInternal] = useState(false);
+  const open = controlledIsOpen !== undefined ? controlledIsOpen : openInternal;
 
   const [selectedTaskId, setSelectedTaskId] = useState(defaultTaskId || tasks[0]?.id || 0);
   const [level, setLevel] = useState<LogLevel>('info');
@@ -88,7 +88,7 @@ export function AddLogDialog({
   };
 
   // Trigger button
-  if (!isOpen) {
+  if (!open) {
     return (
       <button
         onClick={() => {

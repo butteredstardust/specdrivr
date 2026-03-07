@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { TaskSelect } from '@/db/schema';
-import { Dialog } from '@/components/ui/dialog';
+import { CustomDialog, Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/dialog';
 import { taskStatusColors, type TaskStatus } from '@/lib/ios-styles';
@@ -11,8 +11,9 @@ import { clsx } from 'clsx';
 import { FileText, Copy, Check } from 'lucide-react';
 
 interface TaskDetailModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  open: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onClose?: () => void;
   task: TaskSelect & {
     testResults?: any[];
     agentLogs?: any[];
@@ -24,7 +25,7 @@ interface TaskDetailModalProps {
 }
 
 export function TaskDetailModal({
-  isOpen,
+  open,
   onClose,
   task,
   onRetry,
@@ -54,7 +55,7 @@ export function TaskDetailModal({
     try {
       await onRetry(task.id);
       setShowRetryConfirm(false);
-      onClose();
+      onClose?.();
     } finally {
       setIsSubmitting(false);
     }
@@ -66,7 +67,7 @@ export function TaskDetailModal({
     try {
       await onSkip(task.id);
       setShowSkipConfirm(false);
-      onClose();
+      onClose?.();
     } finally {
       setIsSubmitting(false);
     }
@@ -92,12 +93,12 @@ export function TaskDetailModal({
 
   return (
     <>
-      <Dialog
+      <CustomDialog
         data-testid="task-detail-modal"
-        isOpen={isOpen}
-        onClose={onClose}
+        open={open}
+        onOpenChange={(o: boolean) => { if (!o && onClose) onClose?.(); }}
         title={`Task #${task.id}`}
-        size="large"
+        size="lg"
         footer={
           <div className="flex items-center justify-between flex-wrap gap-[var(--sp-3)]">
             <div className="text-[var(--font-size-sm)] text-[var(--text-secondary)]">
@@ -258,7 +259,7 @@ export function TaskDetailModal({
               </code>
               <Button
                 variant="secondary"
-                size="small"
+                size="sm"
                 onClick={handleCopyVerifyCommand}
                 icon={copied ? <Check size={14} /> : <Copy size={14} />}
               >
@@ -364,28 +365,28 @@ export function TaskDetailModal({
             )}
           </div>
         </div>
-      </Dialog>
+      </CustomDialog>
 
       {/* Retry Confirmation */}
       <ConfirmDialog
-        isOpen={showRetryConfirm}
-        onClose={() => setShowRetryConfirm(false)}
+        open={showRetryConfirm}
+        onOpenChange={() => setShowRetryConfirm(false)}
         onConfirm={handleRetry}
         title="Retry Task"
         message="This will reset the task status to 'todo' and increment the retry counter. The agent will attempt this task again."
         confirmText="Retry"
-        variant="primary"
+        variant="default"
       />
 
       {/* Skip Confirmation */}
       <ConfirmDialog
-        isOpen={showSkipConfirm}
-        onClose={() => setShowSkipConfirm(false)}
+        open={showSkipConfirm}
+        onOpenChange={() => setShowSkipConfirm(false)}
         onConfirm={handleSkip}
         title="Skip Task"
         message="This will mark the task as done without execution. Use this only if you're certain the task can be safely skipped."
         confirmText="Skip"
-        variant="danger"
+        variant="destructive"
       />
     </>
   );

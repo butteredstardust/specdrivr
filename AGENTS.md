@@ -2,7 +2,7 @@
 
 ## Architecture & Core Tech Stack
 
-- **Framework:** Next.js 14 (App Router)
+- **Framework:** Next.js 15 (App Router)
 - **Language:** TypeScript (strict mode)
 - **Database:** PostgreSQL (Central State Machine + Persistent Memory)
 - **ORM:** Drizzle ORM
