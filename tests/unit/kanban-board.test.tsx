@@ -51,8 +51,8 @@ describe('KanbanBoard', () => {
 
     render(<KanbanBoard tasks={tasks} />);
 
-    const todoCount = await screen.findByTestId('count-todo');
-    const inProgressCount = await screen.findByTestId('count-in_progress');
+    const todoCount = (await screen.findAllByTestId('column-count'))[0];
+    const inProgressCount = (await screen.findAllByTestId('column-count'))[1];
 
     expect(todoCount.textContent).toBe('2');
     expect(inProgressCount.textContent).toBe('1');
