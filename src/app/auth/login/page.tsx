@@ -69,7 +69,7 @@ export default function LoginPage() {
               </label>
               <div className="relative">
                 <input
-                  id="username"
+                  id="username" name="username" autoFocus
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
@@ -87,7 +87,7 @@ export default function LoginPage() {
               </label>
               <div className="relative">
                 <input
-                  id="password"
+                  id="password" name="password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
