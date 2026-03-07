@@ -317,7 +317,7 @@ test.test.describe('Task Management', () => {
       const initialStatus = await statusElement.textContent();
 
       // Click change status button
-      await modal.locator('[data-testid="change-status-button"]').click();
+      // change status is a list of buttons in modal, not a dropdown that needs clicking first
 
       // Select new status
       await modal.locator('[data-testid="status-option-done"]').click();
@@ -356,7 +356,7 @@ test.test.describe('Task Management', () => {
 
       if (count > 0) {
         const hasNonHighPriority = await page.evaluate(() => {
-          const cards = document.querySelectorAll('[data-testid="task-card"]:visible [data-testid="priority-indicator"]');
+          const cards = document.querySelectorAll('[data-testid="task-card"] [data-testid="priority-indicator"]');
           for (const card of cards) {
             if (!card.classList.contains('border-red-500')) {
               return true;
