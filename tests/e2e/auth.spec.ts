@@ -1,6 +1,6 @@
 import { test, expect } from '../mocks/fixture';
 
-test.test.describe('Authentication Flow', () => {
+test.describe('Authentication Flow', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/auth/login');
   });
@@ -63,7 +63,7 @@ test.test.describe('Authentication Flow', () => {
   });
 });
 
-test.test.describe('Session Management', () => {
+test.describe('Session Management', () => {
   test('Session persists after refresh', async ({ page }) => {
     await page.goto('/auth/login');
     await page.fill('#username', 'Admin');
@@ -91,7 +91,7 @@ test.test.describe('Session Management', () => {
   });
 });
 
-test.test.describe('Protected Routes', () => {
+test.describe('Protected Routes', () => {
   test('Unauthenticated user is redirected to login', async ({ page }) => {
     await page.goto('/');
     await expect(page).toHaveURL(/\/auth\/login/);
