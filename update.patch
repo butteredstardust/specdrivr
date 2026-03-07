@@ -1,0 +1,52 @@
+--- src/components/dashboard-project-list.tsx
++++ src/components/dashboard-project-list.tsx
+@@ -21,17 +21,17 @@
+         <>
+             <style>{`
+                 .dashboard-search-input {
+-                    background: #FFFFFF;
+-                    border: 1px solid #DFE1E6;
++                    background: var(--bg-surface);
++                    border: 1px solid var(--border-default);
+                     border-radius: 6px;
+                     height: 32px;
+                     padding: 0 12px 0 32px;
+-                    margin-bottom: 8px;
+                     width: 100%;
+                     font-size: 13px;
+-                    color: #172B4D;
++                    color: var(--text-primary);
+                     outline: none;
+                     transition: all 0.2s ease;
++                    margin-bottom: 8px;
+                 }
+-                .dashboard-search-input::placeholder {
+-                    color: #8590A2;
++                .dashboard-search-input::placeholder {
++                    color: var(--text-tertiary);
+                 }
+                 .dashboard-search-input:focus {
+-                    border-color: #2563EB;
+-                    box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
++                    border-color: var(--brand-primary);
++                    box-shadow: 0 0 0 2px var(--brand-subtle);
+                 }
+             `}</style>
+@@ -42,3 +42,3 @@
+
+-            <div className="relative">
+-                <div className="absolute inset-y-0 flex items-center pointer-events-none" style={{ left: '10px', top: '-8px' }}>
++            <div className="relative" style={{ marginBottom: '8px' }}>
++                <div className="absolute inset-y-0 flex items-center pointer-events-none" style={{ left: '10px' }}>
+                     <Search size={14} className="text-[var(--text-tertiary)]" />
+                 </div>
+                 <input
+                     type="search"
+                     placeholder="Search projects..."
+                     value={searchQuery}
+                     onChange={(e) => setSearchQuery(e.target.value)}
+-                    className="dashboard-search-input"
++                    className="dashboard-search-input"
++                    style={{ marginBottom: 0 }}
+                 />
+             </div>

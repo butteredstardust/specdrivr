@@ -1,0 +1,31 @@
+--- src/components/dashboard-project-list.tsx
++++ src/components/dashboard-project-list.tsx
+@@ -23,19 +23,19 @@
+             <style>{`
+                 .dashboard-search-input {
+-                    background: #FFFFFF;
+-                    border: 1px solid #DFE1E6;
++                    background: var(--bg-surface);
++                    border: 1px solid var(--border-default);
+                     border-radius: 6px;
+                     height: 32px;
+                     padding: 0 12px 0 32px;
+-                    margin-bottom: 8px;
+                     width: 100%;
+                     font-size: 13px;
+-                    color: #172B4D;
++                    color: var(--text-primary);
+                     outline: none;
+                     transition: all 0.2s ease;
+                 }
+                 .dashboard-search-input::placeholder {
+-                    color: #8590A2;
++                    color: var(--text-tertiary);
+                 }
+                 .dashboard-search-input:focus {
+-                    border-color: #2563EB;
+-                    box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
++                    border-color: var(--brand-primary);
++                    box-shadow: 0 0 0 2px var(--brand-subtle);
+                 }
+             `}</style>
