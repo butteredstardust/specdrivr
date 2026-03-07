@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.test.describe('Git Webhooks E2E', () => {
+test.describe('Git Webhooks E2E', () => {
     test('should process a valid git webhook and create a commit record', async ({ request }) => {
         // Ideally we would set up a user and project here or use a known seed project.
         // For this e2e test, we will attempt to ping the webhook without auth and expect 401,
