@@ -29,7 +29,7 @@ export function ProjectSidebarWrapper({ projects, currentProjectId }: ProjectSid
 
   return (
     <aside
-      className={`shrink-0 bg-[var(--bg-surface)] border-r border-[var(--border-default)] overflow-y-auto min-h-[100vh] transition-[width] duration-200 ease-in-out ${isCollapsed ? 'w-[64px]' : 'w-[240px]'}`}
+      className={`shrink-0 bg-[var(--bg-surface)] border-r border-[var(--border-default)] overflow-y-auto min-h-[calc(100vh-56px)] transition-[width] duration-200 ease-in-out ${isCollapsed ? 'w-[64px]' : 'w-[240px]'}`}
     >
       <ProjectSidebar
         projects={projects}

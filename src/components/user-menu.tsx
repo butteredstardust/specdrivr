@@ -76,7 +76,7 @@ export function UserMenu() {
         <>
           <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
           <div
-            className="absolute right-0 origin-top-right top-[calc(100%+var(--sp-2))] w-56 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-overlay)] z-20 overflow-hidden animate-in fade-in zoom-in-95 duration-100"
+            className="absolute right-0 left-auto origin-top-right top-[calc(100%+var(--sp-2))] w-56 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-lg)] shadow-[var(--shadow-overlay)] z-20 overflow-hidden animate-in fade-in zoom-in-95 duration-100"
           >
             <div className="px-[var(--sp-4)] py-[var(--sp-3)] border-b border-[var(--border-default)]">
               <div className="text-[14px] font-semibold text-[var(--text-primary)]">
