@@ -93,6 +93,7 @@ export function TaskDetailModal({
   return (
     <>
       <Dialog
+        data-testid="task-detail-modal"
         isOpen={isOpen}
         onClose={onClose}
         title={`Task #${task.id}`}
@@ -123,7 +124,7 @@ export function TaskDetailModal({
                   Skip
                 </Button>
               )}
-              <Button onClick={onClose} data-testid="task-close-button">Close</Button>
+              <Button onClick={onClose} data-testid="modal-close">Close</Button>
             </div>
           </div>
         }
@@ -166,7 +167,7 @@ export function TaskDetailModal({
           {/* Description */}
           <div>
             <span className={sectionLabel}>Description</span>
-            <p className="text-[var(--font-size-sm)] text-[var(--text-primary)]">
+            <p data-testid="task-description" className="text-[var(--font-size-sm)] text-[var(--text-primary)]">
               {task.description || 'No description provided.'}
             </p>
           </div>
@@ -188,7 +189,7 @@ export function TaskDetailModal({
                   />
                 ))}
               </div>
-              <span className="text-[var(--font-size-sm)] font-medium text-[var(--text-primary)]">
+              <span data-testid="task-priority" className="text-[var(--font-size-sm)] font-medium text-[var(--text-primary)]">
                 P{task.priority}
               </span>
             </div>
@@ -198,13 +199,13 @@ export function TaskDetailModal({
           {onStatusChange && (
             <div>
               <span className={sectionLabel}>Change Status</span>
-              <div className="flex flex-wrap gap-[var(--sp-2)]">
+              <div data-testid="change-status-button" className="flex flex-wrap gap-[var(--sp-2)]">
                 {(Object.keys(taskStatusColors) as TaskStatus[]).map((status) => (
                   <button
                     key={status}
                     onClick={() => handleStatusChange(status)}
                     disabled={status === task.status || isSubmitting}
-                    data-testid={`task-status-${status}`}
+                    data-testid={`status-option-${status}`.toLowerCase()}
                     className={clsx(
                       'px-[var(--sp-3)] py-[6px] rounded-[var(--radius-sm)] text-[var(--font-size-xs)] font-bold border transition-colors',
                       status === task.status

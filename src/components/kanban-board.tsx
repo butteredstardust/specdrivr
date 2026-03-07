@@ -141,7 +141,7 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
                   )}>
                     {column.title}
                   </span>
-                  <span data-testid={`count-${column.id}`} className="bg-[var(--bg-sunken)] px-[var(--sp-2)] py-0.5 rounded-full text-[11px] font-bold text-[var(--text-secondary)] ml-1">
+                  <span data-testid="column-count" className="bg-[var(--bg-sunken)] px-[var(--sp-2)] py-0.5 rounded-full text-[11px] font-bold text-[var(--text-secondary)] ml-1">
                     {columnTasks.length}
                   </span>
                 </div>
