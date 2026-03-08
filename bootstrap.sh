@@ -56,8 +56,15 @@ if [ ! -f ".env.local" ]; then
   fi
 fi
 
-# Update DATABASE_URL in .env.local
-sed -i "s|DATABASE_URL=.*|DATABASE_URL=postgresql://specdrivr:specdrivr@localhost:5432/specdrivr|g" .env.local
+# DATABASE_URL already correct in .env.example, no need to update
+
+# Push database schema
+echo "Applying database schema..."
+npm run db:push
+
+# Optional: Seed demo data
+echo "Seeding demo data..."
+npm run db:seed || echo "Seed failed or not configured"
 
 # Build the project
 echo "Building project..."
