@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import Link from 'next/link';
 import { ShieldOff } from 'lucide-react';
+
+export const metadata: Metadata = { title: 'Specdrivr', robots: 'noindex' };
 
 export default function ForbiddenPage() {
   return (

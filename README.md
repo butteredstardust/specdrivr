@@ -57,7 +57,7 @@ Get your local environment running in under 5 minutes.
 
 1. **Clone & Install**
    ```bash
-   git clone https://github.com/your-org/specdrivr.git
+   git clone https://github.com/butteredstardust/specdrivr.git
    cd specdrivr
    npm install
    ```

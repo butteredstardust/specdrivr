@@ -1,8 +1,11 @@
+import type { Metadata } from "next";
 import { getProjects, getTasksDoneToday } from '@/lib/actions';
 import { DashboardSummaryCard } from '@/components/project-card';
 import { DashboardProjectList } from '@/components/dashboard-project-list';
 import { AppShell } from '@/components/layout/app-shell';
 import { Layout, Radio, CheckSquare } from 'lucide-react';
+
+export const metadata: Metadata = { title: 'Specdrivr', robots: 'noindex' };
 
 export default async function Home() {
   const result = await getProjects();

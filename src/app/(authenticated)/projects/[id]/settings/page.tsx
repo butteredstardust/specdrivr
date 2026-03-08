@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getProjects, getProjectById } from '@/lib/actions';
 import { ProjectSettingsClient } from './client-page';
 import { notFound } from 'next/navigation';
@@ -5,6 +6,8 @@ import { notFound } from 'next/navigation';
 interface SettingsPageProps {
   params: Promise<{ id: string }>;
 }
+
+export const metadata: Metadata = { title: 'Specdrivr', robots: 'noindex' };
 
 export default async function SettingsPage({ params }: SettingsPageProps) {
   const { id } = await params;

@@ -75,7 +75,7 @@ export async function updateTaskStatus(taskId: number, status: string) {
     const [updatedTask] = await db
       .update(tasks)
       .set({
-        status: status as any,
+        status: status as 'todo' | 'in_progress' | 'done' | 'blocked' | 'paused' | 'skipped',
         updatedAt: new Date(),
       })
       .where(eq(tasks.id, taskId))

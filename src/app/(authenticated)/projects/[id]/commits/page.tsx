@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getProjects, getProjectById, getProjectCommits } from '@/lib/actions';
 import { ProjectCommitsClient } from './client-page';
 import { notFound } from 'next/navigation';
@@ -5,6 +6,8 @@ import { notFound } from 'next/navigation';
 interface CommitsPageProps {
   params: Promise<{ id: string }>;
 }
+
+export const metadata: Metadata = { title: 'Specdrivr', robots: 'noindex' };
 
 export default async function CommitsPage({ params }: CommitsPageProps) {
   const { id } = await params;
