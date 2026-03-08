@@ -63,7 +63,7 @@ export function TestResultsPanel({ testResults }: TestResultsPanelProps) {
             {result.logs && (
               <details className="group">
                 <summary className="cursor-pointer text-[12px] font-bold text-[var(--brand-primary)] hover:underline list-none flex items-center gap-1">
-                  <List size={14} className="group-open:rotate-180 transition-transform" />
+                  <List size={14} className="group-open:rotate-180 transition-[transform,translate,scale,rotate,opacity]" />
                   View Execution Logs
                 </summary>
                 <div className="mt-[var(--sp-3)] rounded-[var(--radius-sm)] overflow-hidden border border-[var(--border-default)] shadow-sm">

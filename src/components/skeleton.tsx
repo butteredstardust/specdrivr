@@ -24,7 +24,7 @@ export function CardSkeleton({ className }: { className?: string }) {
   return (
     <div className={cn('bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-sm)] p-4', className)}>
       <div className="flex gap-4">
-        <Skeleton className="w-10 h-10 rounded-full flex-shrink-0" />
+        <Skeleton className="w-10 h-10 rounded-full shrink-0" />
         <div className="flex-1 space-y-2">
           <Skeleton className="h-4 w-3/4" />
           <Skeleton className="h-3 w-1/2" />
@@ -89,7 +89,7 @@ export function TaskCardSkeleton() {
     <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-sm)] p-4">
       <div className="space-y-3">
         <div className="flex items-start gap-3">
-          <Skeleton className="w-10 h-10 rounded-lg flex-shrink-0" />
+          <Skeleton className="w-10 h-10 rounded-lg shrink-0" />
           <div className="flex-1 space-y-2">
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-3 w-2/3" />
@@ -113,7 +113,7 @@ export function LogSkeleton({ count = 3 }: { count?: number }) {
       {Array.from({ length: count }).map((_, i) => (
         <div key={i} className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-sm)] p-3">
           <div className="flex items-start gap-3">
-            <Skeleton className="w-8 h-8 rounded-full flex-shrink-0" />
+            <Skeleton className="w-8 h-8 rounded-full shrink-0" />
             <div className="flex-1 space-y-2">
               <Skeleton className="h-4 w-3/4" />
               <div className="flex gap-2">
@@ -134,7 +134,7 @@ export function LogSkeleton({ count = 3 }: { count?: number }) {
 export function ProjectItemSkeleton() {
   return (
     <div className="flex items-center gap-3 p-3 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-sm)] mb-2">
-      <Skeleton className="w-10 h-10 rounded-lg flex-shrink-0" />
+      <Skeleton className="w-10 h-10 rounded-lg shrink-0" />
       <div className="flex-1 space-y-2">
         <Skeleton className="h-4 w-40" />
         <Skeleton className="h-3 w-24" />

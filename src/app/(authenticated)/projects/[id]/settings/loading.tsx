@@ -15,7 +15,7 @@ export default function SettingsLoading() {
       </header>
 
       <div className="flex h-[calc(100vh-57px)]">
-        <aside className="w-[240px] flex-shrink-0 border-r border-[var(--border-default)] bg-[var(--bg-surface)] overflow-y-auto p-[var(--sp-4)]">
+        <aside className="w-[240px] shrink-0 border-r border-[var(--border-default)] bg-[var(--bg-surface)] overflow-y-auto p-[var(--sp-4)]">
           <Skeleton className="h-8 w-32 mb-[var(--sp-4)]" />
           <div className="space-y-[var(--sp-2)]">
             {Array.from({ length: 3 }).map((_, i) => (
