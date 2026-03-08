@@ -7,6 +7,9 @@ on:
 
 env:
   DATABASE_URL: postgresql://postgres:postgres@localhost:5432/specdrivr_test
+  NEXTAUTH_URL: http://localhost:3000
+  NEXTAUTH_SECRET: test-secret-for-ci
+  BETTER_AUTH_SECRET: test-secret-for-ci
 
 jobs:
   test:
