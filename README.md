@@ -4,6 +4,24 @@ Simple AI-native orchestration platform demo.
 
 ## Setup
 
+### Prerequisites
+
+- Node.js v25.6.1 (use .nvmrc with nvm)
+- npm v10.2.4 or higher
+- PostgreSQL 16
+
+### Node Version Management
+
+We use [nvm](https://github.com/nvm-sh/nvm) to manage Node versions.
+
+After installing nvm:
+```bash
+nvm use  # Uses version from .nvmrc
+npm install
+```
+
+### Steps
+
 1. Install dependencies:
    ```bash
    npm install

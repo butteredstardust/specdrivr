@@ -121,11 +121,18 @@ Clarify:
 ## Project Architecture
 
 ### Tech Stack
+- **Runtime:** Node.js v25.6.1 (managed with .nvmrc)
 - **Framework:** Next.js 16 App Router
 - **Language:** TypeScript (strict mode)
 - **Styling:** Tailwind CSS 4 with shadcn/ui
 - **Database:** PostgreSQL with Drizzle ORM
 - **Testing:** Vitest + Playwright
+
+### Node Version Management
+We use `.nvmrc` to specify the Node.js version. Always use:
+```bash
+nvm use  # Auto-switches to correct version
+```
 
 ### Design Patterns
 - **Repository Pattern:** All DB access through repositories
