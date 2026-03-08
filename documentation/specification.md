@@ -92,7 +92,7 @@ Software specifications should be executable. The gap between "what we want to b
 | Language           | TypeScript 5.x (strict mode)                      | Type safety across all layers; Drizzle types flow end-to-end              |
 | Database           | PostgreSQL 16                                     | ACID transactions; JSONB for log lines and metadata                       |
 | ORM                | Drizzle ORM + drizzle-kit                         | Type-safe queries; schema-first migrations; no code generation            |
-| Auth               | NextAuth.js v5 (Auth.js)                          | Credentials + OAuth; session in httpOnly cookie; CSRF protection built-in |
+| Auth               | BetterAuth v5 (Auth.js)                           | Credentials + OAuth; session in httpOnly cookie; CSRF protection built-in |
 | Cache / Queues     | Redis (Upstash)                                   | Session store; rate limiting; agent task queue; pub/sub for live events   |
 | File storage       | S3-compatible (AWS or self-hosted MinIO)          | Spec attachments; diff snapshots for long sessions                        |
 | Email              | Resend                                            | Transactional email for invites, notifications, password reset            |
@@ -670,7 +670,7 @@ Authentication: Pass the session cookie (browser clients) or Authorization: Bear
 
 ## **7.1 Auth System**
 
-- Authentication provider: NextAuth.js v5 (Auth.js) with Credentials provider.
+- Authentication provider: BetterAuth v5 (Auth.js) with Credentials provider.
 - Session storage: Redis, key = session:{sessionToken}. TTL = 30 days, refreshed on each request.
 - Passwords: bcrypt, cost factor 12. Never stored in plain text. Never logged.
 - Password reset: time-limited token (UUID, 1 hour TTL) stored in Redis key reset:{token}. Always returns HTTP 200 regardless of whether email exists.
@@ -1278,7 +1278,7 @@ DAEMON error expression (large, centred) + "404 - Not found." + "This page doesn
 
 - All input validated with Zod at the API boundary. No raw SQL string interpolation - parameterised queries only (Drizzle ORM enforces this).
 - Rate limiting: Upstash Ratelimit in proxy.ts. Auth endpoints: 10 req/min per IP. API endpoints: 100 req/min per user. Agent endpoints: 1000 req/min per token.
-- CSRF protection: NextAuth.js handles for session-based requests. API token requests are exempt (no cookies involved).
+- CSRF protection: BetterAuth handles for session-based requests. API token requests are exempt (no cookies involved).
 - Secrets: never stored in database. Never logged. Never returned in API responses (except one-time token reveal). AGENT_TOKEN visible only in infrastructure environment variables.
 - import 'server-only' on lib/db.ts, lib/env.ts, lib/logger.ts - build-time enforcement of server boundary.
 - Audit log: all administrative actions are written to audit_log within the same DB transaction as the action. Cannot be suppressed.
