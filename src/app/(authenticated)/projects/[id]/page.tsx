@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getProjects, getProjectById, getProjectSpecs, getProjectTestResults, getProjectAgentLogs } from '@/lib/actions';
 import { ProjectDetailClient } from './client-page';
 import { notFound } from 'next/navigation';
@@ -8,6 +9,8 @@ import { eq } from 'drizzle-orm';
 interface ProjectDetailPageProps {
   params: Promise<{ id: string }>;
 }
+
+export const metadata: Metadata = { title: 'Specdrivr', robots: 'noindex' };
 
 export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const { id } = await params;

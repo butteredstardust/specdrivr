@@ -85,7 +85,7 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
     const activeTask = tasksState.find((t) => t.id === active.id);
     if (!activeTask) return;
     const newStatus = over.id as string;
-    if (validStatuses.includes(newStatus as any) && activeTask.status !== over.id) {
+    if (validStatuses.includes(newStatus as TaskStatus) && activeTask.status !== over.id) {
       setTasksState((prev) =>
         prev.map((t) => t.id === active.id ? { ...t, status: newStatus as TaskSelect['status'] } : t)
       );
@@ -99,7 +99,7 @@ export function KanbanBoard({ projectId, plans = [], tasks, onTaskClick }: Kanba
     const activeTask = tasksState.find((t) => t.id === active.id);
     if (!activeTask) return;
     const newStatus = over.id as string;
-    if (validStatuses.includes(newStatus as any) && activeTask.status !== over.id) {
+    if (validStatuses.includes(newStatus as TaskStatus) && activeTask.status !== over.id) {
       try {
         const taskId = typeof active.id === 'number' ? active.id : parseInt(active.id as string, 10);
         const result = await updateTaskStatus(taskId, newStatus);

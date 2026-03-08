@@ -98,7 +98,7 @@ export async function PATCH(
 
       const [updatedProject] = await db
         .update(projects)
-        .set(updateData as any)
+        .set(updateData as Record<string, unknown>)
         .where(eq(projects.id, projectId))
         .returning();
 

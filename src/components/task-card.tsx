@@ -96,7 +96,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
         )}
 
         <div data-testid="retry-count" className="hidden">
-            {(task as any).retries || 0}
+            {'retries' in task ? Number(task.retries) : 0}
         </div>
 
         <div className="flex items-center justify-between mt-auto">

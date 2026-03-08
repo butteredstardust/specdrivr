@@ -93,3 +93,9 @@ Thumbs.db
 
 # Claude system files
 .claude/
+
+# Cleanup scripts
+knip-baseline.json
+audit-report.json
+cleanup-notes.md
+migration-notes.md

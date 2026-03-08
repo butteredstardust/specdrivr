@@ -84,7 +84,7 @@ export function ProjectSidebar({
       <div className={cn("space-y-0.5 mb-[var(--sp-4)] flex-1 overflow-y-auto", isCollapsed ? "px-0" : "px-[var(--sp-2)]")}>
         {projects.map((project) => {
           const isActive = pathname.startsWith(`/projects/${project.id}`) || activeId === project.id;
-          const agentStatus = (project as any).agentStatus || 'idle';
+          const agentStatus = project.agentStatus || 'idle';
 
           const statusColors: Record<string, string> = {
             running: 'bg-[#4ADE80]',
