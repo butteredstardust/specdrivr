@@ -176,7 +176,6 @@ export function CustomDialog({
   onOpenChange,
   title,
   size = 'md',
-  showCloseButton = true,
   children,
   footer
 }: CustomDialogProps) {

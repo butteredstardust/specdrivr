@@ -7,7 +7,7 @@ interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
-    ({ children, className, intensity = 'medium', ...props }, ref) => {
+    ({ children, className, ...props }, ref) => {
         return (
             <div
                 ref={ref}
