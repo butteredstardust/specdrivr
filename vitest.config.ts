@@ -12,7 +12,7 @@ export default defineConfig({
             '@': path.resolve(__dirname, './src'),
             'next/server': 'next/dist/server/web/exports/index.js'
         },
-        include: ['tests/unit/**/*.{test,spec}.{ts,tsx}'],
+        include: ['tests/unit/**/*.test.{ts,tsx}'],
         exclude: ['**/node_modules/**', '**/dist/**'],
     },
 });
