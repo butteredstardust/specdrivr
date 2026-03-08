@@ -161,7 +161,7 @@ export function DashboardSummaryCard({
           color: '#172B4D'
         }}
       >
-        {React.cloneElement(icon as React.ReactElement, { size: 20 })}
+        {React.cloneElement(icon as React.ReactElement<{ size?: number }>, { size: 20 })}
       </div>
       <p style={{ fontSize: '28px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1 }}>
         {value}

@@ -1,3 +1,24 @@
+## Overview
+Migrated the application from Next.js 15 to Next.js 16 to leverage the latest framework capabilities, including the stabilization of Turbopack and updated API interfaces. This PR includes resolution for breaking changes like synchronous request APIs and updates the project's dependency matrix accordingly.
+
+### Package versions before and after
+- `next`: `15.5.12` → `16.1.6`
+- `react`: `19.0.0` → `19.2.4`
+- `react-dom`: `19.0.0` → `19.2.4`
+- `typescript`: `5.4.0` → `5.9.3`
+
+### Summary of changes
+- **Async API Enforcement**: Updated all sync params references to awaited Promise-based ones.
+- **proxy.ts**: Renamed `middleware.ts` to `proxy.ts` and set up the exported `proxy` function to run in the Node.js runtime.
+- **Turbopack**: Ensured Turbopack is the default bundler; no overrides were necessary.
+- **next lint removal**: Updated lint execution to use `eslint` directly and transitioned to `eslint.config.mjs` with Flat Config utilizing ESLint 9.
+- **Image Defaults**: Verified `next/image` layout rendering behaviors; no manual dimension injection was necessary.
+- **Config Cleanup**: Transferred `.js` configurations to `.mjs` as appropriate.
+
+---
+
+### Migration Notes:
+```markdown
 # Next.js 14 to 15 Migration Notes
 
 ## Overview
@@ -40,9 +61,6 @@ This project has been successfully migrated from Next.js 14 to Next.js 15, addre
 - **Config:** `next.config.js` contained no deprecated experimental flags.
 - **React 19:** No deprecated `ReactDOM.render` or `ReactDOM.hydrate` APIs existed.
 
-## Pre-existing Issues
-- E2E Tests: The command `npm run test:e2e` fails before executing tests with a module resolution error: `Error: Cannot find module '../utils/test-helpers'`. The directory `tests/utils/` does not exist in the repository, making the E2E tests non-functional. This is unrelated to the Next.js 15 migration and was left as-is.
-
 # Next.js 15 to 16 Migration Notes
 
 ## Packages Upgraded
@@ -70,7 +88,7 @@ This project has been successfully migrated from Next.js 14 to Next.js 15, addre
 
 ### ESLint updates
 - Removed `next lint` and replaced the `lint` script in `package.json` with direct `eslint` execution `eslint . --ext .ts,.tsx,.js,.jsx`.
-- Set eslint version to `^8.57.1` as ESLint 9 is not fully supported by `next/core-web-vitals` yet. Configured with a `.eslintrc.json` using `@typescript-eslint` bypass rules matching previous configuration semantics.
+- Set eslint version to `^9.39.4`. Configured with `eslint.config.mjs` using `@typescript-eslint` bypass rules matching previous configuration semantics and `@next/eslint-plugin-next` to bypass flat-compat circular dependency bugs in Next's core-vitals.
 
 ### Turbopack & Image Defaults
 - No custom Turbopack configuration flags were required, it runs implicitly by default.
@@ -83,3 +101,4 @@ This project has been successfully migrated from Next.js 14 to Next.js 15, addre
 - `npm run test:e2e`: FAILING — missing module '../utils/test-helpers'
 - Confirmed pre-existing: not caused by this migration
 - Action required: separate ticket for test infrastructure fix
+```
