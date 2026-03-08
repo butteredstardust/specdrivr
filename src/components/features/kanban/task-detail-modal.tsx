@@ -228,7 +228,7 @@ export function TaskDetailModal({
               <div className={clsx(infoBox, 'space-y-[var(--sp-1)]')}>
                 {filesInvolved.map((file, index) => (
                   <div key={index} className="flex items-center gap-[var(--sp-2)] text-[var(--font-size-xs)]">
-                    <FileText size={14} className="text-[var(--text-tertiary)] flex-shrink-0" />
+                    <FileText size={14} className="text-[var(--text-tertiary)] shrink-0" />
                     <code className="text-[var(--text-primary)]">{file}</code>
                   </div>
                 ))}
@@ -320,13 +320,13 @@ export function TaskDetailModal({
               <div className={clsx(infoBox, 'max-h-[192px] overflow-y-auto')}>
                 {task.agentLogs.map((log, index) => (
                   <div key={index} className="flex items-start gap-[var(--sp-3)] py-[var(--sp-1)] border-b border-[var(--border-default)] last:border-0">
-                    <span className="text-[var(--font-size-xs)] text-[var(--text-tertiary)] font-mono flex-shrink-0 w-[48px]">
+                    <span className="text-[var(--font-size-xs)] text-[var(--text-tertiary)] font-mono shrink-0 w-[48px]">
                       {log.level.toUpperCase()}
                     </span>
                     <span className="text-[var(--font-size-xs)] text-[var(--text-primary)] flex-1">
                       {log.message}
                     </span>
-                    <span className="text-[var(--font-size-xs)] text-[var(--text-tertiary)] flex-shrink-0">
+                    <span className="text-[var(--font-size-xs)] text-[var(--text-tertiary)] shrink-0">
                       {formatDateTime(log.timestamp)}
                     </span>
                   </div>

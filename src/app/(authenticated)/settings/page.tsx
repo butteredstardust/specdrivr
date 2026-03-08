@@ -147,7 +147,7 @@ export default async function SettingsPage({ }: SettingsPageProps) {
 
                 }}
               >
-                <div className="flex-shrink-0 w-[32px] h-[32px] rounded-[var(--radius-sm)] bg-[var(--bg-hovered)] flex items-center justify-center text-[var(--text-tertiary)]" >
+                <div className="shrink-0 w-[32px] h-[32px] rounded-[var(--radius-sm)] bg-[var(--bg-hovered)] flex items-center justify-center text-[var(--text-tertiary)]" >
                   {item.icon}
                 </div>
 
