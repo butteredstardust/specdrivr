@@ -46,6 +46,7 @@ Open [http://localhost:3000](http://localhost:3000) to view the app.
 - [Development Best Practices](DEVELOPMENT.md) - Code standards, patterns, and conventions
 - [Agent Documentation](AGENTS.md) - How to use Claude Code agents
 - [CLAUDE.md](CLAUDE.md) - Claude-specific behavior guidelines
+- [Product Specification](documentation/README.md) - Complete product specification covering architecture, APIs, design system, and more
 
 ## Key Features
 
