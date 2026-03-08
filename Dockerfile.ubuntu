@@ -1,0 +1,30 @@
+FROM ubuntu:22.04
+
+# Install dependencies needed for bootstrap
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    build-essential \
+    ca-certificates \
+    sudo \
+    lsb-release \
+    postgresql \
+    postgresql-contrib \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set up a non-root user (more realistic testing)
+RUN useradd -m -s /bin/bash specdrivr && \
+    echo "specdrivr ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Switch to the specdrivr user
+USER specdrivr
+WORKDIR /home/specdrivr
+
+# Copy project files
+COPY --chown=specdrivr:specdrivr . .
+
+# Make bootstrap executable
+RUN chmod +x bootstrap.sh
+
+# Run the bootstrap script
+CMD ["./bootstrap.sh"]
