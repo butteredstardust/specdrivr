@@ -10,7 +10,7 @@ const fs = require('fs');
   await page.waitForTimeout(2000);
 
   try {
-    await page.fill('input[name="username"]', 'admin');
+    await page.fill('input[name="username"]', 'Admin');
     await page.fill('input[name="password"]', 'demo');
     await page.click('button[type="submit"]', { force: true });
 
@@ -20,13 +20,13 @@ const fs = require('fs');
     await page.waitForTimeout(2000);
 
     await page.evaluate(() => {
-        document.documentElement.removeAttribute('data-theme');
+      document.documentElement.removeAttribute('data-theme');
     });
     await page.waitForTimeout(2000);
     await page.screenshot({ path: 'screenshots/search-light.png' });
 
     await page.evaluate(() => {
-        document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
     });
     await page.waitForTimeout(2000);
     await page.screenshot({ path: 'screenshots/search-dark.png' });

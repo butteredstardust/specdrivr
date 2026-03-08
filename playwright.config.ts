@@ -1,9 +1,15 @@
 import { defineConfig, devices } from '@playwright/test';
 
+/**
+ * Main Playwright Configuration
+ *
+ * This config works in conjunction with scripts/test-e2e-setup.ts
+ * The setup script handles PostgreSQL detection and data seeding before tests run
+ */
+
 export default defineConfig({
   testDir: './tests',
-  testMatch: '**/*.spec.ts',
-  testIgnore: 'tests/{api,unit}/**/*.spec.ts',
+  testMatch: 'tests/e2e/**/*.spec.ts',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -13,7 +19,7 @@ export default defineConfig({
     ['list']
   ],
   use: {
-    baseURL: 'http://localhost:3001',
+    baseURL: process.env.BASE_URL || 'http://localhost:3001',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'on-first-retry',
@@ -24,9 +30,10 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  webServer: {
-    command: 'PORT=3001 npm run dev',
-    url: 'http://localhost:3001',
+  // Web server is started by scripts/test-e2e-setup.ts if needed
+  webServer: process.env.PLAYWRIGHT_SKIP_WEB_SERVER ? undefined : {
+    command: `PORT=${process.env.PORT || '3001'} npm run dev`,
+    url: `http://localhost:${process.env.PORT || '3001'}`,
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
   },

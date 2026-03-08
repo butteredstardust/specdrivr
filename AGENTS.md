@@ -2,12 +2,12 @@
 
 ## Architecture & Core Tech Stack
 
-- **Framework:** Next.js 15 (App Router)
+- **Framework:** Next.js 16 (App Router)
 - **Language:** TypeScript (strict mode)
 - **Database:** PostgreSQL (Central State Machine + Persistent Memory)
 - **ORM:** Drizzle ORM
 - **Validation:** Zod
-- **Styling:** Tailwind CSS (Linear-inspired token system)
+- **Styling:** Tailwind CSS 4 (Linear-inspired token system)
 - **Auth:** NextAuth.js v5
 
 ## Repository Structure
