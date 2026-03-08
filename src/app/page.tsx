@@ -1,16 +1,7 @@
-import { db } from '@/db';
-import { projects } from '@/db/schema';
-import { desc } from 'drizzle-orm';
+import { projectRepository } from '@/repositories/project-repository';
 
 export default async function HomePage() {
-  const allProjects = await db
-    .select({
-      id: projects.id,
-      name: projects.name,
-      description: projects.description,
-    })
-    .from(projects)
-    .orderBy(desc(projects.createdAt));
+  const allProjects = await projectRepository.getAll();
 
   return (
     <div className="min-h-screen p-8">

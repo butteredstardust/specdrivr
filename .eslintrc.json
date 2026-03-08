@@ -4,12 +4,12 @@
     "next/typescript"
   ],
   "rules": {
-    "@typescript-eslint/no-unused-vars": "off",
-    "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/no-require-imports": "off",
-    "prefer-const": "off",
-    "@typescript-eslint/no-empty-object-type": "off",
-    "react/no-unescaped-entities": "off",
-    "@typescript-eslint/ban-ts-comment": "off"
+    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/no-require-imports": "error",
+    "prefer-const": "error",
+    "@typescript-eslint/no-empty-object-type": "error",
+    "react/no-unescaped-entities": "error",
+    "@typescript-eslint/ban-ts-comment": "error"
   }
 }
