@@ -67,6 +67,16 @@ background: var(--destructive);
 - **Path mapping** - Use `@/` alias, no relative paths from deep directories
 - **Named exports** - Prefer over default exports for clarity
 
+### Node Version Management
+
+Always use the Node version specified in `.nvmrc`:
+
+```bash
+nvm use  # Auto-switches to correct version
+```
+
+This ensures consistent behavior across all environments. The current project requires Node.js v25.6.1.
+
 ## Project Structure
 
 ```
