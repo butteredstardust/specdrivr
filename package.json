@@ -21,7 +21,9 @@
     "setup": "npm run db:push && npm run db:seed",
     "fkillall": "fkill -f \"npm run dev\"",
     "test": "vitest run",
-    "test:e2e": "playwright test",
+    "test:e2e": "npx tsx scripts/test-e2e-runner.ts",
+    "test:e2e:dev": "playwright test --config=playwright.dev.config.ts",
+    "test:e2e:ci": "playwright test",
     "test:all": "npm run test"
   },
   "dependencies": {

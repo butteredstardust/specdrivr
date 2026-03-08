@@ -32,14 +32,14 @@ We use PostgreSQL not just as a database, but as a rigid state machine and persi
 
 ## Tech Stack
 
-| Layer | Tech | Why |
-|-------|------|-----|
-| **Core** | Next.js 14 (App Router) | Fast, unified React experience |
-| **Language** | TypeScript (Strict) | If it compiles, it probably works |
-| **State** | PostgreSQL | Robust ACID compliance for the state machine |
-| **ORM** | Drizzle | Type-safe SQL that doesn't hide the database |
-| **Validation** | Zod | Impermeable boundary between the wild west and our DB |
-| **Styling** | Tailwind CSS | Premium, Linear-inspired dark UI |
+| Layer          | Tech                    | Why                                                   |
+| -------------- | ----------------------- | ----------------------------------------------------- |
+| **Core**       | Next.js 16 (App Router) | Fast, unified React experience                        |
+| **Language**   | TypeScript (Strict)     | If it compiles, it probably works                     |
+| **State**      | PostgreSQL              | Robust ACID compliance for the state machine          |
+| **ORM**        | Drizzle                 | Type-safe SQL that doesn't hide the database          |
+| **Validation** | Zod                     | Impermeable boundary between the wild west and our DB |
+| **Styling**    | Tailwind CSS 4          | Premium, Linear-inspired dark UI                      |
 
 ---
 
@@ -82,16 +82,16 @@ Get your local environment running in under 5 minutes.
 
 ## Commands
 
-| Command | What it does |
-|---------|--------------|
-| `npm run dev:seed` | Wipes DB, seeds test data, starts dev server |
-| `npm run dev` | Starts Next.js dev server |
-| `npm run db:generate` | Generates Drizzle migrations |
-| `npm run db:migrate` | Applies migrations to the DB |
-| `npm run db:studio` | Opens visual DB explorer |
-| `npm run test` | Runs Vitest unit tests |
-| `npm run test:e2e` | Runs Playwright browser tests (requires port 3001) |
-| `npm run test:all` | Runs both test suites |
+| Command               | What it does                                       |
+| --------------------- | -------------------------------------------------- |
+| `npm run dev:seed`    | Wipes DB, seeds test data, starts dev server       |
+| `npm run dev`         | Starts Next.js dev server                          |
+| `npm run db:generate` | Generates Drizzle migrations                       |
+| `npm run db:migrate`  | Applies migrations to the DB                       |
+| `npm run db:studio`   | Opens visual DB explorer                           |
+| `npm run test`        | Runs Vitest unit tests                             |
+| `npm run test:e2e`    | Runs Playwright browser tests (requires port 3001) |
+| `npm run test:all`    | Runs both test suites                              |
 
 ---
 

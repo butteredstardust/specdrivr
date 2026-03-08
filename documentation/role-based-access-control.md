@@ -39,12 +39,3 @@ The Viewer role is a read-only role intended for stakeholders, PMs, or external 
     *   Cannot move tasks on the Kanban board.
     *   Cannot start, stop, or manage the agent.
     *   Cannot manage users.
-
----
-
-## Enforcement Implementation
-
-Currently, role enforcement is primarily handled in:
-*   **`middleware.ts`**: Verifies authentication. Could be extended to block `/admin` paths based on role.
-*   **Server Actions (`auth-utils.ts` / `actions.ts`)**: Server actions that mutate data should check `await getSessionUser()` and assert `user.role === 'admin' || user.role === 'developer'`.
-*   **UI Client Components**: Components conditionally render inputs or "Edit" buttons based on the user's role (e.g., hiding the "Settings" tab or disabling the Kanban drag-and-drop for viewers).
