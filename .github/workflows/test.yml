@@ -45,6 +45,9 @@ jobs:
       - name: Run database migrations
         run: npm run db:push
 
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
       - name: Run unit tests
         run: npm run test:unit
         env:
