@@ -29,8 +29,8 @@ export async function POST(
         await db
             .update(tasks)
             .set({
-                // @ts-ignore - The underlying schema supports 'skipped' but TS might complain if it uses outdated types
-                status: 'skipped',
+
+                status: 'skipped' as 'todo' | 'in_progress' | 'done' | 'blocked' | 'paused' | 'skipped',
                 completedAt: new Date(),
                 notes: task.notes ? `${task.notes}\n[SKIPPED by developer]` : '[SKIPPED by developer]',
             })

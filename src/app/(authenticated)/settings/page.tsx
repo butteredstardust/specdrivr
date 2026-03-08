@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import {
   Database,
   Server,
@@ -25,6 +26,8 @@ interface SettingGroup {
 }
 
 interface SettingsPageProps { }
+
+export const metadata: Metadata = { title: 'Specdrivr', robots: 'noindex' };
 
 export default async function SettingsPage({ }: SettingsPageProps) {
   const projectsResult = await getProjects();

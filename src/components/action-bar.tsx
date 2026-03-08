@@ -10,7 +10,7 @@ interface ActionBarProps {
   projectId: number;
   plans?: PlanSelect[];
   existingTasks?: TaskSelect[];
-  onFilterChange?: (filters: any) => void;
+  onFilterChange?: (filters: Record<string, string>) => void;
 }
 
 export function ActionBar({ projectId, plans = [], existingTasks = [], onFilterChange }: ActionBarProps) {
