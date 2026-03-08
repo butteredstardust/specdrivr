@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { taskRepository } from '@/repositories/task-repository';
 import { formatErrorResponse, handleApiError } from '@/lib/error-handler';
 import { taskQuerySchema, createTaskSchema } from '@/lib/schemas';
+import { Task } from '@/repositories/task-repository';
 
 /**
  * Task API Routes
@@ -80,7 +81,7 @@ export async function GET(request: NextRequest) {
     const { planId, status, page, limit } = parsed.data;
 
     // Fetch tasks based on parameters
-    let taskList: any[];
+    let taskList: Task[];
     let totalCount: number;
 
     if (planId !== undefined) {
