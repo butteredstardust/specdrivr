@@ -31,7 +31,6 @@ npm install
    ```bash
    # Copy .env.example to .env.local and configure DATABASE_URL
    npm run db:push
-   npm run db:seed  # Optional: seed demo data
    ```
 
 3. Run development server:
