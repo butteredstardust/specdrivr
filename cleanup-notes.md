@@ -12,7 +12,8 @@ Ran `npx knip`. Verified packages with `grep`. The following dependencies were m
 Note: The following packages were flagged by `knip` but are actually used (false positives), so they were kept: `@auth/core`, `@radix-ui/react-alert-dialog`, `@radix-ui/react-dropdown-menu`, `@radix-ui/react-separator`, `@radix-ui/react-toast`, and `next-themes`.
 
 ## Remove Dead Code
-Removed unused non-special files as flagged by knip: check-users.mjs, classify.js, fix-kanban.ts, full_classification.js, list-all.js, src/components/agent-buttons.tsx, src/components/bottom-tabs.tsx, src/components/create-plan-dialog.tsx, src/components/project-tab-layout.tsx, src/components/specification-viewer.tsx, test-db.mjs, test-playwright.mjs, tests/screenshots/capture.js, tests/seed-test-data.mjs, src/hooks/use-toast.ts, src/lib/env.ts, src/styles/globals.css. Also removed export statements from unused internal components/utilities (e.g. CardSkeleton, CompactAgentStatus) instead of deleting them since they are still in use locally.
+Removed unused non-special files as flagged by knip: check-users.mjs, classify.js, fix-kanban.ts, full_classification.js, list-all.js, The following files were flagged but kept intentionally: src/components/agent-buttons.tsx, src/components/bottom-tabs.tsx, src/components/create-plan-dialog.tsx, src/components/project-tab-layout.tsx, src/components/specification-viewer.tsx, test-db.mjs, test-playwright.mjs, tests/screenshots/capture.js, tests/seed-test-data.mjs, src/hooks/use-toast.ts, src/lib/env.ts, src/styles/globals.css.
+Also removed export statements from unused internal components/utilities (e.g. CardSkeleton, CompactAgentStatus) instead of deleting them since they are still in use locally.
 
 ## Emoji Removal
 Searched codebase for emoji Unicode characters. None found in specified locations.
