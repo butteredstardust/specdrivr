@@ -20,6 +20,15 @@ This specification has been split into the following purpose-specific files:
   - Error States & Edge Cases
   - Empty States & Microcopy Reference
 
+- **[PRODUCT_FEATURES.md](PRODUCT_FEATURES.md)** - Authentication flows, RBAC, settings, notifications, and user management
+  - Authentication System (Login, Forgot Password, Reset Password)
+  - User Management & RBAC (Owner, Admin, Member, Viewer roles)
+  - Plan Review & Rejection workflows
+  - Onboarding Flow
+  - Notification System
+  - Settings (Project, Agent, Advanced, Danger Zone)
+  - User Profile & Preferences
+
 ## Technical Architecture
 **Audience**: Engineers, Architects
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** - System architecture and engineering constraints
@@ -47,6 +56,16 @@ This specification has been split into the following purpose-specific files:
   - Pages - Detailed Specification
   - State Machines
   - Notification System
+
+- **[USER_INTERFACE.md](USER_INTERFACE.md)** - Complete screen inventory, interaction flows, and state machines
+  - Complete Screen Inventory (P1-P8 + overlays)
+  - Navigation Flow Diagram
+  - All 26 Interaction Flows
+  - 4 State Machines (Spec, Plan, Task, Session)
+  - Conditional Rendering Truth Tables
+  - Mock Data Requirements
+  - Component Cross-Reference
+  - Anti-Patterns to Avoid
 
 ## Integration & Development
 **Audience**: Engineers, DevOps
