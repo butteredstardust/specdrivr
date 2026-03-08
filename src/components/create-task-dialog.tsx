@@ -220,7 +220,7 @@ export function CreateTaskDialog({
               aria-label="Toggle quick mode"
             >
               <span
-                className={`block w-[18px] h-[18px] rounded-full bg-white shadow-sm transition-transform ${isQuickMode ? 'translate-x-[18px]' : 'translate-x-0'
+                className={`block w-[18px] h-[18px] rounded-full bg-white shadow-sm transition-[transform,translate,scale,rotate,opacity] ${isQuickMode ? 'translate-x-[18px]' : 'translate-x-0'
                   }`}
               />
             </button>

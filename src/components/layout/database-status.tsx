@@ -59,7 +59,7 @@ export function DatabaseStatus() {
       title="PostgreSQL database connection status"
     >
       <span
-        className={`w-[6px] h-[6px] rounded-full flex-shrink-0 ${config.dot} ${status === 'connecting' ? 'animate-pulse' : ''}`}
+        className={`w-[6px] h-[6px] rounded-full shrink-0 ${config.dot} ${status === 'connecting' ? 'animate-pulse' : ''}`}
       />
       <span>
         {config.label}

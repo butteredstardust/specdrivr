@@ -83,7 +83,7 @@ export function ProjectCard({
           </div>
         ) : (
           <div className="flex items-center gap-[var(--sp-2)] text-[var(--font-size-sm)] font-medium text-[var(--text-secondary)]">
-            <span className={cn("w-[6px] h-[6px] rounded-full flex-shrink-0", dotColor)} />
+            <span className={cn("w-[6px] h-[6px] rounded-full shrink-0", dotColor)} />
             <span>{agentStatusLabels[agentStatus]}</span>
           </div>
         )}
