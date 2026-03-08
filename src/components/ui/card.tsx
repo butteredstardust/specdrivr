@@ -49,7 +49,6 @@ export interface CardTitleProps extends React.HTMLAttributes<HTMLHeadingElement>
   as?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 }
 
-export type CardDescriptionProps = React.HTMLAttributes<HTMLParagraphElement>
 
 export interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
