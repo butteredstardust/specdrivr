@@ -1,7 +1,8 @@
 import { auth } from "@/auth"
 import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
 
-export default auth((req) => {
+const proxyHandler = auth((req) => {
   const isAuthPage = req.nextUrl.pathname.startsWith('/auth/login');
 
   if (req.nextUrl.pathname.startsWith('/api/agent') || req.nextUrl.pathname.startsWith('/api/webhooks')) {
@@ -18,6 +19,12 @@ export default auth((req) => {
   }
   return NextResponse.next();
 })
+
+export function proxy(req: NextRequest) {
+  return proxyHandler(req, undefined as any)
+}
+
+export { proxy as default };
 
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],

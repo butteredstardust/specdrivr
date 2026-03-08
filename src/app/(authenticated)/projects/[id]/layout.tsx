@@ -8,9 +8,10 @@ export default async function ProjectLayout({
     params,
 }: {
     children: ReactNode;
-    params: { id: string };
+    params: Promise<{ id: string }>;
 }) {
-    const projectId = parseInt(params.id, 10);
+    const { id } = await params;
+    const projectId = parseInt(id, 10);
     if (isNaN(projectId)) return notFound();
 
     const result = await getProjectById(projectId);

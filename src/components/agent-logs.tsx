@@ -35,7 +35,7 @@ const levelLozengeStyles: Record<LogLevel, string> = {
   error: 'bg-[var(--status-error-bg)] text-[var(--status-error-text)]',
 };
 
-const levelIcons: Record<LogLevel, JSX.Element> = {
+const levelIcons: Record<LogLevel, React.ReactNode> = {
   debug: <Terminal size={12} />,
   info: <Info size={12} />,
   warn: <AlertTriangle size={12} />,

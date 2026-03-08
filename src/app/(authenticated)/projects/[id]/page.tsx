@@ -6,13 +6,12 @@ import { plans } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 interface ProjectDetailPageProps {
-  params: {
-    id: string;
-  };
+  params: Promise<{ id: string }>;
 }
 
 export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {
-  const projectId = parseInt(params.id, 10);
+  const { id } = await params;
+  const projectId = parseInt(id, 10);
 
   if (isNaN(projectId)) {
     return notFound();

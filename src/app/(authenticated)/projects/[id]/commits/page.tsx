@@ -3,13 +3,12 @@ import { ProjectCommitsClient } from './client-page';
 import { notFound } from 'next/navigation';
 
 interface CommitsPageProps {
-  params: {
-    id: string;
-  };
+  params: Promise<{ id: string }>;
 }
 
 export default async function CommitsPage({ params }: CommitsPageProps) {
-  const projectId = parseInt(params.id, 10);
+  const { id } = await params;
+  const projectId = parseInt(id, 10);
 
   if (isNaN(projectId)) {
     return notFound();
