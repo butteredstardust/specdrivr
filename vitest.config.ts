@@ -10,6 +10,7 @@ export default defineConfig({
         setupFiles: ['./vitest.setup.ts'],
         alias: {
             '@': path.resolve(__dirname, './src'),
+            'next/server': 'next/dist/server/web/exports/index.js'
         },
         include: ['tests/unit/**/*.{test,spec}.{ts,tsx}'],
         exclude: ['**/node_modules/**', '**/dist/**'],
