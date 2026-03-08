@@ -1,45 +1,22 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import { ThemeProvider } from '@/components/theme-provider';
-import { Inter } from "next/font/google";
-import { cn } from "@/lib/utils";
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
 
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "specdrivr",
-  description: "AI Agent Development Platform",
-  icons: {
-    icon: "/brand/icon.svg",
-    shortcut: "/brand/icon.svg",
-    apple: "/brand/icon.svg",
-  },
+  title: 'Specdrivr',
+  description: 'AI-native orchestration platform',
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en" className={cn("font-sans", inter.variable)}>
-      <head>
-        <script dangerouslySetInnerHTML={{
-          __html: `
-            (function() {
-              var theme = localStorage.getItem('app-theme') || 'light';
-              if (theme === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'dark');
-              }
-            })();
-          `
-        }} />
-      </head>
-      <body>
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
-      </body>
+    <html lang="en">
+      <body className={inter.className}>{children}</body>
     </html>
   );
 }
