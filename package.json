@@ -64,7 +64,8 @@
   "overrides": {
     "next-auth": {
       "next": "$next"
-    }
+    },
+    "esbuild": "^0.27.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.5",
