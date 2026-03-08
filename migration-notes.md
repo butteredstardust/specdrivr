@@ -78,8 +78,3 @@ This project has been successfully migrated from Next.js 14 to Next.js 15, addre
 
 ### Config Updates
 - Fixed `next.config.js` to `next.config.mjs` to alleviate `MODULE_TYPELESS_PACKAGE_JSON` CommonJS parser warnings during builds.
-
-## Pre-existing Test Failures
-- `npm run test:e2e`: FAILING — missing module '../utils/test-helpers'
-- Confirmed pre-existing: not caused by this migration
-- Action required: separate ticket for test infrastructure fix
