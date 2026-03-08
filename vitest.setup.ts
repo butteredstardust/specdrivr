@@ -21,12 +21,3 @@ vi.mock('next-auth/react', () => ({
     signIn: vi.fn(),
     signOut: vi.fn(),
 }));
-
-vi.mock('next/server', () => ({
-    NextResponse: {
-        json: vi.fn(),
-        next: vi.fn(),
-        redirect: vi.fn(),
-    },
-    NextRequest: vi.fn(),
-}));
