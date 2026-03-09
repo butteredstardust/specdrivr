@@ -1,0 +1,36 @@
+#!/bin/sh
+set -e
+
+echo "🔍 Running pre-push checks..."
+
+# Check for forbidden scripts
+echo "  Checking for temporary fix scripts..."
+if [ -f "fix-tsc.sh" ] || [ -f "fix-lint2.sh" ]; then
+  echo "❌ ERROR: Temporary fix scripts found!"
+  echo "Remove these scripts before pushing:"
+  [[ -f "fix-tsc.sh" ]] && echo "  - fix-tsc.sh"
+  [[ -f "fix-lint2.sh" ]] && echo "  - fix-lint2.sh"
+  echo ""
+  echo "See TASK-102 in implementation plan for details."
+  exit 1
+fi
+echo "  ✅ No temporary fix scripts found"
+
+# Run ESLint
+echo "  Running ESLint..."
+if ! pnpm lint; then
+  echo "❌ ESLint found issues. Please fix them before pushing."
+  exit 1
+fi
+echo "  ✅ ESLint passed"
+
+# Run TypeScript type check
+echo "  Running TypeScript type check..."
+if ! pnpm tsc --noEmit; then
+  echo "❌ TypeScript errors found. Please fix them before pushing."
+  exit 1
+fi
+echo "  ✅ TypeScript type check passed"
+
+echo ""
+echo "✅ All pre-push checks passed! Pushing..."
