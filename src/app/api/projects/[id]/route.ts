@@ -33,7 +33,7 @@ export async function GET(
       success: true,
       data: project,
     });
-  } catch {
+  } catch (error) {
     return handleApiError(error);
   }
 }
@@ -62,7 +62,7 @@ export async function PATCH(
       success: true,
       data: project,
     });
-  } catch {
+  } catch (error) {
     return handleApiError(error);
   }
 }
@@ -85,7 +85,7 @@ export async function DELETE(
     await projectRepository.delete(projectId);
 
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (error) {
     return handleApiError(error);
   }
 }

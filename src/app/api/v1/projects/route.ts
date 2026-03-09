@@ -21,7 +21,7 @@ export async function GET() {
 
     // Fetch projects where the user is a member
     let allProjects;
-    if (session.user.role === 'admin') {
+    if (((session.user as { role?: string }).role) === 'admin') {
       allProjects = await db.select().from(projects).orderBy(desc(projects.createdAt));
     } else {
       const userProjects = await db.select({
