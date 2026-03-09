@@ -38,6 +38,28 @@ You are an expert AI Systems Architect and a Senior Next.js/TypeScript Engineer 
 - **Error Handling:** Return structured JSON responses with standard HTTP status codes and `{ success: false, error: string }`.
 - **Consistent Formatting:** All API routes use repository pattern and handle errors with `handleApiError()`.
 
+### Environment Configuration Architecture
+
+Environment variables must be validated with Zod and protected from client exposure using the `server-only` package.
+
+**For Next.js code (server components, API routes, server actions, repositories):**
+```typescript
+import { env } from '@/lib/env';  // Has server-only protection
+```
+
+**For standalone Node.js scripts (seed, migrations, CLI tools):**
+```typescript
+import { env } from '@/lib/env-script';  // No server-only, safe for scripts
+```
+
+**Never import directly from `env-core.ts`** - use one of the wrapper files above.
+
+**Rationale:**
+- `server-only` is a Next.js runtime package that throws when imported outside Next.js environment
+- We decouple validation logic (`env-core.ts`) from the security boundary (`env.ts`)
+- Standalone scripts use `env-script.ts` which bypasses the server-only import
+- This maintains security boundaries while enabling script usage
+
 ## Project Documentation
 
 This project follows professional development standards documented in:
