@@ -1487,7 +1487,7 @@ These create realistic delays so the UI doesn't feel instant (which breaks the i
 
 ## 3.10 First Load State Checklist
 
-On initial load (e.g., after npm run dev), verify:
+On initial load (e.g., after `pnpm dev`), verify:
 
 1. ✅ P1 Mission Control shows amber "Needs Attention" banner (from T-019 blocked)
 2. ✅ P5 Spec Detail (spec_001) shows PLAN tab with `[APPROVE & EXECUTE]` button active

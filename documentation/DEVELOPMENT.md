@@ -34,7 +34,7 @@ DAEMON's interaction with git is the highest-risk part of the system from a data
 - Verify the repository is clean: git status --porcelain. If there are uncommitted changes, fail the session immediately with errorMessage: "Repository has uncommitted changes. Clean the working tree before starting a session."
 - Record base commit: git rev-parse HEAD → store in agent_sessions.gitBaseCommit.
 - Do NOT create a session-level branch. DAEMON works on task-level branches only.
-- Run setupCommand (if configured, e.g. npm install) before the first task. If it fails, fail the session.
+- Run setupCommand (if configured, e.g. pnpm install) before the first task. If it fails, fail the session.
 
 ## **22.2 Per-Task Branch Lifecycle**
 

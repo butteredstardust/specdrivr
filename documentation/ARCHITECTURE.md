@@ -126,7 +126,26 @@ The spec currently uses 3-second polling for session state and notifications. Th
 | Exit animations conflict with Vaul's DOM removal: Vaul removes the drawer from the DOM on close. If a Motion animate on unmount is running, Framer will throw because the element is gone. | Wrap Vaul's content in AnimatePresence with mode="wait". All exit animations must complete within 200ms (Vaul's default close duration). Use custom={...} to pass close state into the exit variant. |
 | DAEMON sprite layout shift: when DAEMON expression changes, a layout animation can cause surrounding text to jump.                                                                         | Apply layout="size" only on the DAEMON sprite container, not on the parent flex row. Never use layout on text elements adjacent to DAEMON.                                                           |
 
-## **23.9 NextAuth v5 Breaking Changes (vs v4)**
+## **23.9 pnpm Package Manager**
+
+| **Pitfall** | **Mitigation** |
+| ----------- | -------------- |
+| Dependency vulnerabilities in transitive dependencies. `pnpm audit` reveals moderate vulnerabilities in build tools like esbuild that are not directly fixable by upgrading the direct dependency. | Use `pnpm.overrides` in package.json to force secure versions.
+
+```json
+{
+  "pnpm": {
+    "overrides": {
+      "esbuild": "^0.25.0"
+    }
+  }
+}
+```
+
+Example: commit 33a0f48 fixed an esbuild vulnerability via pnpm overrides. Always address security warnings from `pnpm audit` before deployment.
+| CI/CD pipelines using `npm ci` instead of pnpm commands. The project enforces pnpm and deletes package-lock.json (commit 99bb6ea). | Update GitHub Actions workflows to use `pnpm install --frozen-lockfile` (not `npm ci`). All package scripts must use `pnpm` commands exclusively.
+| Type errors and undefined environment variables in CI environments. | Validate all environment variables with Zod in lib/env.ts. Run TypeScript compilation in CI: `tsc --noEmit` to catch type errors before deployment (commit 3eb626b).|
+## **23.10 NextAuth v5 Breaking Changes (vs v4)**
 
 | **Change**                                                                                      | **Required action**                                                                                                               |
 | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |

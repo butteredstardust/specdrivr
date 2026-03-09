@@ -1,8 +1,8 @@
 ## Environment Setup
-- `npm ci`, `npm run dev`, `npm run build`
+- `pnpm install --frozen-lockfile`, `pnpm dev`, `pnpm build`
 
 ## Testing
-- `npm test`, `npx jest file.test.ts`
+- `pnpm test`, `pnpm test:unit`, `pnpm test:e2e`
 - Must pass
 
 ## Architecture
@@ -13,6 +13,7 @@
 
 ## PR
 - `[scope]: description`, never modify migrations
+- Package manager: **pnpm** (not npm)
 
 ## Off Limits
 - `infrastructure/`, CI/CD YAML, `.env`, secrets
@@ -21,4 +22,4 @@
 File paths, errors, goals. Clarify research vs implement vs test.
 
 ## Common Commands
-`npm run dev build`, `db:push db:studio`, `npm test`.
+`pnpm dev`, `pnpm build`, `pnpm db:push`, `pnpm db:studio`, `pnpm test`.
