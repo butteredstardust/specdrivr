@@ -6,7 +6,7 @@ import { z } from 'zod';
 const projectSchema = z.object({
   name: z.string().min(1, 'Project name is required').max(255, 'Project name cannot exceed 255 characters'),
   description: z.string().max(1000, 'Description cannot exceed 1000 characters').optional().nullable(),
-  createdByUserId: z.number().optional().nullable(),
+  createdBy: z.number().optional().nullable(),
 });
 
 export const updateProjectSchema = z.object({
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     const project = await projectRepository.create({
       name: parsed.name,
       description: parsed.description ?? undefined,
-      createdByUserId: parsed.createdByUserId ?? undefined,
+      createdBy: parsed.createdBy ?? undefined,
     });
 
     return NextResponse.json({

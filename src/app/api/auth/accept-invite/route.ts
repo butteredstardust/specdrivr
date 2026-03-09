@@ -38,7 +38,7 @@ export async function POST(req: Request) {
 
 
     const result = await db.transaction(async (tx) => {
-      const existingUserResult = await tx.select().from(users).where(eq(users.username, invite.email));
+      const existingUserResult = await tx.select().from(users).where(eq(users.email, invite.email));
 
       if (existingUserResult.length > 0) {
         userId = existingUserResult[0].id;
@@ -48,7 +48,8 @@ export async function POST(req: Request) {
         }
         const passwordHash = await bcrypt.hash(password, 12);
         const [newUser] = await tx.insert(users).values({
-          username: invite.email,
+          name: parsed.data.name || invite.email.split("@")[0],
+          email: invite.email,
           passwordHash: passwordHash,
           role: invite.role
         }).returning();

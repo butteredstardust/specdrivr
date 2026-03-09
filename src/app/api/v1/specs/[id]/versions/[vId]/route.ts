@@ -26,7 +26,7 @@ export async function GET(req: Request, context: { params: Promise<{ id: string,
       data: {
         id: spec.id.toString(),
         versionNumber: spec.versionNumber,
-        markdownContent: spec.content,
+        markdownContent: spec.markdownContent,
         createdAt: spec.createdAt.toISOString()
       }
     });
