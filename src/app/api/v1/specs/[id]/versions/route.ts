@@ -77,7 +77,7 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
         specId: Number(id),
         versionNumber: newSpecVersionNum,
         content: parsed.data.markdownContent,
-        createdByUserId: Number(session.user.id)
+        createdByUserId: Number(session.user!.id)
       }).returning();
 
       const [updatedSpec] = await tx.update(specifications).set({

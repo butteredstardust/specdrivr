@@ -43,7 +43,7 @@ export async function POST(
       success: true,
       data: completedProject,
     });
-  } catch {
+  } catch (error) {
     return handleApiError(error);
   }
 }

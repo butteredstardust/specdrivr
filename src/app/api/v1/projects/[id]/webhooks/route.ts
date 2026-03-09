@@ -47,7 +47,7 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
       return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Authentication required' } }, { status: 401 });
     }
 
-    if (session.user.role !== 'admin' && session.user.role !== 'owner') {
+    if (((session.user as { role?: string }).role) !== 'admin' && ((session.user as { role?: string }).role) !== 'owner') {
       return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'Insufficient permissions' } }, { status: 403 });
     }
 
