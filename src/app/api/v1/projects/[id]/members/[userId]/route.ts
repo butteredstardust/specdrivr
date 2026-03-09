@@ -6,7 +6,7 @@ import { eq, and } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
 
 const UpdateMemberRoleSchema = z.object({
-  role: z.enum(['admin', 'developer', 'viewer'])
+  role: z.enum(['admin', 'member', 'viewer'])
 });
 
 export async function PATCH(req: Request, context: { params: Promise<{ id: string, userId: string }> }) {
@@ -36,7 +36,7 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
       return NextResponse.json({ error: { code: 'NOT_FOUND', message: 'Project not found' } }, { status: 404 });
     }
 
-    if (existing[0].createdByUserId === targetUserId) {
+    if (existing[0].createdBy === targetUserId) {
        return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'Cannot demote the owner' } }, { status: 403 });
     }
 
@@ -82,7 +82,7 @@ export async function DELETE(req: Request, context: { params: Promise<{ id: stri
       return NextResponse.json({ error: { code: 'NOT_FOUND', message: 'Project not found' } }, { status: 404 });
     }
 
-    if (existing[0].createdByUserId === targetUserId) {
+    if (existing[0].createdBy === targetUserId) {
        return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'Cannot remove the owner' } }, { status: 403 });
     }
 

@@ -43,7 +43,7 @@ export async function GET() {
       name: p.name,
       slug: p.slug,
       memberCount: 1,
-      lastSessionSummary: p.state
+      lastSessionSummary: p.description
     }));
 
     return NextResponse.json({ data: formattedProjects });
@@ -78,8 +78,6 @@ export async function POST(req: Request) {
       const [newProject] = await tx.insert(projects).values({
         name,
         slug,
-        createdByUserId: userId,
-        createdBy: userId
       }).returning();
 
       await tx.insert(projectMembers).values({

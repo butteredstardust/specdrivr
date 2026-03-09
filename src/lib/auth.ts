@@ -30,7 +30,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         try {
           const { email, password } = CredentialsSchema.parse(credentials);
 
-          const result = await db.select().from(users).where(eq(users.username, email));
+          const result = await db.select().from(users).where(eq(users.email, email));
           const user = result[0];
 
           if (!user || !user.passwordHash) {
@@ -42,8 +42,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           if (passwordsMatch) {
             return {
               id: user.id.toString(),
-              email: user.username,
-              name: user.username,
+              email: user.email,
+              name: user.email,
               role: user.role,
             };
           }

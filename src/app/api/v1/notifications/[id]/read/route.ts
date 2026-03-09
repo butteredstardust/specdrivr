@@ -21,7 +21,7 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
       return NextResponse.json({ error: { code: 'NOT_FOUND', message: 'Notification not found' } }, { status: 404 });
     }
 
-    await db.update(notifications).set({ read: true }).where(eq(notifications.id, Number(id)));
+    await db.update(notifications).set({ readAt: new Date() }).where(eq(notifications.id, Number(id)));
 
     return NextResponse.json({ data: { success: true } });
   } catch {

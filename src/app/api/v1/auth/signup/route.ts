@@ -21,7 +21,7 @@ export async function POST(req: Request) {
 
     const { email, password } = parsed.data;
 
-    const existingUser = await db.select().from(users).where(eq(users.username, email));
+    const existingUser = await db.select().from(users).where(eq(users.email, email));
     if (existingUser.length > 0) {
       return NextResponse.json({ error: { code: 'CONFLICT', message: 'Email already exists' } }, { status: 409 });
     }
@@ -29,16 +29,17 @@ export async function POST(req: Request) {
     const passwordHash = await bcrypt.hash(password, 12);
 
     const [newUser] = await db.insert(users).values({
-      username: email,
+      name: email.split("@")[0],
+          email: email,
       passwordHash: passwordHash,
       role: 'viewer'
     }).returning({
       id: users.id,
-      username: users.username,
+      email: users.email,
       role: users.role
     });
 
-    return NextResponse.json({ data: { user: { id: newUser.id.toString(), email: newUser.username, role: newUser.role } } }, { status: 201 });
+    return NextResponse.json({ data: { user: { id: newUser.id.toString(), email: newUser.email, role: newUser.role } } }, { status: 201 });
   } catch {
     return NextResponse.json({ error: { code: 'INTERNAL_SERVER_ERROR', message: 'Something went wrong' } }, { status: 500 });
   }

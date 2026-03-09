@@ -19,10 +19,10 @@ export const taskStatusSchema = z.enum([
   'in_progress',
   'done',
   'blocked',
-  'paused',
+  'failed',
   'skipped'
 ], {
-  errorMap: () => ({ message: "Status must be one of: 'todo', 'in_progress', 'done', 'blocked', 'paused', or 'skipped'" })
+  errorMap: () => ({ message: "Status must be one of: 'todo', 'in_progress', 'done', 'blocked', 'failed', or 'skipped'" })
 });
 
 /**

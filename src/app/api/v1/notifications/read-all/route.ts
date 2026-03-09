@@ -11,7 +11,7 @@ export async function POST() {
       return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Authentication required' } }, { status: 401 });
     }
 
-    await db.update(notifications).set({ read: true }).where(eq(notifications.userId, Number(session.user.id)));
+    await db.update(notifications).set({ readAt: new Date() }).where(eq(notifications.userId, Number(session.user.id)));
 
     return NextResponse.json({ data: { success: true } });
   } catch {

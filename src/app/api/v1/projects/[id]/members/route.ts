@@ -22,7 +22,7 @@ export async function GET(req: Request, context: { params: Promise<{ id: string 
     const activeMembers = await db.select({
       id: projectMembers.id,
       userId: users.id,
-      email: users.username,
+      email: users.email,
       role: projectMembers.role,
     })
     .from(projectMembers)
