@@ -62,7 +62,7 @@ export async function GET(
       success: true,
       data: task,
     });
-  } catch (error) {
+  } catch {
     // Handle errors including NotFoundError
     return handleApiError(error);
   }
@@ -150,7 +150,7 @@ export async function PATCH(
       success: true,
       data: task,
     });
-  } catch (error) {
+  } catch {
     // Handle validation, not found, and database errors
     return handleApiError(error);
   }
@@ -199,7 +199,7 @@ export async function DELETE(
 
     // Return success response
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     // Handle validation and not found errors
     return handleApiError(error);
   }

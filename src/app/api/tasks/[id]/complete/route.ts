@@ -65,7 +65,7 @@ export async function POST(
       success: true,
       data: task,
     });
-  } catch (error) {
+  } catch {
     // Handle validation, not found, and database errors
     return handleApiError(error);
   }
