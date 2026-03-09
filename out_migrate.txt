@@ -1,0 +1,7 @@
+
+> specdrivr@0.1.0 db:generate /app
+> drizzle-kit generate
+
+sh: 1: drizzle-kit: not found
+ ELIFECYCLE  Command failed.
+ WARN   Local package.json exists, but node_modules missing, did you mean to install?
