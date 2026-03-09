@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { pgTable, serial, text, timestamp, boolean, jsonb, integer, pgEnum, uniqueIndex } from "drizzle-orm/pg-core";
 
 // Status enums
