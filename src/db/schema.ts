@@ -358,3 +358,63 @@ export type UsageSnapshotInsert = typeof usageSnapshots.$inferInsert;
 export type UsageSnapshotSelect = typeof usageSnapshots.$inferSelect;
 export type AuditLogInsert = typeof auditLog.$inferInsert;
 export type AuditLogSelect = typeof auditLog.$inferSelect;
+
+// --- Added tables for full API support ---
+
+// Project Members table
+export const projectMembers = pgTable('project_members', {
+  id: serial('id').primaryKey(),
+  projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  role: userRoleEnum('role').notNull().default('viewer'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => {
+  return {
+    uniqueProjectUser: uniqueIndex('project_user_idx').on(table.projectId, table.userId)
+  };
+});
+
+// Specification Versions table
+export const specVersions = pgTable('spec_versions', {
+  id: serial('id').primaryKey(),
+  specId: integer('spec_id').notNull().references(() => specifications.id, { onDelete: 'cascade' }),
+  versionNumber: integer('version_number').notNull(),
+  content: text('content').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  createdByUserId: integer('created_by_user_id').references(() => users.id),
+}, (table) => {
+  return {
+    uniqueSpecVersion: uniqueIndex('spec_version_idx').on(table.specId, table.versionNumber)
+  };
+});
+
+// Notifications table
+export const notifications = pgTable('notifications', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  type: text('type').notNull(),
+  message: text('message').notNull(),
+  read: boolean('read').notNull().default(false),
+  link: text('link'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+// Webhooks table
+export const webhooks = pgTable('webhooks', {
+  id: serial('id').primaryKey(),
+  projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  url: text('url').notNull(),
+  secret: text('secret'),
+  events: jsonb('events').notNull().default(['*']),
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type ProjectMemberInsert = typeof projectMembers.$inferInsert;
+export type ProjectMemberSelect = typeof projectMembers.$inferSelect;
+export type SpecVersionInsert = typeof specVersions.$inferInsert;
+export type SpecVersionSelect = typeof specVersions.$inferSelect;
+export type NotificationInsert = typeof notifications.$inferInsert;
+export type NotificationSelect = typeof notifications.$inferSelect;
+export type WebhookInsert = typeof webhooks.$inferInsert;
+export type WebhookSelect = typeof webhooks.$inferSelect;
