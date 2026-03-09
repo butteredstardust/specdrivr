@@ -1,36 +1,49 @@
 #!/bin/sh
 set -e
 
-echo "🔍 Running pre-push checks..."
+echo "Checking code quality before push..."
+echo ""
 
 # Check for forbidden scripts
-echo "  Checking for temporary fix scripts..."
-if [ -f "fix-tsc.sh" ] || [ -f "fix-lint2.sh" ]; then
-  echo "❌ ERROR: Temporary fix scripts found!"
-  echo "Remove these scripts before pushing:"
-  [[ -f "fix-tsc.sh" ]] && echo "  - fix-tsc.sh"
-  [[ -f "fix-lint2.sh" ]] && echo "  - fix-lint2.sh"
-  echo ""
-  echo "See TASK-102 in implementation plan for details."
+if [ -f "fix-tsc.sh" ] || [ -f "fix-lint2.sh" ] || ls fix-*.mjs 1> /dev/null 2>&1; then
+  echo "Error: Temporary fix scripts found. Remove before pushing."
   exit 1
 fi
-echo "  ✅ No temporary fix scripts found"
 
-# Run ESLint
-echo "  Running ESLint..."
-if ! pnpm lint; then
-  echo "❌ ESLint found issues. Please fix them before pushing."
+# Check for modified migration files
+if git diff --cached --name-only | grep -q "^drizzle/.*\.sql$"; then
+  echo "Error: Migration files cannot be modified. Run 'pnpm db:generate' instead."
   exit 1
 fi
-echo "  ✅ ESLint passed"
 
-# Run TypeScript type check
-echo "  Running TypeScript type check..."
-if ! pnpm tsc --noEmit; then
-  echo "❌ TypeScript errors found. Please fix them before pushing."
+# Check for .env files
+if git diff --cached --name-only | grep -q "\.env"; then
+  echo "Error: Environment files cannot be committed."
   exit 1
 fi
-echo "  ✅ TypeScript type check passed"
 
-echo ""
-echo "✅ All pre-push checks passed! Pushing..."
+# Check for debug code
+if git diff --cached | grep -qE "(console\.(log|debug|warn)|debugger)"; then
+  echo "Error: Debug code found. Remove console logs and debugger statements."
+  exit 1
+fi
+
+# TypeScript type check
+if ! pnpm tsc --noEmit > /dev/null 2>&1; then
+  echo "Error: TypeScript type errors found."
+  exit 1
+fi
+
+# ESLint
+if ! pnpm lint > /dev/null 2>&1; then
+  echo "Error: Linting failed."
+  exit 1
+fi
+
+# Unit tests
+if ! pnpm test:unit > /dev/null 2>&1; then
+  echo "Error: Unit tests failed."
+  exit 1
+fi
+
+echo "All checks passed!"
