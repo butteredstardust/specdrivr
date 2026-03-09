@@ -25,9 +25,13 @@ else
   exit 1
 fi
 
-# Verify Node.js and npm
+# Verify Node.js
 node --version
-npm --version
+
+# Install pnpm
+echo "Installing pnpm..."
+npm install -g pnpm
+pnpm --version
 
 # Install PostgreSQL 16
 echo "Installing PostgreSQL 16..."
@@ -42,7 +46,7 @@ sudo -u postgres psql -c "CREATE DATABASE specdrivr OWNER specdrivr;"
 
 # Install project dependencies
 echo "Installing dependencies..."
-npm ci
+pnpm install --frozen-lockfile
 
 # Set up environment
 echo "Setting up environment..."
@@ -56,23 +60,21 @@ if [ ! -f ".env.local" ]; then
   fi
 fi
 
-# DATABASE_URL already correct in .env.example, no need to update
-
 # Push database schema
 echo "Applying database schema..."
-npm run db:push
+pnpm db:push
 
 # Optional: Seed demo data
 echo "Seeding demo data..."
-npm run db:seed || echo "Seed failed or not configured"
+pnpm db:seed || echo "Seed failed or not configured"
 
 # Build the project
 echo "Building project..."
-npm run build
+pnpm build
 
 echo "=== Bootstrap Complete ==="
 echo "Next steps:"
 echo "1. Review and update .env.local with any other required variables"
-echo "2. Run: npm run db:push"
-echo "3. Optional: npm run db:seed"
-echo "4. Start development: npm run dev"
+echo "2. Run: pnpm db:push (if needed)"
+echo "3. Optional: pnpm db:seed"
+echo "4. Start development: pnpm dev"
