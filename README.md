@@ -47,6 +47,10 @@ Open [http://localhost:3000](http://localhost:3000) to view the app.
 - [CLAUDE.md](CLAUDE.md) - Claude-specific behavior guidelines
 - [Product Specification](documentation/README.md) - Complete product specification covering architecture, APIs, design system, and more
 
+## Development Notes
+
+**Important**: Always make changes directly to source files through proper editing and version control workflows. Do not use or commit temporary fix scripts (e.g., `fix.mjs`, `fix*.mjs`) that modify source files programmatically. Such scripts bypass proper code review, testing, and version control best practices.
+
 ## Key Features
 
 - Repository pattern for data access

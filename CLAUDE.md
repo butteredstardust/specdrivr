@@ -15,6 +15,7 @@ You are an expert AI Systems Architect and a Senior Next.js/TypeScript Engineer 
 - **Strict Typing:** Never use `any`. Always use explicit types.
 - **Validation over Casting:** Use TypeScript type guards over `as any` casts, especially for validating strings against literal union types (e.g., `TaskStatus`).
 - **Extended Types:** When passing database models to UI components, use extended types defined in component props (e.g., `ProjectCardProps['project']`) rather than raw schema types to ensure UI-specific properties are correctly typed.
+- **No Temporary Fix Scripts:** Never commit temporary fix scripts (e.g., `fix.mjs`, `fix2.mjs`) that modify source files directly. Make changes directly to source files via proper editing and version control workflows, not through automated modification scripts.
 
 ### Database & ORM
 - **Drizzle ORM:** Write database queries using Drizzle ORM exclusively. Never write raw SQL.
