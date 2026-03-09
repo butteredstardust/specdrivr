@@ -1,26 +1,34 @@
+import 'server-only';
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
 import { notifications } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
+import { PaginationSchema } from '@/lib/schemas/shared.schemas';
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const session = await auth();
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Authentication required' } }, { status: 401 });
     }
 
-    const userNotifs = await db.select().from(notifications).where(eq(notifications.userId, Number(session.user.id))).orderBy(desc(notifications.createdAt));
+    const url = new URL(req.url);
+    const query = PaginationSchema.safeParse(Object.fromEntries(url.searchParams));
 
-    const mapped = userNotifs.map(n => ({
-      ...n,
-      id: n.id.toString(),
-      userId: n.userId.toString()
-    }));
+    if (!query.success) {
+      return NextResponse.json({ error: { code: 'VALIDATION_ERROR', message: query.error.message } }, { status: 400 });
+    }
 
-    return NextResponse.json({ data: mapped });
+    const items = await db.query.notifications.findMany({
+      where: eq(notifications.userId, session.user.id),
+      limit: query.data.limit,
+      offset: query.data.offset,
+      orderBy: [desc(notifications.createdAt)],
+    });
+
+    return NextResponse.json({ data: items });
   } catch {
-    return NextResponse.json({ error: { code: 'INTERNAL_SERVER_ERROR', message: 'Something went wrong' } }, { status: 500 });
+    return NextResponse.json({ error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch notifications' } }, { status: 500 });
   }
 }
