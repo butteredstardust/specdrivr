@@ -3,9 +3,10 @@ import type { NextRequest } from 'next/server';
 import { Ratelimit } from '@upstash/ratelimit';
 import { redis } from '@/lib/redis';
 
+
 // Create a new ratelimiter, that allows 100 requests per 1 minute
 const ratelimit = new Ratelimit({
-  redis,
+  redis: redis as never,
   limiter: Ratelimit.slidingWindow(100, "1 m"),
   analytics: true,
 });
@@ -14,7 +15,7 @@ export async function proxy(request: NextRequest) {
   // Only apply to API routes
   if (request.nextUrl.pathname.startsWith('/api/')) {
     // Determine IP
-    const ip = request.ip || request.headers.get('x-forwarded-for') || '127.0.0.1';
+    const ip = (request.headers.get('x-forwarded-for') ?? '127.0.0.1') || '127.0.0.1';
 
     // Check rate limit
     const { success, limit, reset, remaining } = await ratelimit.limit(

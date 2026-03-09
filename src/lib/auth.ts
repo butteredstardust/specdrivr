@@ -16,7 +16,7 @@ export const CredentialsSchema = z.object({
 });
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: UpstashRedisAdapter(redis),
+  adapter: UpstashRedisAdapter(redis as never),
   session: { strategy: "jwt" },
   secret: env.NEXTAUTH_SECRET,
   providers: [
@@ -65,8 +65,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async session({ session, token }) {
       if (token && session.user) {
-        session.user.id = token.id as string;
-        (session.user as { role?: string }).role = token.role;
+        session.user.id = (token.id as string) || '';
+        (session.user as { role?: string }).role = token.role as string | undefined;
       }
       return session;
     }
