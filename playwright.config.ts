@@ -1,4 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
+import * as dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -19,8 +21,8 @@ export default defineConfig({
   ],
   webServer: {
     command: 'npm run dev',
-    url: 'http://localhost:3000',
+    url: 'http://localhost:3000/api/health',
     reuseExistingServer: !process.env.CI,
-    timeout: 120000,
+    timeout: 120 * 1000,
   },
 });
