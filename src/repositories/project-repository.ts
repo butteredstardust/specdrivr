@@ -72,8 +72,10 @@ export class ProjectRepository extends BaseRepository {
   }
 
   async create(data: CreateProjectData): Promise<Project> {
+    const slugBase = data.name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
     const cleanData = {
       name: data.name.trim(),
+      slug: `${slugBase}-${Date.now()}`,
       description: data.description ?? null,
       createdByUserId: data.createdByUserId || null,
       status: 'active' as const,
