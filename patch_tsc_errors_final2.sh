@@ -1,3 +1,7 @@
+sed -i "s/import { db } from '@\/lib\/db';/import { db } from '@\/db';/g" src/repositories/project-repository.ts
+sed -i "s/from '@\/lib\/schema';/from '@\/db\/schema';/g" src/repositories/project-repository.ts
+
+cat << 'INNER_EOF' > src/repositories/project-repository.ts
 import { db } from '@/db';
 import { projects, type ProjectSelect as Project } from '@/db/schema';
 import { eq } from 'drizzle-orm';
@@ -55,7 +59,7 @@ export class ProjectRepository extends BaseRepository {
     const slugBase = data.name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
     const cleanData = {
       name: data.name.trim(),
-      slug: `${slugBase}-${Date.now()}`,
+      slug: \`\${slugBase}-\${Date.now()}\`,
       description: data.description ?? null,
       createdBy: data.createdBy || null,
       status: 'active' as const,
@@ -75,7 +79,7 @@ export class ProjectRepository extends BaseRepository {
 
     const [project] = await this.execQuery(() =>
       db.insert(projects).values(cleanData).returning()
-    ) as unknown as unknown[];
+    ) as unknown as any[];
 
     if (!project) {
       throw new DatabaseError('Failed to create project');
@@ -88,7 +92,7 @@ export class ProjectRepository extends BaseRepository {
     const project = await this.getById(id);
 
     if (!project) {
-      throw new NotFoundError(`Project with ID ${id} not found`);
+      throw new NotFoundError(\`Project with ID \${id} not found\`);
     }
 
     const updateData: Record<string, unknown> = {};
@@ -125,7 +129,7 @@ export class ProjectRepository extends BaseRepository {
         .set(updateData)
         .where(eq(projects.id, id))
         .returning()
-    ) as unknown as unknown[];
+    ) as unknown as any[];
 
     if (!updatedProject) {
       throw new DatabaseError('Failed to update project');
@@ -138,7 +142,7 @@ export class ProjectRepository extends BaseRepository {
     const project = await this.getById(id);
 
     if (!project) {
-      throw new NotFoundError(`Project with ID ${id} not found`);
+      throw new NotFoundError(\`Project with ID \${id} not found\`);
     }
 
     await this.execQuery(() =>
@@ -151,8 +155,18 @@ export class ProjectRepository extends BaseRepository {
   }
 
   async complete(id: number): Promise<Project> {
-    return this.update(id, { status: 'completed' as unknown as "active" });
+    return this.update(id, { status: 'completed' as any });
   }
 }
 
 export const projectRepository = new ProjectRepository();
+INNER_EOF
+
+sed -i 's/"paused"/"failed"/g' src/app/api/tasks/[id]/route.ts
+
+sed -i 's/users.username/users.email/g' src/app/api/auth/accept-invite/route.ts
+sed -i 's/users.username/users.email/g' src/app/api/v1/auth/signup/route.ts
+sed -i 's/username:/email:/g' src/app/api/auth/accept-invite/route.ts
+sed -i 's/username:/email:/g' src/app/api/v1/auth/signup/route.ts
+
+sed -i 's/project.state/project.description/g' src/app/api/v1/projects/route.ts

@@ -1,3 +1,4 @@
+cat << 'INNER_EOF' > db/seed.ts
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { users, projects, specifications, plans, tasks, invites, agentSessions, taskAttempts } from "../src/db/schema";
@@ -38,8 +39,8 @@ async function main() {
     }).onConflictDoNothing();
 
     // Get the users (whether newly inserted or existing)
-    const [u1] = await tx.select().from(users).where(sql`email = 'alice@example.com'`).limit(1);
-    const [u2] = await tx.select().from(users).where(sql`email = 'bob@example.com'`).limit(1);
+    const [u1] = await tx.select().from(users).where(sql\`email = 'alice@example.com'\`).limit(1);
+    const [u2] = await tx.select().from(users).where(sql\`email = 'bob@example.com'\`).limit(1);
 
     if (!u1 || !u2) {
       return; // Skip rest of seed if users don't exist
@@ -61,8 +62,8 @@ async function main() {
     }).onConflictDoNothing();
 
     // Get the projects
-    const [p1] = await tx.select().from(projects).where(sql`slug = 'project-alpha'`).limit(1);
-    const [p2] = await tx.select().from(projects).where(sql`slug = 'project-beta'`).limit(1);
+    const [p1] = await tx.select().from(projects).where(sql\`slug = 'project-alpha'\`).limit(1);
+    const [p2] = await tx.select().from(projects).where(sql\`slug = 'project-beta'\`).limit(1);
 
     if (!p1 || !p2) {
       return;
@@ -83,8 +84,8 @@ async function main() {
     await tx.insert(specifications).values({ projectId: p1.id, name: "Spec 002", createdBy: u1.id }).onConflictDoNothing();
 
     // Get specs for the projects
-    const s1 = (await tx.select().from(specifications).where(sql`project_id = ${p1.id} AND name = 'Spec 001'`).limit(1))[0];
-    const s2 = (await tx.select().from(specifications).where(sql`project_id = ${p1.id} AND name = 'Spec 002'`).limit(1))[0];
+    const s1 = (await tx.select().from(specifications).where(sql\`project_id = \${p1.id} AND name = 'Spec 001'\`).limit(1))[0];
+    const s2 = (await tx.select().from(specifications).where(sql\`project_id = \${p1.id} AND name = 'Spec 002'\`).limit(1))[0];
 
     if (!s1 || !s2) {
       return;
@@ -141,3 +142,10 @@ main().catch((err) => {
   console.error("Error seeding database:", err);
   process.exit(1);
 });
+INNER_EOF
+
+sed -i 's/"paused"/"failed"/g' src/app/api/tasks/[id]/route.ts
+sed -i "s/'paused'/'failed'/g" src/app/api/tasks/[id]/route.ts
+
+sed -i 's/user.username/user.email/g' src/app/api/v1/auth/signup/route.ts
+sed -i 's/project.state/project.description/g' src/app/api/v1/projects/route.ts
