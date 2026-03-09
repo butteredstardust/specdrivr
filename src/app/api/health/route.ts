@@ -5,6 +5,7 @@ import { sql, desc } from 'drizzle-orm';
 import { agentSessions } from '@/db/schema';
 
 export async function GET() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const result: any = {
     status: 'ok',
     git: 'unknown',
@@ -16,14 +17,14 @@ export async function GET() {
 
   try {
     await db.execute(sql`SELECT 1`);
-  } catch (err) {
+  } catch {
     result.db = 'error';
     result.status = 'error';
   }
 
   try {
     await redis.ping();
-  } catch (err) {
+  } catch {
     result.redis = 'error';
     result.status = 'error';
   }
@@ -37,7 +38,7 @@ export async function GET() {
       result.agent = diff < 90_000 ? 'ok' : 'degraded';
       if (result.agent === 'degraded' && result.status === 'ok') result.status = 'degraded';
     }
-  } catch (err) {
+  } catch {
     result.agent = 'error';
   }
 

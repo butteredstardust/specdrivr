@@ -5,7 +5,6 @@ import { specifications } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { requireRole } from '@/lib/rbac';
 import { PaginationSchema } from '@/lib/schemas/shared.schemas';
-import { z } from 'zod';
 
 export async function GET(req: Request, context: { params: Promise<{ id: string }> }) {
   try {
@@ -44,7 +43,7 @@ export async function GET(req: Request, context: { params: Promise<{ id: string 
         counts
       }
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch specifications' } }, { status: 500 });
   }
 }
