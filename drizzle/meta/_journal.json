@@ -15,6 +15,20 @@
       "when": 1773046942049,
       "tag": "0001_rare_cable",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1773082776878,
+      "tag": "0002_schema_update",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1773083226682,
+      "tag": "0003_careless_mauler",
+      "breakpoints": true
     }
   ]
 }

@@ -1,405 +1,475 @@
-import { pgTable, serial, text, timestamp, boolean, jsonb, integer, pgEnum, uniqueIndex } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  serial,
+  text,
+  timestamp,
+  boolean,
+  jsonb,
+  integer,
+  pgEnum,
+  uniqueIndex,
+  index,
+  doublePrecision,
+} from 'drizzle-orm/pg-core';
 
-// Status enums
-export const planStatusEnum = pgEnum('plan_status', ['draft', 'active', 'completed', 'archived', 'pending_approval']);
-export const projectStatusEnum = pgEnum('project_status', ['active', 'archived']);
-export const taskStatusEnum = pgEnum('task_status', ['todo', 'in_progress', 'done', 'blocked', 'paused', 'skipped']);
-export const specStatusEnum = pgEnum('spec_status', ['draft', 'active', 'completed', 'stalled']);
-export const logLevelEnum = pgEnum('log_level', ['debug', 'info', 'warn', 'error']);
-export const agentStatusEnum = pgEnum('agent_status', ['idle', 'running', 'paused', 'stopped', 'error']);
-export const userRoleEnum = pgEnum('user_role', ['admin', 'developer', 'viewer']);
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
 
+export const planStatusEnum = pgEnum('plan_status', [
+  'pending_approval',
+  'approved',
+  'rejected',
+  'abandoned',
+  'changes_requested',
+  'complete',
+]);
 
-// Invites table
-export const invites = pgTable('invites', {
+export const specStatusEnum = pgEnum('spec_status', [
+  'drafting',
+  'pending_plan',
+  'pending_approval',
+  'executing',
+  'complete',
+  'stalled',
+  'archived',
+]);
+
+export const taskStatusEnum = pgEnum('task_status', [
+  'todo',
+  'in_progress',
+  'done',
+  'blocked',
+  'failed',
+  'skipped',
+]);
+
+export const sessionStatusEnum = pgEnum('session_status', [
+  'running',
+  'paused',
+  'completed',
+  'failed',
+  'cancelled',
+]);
+
+export const projectStatusEnum = pgEnum('project_status', [
+  'active',
+  'archived',
+]);
+
+export const logLevelEnum = pgEnum('log_level', [
+  'debug',
+  'info',
+  'warn',
+  'error',
+]);
+
+export const userRoleEnum = pgEnum('user_role', [
+  'owner',
+  'admin',
+  'member',
+  'viewer',
+]);
+
+export const taskAttemptStatusEnum = pgEnum('task_attempt_status', [
+  'running',
+  'succeeded',
+  'failed',
+]);
+
+// ---------------------------------------------------------------------------
+// Users
+// ---------------------------------------------------------------------------
+
+export const users = pgTable('users', {
   id: serial('id').primaryKey(),
-  projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
-  email: text('email').notNull(),
+  name: text('name').notNull(),
+  email: text('email').notNull().unique(),
+  passwordHash: text('password_hash').notNull(),
+  avatarUrl: text('avatar_url'),
+  timezone: text('timezone').default('UTC'),
+  locale: text('locale').default('en-US'),
+  onboardingStep: integer('onboarding_step').default(0),
+  theme: text('theme').default('system'),
   role: userRoleEnum('role').notNull().default('viewer'),
-  invitedBy: integer('invited_by').notNull().references(() => users.id),
-  resendCount: integer('resend_count').notNull().default(0),
-  lastResentAt: timestamp('last_resent_at', { withTimezone: true }),
-  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  isActive: boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  lastActiveAt: timestamp('last_active_at', { withTimezone: true }),
 });
 
-// Projects table
+// ---------------------------------------------------------------------------
+// Projects
+// ---------------------------------------------------------------------------
+
 export const projects = pgTable('projects', {
   id: serial('id').primaryKey(),
   name: text('name').notNull(),
   slug: text('slug').notNull().unique(),
-  avatarColor: text('avatar_color'),
+  description: text('description'),
+  repositoryUrl: text('repository_url'),
+  repositoryBranch: text('repository_branch').default('main'),
+  avatarColor: text('avatar_color').default('7c5cfc'),
   isDemo: boolean('is_demo').notNull().default(false),
-  mission: text('mission'),
-  description: text('description'),
-  constitution: text('constitution'), // markdown content
-  techStack: jsonb('tech_stack'),
-  basePath: text('base_path'),
-  gitBranch: text('git_branch').default('main'),
-  gitStrategy: text('git_strategy'), // e.g., 'merge', 'rebase', 'squash'
-  agentLastHeartbeatAt: timestamp('agent_last_heartbeat_at', { withTimezone: true }),
-  state: jsonb('state').default({
-    decisions: [],
-    blockers: [],
-    last_position: null,
-    context_summary: null
-  }),
-  gitConfig: jsonb('git_config').default({
-    enabled: false,
-    provider: 'github',
-    repo_url: null,
-    default_branch: 'main',
-    branching_strategy: 'none',
-    phase_branch_template: 'specdriver/phase-{phase_id}-{slug}',
-    milestone_branch_template: 'specdriver/{milestone}-{slug}',
-    webhook_secret: null,
-    commit_message_template: '{type}({plan_id}-{task_id}): {description}'
-  }),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-  // Agent control fields
-  agentStatus: agentStatusEnum('agent_status').notNull().default('idle'),
-  agentStartedAt: timestamp('agent_started_at', { withTimezone: true }),
-  agentStoppedAt: timestamp('agent_stopped_at', { withTimezone: true }),
-  createdBy: integer('created_by').references(() => users.id),
-  createdByUserId: integer('created_by_user_id').references(() => users.id),
-  // Project status
   status: projectStatusEnum('status').notNull().default('active'),
-}, (table) => {
-  return {
-    slugIdx: uniqueIndex('project_slug_idx').on(table.slug),
-  };
-});
-
-// Specifications table
-export const specifications = pgTable('specifications', {
-  status: specStatusEnum('status').notNull().default('draft'),
-  id: serial('id').primaryKey(),
-  projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
-  content: text('content').notNull(), // markdown specification
-  version: text('version').notNull().default('1.0'),
-  isActive: boolean('is_active').notNull().default(true),
+  createdBy: integer('created_by').references(() => users.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-  createdByUserId: integer('created_by_user_id').references(() => users.id),
-});
+}, (table) => ({
+  slugIdx: uniqueIndex('project_slug_idx').on(table.slug),
+  createdByIdx: index('project_created_by_idx').on(table.createdBy),
+}));
 
-// Plans table
-export const plans = pgTable('plans', {
-  id: serial('id').primaryKey(),
-  specId: integer('spec_id').notNull().references(() => specifications.id, { onDelete: 'cascade' }),
-  architectureDecisions: jsonb('architecture_decisions'),
-  intent: text('intent'),
-  phaseLabel: text('phase_label'),
-  status: planStatusEnum('status').notNull().default('draft'),
-  generationDurationMs: integer('generation_duration_ms'),
-  generationError: text('generation_error'),
-  modelVersion: text('model_version'),
-  taskCount: integer('task_count').default(0),
-  totalEstimatedMinutes: integer('total_estimated_minutes'),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  createdByUserId: integer('created_by_user_id').references(() => users.id),
-});
+// ---------------------------------------------------------------------------
+// Project Members
+// ---------------------------------------------------------------------------
 
-// Tasks table
-export const tasks = pgTable('tasks', {
-  id: serial('id').primaryKey(),
-  planId: integer('plan_id').references(() => plans.id, { onDelete: 'cascade' }),
-  status: taskStatusEnum('status').notNull().default('todo'),
-  description: text('description'),
-  filesInvolved: jsonb('files_involved'), // array of file paths
-  estimatedMinutes: integer('estimated_minutes'),
-  actualDurationMs: integer('actual_duration_ms'),
-  gitBranch: text('git_branch'),
-  gitCommitHash: text('git_commit_hash'),
-  expectedFiles: jsonb('expected_files'),
-  agentVersion: text('agent_version'),
-  promptTokens: integer('prompt_tokens'),
-  completionTokens: integer('completion_tokens'),
-  totalTokens: integer('total_tokens'),
-  totalCostUsd: integer('total_cost_usd'),
-  blockedReason: text('blocked_reason'),
-  priority: integer('priority').notNull().default(1),
-  // dependencyTaskId: integer('dependency_task_id').references(() => tasks.id), // Circular reference
-  dependencyTaskId: integer('dependency_task_id'),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-  // Agent control fields
-  retryCount: integer('retry_count').notNull().default(0),
-  notes: text('notes'),
-  completedAt: timestamp('completed_at', { withTimezone: true }),
-  // Task verification fields
-  estimateHours: integer('estimate_hours'),
-  verifyCommand: text('verify_command'),
-  doneCriteria: text('done_criteria'),
-  resumeContext: jsonb('resume_context'),
-  recommendedModel: text('recommended_model').default('sonnet'),
-  createdByUserId: integer('created_by_user_id').references(() => users.id),
-});
-
-
-// Task Attempts table
-export const taskAttempts = pgTable('task_attempts', {
-  id: serial('id').primaryKey(),
-  taskId: integer('task_id').notNull().references(() => tasks.id, { onDelete: 'cascade' }),
-  seq: integer('seq').notNull(),
-  logLines: jsonb('log_lines'), // Make sure this is parameterized properly in drizzle
-  startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
-  endedAt: timestamp('ended_at', { withTimezone: true }),
-  success: boolean('success'),
-});
-
-// Test_Results table
-export const testResults = pgTable('test_results', {
-  id: serial('id').primaryKey(),
-  taskId: integer('task_id').notNull().references(() => tasks.id, { onDelete: 'cascade' }),
-  success: boolean('success').notNull(),
-  logs: text('logs'),
-  timestamp: timestamp('timestamp', { withTimezone: true }).notNull().defaultNow(),
-  createdByUserId: integer('created_by_user_id').references(() => users.id),
-});
-
-
-// File Changes table
-export const fileChanges = pgTable('file_changes', {
-  id: serial('id').primaryKey(),
-  attemptId: integer('attempt_id').notNull().references(() => taskAttempts.id, { onDelete: 'cascade' }),
-  filePath: text('file_path').notNull(),
-  diff: text('diff'),
-  action: text('action').notNull(), // 'added', 'modified', 'deleted'
-});
-
-// Agent_Logs table
-export const agentLogs = pgTable('agent_logs', {
-  id: serial('id').primaryKey(),
-  taskId: integer('task_id').notNull().references(() => tasks.id, { onDelete: 'cascade' }),
-  projectId: integer('project_id'), // denormalized for faster filtering
-  level: logLevelEnum('level').notNull().default('info'),
-  isInternal: boolean('is_internal').default(false),
-  message: text('message').notNull(),
-  context: jsonb('context'), // Additional context like file, function, etc.
-  timestamp: timestamp('timestamp', { withTimezone: true }).notNull().defaultNow(),
-});
-
-
-// Agent Sessions table
-export const agentSessions = pgTable('agent_sessions', {
-  id: serial('id').primaryKey(),
-  projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
-  planId: integer('plan_id').references(() => plans.id),
-  gitBranch: text('git_branch'),
-  promptTokens: integer('prompt_tokens').default(0),
-  completionTokens: integer('completion_tokens').default(0),
-  totalTokens: integer('total_tokens').default(0),
-  status: agentStatusEnum('status').notNull().default('running'),
-  startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
-  endedAt: timestamp('ended_at', { withTimezone: true }),
-  error: text('error'),
-});
-
-// Users table
-export const users = pgTable('users', {
-  id: serial('id').primaryKey(),
-  username: text('username').notNull().unique(),
-  passwordHash: text('password_hash').notNull(),
-  avatarUrl: text('avatar_url'),
-  timezone: text('timezone'),
-  locale: text('locale').default('en'),
-  onboardingStep: integer('onboarding_step').default(0),
-  avatarId: integer('avatar_id').notNull().default(1),
-  isActive: boolean('is_active').notNull().default(true),
-  isAdmin: boolean('is_admin').notNull().default(false),
-  role: userRoleEnum('role').notNull().default('viewer'),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-  lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
-});
-
-
-// Agent Config table
-export const agentConfig = pgTable('agent_config', {
-  id: serial('id').primaryKey(),
-  projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
-  fileGlobBoundaries: jsonb('file_glob_boundaries').default([]),
-  model: text('model').notNull().default('sonnet'),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-});
-
-// Git Commits table
-export const gitCommits = pgTable('git_commits', {
-  id: serial('id').primaryKey(),
-  projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
-  commitSha: text('commit_sha').notNull(),
-  branch: text('branch').notNull(),
-  message: text('message').notNull(),
-  author: text('author'),
-  metadata: jsonb('metadata'),
-  committedAt: timestamp('committed_at', { withTimezone: true }).notNull().defaultNow(),
-  timestamp: timestamp('timestamp', { withTimezone: true }).notNull().defaultNow(),
-  taskId: integer('task_id').references(() => tasks.id, { onDelete: 'set null' }),
-  planId: integer('plan_id').references(() => plans.id, { onDelete: 'set null' }),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  createdByUserId: integer('created_by_user_id').references(() => users.id),
-});
-
-
-// Webhook Deliveries table
-export const webhookDeliveries = pgTable('webhook_deliveries', {
-  id: serial('id').primaryKey(),
-  projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
-  event: text('event').notNull(),
-  payload: jsonb('payload').notNull(),
-  url: text('url').notNull(),
-  status: text('status').notNull(),
-  statusCode: integer('status_code'),
-  response: text('response'),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  deliveredAt: timestamp('delivered_at', { withTimezone: true }),
-});
-
-// Agent Tokens table
-export const agentTokens = pgTable('agent_tokens', {
-  id: serial('id').primaryKey(),
-  projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
-  name: text('name').notNull(),
-  tokenHash: text('token_hash').notNull().unique(),
-  createdByUserId: integer('created_by_user_id').references(() => users.id),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-  lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
-  revokedAt: timestamp('revoked_at', { withTimezone: true }),
-  preferredModel: text('preferred_model').default('sonnet'),
-});
-
-
-// Usage Snapshots table
-export const usageSnapshots = pgTable('usage_snapshots', {
-  id: serial('id').primaryKey(),
-  projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
-  date: timestamp('date', { withTimezone: true }).notNull(),
-  totalTokens: integer('total_tokens').notNull().default(0),
-  totalCostUsd: integer('total_cost_usd').notNull().default(0),
-  taskCount: integer('task_count').notNull().default(0),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-}, (table) => {
-  return {
-    uniqueDateProject: uniqueIndex('usage_date_project_idx').on(table.projectId, table.date)
-  };
-});
-
-// API Request Logs table
-export const apiRequestLogs = pgTable('api_request_logs', {
-  id: serial('id').primaryKey(),
-  tokenId: integer('token_id').references(() => agentTokens.id),
-  endpoint: text('endpoint').notNull(),
-  method: text('method').notNull(),
-  statusCode: integer('status_code').notNull(),
-  durationMs: integer('duration_ms').notNull(),
-  projectId: integer('project_id').references(() => projects.id),
-  requestedAt: timestamp('requested_at', { withTimezone: true }).defaultNow(),
-});
-
-
-// Audit Log table
-export const auditLog = pgTable('audit_log', {
-  id: serial('id').primaryKey(),
-  projectId: integer('project_id').references(() => projects.id),
-  userId: integer('user_id').references(() => users.id),
-  action: text('action').notNull(),
-  resource: text('resource').notNull(),
-  resourceId: text('resource_id'),
-  details: jsonb('details'),
-  ipAddress: text('ip_address'),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-});
-
-// Types for insertion
-export type ProjectInsert = typeof projects.$inferInsert;
-export type ProjectSelect = typeof projects.$inferSelect;
-export type SpecificationInsert = typeof specifications.$inferInsert;
-export type SpecificationSelect = typeof specifications.$inferSelect;
-export type PlanInsert = typeof plans.$inferInsert;
-export type PlanSelect = typeof plans.$inferSelect;
-export type TaskInsert = typeof tasks.$inferInsert;
-export type TaskSelect = typeof tasks.$inferSelect;
-export type TestResultInsert = typeof testResults.$inferInsert;
-export type TestResultSelect = typeof testResults.$inferSelect;
-export type AgentLogInsert = typeof agentLogs.$inferInsert;
-export type AgentLogSelect = typeof agentLogs.$inferSelect;
-export type UserInsert = typeof users.$inferInsert;
-export type UserSelect = typeof users.$inferSelect;
-export type GitCommitInsert = typeof gitCommits.$inferInsert;
-export type GitCommitSelect = typeof gitCommits.$inferSelect;
-export type AgentTokenInsert = typeof agentTokens.$inferInsert;
-export type AgentTokenSelect = typeof agentTokens.$inferSelect;
-export type ApiRequestLogInsert = typeof apiRequestLogs.$inferInsert;
-export type ApiRequestLogSelect = typeof apiRequestLogs.$inferSelect;
-
-// Enum types for use in applications
-export type TaskStatus = 'todo' | 'in_progress' | 'done' | 'blocked' | 'paused' | 'skipped';
-export type PlanStatus = 'draft' | 'active' | 'completed' | 'archived';
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
-export type AgentStatus = 'idle' | 'running' | 'paused' | 'stopped' | 'error';
-export type UserRole = 'admin' | 'developer' | 'viewer';
-
-export type InviteInsert = typeof invites.$inferInsert;
-export type InviteSelect = typeof invites.$inferSelect;
-export type TaskAttemptInsert = typeof taskAttempts.$inferInsert;
-export type TaskAttemptSelect = typeof taskAttempts.$inferSelect;
-export type FileChangeInsert = typeof fileChanges.$inferInsert;
-export type FileChangeSelect = typeof fileChanges.$inferSelect;
-export type AgentSessionInsert = typeof agentSessions.$inferInsert;
-export type AgentSessionSelect = typeof agentSessions.$inferSelect;
-export type AgentConfigInsert = typeof agentConfig.$inferInsert;
-export type AgentConfigSelect = typeof agentConfig.$inferSelect;
-export type WebhookDeliveryInsert = typeof webhookDeliveries.$inferInsert;
-export type WebhookDeliverySelect = typeof webhookDeliveries.$inferSelect;
-export type UsageSnapshotInsert = typeof usageSnapshots.$inferInsert;
-export type UsageSnapshotSelect = typeof usageSnapshots.$inferSelect;
-export type AuditLogInsert = typeof auditLog.$inferInsert;
-export type AuditLogSelect = typeof auditLog.$inferSelect;
-
-// --- Added tables for full API support ---
-
-// Project Members table
 export const projectMembers = pgTable('project_members', {
   id: serial('id').primaryKey(),
   projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
   userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   role: userRoleEnum('role').notNull().default('viewer'),
+  status: text('status').notNull().default('active'), // active | invited | suspended
+  invitedAt: timestamp('invited_at', { withTimezone: true }).notNull().defaultNow(),
+  joinedAt: timestamp('joined_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-}, (table) => {
-  return {
-    uniqueProjectUser: uniqueIndex('project_user_idx').on(table.projectId, table.userId)
-  };
+}, (table) => ({
+  uniqueProjectUser: uniqueIndex('project_user_idx').on(table.projectId, table.userId),
+}));
+
+// ---------------------------------------------------------------------------
+// Invites
+// ---------------------------------------------------------------------------
+
+export const invites = pgTable('invites', {
+  id: serial('id').primaryKey(),
+  projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  email: text('email').notNull(),
+  role: userRoleEnum('role').notNull().default('viewer'),
+  token: text('token').notNull().unique(),
+  invitedBy: integer('invited_by').notNull().references(() => users.id),
+  resendCount: integer('resend_count').notNull().default(0),
+  lastResentAt: timestamp('last_resent_at', { withTimezone: true }),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  usedAt: timestamp('used_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
-// Specification Versions table
+// ---------------------------------------------------------------------------
+// Agent Tokens (user API tokens)
+// ---------------------------------------------------------------------------
+
+export const agentTokens = pgTable('agent_tokens', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  projectId: integer('project_id').references(() => projects.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  tokenHash: text('token_hash').notNull().unique(),
+  prefix: text('prefix').notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }),
+  lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+// ---------------------------------------------------------------------------
+// Specifications
+// ---------------------------------------------------------------------------
+
+export const specifications = pgTable('specifications', {
+  id: serial('id').primaryKey(),
+  projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  status: specStatusEnum('status').notNull().default('drafting'),
+  currentVersionId: integer('current_version_id'), // FK set after first version created
+  createdBy: integer('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  projectStatusIdx: index('spec_project_status_idx').on(table.projectId, table.status),
+}));
+
+// ---------------------------------------------------------------------------
+// Spec Versions
+// ---------------------------------------------------------------------------
+
 export const specVersions = pgTable('spec_versions', {
   id: serial('id').primaryKey(),
   specId: integer('spec_id').notNull().references(() => specifications.id, { onDelete: 'cascade' }),
   versionNumber: integer('version_number').notNull(),
-  content: text('content').notNull(),
+  markdownContent: text('markdown_content').notNull(),
+  createdBy: integer('created_by').references(() => users.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  createdByUserId: integer('created_by_user_id').references(() => users.id),
-}, (table) => {
-  return {
-    uniqueSpecVersion: uniqueIndex('spec_version_idx').on(table.specId, table.versionNumber)
-  };
+}, (table) => ({
+  uniqueSpecVersion: uniqueIndex('spec_version_idx').on(table.specId, table.versionNumber),
+}));
+
+// ---------------------------------------------------------------------------
+// Plans
+// ---------------------------------------------------------------------------
+
+export const plans = pgTable('plans', {
+  id: serial('id').primaryKey(),
+  specId: integer('spec_id').notNull().references(() => specifications.id, { onDelete: 'cascade' }),
+  specVersionId: integer('spec_version_id').references(() => specVersions.id, { onDelete: 'set null' }),
+  status: planStatusEnum('status').notNull().default('pending_approval'),
+  markdownContent: text('markdown_content'),
+  reviewerNotes: text('reviewer_notes'),
+  approvedAt: timestamp('approved_at', { withTimezone: true }),
+  approvedBy: integer('approved_by').references(() => users.id, { onDelete: 'set null' }),
+  generationDurationMs: integer('generation_duration_ms'),
+  generationError: text('generation_error'),
+  modelVersion: text('model_version'),
+  taskCount: integer('task_count').default(0),
+  totalEstimatedMinutes: integer('total_estimated_minutes'),
+  createdBy: integer('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  specStatusIdx: index('plan_spec_status_idx').on(table.specId, table.status),
+}));
+
+// ---------------------------------------------------------------------------
+// Plan Reviews (audit trail)
+// ---------------------------------------------------------------------------
+
+export const planReviews = pgTable('plan_reviews', {
+  id: serial('id').primaryKey(),
+  planId: integer('plan_id').notNull().references(() => plans.id, { onDelete: 'cascade' }),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'set null' }),
+  action: text('action').notNull(), // approved | rejected | changes_requested | abandoned
+  notes: text('notes'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
-// Notifications table
+// ---------------------------------------------------------------------------
+// Tasks
+// ---------------------------------------------------------------------------
+
+export const tasks = pgTable('tasks', {
+  id: serial('id').primaryKey(),
+  planId: integer('plan_id').notNull().references(() => plans.id, { onDelete: 'cascade' }),
+  specId: integer('spec_id').references(() => specifications.id, { onDelete: 'set null' }),
+  externalId: text('external_id').notNull(), // e.g. "T-101" — display identifier
+  title: text('title').notNull(),
+  description: text('description'),
+  status: taskStatusEnum('status').notNull().default('todo'),
+  dependsOn: text('depends_on').array().default([]), // array of externalIds e.g. ["T-099", "T-100"]
+  executionOrder: integer('execution_order').notNull().default(0),
+  blockedReason: text('blocked_reason'),
+  humanContext: text('human_context'),
+  forcedDone: boolean('forced_done').notNull().default(false),
+  attemptCount: integer('attempt_count').notNull().default(0),
+  currentAttemptId: integer('current_attempt_id'), // set to latest attempt FK after start
+  verificationPassed: boolean('verification_passed'),
+  estimatedMinutes: integer('estimated_minutes'),
+  actualDurationMs: integer('actual_duration_ms'),
+  gitBranch: text('git_branch'),
+  gitCommitHash: text('git_commit_hash'),
+  expectedFiles: text('expected_files').array().default([]),
+  agentVersion: text('agent_version'),
+  promptTokensUsed: integer('prompt_tokens_used'),
+  completionTokensUsed: integer('completion_tokens_used'),
+  totalCostUsd: doublePrecision('total_cost_usd'),
+  recommendedModel: text('recommended_model').default('sonnet'),
+  startedAt: timestamp('started_at', { withTimezone: true }),
+  completedAt: timestamp('completed_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  planStatusIdx: index('task_plan_status_idx').on(table.planId, table.status),
+  specIdx: index('task_spec_idx').on(table.specId),
+  externalIdIdx: index('task_external_id_idx').on(table.planId, table.externalId),
+}));
+
+// ---------------------------------------------------------------------------
+// Task Attempts
+// ---------------------------------------------------------------------------
+
+export const taskAttempts = pgTable('task_attempts', {
+  id: serial('id').primaryKey(),
+  taskId: integer('task_id').notNull().references(() => tasks.id, { onDelete: 'cascade' }),
+  seq: integer('seq').notNull(),
+  status: taskAttemptStatusEnum('status').notNull().default('running'),
+  logLines: jsonb('log_lines').default([]),
+  agentVersion: text('agent_version'),
+  promptTokensUsed: integer('prompt_tokens_used'),
+  completionTokensUsed: integer('completion_tokens_used'),
+  exitCode: integer('exit_code'),
+  workingDirectory: text('working_directory'),
+  errorMessage: text('error_message'),
+  startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
+  endedAt: timestamp('ended_at', { withTimezone: true }),
+}, (table) => ({
+  taskIdx: index('attempt_task_idx').on(table.taskId),
+}));
+
+// ---------------------------------------------------------------------------
+// File Changes
+// ---------------------------------------------------------------------------
+
+export const fileChanges = pgTable('file_changes', {
+  id: serial('id').primaryKey(),
+  taskId: integer('task_id').notNull().references(() => tasks.id, { onDelete: 'cascade' }),
+  attemptId: integer('attempt_id').references(() => taskAttempts.id, { onDelete: 'set null' }),
+  filePath: text('file_path').notNull(),
+  changeType: text('change_type').notNull(), // created | modified | deleted
+  diff: text('diff'),
+  isBinary: boolean('is_binary').notNull().default(false),
+  language: text('language'),
+  sizeBytes: integer('size_bytes'),
+  linesAdded: integer('lines_added').default(0),
+  linesRemoved: integer('lines_removed').default(0),
+  previousHash: text('previous_hash'),
+  newHash: text('new_hash'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  taskIdx: index('file_change_task_idx').on(table.taskId),
+}));
+
+// ---------------------------------------------------------------------------
+// Agent Sessions
+// ---------------------------------------------------------------------------
+
+export const agentSessions = pgTable('agent_sessions', {
+  id: serial('id').primaryKey(),
+  specId: integer('spec_id').references(() => specifications.id, { onDelete: 'set null' }),
+  planId: integer('plan_id').references(() => plans.id, { onDelete: 'set null' }),
+  projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  status: sessionStatusEnum('status').notNull().default('running'),
+  currentTaskId: integer('current_task_id'),
+  lastHeartbeatAt: timestamp('last_heartbeat_at', { withTimezone: true }),
+  tasksExecuted: integer('tasks_executed').notNull().default(0),
+  tasksSucceeded: integer('tasks_succeeded').notNull().default(0),
+  tasksFailed: integer('tasks_failed').notNull().default(0),
+  totalPromptTokens: integer('total_prompt_tokens').default(0),
+  totalCompletionTokens: integer('total_completion_tokens').default(0),
+  totalCostUsd: doublePrecision('total_cost_usd').default(0),
+  pauseCount: integer('pause_count').notNull().default(0),
+  agentVersion: text('agent_version'),
+  gitBaseBranch: text('git_base_branch'),
+  gitBaseCommit: text('git_base_commit'),
+  gitHeadCommit: text('git_head_commit'),
+  errorMessage: text('error_message'),
+  startedBy: integer('started_by').references(() => users.id, { onDelete: 'set null' }),
+  startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
+  endedAt: timestamp('ended_at', { withTimezone: true }),
+}, (table) => ({
+  projectStatusIdx: index('session_project_status_idx').on(table.projectId, table.status),
+  specIdx: index('session_spec_idx').on(table.specId),
+}));
+
+// ---------------------------------------------------------------------------
+// Agent Events (session-scoped event log — feeds Mission Control event feed)
+// ---------------------------------------------------------------------------
+
+export const agentEvents = pgTable('agent_events', {
+  id: serial('id').primaryKey(),
+  sessionId: integer('session_id').notNull().references(() => agentSessions.id, { onDelete: 'cascade' }),
+  specId: integer('spec_id').references(() => specifications.id, { onDelete: 'set null' }),
+  taskId: integer('task_id').references(() => tasks.id, { onDelete: 'set null' }),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'set null' }),
+  eventType: text('event_type').notNull(),
+  // PLAN_GENERATED | PLAN_APPROVED | PLAN_REJECTED | CHANGES_REQUESTED
+  // TASK_START | TASK_DONE | TASK_BLOCKED | TASK_FAILED | TASK_RETRIED
+  // SESSION_PAUSED | SESSION_RESUMED | SESSION_COMPLETED | SESSION_FAILED | SESSION_CANCELLED
+  message: text('message').notNull(),
+  metadata: jsonb('metadata').default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  sessionIdx: index('event_session_idx').on(table.sessionId),
+  sessionTypeIdx: index('event_session_type_idx').on(table.sessionId, table.eventType),
+}));
+
+// ---------------------------------------------------------------------------
+// Agent Logs (task-scoped execution output — feeds terminal in Task Drawer)
+// ---------------------------------------------------------------------------
+
+export const agentLogs = pgTable('agent_logs', {
+  id: serial('id').primaryKey(),
+  taskId: integer('task_id').notNull().references(() => tasks.id, { onDelete: 'cascade' }),
+  sessionId: integer('session_id').references(() => agentSessions.id, { onDelete: 'set null' }),
+  projectId: integer('project_id'),
+  level: logLevelEnum('level').notNull().default('info'),
+  isInternal: boolean('is_internal').default(false),
+  message: text('message').notNull(),
+  context: jsonb('context'),
+  timestamp: timestamp('timestamp', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  taskIdx: index('agent_log_task_idx').on(table.taskId),
+}));
+
+// ---------------------------------------------------------------------------
+// Agent Config (one row per project)
+// ---------------------------------------------------------------------------
+
+export const agentConfig = pgTable('agent_config', {
+  id: serial('id').primaryKey(),
+  projectId: integer('project_id').notNull().unique().references(() => projects.id, { onDelete: 'cascade' }),
+  modelId: text('model_id').notNull().default('claude-sonnet-4-6'),
+  planModelId: text('plan_model_id').notNull().default('claude-opus-4-6'),
+  maxConcurrentTasks: integer('max_concurrent_tasks').notNull().default(3),
+  taskTimeoutSeconds: integer('task_timeout_seconds').notNull().default(300),
+  maxRetriesPerTask: integer('max_retries_per_task').notNull().default(2),
+  retryDelaySeconds: integer('retry_delay_seconds').notNull().default(30),
+  requireApproval: boolean('require_approval').notNull().default(true),
+  autoGeneratePlan: boolean('auto_generate_plan').notNull().default(false),
+  branchPrefix: text('branch_prefix').notNull().default('daemon'),
+  commitMessagePrefix: text('commit_message_prefix').notNull().default('feat'),
+  allowedFileGlobs: text('allowed_file_globs').array().default([]),
+  forbiddenFileGlobs: text('forbidden_file_globs').array().default([]),
+  testCommand: text('test_command'),
+  lintCommand: text('lint_command'),
+  setupCommand: text('setup_command'),
+  maxDiffSizeKb: integer('max_diff_size_kb').notNull().default(500),
+  prAutoCreate: boolean('pr_auto_create').notNull().default(false),
+  prTargetBranch: text('pr_target_branch').notNull().default('main'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+// ---------------------------------------------------------------------------
+// Notifications
+// ---------------------------------------------------------------------------
+
 export const notifications = pgTable('notifications', {
   id: serial('id').primaryKey(),
   userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   type: text('type').notNull(),
-  message: text('message').notNull(),
-  read: boolean('read').notNull().default(false),
-  link: text('link'),
+  // plan_generated | plan_approved | plan_rejected | changes_requested
+  // session_complete | session_failed | task_blocked | member_invited | role_changed
+  title: text('title').notNull(),
+  body: text('body').notNull(),
+  linkUrl: text('link_url').notNull(),
+  readAt: timestamp('read_at', { withTimezone: true }),
+  actorUserId: integer('actor_user_id').references(() => users.id, { onDelete: 'set null' }),
+  projectId: integer('project_id').references(() => projects.id, { onDelete: 'cascade' }),
+  resourceType: text('resource_type'),
+  resourceId: text('resource_id'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-});
+}, (table) => ({
+  userUnreadIdx: index('notification_user_unread_idx').on(table.userId, table.readAt),
+}));
 
-// Webhooks table
+// ---------------------------------------------------------------------------
+// Notification Preferences
+// ---------------------------------------------------------------------------
+
+export const notificationPreferences = pgTable('notification_preferences', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  eventType: text('event_type').notNull(),
+  emailEnabled: boolean('email_enabled').notNull().default(false),
+  inAppEnabled: boolean('in_app_enabled').notNull().default(true),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  uniqueUserEvent: uniqueIndex('notif_pref_user_event_idx').on(table.userId, table.eventType),
+}));
+
+// ---------------------------------------------------------------------------
+// Webhooks
+// ---------------------------------------------------------------------------
+
 export const webhooks = pgTable('webhooks', {
   id: serial('id').primaryKey(),
   projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
@@ -410,11 +480,173 @@ export const webhooks = pgTable('webhooks', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
+// ---------------------------------------------------------------------------
+// Webhook Deliveries
+// ---------------------------------------------------------------------------
+
+export const webhookDeliveries = pgTable('webhook_deliveries', {
+  id: serial('id').primaryKey(),
+  webhookId: integer('webhook_id').references(() => webhooks.id, { onDelete: 'set null' }),
+  projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  eventType: text('event_type').notNull(),
+  payload: jsonb('payload').notNull(),
+  requestHeaders: jsonb('request_headers'),
+  responseStatus: integer('response_status'),
+  responseBody: text('response_body'),
+  durationMs: integer('duration_ms'),
+  attempt: integer('attempt').notNull().default(1),
+  status: text('status').notNull().default('pending'), // pending | delivered | failed | exhausted
+  nextRetryAt: timestamp('next_retry_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  deliveredAt: timestamp('delivered_at', { withTimezone: true }),
+});
+
+// ---------------------------------------------------------------------------
+// Usage Snapshots
+// ---------------------------------------------------------------------------
+
+export const usageSnapshots = pgTable('usage_snapshots', {
+  id: serial('id').primaryKey(),
+  projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  date: timestamp('date', { withTimezone: true }).notNull(),
+  sessionsRun: integer('sessions_run').notNull().default(0),
+  tasksExecuted: integer('tasks_executed').notNull().default(0),
+  tasksSucceeded: integer('tasks_succeeded').notNull().default(0),
+  tasksFailed: integer('tasks_failed').notNull().default(0),
+  promptTokens: integer('prompt_tokens').notNull().default(0),
+  completionTokens: integer('completion_tokens').notNull().default(0),
+  estimatedCostUsd: doublePrecision('estimated_cost_usd').notNull().default(0),
+  specsCreated: integer('specs_created').notNull().default(0),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  uniqueDateProject: uniqueIndex('usage_date_project_idx').on(table.projectId, table.date),
+}));
+
+// ---------------------------------------------------------------------------
+// Git Commits
+// ---------------------------------------------------------------------------
+
+export const gitCommits = pgTable('git_commits', {
+  id: serial('id').primaryKey(),
+  projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  taskId: integer('task_id').references(() => tasks.id, { onDelete: 'set null' }),
+  commitSha: text('commit_sha').notNull(),
+  branch: text('branch').notNull(),
+  message: text('message').notNull(),
+  author: text('author'),
+  metadata: jsonb('metadata'),
+  committedAt: timestamp('committed_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+// ---------------------------------------------------------------------------
+// API Request Logs
+// ---------------------------------------------------------------------------
+
+export const apiRequestLogs = pgTable('api_request_logs', {
+  id: serial('id').primaryKey(),
+  tokenId: integer('token_id').references(() => agentTokens.id),
+  projectId: integer('project_id').references(() => projects.id),
+  endpoint: text('endpoint').notNull(),
+  method: text('method').notNull(),
+  statusCode: integer('status_code').notNull(),
+  durationMs: integer('duration_ms').notNull(),
+  requestedAt: timestamp('requested_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+// ---------------------------------------------------------------------------
+// Audit Log
+// ---------------------------------------------------------------------------
+
+export const auditLog = pgTable('audit_log', {
+  id: serial('id').primaryKey(),
+  projectId: integer('project_id').references(() => projects.id, { onDelete: 'cascade' }),
+  userId: integer('user_id').references(() => users.id),
+  action: text('action').notNull(),
+  targetType: text('target_type'),
+  targetId: text('target_id'),
+  detail: jsonb('detail'),
+  ipAddress: text('ip_address'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  projectIdx: index('audit_project_idx').on(table.projectId),
+}));
+
+// ---------------------------------------------------------------------------
+// Test Results
+// ---------------------------------------------------------------------------
+
+export const testResults = pgTable('test_results', {
+  id: serial('id').primaryKey(),
+  taskId: integer('task_id').notNull().references(() => tasks.id, { onDelete: 'cascade' }),
+  success: boolean('success').notNull(),
+  logs: text('logs'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+// ---------------------------------------------------------------------------
+// Inferred types
+// ---------------------------------------------------------------------------
+
+export type UserInsert = typeof users.$inferInsert;
+export type UserSelect = typeof users.$inferSelect;
+export type ProjectInsert = typeof projects.$inferInsert;
+export type ProjectSelect = typeof projects.$inferSelect;
 export type ProjectMemberInsert = typeof projectMembers.$inferInsert;
 export type ProjectMemberSelect = typeof projectMembers.$inferSelect;
+export type InviteInsert = typeof invites.$inferInsert;
+export type InviteSelect = typeof invites.$inferSelect;
+export type AgentTokenInsert = typeof agentTokens.$inferInsert;
+export type AgentTokenSelect = typeof agentTokens.$inferSelect;
+export type SpecificationInsert = typeof specifications.$inferInsert;
+export type SpecificationSelect = typeof specifications.$inferSelect;
 export type SpecVersionInsert = typeof specVersions.$inferInsert;
 export type SpecVersionSelect = typeof specVersions.$inferSelect;
+export type PlanInsert = typeof plans.$inferInsert;
+export type PlanSelect = typeof plans.$inferSelect;
+export type PlanReviewInsert = typeof planReviews.$inferInsert;
+export type PlanReviewSelect = typeof planReviews.$inferSelect;
+export type TaskInsert = typeof tasks.$inferInsert;
+export type TaskSelect = typeof tasks.$inferSelect;
+export type TaskAttemptInsert = typeof taskAttempts.$inferInsert;
+export type TaskAttemptSelect = typeof taskAttempts.$inferSelect;
+export type FileChangeInsert = typeof fileChanges.$inferInsert;
+export type FileChangeSelect = typeof fileChanges.$inferSelect;
+export type AgentSessionInsert = typeof agentSessions.$inferInsert;
+export type AgentSessionSelect = typeof agentSessions.$inferSelect;
+export type AgentEventInsert = typeof agentEvents.$inferInsert;
+export type AgentEventSelect = typeof agentEvents.$inferSelect;
+export type AgentLogInsert = typeof agentLogs.$inferInsert;
+export type AgentLogSelect = typeof agentLogs.$inferSelect;
+export type AgentConfigInsert = typeof agentConfig.$inferInsert;
+export type AgentConfigSelect = typeof agentConfig.$inferSelect;
 export type NotificationInsert = typeof notifications.$inferInsert;
 export type NotificationSelect = typeof notifications.$inferSelect;
+export type NotificationPreferenceInsert = typeof notificationPreferences.$inferInsert;
+export type NotificationPreferenceSelect = typeof notificationPreferences.$inferSelect;
 export type WebhookInsert = typeof webhooks.$inferInsert;
 export type WebhookSelect = typeof webhooks.$inferSelect;
+export type WebhookDeliveryInsert = typeof webhookDeliveries.$inferInsert;
+export type WebhookDeliverySelect = typeof webhookDeliveries.$inferSelect;
+export type UsageSnapshotInsert = typeof usageSnapshots.$inferInsert;
+export type UsageSnapshotSelect = typeof usageSnapshots.$inferSelect;
+export type GitCommitInsert = typeof gitCommits.$inferInsert;
+export type GitCommitSelect = typeof gitCommits.$inferSelect;
+export type ApiRequestLogInsert = typeof apiRequestLogs.$inferInsert;
+export type ApiRequestLogSelect = typeof apiRequestLogs.$inferSelect;
+export type AuditLogInsert = typeof auditLog.$inferInsert;
+export type AuditLogSelect = typeof auditLog.$inferSelect;
+export type TestResultInsert = typeof testResults.$inferInsert;
+export type TestResultSelect = typeof testResults.$inferSelect;
+
+// ---------------------------------------------------------------------------
+// Enum string literal types (for use in application code)
+// ---------------------------------------------------------------------------
+
+export type PlanStatus = typeof planStatusEnum.enumValues[number];
+export type SpecStatus = typeof specStatusEnum.enumValues[number];
+export type TaskStatus = typeof taskStatusEnum.enumValues[number];
+export type SessionStatus = typeof sessionStatusEnum.enumValues[number];
+export type ProjectStatus = typeof projectStatusEnum.enumValues[number];
+export type LogLevel = typeof logLevelEnum.enumValues[number];
+export type UserRole = typeof userRoleEnum.enumValues[number];
+export type TaskAttemptStatus = typeof taskAttemptStatusEnum.enumValues[number];
