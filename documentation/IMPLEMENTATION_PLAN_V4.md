@@ -236,7 +236,7 @@ Extends existing `users` and `projects` tables with missing fields and adds the 
 - [ ] `avatarUrl`, `timezone`, `locale`, and `onboardingStep` exist on the `users` table.
 - [ ] `slug`, `createdBy`, `avatarColor`, and `isDemo` exist on the `projects` table with the correct constraints.
 - [ ] `invites` table is created with `invitedBy`, `resendCount`, and `lastResentAt` fields.
-- [ ] A Drizzle migration can be successfully generated using `npm run db:generate`.
+- [ ] A Drizzle migration can be successfully generated using `pnpm db:generate`.
 ### Implementation notes
 - **File:** `src/db/schema.ts` — Add missing columns to `users` and `projects`. Add new `invites` table definition.
 - **Database query pattern:** Add missing columns and tables. No transaction required.
@@ -295,7 +295,7 @@ Finalizes the data model by creating agent sessions, agent configuration, webhoo
 ### Context
 Implements the definitive database seed script to meet exact product demonstration scenarios, specifically mocking active sessions, a blocked task, and `pending_approval` state.
 ### Acceptance criteria
-- [ ] Running `npm run db:seed` provisions exactly 3 users, 2 projects, 6 specs, 4 plans.
+- [ ] Running `pnpm db:seed` provisions exactly 3 users, 2 projects, 6 specs, 4 plans.
 - [ ] `spec_001` has a plan with status `pending_approval`.
 - [ ] `task_105` in `spec_002` is seeded with status `blocked` and valid blockedReason.
 - [ ] One session is seeded in a running state.

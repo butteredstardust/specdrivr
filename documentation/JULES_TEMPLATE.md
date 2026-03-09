@@ -1,11 +1,11 @@
 ## Environment Setup
-- Install: `npm ci`
-- Dev server: `npm run dev`
-- Build: `npm run build`
+- Install: `pnpm install --frozen-lockfile`
+- Dev server: `pnpm dev`
+- Build: `pnpm build`
 
 ## Testing
-- Full suite: `npm test`
-- Single file: `npx jest path/to/file.test.ts`
+- Full suite: `pnpm test`
+- Single file: `pnpm jest path/to/file.test.ts` (if applicable)
 - Must pass before any PR
 
 ## Architecture

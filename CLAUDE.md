@@ -18,8 +18,9 @@ You are an expert AI Systems Architect and a Senior Next.js/TypeScript Engineer 
 
 ### Database & ORM
 - **Drizzle ORM:** Write database queries using Drizzle ORM exclusively. Never write raw SQL.
-- **Schema Management:** Never change the DB schema without running `npm run db:generate`. Do not delete migration files in `drizzle/`.
+- **Schema Management:** Never change the DB schema without running `pnpm db:generate`. Do not delete migration files in `drizzle/`.
 - **Query Optimization:** For complex date/time filtering, fetch timestamp fields directly (returned as JS Date objects) and perform date filtering in JavaScript using `.filter()` to maintain cross-database compatibility.
+- **Security Overrides:** Use pnpm overrides to address dependency vulnerabilities (see package.json pnpm.overrides section).
 
 ### UI & Styling
 - **Design System:** Strictly use the token-based Design System defined in `src/app/globals.css` with CSS variables (e.g., `var(--brand-primary)`). Do not use hardcoded hex values.
@@ -61,6 +62,13 @@ See DEVELOPMENT.md for complete project structure and best practices for:
 - API route standards
 - Testing patterns
 - Database practices
+
+### Security Requirements
+- **Strict TypeScript:** Enforce strict mode with no `any` types
+- **pnpm Overrides:** Use pnpm overrides to address dependency vulnerabilities immediately
+- **Vulnerability Management:** Run `pnpm audit` regularly and address all security warnings
+- **Environment Validation:** Validate all environment variables with Zod schemas
+- **Dependency Updates:** Keep dependencies current to minimize exposure window
 
 ### Performance Requirements
 - Bundle size optimization

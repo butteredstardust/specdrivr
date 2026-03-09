@@ -75,7 +75,7 @@ Always use the Node version specified in `.nvmrc`:
 nvm use  # Auto-switches to correct version
 ```
 
-This ensures consistent behavior across all environments. The current project requires Node.js v25.6.1.
+This ensures consistent behavior across all environments. The current project requires Node.js v25.6.1 with pnpm package manager.
 
 ## Project Structure
 
@@ -292,9 +292,9 @@ test('should create new project', async ({ page }) => {
 
 ```bash
 # Right
-npm run db:generate  # Generate migration
-npm run db:migrate  # Apply to prod
-npm run db:seed  # TypeScript seeding with Drizzle ORM
+pnpm db:generate  # Generate migration
+pnpm db:migrate  # Apply to prod
+pnpm db:seed  # TypeScript seeding with Drizzle ORM
 
 # Wrong
 # Directly editing drizzle/ files
@@ -382,7 +382,25 @@ refactor/project-repository
 7. **Don't hardcode values** - Use design tokens and env vars
 8. **Don't skip tests** - Write tests as you code
 9. **Don't commit dead code** - Remove unused code
-10. **Don't ignore security warnings** - Address all npm audit issues
+10. **Don't ignore security warnings** - Address all pnpm audit issues
+
+### Package Manager Security
+When pnpm audit reveals vulnerabilities, address them using pnpm overrides in package.json:
+
+```bash
+# Check for vulnerabilities
+pnpm audit
+
+# Example override for a security issue:
+# In package.json:
+{
+  "pnpm": {
+    "overrides": {
+      "esbuild": "^0.25.0"
+    }
+  }
+}
+```
 
 ## Code Review Checklist
 
