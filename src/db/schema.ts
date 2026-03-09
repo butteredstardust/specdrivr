@@ -1,17 +1,35 @@
-import { pgTable, serial, text, timestamp, boolean, jsonb, integer, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, timestamp, boolean, jsonb, integer, pgEnum, uniqueIndex } from "drizzle-orm/pg-core";
 
 // Status enums
-export const planStatusEnum = pgEnum('plan_status', ['draft', 'active', 'completed', 'archived']);
+export const planStatusEnum = pgEnum('plan_status', ['draft', 'active', 'completed', 'archived', 'pending_approval']);
 export const projectStatusEnum = pgEnum('project_status', ['active', 'archived']);
 export const taskStatusEnum = pgEnum('task_status', ['todo', 'in_progress', 'done', 'blocked', 'paused', 'skipped']);
+export const specStatusEnum = pgEnum('spec_status', ['draft', 'active', 'completed', 'stalled']);
 export const logLevelEnum = pgEnum('log_level', ['debug', 'info', 'warn', 'error']);
 export const agentStatusEnum = pgEnum('agent_status', ['idle', 'running', 'paused', 'stopped', 'error']);
 export const userRoleEnum = pgEnum('user_role', ['admin', 'developer', 'viewer']);
+
+
+// Invites table
+export const invites = pgTable('invites', {
+  id: serial('id').primaryKey(),
+  projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  email: text('email').notNull(),
+  role: userRoleEnum('role').notNull().default('viewer'),
+  invitedBy: integer('invited_by').notNull().references(() => users.id),
+  resendCount: integer('resend_count').notNull().default(0),
+  lastResentAt: timestamp('last_resent_at', { withTimezone: true }),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
 
 // Projects table
 export const projects = pgTable('projects', {
   id: serial('id').primaryKey(),
   name: text('name').notNull(),
+  slug: text('slug').notNull().unique(),
+  avatarColor: text('avatar_color'),
+  isDemo: boolean('is_demo').notNull().default(false),
   mission: text('mission'),
   description: text('description'),
   constitution: text('constitution'), // markdown content
@@ -43,13 +61,19 @@ export const projects = pgTable('projects', {
   agentStatus: agentStatusEnum('agent_status').notNull().default('idle'),
   agentStartedAt: timestamp('agent_started_at', { withTimezone: true }),
   agentStoppedAt: timestamp('agent_stopped_at', { withTimezone: true }),
+  createdBy: integer('created_by').references(() => users.id),
   createdByUserId: integer('created_by_user_id').references(() => users.id),
   // Project status
   status: projectStatusEnum('status').notNull().default('active'),
+}, (table) => {
+  return {
+    slugIdx: uniqueIndex('project_slug_idx').on(table.slug),
+  };
 });
 
 // Specifications table
 export const specifications = pgTable('specifications', {
+  status: specStatusEnum('status').notNull().default('draft'),
   id: serial('id').primaryKey(),
   projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
   content: text('content').notNull(), // markdown specification
@@ -68,6 +92,11 @@ export const plans = pgTable('plans', {
   intent: text('intent'),
   phaseLabel: text('phase_label'),
   status: planStatusEnum('status').notNull().default('draft'),
+  generationDurationMs: integer('generation_duration_ms'),
+  generationError: text('generation_error'),
+  modelVersion: text('model_version'),
+  taskCount: integer('task_count').default(0),
+  totalEstimatedMinutes: integer('total_estimated_minutes'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   createdByUserId: integer('created_by_user_id').references(() => users.id),
 });
@@ -79,6 +108,17 @@ export const tasks = pgTable('tasks', {
   status: taskStatusEnum('status').notNull().default('todo'),
   description: text('description'),
   filesInvolved: jsonb('files_involved'), // array of file paths
+  estimatedMinutes: integer('estimated_minutes'),
+  actualDurationMs: integer('actual_duration_ms'),
+  gitBranch: text('git_branch'),
+  gitCommitHash: text('git_commit_hash'),
+  expectedFiles: jsonb('expected_files'),
+  agentVersion: text('agent_version'),
+  promptTokens: integer('prompt_tokens'),
+  completionTokens: integer('completion_tokens'),
+  totalTokens: integer('total_tokens'),
+  totalCostUsd: integer('total_cost_usd'),
+  blockedReason: text('blocked_reason'),
   priority: integer('priority').notNull().default(1),
   // dependencyTaskId: integer('dependency_task_id').references(() => tasks.id), // Circular reference
   dependencyTaskId: integer('dependency_task_id'),
@@ -97,6 +137,18 @@ export const tasks = pgTable('tasks', {
   createdByUserId: integer('created_by_user_id').references(() => users.id),
 });
 
+
+// Task Attempts table
+export const taskAttempts = pgTable('task_attempts', {
+  id: serial('id').primaryKey(),
+  taskId: integer('task_id').notNull().references(() => tasks.id, { onDelete: 'cascade' }),
+  seq: integer('seq').notNull(),
+  logLines: jsonb('log_lines'), // Make sure this is parameterized properly in drizzle
+  startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
+  endedAt: timestamp('ended_at', { withTimezone: true }),
+  success: boolean('success'),
+});
+
 // Test_Results table
 export const testResults = pgTable('test_results', {
   id: serial('id').primaryKey(),
@@ -105,6 +157,16 @@ export const testResults = pgTable('test_results', {
   logs: text('logs'),
   timestamp: timestamp('timestamp', { withTimezone: true }).notNull().defaultNow(),
   createdByUserId: integer('created_by_user_id').references(() => users.id),
+});
+
+
+// File Changes table
+export const fileChanges = pgTable('file_changes', {
+  id: serial('id').primaryKey(),
+  attemptId: integer('attempt_id').notNull().references(() => taskAttempts.id, { onDelete: 'cascade' }),
+  filePath: text('file_path').notNull(),
+  diff: text('diff'),
+  action: text('action').notNull(), // 'added', 'modified', 'deleted'
 });
 
 // Agent_Logs table
@@ -119,12 +181,31 @@ export const agentLogs = pgTable('agent_logs', {
   timestamp: timestamp('timestamp', { withTimezone: true }).notNull().defaultNow(),
 });
 
+
+// Agent Sessions table
+export const agentSessions = pgTable('agent_sessions', {
+  id: serial('id').primaryKey(),
+  projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  planId: integer('plan_id').references(() => plans.id),
+  gitBranch: text('git_branch'),
+  promptTokens: integer('prompt_tokens').default(0),
+  completionTokens: integer('completion_tokens').default(0),
+  totalTokens: integer('total_tokens').default(0),
+  status: agentStatusEnum('status').notNull().default('running'),
+  startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
+  endedAt: timestamp('ended_at', { withTimezone: true }),
+  error: text('error'),
+});
+
 // Users table
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
   username: text('username').notNull().unique(),
   passwordHash: text('password_hash').notNull(),
   avatarUrl: text('avatar_url'),
+  timezone: text('timezone'),
+  locale: text('locale').default('en'),
+  onboardingStep: integer('onboarding_step').default(0),
   avatarId: integer('avatar_id').notNull().default(1),
   isActive: boolean('is_active').notNull().default(true),
   isAdmin: boolean('is_admin').notNull().default(false),
@@ -132,6 +213,17 @@ export const users = pgTable('users', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
+});
+
+
+// Agent Config table
+export const agentConfig = pgTable('agent_config', {
+  id: serial('id').primaryKey(),
+  projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  fileGlobBoundaries: jsonb('file_glob_boundaries').default([]),
+  model: text('model').notNull().default('sonnet'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Git Commits table
@@ -151,6 +243,21 @@ export const gitCommits = pgTable('git_commits', {
   createdByUserId: integer('created_by_user_id').references(() => users.id),
 });
 
+
+// Webhook Deliveries table
+export const webhookDeliveries = pgTable('webhook_deliveries', {
+  id: serial('id').primaryKey(),
+  projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  event: text('event').notNull(),
+  payload: jsonb('payload').notNull(),
+  url: text('url').notNull(),
+  status: text('status').notNull(),
+  statusCode: integer('status_code'),
+  response: text('response'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  deliveredAt: timestamp('delivered_at', { withTimezone: true }),
+});
+
 // Agent Tokens table
 export const agentTokens = pgTable('agent_tokens', {
   id: serial('id').primaryKey(),
@@ -164,6 +271,22 @@ export const agentTokens = pgTable('agent_tokens', {
   preferredModel: text('preferred_model').default('sonnet'),
 });
 
+
+// Usage Snapshots table
+export const usageSnapshots = pgTable('usage_snapshots', {
+  id: serial('id').primaryKey(),
+  projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  date: timestamp('date', { withTimezone: true }).notNull(),
+  totalTokens: integer('total_tokens').notNull().default(0),
+  totalCostUsd: integer('total_cost_usd').notNull().default(0),
+  taskCount: integer('task_count').notNull().default(0),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => {
+  return {
+    uniqueDateProject: uniqueIndex('usage_date_project_idx').on(table.projectId, table.date)
+  };
+});
+
 // API Request Logs table
 export const apiRequestLogs = pgTable('api_request_logs', {
   id: serial('id').primaryKey(),
@@ -174,6 +297,20 @@ export const apiRequestLogs = pgTable('api_request_logs', {
   durationMs: integer('duration_ms').notNull(),
   projectId: integer('project_id').references(() => projects.id),
   requestedAt: timestamp('requested_at', { withTimezone: true }).defaultNow(),
+});
+
+
+// Audit Log table
+export const auditLog = pgTable('audit_log', {
+  id: serial('id').primaryKey(),
+  projectId: integer('project_id').references(() => projects.id),
+  userId: integer('user_id').references(() => users.id),
+  action: text('action').notNull(),
+  resource: text('resource').notNull(),
+  resourceId: text('resource_id'),
+  details: jsonb('details'),
+  ipAddress: text('ip_address'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Types for insertion
@@ -204,3 +341,20 @@ export type PlanStatus = 'draft' | 'active' | 'completed' | 'archived';
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 export type AgentStatus = 'idle' | 'running' | 'paused' | 'stopped' | 'error';
 export type UserRole = 'admin' | 'developer' | 'viewer';
+
+export type InviteInsert = typeof invites.$inferInsert;
+export type InviteSelect = typeof invites.$inferSelect;
+export type TaskAttemptInsert = typeof taskAttempts.$inferInsert;
+export type TaskAttemptSelect = typeof taskAttempts.$inferSelect;
+export type FileChangeInsert = typeof fileChanges.$inferInsert;
+export type FileChangeSelect = typeof fileChanges.$inferSelect;
+export type AgentSessionInsert = typeof agentSessions.$inferInsert;
+export type AgentSessionSelect = typeof agentSessions.$inferSelect;
+export type AgentConfigInsert = typeof agentConfig.$inferInsert;
+export type AgentConfigSelect = typeof agentConfig.$inferSelect;
+export type WebhookDeliveryInsert = typeof webhookDeliveries.$inferInsert;
+export type WebhookDeliverySelect = typeof webhookDeliveries.$inferSelect;
+export type UsageSnapshotInsert = typeof usageSnapshots.$inferInsert;
+export type UsageSnapshotSelect = typeof usageSnapshots.$inferSelect;
+export type AuditLogInsert = typeof auditLog.$inferInsert;
+export type AuditLogSelect = typeof auditLog.$inferSelect;
