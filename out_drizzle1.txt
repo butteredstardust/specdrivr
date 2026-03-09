@@ -1,3 +1,0 @@
-0000_loose_moira_mactaggert.sql
-0001_rare_cable.sql
-meta
