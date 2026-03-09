@@ -1,0 +1,43 @@
+{
+  "ignore": [
+    "src/components/error-boundary.tsx",
+    "src/components/ui/card.tsx",
+    "src/lib/logger.ts",
+    "src/lib/utils.ts",
+    "src/repositories/index.ts"
+  ],
+  "ignoreDependencies": [
+    "@auth/core",
+    "@base-ui/react",
+    "@dnd-kit/core",
+    "@dnd-kit/sortable",
+    "@dnd-kit/utilities",
+    "@types/dompurify",
+    "@uiw/react-md-editor",
+    "clsx",
+    "dompurify",
+    "isomorphic-dompurify",
+    "next-remove-imports",
+    "next-themes",
+    "pino",
+    "pino-pretty",
+    "rehype-sanitize",
+    "tailwind-merge",
+    "ts-morph",
+    "@eslint/eslintrc",
+    "@faker-js/faker",
+    "@types/bcryptjs",
+    "autoprefixer",
+    "eslint-config-next",
+    "eslint-plugin-react",
+    "eslint-plugin-react-hooks",
+    "shadcn"
+  ],
+  "ignoreBinaries": ["better-auth"],
+  "ignoreExportsUsedInFile": true,
+  "rules": {
+    "exports": "off",
+    "types": "off",
+    "unlisted": "off"
+  }
+}
