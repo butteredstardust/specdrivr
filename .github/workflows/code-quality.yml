@@ -64,7 +64,7 @@ jobs:
       - name: Lint Next.js and React standards
         run: |
           # Enforces Next.js 15 async request patterns and React 19 rules
-          pnpm next lint
+          pnpm run lint
 
       - name: Type check
         run: |
