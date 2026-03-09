@@ -11,7 +11,7 @@ export async function DELETE(req: Request, context: { params: Promise<{ id: stri
       return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Authentication required' } }, { status: 401 });
     }
 
-    if (session.user.role !== 'admin' && session.user.role !== 'owner') {
+    if (((session.user as { role?: string }).role) !== 'admin' && ((session.user as { role?: string }).role) !== 'owner') {
       return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'Insufficient permissions' } }, { status: 403 });
     }
 
