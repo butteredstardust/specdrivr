@@ -99,3 +99,6 @@ knip-baseline.json
 audit-report.json
 cleanup-notes.md
 migration-notes.md
+
+# Temporary fix scripts (forbidden - see CLAUDE.md)
+fix-*.sh
