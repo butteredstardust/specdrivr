@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
       data: projects,
       count: projects.length,
     });
-  } catch (error) {
+  } catch {
     return handleApiError(error);
   }
 }
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: project,
     }, { status: 201 });
-  } catch (error) {
+  } catch {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         formatErrorResponse({
@@ -98,7 +98,7 @@ export async function PATCH(request: NextRequest) {
       success: true,
       data: project,
     });
-  } catch (error) {
+  } catch {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         formatErrorResponse({
@@ -135,7 +135,7 @@ export async function DELETE(request: NextRequest) {
     await projectRepository.delete(projectId);
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return handleApiError(error);
   }
 }

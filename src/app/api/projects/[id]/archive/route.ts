@@ -41,7 +41,7 @@ export async function POST(
       success: true,
       data: archivedProject,
     });
-  } catch (error) {
+  } catch {
     return handleApiError(error);
   }
 }

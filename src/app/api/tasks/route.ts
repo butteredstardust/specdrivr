@@ -113,7 +113,7 @@ export async function GET(request: NextRequest) {
         pages: Math.ceil(totalCount / limit),
       },
     });
-  } catch (error) {
+  } catch {
     // Handle all errors consistently
     return handleApiError(error);
   }
@@ -186,7 +186,7 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error) {
+  } catch {
     // Handle validation and database errors
     return handleApiError(error);
   }
@@ -271,7 +271,7 @@ export async function PATCH(request: NextRequest) {
       success: true,
       data: results,
     });
-  } catch (error) {
+  } catch {
     // Handle unexpected errors
     return handleApiError(error);
   }
