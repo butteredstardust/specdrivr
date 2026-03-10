@@ -10,6 +10,7 @@ env:
   DATABASE_URL: postgresql://postgres:postgres@localhost:5432/specdrivr_test
   NEXTAUTH_URL: http://localhost:3000
   NEXTAUTH_SECRET: test-secret-for-ci
+  REDIS_URL: redis://localhost:6379
   BETTER_AUTH_SECRET: test-secret-for-ci
 
 jobs:
@@ -31,6 +32,15 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
 
     steps:
       - uses: actions/checkout@v4
