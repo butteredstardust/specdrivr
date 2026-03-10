@@ -251,8 +251,9 @@ export const updateProjectSchema = z.object({
   description: z.string().max(1000, 'Description too long').optional().nullable(),
 }).refine(
   (data) => {
-    const { id, ...rest } = data;
-    return Object.keys(rest).some(key => rest[key as keyof typeof rest] !== undefined);
+    const rest = { ...data } as Record<string, unknown>;
+    delete rest.id;
+    return Object.keys(rest).some(key => rest[key] !== undefined);
   },
   { message: 'At least one field to update is required' }
 );

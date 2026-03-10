@@ -1,5 +1,6 @@
 import { db } from '@/db';
 import { tasks, type TaskSelect as Task, type TaskStatus } from '@/db/schema';
+import * as schema from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, ValidationError, DatabaseError } from '@/lib/errors';
@@ -182,29 +183,22 @@ export class TaskRepository extends BaseRepository {
     });
   }
 
-  async incrementRetryCount(id: number): Promise<Task> {
-    const task = await this.getById(id);
+  async getAttempts(taskId: number): Promise<(typeof schema.taskAttempts.$inferSelect)[]> {
+    return this.execQuery(() =>
+      db.select()
+        .from(schema.taskAttempts)
+        .where(eq(schema.taskAttempts.taskId, taskId))
+        .orderBy(desc(schema.taskAttempts.seq))
+    );
+  }
 
-    if (!task) {
-      throw new NotFoundError(`Task with ID ${id} not found`);
-    }
-
-    const [updatedTask] = (await this.execQuery(() =>
-      db
-        .update(tasks)
-        .set({
-          attemptCount: task.attemptCount + 1,
-          updatedAt: new Date(),
-        })
-        .where(eq(tasks.id, id))
-        .returning()
-    )) as unknown as unknown[];
-
-    if (!updatedTask) {
-      throw new DatabaseError('Failed to update task');
-    }
-
-    return updatedTask as Task;
+  async getFileChanges(taskId: number): Promise<(typeof schema.fileChanges.$inferSelect)[]> {
+    return this.execQuery(() =>
+      db.select()
+        .from(schema.fileChanges)
+        .where(eq(schema.fileChanges.taskId, taskId))
+        .orderBy(desc(schema.fileChanges.createdAt))
+    );
   }
 }
 

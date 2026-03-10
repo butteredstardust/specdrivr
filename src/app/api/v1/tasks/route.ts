@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
         tasks = tasks.filter(task => task.status === status);
       }
     } else if (status) {
-      tasks = await taskRepository.getByStatus(status as any);
+      tasks = await taskRepository.getByStatus(status as import('@/db/schema').TaskStatus);
     } else {
       tasks = await taskRepository.getAll();
     }
@@ -69,9 +69,9 @@ export async function POST(request: NextRequest) {
       externalId: `T-${Date.now()}`, 
       title: data.description.substring(0, 50), 
       ...data,
-      createdByUserId: Number(session.user.id)
+      createdBy: Number(session.user.id)
     };
-    const newTask = await taskRepository.create(taskData as any);
+    const newTask = await taskRepository.create(taskData);
 
     return NextResponse.json(
       { success: true, data: newTask },

@@ -1,0 +1,31 @@
+
+> specdrivr@0.1.0 build C:\Users\Admin\Dev\specdrivr
+> next build
+
+Γû▓ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 1215.6ms
+  Running TypeScript ...
+  Collecting page data using 23 workers ...
+Error: Could not parse module '[project]/node_modules/.pnpm/next@16.1.6_@babel+core@7.2_56d2a8830df1de40eb84459a26ce0f4a/node_modules/next/dist/server/route-modules/app-route/vendored/contexts/app-router-context.js', file not found
+    at module evaluation (C:\Users\Admin\Dev\specdrivr\.next\server\chunks\[root-of-the-server]__65551712._.js:1:21036)
+    at instantiateModule (C:\Users\Admin\Dev\specdrivr\.next\server\chunks\[turbopack]_runtime.js:740:9)
+    at getOrInstantiateModuleFromParent (C:\Users\Admin\Dev\specdrivr\.next\server\chunks\[turbopack]_runtime.js:763:12)
+    at Context.commonJsRequire [as r] (C:\Users\Admin\Dev\specdrivr\.next\server\chunks\[turbopack]_runtime.js:249:12)
+    at module evaluation (C:\Users\Admin\Dev\specdrivr\.next\server\chunks\[root-of-the-server]__65551712._.js:1:34289)
+    at instantiateModule (C:\Users\Admin\Dev\specdrivr\.next\server\chunks\[turbopack]_runtime.js:740:9)
+    at getOrInstantiateModuleFromParent (C:\Users\Admin\Dev\specdrivr\.next\server\chunks\[turbopack]_runtime.js:763:12)
+    at Context.commonJsRequire [as r] (C:\Users\Admin\Dev\specdrivr\.next\server\chunks\[turbopack]_runtime.js:249:12)
+    at module evaluation (C:\Users\Admin\Dev\specdrivr\.next\server\chunks\[root-of-the-server]__65551712._.js:1:35540)
+    at instantiateModule (C:\Users\Admin\Dev\specdrivr\.next\server\chunks\[turbopack]_runtime.js:740:9) {
+  code: 'MODULE_UNPARSABLE'
+}
+
+> Build error occurred
+Error: Failed to collect page data for /api/auth/[...nextauth]
+    at ignore-listed frames {
+  type: 'Error'
+}
+ΓÇëELIFECYCLEΓÇë Command failed with exit code 1.
