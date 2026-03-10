@@ -67,3 +67,13 @@ This file serves as the strict operational manual and development guardrails for
 - **NO** Route Handlers used solely for button clicks (use Server Actions instead).
 - **NO** throwing errors directly from Server Actions to the client (return `{ error: { code, message } }`).
 - **NO** use of `npm` or `yarn`. Always use `pnpm`.
+
+## Automated Branch Review & Documentation
+Before submitting any new Pull Request, you **must** perform an automated analysis and code review of the changes you have made in your branch. This codified process ensures transparency, impact assessment, and senior-level oversight of all AI-generated code.
+
+For every branch created, follow these steps:
+1. Create a dedicated directory for your branch: `documentation/julespr/{branch-name}`.
+2. Inside this directory, create `BRANCH_CHANGES.md`. This file must contain a markdown table documenting all modified files. The table headers must be: `File Name`, `Summary of Changes`, `Summary Reason for Change`, `Expected Impact`, `Best Practice Evaluation Score` (e.g. out of 10 with a brief reason), and `Reason for Deletion` (if applicable; otherwise state 'not deleted').
+3. At the end of `BRANCH_CHANGES.md`, include a brief summary section explaining any changes made to CI configuration files or test files, and the specific reasons for those changes.
+4. Next, create `BRANCH_CODE_REVIEW.md` in the same directory. In this file, act as a senior developer thoughtfully and deeply evaluating the changes presented. For each discovered problem or potential improvement, present a summary and the reason why the change is needed or recommended.
+5. Commit these documentation files as part of your final pre-commit steps before invoking the `submit` tool.
