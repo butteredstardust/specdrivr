@@ -49,8 +49,8 @@ export async function withRetry<T>(
       if (attempt < retryOptions.maxAttempts && isTransientError(error)) {
         const delay = retryOptions.delayMs * Math.pow(retryOptions.backoffMultiplier, attempt - 1);
         logger.warn(
-          'Database operation failed, retrying',
-          { attempt, maxAttempts: retryOptions.maxAttempts, delayMs: delay, error }
+          { attempt, maxAttempts: retryOptions.maxAttempts, delayMs: delay, error },
+          'Database operation failed, retrying'
         );
         await sleep(delay);
       } else {

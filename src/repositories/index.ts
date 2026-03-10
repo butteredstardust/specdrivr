@@ -16,6 +16,7 @@
 
 export { taskRepository, TaskRepository } from './task-repository';
 export { projectRepository, ProjectRepository } from './project-repository';
+export { userRepository, UserRepository } from './user-repository';
 export { BaseRepository } from './base-repository';
 
 /**

@@ -93,9 +93,51 @@ export const users = pgTable('users', {
   theme: text('theme').default('system'),
   role: userRoleEnum('role').notNull().default('viewer'),
   isActive: boolean('is_active').notNull().default(true),
+  emailVerified: boolean('email_verified').notNull().default(false),
+  image: text('image'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   lastActiveAt: timestamp('last_active_at', { withTimezone: true }),
+});
+
+// ---------------------------------------------------------------------------
+// Better Auth Tables
+// ---------------------------------------------------------------------------
+
+export const sessions = pgTable('sessions', {
+  id: text('id').primaryKey(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  token: text('token').notNull().unique(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  ipAddress: text('ip_address'),
+  userAgent: text('user_agent'),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+});
+
+export const accounts = pgTable('accounts', {
+  id: text('id').primaryKey(),
+  accountId: text('account_id').notNull(),
+  providerId: text('provider_id').notNull(),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  accessToken: text('access_token'),
+  refreshToken: text('refresh_token'),
+  idToken: text('id_token'),
+  accessTokenExpiresAt: timestamp('access_token_expires_at', { withTimezone: true }),
+  refreshTokenExpiresAt: timestamp('refresh_token_expires_at', { withTimezone: true }),
+  scope: text('scope'),
+  password: text('password'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const verifications = pgTable('verifications', {
+  id: text('id').primaryKey(),
+  identifier: text('identifier').notNull(),
+  value: text('value').notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }),
+  updatedAt: timestamp('updated_at', { withTimezone: true }),
 });
 
 // ---------------------------------------------------------------------------
@@ -637,6 +679,12 @@ export type AuditLogInsert = typeof auditLog.$inferInsert;
 export type AuditLogSelect = typeof auditLog.$inferSelect;
 export type TestResultInsert = typeof testResults.$inferInsert;
 export type TestResultSelect = typeof testResults.$inferSelect;
+export type SessionInsert = typeof sessions.$inferInsert;
+export type SessionSelect = typeof sessions.$inferSelect;
+export type AccountInsert = typeof accounts.$inferInsert;
+export type AccountSelect = typeof accounts.$inferSelect;
+export type VerificationInsert = typeof verifications.$inferInsert;
+export type VerificationSelect = typeof verifications.$inferSelect;
 
 // ---------------------------------------------------------------------------
 // Enum string literal types (for use in application code)

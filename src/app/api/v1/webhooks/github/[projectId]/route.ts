@@ -13,7 +13,7 @@ export async function POST(
     const projectId = parseInt(resolvedParams.projectId, 10);
 
     if (isNaN(projectId)) {
-      return NextResponse.json({ success: false, error: 'Invalid project ID' }, { status: 400 });
+      return NextResponse.json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Invalid project ID' } }, { status: 400 });
     }
 
     const project = await db.query.projects.findFirst({
@@ -21,7 +21,7 @@ export async function POST(
     });
 
     if (!project) {
-      return NextResponse.json({ success: false, error: 'Project not found' }, { status: 404 });
+      return NextResponse.json({ success: false, error: { code: 'NOT_FOUND', message: 'Project not found' } }, { status: 404 });
     }
 
     const payload = await request.json();

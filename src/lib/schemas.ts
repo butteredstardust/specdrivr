@@ -232,6 +232,27 @@ export const taskQuerySchema = z.object({
 });
 
 // Additional schemas can be added here for other resources
-// For example:
-// export const createSpecificationSchema = z.object({...})
-// export const createPlanSchema = z.object({...})
+
+/**
+ * Schema for creating a new project
+ */
+export const createProjectSchema = z.object({
+  name: z.string().min(1, 'Project name is required').max(255, 'Project name cannot exceed 255 characters'),
+  description: z.string().max(1000, 'Description cannot exceed 1000 characters').optional().nullable(),
+  createdBy: z.number().optional().nullable(),
+});
+
+/**
+ * Schema for updating an existing project
+ */
+export const updateProjectSchema = z.object({
+  id: z.number().int().positive('Valid project ID is required'),
+  name: z.string().min(1, 'Project name cannot be empty').max(255, 'Project name too long').optional(),
+  description: z.string().max(1000, 'Description too long').optional().nullable(),
+}).refine(
+  (data) => {
+    const { id, ...rest } = data;
+    return Object.keys(rest).some(key => rest[key as keyof typeof rest] !== undefined);
+  },
+  { message: 'At least one field to update is required' }
+);

@@ -110,7 +110,7 @@ Specdrivr utilizes a modern, type-safe stack optimized for AI-native orchestrati
 - **Framework**: Next.js 16.1.6 (App Router) with React 19.2.4, TypeScript 5.9.3
 - **Styling**: Tailwind CSS 4.2.1 with shadcn/ui components and CSS variables
 - **Database**: PostgreSQL with Drizzle ORM 0.45.1
-- **Authentication**: NextAuth.js 5.0.0-beta.19 with Upstash Redis adapter
+- **Authentication**: better-auth 1.5.4 with Drizzle adapter
 - **Data Validation**: Zod 3.22.0
 - **Testing**: Vitest 4 (unit), Playwright 1.42 (E2E)
 - **State/Interactivity**: @dnd-kit (drag-and-drop), Base UI
@@ -407,6 +407,18 @@ if (lockAcquired) {
   } finally {
     await releaseLock(resourceId);
   }
+}
+```
+
+### Auth Utilities (`src/lib/auth.ts`)
+Better Auth integration. Always use the `auth()` helper to retrieve the current session in Server Components and API routes.
+
+```typescript
+import { auth } from '@/lib/auth';
+
+const session = await auth();
+if (!session) {
+  // handle unauthorized
 }
 ```
 

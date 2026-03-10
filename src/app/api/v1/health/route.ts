@@ -22,7 +22,7 @@ export async function GET() {
   const status = dbStatus === "ok" && redisStatus === "ok" ? "ok" : "error";
 
   return NextResponse.json(
-    { data: { status, db: dbStatus, redis: redisStatus } },
+    { success: true, data: { status, db: dbStatus, redis: redisStatus } },
     { status: status === "ok" ? 200 : 503 }
   );
 }

@@ -66,7 +66,7 @@ When CI fails on typecheck, lint, or tests:
 | Icons             | Lucide React                                             |
 | Database          | PostgreSQL                                               |
 | ORM               | Drizzle ORM 0.45.1                                       |
-| Auth              | NextAuth.js 5.0.0-beta.19 with Upstash Redis adapter    |
+| Auth              | better-auth 1.5.4 with Drizzle adapter                  |
 | Validation        | Zod 3.22.0                                               |
 | Testing (Unit)    | Vitest 4 + @testing-library/react                        |
 | Testing (E2E)     | Playwright 1.42                                          |
@@ -144,7 +144,7 @@ When CI fails on typecheck, lint, or tests:
 ### Authentication
 - **Always verify auth** before protected actions: `const session = await auth();` in API routes and Server Actions. Return 401 if unauthorized.
 - **Passwords/tokens** must be hashed (bcrypt cost 12).
-- **Session cookies:** Let NextAuth.js manage them; do not tamper.
+- **Session cookies:** Managed by `better-auth` (default: `better-auth.session_token`).
 - **Never expose user IDs or emails** in error messages.
 
 ### Authorization
@@ -203,9 +203,8 @@ import { env } from '@/lib/env-script'; // no server-only
 
 **Validated schema** (env-core.ts):
 - `DATABASE_URL` (required, URL)
-- `NEXTAUTH_SECRET` (required, string)
-- `NEXTAUTH_URL` (optional, URL)
-- `REDIS_URL` (optional, default `redis://localhost:6379`)
+- `DATABASE_URL` (required, URL)
+- `NEXTAUTH_SECRET` (required, string) - Reused as Better Auth secret
 - `NODE_ENV` (default 'development')
 
 **Never import** from `env-core.ts` directly; use the wrappers above.
@@ -238,6 +237,7 @@ import { env } from '@/lib/env-script'; // no server-only
 17. Hardcoding secrets in code.
 18. Missing rate limiting on public endpoints.
 19. Forgetting to log audit events in same transaction.
+20. Using `auth.api.getSession` in server components instead of the `auth()` helper.
 
 **API & Validation**
 20. Skipping Zod validation on inputs.

@@ -1,108 +1,147 @@
-import { NextResponse } from 'next/server';
-import { z } from 'zod';
-import { db } from '@/db';
-import { projects, projectMembers } from '@/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { NextRequest, NextResponse } from 'next/server';
+import { projectRepository } from '@/repositories/project-repository';
+import { createProjectSchema, updateProjectSchema } from '@/lib/schemas';
+import { formatErrorResponse, handleApiError } from '@/lib/error-handler';
 import { auth } from '@/lib/auth';
-import { handleApiError } from '@/lib/error-handler';
+import { z } from 'zod';
 
-const CreateProjectSchema = z.object({
-  name: z.string().min(1),
-  slug: z.string().min(1)
-});
-
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
-        { status: 401 }
-      );
+    if (!session?.user?.id) {
+      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
     }
 
-    const userId = Number(session.user.id);
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
+    const status = searchParams.get('status');
 
-    // Fetch projects where the user is a member
-    let allProjects;
-    if (((session.user as { role?: string }).role) === 'admin') {
-      allProjects = await db.select().from(projects).orderBy(desc(projects.createdAt));
+    let projects;
+
+    if (userId) {
+      const userIdNum = parseInt(userId, 10);
+      if (isNaN(userIdNum)) {
+        return NextResponse.json(
+          formatErrorResponse({ message: 'Invalid userId parameter' }),
+          { status: 400 }
+        );
+      }
+      projects = await projectRepository.getByUserId(userIdNum);
+    } else if (status === 'active') {
+      projects = await projectRepository.getActive();
     } else {
-      const userProjects = await db.select({
-        project: projects
-      })
-      .from(projects)
-      .innerJoin(projectMembers, eq(projects.id, projectMembers.projectId))
-      .where(eq(projectMembers.userId, userId))
-      .orderBy(desc(projects.createdAt));
-
-      allProjects = userProjects.map(up => up.project);
+      projects = await projectRepository.getAll();
     }
 
-    // For simplicity, we are returning memberCount: 1,
-    // but in a real app we would query COUNT(*) grouped by projectId
-
-    const formattedProjects = allProjects.map(p => ({
-      id: p.id.toString(),
-      name: p.name,
-      slug: p.slug,
-      memberCount: 1,
-      lastSessionSummary: p.description
-    }));
-
-    return NextResponse.json({ success: true, data: formattedProjects });
+    return NextResponse.json({
+      success: true,
+      data: projects,
+      count: projects.length,
+    });
   } catch (error) {
     return handleApiError(error);
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(request: NextRequest) {
   try {
     const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
-        { status: 401 }
-      );
+    if (!session?.user?.id) {
+      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
     }
 
-    const body = await req.json();
-    const parsed = CreateProjectSchema.safeParse(body);
+    const body = await request.json();
+    const parsed = createProjectSchema.parse(body);
 
-    if (!parsed.success) {
+    const project = await projectRepository.create({
+      name: parsed.name,
+      description: parsed.description ?? undefined,
+      createdBy: Number(session.user.id),
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: project,
+    }, { status: 201 });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.message, details: parsed.error.errors } },
+        formatErrorResponse({
+          message: 'Validation failed',
+          details: error.errors,
+        }),
+        { status: 400 }
+      );
+    }
+    return handleApiError(error);
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const parsed = updateProjectSchema.parse(body);
+
+    const updateData: Record<string, unknown> = {};
+    if (parsed.name !== undefined) updateData.name = parsed.name;
+    if (parsed.description !== undefined) updateData.description = parsed.description;
+
+    const project = await projectRepository.update(parsed.id, {
+      name: updateData.name as string | undefined,
+      description: updateData.description as string | null | undefined,
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: project,
+    });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        formatErrorResponse({
+          message: 'Validation failed',
+          details: error.errors,
+        }),
+        { status: 400 }
+      );
+    }
+    return handleApiError(error);
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json(
+        formatErrorResponse({ message: 'Project ID is required' }),
         { status: 400 }
       );
     }
 
-    const { name, slug } = parsed.data;
-    const userId = Number(session.user.id);
-
-    const existing = await db.select().from(projects).where(eq(projects.slug, slug));
-    if (existing.length > 0) {
+    const projectId = parseInt(id, 10);
+    if (isNaN(projectId) || projectId <= 0) {
       return NextResponse.json(
-        { success: false, error: { code: 'CONFLICT', message: 'Project slug already exists' } },
-        { status: 409 }
+        formatErrorResponse({ message: 'Invalid project ID' }),
+        { status: 400 }
       );
     }
 
-    const result = await db.transaction(async (tx) => {
-      const [newProject] = await tx.insert(projects).values({
-        name,
-        slug,
-      }).returning();
+    await projectRepository.delete(projectId);
 
-      await tx.insert(projectMembers).values({
-        projectId: newProject.id,
-        userId: userId,
-        role: 'admin' // Creator is an admin/owner
-      });
-
-      return newProject;
-    });
-
-    return NextResponse.json({ success: true, data: { ...result, id: result.id.toString() } }, { status: 201 });
+    return NextResponse.json({ success: true });
   } catch (error) {
     return handleApiError(error);
   }

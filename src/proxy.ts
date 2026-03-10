@@ -35,11 +35,9 @@ function isAgentPath(pathname: string): boolean {
 // Note: Full cryptographic verification still happens in the Route Handlers.
 function hasSessionCookie(request: NextRequest): boolean {
   const isSecure = process.env.NODE_ENV === 'production' || request.nextUrl.protocol === 'https:';
-  const cookieName = isSecure ? '__Secure-authjs.session-token' : 'authjs.session-token';
-  // Also check legacy NextAuth cookie name as a fallback
-  const legacyCookieName = isSecure ? '__Secure-next-auth.session-token' : 'next-auth.session-token';
+  const cookieName = isSecure ? '__Secure-better-auth.session_token' : 'better-auth.session_token';
 
-  return request.cookies.has(cookieName) || request.cookies.has(legacyCookieName);
+  return request.cookies.has(cookieName);
 }
 
 export async function proxy(request: NextRequest) {
