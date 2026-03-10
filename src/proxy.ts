@@ -1,14 +1,5 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { Ratelimit } from '@upstash/ratelimit';
-import { redis } from '@/lib/redis';
-
-// Create a new ratelimiter, that allows 100 requests per 1 minute
-const ratelimit = new Ratelimit({
-  redis: redis as never,
-  limiter: Ratelimit.slidingWindow(100, "1 m"),
-  analytics: true,
-});
 
 // Routes that do not require authentication
 const PUBLIC_PATHS = new Set([
@@ -65,37 +56,6 @@ export async function proxy(request: NextRequest) {
       'Strict-Transport-Security',
       'max-age=63072000; includeSubDomains; preload'
     );
-  }
-
-  // Only apply to API routes
-  if (pathname.startsWith('/api/')) {
-    // Determine IP
-    // request.ip is available in Next.js edge runtime
-    const ip = request.headers.get('x-forwarded-for') || 'anonymous';
-
-    // Check rate limit
-    const { success, limit, reset, remaining } = await ratelimit.limit(
-      `ratelimit_${ip}`
-    );
-
-    // Return early if rate limit is exceeded
-    if (!success) {
-      return NextResponse.json(
-        { error: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many requests' } },
-        {
-          status: 429,
-          headers: {
-            'X-RateLimit-Limit': limit.toString(),
-            'X-RateLimit-Remaining': remaining.toString(),
-            'X-RateLimit-Reset': reset.toString()
-          }
-        }
-      );
-    }
-
-    response.headers.set('X-RateLimit-Limit', limit.toString());
-    response.headers.set('X-RateLimit-Remaining', remaining.toString());
-    response.headers.set('X-RateLimit-Reset', reset.toString());
   }
 
   // Always allow public paths through
