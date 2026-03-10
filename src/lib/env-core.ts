@@ -1,7 +1,4 @@
-import { config } from 'dotenv';
 import { z } from 'zod';
-
-config({ path: '.env.local' });
 
 export const envSchema = z.object({
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required').url('DATABASE_URL must be a valid URL'),
@@ -14,5 +11,23 @@ export const envSchema = z.object({
 export type Env = z.infer<typeof envSchema>;
 
 export function parseEnv(): Env {
-  return envSchema.parse(process.env);
+  // Try to load dotenv only if we're not in the Edge runtime
+  if (typeof process !== 'undefined' && process.env && typeof process.cwd === 'function') {
+    try {
+      // Use dynamic import so it doesn't get bundled into Edge functions
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { config } = require('dotenv');
+      config({ path: '.env.local' });
+    } catch {
+      // Ignore if dotenv isn't available or fails
+    }
+  }
+
+  return envSchema.parse({
+    DATABASE_URL: process.env.DATABASE_URL,
+    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+    REDIS_URL: process.env.REDIS_URL,
+    NODE_ENV: process.env.NODE_ENV,
+  });
 }
