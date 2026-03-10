@@ -4,6 +4,7 @@ import { db } from '@/db';
 import { users, invites, projectMembers } from '@/db/schema';
 import bcrypt from 'bcryptjs';
 import { eq } from 'drizzle-orm';
+import { handleApiError } from '@/lib/error-handler';
 
 const AcceptInviteSchema = z.object({
   token: z.string(),
@@ -17,7 +18,10 @@ export async function POST(req: Request) {
     const parsed = AcceptInviteSchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json({ error: { code: 'VALIDATION_ERROR', message: parsed.error.message } }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.message, details: parsed.error.errors } },
+        { status: 400 }
+      );
     }
 
     const { token, password } = parsed.data;
@@ -25,13 +29,19 @@ export async function POST(req: Request) {
     const existingInvites = await db.select().from(invites).where(eq(invites.id, Number(token)));
 
     if (existingInvites.length === 0) {
-      return NextResponse.json({ error: { code: 'VALIDATION_ERROR', message: 'Invite token is invalid or expired' } }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Invite token is invalid or expired' } },
+        { status: 400 }
+      );
     }
 
     const invite = existingInvites[0];
 
     if (new Date() > new Date(invite.expiresAt)) {
-      return NextResponse.json({ error: { code: 'VALIDATION_ERROR', message: 'Invite token is invalid or expired' } }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Invite token is invalid or expired' } },
+        { status: 400 }
+      );
     }
 
     let userId: number;
@@ -69,11 +79,14 @@ export async function POST(req: Request) {
     });
 
     if (result.error) {
-       return NextResponse.json({ error: { code: 'VALIDATION_ERROR', message: result.error } }, { status: result.status });
+       return NextResponse.json(
+         { success: false, error: { code: 'VALIDATION_ERROR', message: result.error } },
+         { status: result.status }
+       );
     }
 
-    return NextResponse.json({ data: { user: result.user } }, { status: 200 });
-  } catch {
-    return NextResponse.json({ error: { code: 'INTERNAL_SERVER_ERROR', message: 'Something went wrong' } }, { status: 500 });
+    return NextResponse.json({ success: true, data: { user: result.user } }, { status: 200 });
+  } catch (error) {
+    return handleApiError(error);
   }
 }

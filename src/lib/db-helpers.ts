@@ -1,3 +1,5 @@
+import 'server-only';
+import { logger } from './logger';
 import { DatabaseError } from './errors';
 import type { PgTable } from 'drizzle-orm/pg-core';
 
@@ -46,9 +48,9 @@ export async function withRetry<T>(
 
       if (attempt < retryOptions.maxAttempts && isTransientError(error)) {
         const delay = retryOptions.delayMs * Math.pow(retryOptions.backoffMultiplier, attempt - 1);
-        console.warn(
-          `Database operation failed (attempt ${attempt}/${retryOptions.maxAttempts}), retrying in ${delay}ms:`,
-          error
+        logger.warn(
+          'Database operation failed, retrying',
+          { attempt, maxAttempts: retryOptions.maxAttempts, delayMs: delay, error }
         );
         await sleep(delay);
       } else {

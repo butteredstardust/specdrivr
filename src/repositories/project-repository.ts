@@ -13,7 +13,7 @@ interface CreateProjectData {
 interface UpdateProjectData {
   name?: string;
   description?: string | null;
-  status?: 'active' | 'completed' | 'archived';
+  status?: 'active' | 'archived';
 }
 
 export { type ProjectSelect as Project } from '@/db/schema';
@@ -148,10 +148,6 @@ export class ProjectRepository extends BaseRepository {
 
   async archive(id: number): Promise<Project> {
     return this.update(id, { status: 'archived' });
-  }
-
-  async complete(id: number): Promise<Project> {
-    return this.update(id, { status: 'completed' as unknown as "active" });
   }
 }
 

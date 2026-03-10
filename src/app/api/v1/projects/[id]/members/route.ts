@@ -3,12 +3,16 @@ import { db } from '@/db';
 import { projects, users, invites, projectMembers } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
+import { handleApiError } from '@/lib/error-handler';
 
 export async function GET(req: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth();
     if (!session?.user) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Authentication required' } }, { status: 401 });
+      return NextResponse.json(
+        { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
+        { status: 401 }
+      );
     }
 
     const { id } = await context.params;
@@ -16,7 +20,10 @@ export async function GET(req: Request, context: { params: Promise<{ id: string 
 
     const project = await db.select().from(projects).where(eq(projects.id, projectId));
     if (project.length === 0) {
-      return NextResponse.json({ error: { code: 'NOT_FOUND', message: 'Project not found' } }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: { code: 'NOT_FOUND', message: 'Project not found' } },
+        { status: 404 }
+      );
     }
 
     const activeMembers = await db.select({
@@ -47,8 +54,8 @@ export async function GET(req: Request, context: { params: Promise<{ id: string 
         status: 'invited'
     }));
 
-    return NextResponse.json({ data: [...members, ...invited] });
-  } catch {
-    return NextResponse.json({ error: { code: 'INTERNAL_SERVER_ERROR', message: 'Something went wrong' } }, { status: 500 });
+    return NextResponse.json({ success: true, data: [...members, ...invited] });
+  } catch (error) {
+    return handleApiError(error);
   }
 }

@@ -3,6 +3,7 @@ import { taskRepository } from '@/repositories/task-repository';
 import { formatErrorResponse, handleApiError } from '@/lib/error-handler';
 import { NotFoundError } from '@/lib/errors';
 import { updateTaskSchema } from '@/lib/schemas';
+import { auth } from '@/lib/auth';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -37,6 +38,11 @@ export async function GET(
   { params }: RouteParams
 ) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+    }
+
     // Unwrap the params promise (Next.js 14+ pattern)
     const { id } = await params;
 
@@ -115,6 +121,11 @@ export async function PATCH(
   { params }: RouteParams
 ) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+    }
+
     // Unwrap params promise
     const { id } = await params;
 
@@ -182,6 +193,11 @@ export async function DELETE(
   { params }: RouteParams
 ) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+    }
+
     // Unwrap params promise
     const { id } = await params;
 

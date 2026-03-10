@@ -3,6 +3,7 @@ import { projectRepository } from '@/repositories/project-repository';
 import { formatErrorResponse, handleApiError } from '@/lib/error-handler';
 import { NotFoundError } from '@/lib/errors';
 import { updateProjectSchema } from '../route';
+import { auth } from '@/lib/auth';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -13,6 +14,11 @@ export async function GET(
   { params }: RouteParams
 ) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+    }
+
     const { id } = await params;
     const projectId = parseInt(id, 10);
 
@@ -43,6 +49,11 @@ export async function PATCH(
   { params }: RouteParams
 ) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+    }
+
     const { id } = await params;
     const projectId = parseInt(id, 10);
 
@@ -72,6 +83,11 @@ export async function DELETE(
   { params }: RouteParams
 ) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+    }
+
     const { id } = await params;
     const projectId = parseInt(id, 10);
 

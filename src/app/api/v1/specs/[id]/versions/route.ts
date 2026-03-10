@@ -3,6 +3,8 @@ import { db } from '@/db';
 import { specVersions, specifications } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
+import { logger } from '@/lib/logger';
+import { handleApiError } from '@/lib/error-handler';
 
 export async function GET(
   request: NextRequest,
@@ -11,16 +13,19 @@ export async function GET(
   try {
     const session = await auth();
     if (!session || !session.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json(
+        { success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        { status: 401 }
+      );
     }
 
     const { id } = await params;
     const versions = await db.select().from(specVersions).where(eq(specVersions.specId, Number(id))).orderBy(desc(specVersions.versionNumber));
 
-    return NextResponse.json({ data: versions });
+    return NextResponse.json({ success: true, data: versions });
   } catch (error) {
-    console.error('Error fetching spec versions:', error);
-    return NextResponse.json({ error: 'Failed to fetch versions' }, { status: 500 });
+    logger.error('Error fetching spec versions', { error });
+    return handleApiError(error);
   }
 }
 
@@ -31,20 +36,29 @@ export async function POST(
   try {
     const session = await auth();
     if (!session || !session.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json(
+        { success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        { status: 401 }
+      );
     }
 
     const { id } = await params;
     const { markdownContent } = await request.json();
 
     if (!markdownContent) {
-      return NextResponse.json({ error: 'Content is required' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Content is required' } },
+        { status: 400 }
+      );
     }
 
     const [spec] = await db.select().from(specifications).where(eq(specifications.id, Number(id))).limit(1);
 
     if (!spec) {
-      return NextResponse.json({ error: 'Specification not found' }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: { code: 'NOT_FOUND', message: 'Specification not found' } },
+        { status: 404 }
+      );
     }
 
     const currentVersions = await db.select().from(specVersions).where(eq(specVersions.specId, Number(id))).orderBy(desc(specVersions.versionNumber)).limit(1);
@@ -66,9 +80,9 @@ export async function POST(
       return newVersion;
     });
 
-    return NextResponse.json({ data: result }, { status: 201 });
+    return NextResponse.json({ success: true, data: result }, { status: 201 });
   } catch (error) {
-    console.error('Error creating spec version:', error);
-    return NextResponse.json({ error: 'Failed to create version' }, { status: 500 });
+    logger.error('Error creating spec version', { error });
+    return handleApiError(error);
   }
 }

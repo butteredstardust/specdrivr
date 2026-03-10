@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { projectRepository } from '@/repositories/project-repository';
 import { formatErrorResponse, handleApiError } from '@/lib/error-handler';
 import { NotFoundError } from '@/lib/errors';
+import { auth } from '@/lib/auth';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -12,6 +13,11 @@ export async function POST(
   { params }: RouteParams
 ) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+    }
+
     const { id } = await params;
     const projectId = parseInt(id, 10);
 

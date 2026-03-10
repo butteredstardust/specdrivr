@@ -4,6 +4,7 @@ import { db } from '@/db';
 import { users } from '@/db/schema';
 import bcrypt from 'bcryptjs';
 import { eq } from 'drizzle-orm';
+import { handleApiError } from '@/lib/error-handler';
 
 const SignupSchema = z.object({
   email: z.string().email(),
@@ -16,14 +17,20 @@ export async function POST(req: Request) {
     const parsed = SignupSchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json({ error: { code: 'VALIDATION_ERROR', message: parsed.error.message } }, { status: 422 });
+      return NextResponse.json(
+        { success: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.message, details: parsed.error.errors } },
+        { status: 400 }
+      );
     }
 
     const { email, password } = parsed.data;
 
     const existingUser = await db.select().from(users).where(eq(users.email, email));
     if (existingUser.length > 0) {
-      return NextResponse.json({ error: { code: 'CONFLICT', message: 'Email already exists' } }, { status: 409 });
+      return NextResponse.json(
+        { success: false, error: { code: 'CONFLICT', message: 'Email already exists' } },
+        { status: 409 }
+      );
     }
 
     const passwordHash = await bcrypt.hash(password, 12);
@@ -39,8 +46,11 @@ export async function POST(req: Request) {
       role: users.role
     });
 
-    return NextResponse.json({ data: { user: { id: newUser.id.toString(), email: newUser.email, role: newUser.role } } }, { status: 201 });
-  } catch {
-    return NextResponse.json({ error: { code: 'INTERNAL_SERVER_ERROR', message: 'Something went wrong' } }, { status: 500 });
+    return NextResponse.json(
+      { success: true, data: { user: { id: newUser.id.toString(), email: newUser.email, role: newUser.role } } },
+      { status: 201 }
+    );
+  } catch (error) {
+    return handleApiError(error);
   }
 }
