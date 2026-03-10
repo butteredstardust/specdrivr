@@ -39,6 +39,18 @@ function isAgentPath(pathname: string): boolean {
   return AGENT_PATHS.some((p) => pathname.startsWith(p));
 }
 
+// Edge-compatible JWT token check
+// Checks for the existence of the NextAuth session token cookie.
+// Note: Full cryptographic verification still happens in the Route Handlers.
+function hasSessionCookie(request: NextRequest): boolean {
+  const isSecure = process.env.NODE_ENV === 'production' || request.nextUrl.protocol === 'https:';
+  const cookieName = isSecure ? '__Secure-authjs.session-token' : 'authjs.session-token';
+  // Also check legacy NextAuth cookie name as a fallback
+  const legacyCookieName = isSecure ? '__Secure-next-auth.session-token' : 'next-auth.session-token';
+
+  return request.cookies.has(cookieName) || request.cookies.has(legacyCookieName);
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -58,7 +70,8 @@ export async function proxy(request: NextRequest) {
   // Only apply to API routes
   if (pathname.startsWith('/api/')) {
     // Determine IP
-    const ip = (request.headers.get('x-forwarded-for') ?? '127.0.0.1') || '127.0.0.1';
+    // request.ip is available in Next.js edge runtime
+    const ip = request.headers.get('x-forwarded-for') || 'anonymous';
 
     // Check rate limit
     const { success, limit, reset, remaining } = await ratelimit.limit(
@@ -100,10 +113,21 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  // NextAuth v5 session requires node environment but middleware proxy runs in Edge Runtime.
-  // Using dynamic import or auth check is better left to app/api Route Handlers and pages.
-  // Note: We've removed `await auth()` from the proxy middleware.
-  // Individual Route Handlers (app/api/**/route.ts) are responsible for calling `const session = await auth();` and checking permissions.
+  // All other paths: require a valid user session cookie
+  // Edge runtime cannot dynamically load Node.js crypto for full validation
+  // so we perform a lightweight presence check here. Full validation in route.
+  if (!hasSessionCookie(request)) {
+    // API routes get JSON 401; page routes redirect to login
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
+        { status: 401 }
+      );
+    }
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('next', pathname);
+    return NextResponse.redirect(loginUrl);
+  }
 
   return response;
 }
