@@ -1,4 +1,8 @@
-# Development Best Practices
+# DEVELOPMENT.md | Human Developer Guide
+
+Development standards and best practices for Specdrivr, an AI-native orchestration platform.
+
+> **Cross-reference**: For AI agent operations, see `AGENTS.md`. For AI constraints, see `CLAUDE.md`.
 
 ## Code Standards
 
@@ -76,6 +80,45 @@ nvm use  # Auto-switches to correct version
 ```
 
 This ensures consistent behavior across all environments. The current project requires Node.js v25.6.1 with pnpm package manager.
+
+## Environment Configuration Architecture
+
+Environment variables must be validated with Zod and protected from client exposure using the `server-only` package.
+
+**For Next.js code (server components, API routes, server actions, repositories):**
+```typescript
+import { env } from '@/lib/env';  // Has server-only protection
+```
+
+**For standalone Node.js scripts (seed, migrations, CLI tools):**
+```typescript
+import { env } from '@/lib/env-script';  // No server-only, safe for scripts
+```
+
+**Never import directly from `env-core.ts`** - use one of the wrapper files above.
+
+**Rationale:**
+- `server-only` is a Next.js runtime package that throws when imported outside Next.js environment
+- We decouple validation logic (`env-core.ts`) from the security boundary (`env.ts`)
+- Standalone scripts use `env-script.ts` which bypasses the server-only import
+- This maintains security boundaries while enabling script usage
+
+## Tech Stack Overview
+
+Specdrivr utilizes a modern, type-safe stack optimized for AI-native orchestration:
+
+- **Framework**: Next.js 16.1.6 (App Router) with React 19.2.4, TypeScript 5.9.3
+- **Styling**: Tailwind CSS 4.2.1 with shadcn/ui components and CSS variables
+- **Database**: PostgreSQL with Drizzle ORM 0.45.1
+- **Authentication**: NextAuth.js 5.0.0-beta.19 with Upstash Redis adapter
+- **Data Validation**: Zod 3.22.0
+- **Testing**: Vitest 4 (unit), Playwright 1.42 (E2E)
+- **State/Interactivity**: @dnd-kit (drag-and-drop), Base UI
+- **Rich Text**: @uiw/react-md-editor
+- **Security**: bcryptjs, @upstash/ratelimit, @upstash/redis, RBAC utilities, lock-manager
+- **Utilities**: clsx, tailwind-merge, lucide icons, next-themes (dark mode), DOMPurify (sanitization)
+
+See `package.json` for full dependency list.
 
 ## Project Structure
 
@@ -231,6 +274,13 @@ export default function ErrorPage({
 
 ## Testing Standards
 
+### Testing Stack Details
+
+- **Unit Testing**: Vitest 4.x with @testing-library/react for component unit tests
+- **E2E Testing**: Playwright 1.42.x with ARIA-first selectors
+- **Test Environment**: jsdom 28.1.0 for DOM testing
+- **Mocking**: Use test factories (tests/factories) rather than fixtures
+
 ### Unit Tests
 ```typescript
 describe('ProjectRepository', () => {
@@ -294,7 +344,7 @@ test('should create new project', async ({ page }) => {
 # Right
 pnpm db:generate  # Generate migration
 pnpm db:migrate  # Apply to prod
-pnpm db:seed  # TypeScript seeding with Drizzle ORM
+pnpm db:seed      # TypeScript seeding with Drizzle ORM
 
 # Wrong
 # Directly editing drizzle/ files
@@ -318,6 +368,50 @@ const result = await db.execute('SELECT * FROM projects WHERE id = ?', [id]);
 - **Use pagination** for large result sets
 - **Fetch only needed fields**
 - **Avoid N+1 queries** by eager loading
+
+## Security Libraries
+
+### Rate Limiting (`src/lib/rate-limiter.ts`)
+Uses `@upstash/ratelimit` with Redis to protect API routes from abuse. This implements token bucket algorithm across distributed systems.
+
+```typescript
+import { ratelimit } from '@/lib/rate-limiter';
+
+const { success } = await ratelimit.limit(identifier, 10, 'MINUTE');
+if (!success) {
+  return NextResponse.json({ success: false, error: 'Rate limit exceeded' }, { status: 429 });
+}
+```
+
+### RBAC (`src/lib/rbac.ts`)
+Role-based access control utilities. Use to check project membership and permissions before database operations.
+
+```typescript
+import { canAccessProject } from '@/lib/rbac';
+
+if (!(await canAccessProject(userId, projectId))) {
+  return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
+}
+```
+
+### Lock Manager (`src/lib/lock-manager.ts`)
+Distributed locking via Redis for concurrency control (e.g., task assignment, project locks).
+
+```typescript
+import { acquireLock, releaseLock } from '@/lib/lock-manager';
+
+const lockAcquired = await acquireLock(resourceId, ttl);
+if (lockAcquired) {
+  try {
+    // perform operation
+  } finally {
+    await releaseLock(resourceId);
+  }
+}
+```
+
+### Redis Utilities (`src/lib/redis.ts`)
+Abstracted access to Redis through `@upstash/redis`. Used for rate limiting, auth sessions, and caching. Never connect directly using raw Redis clients.
 
 ## Git Workflow
 
@@ -383,6 +477,11 @@ refactor/project-repository
 8. **Don't skip tests** - Write tests as you code
 9. **Don't commit dead code** - Remove unused code
 10. **Don't ignore security warnings** - Address all pnpm audit issues
+11. **Don't use `console.log`** - Use Pino logger from `@/lib/logger`
+12. **Don't mix npm/pnpm** - Use pnpm for all commands
+13. **Don't forget to await dynamic APIs** - `params`, `searchParams`, `cookies`, `headers` require await in Next.js 16
+14. **Don't import env-core.ts** - Use `@/lib/env` or `@/lib/env-script` instead
+15. **Don't bypass type safety** - Avoid `as Type` assertions; use type guards
 
 ### Package Manager Security
 When pnpm audit reveals vulnerabilities, address them using pnpm overrides in package.json:
@@ -401,6 +500,27 @@ pnpm audit
   }
 }
 ```
+
+## AI-Generated Code Issues
+
+AI coding assistants may produce code that violates project standards. Be vigilant:
+
+- **Environment file misuse**: Importing from `env-core.ts` instead of `env.ts` or `env-script.ts`
+- **Command confusion**: Using `npm` instead of `pnpm` for all commands
+- **Console logging**: Using `console.log`/`console.error` instead of Pino logger
+- **Type assertions**: Using `as Type` to bypass type checking - prefer type guards
+- **Missing validation**: Skipping Zod validation on API inputs
+- **Hardcoded styles**: Using hex values instead of CSS variables (`var(--color)`)
+- **Side-effect imports**: Importing server-only modules in client components
+- **Direct DB access**: Bypassing repositories
+- **Unawaited Next.js APIs**: Accessing `params`, `searchParams` without await in Next.js 16
+- **Global state mutation**: Modifying global variables or DB without transactions
+- **Missing error handling**: Not wrapping operations in try/catch with structured responses
+- **Incorrect error responses**: Throwing errors from Server Actions instead of returning `{ error }`
+- **Server Actions misplacement**: Using API Routes for UI-invoked mutations when Server Actions are appropriate
+- **Design token avoidance**: Not using the `ios-styles.ts` status colors or token system
+
+If an AI-generated snippet fails review, correct it following the patterns in this document.
 
 ## Code Review Checklist
 

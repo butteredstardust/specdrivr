@@ -3,9 +3,15 @@ import { taskRepository } from '@/repositories/task-repository';
 import { type TaskSelect as Task } from "@/db/schema";
 import { handleApiError } from '@/lib/error-handler';
 import { taskQuerySchema, createTaskSchema } from '@/lib/schemas';
+import { auth } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+    }
+
     const searchParams = request.nextUrl.searchParams;
     const query = {
       status: searchParams.get('status'),
@@ -43,6 +49,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+    }
+
     const body = await request.json();
     const validationResult = createTaskSchema.safeParse(body);
 

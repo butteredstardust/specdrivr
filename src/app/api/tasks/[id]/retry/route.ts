@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { taskRepository } from '@/repositories/task-repository';
 import { formatErrorResponse, handleApiError } from '@/lib/error-handler';
+import { auth } from '@/lib/auth';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -43,6 +44,11 @@ export async function POST(
   { params }: RouteParams
 ) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+    }
+
     // Unwrap params promise
     const { id } = await params;
 

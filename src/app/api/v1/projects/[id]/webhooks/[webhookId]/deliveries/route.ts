@@ -3,12 +3,16 @@ import { db } from '@/db';
 import { webhookDeliveries, webhooks } from '@/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
+import { handleApiError } from '@/lib/error-handler';
 
 export async function GET(req: Request, context: { params: Promise<{ id: string, webhookId: string }> }) {
   try {
     const session = await auth();
     if (!session?.user) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Authentication required' } }, { status: 401 });
+      return NextResponse.json(
+        { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
+        { status: 401 }
+      );
     }
 
     const { id, webhookId } = await context.params;
@@ -19,7 +23,10 @@ export async function GET(req: Request, context: { params: Promise<{ id: string,
     );
 
     if (existing.length === 0) {
-      return NextResponse.json({ error: { code: 'NOT_FOUND', message: 'Webhook not found' } }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: { code: 'NOT_FOUND', message: 'Webhook not found' } },
+        { status: 404 }
+      );
     }
 
     const deliveries = await db.select().from(webhookDeliveries).where(eq(webhookDeliveries.projectId, Number(id))).orderBy(desc(webhookDeliveries.createdAt));
@@ -34,8 +41,8 @@ export async function GET(req: Request, context: { params: Promise<{ id: string,
       projectId: d.projectId.toString()
     }));
 
-    return NextResponse.json({ data: mapped });
-  } catch {
-    return NextResponse.json({ error: { code: 'INTERNAL_SERVER_ERROR', message: 'Something went wrong' } }, { status: 500 });
+    return NextResponse.json({ success: true, data: mapped });
+  } catch (error) {
+    return handleApiError(error);
   }
 }

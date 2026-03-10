@@ -4,6 +4,7 @@ import { db } from '@/db';
 import { projects, projectMembers } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
+import { handleApiError } from '@/lib/error-handler';
 
 const CreateProjectSchema = z.object({
   name: z.string().min(1),
@@ -14,7 +15,10 @@ export async function GET() {
   try {
     const session = await auth();
     if (!session?.user) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Authentication required' } }, { status: 401 });
+      return NextResponse.json(
+        { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
+        { status: 401 }
+      );
     }
 
     const userId = Number(session.user.id);
@@ -46,9 +50,9 @@ export async function GET() {
       lastSessionSummary: p.description
     }));
 
-    return NextResponse.json({ data: formattedProjects });
-  } catch {
-    return NextResponse.json({ error: { code: 'INTERNAL_SERVER_ERROR', message: 'Something went wrong' } }, { status: 500 });
+    return NextResponse.json({ success: true, data: formattedProjects });
+  } catch (error) {
+    return handleApiError(error);
   }
 }
 
@@ -56,14 +60,20 @@ export async function POST(req: Request) {
   try {
     const session = await auth();
     if (!session?.user) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Authentication required' } }, { status: 401 });
+      return NextResponse.json(
+        { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
+        { status: 401 }
+      );
     }
 
     const body = await req.json();
     const parsed = CreateProjectSchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json({ error: { code: 'VALIDATION_ERROR', message: parsed.error.message } }, { status: 422 });
+      return NextResponse.json(
+        { success: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.message, details: parsed.error.errors } },
+        { status: 400 }
+      );
     }
 
     const { name, slug } = parsed.data;
@@ -71,7 +81,10 @@ export async function POST(req: Request) {
 
     const existing = await db.select().from(projects).where(eq(projects.slug, slug));
     if (existing.length > 0) {
-      return NextResponse.json({ error: { code: 'CONFLICT', message: 'Project slug already exists' } }, { status: 409 });
+      return NextResponse.json(
+        { success: false, error: { code: 'CONFLICT', message: 'Project slug already exists' } },
+        { status: 409 }
+      );
     }
 
     const result = await db.transaction(async (tx) => {
@@ -89,8 +102,8 @@ export async function POST(req: Request) {
       return newProject;
     });
 
-    return NextResponse.json({ data: { ...result, id: result.id.toString() } }, { status: 201 });
-  } catch {
-    return NextResponse.json({ error: { code: 'INTERNAL_SERVER_ERROR', message: 'Something went wrong' } }, { status: 500 });
+    return NextResponse.json({ success: true, data: { ...result, id: result.id.toString() } }, { status: 201 });
+  } catch (error) {
+    return handleApiError(error);
   }
 }
