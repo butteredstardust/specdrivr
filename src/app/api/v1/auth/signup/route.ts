@@ -26,7 +26,7 @@ export async function POST(req: Request) {
 
     // Use Better Auth server-side API to create user
     // This handles password hashing, validation, and session creation if autoSignIn is enabled
-    const result: any = await authInstance.api.signUpEmail({
+    const result = await authInstance.api.signUpEmail({
       body: {
         email,
         password,
@@ -36,12 +36,13 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json(
-      { success: true, data: { user: result.user, session: result.session || null } },
+      { success: true, data: { user: result.user, token: result.token || null } },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as { code?: string; message?: string };
     // Better Auth might throw specific errors (e.g. Email already exists)
-    if (error.code === 'USER_ALREADY_EXISTS' || error.message?.includes('already exists')) {
+    if (err.code === 'USER_ALREADY_EXISTS' || (err.message && err.message.includes('already exists'))) {
         return NextResponse.json(
             { success: false, error: { code: 'CONFLICT', message: 'Email already exists' } },
             { status: 409 }

@@ -1,29 +1,24 @@
 import { NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
 import { db } from '@/db';
 import { notifications } from '@/db/schema';
-import { eq, desc } from 'drizzle-orm';
-import { auth } from '@/lib/auth';
 import { handleApiError } from '@/lib/error-handler';
+import { eq, desc } from 'drizzle-orm';
 
 export async function GET() {
+  const session = await auth();
+  if (!session) {
+    return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+  }
+
   try {
-    const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
-        { status: 401 }
-      );
-    }
+    const userId = parseInt(session.user.id);
+    const list = await db.select()
+      .from(notifications)
+      .where(eq(notifications.userId, userId))
+      .orderBy(desc(notifications.createdAt));
 
-    const userNotifs = await db.select().from(notifications).where(eq(notifications.userId, Number(session.user.id))).orderBy(desc(notifications.createdAt));
-
-    const mapped = userNotifs.map(n => ({
-      ...n,
-      id: n.id.toString(),
-      userId: n.userId.toString()
-    }));
-
-    return NextResponse.json({ success: true, data: mapped });
+    return NextResponse.json({ success: true, data: list });
   } catch (error) {
     return handleApiError(error);
   }

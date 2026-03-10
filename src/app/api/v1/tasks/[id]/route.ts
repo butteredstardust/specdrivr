@@ -73,7 +73,7 @@ export async function PATCH(
       );
     }
 
-    const task = await taskRepository.update(taskId, parsed.data as any);
+    const task = await taskRepository.update(taskId, parsed.data);
 
     return NextResponse.json({
       success: true,

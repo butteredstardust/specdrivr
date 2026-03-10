@@ -7,12 +7,7 @@ const PUBLIC_PATHS = new Set([
   '/forgot-password',
   '/reset-password',
   '/accept-invite',
-  '/api/auth/signin',
-  '/api/auth/signout',
-  '/api/auth/forgot-password',
-  '/api/auth/reset-password',
-  '/api/auth/accept-invite',
-  '/api/health',
+  '/api/v1/health',
 ]);
 
 // Routes only the agent token can access (no user session required)
@@ -20,6 +15,7 @@ const AGENT_PATHS = ['/api/v1/agent/'];
 
 function isPublic(pathname: string): boolean {
   if (PUBLIC_PATHS.has(pathname)) return true;
+  if (pathname.startsWith('/api/auth/')) return true;
   // Allow Next.js internals and static assets
   if (pathname.startsWith('/_next/')) return true;
   if (pathname.startsWith('/favicon')) return true;

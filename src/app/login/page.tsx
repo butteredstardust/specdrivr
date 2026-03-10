@@ -1,14 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { authClient } from '@/lib/auth-client'; // We'll need to create this
-import { useRouter } from 'next/navigation';
+import { authClient } from '@/lib/auth-client';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
