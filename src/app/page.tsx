@@ -1,7 +1,15 @@
 import { projectRepository } from '@/repositories/project-repository';
+import type { ProjectSelect } from '@/db/schema';
+
+export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  const allProjects = await projectRepository.getAll();
+  let allProjects: ProjectSelect[] = [];
+  try {
+    allProjects = await projectRepository.getAll();
+  } catch (error) {
+    console.warn('Failed to fetch projects during build or at runtime:', error);
+  }
 
   return (
     <div className="min-h-screen p-8">

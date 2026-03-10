@@ -21,6 +21,7 @@ async function main() {
       email: "alice@example.com",
       passwordHash,
       role: "admin",
+      emailVerified: true,
     }).onConflictDoNothing();
 
     await tx.insert(users).values({
@@ -28,6 +29,7 @@ async function main() {
       email: "bob@example.com",
       passwordHash,
       role: "member",
+      emailVerified: true,
     }).onConflictDoNothing();
 
     await tx.insert(users).values({
@@ -35,6 +37,7 @@ async function main() {
       email: "charlie@example.com",
       passwordHash,
       role: "viewer",
+      emailVerified: true,
     }).onConflictDoNothing();
 
     // Get the users (whether newly inserted or existing)

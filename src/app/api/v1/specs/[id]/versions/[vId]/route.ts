@@ -3,6 +3,7 @@ import { db } from '@/db';
 import { specVersions } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
+import { logger } from '@/lib/logger';
 import { handleApiError } from '@/lib/error-handler';
 
 export async function GET(req: Request, context: { params: Promise<{ id: string, vId: string }> }) {
@@ -39,6 +40,7 @@ export async function GET(req: Request, context: { params: Promise<{ id: string,
       }
     });
   } catch (error) {
+    logger.error({ error }, 'Error fetching spec version by ID');
     return handleApiError(error);
   }
 }

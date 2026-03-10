@@ -36,12 +36,12 @@ export async function GET(request: NextRequest) {
         tasks = tasks.filter(task => task.status === status);
       }
     } else if (status) {
-      tasks = await taskRepository.getByStatus(status as unknown as "todo");
+      tasks = await taskRepository.getByStatus(status as any);
     } else {
       tasks = await taskRepository.getAll();
     }
 
-    return NextResponse.json({ data: tasks });
+    return NextResponse.json({ success: true, data: tasks });
   } catch (error) {
     return handleApiError(error);
   }
@@ -59,17 +59,22 @@ export async function POST(request: NextRequest) {
 
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: { code: 'VALIDATION_ERROR', message: 'Invalid task data', details: validationResult.error.errors } },
+        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Invalid task data', details: validationResult.error.errors } },
         { status: 400 }
       );
     }
 
     const data = validationResult.data;
-    const taskData = { externalId: `T-${Date.now()}`, title: data.description.substring(0, 50), ...data };
-    const newTask = await taskRepository.create(taskData);
+    const taskData = { 
+      externalId: `T-${Date.now()}`, 
+      title: data.description.substring(0, 50), 
+      ...data,
+      createdByUserId: Number(session.user.id)
+    };
+    const newTask = await taskRepository.create(taskData as any);
 
     return NextResponse.json(
-      { data: newTask },
+      { success: true, data: newTask },
       { status: 201 }
     );
   } catch (error) {

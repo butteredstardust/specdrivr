@@ -24,7 +24,7 @@ export async function GET(
 
     return NextResponse.json({ success: true, data: versions });
   } catch (error) {
-    logger.error('Error fetching spec versions', { error });
+    logger.error({ error }, 'Error fetching spec versions');
     return handleApiError(error);
   }
 }
@@ -82,7 +82,7 @@ export async function POST(
 
     return NextResponse.json({ success: true, data: result }, { status: 201 });
   } catch (error) {
-    logger.error('Error creating spec version', { error });
+    logger.error({ error }, 'Error creating spec version');
     return handleApiError(error);
   }
 }

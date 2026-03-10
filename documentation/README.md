@@ -35,8 +35,7 @@ documentation/
 ├── DESIGN_SYSTEM.md              # Design system specification
 ├── INTEGRATIONS.md               # Integration specification
 ├── DEVELOPMENT.md               # Development specification
-├── OPERATIONS.md                # Operations specification
-└── AUTHENTICATION.md            # Auth specification
+└── OPERATIONS.md                # Operations specification
 ```
 
 ## Splitting Rationale

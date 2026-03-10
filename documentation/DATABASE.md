@@ -241,8 +241,11 @@ Application users with role-based access.
 
 ```sql
 id: serial PRIMARY KEY
-username: text NOT NULL UNIQUE
-password_hash: text NOT NULL
+email: text NOT NULL UNIQUE
+email_verified: boolean DEFAULT false NOT NULL
+image: text
+username: text UNIQUE
+password_hash: text
 avatar_url: text
 timezone: text
 locale: text DEFAULT 'en'
@@ -269,6 +272,51 @@ resend_count: integer DEFAULT 0 NOT NULL
 last_resent_at: timestamp with time zone
 expires_at: timestamp with time zone NOT NULL
 created_at: timestamp with time zone DEFAULT now()
+```
+
+### `sessions`
+Authentication sessions for Better Auth.
+
+```sql
+id: text PRIMARY KEY
+expires_at: timestamp with time zone NOT NULL
+token: text NOT NULL UNIQUE
+created_at: timestamp with time zone NOT NULL
+updated_at: timestamp with time zone NOT NULL
+ip_address: text
+user_agent: text
+user_id: integer NOT NULL REFERENCES users(id) ON DELETE CASCADE
+```
+
+### `accounts`
+External accounts linked to users (for OAuth/Credentials).
+
+```sql
+id: text PRIMARY KEY
+account_id: text NOT NULL
+provider_id: text NOT NULL
+user_id: integer NOT NULL REFERENCES users(id) ON DELETE CASCADE
+access_token: text
+refresh_token: text
+id_token: text
+access_token_expires_at: timestamp with time zone
+refresh_token_expires_at: timestamp with time zone
+scope: text
+password: text
+created_at: timestamp with time zone NOT NULL
+updated_at: timestamp with time zone NOT NULL
+```
+
+### `verifications`
+Verification tokens for email verification and password resets.
+
+```sql
+id: text PRIMARY KEY
+identifier: text NOT NULL
+value: text NOT NULL
+expires_at: timestamp with time zone NOT NULL
+created_at: timestamp with time zone
+updated_at: timestamp with time zone
 ```
 
 ## Integration & Audit Tables

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { projectRepository } from '@/repositories/project-repository';
+import { taskRepository } from '@/repositories/task-repository';
 import { formatErrorResponse, handleApiError } from '@/lib/error-handler';
 import { NotFoundError } from '@/lib/errors';
-import { updateProjectSchema } from '../route';
+import { updateTaskSchema } from '@/lib/schemas';
 import { auth } from '@/lib/auth';
 
 interface RouteParams {
@@ -20,24 +20,24 @@ export async function GET(
     }
 
     const { id } = await params;
-    const projectId = parseInt(id, 10);
+    const taskId = parseInt(id, 10);
 
-    if (isNaN(projectId) || projectId <= 0) {
+    if (isNaN(taskId) || taskId <= 0) {
       return NextResponse.json(
-        formatErrorResponse({ message: 'Invalid project ID' }),
+        formatErrorResponse({ message: 'Invalid task ID - must be a positive number' }),
         { status: 400 }
       );
     }
 
-    const project = await projectRepository.getById(projectId);
+    const task = await taskRepository.getById(taskId);
 
-    if (!project) {
-      throw new NotFoundError(`Project with ID ${projectId} not found`);
+    if (!task) {
+      throw new NotFoundError(`Task with ID ${taskId} not found`);
     }
 
     return NextResponse.json({
       success: true,
-      data: project,
+      data: task,
     });
   } catch (error) {
     return handleApiError(error);
@@ -55,23 +55,29 @@ export async function PATCH(
     }
 
     const { id } = await params;
-    const projectId = parseInt(id, 10);
+    const taskId = parseInt(id, 10);
 
-    if (isNaN(projectId) || projectId <= 0) {
+    if (isNaN(taskId) || taskId <= 0) {
       return NextResponse.json(
-        formatErrorResponse({ message: 'Invalid project ID' }),
+        formatErrorResponse({ message: 'Invalid task ID - must be a positive number' }),
         { status: 400 }
       );
     }
 
     const body = await request.json();
-    const parsed = updateProjectSchema.parse({ id: projectId, ...body });
+    const parsed = updateTaskSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Validation failed', details: parsed.error.errors } },
+        { status: 400 }
+      );
+    }
 
-    const project = await projectRepository.update(projectId, parsed);
+    const task = await taskRepository.update(taskId, parsed.data as any);
 
     return NextResponse.json({
       success: true,
-      data: project,
+      data: task,
     });
   } catch (error) {
     return handleApiError(error);
@@ -89,16 +95,16 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    const projectId = parseInt(id, 10);
+    const taskId = parseInt(id, 10);
 
-    if (isNaN(projectId) || projectId <= 0) {
+    if (isNaN(taskId) || taskId <= 0) {
       return NextResponse.json(
-        formatErrorResponse({ message: 'Invalid project ID' }),
+        formatErrorResponse({ message: 'Invalid task ID - must be a positive number' }),
         { status: 400 }
       );
     }
 
-    await projectRepository.delete(projectId);
+    await taskRepository.delete(taskId);
 
     return NextResponse.json({ success: true });
   } catch (error) {

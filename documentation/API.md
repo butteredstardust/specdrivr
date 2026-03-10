@@ -16,12 +16,13 @@ Authentication: Pass the session cookie (browser clients) or Authorization: Bear
 
 | **Method** | **Path**                  | **Description**                                                        | **Auth required** |
 | ---------- | ------------------------- | ---------------------------------------------------------------------- | ----------------- |
-| **POST**   | /api/auth/signin          | Email + password login. Sets httpOnly session cookie.                  | No                |
-| **POST**   | /api/auth/signout         | Invalidates session cookie + Redis session key.                        | Yes               |
-| **POST**   | /api/auth/forgot-password | Sends reset email. Always returns 200 (never reveals if email exists). | No                |
-| **POST**   | /api/auth/reset-password  | Validates token, sets new password, invalidates token.                 | No                |
-| **POST**   | /api/auth/accept-invite   | Accepts invite token, creates user, auto-signs in.                     | No                |
-| **GET**    | /api/auth/session         | Returns current user and active project context.                       | Yes               |
+| **POST**   | /api/auth/sign-in/email   | Email + password login. Sets httpOnly session cookie.                  | No                |
+| **POST**   | /api/auth/sign-out        | Invalidates session cookie + DB session record.                        | Yes               |
+| **POST**   | /api/auth/forget-password | Sends reset email (Better Auth flow).                                  | No                |
+| **POST**   | /api/auth/reset-password  | Validates token and sets new password.                                 | No                |
+| **POST**   | /api/auth/get-session     | Returns current user and session data.                                 | Yes               |
+
+Note: These are handled by the Better Auth catch-all handler at `/api/auth/[...auth]`.
 
 ## **6.2 Projects**
 

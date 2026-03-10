@@ -28,7 +28,7 @@ Specdrivr uses modern, type-safe stack:
 | UI | shadcn/ui (Radix UI primitives) |
 | Database | PostgreSQL |
 | ORM | Drizzle ORM 0.45.1 |
-| Auth | NextAuth.js 5.0.0-beta.19 |
+| Auth | better-auth 1.5.4 |
 | Validation | Zod 3.22.0 |
 | Testing | Vitest 4, Playwright 1.42 |
 | Drag-drop | @dnd-kit |

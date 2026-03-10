@@ -16,8 +16,8 @@ _Spec-driven autonomous code execution for engineering teams_
 | Language           | TypeScript 5.x (strict mode)                      | Type safety across all layers; Drizzle types flow end-to-end              |
 | Database           | PostgreSQL 16                                     | ACID transactions; JSONB for log lines and metadata                       |
 | ORM                | Drizzle ORM + drizzle-kit                         | Type-safe queries; schema-first migrations; no code generation            |
-| Auth               | BetterAuth v5 (Auth.js)                           | Credentials + OAuth; session in httpOnly cookie; CSRF protection built-in |
-| Cache / Queues     | Redis (Upstash)                                   | Session store; rate limiting; agent task queue; pub/sub for live events   |
+| Auth               | [Better Auth](https://www.better-auth.com/)        | Credentials + Email/Password; session in httpOnly cookie; CSRF built-in |
+| Cache / Queues     | Redis (Upstash)                                   | Rate limiting; agent task queue; pub/sub for live events                |
 | File storage       | S3-compatible (AWS or self-hosted MinIO)          | Spec attachments; diff snapshots for long sessions                        |
 | Email              | Resend                                            | Transactional email for invites, notifications, password reset            |
 | UI components      | shadcn/ui (Radix + Tailwind)                      | Accessible, unstyled primitives; customisable without overrides           |
@@ -47,7 +47,7 @@ _Spec-driven autonomous code execution for engineering teams_
 - The web application (Next.js) never exposes database credentials to the client. All DB access goes through Server Actions or Route Handlers on the server only.
 - lib/db.ts, lib/env.ts, and lib/logger.ts all carry import 'server-only' - any accidental client import is a compile-time error.
 - The DAEMON agent communicates via the public API only. No direct DB access from the agent process.
-- User sessions are stored in Redis with a 30-day TTL. Revoking a session deletes the Redis key immediately.
+- User sessions are stored in the database (Postgres) with a 30-day TTL. Revoking a session deletes the record immediately.
 - API tokens are stored as bcrypt hashes. The raw token is shown exactly once (on creation) and cannot be recovered.
 
 # **23\. Stack-Specific Engineering Constraints**
@@ -77,7 +77,7 @@ This section documents known pitfalls and required mitigations for the specific 
 | **Pitfall**                                                                                                                              | **Mitigation**                                                                                                                                                |
 | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Using ioredis (TCP) in serverless: Vercel Lambda functions do not maintain persistent TCP connections. ioredis will fail on cold starts. | Use @upstash/redis which uses HTTP fetch under the hood. Safe for serverless. Do not install ioredis in this project.                                         |
-| Session key naming collisions: if multiple projects share a Redis instance, session keys for different apps could collide.               | Prefix all keys: session:{sessionToken}, reset:{token}, ratelimit:{ip}:{endpoint}, queue:task:{taskId}. Never store a bare key.                               |
+| Redis keys: rate limiting and queue management.                                              | Prefix all keys: ratelimit:{ip}:{endpoint}, queue:task:{taskId}. Never store a bare key.                               |
 | Rate limit bypass via header spoofing: using X-Forwarded-For as the rate limit key allows clients to spoof IP addresses.                 | Extract real IP from Vercel's trusted x-vercel-forwarded-for header in production. In development, fall back to req.ip. Never trust X-Forwarded-For directly. |
 
 ## **23.4 Plan Generation as a Long-Running Job**
@@ -145,14 +145,14 @@ The spec currently uses 3-second polling for session state and notifications. Th
 Example: commit 33a0f48 fixed an esbuild vulnerability via pnpm overrides. Always address security warnings from `pnpm audit` before deployment.
 | CI/CD pipelines using `npm ci` instead of pnpm commands. The project enforces pnpm and deletes package-lock.json (commit 99bb6ea). | Update GitHub Actions workflows to use `pnpm install --frozen-lockfile` (not `npm ci`). All package scripts must use `pnpm` commands exclusively.
 | Type errors and undefined environment variables in CI environments. | Validate all environment variables with Zod in lib/env.ts. Run TypeScript compilation in CI: `tsc --noEmit` to catch type errors before deployment (commit 3eb626b).|
-## **23.10 NextAuth v5 Breaking Changes (vs v4)**
+## **23.10 Better Auth Implementation Patterns**
 
-| **Change**                                                                                      | **Required action**                                                                                                               |
+| **Target**                                                                                      | **Best Practice**                                                                                                               |
 | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| Session shape changed: session.user no longer contains id by default.                           | Add the id to the session in auth.ts: callbacks: { session({ session, token }) { session.user.id = token.sub; return session; } } |
-| jwt callback renamed: the jwt callback receives a token, not a user object on subsequent calls. | Check token.sub (the user ID) instead of token.id. The user object is only present on the first sign-in call.                     |
-| getServerSession renamed: use auth() from the NextAuth config instead.                          | Import auth from @/auth everywhere. Never import getServerSession from next-auth/next - it does not exist in v5.                  |
-| Middleware pattern changed: NextAuth v5 middleware exports auth as a default middleware.        | export { auth as middleware } from '@/auth'. The config export controls which routes require authentication.                      |
+| Session retrieval in Server Components: the data returned by auth() is reactive to the DB record. | Always use `const session = await auth();` from `src/lib/auth.ts`. It wraps the Better Auth client for internal use. |
+| Middleware session check: the edge session check in proxy.ts is restricted to cookie existence. | `proxy.ts` performs a fast existence check for `better-auth.session_token`. Cryptographic verification happens in Route Handlers. |
+| User metadata and roles: the `users` table is extended with custom fields like `role`.          | Access roles via `session.user.role`. This is populated via the `additionalFields` configuration in `src/lib/auth.ts`. |
+| API Route endpoints: authentication logic is unified under a single catch-all route.             | Use `/api/auth/[...auth]` handled by `toNextJsHandler`. Do not implement manual sign-in routes. |
 
 # **24\. Concurrency & Race Condition Handling**
 

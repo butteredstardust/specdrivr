@@ -1,74 +1,43 @@
-import 'server-only';
-import NextAuth from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
-import { z } from "zod";
+import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { db } from "@/db";
-import { users } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import * as schema from "@/db/schema";
 import { env } from "./env";
-import { UpstashRedisAdapter } from "@auth/upstash-redis-adapter";
-import { redis } from "./redis";
+import { headers } from "next/headers";
 
-export const CredentialsSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8)
-});
-
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: UpstashRedisAdapter(redis as never),
-  session: { strategy: "jwt" },
-  secret: env.NEXTAUTH_SECRET,
-  providers: [
-    CredentialsProvider({
-      name: "Credentials",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
-      },
-      async authorize(credentials) {
-        try {
-          const { email, password } = CredentialsSchema.parse(credentials);
-
-          const result = await db.select().from(users).where(eq(users.email, email));
-          const user = result[0];
-
-          if (!user || !user.passwordHash) {
-            return null;
-          }
-
-          const passwordsMatch = await bcrypt.compare(password, user.passwordHash);
-
-          if (passwordsMatch) {
-            return {
-              id: user.id.toString(),
-              email: user.email,
-              name: user.email,
-              role: user.role,
-            };
-          }
-
-          return null;
-        } catch {
-          return null;
-        }
-      }
-    })
-  ],
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.role = (user as { role?: string }).role;
-      }
-      return token;
+export const authInstance = betterAuth({
+  database: drizzleAdapter(db, {
+    provider: "pg",
+    schema: {
+      user: schema.users,
+      session: schema.sessions,
+      account: schema.accounts,
+      verification: schema.verifications,
     },
-    async session({ session, token }) {
-      if (token && session.user) {
-        session.user.id = (token.id as string) || '';
-        (session.user as { role?: string }).role = token.role as string | undefined;
-      }
-      return session;
+  }),
+  user: {
+    additionalFields: {
+      role: { type: "string", required: false, defaultValue: "viewer" },
+      isActive: { type: "boolean", required: false, defaultValue: true },
+      timezone: { type: "string", required: false },
+      locale: { type: "string", required: false },
+      onboardingStep: { type: "number", required: false, defaultValue: 0 },
+      theme: { type: "string", required: false, defaultValue: "dark" },
     }
-  }
+  },
+  emailAndPassword: {
+    enabled: true,
+    autoSignIn: true,
+  },
+  session: {
+    expiresIn: 60 * 60 * 24 * 7, // 7 days
+    updateAge: 60 * 60 * 24, // 1 day
+  },
+  secret: env.NEXTAUTH_SECRET,
 });
+
+export const auth = async () => {
+  return await authInstance.api.getSession({
+    headers: await headers(),
+  });
+};
