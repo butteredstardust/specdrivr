@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { Ratelimit } from '@upstash/ratelimit';
 import { redis } from '@/lib/redis';
-import { auth } from '@/lib/auth';
 
 // Create a new ratelimiter, that allows 100 requests per 1 minute
 const ratelimit = new Ratelimit({
@@ -101,21 +100,10 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  // All other paths: require a valid user session
-  // Note: We MUST pass the request to auth() in middleware/proxy
-  const session = await auth(request);
-  if (!session?.user?.id) {
-    // API routes get JSON 401; page routes redirect to login
-    if (pathname.startsWith('/api/')) {
-      return NextResponse.json(
-        { error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
-        { status: 401 }
-      );
-    }
-    const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('next', pathname);
-    return NextResponse.redirect(loginUrl);
-  }
+  // NextAuth v5 session requires node environment but middleware proxy runs in Edge Runtime.
+  // Using dynamic import or auth check is better left to app/api Route Handlers and pages.
+  // Note: We've removed `await auth()` from the proxy middleware.
+  // Individual Route Handlers (app/api/**/route.ts) are responsible for calling `const session = await auth();` and checking permissions.
 
   return response;
 }
