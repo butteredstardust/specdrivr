@@ -49,7 +49,7 @@ const ArrowRightIcon = ({ className }: { className?: string }) => (
 );
 
 const PulsingDotIcon = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"/></svg>
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"/></svg>
 );
 
 const UserIcon = ({ className }: { className?: string }) => (
