@@ -203,3 +203,57 @@ Scenario: the agent sends a heartbeat, and simultaneously the user clicks \[Canc
 
 Resolution: the agent MUST check the heartbeat response before executing each task, not just at the heartbeat interval. The task execution loop is: 1) send heartbeat, 2) if shouldStop → exit loop, 3) pick up next task. The heartbeat is the only mechanism for stopping a session - never kill the agent process externally.
 
+
+
+## **4.4 Sequence & Data Flow**
+
+The system employs an event-driven flow for AI task execution, utilizing PostgreSQL as a central state machine and Redis for queues and rate limiting.
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant NextJS as Next.js API (Edge/Node)
+    participant Redis as Redis (Upstash)
+    participant Postgres as PostgreSQL (Drizzle)
+    participant DAEMON as Agent DAEMON
+    participant Repo as Git Repository
+
+    User->>NextJS: Approve Plan (POST /plans/:id/approve)
+    NextJS->>Postgres: Create session, update tasks (status: todo)
+    NextJS-->>User: 200 OK
+
+    loop Agent Execution Cycle
+        DAEMON->>Redis: Check Queue / Heartbeat
+        DAEMON->>NextJS: Poll for Next Task (GET /api/v1/agent/tasks/next)
+        NextJS->>Postgres: Find `todo` task, lock transaction
+        Postgres-->>NextJS: Task Data
+        NextJS->>Redis: Record currentlyRunningTaskIds
+        NextJS-->>DAEMON: Task Details
+        DAEMON->>Repo: git checkout, write code
+        DAEMON->>NextJS: Report Changes/Status (POST /tasks/:id/changes)
+        NextJS->>Postgres: Update file_changes, task status (`done`)
+        NextJS->>Redis: Remove from currentlyRunningTaskIds
+    end
+```
+
+## **4.5 Frontend State Management**
+
+Frontend state is managed explicitly to distinguish between persistent global state and ephemeral UI state.
+
+1. **Server Components:** The default for data fetching. Data is passed as props to Client Components.
+2. **React Context:** Used sparingly for truly global application state (e.g., Theme, current active Project).
+3. **Local State (useState/useReducer):** Ephemeral UI interactions (e.g., form inputs, dropdown visibility).
+4. **URL State (searchParams):** Filters, search queries, and pagination are stored in the URL. This ensures sharable links and survives reloads.
+5. **Zustand (Optional/Planned):** If complex client-side state is required in the future (like a multi-step wizard), a lightweight global store like Zustand is preferred over Redux.
+
+## **4.6 Edge Runtime Constraints & Race Conditions**
+
+**Edge Runtime (proxy.ts):**
+- Specdrivr uses Next.js Edge for middleware/proxy routing.
+- Native Node.js modules, globals (`process.cwd`), and raw TCP connections (`ioredis`) are unsupported at the Edge.
+- Rate limiting and session verification at the edge use `@upstash/ratelimit` (HTTP-based Redis), avoiding `ioredis` connection crashes.
+
+**Race Condition Handling (PostgreSQL State Machine):**
+- Specdrivr relies on database-level row locks (`SELECT ... FOR UPDATE`) and optimistic concurrency control.
+- Distributed locking via Redis (`src/lib/lock-manager.ts`) is used for task assignment to prevent multiple agent instances from picking up the same task simultaneously.
+- Concurrent updates to the same entity (e.g., Spec edits) use versioning logic to ensure idempotency and prevent lost updates.
