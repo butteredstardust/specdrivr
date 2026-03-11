@@ -10,14 +10,14 @@ export async function POST() {
     const session = await auth();
     if (!session?.user) {
       return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
+        { error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
         { status: 401 }
       );
     }
 
     await db.update(notifications).set({ readAt: new Date() }).where(eq(notifications.userId, Number(session.user.id)));
 
-    return NextResponse.json({ success: true, data: { success: true } });
+    return NextResponse.json({ data: { success: true } });
   } catch (error) {
     return handleApiError(error);
   }

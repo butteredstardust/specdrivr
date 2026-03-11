@@ -15,14 +15,14 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
     const session = await auth();
     if (!session?.user) {
       return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
+        { error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
         { status: 401 }
       );
     }
 
     if (((session.user as { role?: string }).role) !== 'admin' && ((session.user as { role?: string }).role) !== 'owner') {
       return NextResponse.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Insufficient permissions' } },
+        { error: { code: 'FORBIDDEN', message: 'Insufficient permissions' } },
         { status: 403 }
       );
     }
@@ -33,7 +33,7 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
 
     if (!parsed.success) {
       return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.message, details: parsed.error.errors } },
+        { error: { code: 'VALIDATION_ERROR', message: parsed.error.message, details: parsed.error.errors } },
         { status: 400 }
       );
     }
@@ -44,14 +44,14 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
     const existing = await db.select().from(projects).where(eq(projects.id, projectId));
     if (existing.length === 0) {
       return NextResponse.json(
-        { success: false, error: { code: 'NOT_FOUND', message: 'Project not found' } },
+        { error: { code: 'NOT_FOUND', message: 'Project not found' } },
         { status: 404 }
       );
     }
 
     if (existing[0].createdBy === targetUserId) {
        return NextResponse.json(
-         { success: false, error: { code: 'FORBIDDEN', message: 'Cannot demote the owner' } },
+         { error: { code: 'FORBIDDEN', message: 'Cannot demote the owner' } },
          { status: 403 }
        );
     }
@@ -62,7 +62,7 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
 
     if (existingMember.length === 0) {
         return NextResponse.json(
-          { success: false, error: { code: 'NOT_FOUND', message: 'Member not found' } },
+          { error: { code: 'NOT_FOUND', message: 'Member not found' } },
           { status: 404 }
         );
     }
@@ -71,7 +71,7 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
         and(eq(projectMembers.projectId, projectId), eq(projectMembers.userId, targetUserId))
     );
 
-    return NextResponse.json({ success: true, data: { success: true } });
+    return NextResponse.json({ data: { success: true } });
   } catch (error) {
     return handleApiError(error);
   }
@@ -82,14 +82,14 @@ export async function DELETE(req: Request, context: { params: Promise<{ id: stri
     const session = await auth();
     if (!session?.user) {
       return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
+        { error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
         { status: 401 }
       );
     }
 
     if (((session.user as { role?: string }).role) !== 'admin' && ((session.user as { role?: string }).role) !== 'owner') {
       return NextResponse.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Insufficient permissions' } },
+        { error: { code: 'FORBIDDEN', message: 'Insufficient permissions' } },
         { status: 403 }
       );
     }
@@ -100,7 +100,7 @@ export async function DELETE(req: Request, context: { params: Promise<{ id: stri
 
     if (Number(session.user.id) === targetUserId) {
       return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Cannot remove self' } },
+        { error: { code: 'VALIDATION_ERROR', message: 'Cannot remove self' } },
         { status: 400 }
       );
     }
@@ -108,14 +108,14 @@ export async function DELETE(req: Request, context: { params: Promise<{ id: stri
     const existing = await db.select().from(projects).where(eq(projects.id, projectId));
     if (existing.length === 0) {
       return NextResponse.json(
-        { success: false, error: { code: 'NOT_FOUND', message: 'Project not found' } },
+        { error: { code: 'NOT_FOUND', message: 'Project not found' } },
         { status: 404 }
       );
     }
 
     if (existing[0].createdBy === targetUserId) {
        return NextResponse.json(
-         { success: false, error: { code: 'FORBIDDEN', message: 'Cannot remove the owner' } },
+         { error: { code: 'FORBIDDEN', message: 'Cannot remove the owner' } },
          { status: 403 }
        );
     }
@@ -126,7 +126,7 @@ export async function DELETE(req: Request, context: { params: Promise<{ id: stri
 
     if (existingMember.length === 0) {
         return NextResponse.json(
-          { success: false, error: { code: 'NOT_FOUND', message: 'Member not found' } },
+          { error: { code: 'NOT_FOUND', message: 'Member not found' } },
           { status: 404 }
         );
     }
@@ -135,7 +135,7 @@ export async function DELETE(req: Request, context: { params: Promise<{ id: stri
         and(eq(projectMembers.projectId, projectId), eq(projectMembers.userId, targetUserId))
     );
 
-    return NextResponse.json({ success: true, data: { success: true } });
+    return NextResponse.json({ data: { success: true } });
   } catch (error) {
     return handleApiError(error);
   }

@@ -18,7 +18,7 @@ export async function GET(
 ) {
   const session = await auth();
   if (!session) {
-    return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+    return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
   }
 
   const { id } = await params;
@@ -29,7 +29,7 @@ export async function GET(
       .from(webhooks)
       .where(eq(webhooks.projectId, projectId));
 
-    return NextResponse.json({ success: true, data: list });
+    return NextResponse.json({ data: list });
   } catch (error) {
     return handleApiError(error);
   }
@@ -41,7 +41,7 @@ export async function POST(
 ) {
   const session = await auth();
   if (!session) {
-    return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+    return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
   }
 
   const { id } = await params;
@@ -56,7 +56,7 @@ export async function POST(
       ...data,
     }).returning();
 
-    return NextResponse.json({ success: true, data: inserted });
+    return NextResponse.json({ data: inserted });
   } catch (error) {
     return handleApiError(error);
   }

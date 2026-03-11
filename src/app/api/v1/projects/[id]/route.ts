@@ -16,7 +16,7 @@ export async function GET(
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
     }
 
     const { id } = await params;
@@ -36,7 +36,6 @@ export async function GET(
     }
 
     return NextResponse.json({
-      success: true,
       data: project,
     });
   } catch (error) {
@@ -51,7 +50,7 @@ export async function PATCH(
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
     }
 
     const { id } = await params;
@@ -70,7 +69,6 @@ export async function PATCH(
     const project = await projectRepository.update(projectId, parsed);
 
     return NextResponse.json({
-      success: true,
       data: project,
     });
   } catch (error) {
@@ -85,7 +83,7 @@ export async function DELETE(
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
     }
 
     const { id } = await params;
@@ -100,7 +98,7 @@ export async function DELETE(
 
     await projectRepository.delete(projectId);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ data: { success: true } });
   } catch (error) {
     return handleApiError(error);
   }

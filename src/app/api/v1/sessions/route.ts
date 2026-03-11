@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
     }
 
     const projectId = request.nextUrl.searchParams.get('projectId');
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
       sessions = await agentSessionRepository.getAll();
     }
 
-    return NextResponse.json({ success: true, data: sessions });
+    return NextResponse.json({ data: sessions });
   } catch (error) {
     return handleApiError(error);
   }
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
     }
 
     const body = await request.json();
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Invalid session data', details: parsed.error.errors } },
+        { error: { code: 'VALIDATION_ERROR', message: 'Invalid session data', details: parsed.error.errors } },
         { status: 400 }
       );
     }
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       startedBy: Number(session.user.id),
     });
 
-    return NextResponse.json({ success: true, data: newSession }, { status: 201 });
+    return NextResponse.json({ data: newSession }, { status: 201 });
   } catch (error) {
     return handleApiError(error);
   }

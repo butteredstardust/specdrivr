@@ -14,7 +14,7 @@ export async function GET(
     const session = await auth();
     if (!session || !session.user) {
       return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
         { status: 401 }
       );
     }
@@ -22,7 +22,7 @@ export async function GET(
     const { id } = await params;
     const versions = await db.select().from(specVersions).where(eq(specVersions.specId, Number(id))).orderBy(desc(specVersions.versionNumber));
 
-    return NextResponse.json({ success: true, data: versions });
+    return NextResponse.json({ data: versions });
   } catch (error) {
     logger.error({ error }, 'Error fetching spec versions');
     return handleApiError(error);
@@ -37,7 +37,7 @@ export async function POST(
     const session = await auth();
     if (!session || !session.user) {
       return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
         { status: 401 }
       );
     }
@@ -47,7 +47,7 @@ export async function POST(
 
     if (!markdownContent) {
       return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Content is required' } },
+        { error: { code: 'VALIDATION_ERROR', message: 'Content is required' } },
         { status: 400 }
       );
     }
@@ -56,7 +56,7 @@ export async function POST(
 
     if (!spec) {
       return NextResponse.json(
-        { success: false, error: { code: 'NOT_FOUND', message: 'Specification not found' } },
+        { error: { code: 'NOT_FOUND', message: 'Specification not found' } },
         { status: 404 }
       );
     }
@@ -80,7 +80,7 @@ export async function POST(
       return newVersion;
     });
 
-    return NextResponse.json({ success: true, data: result }, { status: 201 });
+    return NextResponse.json({ data: result }, { status: 201 });
   } catch (error) {
     logger.error({ error }, 'Error creating spec version');
     return handleApiError(error);
