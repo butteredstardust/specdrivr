@@ -1,5 +1,4 @@
 import 'server-only';
-import 'server-only';
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { db } from "@/db";
@@ -8,6 +7,9 @@ import { env } from "./env";
 import { headers } from "next/headers";
 
 export const authInstance = betterAuth({
+  baseURL: env.NEXTAUTH_URL,
+  basePath: '/api/auth',
+  trustedOrigins: [env.NEXTAUTH_URL],
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
@@ -34,6 +36,16 @@ export const authInstance = betterAuth({
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24, // 1 day
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60, // 5 minutes
+    },
+  },
+  advanced: {
+    useSecureCookies: env.NODE_ENV === 'production',
+    crossSubDomainCookies: {
+      enabled: false,
+    },
   },
   secret: env.NEXTAUTH_SECRET,
 });

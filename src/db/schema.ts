@@ -82,10 +82,10 @@ export const taskAttemptStatusEnum = pgEnum('task_attempt_status', [
 // ---------------------------------------------------------------------------
 
 export const users = pgTable('users', {
-  id: serial('id').primaryKey(),
+  id: text('id').primaryKey(),
   name: text('name').notNull(),
   email: text('email').notNull().unique(),
-  passwordHash: text('password_hash').notNull(),
+  passwordHash: text('password_hash'),
   avatarUrl: text('avatar_url'),
   timezone: text('timezone').default('UTC'),
   locale: text('locale').default('en-US'),
@@ -112,14 +112,14 @@ export const sessions = pgTable('sessions', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   ipAddress: text('ip_address'),
   userAgent: text('user_agent'),
-  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
 });
 
 export const accounts = pgTable('accounts', {
   id: text('id').primaryKey(),
   accountId: text('account_id').notNull(),
   providerId: text('provider_id').notNull(),
-  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   accessToken: text('access_token'),
   refreshToken: text('refresh_token'),
   idToken: text('id_token'),
@@ -154,7 +154,7 @@ export const projects = pgTable('projects', {
   avatarColor: text('avatar_color').default('7c5cfc'),
   isDemo: boolean('is_demo').notNull().default(false),
   status: projectStatusEnum('status').notNull().default('active'),
-  createdBy: integer('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdBy: text('created_by').references(() => users.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (table) => ({
@@ -169,7 +169,7 @@ export const projects = pgTable('projects', {
 export const projectMembers = pgTable('project_members', {
   id: serial('id').primaryKey(),
   projectId: integer('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
-  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   role: userRoleEnum('role').notNull().default('viewer'),
   status: text('status').notNull().default('active'), // active | invited | suspended
   invitedAt: timestamp('invited_at', { withTimezone: true }).notNull().defaultNow(),
@@ -189,7 +189,7 @@ export const invites = pgTable('invites', {
   email: text('email').notNull(),
   role: userRoleEnum('role').notNull().default('viewer'),
   token: text('token').notNull().unique(),
-  invitedBy: integer('invited_by').notNull().references(() => users.id),
+  invitedBy: text('invited_by').notNull().references(() => users.id),
   resendCount: integer('resend_count').notNull().default(0),
   lastResentAt: timestamp('last_resent_at', { withTimezone: true }),
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
@@ -203,7 +203,7 @@ export const invites = pgTable('invites', {
 
 export const agentTokens = pgTable('agent_tokens', {
   id: serial('id').primaryKey(),
-  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
   projectId: integer('project_id').references(() => projects.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   tokenHash: text('token_hash').notNull().unique(),
@@ -224,7 +224,7 @@ export const specifications = pgTable('specifications', {
   name: text('name').notNull(),
   status: specStatusEnum('status').notNull().default('drafting'),
   currentVersionId: integer('current_version_id'), // FK set after first version created
-  createdBy: integer('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdBy: text('created_by').references(() => users.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (table) => ({
@@ -240,7 +240,7 @@ export const specVersions = pgTable('spec_versions', {
   specId: integer('spec_id').notNull().references(() => specifications.id, { onDelete: 'cascade' }),
   versionNumber: integer('version_number').notNull(),
   markdownContent: text('markdown_content').notNull(),
-  createdBy: integer('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdBy: text('created_by').references(() => users.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (table) => ({
   uniqueSpecVersion: uniqueIndex('spec_version_idx').on(table.specId, table.versionNumber),
@@ -258,13 +258,13 @@ export const plans = pgTable('plans', {
   markdownContent: text('markdown_content'),
   reviewerNotes: text('reviewer_notes'),
   approvedAt: timestamp('approved_at', { withTimezone: true }),
-  approvedBy: integer('approved_by').references(() => users.id, { onDelete: 'set null' }),
+  approvedBy: text('approved_by').references(() => users.id, { onDelete: 'set null' }),
   generationDurationMs: integer('generation_duration_ms'),
   generationError: text('generation_error'),
   modelVersion: text('model_version'),
   taskCount: integer('task_count').default(0),
   totalEstimatedMinutes: integer('total_estimated_minutes'),
-  createdBy: integer('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdBy: text('created_by').references(() => users.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (table) => ({
   specStatusIdx: index('plan_spec_status_idx').on(table.specId, table.status),
@@ -277,7 +277,7 @@ export const plans = pgTable('plans', {
 export const planReviews = pgTable('plan_reviews', {
   id: serial('id').primaryKey(),
   planId: integer('plan_id').notNull().references(() => plans.id, { onDelete: 'cascade' }),
-  userId: integer('user_id').references(() => users.id, { onDelete: 'set null' }),
+  userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
   action: text('action').notNull(), // approved | rejected | changes_requested | abandoned
   notes: text('notes'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -392,7 +392,7 @@ export const agentSessions = pgTable('agent_sessions', {
   gitBaseCommit: text('git_base_commit'),
   gitHeadCommit: text('git_head_commit'),
   errorMessage: text('error_message'),
-  startedBy: integer('started_by').references(() => users.id, { onDelete: 'set null' }),
+  startedBy: text('started_by').references(() => users.id, { onDelete: 'set null' }),
   startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
   endedAt: timestamp('ended_at', { withTimezone: true }),
 }, (table) => ({
@@ -409,7 +409,7 @@ export const agentEvents = pgTable('agent_events', {
   sessionId: integer('session_id').notNull().references(() => agentSessions.id, { onDelete: 'cascade' }),
   specId: integer('spec_id').references(() => specifications.id, { onDelete: 'set null' }),
   taskId: integer('task_id').references(() => tasks.id, { onDelete: 'set null' }),
-  userId: integer('user_id').references(() => users.id, { onDelete: 'set null' }),
+  userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
   eventType: text('event_type').notNull(),
   // PLAN_GENERATED | PLAN_APPROVED | PLAN_REJECTED | CHANGES_REQUESTED
   // TASK_START | TASK_DONE | TASK_BLOCKED | TASK_FAILED | TASK_RETRIED
@@ -475,7 +475,7 @@ export const agentConfig = pgTable('agent_config', {
 
 export const notifications = pgTable('notifications', {
   id: serial('id').primaryKey(),
-  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   type: text('type').notNull(),
   // plan_generated | plan_approved | plan_rejected | changes_requested
   // session_complete | session_failed | task_blocked | member_invited | role_changed
@@ -483,7 +483,7 @@ export const notifications = pgTable('notifications', {
   body: text('body').notNull(),
   linkUrl: text('link_url').notNull(),
   readAt: timestamp('read_at', { withTimezone: true }),
-  actorUserId: integer('actor_user_id').references(() => users.id, { onDelete: 'set null' }),
+  actorUserId: text('actor_user_id').references(() => users.id, { onDelete: 'set null' }),
   projectId: integer('project_id').references(() => projects.id, { onDelete: 'cascade' }),
   resourceType: text('resource_type'),
   resourceId: text('resource_id'),
@@ -498,7 +498,7 @@ export const notifications = pgTable('notifications', {
 
 export const notificationPreferences = pgTable('notification_preferences', {
   id: serial('id').primaryKey(),
-  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   eventType: text('event_type').notNull(),
   emailEnabled: boolean('email_enabled').notNull().default(false),
   inAppEnabled: boolean('in_app_enabled').notNull().default(true),
@@ -602,7 +602,7 @@ export const apiRequestLogs = pgTable('api_request_logs', {
 export const auditLog = pgTable('audit_log', {
   id: serial('id').primaryKey(),
   projectId: integer('project_id').references(() => projects.id, { onDelete: 'cascade' }),
-  userId: integer('user_id').references(() => users.id),
+  userId: text('user_id').references(() => users.id),
   action: text('action').notNull(),
   targetType: text('target_type'),
   targetId: text('target_id'),
