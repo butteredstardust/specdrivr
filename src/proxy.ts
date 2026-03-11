@@ -1,10 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { authInstance } from '@/lib/auth';
 
 // Routes that do not require authentication
 const PUBLIC_PATHS = new Set([
-  '/',
   '/',
   '/login',
   '/forgot-password',
@@ -30,12 +28,13 @@ function isAgentPath(pathname: string): boolean {
 }
 
 // Edge-compatible JWT token check
-async function checkSession(request: NextRequest): Promise<boolean> {
-  const auth = authInstance;
-  const session = await auth.api.getSession({
-    headers: request.headers,
-  });
-  return !!session;
+// Checks for the existence of the Better Auth session token cookie.
+// Note: Full cryptographic verification still happens in the Route Handlers.
+function hasSessionCookie(request: NextRequest): boolean {
+  const isSecure = process.env.NODE_ENV === 'production' || request.nextUrl.protocol === 'https:';
+  const cookieName = isSecure ? '__Secure-better-auth.session_token' : 'better-auth.session_token';
+
+  return request.cookies.has(cookieName);
 }
 
 export async function proxy(request: NextRequest) {
@@ -72,7 +71,7 @@ export async function proxy(request: NextRequest) {
   // All other paths: require a valid user session cookie
   // Edge runtime cannot dynamically load Node.js crypto for full validation
   // so we perform a lightweight presence check here. Full validation in route.
-  if (!(await checkSession(request))) {
+  if (!hasSessionCookie(request)) {
     // API routes get JSON 401; page routes redirect to login
     if (pathname.startsWith('/api/')) {
       return NextResponse.json(

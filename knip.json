@@ -44,5 +44,10 @@
     "exports": "off",
     "types": "off",
     "unlisted": "off"
+    // NOTE: Rules temporarily disabled during documentation audit.
+    // These should be re-enabled after audit completion and underlying issues resolved.
+    // - exports: Check for unused exports
+    // - types: Check for unused exported types
+    // - unlisted: Check for unlisted dependencies
   }
 }
