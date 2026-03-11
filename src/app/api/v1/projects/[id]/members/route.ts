@@ -10,7 +10,7 @@ export async function GET(req: Request, context: { params: Promise<{ id: string 
     const session = await auth();
     if (!session?.user) {
       return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
+        { error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
         { status: 401 }
       );
     }
@@ -21,7 +21,7 @@ export async function GET(req: Request, context: { params: Promise<{ id: string 
     const project = await db.select().from(projects).where(eq(projects.id, projectId));
     if (project.length === 0) {
       return NextResponse.json(
-        { success: false, error: { code: 'NOT_FOUND', message: 'Project not found' } },
+        { error: { code: 'NOT_FOUND', message: 'Project not found' } },
         { status: 404 }
       );
     }
@@ -54,7 +54,7 @@ export async function GET(req: Request, context: { params: Promise<{ id: string 
         status: 'invited'
     }));
 
-    return NextResponse.json({ success: true, data: [...members, ...invited] });
+    return NextResponse.json({ data: [...members, ...invited] });
   } catch (error) {
     return handleApiError(error);
   }

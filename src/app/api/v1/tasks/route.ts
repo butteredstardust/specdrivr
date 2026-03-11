@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
     }
 
     const searchParams = request.nextUrl.searchParams;
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
       tasks = await taskRepository.getAll();
     }
 
-    return NextResponse.json({ success: true, data: tasks });
+    return NextResponse.json({ data: tasks });
   } catch (error) {
     return handleApiError(error);
   }
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
     }
 
     const body = await request.json();
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
 
     if (!validationResult.success) {
       return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Invalid task data', details: validationResult.error.errors } },
+        { error: { code: 'VALIDATION_ERROR', message: 'Invalid task data', details: validationResult.error.errors } },
         { status: 400 }
       );
     }
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     const newTask = await taskRepository.create(taskData);
 
     return NextResponse.json(
-      { success: true, data: newTask },
+      { data: newTask },
       { status: 201 }
     );
   } catch (error) {

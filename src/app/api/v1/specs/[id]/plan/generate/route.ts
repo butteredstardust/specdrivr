@@ -15,7 +15,7 @@ export async function POST(
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
     }
 
     const { id } = await params;
@@ -48,7 +48,7 @@ export async function POST(
       },
     } as unknown as import('@/db/schema').PlanInsert);
 
-    return NextResponse.json({ success: true, data: newPlan }, { status: 201 });
+    return NextResponse.json({ data: newPlan }, { status: 201 });
   } catch (error) {
     return handleApiError(error);
   }

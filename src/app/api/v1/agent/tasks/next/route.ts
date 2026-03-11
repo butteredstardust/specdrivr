@@ -8,7 +8,7 @@ import bcrypt from 'bcryptjs';
 export async function GET(request: Request) {
   const authHeader = request.headers.get('Authorization');
   if (!authHeader?.startsWith('Bearer ')) {
-    return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Missing token' } }, { status: 401 });
+    return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Missing token' } }, { status: 401 });
   }
 
   const token = authHeader.replace('Bearer ', '');
@@ -18,12 +18,12 @@ export async function GET(request: Request) {
     // 1. Verify token
     const [agentToken] = await db.select().from(agentTokens).where(eq(agentTokens.prefix, prefix)).limit(1);
     if (!agentToken) {
-      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid token' } }, { status: 401 });
+      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Invalid token' } }, { status: 401 });
     }
 
     const isValid = await bcrypt.compare(token, agentToken.tokenHash);
     if (!isValid) {
-      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid token' } }, { status: 401 });
+      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Invalid token' } }, { status: 401 });
     }
 
     // 2. Find next task (simplifed for now: first 'todo' task in an active session for the project)
@@ -40,13 +40,13 @@ export async function GET(request: Request) {
       .limit(1);
 
     if (!nextTask) {
-      return NextResponse.json({ success: true, data: null });
+      return NextResponse.json({ data: null });
     }
 
     // 3. Mark as in_progress
     await db.update(tasks).set({ status: 'in_progress' }).where(eq(tasks.id, nextTask.tasks.id));
 
-    return NextResponse.json({ success: true, data: nextTask.tasks });
+    return NextResponse.json({ data: nextTask.tasks });
   } catch (error) {
     return handleApiError(error);
   }

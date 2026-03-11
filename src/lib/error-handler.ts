@@ -7,7 +7,6 @@ import {
 } from './errors';
 
 export interface ErrorResponse {
-  success: false;
   error: {
     message: string;
     code: string;
@@ -32,7 +31,6 @@ function getErrorCode(error: AppError): string {
 export function formatErrorResponse(error: unknown): ErrorResponse {
   if (error instanceof AppError) {
     return {
-      success: false,
       error: {
         message: error.message,
         code: getErrorCode(error),
@@ -46,7 +44,6 @@ export function formatErrorResponse(error: unknown): ErrorResponse {
     console.error('Unexpected error:', error);
 
     return {
-      success: false,
       error: {
         message: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
         code: 'INTERNAL_ERROR',
@@ -56,7 +53,6 @@ export function formatErrorResponse(error: unknown): ErrorResponse {
   }
 
   return {
-    success: false,
     error: {
       message: 'An unknown error occurred',
       code: 'UNKNOWN_ERROR',

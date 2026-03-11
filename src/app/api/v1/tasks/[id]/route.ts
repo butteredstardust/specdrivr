@@ -16,7 +16,7 @@ export async function GET(
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
     }
 
     const { id } = await params;
@@ -36,7 +36,6 @@ export async function GET(
     }
 
     return NextResponse.json({
-      success: true,
       data: task,
     });
   } catch (error) {
@@ -51,7 +50,7 @@ export async function PATCH(
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
     }
 
     const { id } = await params;
@@ -68,7 +67,7 @@ export async function PATCH(
     const parsed = updateTaskSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Validation failed', details: parsed.error.errors } },
+        { error: { code: 'VALIDATION_ERROR', message: 'Validation failed', details: parsed.error.errors } },
         { status: 400 }
       );
     }
@@ -76,7 +75,6 @@ export async function PATCH(
     const task = await taskRepository.update(taskId, parsed.data);
 
     return NextResponse.json({
-      success: true,
       data: task,
     });
   } catch (error) {
@@ -91,7 +89,7 @@ export async function DELETE(
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
     }
 
     const { id } = await params;
@@ -106,7 +104,7 @@ export async function DELETE(
 
     await taskRepository.delete(taskId);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ data: { success: true } });
   } catch (error) {
     return handleApiError(error);
   }

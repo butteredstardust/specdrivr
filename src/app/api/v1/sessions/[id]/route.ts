@@ -23,7 +23,7 @@ export async function GET(
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
     }
 
     const { id } = await params;
@@ -34,7 +34,7 @@ export async function GET(
       throw new NotFoundError(`Agent session with ID ${sessionId} not found`);
     }
 
-    return NextResponse.json({ success: true, data: agentSession });
+    return NextResponse.json({ data: agentSession });
   } catch (error) {
     return handleApiError(error);
   }
@@ -47,7 +47,7 @@ export async function PATCH(
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
     }
 
     const { id } = await params;
@@ -58,14 +58,14 @@ export async function PATCH(
 
     if (!parsed.success) {
       return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Invalid session data', details: parsed.error.errors } },
+        { error: { code: 'VALIDATION_ERROR', message: 'Invalid session data', details: parsed.error.errors } },
         { status: 400 }
       );
     }
 
     const updatedSession = await agentSessionRepository.update(sessionId, parsed.data);
 
-    return NextResponse.json({ success: true, data: updatedSession });
+    return NextResponse.json({ data: updatedSession });
   } catch (error) {
     return handleApiError(error);
   }

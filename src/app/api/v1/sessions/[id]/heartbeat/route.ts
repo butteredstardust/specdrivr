@@ -11,7 +11,7 @@ export async function POST(
 ) {
   const authHeader = request.headers.get('Authorization');
   if (!authHeader?.startsWith('Bearer ')) {
-    return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Missing token' } }, { status: 401 });
+    return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Missing token' } }, { status: 401 });
   }
 
   const token = authHeader.replace('Bearer ', '');
@@ -22,12 +22,12 @@ export async function POST(
   try {
     const [agentToken] = await db.select().from(agentTokens).where(eq(agentTokens.prefix, prefix)).limit(1);
     if (!agentToken) {
-      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid token' } }, { status: 401 });
+      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Invalid token' } }, { status: 401 });
     }
 
     const isValid = await bcrypt.compare(token, agentToken.tokenHash);
     if (!isValid) {
-      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Invalid token' } }, { status: 401 });
+      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Invalid token' } }, { status: 401 });
     }
 
     await db.update(agentSessions)
@@ -37,7 +37,7 @@ export async function POST(
     const [session] = await db.select().from(agentSessions).where(eq(agentSessions.id, sessionId)).limit(1);
     const shouldStop = session?.status !== 'running';
 
-    return NextResponse.json({ success: true, data: { shouldStop } });
+    return NextResponse.json({ data: { shouldStop } });
   } catch (error) {
     return handleApiError(error);
   }

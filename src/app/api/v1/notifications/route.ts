@@ -8,7 +8,7 @@ import { eq, desc } from 'drizzle-orm';
 export async function GET() {
   const session = await auth();
   if (!session) {
-    return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+    return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
   }
 
   try {
@@ -18,7 +18,7 @@ export async function GET() {
       .where(eq(notifications.userId, userId))
       .orderBy(desc(notifications.createdAt));
 
-    return NextResponse.json({ success: true, data: list });
+    return NextResponse.json({ data: list });
   } catch (error) {
     return handleApiError(error);
   }

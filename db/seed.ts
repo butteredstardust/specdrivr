@@ -10,39 +10,52 @@ const queryClient = postgres(env.DATABASE_URL, { max: 10 });
 const db = drizzle(queryClient, { schema });
 
 async function main() {
+  console.log("Cleaning database...");
+  await db.transaction(async (tx) => {
+    // Delete in reverse order of dependencies
+    await tx.delete(taskAttempts);
+    await tx.delete(agentSessions);
+    await tx.delete(tasks);
+    await tx.delete(plans);
+    await tx.delete(specifications);
+    await tx.delete(invites);
+    await tx.delete(projects);
+    await tx.delete(users);
+  });
+
   console.log("Seeding database...");
 
   const passwordHash = await bcrypt.hash("password123", 12);
 
   await db.transaction(async (tx) => {
-    // Insert Users (idempotent)
+    // Insert Users
     await tx.insert(users).values({
-      name: "Alice",
-      email: "alice@example.com",
+      name: "Admin User",
+      email: "admin@example.com",
       passwordHash,
       role: "admin",
       emailVerified: true,
-    }).onConflictDoNothing();
+    });
 
     await tx.insert(users).values({
-      name: "Bob",
-      email: "bob@example.com",
+      name: "Test User",
+      email: "test@example.com",
       passwordHash,
       role: "member",
       emailVerified: true,
-    }).onConflictDoNothing();
+    });
 
     await tx.insert(users).values({
-      name: "Charlie",
-      email: "charlie@example.com",
+      name: "Viewer",
+      email: "viewer@example.com",
       passwordHash,
       role: "viewer",
       emailVerified: true,
-    }).onConflictDoNothing();
+    });
 
-    // Get the users (whether newly inserted or existing)
-    const [u1] = await tx.select().from(users).where(sql`email = 'alice@example.com'`).limit(1);
-    const [u2] = await tx.select().from(users).where(sql`email = 'bob@example.com'`).limit(1);
+    // Get the users
+    const [u1] = await tx.select().from(users).where(sql`email = 'admin@example.com'`).limit(1);
+    const [u2] = await tx.select().from(users).where(sql`email = 'test@example.com'`).limit(1);
 
     if (!u1 || !u2) {
       return; // Skip rest of seed if users don't exist
