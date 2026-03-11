@@ -1,6 +1,13 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { users, projects, specifications, plans, tasks, invites, agentSessions, taskAttempts } from "../src/db/schema";
+import {
+  users, projects, specifications, plans, tasks, invites,
+  agentSessions, taskAttempts, apiRequestLogs, auditLog,
+  testResults, webhookDeliveries, webhooks, notifications,
+  notificationPreferences, usageSnapshots, gitCommits,
+  fileChanges, planReviews, specVersions, agentTokens,
+  accounts, sessions, verifications
+} from "../src/db/schema";
 import bcrypt from "bcryptjs";
 import { sql } from "drizzle-orm";
 import { env } from "../src/lib/env-script";
@@ -12,13 +19,30 @@ const db = drizzle(queryClient, { schema });
 async function main() {
   console.log("Cleaning database...");
   await db.transaction(async (tx) => {
+    console.log("Cleaning database...");
     // Delete in reverse order of dependencies
+    await tx.delete(apiRequestLogs);
+    await tx.delete(auditLog);
+    await tx.delete(testResults);
+    await tx.delete(webhookDeliveries);
+    await tx.delete(webhooks);
+    await tx.delete(notifications);
+    await tx.delete(notificationPreferences);
+    await tx.delete(usageSnapshots);
+    await tx.delete(gitCommits);
+    await tx.delete(fileChanges);
     await tx.delete(taskAttempts);
     await tx.delete(agentSessions);
+    await tx.delete(planReviews);
     await tx.delete(tasks);
     await tx.delete(plans);
+    await tx.delete(specVersions);
     await tx.delete(specifications);
     await tx.delete(invites);
+    await tx.delete(agentTokens);
+    await tx.delete(accounts);
+    await tx.delete(sessions);
+    await tx.delete(verifications);
     await tx.delete(projects);
     await tx.delete(users);
   });
@@ -56,10 +80,36 @@ async function main() {
     // Get the users
     const [u1] = await tx.select().from(users).where(sql`email = 'admin@example.com'`).limit(1);
     const [u2] = await tx.select().from(users).where(sql`email = 'test@example.com'`).limit(1);
+    const [u3] = await tx.select().from(users).where(sql`email = 'viewer@example.com'`).limit(1);
 
-    if (!u1 || !u2) {
+    if (!u1 || !u2 || !u3) {
       return; // Skip rest of seed if users don't exist
     }
+
+    // Insert Accounts for BetterAuth
+    await tx.insert(accounts).values([
+      {
+        id: "acc-1",
+        accountId: "admin-account",
+        providerId: "email",
+        userId: u1.id,
+        password: passwordHash,
+      },
+      {
+        id: "acc-2",
+        accountId: "test-account",
+        providerId: "email",
+        userId: u2.id,
+        password: passwordHash,
+      },
+      {
+        id: "acc-3",
+        accountId: "viewer-account",
+        providerId: "email",
+        userId: u3.id,
+        password: passwordHash,
+      },
+    ]);
 
     // Insert Projects (idempotent)
     await tx.insert(projects).values({
