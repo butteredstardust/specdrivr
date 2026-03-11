@@ -16,6 +16,7 @@
 5. Never commit secrets (`.env`) or lockfile misconfigurations.
 6. Do not modify or delete files in `drizzle/` (migrations). Always generate new migrations for schema changes.
 7. Do not create temporary fix scripts (`fix.mjs`). Fix issues directly in source files.
+8. One-time scripts (e.g., `db/migrate-*.ts`) should be removed after execution; do not commit artifact files.
 
 ### Off-Limits
 - Infrastructure CI/CD configs (`.github/`, `infrastructure/`)
@@ -267,6 +268,7 @@ import { env } from '@/lib/env-script'; // no server-only
 38. Creating fix scripts (`fix.mjs`) instead of editing sources directly.
 39. Not checking for outdated dependencies regularly.
 40. Ignoring pnpm audit security warnings.
+41. Committing AI artifact files (`*.exp`, `*_output.txt`, `*_results.txt`, `migrate-*.ts`).
 
 ## Prohibited Patterns
 
@@ -287,6 +289,7 @@ import { env } from '@/lib/env-script'; // no server-only
 - NO hardcoded colors/sizes; always use design tokens.
 - NO committing temporary fix scripts (`*.mjs`).
 - NO committing unused files (dead code, backups).
+- NO committing AI artifact files (`*.exp`, `*_output.txt`, `*_results.txt`, `migrate-*.ts`).
 
 ## Server Actions Pattern
 

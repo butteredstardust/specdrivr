@@ -102,3 +102,9 @@ migration-notes.md
 
 # Temporary fix scripts (forbidden - see CLAUDE.md)
 fix-*.sh
+
+# AI/Agent generated artifacts
+*.exp            # Expect scripts for automation
+*_output.txt     # Build/generate output logs
+*_results.txt    # Test/lint result dumps
+migrate-*.ts     # One-time migration scripts (unless in drizzle/)
