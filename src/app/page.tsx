@@ -1,8 +1,19 @@
 'use client';
 
-import { useMemo, useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '@/components/ui/avatar';
 import {
   Table,
   TableBody,
@@ -11,453 +22,445 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Progress } from '@/components/ui/progress';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Separator } from '@/components/ui/separator';
+import { toast } from 'sonner';
+import {
+  CheckCircledIcon,
+  InfoCircledIcon,
+  ExclamationTriangleIcon,
+  PersonIcon,
+  TargetIcon,
+  StarIcon,
+} from '@radix-ui/react-icons';
 
-// Simple inline SVG icons
-const CheckCircleIcon = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-);
-
-const ErrorOctagonIcon = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-);
-
-const ClockIcon = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-);
-
-const BellIcon = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-);
-
-const TargetHitIcon = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="6" y2="2"/><line x1="12" x2="12" y1="22" y2="18"/></svg>
-);
-
-const SettingsIcon = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.51a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-);
-
-const HomeIcon = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-);
-
-const ArrowRightIcon = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7-7-7-7"/></svg>
-);
-
-const PulsingDotIcon = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"/></svg>
-);
-
-const UserIcon = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-);
-
-const UserGroupIcon = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-3-3.87"/><path d="M9 21v-2a4 4 0 0 1 4-3.87"/><circle cx="12" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-);
-
-const CoinIcon = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
-);
-
-const StarIcon = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-);
-
-const ChestIcon = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 22v-8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8"/><path d="M2 8l7.6 3.2a2 2 0 0 0 1.6 0L20 8"/><path d="M2 10V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4"/><rect x="10" y="6" width="4" height="6"/></svg>
-);
-
-const LoadingSpinnerIcon = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-);
-
-interface SystemStatus {
-  db: 'ok' | 'error';
-  redis: 'ok' | 'error';
-  overall: 'ok' | 'error';
-}
-
-interface SystemCounts {
-  users: number;
-  sessions: number;
-  accounts: number;
-  projects: number;
-  specifications: number;
-  plans: number;
-  tasks: number;
-  agentSessions: number;
-  agentConfig: number;
-}
-
-interface AuditLogEntry {
-  id: string;
-  userId: string | null;
-  action: string;
-  resourceType: string | null;
-  resourceId: string | null;
-  timestamp: Date;
-}
-
-// Mock data
-const mockStatus: SystemStatus = {
-  db: 'ok',
-  redis: 'ok',
-  overall: 'ok',
-};
-
-const mockCounts: SystemCounts = {
-  users: 3,
-  sessions: 2,
-  accounts: 3,
-  projects: 5,
-  specifications: 8,
-  plans: 3,
-  tasks: 12,
-  agentSessions: 7,
-  agentConfig: 1,
-};
-
-const mockAuditLogs: AuditLogEntry[] = [
-  { id: '1', userId: 'abc123', action: 'user_created', resourceType: 'users', resourceId: 'abc123', timestamp: new Date() },
-  { id: '2', userId: 'abc123', action: 'project_created', resourceType: 'projects', resourceId: 'def456', timestamp: new Date(Date.now() - 300000) },
-];
-
-function StatusBadge({ status, label }: { status: 'ok' | 'error'; label: string }) {
-  return (
-    <Badge variant={status === 'ok' ? 'default' : 'destructive'}>
-      <span className="flex items-center gap-1.5">
-        {status === 'ok' ? <CheckCircleIcon /> : <ErrorOctagonIcon />}
-        {label}
-      </span>
-    </Badge>
-  );
-}
-
-function StatusCard({
-  label,
-  status,
-  icon: Icon,
-}: {
-  label: string;
-  status: 'ok' | 'error';
-  icon: React.ElementType;
-}) {
-  return (
-    <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
-      <div className="flex items-center gap-3">
-        <Icon />
-        <span className="font-medium">{label}</span>
-      </div>
-      <StatusBadge status={status} label={status === 'ok' ? 'OK' : 'ERROR'} />
-    </div>
-  );
-}
-
-function EnvRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex justify-between items-center p-3 rounded bg-muted border">
-      <span className="text-sm text-muted-foreground">{label}</span>
-      <code className="px-2 py-1 rounded bg-background text-sm font-mono">{value}</code>
-    </div>
-  );
-}
-
-function QuickAction({
-  href,
-  icon: Icon,
-  label,
-  description,
-}: {
-  href: string;
-  icon: React.ElementType;
-  label: string;
-  description: string;
-}) {
-  return (
-    <a
-      href={href}
-      className="flex items-start gap-4 p-4 rounded-lg border bg-card hover:bg-accent hover:text-accent-foreground transition-colors group"
-    >
-      <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-        <Icon />
-      </div>
-      <div className="flex-1">
-        <h3 className="font-semibold mb-1">{label}</h3>
-        <p className="text-sm text-muted-foreground">{description}</p>
-      </div>
-      <ArrowRightIcon className="mt-1 text-muted-foreground group-hover:text-foreground transition-colors" />
-    </a>
-  );
-}
-
-function LoadingState() {
-  return (
-    <div className="space-y-4">
-      <Skeleton className="h-4 w-[250px]" />
-      <Skeleton className="h-4 w-[200px]" />
-      <Skeleton className="h-4 w-[150px]" />
-    </div>
-  );
-}
-
-export default function DebugDashboard() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [status, setStatus] = useState<SystemStatus>(mockStatus);
-
-  useMemo(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useMemo(() => {
-    const interval = setInterval(() => {
-      setStatus(prev => ({ ...prev }));
-    }, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const overallHealth = status.db === 'ok' && status.redis === 'ok';
+export default function ComponentShowcase() {
+  const showToast = () => {
+    toast.success('This is a toast notification using Sonner!');
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <div className="border-b">
-        <div className="max-w-7xl mx-auto px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-3">
-                <TargetHitIcon className="text-primary" />
-                <h1 className="text-3xl font-bold">Specdrivr Debug</h1>
-              </div>
-              <p className="text-muted-foreground mt-2 ml-11">
-                AI Agent-Friendly System Status & Diagnostics
-              </p>
+      {/* Hero Section */}
+      <div className="border-b bg-gradient-to-b from-primary/5 to-background">
+        <div className="max-w-6xl mx-auto px-8 py-16">
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <TargetIcon className="h-10 w-10 text-primary" />
+              <h1 className="text-4xl font-bold">Specdrivr UI</h1>
             </div>
-            <div className="flex items-center gap-4">
-              <PulsingDotIcon />
-              <Badge variant={overallHealth ? 'default' : 'destructive'} className="gap-2">
-                {overallHealth ? <CheckCircleIcon /> : <ErrorOctagonIcon />}
-                {overallHealth ? 'System Healthy' : 'System Issues'}
-              </Badge>
+            <p className="text-xl text-muted-foreground mb-6">
+              Professional component library built with shadcn/ui
+            </p>
+            <div className="flex items-center justify-center gap-3">
+              <Badge variant="default">shadcn/ui</Badge>
+              <Badge variant="outline">Tailwind CSS</Badge>
+              <Badge variant="secondary">TypeScript</Badge>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-8 py-8 space-y-8">
-        {/* System Status */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <PulsingDotIcon />
-              System Status
-            </CardTitle>
-            <CardDescription>Core infrastructure health checks</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <StatusCard
-                label="Overall Status"
-                status={status.overall}
-                icon={overallHealth ? CheckCircleIcon : ErrorOctagonIcon}
-              />
-              <StatusCard label="Database" status={status.db} icon={ClockIcon} />
-              <StatusCard label="Redis" status={status.redis} icon={BellIcon} />
-            </div>
-            <Separator className="my-6" />
-            <div className="space-y-4">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">System Health</span>
-                <span className="font-medium">{overallHealth ? 'All systems operational' : 'Some services affected'}</span>
+      <div className="max-w-6xl mx-auto px-8 py-12 space-y-16">
+        {/* Color Palette */}
+        <section>
+          <h2 className="text-2xl font-bold mb-6">Design System Colors</h2>
+          <Card>
+            <CardHeader>
+              <CardTitle>Brand & Status Colors</CardTitle>
+              <CardDescription>Design tokens defined in globals.css</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div className="space-y-2">
+                  <div className="h-16 rounded-lg bg-[oklch(0.627_0.265_303.9)]" />
+                  <p className="text-sm font-medium">Brand Primary</p>
+                  <p className="text-xs text-muted-foreground">oklch(0.627 0.265 303.9)</p>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-16 rounded-lg bg-[oklch(0.446_0.3_303.9)]" />
+                  <p className="text-sm font-medium">Brand Secondary</p>
+                  <p className="text-xs text-muted-foreground">oklch(0.446 0.3 303.9)</p>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-16 rounded-lg bg-[oklch(0.627_0.194_149.2)]" />
+                  <p className="text-sm font-medium">Status Done</p>
+                  <p className="text-xs text-muted-foreground">oklch(0.627 0.194 149.2)</p>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-16 rounded-lg bg-[oklch(0.769_0.188_70)]" />
+                  <p className="text-sm font-medium">Status Blocked</p>
+                  <p className="text-xs text-muted-foreground">oklch(0.769 0.188 70)</p>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-16 rounded-lg bg-[oklch(0.627_0.258_23.5)]" />
+                  <p className="text-sm font-medium">Status Failed</p>
+                  <p className="text-xs text-muted-foreground">oklch(0.627 0.258 23.5)</p>
+                </div>
               </div>
-              <Progress value={overallHealth ? 100 : 50} className="h-2" />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </section>
 
-        {/* Environment Configuration */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <SettingsIcon />
-              Environment Configuration
-            </CardTitle>
-            <CardDescription>Safe configuration values (no secrets)</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <EnvRow label="NODE_ENV" value="development" />
-              <EnvRow label="NEXTAUTH_URL" value="http://localhost:3000" />
-              <EnvRow label="Session Expiry" value="7 days" />
-              <EnvRow label="Timezone" value="UTC" />
-            </div>
-          </CardContent>
-        </Card>
+        {/* Buttons */}
+        <section>
+          <h2 className="text-2xl font-bold mb-6">Buttons</h2>
+          <Card>
+            <CardHeader>
+              <CardTitle>Button Variants</CardTitle>
+              <CardDescription>Different styles and sizes</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <Label className="mb-3 block">Variants</Label>
+                <div className="flex flex-wrap gap-3">
+                  <Button>Default</Button>
+                  <Button variant="secondary">Secondary</Button>
+                  <Button variant="destructive">Destructive</Button>
+                  <Button variant="outline">Outline</Button>
+                  <Button variant="ghost">Ghost</Button>
+                  <Button variant="link">Link</Button>
+                </div>
+              </div>
+              <Separator />
+              <div>
+                <Label className="mb-3 block">Sizes</Label>
+                <div className="flex items-center gap-3">
+                  <Button size="sm">Small</Button>
+                  <Button size="default">Default</Button>
+                  <Button size="lg">Large</Button>
+                </div>
+              </div>
+              <Separator />
+              <div>
+                <Label className="mb-3 block">With Icons</Label>
+                <div className="flex flex-wrap gap-3">
+                  <Button><RocketIcon className="mr-2 h-4 w-4" />Launch</Button>
+                  <Button variant="outline"><GearIcon className="mr-2 h-4 w-4" />Settings</Button>
+                  <Button variant="secondary"><StarIcon className="mr-2 h-4 w-4" />Favorite</Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
 
-        {/* Database Record Counts */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ChestIcon />
-              Database Record Counts
-            </CardTitle>
-            <CardDescription>Overview of records in major tables</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <LoadingState />
-            ) : (
+        {/* Badges */}
+        <section>
+          <h2 className="text-2xl font-bold mb-6">Badges</h2>
+          <Card>
+            <CardHeader>
+              <CardTitle>Status Indicators</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-3">
+                <Badge>Default</Badge>
+                <Badge variant="secondary">Secondary</Badge>
+                <Badge variant="outline">Outline</Badge>
+                <Badge variant="destructive">Destructive</Badge>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Card Examples */}
+        <section>
+          <h2 className="text-2xl font-bold mb-6">Cards</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Card Title</CardTitle>
+                <CardDescription>Card description text</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p>Card body content goes here. Use for grouping related information.</p>
+              </CardContent>
+            </Card>
+            <Card bordered variant="raised">
+              <CardHeader>
+                <CardTitle>Raised Card</CardTitle>
+                <CardDescription>With elevated shadow</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p>This card has special styling with border and raised variant.</p>
+              </CardContent>
+              <CardFooter>
+                <Button className="w-full">Action Button</Button>
+              </CardFooter>
+            </Card>
+            <Card className="border-primary/50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TargetIcon className="h-5 w-5 text-primary" />
+                  With Icon
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Cards can contain icons from Radix UI or Lucide.</p>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        {/* Input & Form */}
+        <section>
+          <h2 className="text-2xl font-bold mb-6">Form Elements</h2>
+          <Card>
+            <CardHeader>
+              <CardTitle>Input Fields</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" placeholder="you@example.com" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input id="password" type="password" placeholder="••••••••" />
+              </div>
+              <Button>Submit Form</Button>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Table */}
+        <section>
+          <h2 className="text-2xl font-bold mb-6">Table</h2>
+          <Card>
+            <CardHeader>
+              <CardTitle>Data Table</CardTitle>
+            </CardHeader>
+            <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead />
-                    <TableHead>Entity</TableHead>
-                    <TableHead className="text-right">Count</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Progress</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   <TableRow>
-                    <TableCell><UserIcon className="h-4 w-4" /></TableCell>
-                    <TableCell>Users</TableCell>
-                    <TableCell className="text-right font-mono">{mockCounts.users}</TableCell>
+                    <TableCell className="font-medium">Project Alpha</TableCell>
+                    <TableCell><Badge variant="default">Active</Badge></TableCell>
+                    <TableCell className="text-right">100%</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell><ClockIcon /></TableCell>
-                    <TableCell>Sessions</TableCell>
-                    <TableCell className="text-right font-mono">{mockCounts.sessions}</TableCell>
+                    <TableCell className="font-medium">Project Beta</TableCell>
+                    <TableCell><Badge variant="secondary">In Progress</Badge></TableCell>
+                    <TableCell className="text-right">67%</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell><CoinIcon /></TableCell>
-                    <TableCell>Projects</TableCell>
-                    <TableCell className="text-right font-mono">{mockCounts.projects}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell><StarIcon /></TableCell>
-                    <TableCell>Specifications</TableCell>
-                    <TableCell className="text-right font-mono">{mockCounts.specifications}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell><UserGroupIcon /></TableCell>
-                    <TableCell>Plans</TableCell>
-                    <TableCell className="text-right font-mono">{mockCounts.plans}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell><TargetHitIcon className="h-4 w-4" /></TableCell>
-                    <TableCell>Tasks</TableCell>
-                    <TableCell className="text-right font-mono">{mockCounts.tasks}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell><BellIcon /></TableCell>
-                    <TableCell>Agent Sessions</TableCell>
-                    <TableCell className="text-right font-mono">{mockCounts.agentSessions}</TableCell>
+                    <TableCell className="font-medium">Project Gamma</TableCell>
+                    <TableCell><Badge variant="outline">Planned</Badge></TableCell>
+                    <TableCell className="text-right">0%</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </section>
 
-        {/* Recent Activity */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TargetHitIcon />
-              Recent Activity
-            </CardTitle>
-            <CardDescription>Latest audit log entries</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <LoadingState />
-            ) : mockAuditLogs.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <TargetHitIcon className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p>No recent activity</p>
+        {/* Progress */}
+        <section>
+          <h2 className="text-2xl font-bold mb-6">Progress Indicators</h2>
+          <Card>
+            <CardHeader>
+              <CardTitle>Progress Bars</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <div className="flex justify-between mb-2">
+                  <Label>Complete</Label>
+                  <span className="text-sm text-muted-foreground">100%</span>
+                </div>
+                <Progress value={100} />
               </div>
-            ) : (
-              <div className="space-y-3">
-                {mockAuditLogs.map((log) => (
-                  <div key={log.id} className="p-4 rounded-lg border bg-card">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <CheckCircleIcon className="h-4 w-4 text-green-500" />
-                        <span className="font-medium">{log.action}</span>
-                      </div>
-                      <span className="text-xs text-muted-foreground">
-                        {log.timestamp.toLocaleString()}
-                      </span>
-                    </div>
-                    {(log.resourceType || log.resourceId) && (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        {log.resourceType && (
-                          <Badge variant="outline" className="text-xs">{log.resourceType}</Badge>
-                        )}
-                        {log.resourceId && (
-                          <code className="text-xs bg-muted px-1 rounded">
-                            #{log.resourceId.slice(0, 8)}...
-                          </code>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ))}
+              <div>
+                <div className="flex justify-between mb-2">
+                  <Label>In Progress</Label>
+                  <span className="text-sm text-muted-foreground">67%</span>
+                </div>
+                <Progress value={67} />
               </div>
-            )}
-          </CardContent>
-        </Card>
+              <div>
+                <div className="flex justify-between mb-2">
+                  <Label>Started</Label>
+                  <span className="text-sm text-muted-foreground">25%</span>
+                </div>
+                <Progress value={25} />
+              </div>
+            </CardContent>
+          </Card>
+        </section>
 
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ArrowRightIcon />
-              Quick Actions
-            </CardTitle>
-            <CardDescription>Common debugging and navigation links</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <QuickAction
-                href="/login"
-                icon={UserIcon}
-                label="Login / Sign Up"
-                description="Access authentication flow"
-              />
-              <QuickAction
-                href="/dashboard"
-                icon={HomeIcon}
-                label="Dashboard"
-                description="Main application interface"
-              />
-              <QuickAction
-                href="/api/health"
-                icon={CheckCircleIcon}
-                label="Health API"
-                description="JSON health check endpoint"
-              />
-              <QuickAction
-                href="https://github.com/butteredstardust/specdrivr"
-                icon={SettingsIcon}
-                label="Documentation"
-                description="Project repository and docs"
-              />
-            </div>
-          </CardContent>
-          <CardFooter>
-            <div className="w-full flex items-center justify-between text-xs text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <LoadingSpinnerIcon />
-                <span>Debug Dashboard | Specdrivr v0.1.0</span>
+        {/* Alerts */}
+        <section>
+          <h2 className="text-2xl font-bold mb-6">Alerts</h2>
+          <div className="space-y-4">
+            <Alert>
+              <InfoCircledIcon className="h-4 w-4" />
+              <AlertTitle>Info</AlertTitle>
+              <AlertDescription>This is an informational alert message.</AlertDescription>
+            </Alert>
+            <Alert variant="destructive">
+              <ExclamationTriangleIcon className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>Something went wrong. Please try again.</AlertDescription>
+            </Alert>
+            <Alert variant="default" className="border-green-500/50 text-green-700 dark:text-green-400">
+              <CheckCircledIcon className="h-4 w-4" />
+              <AlertTitle>Success</AlertTitle>
+              <AlertDescription>Your changes have been saved successfully.</AlertDescription>
+            </Alert>
+          </div>
+        </section>
+
+        {/* Avatar */}
+        <section>
+          <h2 className="text-2xl font-bold mb-6">Avatars</h2>
+          <Card>
+            <CardHeader>
+              <CardTitle>User Avatars</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-4">
+                <Avatar>
+                  <AvatarImage src="https://api.dicebear.com/7.x/shapes/svg?seed=admin" />
+                  <AvatarFallback>AD</AvatarFallback>
+                </Avatar>
+                <Avatar>
+                  <AvatarImage src="https://api.dicebear.com/7.x/shapes/svg?seed=elena" />
+                  <AvatarFallback>ER</AvatarFallback>
+                </Avatar>
+                <Avatar>
+                  <AvatarFallback>JC</AvatarFallback>
+                </Avatar>
+                <Avatar>
+                  <AvatarFallback className="bg-primary text-primary-foreground">Admin</AvatarFallback>
+                </Avatar>
               </div>
-              <span>No authentication required</span>
-            </div>
-          </CardFooter>
-        </Card>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Skeleton Loading */}
+        <section>
+          <h2 className="text-2xl font-bold mb-6">Skeleton Loading</h2>
+          <Card>
+            <CardHeader>
+              <CardTitle>Loading States</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center space-x-4">
+                <Skeleton className="h-12 w-12 rounded-full" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-[250px]" />
+                  <Skeleton className="h-4 w-[200px]" />
+                </div>
+              </div>
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Toast Demo */}
+        <section>
+          <h2 className="text-2xl font-bold mb-6">Notifications</h2>
+          <Card>
+            <CardHeader>
+              <CardTitle>Toast Notifications</CardTitle>
+              <CardDescription>Created using Sonner</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={showToast}>Show Toast</Button>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Separator */}
+        <section>
+          <h2 className="text-2xl font-bold mb-6">Separators</h2>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="space-y-4">
+                <p>Content above</p>
+                <Separator />
+                <p>Content below</p>
+                <div className="h-4" />
+                <Separator orientation="vertical" className="h-16" />
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Pxlkit Integration Notice */}
+        <section>
+          <Card className="border-dashed border-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <StarIcon className="h-5 w-5 text-yellow-500" />
+                Pxlkit Components
+              </CardTitle>
+              <CardDescription>These packages are installed and ready to integrate</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="outline">@pxlkit/core</Badge>
+                <Badge variant="outline">@pxlkit/effects</Badge>
+                <Badge variant="outline">@pxlkit/feedback</Badge>
+                <Badge variant="outline">@pxlkit/gamification</Badge>
+                <Badge variant="outline">@pxlkit/social</Badge>
+                <Badge variant="outline">@pxlkit/ui</Badge>
+                <Badge variant="outline">@pxlkit/weather</Badge>
+              </div>
+              <p className="mt-4 text-sm text-muted-foreground">
+                Pxlkit components can be integrated for gamification, social features, feedback systems, and effects.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Navigation */}
+        <section className="text-center">
+          <h2 className="text-2xl font-bold mb-6">Ready to Explore?</h2>
+          <div className="flex items-center justify-center gap-4">
+            <Button size="lg" asChild>
+              <a href="/debug">
+                <GearIcon className="mr-2 h-5 w-5" />
+                Debug Dashboard
+              </a>
+            </Button>
+            <Button size="lg" variant="outline" asChild>
+              <a href="/login">
+                <PersonIcon className="mr-2 h-5 w-5" />
+                Login
+              </a>
+            </Button>
+          </div>
+        </section>
       </div>
     </div>
   );
 }
+
+function RocketIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+      <path d="M12 15l-3-3a22 22 0 0 1 2-2.95c.7-.7 1.87-.7 2.59 0 .7.7.7 1.88 0 2.59L12 15z"/>
+      <path d="m9 12 4 4"/>
+      <path d="m12 16 4-4"/>
+      <path d="M15 9l-3 3"/>
+    </svg>
+  );
+}
+
+function GearIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </svg>
+  );
+}
+
