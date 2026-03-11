@@ -9,7 +9,7 @@ export async function GET(
 ) {
   const session = await auth();
   if (!session) {
-    return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+    return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
   }
 
   const { id } = await params;
@@ -17,7 +17,7 @@ export async function GET(
 
   try {
     const attempts = await taskRepository.getAttempts(taskId);
-    return NextResponse.json({ success: true, data: attempts });
+    return NextResponse.json({ data: attempts });
   } catch (error) {
     return handleApiError(error);
   }

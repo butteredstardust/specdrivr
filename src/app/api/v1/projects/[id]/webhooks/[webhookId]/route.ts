@@ -10,14 +10,14 @@ export async function DELETE(req: Request, context: { params: Promise<{ id: stri
     const session = await auth();
     if (!session?.user) {
       return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
+        { error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
         { status: 401 }
       );
     }
 
     if (((session.user as { role?: string }).role) !== 'admin' && ((session.user as { role?: string }).role) !== 'owner') {
       return NextResponse.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Insufficient permissions' } },
+        { error: { code: 'FORBIDDEN', message: 'Insufficient permissions' } },
         { status: 403 }
       );
     }
@@ -30,14 +30,14 @@ export async function DELETE(req: Request, context: { params: Promise<{ id: stri
 
     if (existing.length === 0) {
       return NextResponse.json(
-        { success: false, error: { code: 'NOT_FOUND', message: 'Webhook not found' } },
+        { error: { code: 'NOT_FOUND', message: 'Webhook not found' } },
         { status: 404 }
       );
     }
 
     await db.delete(webhooks).where(eq(webhooks.id, Number(webhookId)));
 
-    return NextResponse.json({ success: true, data: { success: true } });
+    return NextResponse.json({ data: { success: true } });
   } catch (error) {
     return handleApiError(error);
   }

@@ -17,7 +17,7 @@ export async function POST(req: Request) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.message, details: parsed.error.errors } },
+        { error: { code: 'VALIDATION_ERROR', message: parsed.error.message, details: parsed.error.errors } },
         { status: 400 }
       );
     }
@@ -36,7 +36,7 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json(
-      { success: true, data: { user: result.user, token: result.token || null } },
+      { data: { user: result.user, token: result.token || null } },
       { status: 201 }
     );
   } catch (error: unknown) {
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     // Better Auth might throw specific errors (e.g. Email already exists)
     if (err.code === 'USER_ALREADY_EXISTS' || (err.message && err.message.includes('already exists'))) {
         return NextResponse.json(
-            { success: false, error: { code: 'CONFLICT', message: 'Email already exists' } },
+            { error: { code: 'CONFLICT', message: 'Email already exists' } },
             { status: 409 }
         );
     }

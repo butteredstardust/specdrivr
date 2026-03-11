@@ -16,7 +16,7 @@ const createTokenSchema = z.object({
 export async function GET() {
   const session = await auth();
   if (!session) {
-    return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+    return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
   }
 
   try {
@@ -32,7 +32,7 @@ export async function GET() {
     .from(agentTokens)
     .where(eq(agentTokens.userId, userId));
 
-    return NextResponse.json({ success: true, data: tokens });
+    return NextResponse.json({ data: tokens });
   } catch (error) {
     return handleApiError(error);
   }
@@ -41,7 +41,7 @@ export async function GET() {
 export async function POST(request: Request) {
   const session = await auth();
   if (!session) {
-    return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+    return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
   }
 
   try {
@@ -62,7 +62,6 @@ export async function POST(request: Request) {
     }).returning();
 
     return NextResponse.json({ 
-      success: true, 
       data: { 
         id: inserted.id,
         name: inserted.name,

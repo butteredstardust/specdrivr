@@ -20,7 +20,7 @@ export async function POST(req: Request) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: parsed.error.message, details: parsed.error.errors } },
+        { error: { code: 'VALIDATION_ERROR', message: parsed.error.message, details: parsed.error.errors } },
         { status: 400 }
       );
     }
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
 
     if (existingInvites.length === 0) {
       return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Invite token is invalid or expired' } },
+        { error: { code: 'VALIDATION_ERROR', message: 'Invite token is invalid or expired' } },
         { status: 400 }
       );
     }
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
 
     if (new Date() > new Date(invite.expiresAt)) {
       return NextResponse.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Invite token is invalid or expired' } },
+        { error: { code: 'VALIDATION_ERROR', message: 'Invite token is invalid or expired' } },
         { status: 400 }
       );
     }
@@ -74,7 +74,7 @@ export async function POST(req: Request) {
     }
 
     if (!user) {
-        return NextResponse.json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'User creation failed' } }, { status: 500 });
+        return NextResponse.json({ error: { code: 'INTERNAL_ERROR', message: 'User creation failed' } }, { status: 500 });
     }
 
     // 2. Add member to project (this can be a separate transaction or direct write)
@@ -89,14 +89,14 @@ export async function POST(req: Request) {
     });
 
     if (!user) {
-        return NextResponse.json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to create or find user' } }, { status: 500 });
+        return NextResponse.json({ error: { code: 'INTERNAL_ERROR', message: 'Failed to create or find user' } }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, data: { user: { id: user.id.toString(), email: user.email } } }, { status: 200 });
+    return NextResponse.json({ data: { user: { id: user.id.toString(), email: user.email } } }, { status: 200 });
   } catch (error: unknown) {
     if (error instanceof Error && error.message === 'PASSWORD_REQUIRED') {
         return NextResponse.json(
-            { success: false, error: { code: 'VALIDATION_ERROR', message: 'Password required for new users' } },
+            { error: { code: 'VALIDATION_ERROR', message: 'Password required for new users' } },
             { status: 400 }
         );
     }
