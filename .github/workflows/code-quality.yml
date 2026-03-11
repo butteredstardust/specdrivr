@@ -59,7 +59,7 @@ jobs:
       - name: Security and integrity audit
         run: |
           pnpm audit --prod
-          if [ -f "auth.ts" ]; then pnpm exec better-auth doctor || true; fi
+          if [ -f "src/lib/auth.ts" ]; then pnpm exec better-auth doctor; fi
 
       - name: Lint Next.js and React standards
         run: |
