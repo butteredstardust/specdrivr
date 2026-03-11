@@ -34,7 +34,7 @@ export async function POST(
     }
 
     // Update plan status to approved
-    const updatedPlan = await planRepository.approve(planId, Number(session.user.id));
+    const updatedPlan = await planRepository.approve(planId, session.user.id);
 
     return NextResponse.json({
       data: updatedPlan,

@@ -15,7 +15,7 @@ export function roleAtLeast(userRole: UserRole, required: UserRole): boolean {
  * Returns the user's role on a project, or null if not a member.
  */
 export async function getProjectRole(
-  userId: number,
+  userId: string,
   projectId: number
 ): Promise<UserRole | null> {
   const rows = await db
@@ -36,7 +36,7 @@ export async function getProjectRole(
  * Returns true if the user has at least the required role on the project.
  */
 export async function canPerform(
-  userId: number,
+  userId: string,
   projectId: number,
   required: UserRole
 ): Promise<boolean> {
@@ -49,17 +49,17 @@ export async function canPerform(
  * Permission helpers — call these in route handlers.
  * All return { allowed: boolean, role: UserRole | null }
  */
-export async function requireMember(userId: number, projectId: number) {
+export async function requireMember(userId: string, projectId: number) {
   const role = await getProjectRole(userId, projectId);
   return { allowed: role !== null, role };
 }
 
-export async function requireAdmin(userId: number, projectId: number) {
+export async function requireAdmin(userId: string, projectId: number) {
   const role = await getProjectRole(userId, projectId);
   return { allowed: role !== null && roleAtLeast(role, 'admin'), role };
 }
 
-export async function requireOwner(userId: number, projectId: number) {
+export async function requireOwner(userId: string, projectId: number) {
   const role = await getProjectRole(userId, projectId);
   return { allowed: role === 'owner', role };
 }

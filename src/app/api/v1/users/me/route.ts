@@ -10,7 +10,7 @@ export async function GET() {
   }
 
   try {
-    const userId = parseInt(session.user.id);
+    const userId = session.user.id;
     const user = await userRepository.getById(userId);
     return NextResponse.json({ data: user });
   } catch (error) {
@@ -26,7 +26,7 @@ export async function PATCH(request: Request) {
 
   try {
     const body = await request.json();
-    const userId = parseInt(session.user.id);
+    const userId = session.user.id;
     const updated = await userRepository.update(userId, body);
     return NextResponse.json({ data: updated });
   } catch (error) {

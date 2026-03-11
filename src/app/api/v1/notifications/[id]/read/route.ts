@@ -18,7 +18,7 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
     const { id } = await context.params;
 
     const existing = await db.select().from(notifications).where(
-        and(eq(notifications.id, Number(id)), eq(notifications.userId, Number(session.user.id)))
+        and(eq(notifications.id, Number(id)), eq(notifications.userId, session.user.id))
     );
 
     if (existing.length === 0) {

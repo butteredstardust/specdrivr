@@ -7,7 +7,7 @@ import { NotFoundError, ValidationError, DatabaseError } from '@/lib/errors';
 interface CreateProjectData {
   name: string;
   description?: string | null;
-  createdBy?: number;
+  createdBy?: string;
 }
 
 interface UpdateProjectData {
@@ -35,7 +35,7 @@ export class ProjectRepository extends BaseRepository {
     return (result[0] as unknown as Project) || null;
   }
 
-  async getByUserId(userId: number): Promise<Project[]> {
+  async getByUserId(userId: string): Promise<Project[]> {
     const result = await this.execQuery(() =>
       db.select().from(projects).where(eq(projects.createdBy, userId))
     );

@@ -27,7 +27,7 @@ export class SpecificationRepository extends BaseRepository {
     );
   }
 
-  async create(data: { projectId: number; name: string; createdBy?: number }): Promise<Specification> {
+  async create(data: { projectId: number; name: string; createdBy?: string }): Promise<Specification> {
     const [spec] = await this.execQuery(() =>
       db.insert(specifications).values({
         projectId: data.projectId,

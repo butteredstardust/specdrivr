@@ -77,7 +77,7 @@ export class PlanRepository extends BaseRepository {
     }
   }
 
-  async approve(id: number, approvedBy: number): Promise<Plan> {
+  async approve(id: number, approvedBy: string): Promise<Plan> {
     return await this.update(id, {
       status: 'approved',
       approvedBy,

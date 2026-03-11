@@ -7,7 +7,7 @@ import { DatabaseError } from "@/lib/errors";
 export { type UserSelect as User } from "@/db/schema";
 
 export class UserRepository extends BaseRepository {
-  async getById(id: number): Promise<User | null> {
+  async getById(id: string): Promise<User | null> {
     const result = await this.execQuery(() =>
       db.select().from(users).where(eq(users.id, id)).limit(1)
     );
@@ -34,7 +34,7 @@ export class UserRepository extends BaseRepository {
     return user as unknown as User;
   }
 
-  async update(id: number, data: Partial<UserInsert>): Promise<User> {
+  async update(id: string, data: Partial<UserInsert>): Promise<User> {
     const updatedUser = await this.execQuery(async () => {
       const [user] = await db
         .update(users)
@@ -51,7 +51,7 @@ export class UserRepository extends BaseRepository {
     return updatedUser as unknown as User;
   }
 
-  async delete(id: number): Promise<void> {
+  async delete(id: string): Promise<void> {
     await this.execQuery(() =>
       db.delete(users).where(eq(users.id, id))
     );

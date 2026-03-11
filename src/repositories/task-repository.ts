@@ -15,7 +15,7 @@ export interface CreateTaskData {
   verifyCommand?: string | null;
   doneCriteria?: string | null;
   recommendedModel?: string;
-  createdByUserId?: number | null;
+  createdByUserId?: string | null;
 }
 
 export interface UpdateTaskData {

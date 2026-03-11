@@ -5,7 +5,7 @@ This diagram represents the PostgreSQL database schema defined in `src/db/schema
 ```mermaid
 erDiagram
     users {
-        serial id PK
+        text id PK
         text email "UK"
         text name
         text password_hash
@@ -24,7 +24,7 @@ erDiagram
         text github_repo
         project_status status "default: active"
         jsonb settings
-        integer created_by FK
+        text created_by FK
         timestamp created_at
         timestamp updated_at
     }
@@ -32,7 +32,7 @@ erDiagram
     project_members {
         serial id PK
         integer project_id FK
-        integer user_id FK
+        text user_id FK
         user_role role "default: viewer"
         timestamp joined_at
     }
@@ -40,7 +40,7 @@ erDiagram
     invites {
         serial id PK
         integer project_id FK
-        integer inviter_id FK
+        text inviter_id FK
         text email
         text token "UK"
         user_role role "default: viewer"
@@ -64,7 +64,7 @@ erDiagram
         text title
         spec_status status "default: draft"
         text markdown_content
-        integer created_by FK
+        text created_by FK
         integer active_plan_id FK
         timestamp created_at
         timestamp updated_at
@@ -76,7 +76,7 @@ erDiagram
         integer version_number
         text markdown_content
         text change_summary
-        integer created_by FK
+        text created_by FK
         timestamp created_at
     }
 
@@ -85,7 +85,7 @@ erDiagram
         integer spec_id FK
         plan_status status "default: pending"
         text generated_plan
-        integer created_by FK
+        text created_by FK
         integer active_session_id FK
         timestamp created_at
         timestamp updated_at
@@ -94,7 +94,7 @@ erDiagram
     plan_reviews {
         serial id PK
         integer plan_id FK
-        integer reviewer_id FK
+        text reviewer_id FK
         text status
         text comments
         timestamp created_at
@@ -178,7 +178,7 @@ erDiagram
 
     notifications {
         serial id PK
-        integer user_id FK
+        text user_id FK
         integer project_id FK
         text type
         text title
@@ -190,7 +190,7 @@ erDiagram
 
     notification_preferences {
         serial id PK
-        integer user_id FK
+        text user_id FK
         text event_type
         boolean email_enabled "default: true"
         boolean in_app_enabled "default: true"
@@ -266,7 +266,7 @@ erDiagram
     audit_log {
         serial id PK
         integer project_id FK
-        integer user_id FK
+        text user_id FK
         text action
         text target_type
         text target_id

@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
 
     const newSession = await agentSessionRepository.create({
       ...parsed.data,
-      startedBy: Number(session.user.id),
+      startedBy: session.user.id,
     });
 
     return NextResponse.json({ data: newSession }, { status: 201 });

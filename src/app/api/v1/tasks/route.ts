@@ -65,11 +65,11 @@ export async function POST(request: NextRequest) {
     }
 
     const data = validationResult.data;
-    const taskData = { 
-      externalId: `T-${Date.now()}`, 
-      title: data.description.substring(0, 50), 
+    const taskData = {
+      externalId: `T-${Date.now()}`,
+      title: data.description.substring(0, 50),
       ...data,
-      createdBy: Number(session.user.id)
+      createdBy: session.user.id
     };
     const newTask = await taskRepository.create(taskData);
 

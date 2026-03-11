@@ -19,14 +19,7 @@ export async function GET(request: NextRequest) {
     let projects;
 
     if (userId) {
-      const userIdNum = parseInt(userId, 10);
-      if (isNaN(userIdNum)) {
-        return NextResponse.json(
-          formatErrorResponse({ message: 'Invalid userId parameter' }),
-          { status: 400 }
-        );
-      }
-      projects = await projectRepository.getByUserId(userIdNum);
+      projects = await projectRepository.getByUserId(userId);
     } else if (status === 'active') {
       projects = await projectRepository.getActive();
     } else {
@@ -54,7 +47,7 @@ export async function POST(request: NextRequest) {
     const project = await projectRepository.create({
       name: parsed.name,
       description: parsed.description ?? undefined,
-      createdBy: Number(session.user.id),
+      createdBy: session.user.id,
     });
 
     return NextResponse.json({
