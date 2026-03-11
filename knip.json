@@ -1,14 +1,12 @@
 {
   "ignore": [
     "src/components/error-boundary.tsx",
-    "src/components/ui/card.tsx",
-    "src/lib/utils.ts",
+    "src/components/ui/daemon-mascot.tsx",
+    "src/lib/api-response.ts",
     "src/lib/lock-manager.ts",
     "src/lib/pricing.ts",
     "src/lib/rate-limiter.ts",
-    "src/lib/rbac.ts",
-    "src/components/ui/daemon-mascot.tsx",
-    "src/lib/api-response.ts"
+    "src/lib/rbac.ts"
   ],
   "ignoreDependencies": [
     "@base-ui/react",
@@ -17,14 +15,12 @@
     "@dnd-kit/utilities",
     "@types/dompurify",
     "@uiw/react-md-editor",
-    "clsx",
     "dompurify",
     "isomorphic-dompurify",
     "next-remove-imports",
     "next-themes",
     "pino-pretty",
     "rehype-sanitize",
-    "tailwind-merge",
     "ts-morph",
     "@eslint/eslintrc",
     "@faker-js/faker",
