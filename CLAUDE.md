@@ -50,6 +50,8 @@ Specdrivr uses modern, type-safe stack:
   ```
 - **Extended Types:** When passing DB models to UI components, extend via mapped types. Use component props types (e.g., `ProjectCardProps['project']`) for UI-specific fields.
 - **No Temporary Fix Scripts:** Never commit temporary fix scripts that modify source files directly. Make changes directly to source files via proper editing and version control workflows.
+- **Temporary Work Location:** For one-off scripts, use `/tmp/` directory or execute via `pnpm exec tsx --eval`. Only commit scripts that are part of the reproducible build process.
+- **Artifact Prevention:** Never commit output logs (`*_output.txt`, `*_results.txt`), automation scripts (`*.exp`), or one-time migration scripts (`db/migrate-*.ts`). These are covered by .gitignore.
 
 ### Database & ORM
 
