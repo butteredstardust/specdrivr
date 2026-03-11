@@ -63,3 +63,35 @@ _Spec-driven autonomous code execution for engineering teams_
 | Owner          | Product & Engineering                                                                                                                            |
 | Review cadence | Updated with each significant product decision. Minor corrections do not increment version.                                                      |
 
+
+
+## **17.5 Environment Security & Secrets Management**
+
+**Validation at Startup:**
+All environment variables are validated at startup via `lib/env.ts` using Zod. The application will fail to boot if any required variable is missing or malformed, preventing silent runtime failures.
+
+**Secret Storage:**
+- Secrets (e.g., `AUTH_SECRET`, `DATABASE_URL`) must never be prefixed with `NEXT_PUBLIC_`.
+- In a Next.js (Vercel) environment, secrets are managed securely within the platform dashboard and injected at build/runtime.
+- Passwords are hashed with bcrypt (cost 12) before storage.
+- API tokens (e.g., `AGENT_TOKEN`) are displayed to the user only once and stored as a bcrypt hash.
+- Redis handles short-lived tokens (e.g., password reset, email validation) to avoid persisting sensitive, ephemeral data in the main database.
+
+## **17.6 Observability, Logging, & Metrics**
+
+**Structured Logging (Pino):**
+- Specdrivr uses `pino` for high-performance, structured JSON logging.
+- Logging levels: `debug` (local/development), `info` (request lifecycle/production), `warn` (recoverable errors), `error` (exceptions).
+- Every log entry must include a `correlationId` (extracted from request headers or generated via `crypto.randomUUID()`) for end-to-end trace mapping across services (e.g., DAEMON to Next.js API).
+- PII (Personally Identifiable Information), passwords, tokens, and raw request bodies are explicitly excluded from logs.
+
+**Metrics & Telemetry:**
+- Critical paths (e.g., API response times, database query durations, agent task execution times) should be instrumented for external APM tools (e.g., Datadog, New Relic) via custom Next.js wrappers.
+
+## **17.7 Fallback Strategies & Resiliency**
+
+**Redis (Upstash) Fallback:**
+- Redis is utilized for distributed locking, agent task queues, and rate limiting.
+- In the event of a Redis outage:
+  1. Rate limiting gracefully fails open (or is handled via edge cached responses depending on configuration) to avoid bringing down the entire API, though strict constraints on Auth endpoints remain.
+  2. Agent execution queues pause; tasks remain safe in PostgreSQL (`status: todo`). The agent will resume polling once Redis connectivity is restored.
