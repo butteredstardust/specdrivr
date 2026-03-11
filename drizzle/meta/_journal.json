@@ -43,6 +43,13 @@
       "when": 1773256161539,
       "tag": "0005_pink_dazzler",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1773262709421,
+      "tag": "0006_melted_micromax",
+      "breakpoints": true
     }
   ]
 }

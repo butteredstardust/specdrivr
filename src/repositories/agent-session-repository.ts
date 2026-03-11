@@ -33,7 +33,7 @@ export class AgentSessionRepository extends BaseRepository {
     );
   }
 
-  async create(data: { projectId: number; specId?: number; planId?: number; startedBy?: number }): Promise<AgentSession> {
+  async create(data: { projectId: number; specId?: number; planId?: number; startedBy?: string }): Promise<AgentSession> {
     const [session] = await this.execQuery(() =>
       db.insert(agentSessions).values({
         projectId: data.projectId,

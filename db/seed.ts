@@ -12,6 +12,7 @@ import bcrypt from "bcryptjs";
 import { sql } from "drizzle-orm";
 import { env } from "../src/lib/env-script";
 import * as schema from "../src/db/schema";
+import { nanoid } from "nanoid";
 
 const queryClient = postgres(env.DATABASE_URL, { max: 10 });
 const db = drizzle(queryClient, { schema });
@@ -52,8 +53,9 @@ async function main() {
   const passwordHash = await bcrypt.hash("password123", 12);
 
   await db.transaction(async (tx) => {
-    // Insert Users
+    // Insert Users with text IDs
     await tx.insert(users).values({
+      id: nanoid(),
       name: "Admin User",
       email: "admin@example.com",
       passwordHash,
@@ -62,6 +64,7 @@ async function main() {
     });
 
     await tx.insert(users).values({
+      id: nanoid(),
       name: "Test User",
       email: "test@example.com",
       passwordHash,
@@ -70,6 +73,7 @@ async function main() {
     });
 
     await tx.insert(users).values({
+      id: nanoid(),
       name: "Viewer",
       email: "viewer@example.com",
       passwordHash,

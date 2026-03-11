@@ -12,10 +12,9 @@ export async function GET() {
   }
 
   try {
-    const userId = parseInt(session.user.id);
     const list = await db.select()
       .from(notifications)
-      .where(eq(notifications.userId, userId))
+      .where(eq(notifications.userId, session.user.id))
       .orderBy(desc(notifications.createdAt));
 
     return NextResponse.json({ data: list });

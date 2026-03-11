@@ -38,7 +38,7 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
       );
     }
 
-    const targetUserId = Number(userId);
+    const targetUserId = userId;
     const projectId = Number(id);
 
     const existing = await db.select().from(projects).where(eq(projects.id, projectId));
@@ -95,10 +95,10 @@ export async function DELETE(req: Request, context: { params: Promise<{ id: stri
     }
 
     const { id, userId } = await context.params;
-    const targetUserId = Number(userId);
+    const targetUserId = userId;
     const projectId = Number(id);
 
-    if (Number(session.user.id) === targetUserId) {
+    if (session.user.id === targetUserId) {
       return NextResponse.json(
         { error: { code: 'VALIDATION_ERROR', message: 'Cannot remove self' } },
         { status: 400 }

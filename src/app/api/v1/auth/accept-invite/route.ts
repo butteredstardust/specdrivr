@@ -70,7 +70,7 @@ export async function POST(req: Request) {
         user = signupResult.user as unknown as import('@/db/schema').UserSelect;
         
         // Mark as verified since they accepted an invite link
-        await userRepository.update(Number(user.id), { emailVerified: true });
+        await userRepository.update(user.id, { emailVerified: true });
     }
 
     if (!user) {
@@ -81,7 +81,7 @@ export async function POST(req: Request) {
     await db.transaction(async (tx) => {
         await tx.insert(projectMembers).values({
             projectId: invite.projectId,
-            userId: Number(user!.id),
+            userId: user!.id,
             role: invite.role
         });
 

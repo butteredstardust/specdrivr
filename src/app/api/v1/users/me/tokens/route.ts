@@ -20,7 +20,6 @@ export async function GET() {
   }
 
   try {
-    const userId = parseInt(session.user.id);
     const tokens = await db.select({
       id: agentTokens.id,
       name: agentTokens.name,
@@ -30,7 +29,7 @@ export async function GET() {
       createdAt: agentTokens.createdAt,
     })
     .from(agentTokens)
-    .where(eq(agentTokens.userId, userId));
+    .where(eq(agentTokens.userId, session.user.id));
 
     return NextResponse.json({ data: tokens });
   } catch (error) {
@@ -52,9 +51,8 @@ export async function POST(request: Request) {
     const prefix = token.slice(0, 10);
     const tokenHash = await bcrypt.hash(token, 12);
 
-    const userId = parseInt(session.user.id);
     const [inserted] = await db.insert(agentTokens).values({
-      userId: userId,
+      userId: session.user.id,
       projectId,
       name,
       tokenHash,

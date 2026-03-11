@@ -69,7 +69,7 @@ export async function POST(
         specId: Number(id),
         versionNumber: nextVersionNumber,
         markdownContent,
-        createdBy: Number(session.user!.id)
+        createdBy: session.user!.id
       }).returning();
 
       await tx.update(specifications).set({

@@ -45,7 +45,7 @@ export const recommendedModelSchema = z.enum(['sonnet', 'opus', 'haiku'], {
  * - verifyCommand: Optional, max 1000 characters
  * - doneCriteria: Optional, max 2000 characters
  * - recommendedModel: Optional, defaults to 'sonnet'
- * - createdByUserId: Optional, must be positive integer
+ * - createdByUserId: Optional, string (nanoid)
  */
 export const createTaskSchema = z.object({
   description: z
@@ -109,11 +109,9 @@ export const createTaskSchema = z.object({
     .default('sonnet'),
 
   createdByUserId: z
-    .number({
-      invalid_type_error: 'Created by user ID must be a number',
+    .string({
+      invalid_type_error: 'Created by user ID must be a string',
     })
-    .int('Created by user ID must be an integer')
-    .positive('Created by user ID must be a positive number')
     .optional()
     .nullable(),
 });
@@ -239,7 +237,7 @@ export const taskQuerySchema = z.object({
 export const createProjectSchema = z.object({
   name: z.string().min(1, 'Project name is required').max(255, 'Project name cannot exceed 255 characters'),
   description: z.string().max(1000, 'Description cannot exceed 1000 characters').optional().nullable(),
-  createdBy: z.number().optional().nullable(),
+  createdBy: z.string().optional().nullable(),
 });
 
 /**
