@@ -36,6 +36,13 @@
       "when": 1773179314964,
       "tag": "0004_rapid_magneto",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1773256161539,
+      "tag": "0005_pink_dazzler",
+      "breakpoints": true
     }
   ]
 }
