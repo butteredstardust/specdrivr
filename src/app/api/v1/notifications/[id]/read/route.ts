@@ -10,7 +10,7 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
     const session = await auth();
     if (!session?.user) {
       return NextResponse.json(
-        { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
+        { error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
         { status: 401 }
       );
     }
@@ -23,14 +23,14 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
 
     if (existing.length === 0) {
       return NextResponse.json(
-        { success: false, error: { code: 'NOT_FOUND', message: 'Notification not found' } },
+        { error: { code: 'NOT_FOUND', message: 'Notification not found' } },
         { status: 404 }
       );
     }
 
     await db.update(notifications).set({ readAt: new Date() }).where(eq(notifications.id, Number(id)));
 
-    return NextResponse.json({ success: true, data: { success: true } });
+    return NextResponse.json({ data: { success: true } });
   } catch (error) {
     return handleApiError(error);
   }

@@ -15,7 +15,7 @@ export async function GET(
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
     }
 
     const { id } = await params;
@@ -33,7 +33,7 @@ export async function GET(
       ? plans.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0] 
       : null;
 
-    return NextResponse.json({ success: true, data: latestPlan });
+    return NextResponse.json({ data: latestPlan });
   } catch (error) {
     return handleApiError(error);
   }

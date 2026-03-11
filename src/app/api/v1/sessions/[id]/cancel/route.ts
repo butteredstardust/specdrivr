@@ -9,7 +9,7 @@ export async function POST(
 ) {
   const session = await auth();
   if (!session) {
-    return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+    return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
   }
 
   const { id } = await params;
@@ -17,7 +17,7 @@ export async function POST(
 
   try {
     const updated = await agentSessionRepository.update(sessionId, { status: 'cancelled', endedAt: new Date() });
-    return NextResponse.json({ success: true, data: updated });
+    return NextResponse.json({ data: updated });
   } catch (error) {
     return handleApiError(error);
   }

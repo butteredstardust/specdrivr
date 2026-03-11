@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -34,9 +34,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({
-      success: true,
       data: projects,
-      count: projects.length,
     });
   } catch (error) {
     return handleApiError(error);
@@ -47,7 +45,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
     }
 
     const body = await request.json();
@@ -60,7 +58,6 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({
-      success: true,
       data: project,
     }, { status: 201 });
   } catch (error) {
@@ -81,7 +78,7 @@ export async function PATCH(request: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
     }
 
     const body = await request.json();
@@ -97,7 +94,6 @@ export async function PATCH(request: NextRequest) {
     });
 
     return NextResponse.json({
-      success: true,
       data: project,
     });
   } catch (error) {
@@ -118,7 +114,7 @@ export async function DELETE(request: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -141,7 +137,7 @@ export async function DELETE(request: NextRequest) {
 
     await projectRepository.delete(projectId);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ data: { success: true } });
   } catch (error) {
     return handleApiError(error);
   }
