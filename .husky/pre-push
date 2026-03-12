@@ -194,7 +194,41 @@ if echo "$additions" | grep -q "dangerouslySetInnerHTML"; then
   done
 fi
 
-# ─── 10. Debug Code & Logging Standards ───────────────────────────────────────
+# ─── 10. Specdrivr UI & Performance Guards ────────────────────────────────────
+tsx_additions=$(echo "$changed_files" | grep "\.tsx$" || true)
+
+for f in $tsx_additions; do
+  [ -f "$f" ] || continue
+  
+  # Guard E: Next.js Optimized Media
+  if grep -q "<img" "$f"; then
+    die "Performance Risk: raw <img> tag found in '$f'. Use Next.js <Image /> from 'next/image' instead."
+  fi
+
+  # Guard F: Client-Side Repository Leak
+  if grep -q "'use client'\|\"use client\"" "$f"; then
+    if grep -q "@/repositories" "$f"; then
+      die "Architectural Violation: Client Component '$f' cannot import from @/repositories. Use Server Components or Server Actions."
+    fi
+  fi
+
+  # Guard G: Form Standards (Mandate: zod + react-hook-form)
+  if grep -q "<form" "$f"; then
+    if ! grep -q "react-hook-form" "$f"; then
+      die "Project Mandate: Form found in '$f' must use 'react-hook-form' and 'zod' for validation."
+    fi
+  fi
+
+  # Guard H: Design System Tiering (Avoid raw HTML for common primitives)
+  # Only flag files outside the UI library itself
+  if [[ ! "$f" =~ "src/components/ui/" ]]; then
+    if grep -qE "<(button|input|select)" "$f"; then
+      echo "⚠️  Warning: Raw HTML primitive (<button/input/select>) found in '$f'. Verify if a design system component from @/components/ui or @pxlkit exists."
+    fi
+  fi
+done
+
+# ─── 11. Debug Code & Logging Standards ───────────────────────────────────────
 # Mandate: Use @/lib/logger (Pino) instead of console.log/warn
 if echo "$additions" | grep -qE "console\.(log|debug|warn|table|dir)\s*\("; then
   log_violators=$(echo "$changed_diff" | awk '/^diff --git/ {file=$0; sub(/^diff --git a\/.* b\//, "", file)} /^(\+)([^+]|$)/ && /console\.(log|debug|warn|table|dir)/ {print file}' | sort -u || true)
