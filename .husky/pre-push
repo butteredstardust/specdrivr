@@ -22,6 +22,12 @@ if git diff --cached --name-only | grep -q "\.env"; then
   exit 1
 fi
 
+# Check for .log files
+if git diff --cached --name-only | grep -q "\.log$"; then
+  echo "Error: Log files cannot be committed."
+  exit 1
+fi
+
 # Check for debug code
 if git diff --cached | grep -qE "(console\.(log|debug|warn)|debugger)"; then
   echo "Error: Debug code found. Remove console logs and debugger statements."
