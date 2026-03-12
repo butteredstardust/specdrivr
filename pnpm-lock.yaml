@@ -35,6 +35,9 @@ importers:
       '@next/eslint-plugin-next':
         specifier: ^16.1.6
         version: 16.1.6
+      '@noble/hashes':
+        specifier: ^2.0.1
+        version: 2.0.1
       '@pxlkit/core':
         specifier: ^1.0.1
         version: 1.0.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)

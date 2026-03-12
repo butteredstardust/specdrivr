@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,7 +13,8 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { LockOpen1Icon, PersonIcon, EyeOpenIcon, EyeClosedIcon, TargetIcon } from '@radix-ui/react-icons';
 
-export default function LoginPage() {
+function LoginContent() {
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -22,11 +24,14 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
 
+    // Get redirect path from URL params, default to '/'
+    const callbackURL = searchParams.get('next') || searchParams.get('callbackUrl') || '/';
+
     try {
       const result = await authClient.signIn.email({
         email,
         password,
-        callbackURL: '/dashboard',
+        callbackURL,
       });
 
       if (result.error) {
@@ -172,6 +177,18 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md text-center">Loading...</div>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 }
 
