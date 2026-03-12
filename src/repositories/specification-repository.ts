@@ -129,12 +129,12 @@ export class SpecificationRepository extends BaseRepository {
         if (!version) throw new DatabaseError('Failed to create new specification version');
 
         // 3. Abandon any non-complete plans for this specification
-        // Non-complete = anything that isn't 'completed', 'rejected', or 'abandoned' already
+        // Non-complete = anything that isn't 'complete', 'rejected', or 'abandoned' already
         await tx.update(plans)
           .set({ status: 'abandoned' })
           .where(and(
             eq(plans.specId, data.specId),
-            ne(plans.status, 'completed'),
+            ne(plans.status, 'complete'),
             ne(plans.status, 'rejected'),
             ne(plans.status, 'abandoned')
           ));
