@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { PixelInput, PixelPasswordInput, PixelButton, PixelAlert, PixelCard } from '@pxlkit/ui-kit';
+import { PixelInput, PixelPasswordInput, PixelButton, PixelAlert } from '@pxlkit/ui-kit';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { twMerge } from 'tailwind-merge';
 
