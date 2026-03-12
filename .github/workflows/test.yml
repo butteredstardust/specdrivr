@@ -87,6 +87,8 @@ jobs:
           NEXTAUTH_URL: http://127.0.0.1:3000
           NEXTAUTH_SECRET: test-secret-for-ci-must-be-32-chars-long
           BETTER_AUTH_SECRET: test-secret-for-ci-must-be-32-chars-long
+          RESEND_API_KEY: re_dummy_key_for_ci
+          RESEND_FROM_EMAIL: noreply@specdrivr.dev
 
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps
@@ -100,3 +102,5 @@ jobs:
           NEXTAUTH_URL: http://127.0.0.1:3000
           NEXTAUTH_SECRET: test-secret-for-ci-must-be-32-chars-long
           BETTER_AUTH_SECRET: test-secret-for-ci-must-be-32-chars-long
+          RESEND_API_KEY: re_dummy_key_for_ci
+          RESEND_FROM_EMAIL: noreply@specdrivr.dev

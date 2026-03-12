@@ -40,9 +40,9 @@ export async function POST(req: Request) {
         { data: { success: true } },
         { status: 200 }
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       // BetterAuth throws token invalid or expired error
-      if (error.code === 'INVALID_TOKEN' || error.code === 'EXPIRED_TOKEN') {
+      if (error && typeof error === 'object' && 'code' in error && (error.code === 'INVALID_TOKEN' || error.code === 'EXPIRED_TOKEN')) {
         return NextResponse.json(
           { error: { code: 'INVALID_TOKEN', message: 'Token is invalid or expired' } },
           { status: 400 }

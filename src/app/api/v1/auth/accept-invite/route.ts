@@ -102,7 +102,7 @@ export async function POST(req: Request) {
           password: password,
           name: name,
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         logger.error({ error, email: invite.email }, 'BetterAuth signUpEmail failed in accept-invite');
         return handleApiError(error);
       }

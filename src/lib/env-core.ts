@@ -36,7 +36,7 @@ export function parseEnv(): Env {
     NODE_ENV: process.env.NODE_ENV,
     GITHUB_TOKEN: process.env.GITHUB_TOKEN,
     GITHUB_WEBHOOK_SECRET: process.env.GITHUB_WEBHOOK_SECRET,
-    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    RESEND_API_KEY: process.env.RESEND_API_KEY || (process.env.VITEST ? 're_dummy_key_for_testing' : undefined),
     RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
   };
 
