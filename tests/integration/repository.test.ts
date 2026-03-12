@@ -1,11 +1,11 @@
-import { describe, it, expect, beforeEach, vi, afterAll } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { testDb, cleanDatabase, createTestUser, createTestProject } from '../helpers';
 import { projectRepository } from '@/repositories/project-repository';
 import { specificationRepository } from '@/repositories/specification-repository';
 import { planRepository } from '@/repositories/plan-repository';
 import { taskRepository } from '@/repositories/task-repository';
 import * as schema from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 
 describe('Repository Integration Tests', () => {
   beforeEach(async () => {

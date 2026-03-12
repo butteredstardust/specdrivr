@@ -3,12 +3,12 @@ import postgres from "postgres";
 import {
   users, projects, specifications, plans, tasks,
   agentSessions, specVersions, accounts, projectMembers, 
-  agentConfig, auditLog
+  agentConfig
 } from "../src/db/schema";
 import { env } from "../src/lib/env-script";
 import * as schema from "../src/db/schema";
 import { scryptAsync } from "@noble/hashes/scrypt.js";
-import { sql, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { logger } from "../src/lib/logger-cli";
 
 const queryClient = postgres(env.DATABASE_URL, { max: 1 });
