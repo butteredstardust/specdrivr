@@ -14,13 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
-    env:
-      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/specdrivr_test
-      NEXTAUTH_URL: http://127.0.0.1:3000
-      NEXTAUTH_SECRET: test-secret-for-ci-must-be-32-chars-long
-      REDIS_URL: redis://127.0.0.1:6379
-      BETTER_AUTH_SECRET: test-secret-for-ci-must-be-32-chars-long
-
     services:
       postgres:
         image: postgres:15
@@ -69,13 +62,31 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Debug Environment Variables
+        run: |
+          echo "DATABASE_URL: ${DATABASE_URL:-not set}"
+          echo "REDIS_URL: ${REDIS_URL:-not set}"
+          echo "NEXTAUTH_URL: ${NEXTAUTH_URL:-not set}"
+          echo "NODE_OPTIONS: ${NODE_OPTIONS:-not set}"
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/specdrivr_test
+          REDIS_URL: redis://127.0.0.1:6379
+          NEXTAUTH_URL: http://127.0.0.1:3000
+
       - name: Run database migrations
         run: pnpm db:migrate
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/specdrivr_test
 
       - name: Run unit tests
         run: pnpm vitest run
         env:
           CI: true
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/specdrivr_test
+          REDIS_URL: redis://127.0.0.1:6379
+          NEXTAUTH_URL: http://127.0.0.1:3000
+          NEXTAUTH_SECRET: test-secret-for-ci-must-be-32-chars-long
+          BETTER_AUTH_SECRET: test-secret-for-ci-must-be-32-chars-long
 
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps
@@ -84,3 +95,8 @@ jobs:
         run: pnpm test:e2e
         env:
           CI: true
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/specdrivr_test
+          REDIS_URL: redis://127.0.0.1:6379
+          NEXTAUTH_URL: http://127.0.0.1:3000
+          NEXTAUTH_SECRET: test-secret-for-ci-must-be-32-chars-long
+          BETTER_AUTH_SECRET: test-secret-for-ci-must-be-32-chars-long
