@@ -68,7 +68,7 @@ Note: These are handled by the Better Auth catch-all handler at `/api/auth/[...a
 | **GET**    | /api/v1/tasks/:id/attempts | List all attempts newest-first with logLines and duration.       |
 | **GET**    | /api/v1/tasks/:id/changes  | List all file_changes produced by this task's attempts.          |
 
-## **6.6 Sessions**
+## **6.6 Sessions** [Status: Verified Specification / Implementation Pending]
 
 | **Method** | **Path**                       | **Description**                                                        |
 | ---------- | ------------------------------ | ---------------------------------------------------------------------- |
@@ -80,7 +80,7 @@ Note: These are handled by the Better Auth catch-all handler at `/api/auth/[...a
 | **GET**    | /api/v1/sessions/:id/events    | List agent events for this session, newest-first. **[PLANNED]** |
 | **POST**   | /api/v1/sessions/:id/heartbeat | Agent-only. Updates lastHeartbeatAt. Returns { shouldStop: bool }.     |
 
-## **6.7 Team Management**
+## **6.7 Team Management** [Status: Verified Specification / Implementation Pending]
 
 | **Method** | **Path**                                      | **Description**                                                            |
 | ---------- | --------------------------------------------- | -------------------------------------------------------------------------- |
@@ -160,3 +160,9 @@ Rate limiting is enforced at the `src/proxy.ts` (Next.js Edge) layer using Upsta
 - **Auth Endpoints:** 10 requests / minute / IP
 - **Standard API (User):** 100 requests / minute / user session
 - **Agent API (Token):** 1000 requests / minute / API token
+
+
+## Development Gaps & Technical Debt
+
+- **Authentication Endpoints:** The specification lists custom endpoints (`/api/auth/sign-in/email`), but the implementation utilizes `better-auth` via `/api/auth/[...all]`. The custom signup endpoint at `/api/v1/auth/signup` bridges the gap but doesn't strictly align with the old spec.
+- **Pagination & Envelopes:** Many implemented endpoints (e.g., `/api/v1/projects`) return raw arrays or partial envelopes, deviating slightly from the strict `{ data: [], meta: {} }` spec.
