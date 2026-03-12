@@ -10,7 +10,7 @@ describe('Seed Script Smoke Test', () => {
   });
 
   function runSeed() {
-    execSync('powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "pnpm db:seed"', {
+    execSync('pnpm db:seed', {
       env: { ...process.env, DATABASE_URL: process.env.DATABASE_URL },
       stdio: 'inherit'
     });
