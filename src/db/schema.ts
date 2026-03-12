@@ -18,11 +18,11 @@ import {
 
 export const planStatusEnum = pgEnum('plan_status', [
   'pending_approval',
-  'approved',
+  'executing',
   'rejected',
   'abandoned',
   'changes_requested',
-  'complete',
+  'completed',
 ]);
 
 export const specStatusEnum = pgEnum('spec_status', [
@@ -30,7 +30,7 @@ export const specStatusEnum = pgEnum('spec_status', [
   'pending_plan',
   'pending_approval',
   'executing',
-  'complete',
+  'completed',
   'stalled',
   'archived',
 ]);
@@ -465,6 +465,12 @@ export const agentConfig = pgTable('agent_config', {
   maxDiffSizeKb: integer('max_diff_size_kb').notNull().default(500),
   prAutoCreate: boolean('pr_auto_create').notNull().default(false),
   prTargetBranch: text('pr_target_branch').notNull().default('main'),
+  githubToken: text('github_token'),                          // nullable — PAT or App token
+  githubRepo: text('github_repo'),                            // nullable — "owner/repo-name"
+  githubBranch: text('github_branch').default('main'),        // watched branch
+  githubWebhookSecret: text('github_webhook_secret'),         // nullable — for HMAC validation
+  slackBotToken: text('slack_bot_token'),                     // nullable
+  slackChannelId: text('slack_channel_id'),                   // nullable
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
@@ -519,6 +525,7 @@ export const webhooks = pgTable('webhooks', {
   secret: text('secret'),
   events: jsonb('events').notNull().default(['*']),
   isActive: boolean('is_active').notNull().default(true),
+  status: text('status').notNull().default('active'), // active | error
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 

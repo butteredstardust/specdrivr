@@ -34,7 +34,10 @@ You are an expert AI Systems Architect and Senior Next.js/TypeScript Engineer. Y
 
 ### 4. Database & Migrations
 - **Drizzle ORM:** Use exclusively. No raw SQL.
-- **Migrations:** Do NOT modify or delete files in `drizzle/`. Use `pnpm db:generate` for changes.
+- **Migration Protocol:** `pnpm db:push` is BANNED. Every schema change must follow:
+  1. `pnpm db:generate` (creates a reversible migration file)
+  2. `pnpm db:migrate` (applies the migration)
+- **Migrations:** Do NOT modify or delete files in `drizzle/`.
 - **Transactions:** Multi-step writes must be wrapped in `db.transaction`.
 
 ### 5. UI & Design System
@@ -73,3 +76,7 @@ You are an expert AI Systems Architect and Senior Next.js/TypeScript Engineer. Y
 - **Brevity:** Concise, technical, and direct.
 - **No Emojis:** Zero emojis in code, docs, or messages.
 - **Action-Oriented:** Focus on solutions and architectural decisions.
+- **Task Closure:** Every completed task MUST end with a structured summary:
+  1. **Executive Summary:** 1-3 sentences of core findings and actions.
+  2. **Completion Statement:** Clear text identifying the TASK-ID as "fully complete."
+  3. **Checklist:** A "Summary of Task Completion" section using `[x]` markdown for each verified deliverable.

@@ -13,7 +13,6 @@ import { requireAdmin, requireMember } from '@/lib/rbac';
 import { planRepository } from '@/repositories/plan-repository';
 import { specificationRepository } from '@/repositories/specification-repository';
 import type { z } from 'zod';
-import { webhookService } from '@/lib/webhooks';
 
 type TaskStatus = z.infer<typeof taskStatusSchema>;
 
@@ -44,12 +43,6 @@ export async function retryTaskAction(formData: FormData) {
 
   try {
     const updatedTask = await taskRepository.retryTask(taskId, session.user.id);
-    
-    // Dispatch webhook
-    await webhookService.dispatch(spec.projectId, 'task_retried', updatedTask, {
-      specId: spec.id,
-      taskId: updatedTask.id,
-    });
 
     revalidatePath(`/specs/${spec.id}`);
     
@@ -97,12 +90,6 @@ export async function unblockTaskAction(formData: FormData) {
 
   try {
     const updatedTask = await taskRepository.unblockTask(result.data.id, result.data.humanContext, session.user.id);
-    
-    // Dispatch webhook
-    await webhookService.dispatch(spec.projectId, 'task_unblocked', updatedTask, {
-      specId: spec.id,
-      taskId: updatedTask.id,
-    });
 
     revalidatePath(`/specs/${spec.id}`);
     
@@ -156,12 +143,6 @@ export async function overrideTaskStatusAction(formData: FormData) {
       session.user.id, 
       result.data.notes
     );
-    
-    // Dispatch webhook
-    await webhookService.dispatch(spec.projectId, `task_${updatedTask.status}`, updatedTask, {
-      specId: spec.id,
-      taskId: updatedTask.id,
-    });
 
     revalidatePath(`/specs/${spec.id}`);
     
