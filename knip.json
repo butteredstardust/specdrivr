@@ -1,49 +1,53 @@
 {
+  "entry": [
+    "src/app/**/route.ts",
+    "src/app/**/page.tsx",
+    "src/app/**/layout.tsx",
+    "src/app/**/error.tsx",
+    "src/app/**/global-error.tsx",
+    "src/app/**/not-found.tsx",
+    "src/app/**/loading.tsx",
+    "src/app/globals.css",
+    "src/components/**/*.tsx",
+    "src/actions/**/*.ts",
+    "scripts/**/*.ts",
+    "scripts/**/*.js",
+    "tests/**/*.ts",
+    "tests/**/*.tsx",
+    "tests/**/*.js",
+    "drizzle.config.ts",
+    "src/proxy.ts"
+  ],
+  "project": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "tests/**/*.ts",
+    "tests/**/*.tsx"
+  ],
   "ignore": [
-    "src/components/error-boundary.tsx",
     "src/components/ui/daemon-mascot.tsx",
-    "src/lib/api-response.ts",
-    "src/lib/lock-manager.ts",
-    "src/lib/pricing.ts",
-    "src/lib/rate-limiter.ts",
-    "src/lib/rbac.ts"
+    "src/components/ui/**/*.tsx"
   ],
   "ignoreDependencies": [
-    "@base-ui/react",
-    "@dnd-kit/core",
-    "@dnd-kit/sortable",
-    "@dnd-kit/utilities",
-    "@types/dompurify",
-    "@uiw/react-md-editor",
-    "dompurify",
-    "isomorphic-dompurify",
-    "next-remove-imports",
-    "next-themes",
-    "pino-pretty",
-    "rehype-sanitize",
-    "ts-morph",
-    "@eslint/eslintrc",
-    "@faker-js/faker",
-    "@types/bcryptjs",
+    "@types/node",
+    "@types/react",
+    "@types/react-dom",
+    "typescript",
+    "eslint",
+    "postcss",
+    "tailwindcss",
     "autoprefixer",
     "eslint-config-next",
-    "eslint-plugin-react",
-    "eslint-plugin-react-hooks",
-    "shadcn",
-    "@upstash/ratelimit"
+    "knip",
+    "next-themes",
+    "@pxlkit/social",
+    "@pxlkit/effects",
+    "@pxlkit/gamification",
+    "@pxlkit/weather",
+    "nanoid",
+    "react-hook-form",
+    "@hookform/resolvers",
+    "husky"
   ],
-  "ignoreBinaries": [
-    "better-auth"
-  ],
-  "ignoreExportsUsedInFile": true,
-  "rules": {
-    "exports": "off",
-    "types": "off",
-    "unlisted": "off"
-    // NOTE: Rules temporarily disabled during documentation audit.
-    // These should be re-enabled after audit completion and underlying issues resolved.
-    // - exports: Check for unused exports
-    // - types: Check for unused exported types
-    // - unlisted: Check for unlisted dependencies
-  }
+  "ignoreBinaries": ["drizzle-kit", "better-auth"]
 }
