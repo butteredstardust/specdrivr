@@ -439,3 +439,8 @@ pnpm db:seed
 ```
 
 **Important:** Never manually edit files in the `drizzle/` directory. Always generate migrations from the schema defined in `src/db/schema.ts`.
+
+## Development Gaps & Technical Debt
+
+- **Test Seed Data:** `seed.ts` is not yet implemented, leaving local dev environments empty by default.
+- **Schema completeness:** Drizzle schema covers all tables now, but some indexes or constraints mentioned in the spec might need verification in `drizzle.config.ts` outputs.
