@@ -2,6 +2,8 @@ import { execSync } from 'child_process';
 import fs from 'fs';
 
 const REPORT_FILE = `documentation/HEALTH_CHECK_REPORT_${new Date().toISOString().split('T')[0]}.md`;
+const isWindows = process.platform === 'win32';
+const pnpm = isWindows ? 'pnpm.cmd' : 'pnpm';
 
 function runCommand(name, command) {
   console.log(`Running: ${name}...`);
@@ -27,26 +29,26 @@ async function main() {
   });
 
   // 2. Security Audit
-  results.push(runCommand('Security Audit (pnpm audit)', 'pnpm.cmd audit --prod'));
+  results.push(runCommand('Security Audit (pnpm audit)', `${pnpm} audit --prod`));
 
   // 3. Auth Integrity (better-auth doctor) - TEMPORARILY DISABLED
   // if (fs.existsSync('src/lib/auth.ts')) {
-  //   results.push(runCommand('Auth Integrity (better-auth doctor)', 'pnpm.cmd exec better-auth doctor'));
+  //   results.push(runCommand('Auth Integrity (better-auth doctor)', `${pnpm} exec better-auth doctor`));
   // } else {
   //   results.push({ name: 'Auth Integrity (better-auth doctor)', success: true, output: 'src/lib/auth.ts not found, skipping.' });
   // }
 
   // 4. Linting
-  results.push(runCommand('Linting (ESLint)', 'pnpm.cmd run lint'));
+  results.push(runCommand('Linting (ESLint)', `${pnpm} run lint`));
 
   // 5. Type Check
-  results.push(runCommand('Type Check (TSC)', 'pnpm.cmd tsc --noEmit'));
+  results.push(runCommand('Type Check (TSC)', `${pnpm} run typecheck`));
 
   // 6. Unit Tests
-  results.push(runCommand('Unit Tests (Vitest)', 'pnpm.cmd vitest run'));
+  results.push(runCommand('Unit Tests (Vitest)', `${pnpm} run test:unit`));
 
   // 7. Dead Code Detection
-  results.push(runCommand('Dead Code Detection (Knip)', 'pnpm.cmd exec knip --reporter json'));
+  results.push(runCommand('Dead Code Detection (Knip)', `${pnpm} exec knip --reporter json`));
 
   // Generate Report
   let report = `# Health Check Report - ${new Date().toLocaleString()}\n\n`;
