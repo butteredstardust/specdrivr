@@ -1,16 +1,17 @@
+import 'server-only';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/db';
-import { invites, projectMembers } from '@/db/schema';
-import { userRepository } from '@/repositories';
-import { eq } from 'drizzle-orm';
+import { invites, projectMembers, users } from '@/db/schema';
+import { eq, and, gt } from 'drizzle-orm';
 import { handleApiError } from '@/lib/error-handler';
 import { authInstance } from '@/lib/auth';
+import { logger } from '@/lib/logger';
 
 const AcceptInviteSchema = z.object({
-  token: z.string(),
-  password: z.string().min(8).optional(),
-  name: z.string().min(2).optional()
+  token: z.string().min(1),
+  password: z.string().min(8).optional(), // required for new users only
+  name: z.string().min(2).optional()      // required for new users only
 });
 
 export async function POST(req: Request) {
@@ -20,86 +21,142 @@ export async function POST(req: Request) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: { code: 'VALIDATION_ERROR', message: parsed.error.message, details: parsed.error.errors } },
+        { 
+          error: { 
+            code: 'VALIDATION_ERROR', 
+            message: 'Invalid inputs', 
+            details: parsed.error.errors 
+          } 
+        },
         { status: 400 }
       );
     }
 
     const { token, password, name } = parsed.data;
 
-    const existingInvites = await db.select().from(invites).where(eq(invites.id, Number(token)));
+    // 1. Validate invite token
+    const [invite] = await db
+      .select()
+      .from(invites)
+      .where(
+        and(
+          eq(invites.token, token),
+          gt(invites.expiresAt, new Date())
+        )
+      )
+      .limit(1);
 
-    if (existingInvites.length === 0) {
+    if (!invite) {
       return NextResponse.json(
-        { error: { code: 'VALIDATION_ERROR', message: 'Invite token is invalid or expired' } },
+        { error: { code: 'INVALID_TOKEN', message: 'Invite token not found or expired' } },
         { status: 400 }
       );
     }
 
-    const invite = existingInvites[0];
+    // 2. Check if user already exists
+    const [existingUser] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, invite.email))
+      .limit(1);
 
-    if (new Date() > new Date(invite.expiresAt)) {
-      return NextResponse.json(
-        { error: { code: 'VALIDATION_ERROR', message: 'Invite token is invalid or expired' } },
-        { status: 400 }
-      );
-    }
+    let userId: string;
 
-    let user: import('@/db/schema').UserSelect | null = null;
+    if (existingUser) {
+      // Path B — Existing user
+      userId = existingUser.id;
 
-    await db.transaction(async () => {
-      // 1. Check if user already exists
-      user = await userRepository.getByEmail(invite.email);
+      try {
+        await db.transaction(async (tx) => {
+          // Insert into project_members
+          await tx
+            .insert(projectMembers)
+            .values({
+              projectId: invite.projectId,
+              userId: userId,
+              role: invite.role,
+            })
+            .onConflictDoNothing();
 
-      if (!user) {
-        if (!password) {
-           throw new Error('PASSWORD_REQUIRED');
-        }
+          // Delete the invite row
+          await tx.delete(invites).where(eq(invites.id, invite.id));
+        });
+      } catch (error) {
+        logger.error({ error, inviteId: invite.id }, 'Transaction failed in accept-invite (Path B)');
+        throw error;
       }
-    });
-
-    // If user doesn't exist, create them via Better Auth
-    if (!user) {
-        const signupResult = await authInstance.api.signUpEmail({
-            body: {
-                email: invite.email,
-                password: password!,
-                name: name || invite.email.split("@")[0],
-            }
-        });
-        user = signupResult.user as unknown as import('@/db/schema').UserSelect;
-        
-        // Mark as verified since they accepted an invite link
-        await userRepository.update(user.id, { emailVerified: true });
-    }
-
-    if (!user) {
-        return NextResponse.json({ error: { code: 'INTERNAL_ERROR', message: 'User creation failed' } }, { status: 500 });
-    }
-
-    // 2. Add member to project (this can be a separate transaction or direct write)
-    await db.transaction(async (tx) => {
-        await tx.insert(projectMembers).values({
-            projectId: invite.projectId,
-            userId: user!.id,
-            role: invite.role
-        });
-
-        await tx.delete(invites).where(eq(invites.id, invite.id));
-    });
-
-    if (!user) {
-        return NextResponse.json({ error: { code: 'INTERNAL_ERROR', message: 'Failed to create or find user' } }, { status: 500 });
-    }
-
-    return NextResponse.json({ data: { user: { id: user.id.toString(), email: user.email } } }, { status: 200 });
-  } catch (error: unknown) {
-    if (error instanceof Error && error.message === 'PASSWORD_REQUIRED') {
+    } else {
+      // Path A — New user
+      if (!password || !name) {
         return NextResponse.json(
-            { error: { code: 'VALIDATION_ERROR', message: 'Password required for new users' } },
-            { status: 400 }
+          { error: { code: 'VALIDATION_ERROR', message: 'Name and password required for new users' } },
+          { status: 400 }
         );
+      }
+
+      // Create user via BetterAuth
+      let newUser;
+      try {
+        newUser = await authInstance.api.signUpEmail({
+          email: invite.email,
+          password: password,
+          name: name,
+        });
+      } catch (error: any) {
+        logger.error({ error, email: invite.email }, 'BetterAuth signUpEmail failed in accept-invite');
+        return handleApiError(error);
+      }
+
+      if (!newUser || !newUser.user) {
+        return NextResponse.json(
+          { error: { code: 'INTERNAL_ERROR', message: 'Failed to create user account' } },
+          { status: 500 }
+        );
+      }
+
+      userId = newUser.user.id;
+
+      try {
+        await db.transaction(async (tx) => {
+          // Insert into project_members
+          await tx.insert(projectMembers).values({
+            projectId: invite.projectId,
+            userId: userId,
+            role: invite.role,
+          });
+
+          // Delete the invite row
+          await tx.delete(invites).where(eq(invites.id, invite.id));
+        });
+      } catch (error) {
+        logger.error({ error, userId, inviteId: invite.id }, 'Transaction failed in accept-invite (Path A), cleaning up orphaned user');
+        
+        // Handle atomicity: if transaction fails, delete the orphaned user account
+        try {
+          // BetterAuth doesn't expose a direct delete user API via authInstance.api easily for server side if not using a specific plugin.
+          // We'll delete directly from the database to ensure atomicity.
+          await db.delete(users).where(eq(users.id, userId));
+        } catch (cleanupError) {
+          logger.error({ cleanupError, userId }, 'Failed to cleanup orphaned user after transaction failure');
+        }
+        
+        throw error;
+      }
     }
+
+    return NextResponse.json(
+      { 
+        data: { 
+          user: { 
+            id: userId, 
+            email: invite.email 
+          } 
+        } 
+      },
+      { status: 200 }
+    );
+  } catch (error: unknown) {
+    logger.error(error, 'Accept invite error');
     return handleApiError(error);
   }
 }
