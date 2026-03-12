@@ -2,6 +2,9 @@
 # .husky/pre-push
 set -euo pipefail
 
+# Add common Windows paths for Git and Node tools to PATH
+export PATH="$PATH:/c/Program Files/Git/bin:/c/Program Files/nodejs:/c/Users/Admin/AppData/Roaming/npm"
+
 echo "🔍 Running pre-push checks..."
 echo ""
 
