@@ -1,9 +1,8 @@
 import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { projects, webhookDeliveries, agentLogs, notifications, projectMembers, agentConfig, tasks, auditLog } from '@/db/schema';
-import { eq, and, sql } from 'drizzle-orm';
-import { handleApiError } from '@/lib/error-handler';
+import { webhookDeliveries, agentLogs, notifications, projectMembers, tasks, auditLog } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 import { verifyGitHubSignature, getGitHubConfig } from '@/lib/github';
 import { logger } from '@/lib/logger';
 
@@ -66,7 +65,7 @@ export async function POST(
   }
 }
 
-async function handlePush(projectId: number, payload: any, watchedBranch: string) {
+async function handlePush(projectId: number, payload: { ref?: string; pusher?: { name?: string }; commits?: { message: string }[] }, watchedBranch: string) {
   const ref = payload.ref || '';
   const branch = ref.replace('refs/heads/', '');
   
@@ -138,7 +137,7 @@ async function handlePush(projectId: number, payload: any, watchedBranch: string
   }
 }
 
-async function handlePullRequest(projectId: number, payload: any) {
+async function handlePullRequest(projectId: number, payload: { action: string; pull_request?: { number: number; title: string; body: string; html_url: string } }) {
   const action = payload.action;
   if (action !== 'opened' && action !== 'synchronize') {
     return;

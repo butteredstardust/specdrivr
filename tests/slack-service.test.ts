@@ -18,6 +18,7 @@ describe('Slack Service', () => {
 
   describe('getSlackConfig', () => {
     it('should return null when Slack is not configured', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (db.select as any).mockReturnValue({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
@@ -31,6 +32,7 @@ describe('Slack Service', () => {
     });
 
     it('should return config when configured', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (db.select as any).mockReturnValue({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
@@ -46,6 +48,7 @@ describe('Slack Service', () => {
 
   describe('sendSlackNotification', () => {
     it('should return immediately if Slack is not configured', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (db.select as any).mockReturnValue({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
@@ -64,6 +67,7 @@ describe('Slack Service', () => {
     });
 
     it('should call Slack API with correct blocks', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (db.select as any).mockReturnValue({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
@@ -72,6 +76,7 @@ describe('Slack Service', () => {
         }),
       });
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (global.fetch as any).mockResolvedValue({
         json: () => Promise.resolve({ ok: true }),
       });
@@ -94,6 +99,7 @@ describe('Slack Service', () => {
         })
       );
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const callBody = JSON.parse((global.fetch as any).mock.calls[0][1].body);
       expect(callBody.channel).toBe('C123');
       expect(callBody.blocks).toHaveLength(4);
