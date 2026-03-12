@@ -1,13 +1,17 @@
+import 'server-only';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { authInstance } from '@/lib/auth';
 import { handleApiError } from '@/lib/error-handler';
-import { headers } from 'next/headers';
+import { db } from '@/db';
+import { users } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+import { logger } from '@/lib/logger';
 
 const SignupSchema = z.object({
+  name: z.string().min(2),
   email: z.string().email(),
-  password: z.string().min(8),
-  name: z.string().min(2).optional()
+  password: z.string().min(8)
 });
 
 export async function POST(req: Request) {
@@ -17,37 +21,61 @@ export async function POST(req: Request) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: { code: 'VALIDATION_ERROR', message: parsed.error.message, details: parsed.error.errors } },
+        { 
+          error: { 
+            code: 'VALIDATION_ERROR', 
+            message: 'Invalid input', 
+            details: parsed.error.errors 
+          } 
+        },
         { status: 400 }
       );
     }
 
     const { email, password, name } = parsed.data;
 
-    // Use Better Auth server-side API to create user
-    // This handles password hashing, validation, and session creation if autoSignIn is enabled
-    const result = await authInstance.api.signUpEmail({
-      body: {
+    try {
+      // 1. Call BetterAuth signUpEmail
+      // This handles password hashing and autoSignIn
+      const result = await authInstance.api.signUpEmail({
         email,
         password,
-        name: name || email.split("@")[0],
-      },
-      headers: await headers()
-    });
+        name,
+      });
 
-    return NextResponse.json(
-      { data: { user: result.user, token: result.token || null } },
-      { status: 201 }
-    );
-  } catch (error: unknown) {
-    const err = error as { code?: string; message?: string };
-    // Better Auth might throw specific errors (e.g. Email already exists)
-    if (err.code === 'USER_ALREADY_EXISTS' || (err.message && err.message.includes('already exists'))) {
+      if (!result || !result.user) {
+        throw new Error('Failed to create user account');
+      }
+
+      // 2. Post-signup logic: update onboardingStep
+      await db.update(users)
+        .set({ onboardingStep: 1 })
+        .where(eq(users.id, result.user.id));
+
+      return NextResponse.json(
+        { 
+          data: { 
+            user: { 
+              id: result.user.id, 
+              email: result.user.email, 
+              name: result.user.name 
+            } 
+          } 
+        },
+        { status: 201 }
+      );
+    } catch (error: any) {
+      // BetterAuth throws error objects
+      if (error.code === 'USER_ALREADY_EXISTS') {
         return NextResponse.json(
-            { error: { code: 'CONFLICT', message: 'Email already exists' } },
-            { status: 409 }
+          { error: { code: 'CONFLICT', message: 'Email already registered' } },
+          { status: 409 }
         );
+      }
+      throw error;
     }
+  } catch (error: unknown) {
+    logger.error(error, 'Signup error');
     return handleApiError(error);
   }
 }
