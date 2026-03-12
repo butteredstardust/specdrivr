@@ -163,6 +163,14 @@ import { env } from '@/lib/env-script'; // Standalone Node.js scripts
 - **E2E tests:** Playwright 1.42.x. Use ARIA selectors (`getByRole`). Intercept APIs in `tests/mocks` for deterministic runs.
 - **Write tests alongside implementation.** Avoid flaky tests; keep them idempotent and fast.
 
+### CI & Testing Best Practices
+
+- **Middleware Bypassing:** Always ensure `proxy.ts` (middleware) ignores paths with dots (`.includes('.')`) to prevent static asset redirect loops and MIME type errors.
+- **CI Networking:** Use `127.0.0.1` instead of `localhost` in CI to avoid IPv6 resolution issues. Set `NODE_OPTIONS="--dns-result-order=ipv4first"` in workflows.
+- **Database Enums:** Strictly align TypeScript enums with the established database migrations. The SQL migration is the single source of truth.
+- **Test Environment:** Provide 32-character "safe" defaults for secrets in `env-core.ts` when `process.env.VITEST` is active to satisfy Zod validation without real credentials.
+- **Workflow Parity:** Ensure all workflows (e.g., `test.yml`, `code-quality.yml`) share identical service container and environment variable configurations.
+
 ### Package Management
 
 - **Always use pnpm.** Never `npm` or `yarn`.
