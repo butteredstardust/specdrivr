@@ -4,6 +4,7 @@ import { config } from 'dotenv';
 export const envSchema = z.object({
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required').url('DATABASE_URL must be a valid URL'),
   NEXTAUTH_SECRET: z.string().min(32, 'NEXTAUTH_SECRET must be at least 32 characters for security'),
+  BETTER_AUTH_SECRET: z.string().min(32, 'BETTER_AUTH_SECRET must be at least 32 characters for security'),
   NEXTAUTH_URL: z.string().url('NEXTAUTH_URL must be a valid URL').default('http://localhost:3000'),
   REDIS_URL: z.string().url('REDIS_URL must be a valid URL').optional().default('redis://localhost:6379'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
@@ -24,13 +25,26 @@ export function parseEnv(): Env {
     }
   }
 
-  return envSchema.parse({
+  const envToParse = {
     DATABASE_URL: process.env.DATABASE_URL,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     REDIS_URL: process.env.REDIS_URL,
     NODE_ENV: process.env.NODE_ENV,
     GITHUB_TOKEN: process.env.GITHUB_TOKEN,
     GITHUB_WEBHOOK_SECRET: process.env.GITHUB_WEBHOOK_SECRET,
-  });
+  };
+
+  // Skip validation during some test scenarios if needed, but integration tests DO need them
+  // If we're in Vitest, we'll log what's missing if it fails
+  try {
+    return envSchema.parse(envToParse);
+  } catch (error) {
+    if (process.env.VITEST) {
+      console.error('Environment validation failed during Vitest:', error);
+      // We still throw because integration tests will fail without a DB URL
+    }
+    throw error;
+  }
 }
