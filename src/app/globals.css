@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "@pxlkit/ui-kit/styles.css";
+@source "../node_modules/@pxlkit/ui-kit";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -28,6 +30,18 @@
   --status-failed: oklch(0.627 0.258 23.5);
 
   --radius: 0.5rem;
+
+  /* Retro Pxlkit Token Bridge */
+  --retro-bg: var(--bg-base);
+  --retro-surface: var(--bg-surface);
+  --retro-card: var(--bg-elevated);
+  --retro-border: var(--border-default);
+  --retro-purple: var(--accent-violet);
+  --retro-gold: var(--phosphor-amber);
+  --retro-green: var(--status-emerald);
+  --retro-red: var(--status-red);
+  --retro-cyan: #22d3ee;
+  --retro-neutral: var(--text-secondary);
 }
 
 /* Light theme - using shadcn/ui default variables */
