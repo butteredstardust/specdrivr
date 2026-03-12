@@ -20,6 +20,8 @@ export { userRepository, UserRepository } from './user-repository';
 export { specificationRepository, SpecificationRepository } from './specification-repository';
 export { planRepository, PlanRepository } from './plan-repository';
 export { agentSessionRepository, AgentSessionRepository } from './agent-session-repository';
+export { memberRepository, MemberRepository } from './member-repository';
+export { webhookRepository, WebhookRepository } from './webhook-repository';
 export { BaseRepository } from './base-repository';
 
 /**

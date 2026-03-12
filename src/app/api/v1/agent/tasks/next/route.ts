@@ -1,11 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { tasks, agentSessions, agentTokens } from '@/db/schema';
+import { agentTokens } from '@/db/schema';
 import { handleApiError } from '@/lib/error-handler';
-import { eq, and, asc } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
+import { taskRepository } from '@/repositories/task-repository';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('Authorization');
   if (!authHeader?.startsWith('Bearer ')) {
     return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Missing token' } }, { status: 401 });
@@ -26,27 +27,14 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Invalid token' } }, { status: 401 });
     }
 
-    // 2. Find next task (simplifed for now: first 'todo' task in an active session for the project)
-    // In a full implementation, we'd check dependencies.
-    const [nextTask] = await db.select()
-      .from(tasks)
-      .innerJoin(agentSessions, eq(tasks.planId, agentSessions.planId))
-      .where(and(
-        eq(agentSessions.projectId, agentToken.projectId!),
-        eq(agentSessions.status, 'running'),
-        eq(tasks.status, 'todo')
-      ))
-      .orderBy(asc(tasks.executionOrder))
-      .limit(1);
-
-    if (!nextTask) {
-      return NextResponse.json({ data: null });
+    if (!agentToken.projectId) {
+      return NextResponse.json({ error: { code: 'INTERNAL_ERROR', message: 'Token not associated with a project' } }, { status: 500 });
     }
 
-    // 3. Mark as in_progress
-    await db.update(tasks).set({ status: 'in_progress' }).where(eq(tasks.id, nextTask.tasks.id));
+    // 2. Find and claim next task
+    const nextTask = await taskRepository.claimNextTaskForProject(agentToken.projectId);
 
-    return NextResponse.json({ data: nextTask.tasks });
+    return NextResponse.json({ data: nextTask });
   } catch (error) {
     return handleApiError(error);
   }

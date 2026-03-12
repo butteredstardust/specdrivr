@@ -1,139 +1,78 @@
-import { NextResponse } from 'next/server';
-import { z } from 'zod';
-import { db } from '@/db';
-import { projects, projectMembers } from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { NextRequest, NextResponse } from 'next/server';
+import { memberRepository } from '@/repositories/member-repository';
 import { auth } from '@/lib/auth';
 import { handleApiError } from '@/lib/error-handler';
+import { requireAdmin } from '@/lib/rbac';
+import { updateMemberRoleSchema } from '@/lib/schemas';
 
-const UpdateMemberRoleSchema = z.object({
-  role: z.enum(['admin', 'member', 'viewer'])
-});
+import type { UserRole } from '@/db/schema';
 
-export async function PATCH(req: Request, context: { params: Promise<{ id: string, userId: string }> }) {
+interface RouteParams {
+  params: Promise<{ id: string, userId: string }>;
+}
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: RouteParams
+) {
   try {
     const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
-        { status: 401 }
-      );
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
     }
 
-    if (((session.user as { role?: string }).role) !== 'admin' && ((session.user as { role?: string }).role) !== 'owner') {
-      return NextResponse.json(
-        { error: { code: 'FORBIDDEN', message: 'Insufficient permissions' } },
-        { status: 403 }
-      );
+    const { id, userId } = await params;
+    const projectId = parseInt(id, 10);
+
+    const { allowed, role: actorRole } = await requireAdmin(session.user.id, projectId);
+    if (!allowed) {
+      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'You must be a project admin to update roles' } }, { status: 403 });
     }
 
-    const { id, userId } = await context.params;
-    const body = await req.json();
-    const parsed = UpdateMemberRoleSchema.safeParse(body);
+    const body = await request.json();
+    const parsed = updateMemberRoleSchema.parse({ projectId, userId, ...body });
 
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: { code: 'VALIDATION_ERROR', message: parsed.error.message, details: parsed.error.errors } },
-        { status: 400 }
-      );
+    // Admin cannot create an owner
+    if (parsed.role === 'owner' && actorRole !== 'owner') {
+      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'Only owners can appoint new owners' } }, { status: 403 });
     }
 
-    const targetUserId = userId;
-    const projectId = Number(id);
-
-    const existing = await db.select().from(projects).where(eq(projects.id, projectId));
-    if (existing.length === 0) {
-      return NextResponse.json(
-        { error: { code: 'NOT_FOUND', message: 'Project not found' } },
-        { status: 404 }
-      );
-    }
-
-    if (existing[0].createdBy === targetUserId) {
-       return NextResponse.json(
-         { error: { code: 'FORBIDDEN', message: 'Cannot demote the owner' } },
-         { status: 403 }
-       );
-    }
-
-    const existingMember = await db.select().from(projectMembers).where(
-        and(eq(projectMembers.projectId, projectId), eq(projectMembers.userId, targetUserId))
+    const updated = await memberRepository.updateRole(
+      parsed.projectId,
+      parsed.userId,
+      parsed.role as UserRole,
+      session.user.id
     );
 
-    if (existingMember.length === 0) {
-        return NextResponse.json(
-          { error: { code: 'NOT_FOUND', message: 'Member not found' } },
-          { status: 404 }
-        );
-    }
-
-    await db.update(projectMembers).set({ role: parsed.data.role }).where(
-        and(eq(projectMembers.projectId, projectId), eq(projectMembers.userId, targetUserId))
-    );
-
-    return NextResponse.json({ data: { success: true } });
+    return NextResponse.json({ data: updated });
   } catch (error) {
     return handleApiError(error);
   }
 }
 
-export async function DELETE(req: Request, context: { params: Promise<{ id: string, userId: string }> }) {
+export async function DELETE(
+  _request: NextRequest,
+  { params }: RouteParams
+) {
   try {
     const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
-        { status: 401 }
-      );
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
     }
 
-    if (((session.user as { role?: string }).role) !== 'admin' && ((session.user as { role?: string }).role) !== 'owner') {
-      return NextResponse.json(
-        { error: { code: 'FORBIDDEN', message: 'Insufficient permissions' } },
-        { status: 403 }
-      );
+    const { id, userId } = await params;
+    const projectId = parseInt(id, 10);
+
+    if (userId === session.user.id) {
+      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'You cannot remove yourself from the project' } }, { status: 403 });
     }
 
-    const { id, userId } = await context.params;
-    const targetUserId = userId;
-    const projectId = Number(id);
-
-    if (session.user.id === targetUserId) {
-      return NextResponse.json(
-        { error: { code: 'VALIDATION_ERROR', message: 'Cannot remove self' } },
-        { status: 400 }
-      );
+    const { allowed } = await requireAdmin(session.user.id, projectId);
+    if (!allowed) {
+      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'You must be a project admin to remove members' } }, { status: 403 });
     }
 
-    const existing = await db.select().from(projects).where(eq(projects.id, projectId));
-    if (existing.length === 0) {
-      return NextResponse.json(
-        { error: { code: 'NOT_FOUND', message: 'Project not found' } },
-        { status: 404 }
-      );
-    }
-
-    if (existing[0].createdBy === targetUserId) {
-       return NextResponse.json(
-         { error: { code: 'FORBIDDEN', message: 'Cannot remove the owner' } },
-         { status: 403 }
-       );
-    }
-
-    const existingMember = await db.select().from(projectMembers).where(
-        and(eq(projectMembers.projectId, projectId), eq(projectMembers.userId, targetUserId))
-    );
-
-    if (existingMember.length === 0) {
-        return NextResponse.json(
-          { error: { code: 'NOT_FOUND', message: 'Member not found' } },
-          { status: 404 }
-        );
-    }
-
-    await db.delete(projectMembers).where(
-        and(eq(projectMembers.projectId, projectId), eq(projectMembers.userId, targetUserId))
-    );
+    await memberRepository.remove(projectId, userId, session.user.id);
 
     return NextResponse.json({ data: { success: true } });
   } catch (error) {
