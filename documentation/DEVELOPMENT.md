@@ -48,7 +48,7 @@ const projects = await db.select().from(projects);
 - **Never trust client input**
 
 ### Styling
-- **shadcn/ui components** - Use provided components
+- **pxlkit/ui or shadcn/ui components** - Use provided components
 - **Design tokens** from CSS variables in `src/app/globals.css`
 - **Tailwind utility classes** - No custom CSS unless necessary
 - **Consistent spacing** - Use Tailwind scale (sm, md, lg, etc.)
@@ -108,7 +108,7 @@ import { env } from '@/lib/env-script';  // No server-only, safe for scripts
 Specdrivr utilizes a modern, type-safe stack optimized for AI-native orchestration:
 
 - **Framework**: Next.js 16.1.6 (App Router) with React 19.2.4, TypeScript 5.9.3
-- **Styling**: Tailwind CSS 4.2.1 with shadcn/ui components and CSS variables
+- **Styling**: Tailwind CSS 4.2.1 with pxlkit/ui or shadcn/ui components and CSS variables
 - **Database**: PostgreSQL with Drizzle ORM 0.45.1
 - **Authentication**: better-auth 1.5.4 with Drizzle adapter
 - **Data Validation**: Zod 3.22.0
@@ -131,7 +131,7 @@ src/
 │   ├── error.tsx        # Error boundary
 │   └── global-error.tsx # Global error handler
 ├── components/          # React components
-│   └── ui/              # shadcn/ui components (do not modify)
+│   └── ui/              # pxlkit/ui or shadcn/ui components (do not modify)
 ├── repositories/        # Data access layer
 │   ├── base-repository.ts
 │   └── project-repository.ts

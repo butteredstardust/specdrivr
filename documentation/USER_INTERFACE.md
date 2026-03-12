@@ -1529,5 +1529,5 @@ Verify three distinct permission levels:
 
 ## Development Gaps & Technical Debt
 
-- **UI Components:** App shell, navigation, and core feature pages (Projects, Specs, Sessions) are currently stubbed or missing, though base `shadcn/ui` components are present.
+- **UI Components:** App shell, navigation, and core feature pages (Projects, Specs, Sessions) are currently stubbed or missing, though base `pxlkit/ui or shadcn/ui` components are present.
 - **Mascot Integration:** DAEMON Mascot component exists but is not wired into the global state across pages.

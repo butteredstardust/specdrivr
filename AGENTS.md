@@ -64,9 +64,9 @@ When CI fails on typecheck, lint, or tests:
 | React             | 19.2.4                                                   |
 | TypeScript        | 5.9.3                                                    |
 | Styling           | Tailwind CSS 4.2.1                                       |
-| UI Components     | shadcn/ui (with Radix UI primitives)                     |
+| UI Components     | pxlkit/ui, pxlkit/ui or shadcn/ui (with Radix UI primitives)                     |
 | Base UI           | @base-ui/react 1.2.0                                     |
-| Icons             | Lucide React                                             |
+| Icons             | @pxlkit/core, @pxlkit/feedback, @pxlkit/social, @pxlkit/gamification, @pxlkit/weather, @pxlkit/effects ; Lucide React as fallback                                             |
 | Database          | PostgreSQL                                               |
 | ORM               | Drizzle ORM 0.45.1                                       |
 | Auth              | better-auth 1.5.4 with Drizzle adapter                  |
@@ -133,7 +133,7 @@ Before building any UI, consult `DESIGN_SYSTEM.md` for visual language, spacing,
 | Tier | Source | When to use |
 |------|--------|-------------|
 | 1 | `@pxlkit/*` | First choice for all UI. Pick the most semantically appropriate package (see table below). |
-| 2 | `shadcn/ui` (`@/components/ui/`) | When no pxlkit component covers the need. Do not modify shadcn files; customize via CSS variables only. |
+| 2 | `pxlkit/ui or shadcn/ui` (`@/components/ui/`) | When no pxlkit component covers the need. Do not modify shadcn files; customize via CSS variables only. |
 | 3 | Custom component | Last resort. Must be informed by `DESIGN_SYSTEM.md`. Document why tiers 1 and 2 were insufficient. |
 
 **pxlkit package responsibilities:**
@@ -320,11 +320,11 @@ import { env } from '@/lib/env-script'; // no server-only
 
 **UI Components & Styling**
 38. Writing a custom component when a `@pxlkit/*` equivalent exists.
-39. Reaching for shadcn/ui before checking `@pxlkit/*` packages.
+39. Reaching for pxlkit/ui or shadcn/ui before checking `@pxlkit/*` packages.
 40. Hardcoded hex colors; use design tokens from `src/app/globals.css`.
 41. Adding custom CSS instead of Tailwind utility classes.
 42. Creating new CSS files for minor tweaks; extend existing tokens.
-43. Modifying shadcn/ui source files in `@/components/ui/`; customize via CSS variables only.
+43. Modifying pxlkit/ui or shadcn/ui source files in `@/components/ui/`; customize via CSS variables only.
 44. Building a new screen without checking `USER_INTERFACE.md` for planned flow and layout.
 45. Making visual decisions without consulting `DESIGN_SYSTEM.md`.
 46. Using one-off inline styles for values that appear more than once — promote to a design token.
@@ -369,7 +369,7 @@ import { env } from '@/lib/env-script'; // no server-only
 - NO `dangerouslySetInnerHTML` without `DOMPurify.sanitize()`.
 - NO middleware files outside `src/middleware.ts`.
 - NO importing Server Components into Client Components.
-- NO custom component when a `@pxlkit/*` or shadcn/ui equivalent exists.
+- NO custom component when a `@pxlkit/*` or pxlkit/ui or shadcn/ui equivalent exists.
 - NO visual decisions (color, spacing, typography, layout) without consulting `DESIGN_SYSTEM.md`.
 - NO new screens built without referencing `USER_INTERFACE.md` for flow and layout context.
 - NO hardcoded visual values in custom components; always use CSS variable design tokens.
