@@ -333,17 +333,24 @@ import { env } from '@/lib/env-script'; // no server-only
 47. Importing a Server Component into a Client Component (silent downgrade).
 48. Using `useEffect` for data fetching instead of Server Components.
 
+**CI & Testing**
+43. Forgetting to bypass static assets in `proxy.ts` (middleware); causes MIME mismatch/redirect loops. Always check for dots (`.includes('.')`) in paths.
+44. Using `localhost` in CI database URLs; causes `ECONNREFUSED`. Always use `127.0.0.1` and `NODE_OPTIONS="--dns-result-order=ipv4first"`.
+45. Mismatching DB enums between code and migrations (e.g., `completed` vs `complete`). The migration is the single source of truth.
+46. Skipping environment validation in tests; causes `undefined` errors. Provide 32-char defaults for secrets in `env-core.ts` during Vitest.
+47. Inconsistent service configurations between `test.yml` and `code-quality.yml`.
+
 **General**
-43. Adding `console.log`/`console.error`; use Pino.
-44. Duplicating logic instead of reusing repositories/helpers.
-45. Skipping tests for new features.
-46. Leaving `// TODO` or `// FIXME` without creating follow-up issue.
-47. Committing dead/commented-out code.
-48. Large PRs (>300 lines) without discussion.
-49. Creating fix scripts (`fix.mjs`) instead of editing sources directly.
-50. Not checking for outdated dependencies regularly.
-51. Ignoring pnpm audit security warnings.
-52. Committing AI artifact files (`*.exp`, `*_output.txt`, `*_results.txt`, `migrate-*.ts`).
+48. Adding `console.log`/`console.error`; use Pino.
+49. Duplicating logic instead of reusing repositories/helpers.
+50. Skipping tests for new features.
+51. Leaving `// TODO` or `// FIXME` without creating follow-up issue.
+52. Committing dead/commented-out code.
+53. Large PRs (>300 lines) without discussion.
+54. Creating fix scripts (`fix.mjs`) instead of editing sources directly.
+55. Not checking for outdated dependencies regularly.
+56. Ignoring pnpm audit security warnings.
+57. Committing AI artifact files (`*.exp`, `*_output.txt`, `*_results.txt`, `migrate-*.ts`).
 
 ## Prohibited Patterns
 
