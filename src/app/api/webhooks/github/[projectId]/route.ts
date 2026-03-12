@@ -1,19 +1,16 @@
+import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { projects, webhookDeliveries, gitCommits, tasks, auditLog } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { projects, webhookDeliveries, agentLogs, notifications, projectMembers, agentConfig, tasks, auditLog } from '@/db/schema';
+import { eq, and, sql } from 'drizzle-orm';
 import { handleApiError } from '@/lib/error-handler';
-import { githubService } from '@/lib/github';
+import { verifyGitHubSignature, getGitHubConfig } from '@/lib/github';
 import { logger } from '@/lib/logger';
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ projectId: string }> }
 ) {
-  const rawBody = await request.text();
-  const event = request.headers.get('x-github-event') || 'unknown';
-  const signature = request.headers.get('x-hub-signature-256') || '';
-
   try {
     const resolvedParams = await params;
     const projectId = parseInt(resolvedParams.projectId, 10);
@@ -22,18 +19,22 @@ export async function POST(
       return NextResponse.json({ error: { code: 'VALIDATION_ERROR', message: 'Invalid project ID' } }, { status: 400 });
     }
 
-    const project = await db.query.projects.findFirst({
-      where: eq(projects.id, projectId),
-    });
+    // 1. Read raw body as text for HMAC validation
+    const rawBody = await request.text();
+    const event = request.headers.get('x-github-event') || 'unknown';
+    const signature = request.headers.get('x-hub-signature-256') || '';
 
-    if (!project) {
-      return NextResponse.json({ error: { code: 'NOT_FOUND', message: 'Project not found' } }, { status: 404 });
-    }
+    // 2. Fetch GitHub config to get the secret
+    const ghConfig = await getGitHubConfig(projectId);
 
-    // 1. Verify Signature (if secret is configured for the project)
-    const webhookSecret = process.env.GITHUB_WEBHOOK_SECRET;
-    if (webhookSecret && signature) {
-      const isValid = githubService.verifySignature(rawBody, signature, webhookSecret);
+    // 3. HMAC validation (if secret is configured)
+    if (ghConfig?.webhookSecret) {
+      if (!signature) {
+        logger.warn({ projectId, event }, 'Missing GitHub webhook signature');
+        return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Missing signature' } }, { status: 401 });
+      }
+
+      const isValid = verifyGitHubSignature(rawBody, signature, ghConfig.webhookSecret);
       if (!isValid) {
         logger.warn({ projectId, event }, 'Invalid GitHub webhook signature');
         return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Invalid signature' } }, { status: 401 });
@@ -42,83 +43,142 @@ export async function POST(
 
     const payload = JSON.parse(rawBody);
 
-    // 2. Log delivery
+    // 4. Log delivery to database
     await db.insert(webhookDeliveries).values({
-      projectId: project.id,
+      projectId: projectId,
       eventType: event,
       payload: payload,
       status: 'delivered',
       deliveredAt: new Date(),
     });
 
-    // 3. Process Events
+    // 5. Handle events
     if (event === 'push') {
-      await handlePushEvent(project.id, payload);
+      await handlePush(projectId, payload, ghConfig?.branch || 'main');
     } else if (event === 'pull_request') {
-      await handlePullRequestEvent(project.id, payload);
+      await handlePullRequest(projectId, payload);
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ received: true });
   } catch (error) {
-    return handleApiError(error);
+    logger.error({ error }, 'GitHub webhook processing failed');
+    return NextResponse.json({ received: true });
   }
 }
 
-async function handlePushEvent(projectId: number, payload: { ref: string; commits: { id: string; message: string; timestamp: string; author?: { name?: string; username?: string } }[] }) {
-  const branch = payload.ref.replace('refs/heads/', '');
+async function handlePush(projectId: number, payload: any, watchedBranch: string) {
+  const ref = payload.ref || '';
+  const branch = ref.replace('refs/heads/', '');
+  
+  if (branch !== watchedBranch) {
+    return;
+  }
+
+  const pusher = payload.pusher?.name || 'unknown';
   const commits = payload.commits || [];
+  const commitCount = commits.length;
 
-  for (const commit of commits) {
-    // Regex to find task ID like T-101 or T-42
-    const taskMatch = commit.message.match(/\bT-(\d+)\b/i);
-    let taskId: number | null = null;
+  // 1. Try to find a task ID from commit messages or branch name
+  let taskId: number | null = null;
+  const branchMatch = branch.match(/task-(\d+)/i);
+  if (branchMatch) {
+    taskId = parseInt(branchMatch[1], 10);
+  }
 
-    if (taskMatch) {
-      const externalId = `T-${taskMatch[1]}`;
-      const [task] = await db.select()
-        .from(tasks)
-        .innerJoin(projects, eq(tasks.planId, projects.id)) 
-        .where(eq(tasks.externalId, externalId))
-        .limit(1);
-      
-      if (task) {
-        taskId = task.tasks.id;
+  if (!taskId) {
+    for (const commit of commits) {
+      const msgMatch = commit.message.match(/\bT-(\d+)\b/i);
+      if (msgMatch) {
+        // Find task by external ID
+        const [task] = await db.select({ id: tasks.id })
+          .from(tasks)
+          .where(eq(tasks.externalId, `T-${msgMatch[1]}`))
+          .limit(1);
+        if (task) {
+          taskId = task.id;
+          break;
+        }
       }
     }
+  }
 
-    await db.insert(gitCommits).values({
+  // 2. Log to agent_logs (if taskId found) or audit_log
+  if (taskId) {
+    await db.insert(agentLogs).values({
       projectId,
       taskId,
-      commitSha: commit.id,
-      branch,
-      message: commit.message,
-      author: commit.author?.name || commit.author?.username,
-      committedAt: new Date(commit.timestamp),
+      level: 'info',
+      message: `GitHub Push: ${branch} by ${pusher} (${commitCount} commits)`,
+      context: { pusher, branch, commitCount },
     });
+  } else {
+    await db.insert(auditLog).values({
+      projectId,
+      action: 'github_push',
+      targetType: 'project',
+      targetId: String(projectId),
+      detail: { pusher, branch, commitCount },
+    });
+  }
 
-    if (taskId) {
-      await db.insert(auditLog).values({
-        projectId,
-        action: 'github_commit_linked',
-        targetType: 'task',
-        targetId: String(taskId),
-        detail: { sha: commit.id, message: commit.message },
-      });
-    }
+  // 3. Notify project members
+  const members = await db.select().from(projectMembers).where(eq(projectMembers.projectId, projectId));
+  const title = `New push to ${branch}`;
+  const body = `Pushed by ${pusher} (${commitCount} commits)`;
+
+  for (const member of members) {
+    await db.insert(notifications).values({
+      userId: member.userId,
+      projectId: projectId,
+      type: 'github_push',
+      title,
+      body,
+      linkUrl: `/projects/${projectId}/activity`,
+    });
   }
 }
 
-async function handlePullRequestEvent(projectId: number, payload: { action: string; pull_request?: { number: number; title: string; html_url: string } }) {
+async function handlePullRequest(projectId: number, payload: any) {
   const action = payload.action;
-  const pr = payload.pull_request;
+  if (action !== 'opened' && action !== 'synchronize') {
+    return;
+  }
 
+  const pr = payload.pull_request;
   if (!pr) return;
 
-  await db.insert(auditLog).values({
-    projectId,
-    action: `github_pr_${action}`,
-    targetType: 'pull_request',
-    targetId: String(pr.number),
-    detail: { title: pr.title, url: pr.html_url },
-  });
+  const prTitle = pr.title || '';
+  const prBody = pr.body || '';
+  const fullText = `${prTitle} ${prBody}`;
+
+  const specMatch = fullText.match(/spec[-_]?(\w+)/i);
+  
+  if (specMatch) {
+    const specRef = specMatch[1];
+    
+    // Notify project members
+    const members = await db.select().from(projectMembers).where(eq(projectMembers.projectId, projectId));
+    const title = `PR #${pr.number} references spec ${specRef}`;
+    const body = `PR: "${prTitle}"`;
+
+    for (const member of members) {
+      await db.insert(notifications).values({
+        userId: member.userId,
+        projectId: projectId,
+        type: 'github_pr',
+        title,
+        body,
+        linkUrl: pr.html_url || `/projects/${projectId}`,
+      });
+    }
+    
+    // Log to audit log
+    await db.insert(auditLog).values({
+      projectId,
+      action: 'github_pr_spec_ref',
+      targetType: 'pull_request',
+      targetId: String(pr.number),
+      detail: { prTitle, specRef, url: pr.html_url },
+    });
+  }
 }

@@ -3,7 +3,7 @@ import postgres from "postgres";
 import {
   users, projects, specifications, plans, tasks,
   agentSessions, specVersions, accounts, projectMembers, 
-  agentConfig
+  agentConfig, webhooks
 } from "../src/db/schema";
 import { env } from "../src/lib/env-script";
 import * as schema from "../src/db/schema";
@@ -121,10 +121,9 @@ async function main() {
         }
       }
 
-      // 5. Plans
       const demoPlans = [
         { id: 1, specId: 1, status: "pending_approval" as const, specVersionId: 1 },
-        { id: 2, specId: 2, status: "approved" as const, reviewerNotes: "Approved by Alex", specVersionId: 2, approvedAt: new Date() },
+        { id: 2, specId: 2, status: "executing" as const, reviewerNotes: "Approved by Alex", specVersionId: 2, approvedAt: new Date() },
         { id: 3, specId: 3, status: "abandoned" as const, reviewerNotes: "Spec was revised", specVersionId: 3 },
         { id: 4, specId: 4, status: "pending_approval" as const, specVersionId: 4 },
       ];
@@ -159,7 +158,31 @@ async function main() {
         await tx.insert(tasks).values(t).onConflictDoNothing();
       }
 
-      logger.info({ users: 3, projects: 2, specs: 6, plans: 4, tasks: 6, sessions: 1 }, 'Seed complete');
+      // 8. Webhooks
+      const demoWebhooks = [
+        { 
+          id: 1, 
+          projectId: 1, 
+          url: "https://webhook.site/demo-active", 
+          events: ["plan.approved", "task.blocked"],
+          isActive: true,
+          status: "active" as const
+        },
+        { 
+          id: 2, 
+          projectId: 1, 
+          url: "https://webhook.site/demo-error", 
+          events: ["*"],
+          isActive: false,
+          status: "error" as const
+        },
+      ];
+
+      for (const w of demoWebhooks) {
+        await tx.insert(webhooks).values(w).onConflictDoNothing();
+      }
+
+      logger.info({ users: 3, projects: 2, specs: 6, plans: 4, tasks: 6, sessions: 1, webhooks: 2 }, 'Seed complete');
     });
   } catch (error) {
     logger.error(error, "Seed failed");

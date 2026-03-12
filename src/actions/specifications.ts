@@ -12,7 +12,6 @@ import {
 } from '@/lib/schemas';
 import { requireMember } from '@/lib/rbac';
 import type { z } from 'zod';
-import { webhookService } from '@/lib/webhooks';
 
 type SpecStatus = z.infer<typeof specStatusSchema>;
 
@@ -45,11 +44,6 @@ export async function createSpecificationAction(formData: FormData) {
       name: result.data.name,
       markdownContent: result.data.markdownContent,
       createdBy: session.user.id,
-    });
-    
-    // Dispatch webhook
-    await webhookService.dispatch(result.data.projectId, 'spec_created', spec, {
-      specId: spec.id,
     });
 
     revalidatePath(`/projects/${result.data.projectId}/specs`);
@@ -104,11 +98,6 @@ export async function createSpecVersionAction(formData: FormData) {
       markdownContent: result.data.markdownContent,
       createdBy: session.user.id,
     });
-    
-    // Dispatch webhook
-    await webhookService.dispatch(spec.projectId, 'spec_updated', updatedSpec, {
-      specId: updatedSpec.id,
-    });
 
     revalidatePath(`/specs/${result.data.specId}`);
     revalidatePath(`/projects/${spec.projectId}/specs`);
@@ -162,11 +151,6 @@ export async function updateSpecificationAction(formData: FormData) {
     const updatedSpec = await specificationRepository.update(result.data.id, {
       name: result.data.name,
       status: result.data.status as SpecStatus,
-    });
-    
-    // Dispatch webhook
-    await webhookService.dispatch(spec.projectId, 'spec_updated', updatedSpec, {
-      specId: updatedSpec.id,
     });
 
     revalidatePath(`/specs/${result.data.id}`);

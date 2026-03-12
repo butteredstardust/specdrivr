@@ -4,6 +4,9 @@ import * as schema from '@/db/schema';
 import { eq, desc, sql, and, asc } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, ValidationError, DatabaseError } from '@/lib/errors';
+import { dispatchWebhookEvent, type WebhookEventType } from '@/lib/webhooks';
+import { sendSlackNotification } from '@/lib/slack';
+import { env } from '@/lib/env';
 
 export interface CreateTaskData {
   externalId: string;
@@ -162,7 +165,35 @@ export class TaskRepository extends BaseRepository {
       throw new DatabaseError('Failed to update task');
     }
 
-    return updatedTask as Task;
+    const t = updatedTask as Task;
+
+    // Trigger task.blocked or task.done webhook
+    if (data.status === 'blocked' || data.status === 'done') {
+      (async () => {
+        try {
+          const [plan] = await db.select().from(plans).where(eq(plans.id, t.planId)).limit(1);
+          const [spec] = await db.select({ pid: specifications.projectId }).from(specifications).where(eq(specifications.id, plan.specId)).limit(1);
+          const [session] = await db.select({ id: agentSessions.id }).from(agentSessions).where(eq(agentSessions.planId, plan.id)).orderBy(desc(agentSessions.startedAt)).limit(1);
+          
+          if (spec) {
+            void dispatchWebhookEvent(spec.pid, data.status === 'blocked' ? 'task.blocked' : 'task.done', {
+              taskId: t.id,
+              specId: plan.specId,
+              sessionId: session?.id,
+              data: data.status === 'blocked' ? { blockedReason: t.blockedReason } : {}
+            });
+
+            if (data.status === 'blocked') {
+              void this.notifySlackTaskBlocked(t.id);
+            }
+          }
+        } catch (err) {
+          console.error(`Failed to dispatch task.${data.status} webhook`, err);
+        }
+      })();
+    }
+
+    return t;
   }
 
   async delete(id: number): Promise<void> {
@@ -228,6 +259,51 @@ export class TaskRepository extends BaseRepository {
 
         return updatedTask as Task;
       });
+    }).then((updatedTask) => {
+      if (!updatedTask) return updatedTask;
+      
+      const t = updatedTask as Task;
+
+      // Trigger task.blocked if status is blocked
+      if (t.status === 'blocked') {
+        (async () => {
+          try {
+            const [plan] = await db.select().from(plans).where(eq(plans.id, t.planId)).limit(1);
+            const [spec] = await db.select({ pid: specifications.projectId }).from(specifications).where(eq(specifications.id, plan.specId)).limit(1);
+            const [session] = await db.select({ id: agentSessions.id }).from(agentSessions).where(eq(agentSessions.planId, plan.id)).orderBy(desc(agentSessions.startedAt)).limit(1);
+            if (spec) {
+              void dispatchWebhookEvent(spec.pid, 'task.blocked', {
+                taskId: t.id,
+                specId: plan.specId,
+                sessionId: session?.id,
+                data: { blockedReason: t.blockedReason }
+              });
+              void this.notifySlackTaskBlocked(t.id);
+            }
+          } catch (err) {
+            console.error('Failed to dispatch task.blocked webhook', err);
+          }
+        })();
+      } else if (t.status === 'done') {
+        (async () => {
+          try {
+            const [plan] = await db.select().from(plans).where(eq(plans.id, t.planId)).limit(1);
+            const [spec] = await db.select({ pid: specifications.projectId }).from(specifications).where(eq(specifications.id, plan.specId)).limit(1);
+            const [session] = await db.select({ id: agentSessions.id }).from(agentSessions).where(eq(agentSessions.planId, plan.id)).orderBy(desc(agentSessions.startedAt)).limit(1);
+            if (spec) {
+              void dispatchWebhookEvent(spec.pid, 'task.done', {
+                taskId: t.id,
+                specId: plan.specId,
+                sessionId: session?.id,
+                data: {}
+              });
+            }
+          } catch (err) {
+            console.error('Failed to dispatch task.done webhook', err);
+          }
+        })();
+      }
+      return t;
     });
   }
 
@@ -263,6 +339,24 @@ export class TaskRepository extends BaseRepository {
 
         return updatedTask as Task;
       });
+    }).then((updatedTask) => {
+      // Trigger task.retried webhook after transaction commits
+      (async () => {
+        try {
+          const plan = (await db.select().from(plans).where(eq(plans.id, updatedTask.planId)).limit(1))[0];
+          const spec = (await db.select({ pid: specifications.projectId }).from(specifications).where(eq(specifications.id, plan.specId)).limit(1))[0];
+          if (spec) {
+            void dispatchWebhookEvent(spec.pid, 'task.retried', {
+              taskId: updatedTask.id,
+              specId: plan.specId,
+              data: { attemptCount: updatedTask.attemptCount }
+            });
+          }
+        } catch (err) {
+          console.error('Failed to dispatch task.retried webhook', err);
+        }
+      })();
+      return updatedTask;
     });
   }
 
@@ -300,6 +394,24 @@ export class TaskRepository extends BaseRepository {
 
         return updatedTask as Task;
       });
+    }).then((updatedTask) => {
+      // Trigger task.unblocked webhook after transaction commits
+      (async () => {
+        try {
+          const plan = (await db.select().from(plans).where(eq(plans.id, updatedTask.planId)).limit(1))[0];
+          const spec = (await db.select({ pid: specifications.projectId }).from(specifications).where(eq(specifications.id, plan.specId)).limit(1))[0];
+          if (spec) {
+            void dispatchWebhookEvent(spec.pid, 'task.unblocked', {
+              taskId: updatedTask.id,
+              specId: plan.specId,
+              data: { humanContext }
+            });
+          }
+        } catch (err) {
+          console.error('Failed to dispatch task.unblocked webhook', err);
+        }
+      })();
+      return updatedTask;
     });
   }
 
@@ -336,6 +448,38 @@ export class TaskRepository extends BaseRepository {
 
         return updatedTask as Task;
       });
+    }).then((updatedTask) => {
+      // Trigger appropriate task webhook after transaction commits
+      (async () => {
+        try {
+          const [plan] = await db.select().from(plans).where(eq(plans.id, updatedTask.planId)).limit(1);
+          const [spec] = await db.select({ pid: specifications.projectId }).from(specifications).where(eq(specifications.id, plan.specId)).limit(1);
+          const [session] = await db.select({ id: agentSessions.id }).from(agentSessions).where(eq(agentSessions.planId, plan.id)).orderBy(desc(agentSessions.startedAt)).limit(1);
+          
+          if (spec) {
+            // Mapping for standard events, fallback to generic task.done or task.blocked if applicable
+            let event: WebhookEventType | null = null;
+            if (updatedTask.status === 'blocked') event = 'task.blocked';
+            else if (updatedTask.status === 'done') event = 'task.done';
+            
+            if (event) {
+              void dispatchWebhookEvent(spec.pid, event, {
+                taskId: updatedTask.id,
+                specId: plan.specId,
+                sessionId: session?.id,
+                data: { from: task.status, to: updatedTask.status, notes }
+              });
+
+              if (updatedTask.status === 'blocked') {
+                void this.notifySlackTaskBlocked(updatedTask.id);
+              }
+            }
+          }
+        } catch (err) {
+          console.error('Failed to dispatch task webhook in overrideStatus', err);
+        }
+      })();
+      return updatedTask;
     });
   }
 
@@ -355,6 +499,44 @@ export class TaskRepository extends BaseRepository {
         .where(eq(schema.fileChanges.taskId, taskId))
         .orderBy(desc(schema.fileChanges.createdAt))
     );
+  }
+
+  /**
+   * Helper to fetch context and send Slack notification for a blocked task.
+   */
+  private async notifySlackTaskBlocked(taskId: number): Promise<void> {
+    try {
+      const [context] = await db
+        .select({
+          projectId: schema.projects.id,
+          projectName: schema.projects.name,
+          specId: specifications.id,
+          specName: specifications.name,
+          taskName: tasks.title,
+          blockedReason: tasks.blockedReason,
+        })
+        .from(tasks)
+        .innerJoin(plans, eq(tasks.planId, plans.id))
+        .innerJoin(specifications, eq(plans.specId, specifications.id))
+        .innerJoin(schema.projects, eq(specifications.projectId, schema.projects.id))
+        .where(eq(tasks.id, taskId))
+        .limit(1);
+
+      if (!context) return;
+
+      await sendSlackNotification(context.projectId, 'task_blocked', {
+        projectId: context.projectId,
+        projectName: context.projectName,
+        specId: context.specId,
+        specName: context.specName,
+        taskId: taskId,
+        taskName: context.taskName,
+        blockedReason: context.blockedReason || 'No reason provided.',
+        appUrl: env.NEXT_PUBLIC_APP_URL,
+      });
+    } catch (err) {
+      console.error('Failed to send task blocked Slack notification', err);
+    }
   }
 }
 

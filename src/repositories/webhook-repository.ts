@@ -1,6 +1,6 @@
 import { db } from '@/db';
 import { webhooks, webhookDeliveries, type WebhookSelect as Webhook, type WebhookDeliverySelect as WebhookDelivery } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and, sql, ne } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, DatabaseError } from '@/lib/errors';
 
@@ -75,6 +75,7 @@ export class WebhookRepository extends BaseRepository {
     responseStatus?: number;
     responseBody?: string;
     durationMs?: number;
+    attempt?: number;
   }): Promise<WebhookDelivery> {
     const [delivery] = await this.execQuery(() =>
       db.insert(webhookDeliveries).values({
@@ -86,6 +87,7 @@ export class WebhookRepository extends BaseRepository {
         responseStatus: data.responseStatus,
         responseBody: data.responseBody,
         durationMs: data.durationMs,
+        attempt: data.attempt ?? 1,
         deliveredAt: data.status === 'delivered' ? new Date() : null,
       }).returning()
     );
@@ -97,9 +99,27 @@ export class WebhookRepository extends BaseRepository {
     return delivery;
   }
 
-  async getDeliveriesByProjectId(projectId: number): Promise<WebhookDelivery[]> {
+  async getActiveWebhooksForEvent(projectId: number, event: string): Promise<Webhook[]> {
     return await this.execQuery(() =>
-      db.select().from(webhookDeliveries).where(eq(webhookDeliveries.projectId, projectId))
+      db.select()
+      .from(webhooks)
+      .where(
+        and(
+          eq(webhooks.projectId, projectId),
+          eq(webhooks.isActive, true),
+          ne(webhooks.status, 'error'),
+          sql`${webhooks.events} @> ${JSON.stringify([event])}::jsonb OR ${webhooks.events} @> ${JSON.stringify(['*'])}::jsonb`
+        )
+      )
+    );
+  }
+
+  async setErrorStatus(id: number): Promise<void> {
+    // Set status to 'error' to allow UI to show failure state
+    await this.execQuery(() =>
+      db.update(webhooks)
+        .set({ status: 'error' })
+        .where(eq(webhooks.id, id))
     );
   }
 }

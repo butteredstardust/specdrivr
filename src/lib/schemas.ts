@@ -238,11 +238,11 @@ export const specStatusSchema = z.enum([
   'pending_plan',
   'pending_approval',
   'executing',
-  'complete',
+  'completed',
   'stalled',
   'archived'
 ], {
-  errorMap: () => ({ message: "Status must be one of: 'drafting', 'pending_plan', 'pending_approval', 'executing', 'complete', 'stalled', or 'archived'" })
+  errorMap: () => ({ message: "Status must be one of: 'drafting', 'pending_plan', 'pending_approval', 'executing', 'completed', 'stalled', or 'archived'" })
 });
 
 /**
@@ -299,13 +299,13 @@ export const specQuerySchema = z.object({
  */
 export const planStatusSchema = z.enum([
   'pending_approval',
-  'approved',
+  'executing',
   'rejected',
   'abandoned',
   'changes_requested',
-  'complete'
+  'completed'
 ], {
-  errorMap: () => ({ message: "Status must be one of: 'pending_approval', 'approved', 'rejected', 'abandoned', 'changes_requested', or 'complete'" })
+  errorMap: () => ({ message: "Status must be one of: 'pending_approval', 'executing', 'rejected', 'abandoned', 'changes_requested', or 'completed'" })
 });
 
 /**

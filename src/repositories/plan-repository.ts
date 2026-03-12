@@ -3,6 +3,7 @@ import { plans, specifications, agentSessions, planReviews, auditLog, type PlanS
 import { eq } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, DatabaseError, BusinessError } from '@/lib/errors';
+import { dispatchWebhookEvent } from '@/lib/webhooks';
 
 export { type PlanSelect as Plan } from '@/db/schema';
 
@@ -47,6 +48,27 @@ export class PlanRepository extends BaseRepository {
     if (!plan) {
       throw new DatabaseError('Failed to create plan');
     }
+
+    // Trigger plan.generated webhook
+    (async () => {
+      try {
+        const [spec] = await db.select({ projectId: specifications.projectId })
+          .from(specifications)
+          .where(eq(specifications.id, plan.specId))
+          .limit(1);
+        
+        if (spec) {
+          void dispatchWebhookEvent(spec.projectId, 'plan.generated', {
+            planId: plan.id,
+            specId: plan.specId,
+            data: {}
+          });
+        }
+      } catch (err) {
+        // Log error but don't throw from repository
+        console.error('Failed to dispatch plan.generated webhook', err);
+      }
+    })();
 
     return plan;
   }
@@ -97,7 +119,7 @@ export class PlanRepository extends BaseRepository {
         // 1. Update plan status
         const [updatedPlan] = await tx.update(plans)
           .set({ 
-            status: 'approved',
+            status: 'executing',
             approvedAt: new Date(),
             approvedBy: data.userId,
             reviewerNotes: data.notes
@@ -109,7 +131,7 @@ export class PlanRepository extends BaseRepository {
         await tx.insert(planReviews).values({
           planId: data.planId,
           userId: data.userId,
-          action: 'approved',
+          action: 'executing',
           notes: data.notes,
         });
 
@@ -139,6 +161,27 @@ export class PlanRepository extends BaseRepository {
 
         return { plan: updatedPlan, sessionId: session.id };
       });
+    }).then((result) => {
+      // Trigger plan.approved webhook after transaction commits
+      (async () => {
+        try {
+          const [spec] = await db.select({ projectId: specifications.projectId })
+            .from(specifications)
+            .where(eq(specifications.id, result.plan.specId))
+            .limit(1);
+          
+          if (spec) {
+            void dispatchWebhookEvent(spec.projectId, 'plan.approved', {
+              planId: result.plan.id,
+              specId: result.plan.specId,
+              data: { approvedBy: data.userId }
+            });
+          }
+        } catch (err) {
+          console.error('Failed to dispatch plan.approved webhook', err);
+        }
+      })();
+      return result;
     });
   }
 
@@ -186,6 +229,27 @@ export class PlanRepository extends BaseRepository {
 
         return updatedPlan;
       });
+    }).then((updatedPlan) => {
+      // Trigger plan.rejected webhook after transaction commits
+      (async () => {
+        try {
+          const [spec] = await db.select({ projectId: specifications.projectId })
+            .from(specifications)
+            .where(eq(specifications.id, updatedPlan.specId))
+            .limit(1);
+          
+          if (spec) {
+            void dispatchWebhookEvent(spec.projectId, 'plan.rejected', {
+              planId: updatedPlan.id,
+              specId: updatedPlan.specId,
+              data: { notes: data.notes, userId: data.userId }
+            });
+          }
+        } catch (err) {
+          console.error('Failed to dispatch plan.rejected webhook', err);
+        }
+      })();
+      return updatedPlan;
     });
   }
 
@@ -233,6 +297,27 @@ export class PlanRepository extends BaseRepository {
 
         return updatedPlan;
       });
+    }).then((updatedPlan) => {
+      // Trigger plan.changes_requested webhook after transaction commits
+      (async () => {
+        try {
+          const [spec] = await db.select({ projectId: specifications.projectId })
+            .from(specifications)
+            .where(eq(specifications.id, updatedPlan.specId))
+            .limit(1);
+          
+          if (spec) {
+            void dispatchWebhookEvent(spec.projectId, 'plan.changes_requested', {
+              planId: updatedPlan.id,
+              specId: updatedPlan.specId,
+              data: { notes: data.notes, userId: data.userId }
+            });
+          }
+        } catch (err) {
+          console.error('Failed to dispatch plan.changes_requested webhook', err);
+        }
+      })();
+      return updatedPlan;
     });
   }
 

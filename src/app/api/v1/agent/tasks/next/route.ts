@@ -5,6 +5,8 @@ import { handleApiError } from '@/lib/error-handler';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 import { taskRepository } from '@/repositories/task-repository';
+import { getGitHubConfig, getAgentBranchName, getAgentCommitMessage } from '@/lib/github';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('Authorization');
@@ -34,7 +36,36 @@ export async function GET(request: NextRequest) {
     // 2. Find and claim next task
     const nextTask = await taskRepository.claimNextTaskForProject(agentToken.projectId);
 
-    return NextResponse.json({ data: nextTask });
+    if (!nextTask) {
+      return NextResponse.json({ data: null });
+    }
+
+    // 3. Include GitHub config if configured
+    let githubConfig = null;
+    const ghConfig = await getGitHubConfig(agentToken.projectId);
+
+    if (ghConfig) {
+      githubConfig = {
+        token: ghConfig.token,
+        repo: ghConfig.repo,
+        branch: ghConfig.branch,
+        branchName: getAgentBranchName(nextTask.specId || '0', nextTask.id),
+        commitMessage: getAgentCommitMessage(nextTask.externalId, nextTask.title),
+      };
+    }
+
+    logger.info({ 
+      projectId: agentToken.projectId, 
+      taskId: nextTask.id, 
+      githubConfigIncluded: !!githubConfig 
+    }, 'Agent claimed next task');
+
+    return NextResponse.json({ 
+      data: {
+        ...nextTask,
+        githubConfig
+      }
+    });
   } catch (error) {
     return handleApiError(error);
   }
