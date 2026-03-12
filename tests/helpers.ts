@@ -43,8 +43,15 @@ export async function cleanDatabase() {
     'verifications'
   ];
 
-  const query = `TRUNCATE TABLE ${tables.map(t => `"${t}"`).join(', ')} RESTART IDENTITY CASCADE`;
-  await testDb.execute(sql.raw(query));
+
+  for (const table of tables) {
+    try {
+      await testDb.execute(sql.raw(`TRUNCATE TABLE "${table}" CASCADE`));
+    } catch (e) {
+      // Ignore missing tables
+    }
+  }
+
 }
 
 /**
