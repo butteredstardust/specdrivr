@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { cleanDatabase, testDb } from '../helpers';
 import * as schema from '@/db/schema';
 import { execSync } from 'child_process';
-import { count, eq, and } from 'drizzle-orm';
+import { count, eq } from 'drizzle-orm';
 
 describe('Seed Script Smoke Test', () => {
   beforeEach(async () => {
