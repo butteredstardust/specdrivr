@@ -7,6 +7,7 @@ import path from 'path';
 vi.mock('server-only', () => ({}));
 
 // Load environment variables for tests
+// Use override: false (default) to ensure shell/CI env variables take precedence
 config({ path: path.resolve(process.cwd(), '.env') });
 config({ path: path.resolve(process.cwd(), '.env.local') });
 
