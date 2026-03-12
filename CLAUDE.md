@@ -24,9 +24,9 @@ You are an expert AI Systems Architect and a Senior Next.js/TypeScript Engineer 
 | TypeScript | 5.9.3 |
 | Styling | Tailwind CSS 4.2.1 |
 | UI (tier 1) | @pxlkit/core, @pxlkit/ui, @pxlkit/feedback, @pxlkit/social, @pxlkit/gamification, @pxlkit/weather, @pxlkit/effects |
-| UI (tier 2) | shadcn/ui (Radix UI primitives) |
+| UI (tier 2) | pxlkit/ui or shadcn/ui (Radix UI primitives) |
 | Base UI | @base-ui/react 1.2.0 |
-| Icons | Lucide React |
+| Icons | @pxlkit/core, @pxlkit/feedback, @pxlkit/social, @pxlkit/gamification, @pxlkit/weather, @pxlkit/effects ; Lucide React as fallback |
 | Database | PostgreSQL |
 | ORM | Drizzle ORM 0.45.1 |
 | Auth | better-auth 1.5.4 |
@@ -78,7 +78,7 @@ Before building any UI element, consult `DESIGN_SYSTEM.md` for visual language, 
 | Tier | Source | When to use |
 |------|--------|-------------|
 | 1 | `@pxlkit/*` | First choice for all UI. Pick the most semantically appropriate package. |
-| 2 | `shadcn/ui` (`@/components/ui/`) | When no pxlkit component covers the need. Never modify shadcn source files. |
+| 2 | `pxlkit/ui or shadcn/ui` (`@/components/ui/`) | When no pxlkit component covers the need. Never modify shadcn source files. |
 | 3 | Custom component | Last resort only. Must be fully informed by `DESIGN_SYSTEM.md`. |
 
 **pxlkit package responsibilities:**
@@ -94,7 +94,7 @@ Before building any UI element, consult `DESIGN_SYSTEM.md` for visual language, 
 | `@pxlkit/effects` | Animated VFX, particle systems |
 
 **Hard rules:**
-- Never write a custom component when a pxlkit or shadcn/ui equivalent exists.
+- Never write a custom component when a pxlkit or pxlkit/ui or shadcn/ui equivalent exists.
 - Never hardcode visual values in custom components. Always use `DESIGN_SYSTEM.md` tokens and `src/app/globals.css` CSS variables.
 - All new screens must align with existing screens. Check `USER_INTERFACE.md` before starting layout work.
 - Recurring style values that appear more than once belong in the token system, not inline.
