@@ -61,3 +61,5 @@ Open [http://localhost:3000](http://localhost:3000) to view the app.
 - Security headers configured
 - Zero `any` types
 - No emojis in code
+// dummy
+// dummy
