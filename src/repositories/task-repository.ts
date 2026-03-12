@@ -186,21 +186,33 @@ export class TaskRepository extends BaseRepository {
 
   /**
    * Finds the next 'todo' task for a running session in a project and marks it 'in_progress'.
+   * Respects dependencies: a task is only claimable if all tasks in its 'dependsOn' array are 'done'.
    */
   async claimNextTaskForProject(projectId: number): Promise<Task | null> {
     return await this.execQuery(async () => {
       return await db.transaction(async (tx) => {
-        // 1. Find next task
+        // 1. Find next task that is 'todo' AND has all dependencies met
+        // We use a subquery to ensure NO tasks exist in the same plan that:
+        // - have an externalId present in the current task's dependsOn array
+        // - and are NOT 'done'
         const [nextTask] = await tx.select({ task: tasks })
           .from(tasks)
           .innerJoin(agentSessions, eq(tasks.planId, agentSessions.planId))
           .where(and(
             eq(agentSessions.projectId, projectId),
             eq(agentSessions.status, 'running'),
-            eq(tasks.status, 'todo')
+            eq(tasks.status, 'todo'),
+            // Dependency Gate:
+            sql`NOT EXISTS (
+              SELECT 1 FROM ${tasks} AS t2 
+              WHERE t2.plan_id = ${tasks.planId} 
+              AND t2.external_id = ANY(${tasks.dependsOn}) 
+              AND t2.status != 'done'
+            )`
           ))
           .orderBy(asc(tasks.executionOrder))
-          .limit(1);
+          .limit(1)
+          .for('update', { skipLocked: true });
 
         if (!nextTask) return null;
 

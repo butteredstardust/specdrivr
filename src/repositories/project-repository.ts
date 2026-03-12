@@ -19,9 +19,9 @@ interface UpdateProjectData {
 export { type ProjectSelect as Project } from '@/db/schema';
 
 export class ProjectRepository extends BaseRepository {
-  async getAll(): Promise<Project[]> {
+  async getAll(limit = 50, offset = 0): Promise<Project[]> {
     const result = await this.execQuery(() =>
-      db.select().from(projects)
+      db.select().from(projects).limit(limit).offset(offset)
     );
 
     return result.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()) as unknown as Project[];
@@ -35,9 +35,9 @@ export class ProjectRepository extends BaseRepository {
     return (result[0] as unknown as Project) || null;
   }
 
-  async getByUserId(userId: string): Promise<Project[]> {
+  async getByUserId(userId: string, limit = 50, offset = 0): Promise<Project[]> {
     const result = await this.execQuery(() =>
-      db.select().from(projects).where(eq(projects.createdBy, userId))
+      db.select().from(projects).where(eq(projects.createdBy, userId)).limit(limit).offset(offset)
     );
 
     return result as unknown as Project[];

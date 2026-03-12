@@ -32,7 +32,7 @@ export async function POST(
       return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'You do not have access to this project' } }, { status: 403 });
     }
 
-    const updated = await agentSessionRepository.update(sessionId, { status: 'cancelled', endedAt: new Date() });
+    const updated = await agentSessionRepository.update(sessionId, { status: 'cancelled', endedAt: new Date() }, session.user.id);
     return NextResponse.json({ data: updated });
   } catch (error) {
     return handleApiError(error);

@@ -2,15 +2,24 @@ import { NextRequest, NextResponse } from 'next/server';
 import { taskRepository } from '@/repositories/task-repository';
 import { planRepository } from '@/repositories/plan-repository';
 import { specificationRepository } from '@/repositories/specification-repository';
-import { handleApiError } from '@/lib/error-handler';
+import { handleApiError, formatErrorResponse } from '@/lib/error-handler';
 import { NotFoundError } from '@/lib/errors';
-import { updateTaskSchema } from '@/lib/schemas';
 import { auth } from '@/lib/auth';
 import { requireAdmin, requireMember } from '@/lib/rbac';
+import { z } from 'zod';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
 }
+
+const UpdateTaskSchema = z.object({
+  title: z.string().min(1).max(255).optional(),
+  description: z.string().min(1).max(5000).optional(),
+  status: z.enum(['todo', 'in_progress', 'done', 'blocked', 'failed', 'skipped']).optional(),
+  estimateHours: z.number().nonnegative().optional(),
+  recommendedModel: z.string().optional(),
+  humanContext: z.string().max(5000).optional(),
+});
 
 export async function GET(
   _request: NextRequest,
@@ -77,20 +86,20 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const parsed = updateTaskSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: { code: 'VALIDATION_ERROR', message: 'Validation failed', details: parsed.error.errors } },
-        { status: 400 }
-      );
-    }
+    const parsed = UpdateTaskSchema.parse(body);
 
-    const updatedTask = await taskRepository.update(taskId, parsed.data);
+    const updatedTask = await taskRepository.update(taskId, parsed);
 
     return NextResponse.json({
       data: updatedTask,
     });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        formatErrorResponse({ message: 'Validation failed', details: error.errors }),
+        { status: 400 }
+      );
+    }
     return handleApiError(error);
   }
 }

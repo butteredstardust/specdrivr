@@ -5,7 +5,7 @@ import { BaseRepository } from './base-repository';
 import { NotFoundError, DatabaseError } from '@/lib/errors';
 
 export class MemberRepository extends BaseRepository {
-  async getByProjectId(projectId: number) {
+  async getByProjectId(projectId: number, limit = 50, offset = 0) {
     return await this.execQuery(() =>
       db
         .select({
@@ -19,6 +19,8 @@ export class MemberRepository extends BaseRepository {
         .from(projectMembers)
         .innerJoin(users, eq(projectMembers.userId, users.id))
         .where(eq(projectMembers.projectId, projectId))
+        .limit(limit)
+        .offset(offset)
     );
   }
 

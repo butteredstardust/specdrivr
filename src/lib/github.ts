@@ -2,19 +2,19 @@ import 'server-only';
 import { Octokit } from '@octokit/rest';
 import crypto from 'crypto';
 import { logger } from './logger';
+import { env } from './env';
 
 export class GithubService {
   private octokit: Octokit | null = null;
 
   constructor() {
-    const token = process.env.GITHUB_TOKEN;
+    const token = env.GITHUB_TOKEN;
     if (token) {
       this.octokit = new Octokit({ auth: token });
     } else {
       logger.warn('GITHUB_TOKEN not found in environment. GitHub features will be limited.');
     }
   }
-
   /**
    * Verifies the HMAC signature from GitHub webhooks.
    */

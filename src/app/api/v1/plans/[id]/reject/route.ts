@@ -1,14 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { planRepository } from '@/repositories/plan-repository';
 import { auth } from '@/lib/auth';
-import { handleApiError } from '@/lib/error-handler';
+import { handleApiError, formatErrorResponse } from '@/lib/error-handler';
 import { requireAdmin } from '@/lib/rbac';
 import { specificationRepository } from '@/repositories/specification-repository';
-import { rejectPlanSchema } from '@/lib/schemas';
+import { z } from 'zod';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
 }
+
+const RejectPlanSchema = z.object({
+  id: z.number().int().positive('Plan ID is required'),
+  notes: z.string().min(1, 'Notes are required for rejection').max(2000, 'Notes too long'),
+});
 
 export async function POST(
   request: NextRequest,
@@ -36,7 +41,7 @@ export async function POST(
     }
 
     const body = await request.json();
-    const parsed = rejectPlanSchema.parse({ id: planId, ...body });
+    const parsed = RejectPlanSchema.parse({ id: planId, ...body });
 
     const updatedPlan = await planRepository.rejectPlan({
       planId: parsed.id,
@@ -48,6 +53,12 @@ export async function POST(
       data: updatedPlan,
     });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        formatErrorResponse({ message: 'Validation failed', details: error.errors }),
+        { status: 400 }
+      );
+    }
     return handleApiError(error);
   }
 }
