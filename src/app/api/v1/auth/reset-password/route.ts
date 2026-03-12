@@ -32,8 +32,10 @@ export async function POST(req: Request) {
 
     try {
       await authInstance.api.resetPassword({
-        token,
-        newPassword: password,
+        body: {
+          token,
+          newPassword: password,
+        }
       });
       
       return NextResponse.json(
