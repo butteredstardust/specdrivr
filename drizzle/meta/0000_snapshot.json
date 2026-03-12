@@ -1,5 +1,5 @@
 {
-  "id": "0b9f6098-28d9-43b2-a913-8470f2cafbd2",
+  "id": "fbe6cbe5-4833-42da-bc45-553b2c618eec",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -249,6 +249,43 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'main'"
+        },
+        "github_token": {
+          "name": "github_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "github_repo": {
+          "name": "github_repo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "github_branch": {
+          "name": "github_branch",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'main'"
+        },
+        "github_webhook_secret": {
+          "name": "github_webhook_secret",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "slack_bot_token": {
+          "name": "slack_bot_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "slack_channel_id": {
+          "name": "slack_channel_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -3479,6 +3516,13 @@
           "notNull": true,
           "default": true
         },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'active'"
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -3526,11 +3570,11 @@
       "schema": "public",
       "values": [
         "pending_approval",
-        "approved",
+        "executing",
         "rejected",
         "abandoned",
         "changes_requested",
-        "complete"
+        "completed"
       ]
     },
     "public.project_status": {
@@ -3560,7 +3604,7 @@
         "pending_plan",
         "pending_approval",
         "executing",
-        "complete",
+        "completed",
         "stalled",
         "archived"
       ]

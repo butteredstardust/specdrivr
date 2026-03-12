@@ -3,6 +3,7 @@ import { specifications, specVersions, plans, auditLog, type SpecificationSelect
 import { eq, and, ne, desc } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, DatabaseError } from '@/lib/errors';
+import { dispatchWebhookEvent } from '@/lib/webhooks';
 
 export { type SpecificationSelect as Specification } from '@/db/schema';
 
@@ -40,6 +41,12 @@ export class SpecificationRepository extends BaseRepository {
     if (!spec) {
       throw new DatabaseError('Failed to create specification');
     }
+
+    // Trigger spec.created webhook
+    void dispatchWebhookEvent(spec.projectId, 'spec.created', {
+      specId: spec.id,
+      data: {}
+    });
 
     return spec;
   }
@@ -93,6 +100,13 @@ export class SpecificationRepository extends BaseRepository {
 
         return updatedSpec;
       });
+    }).then((updatedSpec) => {
+      // Trigger spec.created webhook after transaction commits
+      void dispatchWebhookEvent(updatedSpec.projectId, 'spec.created', {
+        specId: updatedSpec.id,
+        data: {}
+      });
+      return updatedSpec;
     });
   }
 
@@ -129,12 +143,12 @@ export class SpecificationRepository extends BaseRepository {
         if (!version) throw new DatabaseError('Failed to create new specification version');
 
         // 3. Abandon any non-complete plans for this specification
-        // Non-complete = anything that isn't 'complete', 'rejected', or 'abandoned' already
+        // Non-complete = anything that isn't 'completed', 'rejected', or 'abandoned' already
         await tx.update(plans)
           .set({ status: 'abandoned' })
           .where(and(
             eq(plans.specId, data.specId),
-            ne(plans.status, 'complete'),
+            ne(plans.status, 'completed'),
             ne(plans.status, 'rejected'),
             ne(plans.status, 'abandoned')
           ));
@@ -161,6 +175,13 @@ export class SpecificationRepository extends BaseRepository {
 
         return updatedSpec;
       });
+    }).then((updatedSpec) => {
+      // Trigger spec.updated webhook after transaction commits
+      void dispatchWebhookEvent(updatedSpec.projectId, 'spec.updated', {
+        specId: updatedSpec.id,
+        data: {}
+      });
+      return updatedSpec;
     });
   }
 
@@ -176,6 +197,12 @@ export class SpecificationRepository extends BaseRepository {
     if (!updatedSpec) {
       throw new NotFoundError(`Specification with ID ${id} not found`);
     }
+
+    // Trigger spec.updated webhook
+    void dispatchWebhookEvent(updatedSpec.projectId, 'spec.updated', {
+      specId: updatedSpec.id,
+      data: {}
+    });
 
     return updatedSpec;
   }

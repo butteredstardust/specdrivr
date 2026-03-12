@@ -12,7 +12,6 @@ import {
 } from '@/lib/schemas';
 import { requireAdmin, requireMember } from '@/lib/rbac';
 import { specificationRepository } from '@/repositories/specification-repository';
-import { webhookService } from '@/lib/webhooks';
 
 export async function approvePlanAction(formData: FormData) {
   const session = await auth();
@@ -46,12 +45,6 @@ export async function approvePlanAction(formData: FormData) {
       planId: result.data.id,
       userId: session.user.id,
       notes: result.data.notes,
-    });
-    
-    // Dispatch webhook
-    await webhookService.dispatch(spec.projectId, 'plan_approved', updatedPlan, {
-      specId: spec.id,
-      sessionId,
     });
 
     revalidatePath(`/specs/${plan.specId}`);
@@ -102,11 +95,6 @@ export async function rejectPlanAction(formData: FormData) {
       userId: session.user.id,
       notes: result.data.notes,
     });
-    
-    // Dispatch webhook
-    await webhookService.dispatch(spec.projectId, 'plan_rejected', updatedPlan, {
-      specId: spec.id,
-    });
 
     revalidatePath(`/specs/${plan.specId}`);
     
@@ -154,11 +142,6 @@ export async function requestChangesAction(formData: FormData) {
       planId: result.data.id,
       userId: session.user.id,
       notes: result.data.notes,
-    });
-    
-    // Dispatch webhook
-    await webhookService.dispatch(spec.projectId, 'changes_requested', updatedPlan, {
-      specId: spec.id,
     });
 
     revalidatePath(`/specs/${plan.specId}`);

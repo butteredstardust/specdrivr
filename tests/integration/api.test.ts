@@ -124,7 +124,7 @@ describe('API Route Integration Tests', () => {
       await mockSession(owner.id, owner.email);
 
       const [spec] = await testDb.insert(schema.specifications).values({ projectId: project.id, name: 'S1' }).returning();
-      const [plan] = await testDb.insert(schema.plans).values({ specId: spec.id, status: 'approved' }).returning();
+      const [plan] = await testDb.insert(schema.plans).values({ specId: spec.id, status: 'executing' }).returning();
 
       const req = new NextRequest(`http://localhost/api/v1/plans/${plan.id}/approve`, {
         method: 'POST',

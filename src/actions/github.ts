@@ -7,7 +7,7 @@ import { createPullRequestSchema } from '@/lib/schemas';
 import { requireAdmin } from '@/lib/rbac';
 import { projectRepository } from '@/repositories/project-repository';
 import { agentSessionRepository } from '@/repositories/agent-session-repository';
-import { githubService } from '@/lib/github';
+import { getGitHubConfig, createPullRequest } from '@/lib/github';
 import { db } from '@/db';
 import { auditLog, agentEvents } from '@/db/schema';
 
@@ -38,8 +38,13 @@ export async function createPullRequestAction(formData: FormData) {
 
   try {
     const project = await projectRepository.getById(result.data.projectId);
-    if (!project || !project.repositoryUrl) {
-      return { success: false, error: { code: 'PRECONDITION_FAILED', message: 'Project does not have a linked repository' } };
+    if (!project) {
+      return { success: false, error: { code: 'NOT_FOUND', message: 'Project not found' } };
+    }
+
+    const ghConfig = await getGitHubConfig(project.id);
+    if (!ghConfig) {
+      return { success: false, error: { code: 'PRECONDITION_FAILED', message: 'Project does not have GitHub integration configured' } };
     }
 
     const agentSession = await agentSessionRepository.getById(result.data.sessionId);
@@ -47,8 +52,9 @@ export async function createPullRequestAction(formData: FormData) {
       return { success: false, error: { code: 'NOT_FOUND', message: 'Session not found' } };
     }
 
-    const pr = await githubService.createPullRequest({
-      repoUrl: project.repositoryUrl,
+    const pr = await createPullRequest({
+      token: ghConfig.token,
+      repo: ghConfig.repo,
       title: result.data.title,
       head: result.data.headBranch,
       base: result.data.baseBranch,

@@ -1,8 +1,8 @@
 CREATE TYPE "public"."log_level" AS ENUM('debug', 'info', 'warn', 'error');--> statement-breakpoint
-CREATE TYPE "public"."plan_status" AS ENUM('pending_approval', 'approved', 'rejected', 'abandoned', 'changes_requested', 'complete');--> statement-breakpoint
+CREATE TYPE "public"."plan_status" AS ENUM('pending_approval', 'executing', 'rejected', 'abandoned', 'changes_requested', 'completed');--> statement-breakpoint
 CREATE TYPE "public"."project_status" AS ENUM('active', 'archived');--> statement-breakpoint
 CREATE TYPE "public"."session_status" AS ENUM('running', 'paused', 'completed', 'failed', 'cancelled');--> statement-breakpoint
-CREATE TYPE "public"."spec_status" AS ENUM('drafting', 'pending_plan', 'pending_approval', 'executing', 'complete', 'stalled', 'archived');--> statement-breakpoint
+CREATE TYPE "public"."spec_status" AS ENUM('drafting', 'pending_plan', 'pending_approval', 'executing', 'completed', 'stalled', 'archived');--> statement-breakpoint
 CREATE TYPE "public"."task_attempt_status" AS ENUM('running', 'succeeded', 'failed');--> statement-breakpoint
 CREATE TYPE "public"."task_status" AS ENUM('todo', 'in_progress', 'done', 'blocked', 'failed', 'skipped');--> statement-breakpoint
 CREATE TYPE "public"."user_role" AS ENUM('owner', 'admin', 'member', 'viewer');--> statement-breakpoint
@@ -43,6 +43,12 @@ CREATE TABLE "agent_config" (
 	"max_diff_size_kb" integer DEFAULT 500 NOT NULL,
 	"pr_auto_create" boolean DEFAULT false NOT NULL,
 	"pr_target_branch" text DEFAULT 'main' NOT NULL,
+	"github_token" text,
+	"github_repo" text,
+	"github_branch" text DEFAULT 'main',
+	"github_webhook_secret" text,
+	"slack_bot_token" text,
+	"slack_channel_id" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "agent_config_project_id_unique" UNIQUE("project_id")
@@ -413,6 +419,7 @@ CREATE TABLE "webhooks" (
 	"secret" text,
 	"events" jsonb DEFAULT '["*"]'::jsonb NOT NULL,
 	"is_active" boolean DEFAULT true NOT NULL,
+	"status" text DEFAULT 'active' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint

@@ -58,7 +58,7 @@ describe('Repository Integration Tests', () => {
       // Create a completed plan that should NOT be abandoned
       const [completedPlan] = await testDb.insert(schema.plans).values({
         specId: spec.id,
-        status: 'complete',
+        status: 'completed',
         markdownContent: '# Completed Plan',
         specVersionId: spec.currentVersionId,
       }).returning();
@@ -76,7 +76,7 @@ describe('Repository Integration Tests', () => {
 
       // Verify completed plan is still completed
       const [updatedCompletedPlan] = await testDb.select().from(schema.plans).where(eq(schema.plans.id, completedPlan.id));
-      expect(updatedCompletedPlan.status).toBe('complete');
+      expect(updatedCompletedPlan.status).toBe('completed');
     });
   });
 
@@ -106,7 +106,7 @@ describe('Repository Integration Tests', () => {
 
       // Verify plan status
       const [updatedPlan] = await testDb.select().from(schema.plans).where(eq(schema.plans.id, plan.id));
-      expect(updatedPlan.status).toBe('approved');
+      expect(updatedPlan.status).toBe('executing');
 
       // Verify agent session
       const [session] = await testDb.select().from(schema.agentSessions).where(eq(schema.agentSessions.planId, plan.id));
@@ -129,7 +129,7 @@ describe('Repository Integration Tests', () => {
 
       const [plan] = await testDb.insert(schema.plans).values({
         specId: spec.id,
-        status: 'approved',
+        status: 'executing',
         specVersionId: spec.currentVersionId,
       }).returning();
 

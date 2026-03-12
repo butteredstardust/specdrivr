@@ -369,7 +369,7 @@ function StatusBadge({ status }: { status: string }) {
     pending_plan: { variant: 'secondary', label: 'Planning' },
     pending_approval: { variant: 'outline', label: 'Review' },
     executing: { variant: 'default', label: 'Executing' },
-    complete: { variant: 'outline', label: 'Complete' },
+    completed: { variant: 'outline', label: 'Completed' },
     stalled: { variant: 'destructive', label: 'Stalled' },
     archived: { variant: 'secondary', label: 'Archived' },
   };
