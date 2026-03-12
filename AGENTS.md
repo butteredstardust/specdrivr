@@ -64,9 +64,9 @@ When CI fails on typecheck, lint, or tests:
 | React             | 19.2.4                                                   |
 | TypeScript        | 5.9.3                                                    |
 | Styling           | Tailwind CSS 4.2.1                                       |
-| UI Components     | pxlkit/ui, pxlkit/ui or shadcn/ui (with Radix UI primitives)                     |
+| UI Components     | pxlkit/ui or shadcn/ui (with Radix UI primitives)        |
 | Base UI           | @base-ui/react 1.2.0                                     |
-| Icons             | @pxlkit/core, @pxlkit/feedback, @pxlkit/social, @pxlkit/gamification, @pxlkit/weather, @pxlkit/effects ; Lucide React as fallback                                             |
+| Icons             | @pxlkit/core, @pxlkit/feedback, @pxlkit/social, @pxlkit/gamification, @pxlkit/weather, @pxlkit/effects ; Lucide React as fallback |
 | Database          | PostgreSQL                                               |
 | ORM               | Drizzle ORM 0.45.1                                       |
 | Auth              | better-auth 1.5.4 with Drizzle adapter                  |
