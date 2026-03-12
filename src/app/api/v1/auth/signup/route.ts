@@ -38,9 +38,11 @@ export async function POST(req: Request) {
       // 1. Call BetterAuth signUpEmail
       // This handles password hashing and autoSignIn
       const result = await authInstance.api.signUpEmail({
-        email,
-        password,
-        name,
+        body: {
+          email,
+          password,
+          name,
+        }
       });
 
       if (!result || !result.user) {
