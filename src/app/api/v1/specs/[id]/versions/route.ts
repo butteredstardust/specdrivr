@@ -1,16 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { specificationRepository } from '@/repositories/specification-repository';
-import { createSpecVersionSchema } from '@/lib/schemas';
-import { handleApiError } from '@/lib/error-handler';
+import { handleApiError, formatErrorResponse } from '@/lib/error-handler';
 import { auth } from '@/lib/auth';
 import { requireMember } from '@/lib/rbac';
 import { db } from '@/db';
 import { specVersions } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
+import { z } from 'zod';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
 }
+
+const CreateSpecVersionSchema = z.object({
+  specId: z.number().int().positive('Specification ID is required'),
+  markdownContent: z.string().min(1, 'Markdown content is required'),
+});
 
 export async function GET(
   _request: NextRequest,
@@ -73,7 +78,7 @@ export async function POST(
     }
 
     const body = await request.json();
-    const parsed = createSpecVersionSchema.parse({ specId, ...body });
+    const parsed = CreateSpecVersionSchema.parse({ specId, ...body });
 
     const updatedSpec = await specificationRepository.addVersion({
       specId: parsed.specId,
@@ -83,6 +88,12 @@ export async function POST(
 
     return NextResponse.json({ data: updatedSpec }, { status: 201 });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        formatErrorResponse({ message: 'Validation failed', details: error.errors }),
+        { status: 400 }
+      );
+    }
     return handleApiError(error);
   }
 }

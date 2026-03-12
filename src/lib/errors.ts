@@ -59,3 +59,13 @@ export class RateLimitError extends AppError {
     this.name = 'RateLimitError';
   }
 }
+
+export class BusinessError extends AppError {
+  public readonly code: string;
+
+  constructor(message: string, code = 'BUSINESS_ERROR') {
+    super(message, 422);
+    this.name = 'BusinessError';
+    this.code = code;
+  }
+}

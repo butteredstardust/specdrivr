@@ -1,13 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { specificationRepository } from '@/repositories/specification-repository';
-import { createSpecificationSchema } from '@/lib/schemas';
-import { formatErrorResponse, handleApiError } from '@/lib/error-handler';
+import { handleApiError, formatErrorResponse } from '@/lib/error-handler';
 import { auth } from '@/lib/auth';
 import { requireMember } from '@/lib/rbac';
+import { z } from 'zod';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
 }
+
+const CreateSpecificationSchema = z.object({
+  projectId: z.number().int().positive('Project ID is required'),
+  name: z.string().min(1, 'Specification name is required').max(255, 'Specification name too long'),
+  description: z.string().max(1000, 'Description too long').optional().nullable(),
+  markdownContent: z.string().min(1, 'Initial content is required'),
+});
 
 export async function GET(
   _request: NextRequest,
@@ -78,7 +85,16 @@ export async function POST(
     }
 
     const body = await request.json();
-    const parsed = createSpecificationSchema.parse({ projectId, ...body });
+    const parsed = CreateSpecificationSchema.parse({ projectId, ...body });
+
+    // Check for name conflict
+    const existing = await specificationRepository.getByProjectId(projectId);
+    if (existing.some(s => s.name === parsed.name)) {
+      return NextResponse.json(
+        { error: { code: 'CONFLICT', message: `Specification with name "${parsed.name}" already exists in this project` } },
+        { status: 409 }
+      );
+    }
 
     const spec = await specificationRepository.createWithVersion({
       projectId: parsed.projectId,
@@ -91,6 +107,12 @@ export async function POST(
       data: spec,
     }, { status: 201 });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        formatErrorResponse({ message: 'Validation failed', details: error.errors }),
+        { status: 400 }
+      );
+    }
     return handleApiError(error);
   }
 }

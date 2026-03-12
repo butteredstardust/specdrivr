@@ -4,6 +4,7 @@ import {
   DatabaseError,
   NotFoundError,
   ValidationError,
+  BusinessError,
 } from './errors';
 
 export interface ErrorResponse {
@@ -24,6 +25,9 @@ function getErrorCode(error: AppError): string {
   }
   if (error instanceof ValidationError) {
     return 'VALIDATION_ERROR';
+  }
+  if (error instanceof BusinessError) {
+    return error.code;
   }
   return 'INTERNAL_ERROR';
 }

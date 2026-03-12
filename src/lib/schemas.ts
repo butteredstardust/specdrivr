@@ -303,9 +303,9 @@ export const planStatusSchema = z.enum([
   'rejected',
   'abandoned',
   'changes_requested',
-  'complete'
+  'completed'
 ], {
-  errorMap: () => ({ message: "Status must be one of: 'pending_approval', 'approved', 'rejected', 'abandoned', 'changes_requested', or 'complete'" })
+  errorMap: () => ({ message: "Status must be one of: 'pending_approval', 'approved', 'rejected', 'abandoned', 'changes_requested', or 'completed'" })
 });
 
 /**

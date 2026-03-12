@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { agentSessionRepository } from '@/repositories/agent-session-repository';
 import { auth } from '@/lib/auth';
-import { handleApiError } from '@/lib/error-handler';
+import { handleApiError, formatErrorResponse } from '@/lib/error-handler';
 import { z } from 'zod';
 import { requireMember } from '@/lib/rbac';
+
+const SessionQuerySchema = z.object({
+  projectId: z.coerce.number().int().positive().optional(),
+  specId: z.coerce.number().int().positive().optional(),
+  status: z.enum(['running', 'paused', 'completed', 'failed', 'cancelled']).optional(),
+  limit: z.coerce.number().int().positive().default(50),
+  offset: z.coerce.number().int().nonnegative().default(0),
+});
 
 const CreateSessionSchema = z.object({
   projectId: z.number().int().positive(),
@@ -18,26 +26,34 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
     }
 
-    const projectIdStr = request.nextUrl.searchParams.get('projectId');
+    const { searchParams } = new URL(request.url);
+    const query = SessionQuerySchema.parse(Object.fromEntries(searchParams.entries()));
     
-    if (projectIdStr) {
-      const projectId = parseInt(projectIdStr, 10);
-      const { allowed } = await requireMember(session.user.id, projectId);
+    if (query.projectId) {
+      const { allowed } = await requireMember(session.user.id, query.projectId);
       if (!allowed) {
         return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'You do not have access to this project' } }, { status: 403 });
       }
-      const sessions = await agentSessionRepository.getByProjectId(projectId);
-      return NextResponse.json({ data: sessions });
+      const sessions = await agentSessionRepository.getByProjectId(query.projectId, query.limit, query.offset);
+      return NextResponse.json({ 
+        data: sessions,
+        meta: { limit: query.limit, offset: query.offset, count: sessions.length }
+      });
     }
 
-    // If no project ID, only return sessions for projects user is a member of
-    // This would require a more complex query in the repository.
-    // For now, let's keep it simple and return all if no filter, 
-    // assuming it's for global admins or will be filtered by UI.
-    // In a production app, we'd strictly filter here.
-    const allSessions = await agentSessionRepository.getAll();
-    return NextResponse.json({ data: allSessions });
+    // In a production app, we'd strictly filter here to user's projects.
+    const allSessions = await agentSessionRepository.getAll(query.limit, query.offset);
+    return NextResponse.json({ 
+      data: allSessions,
+      meta: { limit: query.limit, offset: query.offset, count: allSessions.length }
+    });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        formatErrorResponse({ message: 'Invalid query parameters', details: error.errors }),
+        { status: 400 }
+      );
+    }
     return handleApiError(error);
   }
 }

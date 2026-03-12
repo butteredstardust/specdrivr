@@ -1,13 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { webhookRepository } from '@/repositories/webhook-repository';
-import { handleApiError } from '@/lib/error-handler';
+import { handleApiError, formatErrorResponse } from '@/lib/error-handler';
 import { requireMember, requireAdmin } from '@/lib/rbac';
-import { createWebhookSchema } from '@/lib/schemas';
+import { z } from 'zod';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
 }
+
+const CreateWebhookSchema = z.object({
+  projectId: z.number().int().positive('Project ID is required'),
+  url: z.string().url('Invalid webhook URL'),
+  secret: z.string().max(255).optional().nullable(),
+  events: z.array(z.string()).min(1, 'At least one event subscription is required'),
+});
 
 export async function GET(
   _request: NextRequest,
@@ -53,11 +60,17 @@ export async function POST(
     }
 
     const body = await request.json();
-    const parsed = createWebhookSchema.parse({ projectId, ...body });
+    const parsed = CreateWebhookSchema.parse({ projectId, ...body });
 
     const webhook = await webhookRepository.create(parsed);
     return NextResponse.json({ data: webhook }, { status: 201 });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        formatErrorResponse({ message: 'Validation failed', details: error.errors }),
+        { status: 400 }
+      );
+    }
     return handleApiError(error);
   }
 }

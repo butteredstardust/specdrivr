@@ -1,31 +1,19 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import {
-  users, projects, specifications, plans, tasks, invites,
-  agentSessions, taskAttempts, apiRequestLogs, auditLog,
-  testResults, webhookDeliveries, webhooks, notifications,
-  notificationPreferences, usageSnapshots, gitCommits,
-  fileChanges, planReviews, specVersions, agentTokens,
-  accounts, sessions, verifications, projectMembers, agentConfig
+  users, projects, specifications, plans, tasks,
+  agentSessions, specVersions, accounts, projectMembers, 
+  agentConfig, auditLog
 } from "../src/db/schema";
 import { env } from "../src/lib/env-script";
 import * as schema from "../src/db/schema";
-import { nanoid } from "nanoid";
 import { scryptAsync } from "@noble/hashes/scrypt.js";
-import { sql } from "drizzle-orm";
+import { sql, eq } from "drizzle-orm";
+import { logger } from "../src/lib/logger-cli";
 
-// Import repositories to use production logic for seeding
-import { projectRepository } from "../src/repositories/project-repository";
-import { specificationRepository } from "../src/repositories/specification-repository";
-import { planRepository } from "../src/repositories/plan-repository";
-import { memberRepository } from "../src/repositories/member-repository";
-import { taskRepository } from "../src/repositories/task-repository";
-
-const queryClient = postgres(env.DATABASE_URL, { max: 10 });
+const queryClient = postgres(env.DATABASE_URL, { max: 1 });
 const db = drizzle(queryClient, { schema });
 
-// Better-auth uses scrypt with these parameters:
 const scryptParams = {
   N: 16384,
   r: 16,
@@ -47,145 +35,138 @@ async function scryptHash(password: string): Promise<string> {
 }
 
 async function main() {
-  console.log("Cleaning database...");
-  await db.transaction(async (tx) => {
-    await tx.delete(apiRequestLogs);
-    await tx.delete(auditLog);
-    await tx.delete(testResults);
-    await tx.delete(webhookDeliveries);
-    await tx.delete(webhooks);
-    await tx.delete(notifications);
-    await tx.delete(notificationPreferences);
-    await tx.delete(usageSnapshots);
-    await tx.delete(gitCommits);
-    await tx.delete(fileChanges);
-    await tx.delete(taskAttempts);
-    await tx.delete(agentSessions);
-    await tx.delete(planReviews);
-    await tx.delete(tasks);
-    await tx.delete(plans);
-    await tx.delete(specVersions);
-    await tx.delete(specifications);
-    await tx.delete(invites);
-    await tx.delete(projectMembers);
-    await tx.delete(agentConfig);
-    await tx.delete(agentTokens);
-    await tx.delete(accounts);
-    await tx.delete(sessions);
-    await tx.delete(verifications);
-    await tx.delete(projects);
-    await tx.delete(users);
-  });
+  logger.info("Starting database seed...");
 
-  console.log("Seeding database using repository logic...");
+  try {
+    await db.transaction(async (tx) => {
+      // 1. Users
+      const passwordHash = await scryptHash("Password123!");
+      
+      const demoUsers = [
+        { id: "user_alex", name: "Alex Rivera", email: "alex@specdrivr.dev", role: "owner" as const, onboardingStep: 3 },
+        { id: "user_sam", name: "Sam Okafor", email: "sam@specdrivr.dev", role: "admin" as const, onboardingStep: 3 },
+        { id: "user_jordan", name: "Jordan Chen", email: "jordan@specdrivr.dev", role: "member" as const, onboardingStep: 3 },
+      ];
 
-  const passwordHash = await scryptHash("password123");
+      for (const u of demoUsers) {
+        await tx.insert(users).values(u).onConflictDoNothing();
+        await tx.insert(accounts).values({
+          id: `acc_${u.id}`,
+          accountId: u.id,
+          providerId: "credential",
+          userId: u.id,
+          password: passwordHash,
+        }).onConflictDoNothing();
+      }
 
-  // 1. Create Users (Direct insert as users don't have a repo-based 'create' with Better Auth sync yet)
-  const u1 = (await db.insert(users).values({ id: nanoid(), name: "Admin User", email: "admin@example.com", role: "admin", emailVerified: true }).returning())[0];
-  const u2 = (await db.insert(users).values({ id: nanoid(), name: "Test User", email: "test@example.com", role: "member", emailVerified: true }).returning())[0];
-  const u3 = (await db.insert(users).values({ id: nanoid(), name: "Viewer User", email: "viewer@example.com", role: "viewer", emailVerified: true }).returning())[0];
-  const u4 = (await db.insert(users).values({ id: nanoid(), name: "Elena Rodriguez", email: "elena@example.com", role: "owner", emailVerified: true }).returning())[0];
+      // 2. Projects
+      const demoProjects = [
+        { id: 1, name: "Project Alpha", slug: "project-alpha", createdBy: "user_alex", isDemo: true },
+        { id: 2, name: "Project Beta", slug: "project-beta", createdBy: "user_sam", isDemo: true },
+      ];
 
-  await db.insert(accounts).values([
-    { id: nanoid(), accountId: u1.id, providerId: "credential", userId: u1.id, password: passwordHash },
-    { id: nanoid(), accountId: u2.id, providerId: "credential", userId: u2.id, password: passwordHash },
-    { id: nanoid(), accountId: u3.id, providerId: "credential", userId: u3.id, password: passwordHash },
-    { id: nanoid(), accountId: u4.id, providerId: "credential", userId: u4.id, password: passwordHash },
-  ]);
+      for (const p of demoProjects) {
+        await tx.insert(projects).values(p).onConflictDoNothing();
+        // Ensure agent config exists for projects
+        await tx.insert(agentConfig).values({
+          projectId: p.id,
+        }).onConflictDoNothing();
+      }
 
-  // 2. Create Projects (Using ProjectRepository to get automatic agentConfig and owner assignment)
-  const p1 = await projectRepository.create({ name: "Project Alpha", description: "enterprise integration", createdBy: u1.id });
-  const p2 = await projectRepository.create({ name: "Project Beta", description: "mobile applications", createdBy: u2.id });
-  const p3 = await projectRepository.create({ name: "Project Gamma", description: "AI-powered analytics", createdBy: u4.id });
+      // 3. Project Members
+      const members = [
+        { projectId: 1, userId: "user_alex", role: "owner" as const },
+        { projectId: 1, userId: "user_sam", role: "admin" as const },
+        { projectId: 1, userId: "user_jordan", role: "member" as const },
+        { projectId: 2, userId: "user_sam", role: "owner" as const },
+        { projectId: 2, userId: "user_jordan", role: "admin" as const },
+      ];
 
-  // 3. Add Members (Using MemberRepository for audit logs)
-  await memberRepository.createInvite({ projectId: p1.id, email: "collab@example.com", role: "member", invitedBy: u1.id });
-  await db.insert(projectMembers).values({ projectId: p1.id, userId: u2.id, role: "admin", status: "active" });
+      for (const m of members) {
+        await tx.insert(projectMembers).values(m).onConflictDoNothing();
+      }
 
-  // 4. Create Specifications (Using SpecificationRepository for atomic versioning and audit logs)
-  const s1 = await specificationRepository.createWithVersion({
-    projectId: p1.id,
-    name: "User Authentication System",
-    markdownContent: "# Auth Spec\n\nInitial version for authentication system.",
-    createdBy: u1.id
-  });
+      // 4. Specifications
+      const demoSpecs = [
+        { id: 1, projectId: 1, name: "Authentication System", status: "pending_approval" as const },
+        { id: 2, projectId: 1, name: "Payment Integration", status: "executing" as const },
+        { id: 3, projectId: 1, name: "Dashboard UI", status: "drafting" as const },
+        { id: 4, projectId: 2, name: "API Gateway", status: "pending_approval" as const },
+        { id: 5, projectId: 2, name: "Data Pipeline", status: "drafting" as const },
+        { id: 6, projectId: 2, name: "Notification Service", status: "drafting" as const },
+      ];
 
-  const s2 = await specificationRepository.createWithVersion({
-    projectId: p1.id,
-    name: "Payment Gateway Integration",
-    markdownContent: "# Payment Spec\n\nInitial payment integration specification.",
-    createdBy: u2.id
-  });
+      const specContents: Record<number, string> = {
+        1: "The authentication system must support OAuth2 and traditional email/password flows. Security is a top priority for this module. We need robust session management.",
+        2: "Integrating Stripe for all payment processing. This includes handling one-time payments and recurring subscriptions. Webhook security must be strictly enforced.",
+        3: "A modern, responsive dashboard providing high-level metrics at a glance. It should support both light and dark modes. Performance should be optimized for large datasets.",
+        4: "Centralized entry point for all API requests. It handles rate limiting, authentication, and request routing to microservices. High availability is mandatory.",
+        5: "Ingests raw data from multiple sources, cleans it, and stores it in the data warehouse. Scalability and data integrity are key requirements. Supports batch and stream processing.",
+        6: "Unified service for sending emails, SMS, and push notifications. It should handle delivery retries and provide detailed logging for audit purposes.",
+      };
 
-  const s3 = await specificationRepository.createWithVersion({
-    projectId: p2.id,
-    name: "Mobile App Redesign",
-    markdownContent: "# Mobile Spec\n\nModern UI components.",
-    createdBy: u4.id
-  });
+      for (const s of demoSpecs) {
+        await tx.insert(specifications).values(s).onConflictDoNothing();
+        
+        // Spec Version 1
+        const [v1] = await tx.insert(specVersions).values({
+          id: s.id, // using same ID for simplicity in seed
+          specId: s.id,
+          versionNumber: 1,
+          markdownContent: specContents[s.id],
+        }).onConflictDoNothing().returning();
 
-  // 5. Add a second version to s1 (This will test version incrementing)
-  await specificationRepository.addVersion({
-    specId: s1.id,
-    markdownContent: "# Auth Spec v2\n\nUpdated with OAuth2 provider support.",
-    createdBy: u1.id
-  });
+        if (v1) {
+          await tx.update(specifications).set({ currentVersionId: v1.id }).where(eq(specifications.id, s.id));
+        }
+      }
 
-  // 6. Create and Approve Plans (Using PlanRepository for sessions and spec status updates)
-  // Direct insert first because we don't have a plan generator repo yet
-  const [rawPlan1] = await db.insert(plans).values({
-    specId: s2.id,
-    specVersionId: s2.currentVersionId,
-    status: "pending_approval",
-    markdownContent: "# Payment Plan\n\nImplement Stripe.",
-    taskCount: 2,
-    createdBy: u2.id
-  }).returning();
+      // 5. Plans
+      const demoPlans = [
+        { id: 1, specId: 1, status: "pending_approval" as const, specVersionId: 1 },
+        { id: 2, specId: 2, status: "approved" as const, reviewerNotes: "Approved by Alex", specVersionId: 2, approvedAt: new Date() },
+        { id: 3, specId: 3, status: "abandoned" as const, reviewerNotes: "Spec was revised", specVersionId: 3 },
+        { id: 4, specId: 4, status: "pending_approval" as const, specVersionId: 4 },
+      ];
 
-  // Use the repository to approve it (this creates the session and updates spec status)
-  await planRepository.approvePlan({
-    planId: rawPlan1.id,
-    userId: u1.id,
-    notes: "Looks good, proceed."
-  });
+      for (const p of demoPlans) {
+        await tx.insert(plans).values(p).onConflictDoNothing();
+      }
 
-  // 7. Seed Tasks for the approved plan
-  const t1 = await taskRepository.create({
-    externalId: "T-101",
-    title: "Stripe Setup",
-    description: "Install Stripe SDK",
-    planId: rawPlan1.id,
-    status: "done"
-  });
+      // 6. Agent Session
+      const session = {
+        id: 1,
+        specId: 2,
+        planId: 2,
+        status: "running" as const,
+        projectId: 1,
+        lastHeartbeatAt: new Date(),
+        startedAt: new Date(),
+      };
+      await tx.insert(agentSessions).values(session).onConflictDoNothing();
 
-  const t2 = await taskRepository.create({
-    externalId: "T-102",
-    title: "API Endpoints",
-    description: "Create payment routes",
-    planId: rawPlan1.id,
-    status: "todo"
-  });
+      // 7. Tasks (Minimum 6 for plan_002 / spec_002)
+      const demoTasks = [
+        { id: 101, planId: 2, specId: 2, externalId: "T-101", title: "Setup payment provider SDK", status: "done" as const, executionOrder: 1 },
+        { id: 102, planId: 2, specId: 2, externalId: "T-102", title: "Implement checkout API", status: "done" as const, executionOrder: 2, dependsOn: ["T-101"] },
+        { id: 103, planId: 2, specId: 2, externalId: "T-103", title: "Add webhook handler", status: "in_progress" as const, executionOrder: 3, dependsOn: ["T-102"] },
+        { id: 104, planId: 2, specId: 2, externalId: "T-104", title: "Write payment tests", status: "todo" as const, executionOrder: 4, dependsOn: ["T-103"] },
+        { id: 105, planId: 2, specId: 2, externalId: "T-105", title: "Handle refund flow", status: "blocked" as const, blockedReason: "Cannot proceed — refund policy not defined in spec. Requires product decision before implementation.", executionOrder: 5 },
+        { id: 106, planId: 2, specId: 2, externalId: "T-106", title: "Update documentation", status: "todo" as const, executionOrder: 6, dependsOn: ["T-104", "T-105"] },
+      ];
 
-  // 8. Test the 'unblock' logic in seeding
-  const t3 = await taskRepository.create({
-    externalId: "T-103",
-    title: "Webhooks",
-    description: "Handle stripe events",
-    planId: rawPlan1.id,
-    status: "blocked"
-  });
-  await db.update(tasks).set({ blockedReason: "Waiting for domain verification" }).where(sql`id = ${t3.id}`);
-  await taskRepository.unblockTask(t3.id, "Domain is now verified.", u1.id);
+      for (const t of demoTasks) {
+        await tx.insert(tasks).values(t).onConflictDoNothing();
+      }
 
-  console.log("Seeding complete!");
-  console.log("Test users:");
-  console.log("  admin@example.com / password123 (admin)");
-  console.log("  test@example.com / password123 (member)");
-  process.exit(0);
+      logger.info({ users: 3, projects: 2, specs: 6, plans: 4, tasks: 6, sessions: 1 }, 'Seed complete');
+    });
+  } catch (error) {
+    logger.error(error, "Seed failed");
+    process.exit(1);
+  } finally {
+    process.exit(0);
+  }
 }
 
-main().catch((err) => {
-  console.error("Error seeding database:", err);
-  process.exit(1);
-});
+main();

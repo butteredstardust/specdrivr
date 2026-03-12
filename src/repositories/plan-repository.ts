@@ -2,7 +2,7 @@ import { db } from '@/db';
 import { plans, specifications, agentSessions, planReviews, auditLog, type PlanSelect as Plan } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
-import { NotFoundError, DatabaseError } from '@/lib/errors';
+import { NotFoundError, DatabaseError, BusinessError } from '@/lib/errors';
 
 export { type PlanSelect as Plan } from '@/db/schema';
 
@@ -87,6 +87,10 @@ export class PlanRepository extends BaseRepository {
   }): Promise<{ plan: Plan; sessionId: number }> {
     const plan = await this.getById(data.planId);
     if (!plan) throw new NotFoundError(`Plan with ID ${data.planId} not found`);
+
+    if (plan.status !== 'pending_approval') {
+      throw new BusinessError(`Plan is in ${plan.status} state and cannot be approved`, 'INVALID_STATE');
+    }
 
     return await this.execQuery(async () => {
       return await db.transaction(async (tx) => {
