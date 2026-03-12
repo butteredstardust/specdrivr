@@ -2,7 +2,7 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import * as schema from '../../db/schema';
 import { env } from '../env-script';
-import { eq, and, gte, lt, sql, sum, count } from 'drizzle-orm';
+import { eq, and, gte, lt, sum, count } from 'drizzle-orm';
 import { logger } from '../logger-cli';
 
 const { agentSessions, usageSnapshots } = schema;
@@ -89,8 +89,8 @@ export async function aggregateUsageForDate(date: Date): Promise<{
             });
         });
         snapshotsWritten++;
-      } catch (err: any) {
-        const errMsg = `Failed to upsert snapshot for project ${res.projectId}: ${err.message}`;
+      } catch (err: unknown) {
+        const errMsg = `Failed to upsert snapshot for project ${res.projectId}: ${err instanceof Error ? err.message : String(err)}`;
         logger.error({ err, projectId: res.projectId }, errMsg);
         errors.push(errMsg);
       }
@@ -101,8 +101,8 @@ export async function aggregateUsageForDate(date: Date): Promise<{
       snapshotsWritten,
       errors,
     };
-  } catch (err: any) {
-    const errMsg = `Usage aggregation failed for ${midnight.toISOString()}: ${err.message}`;
+  } catch (err: unknown) {
+    const errMsg = `Usage aggregation failed for ${midnight.toISOString()}: ${err instanceof Error ? err.message : String(err)}`;
     logger.error({ err }, errMsg);
     throw err;
   }
