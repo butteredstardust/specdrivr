@@ -32,7 +32,9 @@ export async function POST(req: Request) {
     try {
       // BetterAuth generates token and calls sendResetPassword callback
       await authInstance.api.requestPasswordReset({
-        email
+        body: {
+          email
+        }
       });
       
       // Always return 200 to prevent email enumeration
