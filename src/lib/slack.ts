@@ -3,7 +3,6 @@ import { db } from '@/db';
 import { agentConfig } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { logger } from './logger';
-import { env } from './env';
 
 export type SlackEventType =
   | 'session_started'
@@ -120,7 +119,7 @@ export async function sendSlackNotification(
     return;
   }
 
-  let blocks: any[] = [];
+  let blocks: unknown[] = [];
   let fallbackText = '';
 
   switch (event) {
@@ -162,7 +161,7 @@ export async function sendSlackNotification(
     } else {
       logger.info({ projectId, event, slackConfigured: true }, 'Slack notification sent');
     }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error({ error, projectId, event }, 'Slack API call failed');
   }
 }

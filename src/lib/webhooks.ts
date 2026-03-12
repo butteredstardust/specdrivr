@@ -157,7 +157,7 @@ async function dispatchWithRetry(
     
     try {
       await webhookRepository.setErrorStatus(webhook.id);
-    } catch (err) {
+    } catch (err: unknown) {
       logger.error({ err, webhookId: webhook.id }, 'Failed to set webhook error status');
     }
   }
@@ -165,7 +165,7 @@ async function dispatchWithRetry(
 
 // Add a legacy wrapper for actions that expect the old webhookService
 export const webhookService = {
-  dispatch: async (projectId: number, event: WebhookEventType, data: unknown, options: any = {}) => {
+  dispatch: async (projectId: number, event: WebhookEventType, data: unknown, options: Record<string, unknown> = {}) => {
     return dispatchWebhookEvent(projectId, event, {
       ...options,
       data: typeof data === 'object' && data !== null ? (data as Record<string, unknown>) : { data }

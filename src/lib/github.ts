@@ -146,8 +146,8 @@ export async function verifyGitHubToken(
 
     const { data } = await octokit.users.getAuthenticated();
     return { valid: true, login: data.login };
-  } catch (error: any) {
-    return { valid: false, error: error.message || 'Invalid token' };
+  } catch (error: unknown) {
+    return { valid: false, error: error instanceof Error ? error.message : 'Invalid token' };
   }
 }
 
@@ -181,8 +181,8 @@ export async function verifyRepoAccess(
     }
 
     return { valid: true };
-  } catch (error: any) {
-    return { valid: false, error: error.message || 'Failed to verify repository access' };
+  } catch (error: unknown) {
+    return { valid: false, error: error instanceof Error ? error.message : 'Failed to verify repository access' };
   }
 }
 
@@ -194,7 +194,7 @@ export function verifyGitHubSignature(payload: string, signature: string, secret
     const hmac = crypto.createHmac('sha256', secret);
     const digest = 'sha256=' + hmac.update(payload).digest('hex');
     return crypto.timingSafeEqual(Buffer.from(digest), Buffer.from(signature));
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -234,8 +234,8 @@ export async function createPullRequest(params: {
     });
 
     return response.data;
-  } catch (error: any) {
-    logger.error({ error: error.message, repo: params.repo }, 'Failed to create GitHub PR');
+  } catch (error: unknown) {
+    logger.error({ error: error instanceof Error ? error.message : String(error), repo: params.repo }, 'Failed to create GitHub PR');
     throw error;
   }
 }

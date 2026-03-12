@@ -36,8 +36,8 @@ export async function POST(request: NextRequest) {
     }, 'Manual usage aggregation trigger complete');
 
     return NextResponse.json({ data: result });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error({ error }, 'Failed to process manual usage aggregation request');
-    return NextResponse.json({ error: { code: 'INTERNAL_ERROR', message: error.message } }, { status: 500 });
+    return NextResponse.json({ error: { code: 'INTERNAL_ERROR', message: error instanceof Error ? error.message : 'Unknown error' } }, { status: 500 });
   }
 }
