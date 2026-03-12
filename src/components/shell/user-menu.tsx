@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { PixelAvatar, PixelDropdown } from '@pxlkit/ui-kit';
+import { PixelDropdown } from '@pxlkit/ui-kit';
 import { useShell } from '@/components/providers/shell-provider';
 import { authClient } from '@/lib/auth-client';
 

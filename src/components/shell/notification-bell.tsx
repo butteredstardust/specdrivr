@@ -19,7 +19,7 @@ export function NotificationBell() {
           // Assuming { meta: { unreadCount: N } } or { count: N }
           setUnreadCount(data?.meta?.unreadCount ?? data?.count ?? 0);
         }
-      } catch (e) {
+      } catch {
         // fail silently for polling
       }
     }
