@@ -98,6 +98,44 @@
         "-y",
         "hyper-mcp-shell"
       ]
+    },
+    "redis": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-redis",
+        "redis://localhost:6379"
+      ]
+    }
+  },
+  "tools": {
+    "truncateToolOutputThreshold": 20000,
+    "useRipgrep": true,
+    "disableLLMCorrection": true
+  },
+  "context": {
+    "fileFiltering": {
+      "respectGitIgnore": true,
+      "respectGeminiIgnore": true
+    },
+    "includeDirectoryTree": true
+  },
+  "general": {
+    "plan": {
+      "modelRouting": true
+    }
+  },
+  "model": {
+    "skipNextSpeakerCheck": true
+  },
+  "experimental": {
+    "toolOutputMasking": {
+      "enabled": true
+    }
+  },
+  "agents": {
+    "browser": {
+      "headless": true
     }
   }
 }

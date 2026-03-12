@@ -64,9 +64,9 @@ export async function POST(req: Request) {
         },
         { status: 201 }
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       // BetterAuth throws error objects
-      if (error.code === 'USER_ALREADY_EXISTS') {
+      if (error && typeof error === 'object' && 'code' in error && error.code === 'USER_ALREADY_EXISTS') {
         return NextResponse.json(
           { error: { code: 'CONFLICT', message: 'Email already registered' } },
           { status: 409 }
