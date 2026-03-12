@@ -143,12 +143,15 @@ if [ -n "$existing_tsx" ]; then
 fi
 
 # ─── 9. Specdrivr Architecture Guards ─────────────────────────────────────────
-# Guard A: Server Action Directives
+# Guard A: Server Action Directives & Auth
 action_files=$(echo "$changed_files" | grep "src/actions/" || true)
 for f in $action_files; do
   [ -f "$f" ] || continue
   if ! grep -q "'use server'" "$f"; then
     die "Server Action file '$f' is missing the 'use server' directive."
+  fi
+  if ! grep -q "auth()" "$f"; then
+    die "Security Risk: Server Action file '$f' does not appear to call 'auth()'. All actions must verify session."
   fi
   if grep -q "throw new" "$f"; then
     die "Server Action file '$f' contains 'throw'. Actions must return { success: false, error } instead."
@@ -165,18 +168,31 @@ for f in $repo_files; do
 done
 
 # Guard C: Design System (No Hex Colors)
-# Scans only NEW code additions for hex patterns
 if echo "$additions" | grep -qE "#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})"; then
-  # Filter out allowed exceptions (e.g., globals.css variable definitions or config files)
   color_violators=$(echo "$changed_diff" | awk '/^diff --git/ {file=$0; sub(/^diff --git a\/.* b\//, "", file)} /^(\+)([^+]|$)/ && /#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})/ {print file}' | sort -u | grep -vE "globals\.css|tailwind\.config|\.config\." || true)
   [ -n "$color_violators" ] && \
     die "Hardcoded hex colors found in:\n$color_violators\nUse Tailwind classes or CSS variables from globals.css instead."
 fi
 
-# ─── 10. Debug Code Detection ──────────────────────────────────────────────────
-# Allow console.error (legitimate); block log/debug/warn/table/dir and debugger
-if echo "$additions" | grep -qE "(console\.(log|debug|warn|table|dir)\s*\(|debugger\b)"; then
-  die "Debug code found (console.log/debug/warn/table/dir or debugger). Remove before pushing."
+# Guard D: XSS Prevention (DOMPurify Requirement)
+if echo "$additions" | grep -q "dangerouslySetInnerHTML"; then
+  xss_violators=$(echo "$changed_diff" | awk '/^diff --git/ {file=$0; sub(/^diff --git a\/.* b\//, "", file)} /^(\+)([^+]|$)/ && /dangerouslySetInnerHTML/ {print file}' | sort -u || true)
+  for f in $xss_violators; do
+    if ! grep -qE "DOMPurify|isomorphic-dompurify" "$f"; then
+      die "XSS Risk: '$f' uses dangerouslySetInnerHTML without DOMPurify sanitization."
+    fi
+  done
+fi
+
+# ─── 10. Debug Code & Logging Standards ───────────────────────────────────────
+# Mandate: Use @/lib/logger (Pino) instead of console.log/warn
+if echo "$additions" | grep -qE "console\.(log|debug|warn|table|dir)\s*\("; then
+  log_violators=$(echo "$changed_diff" | awk '/^diff --git/ {file=$0; sub(/^diff --git a\/.* b\//, "", file)} /^(\+)([^+]|$)/ && /console\.(log|debug|warn|table|dir)/ {print file}' | sort -u || true)
+  die "Forbidden logging found (use @/lib/logger instead):\n$log_violators"
+fi
+
+if echo "$additions" | grep -q "debugger"; then
+  die "Debugger statement found. Remove before pushing."
 fi
 
 # ─── 10. Test Integrity ───────────────────────────────────────────────────────
