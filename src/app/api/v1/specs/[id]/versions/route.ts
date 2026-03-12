@@ -1,88 +1,88 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/db';
-import { specVersions, specifications } from '@/db/schema';
-import { eq, desc } from 'drizzle-orm';
-import { auth } from '@/lib/auth';
-import { logger } from '@/lib/logger';
+import { specificationRepository } from '@/repositories/specification-repository';
+import { createSpecVersionSchema } from '@/lib/schemas';
 import { handleApiError } from '@/lib/error-handler';
+import { auth } from '@/lib/auth';
+import { requireMember } from '@/lib/rbac';
+import { db } from '@/db';
+import { specVersions } from '@/db/schema';
+import { eq, desc } from 'drizzle-orm';
+
+interface RouteParams {
+  params: Promise<{ id: string }>;
+}
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  _request: NextRequest,
+  { params }: RouteParams
 ) {
   try {
     const session = await auth();
-    if (!session || !session.user) {
-      return NextResponse.json(
-        { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
-        { status: 401 }
-      );
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
     }
 
     const { id } = await params;
-    const versions = await db.select().from(specVersions).where(eq(specVersions.specId, Number(id))).orderBy(desc(specVersions.versionNumber));
+    const specId = parseInt(id, 10);
+
+    const spec = await specificationRepository.getById(specId);
+    if (!spec) {
+      return NextResponse.json({ error: { code: 'NOT_FOUND', message: 'Specification not found' } }, { status: 404 });
+    }
+
+    // RBAC: require member to view versions
+    const { allowed } = await requireMember(session.user.id, spec.projectId);
+    if (!allowed) {
+      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'You do not have access to this project' } }, { status: 403 });
+    }
+
+    const versions = await db
+      .select()
+      .from(specVersions)
+      .where(eq(specVersions.specId, specId))
+      .orderBy(desc(specVersions.versionNumber));
 
     return NextResponse.json({ data: versions });
   } catch (error) {
-    logger.error({ error }, 'Error fetching spec versions');
     return handleApiError(error);
   }
 }
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: RouteParams
 ) {
   try {
     const session = await auth();
-    if (!session || !session.user) {
-      return NextResponse.json(
-        { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
-        { status: 401 }
-      );
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
     }
 
     const { id } = await params;
-    const { markdownContent } = await request.json();
+    const specId = parseInt(id, 10);
 
-    if (!markdownContent) {
-      return NextResponse.json(
-        { error: { code: 'VALIDATION_ERROR', message: 'Content is required' } },
-        { status: 400 }
-      );
-    }
-
-    const [spec] = await db.select().from(specifications).where(eq(specifications.id, Number(id))).limit(1);
-
+    const spec = await specificationRepository.getById(specId);
     if (!spec) {
-      return NextResponse.json(
-        { error: { code: 'NOT_FOUND', message: 'Specification not found' } },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: { code: 'NOT_FOUND', message: 'Specification not found' } }, { status: 404 });
     }
 
-    const currentVersions = await db.select().from(specVersions).where(eq(specVersions.specId, Number(id))).orderBy(desc(specVersions.versionNumber)).limit(1);
-    const nextVersionNumber = currentVersions.length > 0 ? currentVersions[0].versionNumber + 1 : 1;
+    // RBAC: require member to add version
+    const { allowed } = await requireMember(session.user.id, spec.projectId);
+    if (!allowed) {
+      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'You do not have permission to update this specification' } }, { status: 403 });
+    }
 
-    const result = await db.transaction(async (tx) => {
-      const [newVersion] = await tx.insert(specVersions).values({
-        specId: Number(id),
-        versionNumber: nextVersionNumber,
-        markdownContent,
-        createdBy: session.user!.id
-      }).returning();
+    const body = await request.json();
+    const parsed = createSpecVersionSchema.parse({ specId, ...body });
 
-      await tx.update(specifications).set({
-        currentVersionId: newVersion.id,
-        updatedAt: new Date()
-      }).where(eq(specifications.id, Number(id)));
-
-      return newVersion;
+    const updatedSpec = await specificationRepository.addVersion({
+      specId: parsed.specId,
+      markdownContent: parsed.markdownContent,
+      createdBy: session.user.id,
     });
 
-    return NextResponse.json({ data: result }, { status: 201 });
+    return NextResponse.json({ data: updatedSpec }, { status: 201 });
   } catch (error) {
-    logger.error({ error }, 'Error creating spec version');
     return handleApiError(error);
   }
 }

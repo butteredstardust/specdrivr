@@ -229,11 +229,222 @@ export const taskQuerySchema = z.object({
     }),
 });
 
-// Additional schemas can be added here for other resources
+/**
+ * Specification Status Enum
+ * Represents the possible states a specification can be in
+ */
+export const specStatusSchema = z.enum([
+  'drafting',
+  'pending_plan',
+  'pending_approval',
+  'executing',
+  'complete',
+  'stalled',
+  'archived'
+], {
+  errorMap: () => ({ message: "Status must be one of: 'drafting', 'pending_plan', 'pending_approval', 'executing', 'complete', 'stalled', or 'archived'" })
+});
 
 /**
- * Schema for creating a new project
+ * Schema for creating a new specification
  */
+export const createSpecificationSchema = z.object({
+  projectId: z.number().int().positive('Project ID is required'),
+  name: z.string().min(1, 'Specification name is required').max(255, 'Specification name too long'),
+  description: z.string().max(1000, 'Description too long').optional().nullable(),
+  markdownContent: z.string().min(1, 'Initial content is required'),
+});
+
+/**
+ * Schema for updating an existing specification
+ */
+export const updateSpecificationSchema = z.object({
+  id: z.number().int().positive('Specification ID is required'),
+  name: z.string().min(1, 'Name cannot be empty').max(255, 'Name too long').optional(),
+  status: specStatusSchema.optional(),
+}).refine(
+  (data) => {
+    const rest = { ...data } as Record<string, unknown>;
+    delete rest.id;
+    return Object.keys(rest).some(key => rest[key] !== undefined);
+  },
+  { message: 'At least one field to update is required' }
+);
+
+/**
+ * Schema for creating a new specification version
+ */
+export const createSpecVersionSchema = z.object({
+  specId: z.number().int().positive('Specification ID is required'),
+  markdownContent: z.string().min(1, 'Markdown content is required'),
+});
+
+/**
+ * Query parameters for GET /api/specs
+ */
+export const specQuerySchema = z.object({
+  projectId: z
+    .string()
+    .optional()
+    .transform((val) => (val ? parseInt(val, 10) : undefined))
+    .refine((val) => val === undefined || (!isNaN(val) && val > 0), {
+      message: 'Project ID must be a positive number',
+    }),
+  status: specStatusSchema.optional(),
+});
+
+/**
+ * Plan Status Enum
+ * Represents the possible states a plan can be in
+ */
+export const planStatusSchema = z.enum([
+  'pending_approval',
+  'approved',
+  'rejected',
+  'abandoned',
+  'changes_requested',
+  'complete'
+], {
+  errorMap: () => ({ message: "Status must be one of: 'pending_approval', 'approved', 'rejected', 'abandoned', 'changes_requested', or 'complete'" })
+});
+
+/**
+ * Schema for approving a plan
+ */
+export const approvePlanSchema = z.object({
+  id: z.number().int().positive('Plan ID is required'),
+  notes: z.string().max(2000, 'Notes too long').optional().nullable(),
+});
+
+/**
+ * Schema for rejecting a plan
+ */
+export const rejectPlanSchema = z.object({
+  id: z.number().int().positive('Plan ID is required'),
+  notes: z.string().min(1, 'Notes are required for rejection').max(2000, 'Notes too long'),
+});
+
+/**
+ * Schema for requesting changes on a plan
+ */
+export const requestChangesSchema = z.object({
+  id: z.number().int().positive('Plan ID is required'),
+  notes: z.string().min(1, 'Notes are required when requesting changes').max(2000, 'Notes too long'),
+});
+
+/**
+ * Schema for abandoning a plan
+ */
+export const abandonPlanSchema = z.object({
+  id: z.number().int().positive('Plan ID is required'),
+});
+
+/**
+ * Schema for unblocking a task
+ */
+export const unblockTaskSchema = z.object({
+  id: z.number().int().positive('Task ID is required'),
+  humanContext: z.string().min(1, 'Context is required to unblock a task').max(5000, 'Context too long'),
+});
+
+/**
+ * Schema for manually overriding a task status
+ */
+export const overrideTaskStatusSchema = z.object({
+  id: z.number().int().positive('Task ID is required'),
+  status: taskStatusSchema,
+  notes: z.string().max(2000, 'Notes too long').optional().nullable(),
+});
+
+/**
+ * User Role Enum
+ * Represents the hierarchical roles in a project
+ */
+export const userRoleSchema = z.enum([
+  'owner',
+  'admin',
+  'member',
+  'viewer'
+], {
+  errorMap: () => ({ message: "Role must be one of: 'owner', 'admin', 'member', or 'viewer'" })
+});
+
+/**
+ * Schema for inviting a new member to a project
+ */
+export const inviteMemberSchema = z.object({
+  projectId: z.number().int().positive('Project ID is required'),
+  email: z.string().email('Invalid email address'),
+  role: userRoleSchema.default('viewer'),
+});
+
+/**
+ * Schema for updating a member's role
+ */
+export const updateMemberRoleSchema = z.object({
+  projectId: z.number().int().positive('Project ID is required'),
+  userId: z.string().min(1, 'User ID is required'),
+  role: userRoleSchema,
+});
+
+/**
+ * Schema for updating agent configuration
+ */
+export const updateAgentConfigSchema = z.object({
+  projectId: z.number().int().positive('Project ID is required'),
+  modelId: z.string().min(1, 'Model ID is required').default('claude-sonnet-4-6'),
+  planModelId: z.string().min(1, 'Plan model ID is required').default('claude-opus-4-6'),
+  maxConcurrentTasks: z.number().int().min(1).max(10).default(3),
+  taskTimeoutSeconds: z.number().int().min(30).max(3600).default(300),
+  maxRetriesPerTask: z.number().int().min(0).max(5).default(2),
+  retryDelaySeconds: z.number().int().min(5).max(300).default(30),
+  requireApproval: z.boolean().default(true),
+  autoGeneratePlan: z.boolean().default(false),
+  branchPrefix: z.string().min(1).max(50).default('daemon'),
+  commitMessagePrefix: z.string().min(1).max(50).default('feat'),
+  allowedFileGlobs: z.array(z.string()).default([]),
+  forbiddenFileGlobs: z.array(z.string()).default([]),
+  testCommand: z.string().max(255).optional().nullable(),
+  lintCommand: z.string().max(255).optional().nullable(),
+  setupCommand: z.string().max(255).optional().nullable(),
+  maxDiffSizeKb: z.number().int().min(10).max(5000).default(500),
+  prAutoCreate: z.boolean().default(false),
+  prTargetBranch: z.string().min(1).max(100).default('main'),
+});
+
+/**
+ * Schema for creating a GitHub Pull Request
+ */
+export const createPullRequestSchema = z.object({
+  projectId: z.number().int().positive('Project ID is required'),
+  sessionId: z.number().int().positive('Session ID is required'),
+  title: z.string().min(1, 'PR title is required').max(255),
+  body: z.string().max(5000).optional().nullable(),
+  baseBranch: z.string().min(1).default('main'),
+  headBranch: z.string().min(1),
+});
+
+/**
+ * Schema for creating a new generic webhook
+ */
+export const createWebhookSchema = z.object({
+  projectId: z.number().int().positive('Project ID is required'),
+  url: z.string().url('Invalid webhook URL'),
+  secret: z.string().max(255).optional().nullable(),
+  events: z.array(z.string()).min(1, 'At least one event subscription is required'),
+});
+
+/**
+ * Schema for updating an existing webhook
+ */
+export const updateWebhookSchema = z.object({
+  id: z.number().int().positive('Webhook ID is required'),
+  url: z.string().url('Invalid webhook URL').optional(),
+  secret: z.string().max(255).optional().nullable(),
+  events: z.array(z.string()).min(1).optional(),
+  isActive: z.boolean().optional(),
+});
+
 export const createProjectSchema = z.object({
   name: z.string().min(1, 'Project name is required').max(255, 'Project name cannot exceed 255 characters'),
   description: z.string().max(1000, 'Description cannot exceed 1000 characters').optional().nullable(),

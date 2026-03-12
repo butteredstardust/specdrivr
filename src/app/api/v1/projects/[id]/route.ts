@@ -4,6 +4,7 @@ import { formatErrorResponse, handleApiError } from '@/lib/error-handler';
 import { NotFoundError } from '@/lib/errors';
 import { updateProjectSchema } from '@/lib/schemas';
 import { auth } from '@/lib/auth';
+import { requireAdmin, requireOwner, requireMember } from '@/lib/rbac';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -26,6 +27,15 @@ export async function GET(
       return NextResponse.json(
         formatErrorResponse({ message: 'Invalid project ID' }),
         { status: 400 }
+      );
+    }
+
+    // RBAC: Ensure user is at least a member to view project details
+    const { allowed } = await requireMember(session.user.id, projectId);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: { code: 'FORBIDDEN', message: 'You do not have access to this project' } },
+        { status: 403 }
       );
     }
 
@@ -63,6 +73,15 @@ export async function PATCH(
       );
     }
 
+    // RBAC: require admin to update project
+    const { allowed } = await requireAdmin(session.user.id, projectId);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: { code: 'FORBIDDEN', message: 'You must be a project admin to update this project' } },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const parsed = updateProjectSchema.parse({ id: projectId, ...body });
 
@@ -93,6 +112,15 @@ export async function DELETE(
       return NextResponse.json(
         formatErrorResponse({ message: 'Invalid project ID' }),
         { status: 400 }
+      );
+    }
+
+    // RBAC: require owner to delete project
+    const { allowed } = await requireOwner(session.user.id, projectId);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: { code: 'FORBIDDEN', message: 'Only the project owner can delete this project' } },
+        { status: 403 }
       );
     }
 
