@@ -4,11 +4,8 @@ import { revalidatePath } from 'next/cache';
 import { memberRepository } from '@/repositories/member-repository';
 import { auth } from '@/lib/auth';
 import { logger } from '@/lib/logger';
-import { 
-  inviteMemberSchema, 
-  updateMemberRoleSchema 
-} from '@/lib/schemas';
-import { requireAdmin } from '@/lib/rbac';
+import { inviteMemberSchema, updateMemberRoleSchema } from '@/lib/schemas';
+import { requireAdmin, getProjectRole } from '@/lib/rbac';
 import type { UserRole } from '@/db/schema';
 
 export async function inviteMemberAction(formData: FormData) {
@@ -73,11 +70,22 @@ export async function updateMemberRoleAction(formData: FormData) {
   }
 
   const { allowed, role: actorRole } = await requireAdmin(session.user.id, result.data.projectId);
-  if (!allowed) {
+  if (!allowed || !actorRole) {
     return { success: false, error: { code: 'FORBIDDEN', message: 'You must be a project admin to update roles' } };
   }
 
-  // Admin cannot create an owner
+  // Get target user's current role
+  const targetCurrentRole = await getProjectRole(result.data.userId, result.data.projectId);
+  if (!targetCurrentRole) {
+    return { success: false, error: { code: 'NOT_FOUND', message: 'Member not found in project' } };
+  }
+
+  // Guard: Cannot demote an Owner unless you are the owner
+  if (targetCurrentRole === 'owner' && actorRole !== 'owner') {
+    return { success: false, error: { code: 'FORBIDDEN', message: 'Only owners can modify other owners' } };
+  }
+
+  // Guard: Cannot escalate a user to Owner unless you are the owner
   if (result.data.role === 'owner' && actorRole !== 'owner') {
     return { success: false, error: { code: 'FORBIDDEN', message: 'Only owners can appoint new owners' } };
   }
