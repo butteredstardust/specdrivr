@@ -25,6 +25,12 @@
 - [x] **Serial Testing:** Configured Vitest to run integration tests serially to prevent database deadlocks.
 - [x] **Idempotency:** Seed script verified to be safe for multiple runs.
 
+### 5. CI & Final Sanity Check
+- [x] **Enum Alignment:** Confirmed `plan_status` strictly uses `'complete'` matching the established database migration `0000_concerned_morgan_stark.sql`.
+- [x] **Middleware Logic:** Validated that `src/proxy.ts` correctly bypasses static assets (checking for dots in paths) to prevent MIME type mismatch loops.
+- [x] **CI Networking:** Switched to `127.0.0.1` and `ipv4first` DNS resolution in `.github/workflows/` to prevent intermittent connection failures.
+- [x] **Environment Security:** Refined `env-core.ts` to provide safe 32-character defaults during test execution, satisfying Zod validation without real secrets.
+
 ## Identified Improvements (Post-Merge)
 1. **GitHub Installation ID:** Currently uses a global token; consider moving to GitHub App Installation IDs per project for better isolation.
 2. **Webhook Retries:** The current `WebhookService` dispatches events asynchronously but lacks a retry mechanism for failed deliveries (planned for TASK-017).
