@@ -27,8 +27,8 @@ export function parseEnv(): Env {
 
   const envToParse = {
     DATABASE_URL: process.env.DATABASE_URL,
-    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
-    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || (process.env.VITEST ? 'a'.repeat(32) : undefined),
+    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET || (process.env.VITEST ? 'a'.repeat(32) : undefined),
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     REDIS_URL: process.env.REDIS_URL,
     NODE_ENV: process.env.NODE_ENV,
@@ -36,14 +36,15 @@ export function parseEnv(): Env {
     GITHUB_WEBHOOK_SECRET: process.env.GITHUB_WEBHOOK_SECRET,
   };
 
-  // Skip validation during some test scenarios if needed, but integration tests DO need them
-  // If we're in Vitest, we'll log what's missing if it fails
+  if (process.env.VITEST && !process.env.DATABASE_URL) {
+    console.warn('Warning: DATABASE_URL is missing during Vitest execution.');
+  }
+
   try {
     return envSchema.parse(envToParse);
   } catch (error) {
     if (process.env.VITEST) {
-      console.error('Environment validation failed during Vitest:', error);
-      // We still throw because integration tests will fail without a DB URL
+      console.error('Environment validation failed during Vitest:', JSON.stringify(error, null, 2));
     }
     throw error;
   }

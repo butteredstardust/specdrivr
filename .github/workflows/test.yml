@@ -7,16 +7,19 @@ on:
     branches: [main]
 
 env:
-  DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/specdrivr_test
-  NEXTAUTH_URL: http://127.0.0.1:3000
-  NEXTAUTH_SECRET: test-secret-for-ci-must-be-32-chars-long
-  REDIS_URL: redis://127.0.0.1:6379
-  BETTER_AUTH_SECRET: test-secret-for-ci-must-be-32-chars-long
+  NODE_OPTIONS: "--dns-result-order=ipv4first"
 
 jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/specdrivr_test
+      NEXTAUTH_URL: http://127.0.0.1:3000
+      NEXTAUTH_SECRET: test-secret-for-ci-must-be-32-chars-long
+      REDIS_URL: redis://127.0.0.1:6379
+      BETTER_AUTH_SECRET: test-secret-for-ci-must-be-32-chars-long
 
     services:
       postgres:
@@ -68,18 +71,11 @@ jobs:
 
       - name: Run database migrations
         run: pnpm db:migrate
-        env:
-          DATABASE_URL: ${{ env.DATABASE_URL }}
 
       - name: Run unit tests
         run: pnpm vitest run
         env:
           CI: true
-          DATABASE_URL: ${{ env.DATABASE_URL }}
-          NEXTAUTH_SECRET: ${{ env.NEXTAUTH_SECRET }}
-          BETTER_AUTH_SECRET: ${{ env.BETTER_AUTH_SECRET }}
-          NEXTAUTH_URL: ${{ env.NEXTAUTH_URL }}
-          REDIS_URL: ${{ env.REDIS_URL }}
 
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps
@@ -88,8 +84,3 @@ jobs:
         run: pnpm test:e2e
         env:
           CI: true
-          DATABASE_URL: ${{ env.DATABASE_URL }}
-          NEXTAUTH_SECRET: ${{ env.NEXTAUTH_SECRET }}
-          BETTER_AUTH_SECRET: ${{ env.BETTER_AUTH_SECRET }}
-          NEXTAUTH_URL: ${{ env.NEXTAUTH_URL }}
-          REDIS_URL: ${{ env.REDIS_URL }}
