@@ -58,7 +58,7 @@ describe('Repository Integration Tests', () => {
       // Create a completed plan that should NOT be abandoned
       const [completedPlan] = await testDb.insert(schema.plans).values({
         specId: spec.id,
-        status: 'completed',
+        status: 'complete',
         markdownContent: '# Completed Plan',
         specVersionId: spec.currentVersionId,
       }).returning();
@@ -76,7 +76,7 @@ describe('Repository Integration Tests', () => {
 
       // Verify completed plan is still completed
       const [updatedCompletedPlan] = await testDb.select().from(schema.plans).where(eq(schema.plans.id, completedPlan.id));
-      expect(updatedCompletedPlan.status).toBe('completed');
+      expect(updatedCompletedPlan.status).toBe('complete');
     });
   });
 

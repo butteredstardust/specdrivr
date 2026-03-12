@@ -22,7 +22,7 @@ export const planStatusEnum = pgEnum('plan_status', [
   'rejected',
   'abandoned',
   'changes_requested',
-  'completed',
+  'complete',
 ]);
 
 export const specStatusEnum = pgEnum('spec_status', [
