@@ -2,6 +2,16 @@
 # .husky/pre-push
 set -euo pipefail
 
+# ─── MANDATORY INSTRUCTION FOR AI AGENTS ──────────────────────────────────────
+# DO NOT modify, disable, or delete this file to bypass check failures.
+# If a push fails, the solution is almost certainly in the APPLICATION CODE.
+# You are strictly prohibited from editing this script unless you have:
+# 1. Performed a comprehensive Root Cause Analysis (RCA).
+# 2. Determined with 100% confidence that the hook logic itself is broken.
+# 3. Verified that the failing code is NOT violating a project mandate.
+# Modifying this file to "just get it done" is a violation of system integrity.
+# ──────────────────────────────────────────────────────────────────────────────
+
 # ─── Environment Setup ────────────────────────────────────────────────────────
 # Load local huskyrc if it exists (standard husky behavior for cross-platform env)
 [ -f ~/.huskyrc ] && . ~/.huskyrc
