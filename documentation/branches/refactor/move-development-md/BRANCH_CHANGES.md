@@ -1,0 +1,8 @@
+| File Name | Summary of Changes | Summary Reason for Change | Expected Impact | Best Practice Evaluation Score | Reason for Deletion |
+| --- | --- | --- | --- | --- | --- |
+| [DEVELOPMENT.md](file:///Users/tuxgeek/Dev/specdrivr/documentation/DEVELOPMENT.md) | Moved from root to `documentation/`. | Better organization of project documentation. | None, internal links updated. | 10/10 | not deleted |
+| [AGENTS.md](file:///Users/tuxgeek/Dev/specdrivr/AGENTS.md) | Updated link to `DEVELOPMENT.md`. | Reflect new file location. | None. | 10/10 | not deleted |
+| [CLAUDE.md](file:///Users/tuxgeek/Dev/specdrivr/CLAUDE.md) | Updated link to `DEVELOPMENT.md`. | Reflect new file location. | None. | 10/10 | not deleted |
+| [README.md](file:///Users/tuxgeek/Dev/specdrivr/README.md) | Updated link to `DEVELOPMENT.md`. | Reflect new file location. | None. | 10/10 | not deleted |
+
+No changes to CI config or test files.

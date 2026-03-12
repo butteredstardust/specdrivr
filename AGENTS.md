@@ -2,7 +2,7 @@
 
 **AI Agent Operations Manual** for Specdrivr - an AI-native orchestration platform.
 
-> **Cross-reference:** For AI constraints, see `CLAUDE.md`. For human developer guidance, see `DEVELOPMENT.md`.
+> **Cross-reference:** For AI constraints, see `CLAUDE.md`. For human developer guidance, see `documentation/DEVELOPMENT.md`.
 
 ## Environment & Workflow
 
@@ -360,7 +360,7 @@ Before submitting any Pull Request:
 
 ## Summary
 
-Specdrivr enforces strict type safety, security, and performance standards. Always use repositories, validate inputs with Zod, log with Pino, and avoid prohibited patterns. When in doubt, consult `DEVELOPMENT.md` for implementations and `CLAUDE.md` for AI-specific constraints. Cross-reference all three docs to maintain consistency.
+Specdrivr enforces strict type safety, security, and performance standards. Always use repositories, validate inputs with Zod, log with Pino, and avoid prohibited patterns. When in doubt, consult `documentation/DEVELOPMENT.md` for implementations and `CLAUDE.md` for AI-specific constraints. Cross-reference all three docs to maintain consistency.
 
 Remember: your changes will be reviewed by humans and automated systems. Follow these guidelines precisely.
 
