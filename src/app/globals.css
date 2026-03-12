@@ -96,3 +96,22 @@ body {
   background-color: var(--background);
   color: var(--foreground);
 }
+
+/* Terminal Surface specific for agent logs */
+.terminal-surface::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 3px,
+    rgba(0, 0, 0, 0.15) 3px,
+    rgba(0, 0, 0, 0.15) 4px
+  );
+}
+
+:root {
+  --terminal-bg: #0d0d0a;
+}
