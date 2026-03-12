@@ -191,7 +191,7 @@ if echo "$additions" | grep -qE "console\.(log|debug|warn|table|dir)\s*\("; then
   die "Forbidden logging found (use @/lib/logger instead):\n$log_violators"
 fi
 
-if echo "$additions" | grep -q "debugger"; then
+if echo "$additions" | grep -q "debug""ger"; then
   die "Debugger statement found. Remove before pushing."
 fi
 
