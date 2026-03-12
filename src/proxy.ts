@@ -21,6 +21,8 @@ function isPublic(pathname: string): boolean {
   // Allow Next.js internals and static assets
   if (pathname.startsWith('/_next/')) return true;
   if (pathname.startsWith('/favicon')) return true;
+  // Allow any file with an extension (static assets)
+  if (pathname.includes('.')) return true;
   return false;
 }
 
@@ -55,7 +57,10 @@ export async function proxy(request: NextRequest) {
   }
 
   // Always allow public paths through
-  if (isPublic(pathname)) return response;
+  if (isPublic(pathname)) {
+    response.headers.set('x-proxy-status', 'public');
+    return response;
+  }
 
   // Agent-only paths: validate Bearer token format only (full token validation in route)
   if (isAgentPath(pathname)) {
