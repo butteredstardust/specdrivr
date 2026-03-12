@@ -73,6 +73,11 @@ for script in fix-tsc.sh fix-lint2.sh; do
   [ -f "$script" ] && die "Temporary script '$script' found. Remove before pushing."
 done
 
+# Block other package manager lockfiles
+for lock in package-lock.json yarn.lock; do
+  [ -f "$lock" ] && die "Forbidden lockfile '$lock' found. This project uses pnpm exclusively."
+done
+
 fix_scripts=$(find . -maxdepth 1 -name "fix-*.mjs" ! -path "./.git/*" 2>/dev/null || true)
 [ -n "$fix_scripts" ] && die "Temporary fix scripts found:\n$fix_scripts"
 
@@ -124,6 +129,7 @@ if echo "$additions" | grep -q "process\.env"; then
 fi
 
 # Direct DB imports in UI components (both quote styles) - Strict legacy rule
+# Mandate: Repository Pattern (GEMINI.md §3)
 tsx_files=$(echo "$changed_files" | grep "\.tsx$" || true)
 # Filter for existing files only to prevent xargs errors on deleted files
 existing_tsx=$(echo "$tsx_files" | while read -r f; do [ -f "$f" ] && echo "$f"; done || true)
@@ -131,12 +137,43 @@ existing_tsx=$(echo "$tsx_files" | while read -r f; do [ -f "$f" ] && echo "$f";
 if [ -n "$existing_tsx" ]; then
   db_violators=$(echo "$existing_tsx" \
     | xargs grep -lE "from ['\"]@/db['\"]" 2>/dev/null \
-    | grep -vE "src/(lib|server|repositories)/" || true)
+    | grep -vE "src/(lib|server|repositories|actions)/" || true)
   [ -n "$db_violators" ] && \
-    die "Direct DB imports in UI components:\n$db_violators\nUse repository pattern instead."
+    die "Direct DB imports found in UI components or pages:\n$db_violators\nUse the Repository Pattern (src/repositories/) instead."
 fi
 
-# ─── 9. Debug Code Detection ──────────────────────────────────────────────────
+# ─── 9. Specdrivr Architecture Guards ─────────────────────────────────────────
+# Guard A: Server Action Directives
+action_files=$(echo "$changed_files" | grep "src/actions/" || true)
+for f in $action_files; do
+  [ -f "$f" ] || continue
+  if ! grep -q "'use server'" "$f"; then
+    die "Server Action file '$f' is missing the 'use server' directive."
+  fi
+  if grep -q "throw new" "$f"; then
+    die "Server Action file '$f' contains 'throw'. Actions must return { success: false, error } instead."
+  fi
+done
+
+# Guard B: Repository executeQuery Wrapper
+repo_files=$(echo "$changed_files" | grep "src/repositories/" || true)
+for f in $repo_files; do
+  [ -f "$f" ] || continue
+  if ! grep -q "executeQuery" "$f"; then
+    die "Repository '$f' must use the 'executeQuery' wrapper for all database operations."
+  fi
+done
+
+# Guard C: Design System (No Hex Colors)
+# Scans only NEW code additions for hex patterns
+if echo "$additions" | grep -qE "#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})"; then
+  # Filter out allowed exceptions (e.g., globals.css variable definitions or config files)
+  color_violators=$(echo "$changed_diff" | awk '/^diff --git/ {file=$0; sub(/^diff --git a\/.* b\//, "", file)} /^(\+)([^+]|$)/ && /#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})/ {print file}' | sort -u | grep -vE "globals\.css|tailwind\.config|\.config\." || true)
+  [ -n "$color_violators" ] && \
+    die "Hardcoded hex colors found in:\n$color_violators\nUse Tailwind classes or CSS variables from globals.css instead."
+fi
+
+# ─── 10. Debug Code Detection ──────────────────────────────────────────────────
 # Allow console.error (legitimate); block log/debug/warn/table/dir and debugger
 if echo "$additions" | grep -qE "(console\.(log|debug|warn|table|dir)\s*\(|debugger\b)"; then
   die "Debug code found (console.log/debug/warn/table/dir or debugger). Remove before pushing."
