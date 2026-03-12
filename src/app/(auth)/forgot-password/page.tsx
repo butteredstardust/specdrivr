@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { PixelInput, PixelButton, PixelAlert, PixelCard } from '@pxlkit/ui-kit';
+import { PixelInput, PixelButton, PixelAlert } from '@pxlkit/ui-kit';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 
 export default function ForgotPasswordPage() {

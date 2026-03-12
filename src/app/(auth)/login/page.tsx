@@ -4,7 +4,7 @@ import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
-import { PixelInput, PixelPasswordInput, PixelButton, PixelAlert, PixelCard } from '@pxlkit/ui-kit';
+import { PixelInput, PixelPasswordInput, PixelButton, PixelAlert } from '@pxlkit/ui-kit';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 
 function LoginContent() {
