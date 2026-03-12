@@ -154,16 +154,20 @@ fi
 
 # ─── 11. Large File Guard ─────────────────────────────────────────────────────
 MAX_KB=500
+MAX_BYTES=$((MAX_KB * 1024))
 large_files=$(echo "$changed_files" | while IFS= read -r f; do
   [ -f "$f" ] || continue
-  size=$(du -k "$f" 2>/dev/null | cut -f1)
-  [ "${size:-0}" -gt "$MAX_KB" ] && echo "  $f (${size}KB)"
+  # Use wc -c for cross-platform size check (works on git bash / linux / mac)
+  size_bytes=$(wc -c < "$f")
+  if [ "$size_bytes" -gt "$MAX_BYTES" ]; then
+    echo "  $f ($((size_bytes / 1024))KB)"
+  fi
 done)
 [ -n "$large_files" ] && \
   die "Files exceeding ${MAX_KB}KB:\n$large_files\nUse Git LFS or remove generated assets."
 
 # ─── 12. Conventional Commits (all pushed commits) ───────────────────────────
-COMMIT_PATTERN="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert|merge)(\(.+\))?(!)?: .{1,100}$"
+COMMIT_PATTERN="^(feat|feature|fix|bugfix|docs|style|refactor|perf|test|build|ci|chore|revert|merge)(\(.+\))?(!)?: .{1,100}$"
 invalid_commits=""
 
 while IFS= read -r sha; do
@@ -189,13 +193,15 @@ if [ -z "$non_doc_files" ]; then
 fi
 
 # ─── 14. Build & Test Suite ───────────────────────────────────────────────────
-echo "Running TypeScript check..."
+echo "📦 Starting Build & Test Suite..."
+
+echo "🏷️ Running TypeScript check..."
 pnpm tsc --noEmit || die "TypeScript errors found. Run 'pnpm tsc --noEmit' for details."
 
-echo "Running ESLint..."
+echo "🔍 Running ESLint..."
 pnpm lint || die "Linting failed. Run 'pnpm lint' for details."
 
-echo "Running unit tests..."
+echo "🧪 Running unit tests..."
 pnpm test:unit || die "Unit tests failed. Run 'pnpm test:unit' for details."
 
 echo ""
