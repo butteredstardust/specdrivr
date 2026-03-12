@@ -175,7 +175,7 @@ The app shell wraps every screen. It is never unmounted during navigation.
 
 ---
 
-## 1.6 P5 — Specification Detail
+## 1.6 P5 — Specification Detail [Status: Verified Specification / Implementation Pending]
 
 **Route**: `/specs/[id]`
 **Entry**: Row click from P3, or redirect after save from P4
@@ -267,7 +267,7 @@ The app shell wraps every screen. It is never unmounted during navigation.
 
 ---
 
-## 1.8 P6 — Sessions
+## 1.8 P6 — Sessions [Status: Verified Specification / Implementation Pending]
 
 **Route**: `/sessions`
 **Nav link**: "Sessions" in sidebar
@@ -287,7 +287,7 @@ The app shell wraps every screen. It is never unmounted during navigation.
 
 ---
 
-## 1.9 P7 — Settings
+## 1.9 P7 — Settings [Status: Verified Specification / Implementation Pending]
 
 **Route**: `/settings`
 **Nav link**: "Settings" in sidebar
@@ -1525,3 +1525,9 @@ Verify three distinct permission levels:
 - Last Updated: 2026-03-08
 - Audience: Frontend Engineers, Product Managers
 - Purpose: Complete user interface specification including screens, interactions, state machines, and conditional rendering rules
+
+
+## Development Gaps & Technical Debt
+
+- **UI Components:** App shell, navigation, and core feature pages (Projects, Specs, Sessions) are currently stubbed or missing, though base `shadcn/ui` components are present.
+- **Mascot Integration:** DAEMON Mascot component exists but is not wired into the global state across pages.

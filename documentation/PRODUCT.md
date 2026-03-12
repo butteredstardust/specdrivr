@@ -82,7 +82,7 @@ Software specifications should be executable. The gap between "what we want to b
 | Technical level | Low - reads summaries; does not review diffs                                                                               |
 | Key flows used  | Dashboard / Mission Control → Sessions → Spec Activity                                                                     |
 
-# **14\. Onboarding**
+# **14\. Onboarding** [Status: Verified Specification / Implementation Pending]
 
 Triggered after invite acceptance or first login when onboardingDone = false. A full-page modal overlay (backdrop blur, app dimly visible behind). Three steps, ~30 seconds total. No skip button.
 
@@ -94,7 +94,7 @@ Triggered after invite acceptance or first login when onboardingDone = false. A 
 
 onboardingDone flag is set to true on step 3 completion. Never shown again. Can be restarted via Settings → General → \[Restart Onboarding Tour\] link.
 
-# **16\. Error States & Edge Cases**
+# **16\. Error States & Edge Cases** [Status: Verified Specification / Implementation Pending]
 
 ## **16.1 Spec Name Collision**
 
@@ -147,3 +147,8 @@ DAEMON error expression (large, centred) + "404 - Not found." + "This page doesn
 | 404                          | error      | 404 - Not found.      | This page doesn't exist or you don't have access.                        | \[Go to Mission Control\]    |
 | Mission Control (idle)       | idle       | SYSTEM READY          | No active session. Open a spec to begin.                                 | link to /specs               |
 
+
+
+## Development Gaps & Technical Debt
+
+- **As-Built vs Specified:** The original specification (like API envelope strictness and some webhook flows) has been adapted during implementation (e.g., using `better-auth` for auth, simpler Drizzle schema mappings) leaving a few feature gaps mostly in the UI (app shell, detailed spec editors) and integrations (GitHub, Slack).

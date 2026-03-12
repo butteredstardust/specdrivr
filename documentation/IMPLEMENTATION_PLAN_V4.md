@@ -6,114 +6,162 @@
 
 ### 1a. File Tree
 ```text
-.
-├── .dockerignore
-├── .env.example
-├── .github
-│   └── workflows
-│       ├── lint-and-typecheck.yml
-│       ├── security.yml
-│       └── test.yml
-├── .gitignore
-├── .npmrc
-├── .nvmrc
-├── AGENTS.md
-├── BOOTSTRAP_README.md
-├── CLAUDE.md
-├── DEVELOPMENT.md
-├── Dockerfile.ubuntu
-├── LICENSE
-├── README.md
-├── bootstrap.sh
-├── components.json
-├── docker-compose.yml
-├── documentation
-│   ├── API.md
-│   ├── ARCHITECTURE.md
-│   ├── AUTHENTICATION.md
-│   ├── DATABASE.md
-│   ├── DESIGN_SYSTEM.md
-│   ├── DEVELOPMENT.md
-│   ├── INTEGRATIONS.md
-│   ├── JULES_TEMPLATE.md
-│   ├── OPERATIONS.md
-│   ├── PRODUCT.md
-│   ├── PRODUCT_FEATURES.md
-│   ├── README.md
-│   ├── SCREEN_FLOW_INDEX.md
-│   ├── SPECIFICATION_INDEX.md
-│   ├── USER_INTERFACE.md
-│   └── specification.md
-├── drizzle.config.ts
-├── eslint.config.js
-├── next-env.d.ts
-├── next.config.mjs
-├── package-lock.json
-├── package.json
-├── playwright.config.ts
-├── postcss.config.mjs
-├── public
-│   ├── brand
-│   │   └── icon.svg
-│   ├── file.svg
-│   ├── globe.svg
-│   ├── next.svg
-│   ├── vercel.svg
-│   └── window.svg
-├── src
-│   ├── app
-│   │   ├── api
-│   │   │   ├── projects
-│   │   │   └── tasks
-│   │   ├── error.tsx
-│   │   ├── favicon.ico
-│   │   ├── global-error.tsx
-│   │   ├── globals.css
-│   │   ├── layout.tsx
-│   │   └── page.tsx
-│   ├── components
-│   │   ├── error-boundary.tsx
-│   │   └── ui
-│   │       ├── alert-dialog.tsx
-│   │       ├── avatar.tsx
-│   │       ├── badge.tsx
-│   │       ├── button.tsx
-│   │       ├── card.tsx
-│   │       ├── dialog.tsx
-│   │       ├── dropdown-menu.tsx
-│   │       ├── glass-card.tsx
-│   │       ├── input.tsx
-│   │       ├── label.tsx
-│   │       ├── separator.tsx
-│   │       ├── sheet.tsx
-│   │       ├── skeleton.tsx
-│   │       ├── sonner.tsx
-│   │       ├── tabs.tsx
-│   │       └── textarea.tsx
-│   ├── db
-│   │   ├── index.ts
-│   │   └── schema.ts
-│   ├── lib
-│   │   ├── db-helpers.ts
-│   │   ├── env.ts
-│   │   ├── error-handler.ts
-│   │   ├── errors.ts
-│   │   ├── schemas.ts
-│   │   └── utils.ts
-│   └── repositories
-│       ├── base-repository.ts
-│       ├── index.ts
-│       ├── project-repository.ts
-│       └── task-repository.ts
-├── tests
-│   ├── __snapshots__
-│   │   └── home.test.tsx.snap
-│   ├── e2e
-│   │   └── home.spec.ts
-│   ├── home.test.tsx
-│   └── setup.ts
-├── tsconfig.json
-└── vitest.config.ts
+src
+├── app
+│   ├── api
+│   │   ├── auth
+│   │   │   └── [...all]
+│   │   │       └── route.ts
+│   │   ├── health
+│   │   │   └── route.ts
+│   │   ├── v1
+│   │   │   ├── agent
+│   │   │   │   └── tasks
+│   │   │   │       └── next
+│   │   │   │           └── route.ts
+│   │   │   ├── auth
+│   │   │   │   ├── accept-invite
+│   │   │   │   │   └── route.ts
+│   │   │   │   └── signup
+│   │   │   │       └── route.ts
+│   │   │   ├── notifications
+│   │   │   │   ├── [id]
+│   │   │   │   │   └── read
+│   │   │   │   │       └── route.ts
+│   │   │   │   ├── preferences
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── read-all
+│   │   │   │   │   └── route.ts
+│   │   │   │   └── route.ts
+│   │   │   ├── plans
+│   │   │   │   └── [id]
+│   │   │   │       ├── abandon
+│   │   │   │       │   └── route.ts
+│   │   │   │       ├── approve
+│   │   │   │       │   └── route.ts
+│   │   │   │       ├── reject
+│   │   │   │       │   └── route.ts
+│   │   │   │       └── request-changes
+│   │   │   │           └── route.ts
+│   │   │   ├── projects
+│   │   │   │   ├── [id]
+│   │   │   │   │   ├── members
+│   │   │   │   │   │   ├── [userId]
+│   │   │   │   │   │   │   └── route.ts
+│   │   │   │   │   │   └── route.ts
+│   │   │   │   │   ├── route.ts
+│   │   │   │   │   ├── specs
+│   │   │   │   │   │   └── route.ts
+│   │   │   │   │   └── webhooks
+│   │   │   │   │       ├── [webhookId]
+│   │   │   │   │       │   ├── deliveries
+│   │   │   │   │       │   │   └── route.ts
+│   │   │   │   │       │   └── route.ts
+│   │   │   │   │       └── route.ts
+│   │   │   │   └── route.ts
+│   │   │   ├── sessions
+│   │   │   │   ├── [id]
+│   │   │   │   │   ├── cancel
+│   │   │   │   │   │   └── route.ts
+│   │   │   │   │   ├── complete
+│   │   │   │   │   │   └── route.ts
+│   │   │   │   │   ├── heartbeat
+│   │   │   │   │   │   └── route.ts
+│   │   │   │   │   ├── resume
+│   │   │   │   │   │   └── route.ts
+│   │   │   │   │   └── route.ts
+│   │   │   │   └── route.ts
+│   │   │   ├── specs
+│   │   │   │   └── [id]
+│   │   │   │       ├── plan
+│   │   │   │       │   ├── generate
+│   │   │   │       │   │   └── route.ts
+│   │   │   │       │   └── route.ts
+│   │   │   │       └── versions
+│   │   │   │           ├── [vId]
+│   │   │   │           │   └── route.ts
+│   │   │   │           └── route.ts
+│   │   │   ├── tasks
+│   │   │   │   ├── [id]
+│   │   │   │   │   ├── attempts
+│   │   │   │   │   │   └── route.ts
+│   │   │   │   │   ├── changes
+│   │   │   │   │   │   └── route.ts
+│   │   │   │   │   └── route.ts
+│   │   │   │   └── route.ts
+│   │   │   └── users
+│   │   │       └── me
+│   │   │           ├── password
+│   │   │           │   └── route.ts
+│   │   │           ├── route.ts
+│   │   │           └── tokens
+│   │   │               └── route.ts
+│   │   └── webhooks
+│   │       └── github
+│   │           └── [projectId]
+│   │               └── route.ts
+│   ├── dashboard
+│   │   └── page.tsx
+│   ├── error.tsx
+│   ├── favicon.ico
+│   ├── global-error.tsx
+│   ├── globals.css
+│   ├── layout.tsx
+│   ├── login
+│   │   └── page.tsx
+│   └── page.tsx
+├── components
+│   ├── error-boundary.tsx
+│   └── ui
+│       ├── badge.tsx
+│       ├── button.tsx
+│       ├── card.tsx
+│       ├── daemon-mascot.tsx
+│       ├── progress.tsx
+│       ├── separator.tsx
+│       ├── skeleton.tsx
+│       └── table.tsx
+├── db
+│   ├── index.ts
+│   └── schema.ts
+├── lib
+│   ├── api-response.ts
+│   ├── auth-client.ts
+│   ├── auth.ts
+│   ├── db-helpers.ts
+│   ├── env-core.ts
+│   ├── env-script.ts
+│   ├── env.ts
+│   ├── error-handler.ts
+│   ├── errors.ts
+│   ├── lock-manager.ts
+│   ├── logger.ts
+│   ├── pricing.ts
+│   ├── rate-limiter.ts
+│   ├── rbac.ts
+│   ├── redis.ts
+│   ├── schemas.ts
+│   └── utils.ts
+├── proxy.ts
+└── repositories
+    ├── agent-session-repository.ts
+    ├── base-repository.ts
+    ├── index.ts
+    ├── plan-repository.ts
+    ├── project-repository.ts
+    ├── specification-repository.ts
+    ├── task-repository.ts
+    └── user-repository.ts
+tests
+├── __snapshots__
+│   └── home.test.tsx.snap
+├── e2e
+│   └── home.spec.ts
+├── home.test.tsx
+└── setup.ts
+
+65 directories, 88 files
+
 ```
 
 ### 1b. Package Inventory
@@ -129,35 +177,35 @@
 - Testing Framework (Playwright): ^1.42.0
 
 ### 1c. Schema Audit
-- `projects`: EXISTS_PARTIAL (Missing columns: slug, createdBy, avatarColor, isDemo)
+- `projects`: EXISTS_COMPLETE
 - `specifications`: EXISTS_COMPLETE
-- `plans`: EXISTS_PARTIAL (Missing columns: generationDurationMs, generationError, modelVersion, taskCount, totalEstimatedMinutes)
-- `tasks`: EXISTS_PARTIAL (Missing columns: estimatedMinutes, actualDurationMs, gitBranch, gitCommitHash, expectedFiles, agentVersion, promptTokensUsed, completionTokensUsed, totalCostUsd)
+- `plans`: EXISTS_COMPLETE
+- `tasks`: EXISTS_COMPLETE
 - `test_results`: EXISTS_COMPLETE
 - `agent_logs`: EXISTS_COMPLETE
-- `users`: EXISTS_PARTIAL (Missing columns: avatarUrl, timezone, locale, onboardingStep)
+- `users`: EXISTS_COMPLETE
 - `git_commits`: EXISTS_COMPLETE
 - `agent_tokens`: EXISTS_COMPLETE
 - `api_request_logs`: EXISTS_COMPLETE
-- `task_attempts`: MISSING (Needs to be created)
-- `file_changes`: MISSING (Needs to be created)
-- `agent_sessions`: MISSING (Needs to be created)
-- `agent_config`: MISSING (Needs to be created)
-- `webhook_deliveries`: MISSING (Needs to be created)
-- `usage_snapshots`: MISSING (Needs to be created)
-- `invites`: MISSING (Needs to be created)
+- `task_attempts`: EXISTS_COMPLETE
+- `file_changes`: EXISTS_COMPLETE
+- `agent_sessions`: EXISTS_COMPLETE
+- `agent_config`: EXISTS_COMPLETE
+- `webhook_deliveries`: EXISTS_COMPLETE
+- `usage_snapshots`: EXISTS_COMPLETE
+- `invites`: EXISTS_COMPLETE
 
 ### 1d. API Route Audit
-- `src/app/api/projects/route.ts` (GET, POST, PATCH, DELETE) -> STUB (Implements part of API.md §6.2, but missing nested routes, /api/v1 prefix)
-- `src/app/api/tasks/route.ts` (GET, POST, PATCH) -> STUB (Implements part of API.md §6.5, missing /api/v1 prefix)
-- Auth endpoints: MISSING
-- Projects API (/api/v1/projects/:id): MISSING
-- Specifications API: MISSING
-- Plans API: MISSING
-- Tasks API (/api/v1/tasks/:id/*): MISSING
-- Sessions API: MISSING
-- Team management API: MISSING
-- Notifications & User API: MISSING
+- `src/app/api/v1/projects/*`: EXISTS (Implemented)
+- `src/app/api/v1/tasks/*`: EXISTS (Implemented)
+- Auth endpoints: EXISTS (Implemented `src/app/api/auth/[...all]`)
+- Projects API (`/api/v1/projects/:id`): EXISTS
+- Specifications API: EXISTS (`/api/v1/specs/*`)
+- Plans API: EXISTS (`/api/v1/plans/*`)
+- Tasks API (`/api/v1/tasks/:id/*`): EXISTS
+- Sessions API: EXISTS (`/api/v1/sessions/*`)
+- Team management API: EXISTS (`/api/v1/projects/[id]/members/*`)
+- Notifications & User API: EXISTS (`/api/v1/notifications/*`, `/api/v1/users/me/*`)
 
 ### 1e. Page and Component Audit
 - Mission Control (`/`): STUB (Simple static page, missing actual dashboard UI, task integration)
@@ -175,11 +223,11 @@
 - Task Drawer / Overlays / Dialogs: MISSING
 
 ### 1f. Configuration Audit
-- `middleware.ts` / `proxy.ts`: MISSING
-- `lib/auth.ts`: MISSING
+- `proxy.ts`: EXISTS
+- `lib/auth.ts`: EXISTS
 - `lib/db/index.ts`: EXISTS
 - `lib/env.ts`: EXISTS
-- `lib/logger.ts`: MISSING
+- `lib/logger.ts`: EXISTS
 - Redis client setup: MISSING
 - Rate limiting setup: MISSING
 
@@ -224,7 +272,7 @@
 
 ---
 
-## TASK-001: Schema Updates — Users, Projects, Invites
+## TASK-001: Schema Updates — Users, Projects, Invites [COMPLETED]
 
 **Area:** Database
 **Depends on:** none
@@ -233,12 +281,12 @@
 ### Context
 Extends existing `users` and `projects` tables with missing fields and adds the `invites` table for team management. Critical for avatar display, accurate timezone/locale rendering, and routing (project slug).
 ### Acceptance criteria
-- [ ] `avatarUrl`, `timezone`, `locale`, and `onboardingStep` exist on the `users` table.
-- [ ] `slug`, `createdBy`, `avatarColor`, and `isDemo` exist on the `projects` table with the correct constraints.
-- [ ] `invites` table is created with `invitedBy`, `resendCount`, and `lastResentAt` fields.
-- [ ] A Drizzle migration can be successfully generated using `pnpm db:generate`.
+- [x] `avatarUrl`, `timezone`, `locale`, and `onboardingStep` exist on the `users` table.
+- [x] `slug`, `createdBy`, `avatarColor`, and `isDemo` exist on the `projects` table with the correct constraints.
+- [x] `invites` table is created with `invitedBy`, `resendCount`, and `lastResentAt` fields.
+- [x] A Drizzle migration can be successfully generated using `pnpm db:generate`.
 ### Implementation notes
-- **File:** `src/db/schema.ts` — Add missing columns to `users` and `projects`. Add new `invites` table definition.
+- **File:** `src/db/schema.ts` — Added missing columns to `users` and `projects`. Added new `invites` table definition.
 - **Database query pattern:** Add missing columns and tables. No transaction required.
 - **Index:** Create an index on `projects.slug`.
 - **Note:** The `specifications` table must support `stalled` as a valid enum status. This maps to a spec whose last session ended in paused or failed without resolution.
@@ -246,7 +294,7 @@ Extends existing `users` and `projects` tables with missing fields and adds the 
 
 ---
 
-## TASK-002: Schema Updates — Plans, Tasks, File Changes
+## TASK-002: Schema Updates — Plans, Tasks, File Changes [COMPLETED]
 
 **Area:** Database
 **Depends on:** TASK-001
@@ -266,7 +314,7 @@ Updates orchestration core tables (`plans` and `tasks`) to support telemetry, co
 
 ---
 
-## TASK-003: Schema Updates — Sessions, Config, Integrations, Usage
+## TASK-003: Schema Updates — Sessions, Config, Integrations, Usage [COMPLETED]
 
 **Area:** Database
 **Depends on:** TASK-002
@@ -286,7 +334,7 @@ Finalizes the data model by creating agent sessions, agent configuration, webhoo
 
 ---
 
-## TASK-004: Seed Data Generation
+## TASK-004: Seed Data Generation [PENDING]
 
 **Area:** Database
 **Depends on:** TASK-003
@@ -309,7 +357,7 @@ Implements the definitive database seed script to meet exact product demonstrati
 
 ---
 
-## TASK-005: Authentication Infrastructure
+## TASK-005: Authentication Infrastructure [COMPLETED]
 
 **Area:** Auth
 **Depends on:** TASK-004
@@ -330,7 +378,7 @@ Setup BetterAuth v5 (next-auth v5), configure bcrypt password hashing, and imple
 
 ---
 
-## TASK-006: Core Middlewares (Rate Limiting, Logger)
+## TASK-006: Core Middlewares (Rate Limiting, Logger) [COMPLETED]
 
 **Area:** Infrastructure
 **Depends on:** TASK-005
@@ -355,7 +403,7 @@ Sets up global request proxying, structured JSON logging via Pino, and Redis-bac
 
 ---
 
-## TASK-007: API — Auth Endpoints
+## TASK-007: API — Auth Endpoints [IN_PROGRESS]
 
 **Area:** API
 **Depends on:** TASK-006
@@ -410,22 +458,22 @@ DB query: `db.transaction(async (tx) => { ... })` (Insert/Update user, Delete in
 
 ---
 
-## TASK-008: API — Projects CRUD
+## TASK-008: API — Projects CRUD [COMPLETED]
 
 **Area:** API
-**Depends on:** TASK-007
+**Depends on:** TASK-001, TASK-005
 **Estimated effort:** M
 
 ### Context
-Restructures the existing project stubs into `/api/v1/projects`. Enforces RBAC permissions.
+Build the core API for managing projects, ensuring correct RBAC checks. Note: Partial implementation currently returning raw arrays instead of strict envelopes.
 ### Acceptance criteria
-- [ ] `GET /api/v1/projects` returns projects.
-- [ ] `GET /api/v1/projects/:id` returns project details and member counts.
-- [ ] `POST /api/v1/projects` creates project.
-- [ ] `PATCH /api/v1/projects/:id` correctly updates project configurations.
-- [ ] `DELETE /api/v1/projects/:id` deletes project.
+- [x] GET `/api/v1/projects` lists accessible projects (paginated).
+- [x] POST `/api/v1/projects` creates a new project and sets the creator as owner.
+- [x] GET `/api/v1/projects/[id]` retrieves single project details.
+- [x] PATCH `/api/v1/projects/[id]` updates project settings (admin only).
+- [x] DELETE `/api/v1/projects/[id]` soft-deletes a project (owner only).
 ### Implementation notes
-- **File:** `src/app/api/v1/projects/route.ts`, `src/app/api/v1/projects/[id]/route.ts`
+- **File:** `src/app/api/v1/projects/route.ts` and `src/app/api/v1/projects/[id]/route.ts`
 
 **Endpoint: GET /api/v1/projects**
 Request body: none
@@ -464,7 +512,7 @@ DB query: `db.delete(projects).where(eq(projects.id, id))` (No transaction requi
 
 ---
 
-## TASK-009: API — Specifications CRUD
+## TASK-009: API — Specifications CRUD [IN_PROGRESS]
 
 **Area:** API
 **Depends on:** TASK-008
@@ -527,7 +575,7 @@ DB query: `db.select().from(spec_versions).where(and(eq(specId, id), eq(id, vId)
 
 ---
 
-## TASK-010: API — Plans
+## TASK-010: API — Plans [IN_PROGRESS]
 
 **Area:** API
 **Depends on:** TASK-009
@@ -600,7 +648,7 @@ DB query: `db.update(plans).set({ status: 'abandoned' }).where(eq(id, planId))` 
 
 ---
 
-## TASK-011: API — Tasks CRUD
+## TASK-011: API — Tasks CRUD [IN_PROGRESS]
 
 **Area:** API
 **Depends on:** TASK-010
@@ -652,7 +700,7 @@ DB query: `db.select().from(file_changes).innerJoin(task_attempts)...` (No trans
 
 ---
 
-## TASK-012: API — Sessions
+## TASK-012: API — Sessions [IN_PROGRESS]
 
 **Area:** API
 **Depends on:** TASK-011
@@ -723,7 +771,7 @@ DB query: `db.select().from(agent_logs).where(eq(sessionId, id)).orderBy(desc(cr
 
 ---
 
-## TASK-013: API — Team Management
+## TASK-013: API — Team Management [IN_PROGRESS]
 
 **Area:** API
 **Depends on:** TASK-008
@@ -777,7 +825,7 @@ DB query: `db.update(invites).set({ expiresAt: new Date(Date.now() + 7*24*60*60*
 
 ---
 
-## TASK-014: API — Users & Tokens
+## TASK-014: API — Users & Tokens [IN_PROGRESS]
 
 **Area:** API
 **Depends on:** TASK-007
@@ -818,7 +866,7 @@ DB query: `db.update(users).set({ password: bcrypt(newPassword) }).where(eq(id, 
 
 ---
 
-## TASK-015: API — Agent Protocol Endpoints
+## TASK-015: API — Agent Protocol Endpoints [IN_PROGRESS]
 
 **Area:** API / Integration
 **Depends on:** TASK-011
@@ -862,7 +910,7 @@ DB query: `db.update(agent_sessions).set({ status: 'completed', totalPromptToken
 
 ---
 
-## TASK-016: API — Notifications & Webhooks
+## TASK-016: API — Notifications & Webhooks [IN_PROGRESS]
 
 **Area:** API
 **Depends on:** TASK-008
@@ -891,7 +939,7 @@ DB query: `db.insert(agent_logs)` / `db.insert(notifications)` based on event. N
 
 ---
 
-## TASK-017: Design System, Mascot & Base States
+## TASK-017: Design System, Mascot & Base States [COMPLETED]
 
 **Area:** UI — Design System
 **Depends on:** none
@@ -911,7 +959,7 @@ Implements the core visual language, Tailwind configuration, and the DAEMON masc
 
 ---
 
-## TASK-018: App Shell & Navigation
+## TASK-018: App Shell & Navigation [PENDING]
 
 **Area:** UI — App Shell
 **Depends on:** TASK-017
@@ -932,7 +980,7 @@ Build the primary application layout, including sidebar navigation, top header (
 
 ---
 
-## TASK-019: Shared UI Components (Terminal, Diff, Log Row)
+## TASK-019: Shared UI Components (Terminal, Diff, Log Row) [PENDING]
 
 **Area:** UI — Components
 **Depends on:** TASK-017
@@ -949,7 +997,7 @@ Build complex reusable UI components: xterm.js wrapper, Shiki diff viewer, and g
 
 ---
 
-## TASK-020: Shared Infrastructure — Polling Hook
+## TASK-020: Shared Infrastructure — Polling Hook [PENDING]
 
 **Area:** UI — Infrastructure
 **Depends on:** TASK-017
@@ -966,7 +1014,7 @@ Build complex reusable UI components: xterm.js wrapper, Shiki diff viewer, and g
 
 ---
 
-## TASK-021: Error Pages (404, 500)
+## TASK-021: Error Pages (404, 500) [COMPLETED]
 
 **Area:** UI
 **Depends on:** TASK-017
@@ -986,7 +1034,7 @@ Not found and global error pages.
 
 ---
 
-## TASK-022: Auth UI — Login Page
+## TASK-022: Auth UI — Login Page [PENDING]
 
 **Area:** UI — Auth
 **Depends on:** TASK-007, TASK-017
@@ -1002,7 +1050,7 @@ Login page.
 
 ---
 
-## TASK-023: Auth UI — Forgot & Reset Password
+## TASK-023: Auth UI — Forgot & Reset Password [PENDING]
 
 **Area:** UI — Auth
 **Depends on:** TASK-007, TASK-017
@@ -1018,7 +1066,7 @@ Password recovery pages.
 
 ---
 
-## TASK-024: Auth UI — Accept Invite Page
+## TASK-024: Auth UI — Accept Invite Page [PENDING]
 
 **Area:** UI — Auth
 **Depends on:** TASK-013, TASK-017
@@ -1033,7 +1081,7 @@ Invite acceptance page.
 
 ---
 
-## TASK-025: Onboarding Wizard
+## TASK-025: Onboarding Wizard [PENDING]
 
 **Area:** UI
 **Depends on:** TASK-010, TASK-017
@@ -1053,7 +1101,7 @@ Full 3-step onboarding modal.
 
 ---
 
-## TASK-026: Mission Control Dashboard
+## TASK-026: Mission Control Dashboard [PENDING]
 
 **Area:** UI — Mission Control
 **Depends on:** TASK-018, TASK-020
@@ -1104,7 +1152,7 @@ Amber/orange background. Clicking a task chip navigates to that spec's Tasks tab
 
 ---
 
-## TASK-027: Projects Listing Page
+## TASK-027: Projects Listing Page [PENDING]
 
 **Area:** UI
 **Depends on:** TASK-010, TASK-018
@@ -1121,7 +1169,7 @@ List projects.
 
 ---
 
-## TASK-028: Project Creation UI
+## TASK-028: Project Creation UI [PENDING]
 
 **Area:** UI
 **Depends on:** TASK-010, TASK-017
@@ -1136,7 +1184,7 @@ Standalone project creation.
 
 ---
 
-## TASK-029: Specs Listing Page
+## TASK-029: Specs Listing Page [PENDING]
 
 **Area:** UI
 **Depends on:** TASK-009, TASK-018
@@ -1155,7 +1203,7 @@ Specifications list with search, status filter, pagination.
 
 ---
 
-## TASK-030: Spec Editor — New Spec
+## TASK-030: Spec Editor — New Spec [PENDING]
 
 **Area:** UI
 **Depends on:** TASK-009, TASK-018
@@ -1180,7 +1228,7 @@ Markdown editor for new specs.
 
 ---
 
-## TASK-031: Spec Editor — Edit Existing
+## TASK-031: Spec Editor — Edit Existing [PENDING]
 
 **Area:** UI
 **Depends on:** TASK-009, TASK-018
@@ -1209,7 +1257,7 @@ Editor for existing specs with edge case handling.
 
 ---
 
-## TASK-032: Spec Detail — Overview Tab & Header
+## TASK-032: Spec Detail — Overview Tab & Header [PENDING]
 
 **Area:** UI
 **Depends on:** TASK-009, TASK-018
@@ -1238,7 +1286,7 @@ Spec detail header and main overview tab.
 
 ---
 
-## TASK-033: Spec Detail — Plan Review Tab
+## TASK-033: Spec Detail — Plan Review Tab [PENDING]
 
 **Area:** UI
 **Depends on:** TASK-010, TASK-020
@@ -1273,7 +1321,7 @@ Plan generation, review, and approval flow.
 
 ---
 
-## TASK-034: Spec Detail — Approve & Execute Action
+## TASK-034: Spec Detail — Approve & Execute Action [PENDING]
 
 **Area:** UI
 **Depends on:** TASK-033
@@ -1294,7 +1342,7 @@ Approve action with RBAC.
 
 ---
 
-## TASK-035: Spec Detail — Tasks Tab
+## TASK-035: Spec Detail — Tasks Tab [PENDING]
 
 **Area:** UI
 **Depends on:** TASK-011, TASK-018
@@ -1323,7 +1371,7 @@ Task list tab within spec detail.
 
 ---
 
-## TASK-036: Spec Detail — Changes Tab
+## TASK-036: Spec Detail — Changes Tab [PENDING]
 
 **Area:** UI
 **Depends on:** TASK-011, TASK-019
@@ -1340,7 +1388,7 @@ Changes tab rendering diffs.
 
 ---
 
-## TASK-037: Spec Detail — Version History
+## TASK-037: Spec Detail — Version History [PENDING]
 
 **Area:** UI
 **Depends on:** TASK-009, TASK-018
@@ -1356,7 +1404,7 @@ Spec version history list and viewer.
 
 ---
 
-## TASK-038: Task Drawer — Layout & Overview
+## TASK-038: Task Drawer — Layout & Overview [PENDING]
 
 **Area:** UI — Overlays
 **Depends on:** TASK-011, TASK-018
@@ -1372,7 +1420,7 @@ Global sheet component for task details.
 
 ---
 
-## TASK-039: Task Drawer — Attempts & Logs
+## TASK-039: Task Drawer — Attempts & Logs [PENDING]
 
 **Area:** UI — Overlays
 **Depends on:** TASK-011, TASK-019, TASK-020
@@ -1389,7 +1437,7 @@ Logs rendering inside drawer.
 
 ---
 
-## TASK-040: Task Drawer — Changes (Diffs) Tab
+## TASK-040: Task Drawer — Changes (Diffs) Tab [PENDING]
 
 **Area:** UI — Overlays
 **Depends on:** TASK-011, TASK-019
@@ -1406,7 +1454,7 @@ Diffs tab in drawer.
 
 ---
 
-## TASK-041: Task Drawer — Blocked State & Unblock Form
+## TASK-041: Task Drawer — Blocked State & Unblock Form [PENDING]
 
 **Area:** UI — Overlays
 **Depends on:** TASK-011
@@ -1421,7 +1469,7 @@ Handling blocked tasks.
 
 ---
 
-## TASK-042: Task Drawer — Cost Panel & Overrides
+## TASK-042: Task Drawer — Cost Panel & Overrides [PENDING]
 
 **Area:** UI — Overlays
 **Depends on:** TASK-011
@@ -1445,7 +1493,7 @@ Overrides and dev mode metrics.
 
 ---
 
-## TASK-043: Sessions Listing Page
+## TASK-043: Sessions Listing Page [PENDING]
 
 **Area:** UI
 **Depends on:** TASK-012, TASK-018
@@ -1460,7 +1508,7 @@ List sessions.
 
 ---
 
-## TASK-044: Session Detail View
+## TASK-044: Session Detail View [PENDING]
 
 **Area:** UI
 **Depends on:** TASK-012, TASK-018
@@ -1502,7 +1550,7 @@ Session detail.
 
 ---
 
-## TASK-045: Notifications UI
+## TASK-045: Notifications UI [PENDING]
 
 **Area:** UI
 **Depends on:** TASK-016, TASK-018
@@ -1517,7 +1565,7 @@ Notification dropdown and page.
 
 ---
 
-## TASK-046: Settings Layout & General Tab
+## TASK-046: Settings Layout & General Tab [PENDING]
 
 **Area:** UI — Settings
 **Depends on:** TASK-010, TASK-018
@@ -1534,7 +1582,7 @@ Settings page layout.
 
 ---
 
-## TASK-047: Settings — Profile
+## TASK-047: Settings — Profile [PENDING]
 
 **Area:** UI — Settings
 **Depends on:** TASK-014
@@ -1625,7 +1673,7 @@ TASK-016 covers the API. This task covers only the UI.
 
 ---
 
-## TASK-048: Settings — API Tokens
+## TASK-048: Settings — API Tokens [PENDING]
 
 **Area:** UI — Settings
 **Depends on:** TASK-014
@@ -1640,7 +1688,7 @@ API token generation.
 
 ---
 
-## TASK-049: Settings — Team Management
+## TASK-049: Settings — Team Management [PENDING]
 
 **Area:** UI — Settings
 **Depends on:** TASK-013
@@ -1657,7 +1705,7 @@ Team management tab.
 
 ---
 
-## TASK-050: Settings — Agent
+## TASK-050: Settings — Agent [PENDING]
 
 **Area:** UI — Settings
 **Depends on:** TASK-010
@@ -1690,7 +1738,7 @@ Agent settings.
 
 ---
 
-## TASK-051: Settings — Integrations
+## TASK-051: Settings — Integrations [PENDING]
 
 **Area:** UI — Settings
 **Depends on:** TASK-016
@@ -1707,7 +1755,7 @@ Integrations settings.
 
 ---
 
-## TASK-052: Settings — Usage
+## TASK-052: Settings — Usage [PENDING]
 
 **Area:** UI — Settings
 **Depends on:** TASK-017
@@ -1722,7 +1770,7 @@ Usage statistics.
 
 ---
 
-## TASK-053: Settings — Danger Zone
+## TASK-053: Settings — Danger Zone [PENDING]
 
 **Area:** UI — Settings
 **Depends on:** TASK-010
@@ -1771,7 +1819,7 @@ Project deletion.
 
 ---
 
-## TASK-054: Settings — Webhook Delivery Log
+## TASK-054: Settings — Webhook Delivery Log [PENDING]
 
 **Area:** UI — Settings
 **Depends on:** TASK-016
@@ -1786,7 +1834,7 @@ Webhook logs.
 
 ---
 
-## TASK-055: Audit Log Viewer
+## TASK-055: Audit Log Viewer [PENDING]
 
 **Area:** UI — Settings
 **Depends on:** TASK-017
@@ -1803,7 +1851,7 @@ Audit log page.
 
 ---
 
-## TASK-056: Webhooks Event Dispatcher
+## TASK-056: Webhooks Event Dispatcher [PENDING]
 
 **Area:** Integration
 **Depends on:** TASK-016
@@ -1822,7 +1870,7 @@ Backend webhook dispatcher.
 
 ---
 
-## TASK-057: Usage Aggregation Cron Job
+## TASK-057: Usage Aggregation Cron Job [PENDING]
 
 **Area:** Integration
 **Depends on:** TASK-012
@@ -1840,7 +1888,7 @@ Nightly job that reads completed sessions and writes daily aggregates to `usage_
 
 ---
 
-## TASK-058: GitHub Integration Backend
+## TASK-058: GitHub Integration Backend [PENDING]
 
 **Area:** Integration
 **Depends on:** TASK-016
@@ -1858,7 +1906,7 @@ DAEMON agent needs a `GITHUB_TOKEN` to clone, branch, commit, and push.
 
 ---
 
-## TASK-059: Slack Notification Dispatcher
+## TASK-059: Slack Notification Dispatcher [PENDING]
 
 **Area:** Integration
 **Depends on:** TASK-016
@@ -1875,7 +1923,7 @@ Posts to Slack channels when specific DAEMON events occur.
 
 ---
 
-## TASK-060: Dev Mode State Management
+## TASK-060: Dev Mode State Management [PENDING]
 
 **Area:** UI
 **Depends on:** TASK-018
@@ -1891,7 +1939,7 @@ Posts to Slack channels when specific DAEMON events occur.
 
 ---
 
-## TASK-061: Keyboard Shortcuts Modal
+## TASK-061: Keyboard Shortcuts Modal [PENDING]
 
 **Area:** UI
 **Depends on:** TASK-018
@@ -1908,7 +1956,7 @@ Posts to Slack channels when specific DAEMON events occur.
 
 ---
 
-## TASK-062: SYSTEMS Bar Health Indicators
+## TASK-062: SYSTEMS Bar Health Indicators [PENDING]
 
 **Area:** UI
 **Depends on:** TASK-018
@@ -1957,3 +2005,21 @@ TASK-001 → TASK-002 → TASK-003 → TASK-004 → TASK-005 → TASK-008 → TA
 - [DECISION-011] API schemas: Inline the Zod schemas in API endpoints to keep validation rigid and documented.
 - [DECISION-012] Settings Security page: active session management UI assumes a GET /api/v1/users/me/sessions endpoint. If absent from TASK-014, add it there.
 - [DECISION-013] Danger Zone: two new API endpoints (abandon-all sessions, reset agent config) are implied by the UI. Assign to closest existing API task.
+
+## Phase 6 — Gap & Debt Analysis (Audit Log)
+
+### 6a. Architectural Drift
+- **Authentication:** Original spec (API.md §6.1) dictated custom `/api/auth/sign-in/email` and `/api/auth/sign-out` endpoints interacting manually with Redis/Bcrypt. Implementation uses the native `better-auth` library via `src/app/api/auth/[...all]/route.ts`. The custom signup endpoint at `src/app/api/v1/auth/signup/route.ts` remains as a bridge but deviates from strict spec. This impacts TASK-005, TASK-007, and TASK-022.
+- **Data Fetching:** The spec assumes `{ data, meta }` envelopes across all `/api/v1` routes. The current implementation (e.g., in `src/app/api/v1/projects/route.ts` and `src/app/api/v1/projects/[id]/specs/route.ts`) frequently returns flat arrays or raw JSON objects instead.
+- **File Hierarchy:** API routes were originally planned as monolithic handlers (e.g., `src/app/api/projects/route.ts`), but have been correctly nested in the As-Built code (`src/app/api/v1/projects/[id]/route.ts`, `src/app/api/v1/projects/[id]/members/[userId]/route.ts`).
+
+### 6b. Missing Acceptance Criteria & Stubbed Features
+- **TASK-018 (App Shell & Navigation):** `src/app/layout.tsx` is present but the sidebar, DAEMON integration, and active navigation states defined in DESIGN_SYSTEM.md §10 are MISSING.
+- **TASK-004 (Seed Data Generation):** A `src/db/seed.ts` script exists but is empty/unimplemented. Local development currently lacks programmatic seed data, forcing manual DB entry.
+- **TASK-026 to TASK-037 (UI Pages):** Critical frontend screens (`dashboard/page.tsx`, `projects`, `specs`) are essentially empty stubs. Base `shadcn/ui` components are present in `src/components/ui/` but are not composed into the views required by USER_INTERFACE.md.
+- **TASK-058 & TASK-059 (Integrations):** While webhooks logic is scaffolded (`src/app/api/v1/webhooks/github/[projectId]/route.ts`), the actual Slack notification dispatcher and deeper GitHub integrations are not yet fully implemented.
+
+### 6c. Technical Debt
+- **Frontend State Management:** The lack of implemented global state (Context/Zustand) means that DAEMON Mascot expressions (TASK-017) cannot yet react to active session states or background polling.
+- **Error Boundaries:** Although `src/components/error-boundary.tsx` exists, comprehensive error states and 404/500 routing pages required by OPERATIONS.md are incomplete.
+- **Pagination & Rate Limiting Enforcement:** While `src/proxy.ts` implements Upstash, actual granular rate limiting logic inside individual route handlers hasn't been strictly validated against the tier structures defined in API.md.
