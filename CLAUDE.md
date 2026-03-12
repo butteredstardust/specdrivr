@@ -95,7 +95,7 @@ Before building any UI element, consult `DESIGN_SYSTEM.md` for visual language, 
 
 **Hard rules:**
 - Never write a custom component when a pxlkit or pxlkit/ui or shadcn/ui equivalent exists.
-- Never hardcode visual values in custom components. Always use `DESIGN_SYSTEM.md` tokens and `src/app/globals.css` CSS variables.
+- Never hardcode visual values in custom components. Always reference `DESIGN_SYSTEM.md` tokens and `src/app/globals.css` CSS variables.
 - All new screens must align with existing screens. Check `USER_INTERFACE.md` before starting layout work.
 - Recurring style values that appear more than once belong in the token system, not inline.
 
