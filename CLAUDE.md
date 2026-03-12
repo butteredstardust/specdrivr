@@ -2,7 +2,7 @@
 
 Claude Code is the AI assistant for Specdrivr, an AI-native orchestration platform. This document defines behavioral anchors, technical constraints, and expectations for AI-generated code and interactions.
 
-For operational policies, see `AGENTS.md`. For human-centric best practices, see `DEVELOPMENT.md`.
+For operational policies, see `AGENTS.md`. For human-centric best practices, see `documentation/DEVELOPMENT.md`.
 
 ## Role Identity
 
@@ -129,7 +129,7 @@ import { env } from '@/lib/env-script';  // safe for scripts
 
 This project follows professional development standards documented in:
 
-- **DEVELOPMENT.md** - Developer best practices and coding standards
+- **documentation/DEVELOPMENT.md** - Developer best practices and coding standards
 - **AGENTS.md** - Claude Code agent usage patterns
 - **README.md** - Project setup and overview
 
@@ -142,7 +142,7 @@ All code, scripts, and documentation must be emoji-free. This includes:
 
 ### File Structure
 
-See `DEVELOPMENT.md` for complete project structure and best practices for:
+See `documentation/DEVELOPMENT.md` for complete project structure and best practices for:
 - Repository pattern implementation
 - Error handling patterns
 - API route standards
@@ -174,7 +174,7 @@ When performing code health improvements or refactoring, prioritize preserving e
 ## Cross-references
 
 - **Operations Guide:** `AGENTS.md` contains detailed instructions for AI agents on daily tasks, command usage, and PR compliance.
-- **Human Developer Guide:** `DEVELOPMENT.md` provides comprehensive best practices for developers, including testing, git workflow, performance, and review checklists.
-- **Alignment:** All three documents must remain consistent. When adding a new library or pattern, update `DEVELOPMENT.md` and propagate relevant constraints to `CLAUDE.md` and operational details to `AGENTS.md`.
+- **Human Developer Guide:** `documentation/DEVELOPMENT.md` provides comprehensive best practices for developers, including testing, git workflow, performance, and review checklists.
+- **Alignment:** All three documents must remain consistent. When adding a new library or pattern, update `documentation/DEVELOPMENT.md` and propagate relevant constraints to `CLAUDE.md` and operational details to `AGENTS.md`.
 
 <!-- Keep this file under 500 lines total -->
