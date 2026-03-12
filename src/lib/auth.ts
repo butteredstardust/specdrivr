@@ -5,6 +5,7 @@ import { db } from "@/db";
 import * as schema from "@/db/schema";
 import { env } from "./env";
 import { headers } from "next/headers";
+import { sendEmail } from "./email";
 
 export const authInstance = betterAuth({
   baseURL: env.NEXTAUTH_URL,
@@ -32,6 +33,28 @@ export const authInstance = betterAuth({
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
+    sendResetPassword: async ({ user, url }: { user: any; url: string; token: string }) => {
+      await sendEmail(
+        user.email,
+        'Reset your Specdrivr password',
+        `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+          <h2 style="color: #333;">Reset your Specdrivr password</h2>
+          <p style="color: #555; line-height: 1.6;">Hello,</p>
+          <p style="color: #555; line-height: 1.6;">We received a request to reset the password for your Specdrivr account. Click the button below to choose a new password:</p>
+          <div style="margin: 30px 0; text-align: center;">
+            <a href="${url}" style="background-color: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Reset Password</a>
+          </div>
+          <p style="color: #555; font-size: 14px; line-height: 1.6;">This link will expire in 1 hour. If you didn't request a password reset, you can safely ignore this email.</p>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
+          <p style="color: #888; font-size: 12px; text-align: center;">DAEMON &copy; Specdrivr</p>
+        </div>
+        `
+      );
+    },
+    sendVerificationEmail: async ({ user, url }: { user: any; url: string; token: string }) => {
+      // Not required for MVP — leave as a no-op but add the handler stub
+    },
   },
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
