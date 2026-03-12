@@ -8,7 +8,7 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export type MascotState = 'idle' | 'thinking' | 'error' | 'success' | 'working';
+export type MascotState = 'idle' | 'thinking' | 'error' | 'success' | 'working' | 'blocked';
 
 interface DaemonMascotProps {
   state?: MascotState;
@@ -34,6 +34,7 @@ export function DaemonMascot({
     idle: 'bg-indigo-500',
     thinking: 'bg-indigo-400 animate-pulse',
     error: 'bg-red-500',
+    blocked: 'bg-yellow-500',
     success: 'bg-emerald-500',
     working: 'bg-blue-500 animate-spin',
   };
@@ -51,6 +52,7 @@ export function DaemonMascot({
         {state === 'idle' && '◕◡◕'}
         {state === 'thinking' && '⊙_⊙'}
         {state === 'error' && 'ಠ_ಠ'}
+        {state === 'blocked' && '>_<'}
         {state === 'success' && '◉◡◉'}
         {state === 'working' && '⚙'}
       </div>

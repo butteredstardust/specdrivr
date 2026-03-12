@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation';
-import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
 import { ShellProvider } from '@/components/providers/shell-provider';
 import { Sidebar } from '@/components/shell/sidebar';
