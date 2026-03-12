@@ -29,6 +29,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@hookform/resolvers": "^5.2.2",
     "@next/eslint-plugin-next": "^16.1.6",
+    "@noble/hashes": "^2.0.1",
     "@pxlkit/core": "^1.0.1",
     "@pxlkit/effects": "^1.0.1",
     "@pxlkit/feedback": "^1.0.1",

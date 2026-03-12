@@ -9,14 +9,37 @@ import {
   fileChanges, planReviews, specVersions, agentTokens,
   accounts, sessions, verifications, projectMembers, agentConfig
 } from "../src/db/schema";
-import bcrypt from "bcryptjs";
-import { sql } from "drizzle-orm";
 import { env } from "../src/lib/env-script";
 import * as schema from "../src/db/schema";
 import { nanoid } from "nanoid";
+import { scryptAsync } from "@noble/hashes/scrypt.js";
+import { sql } from "drizzle-orm";
 
 const queryClient = postgres(env.DATABASE_URL, { max: 10 });
 const db = drizzle(queryClient, { schema });
+
+// Better-auth uses scrypt with these parameters:
+const scryptParams = {
+  N: 16384,
+  r: 16,
+  p: 1,
+  dkLen: 64,
+};
+
+// Scrypt key derivation async (same as better-auth)
+async function scryptHash(password: string): Promise<string> {
+  const saltBuf = crypto.getRandomValues(new Uint8Array(16));
+  const salt = Buffer.from(saltBuf).toString("hex");
+  // Better-auth normalizes the password before hashing
+  const key = await scryptAsync(password.normalize("NFKC"), salt, {
+    N: scryptParams.N,
+    p: scryptParams.p,
+    r: scryptParams.r,
+    dkLen: scryptParams.dkLen,
+    maxmem: 128 * scryptParams.N * scryptParams.r * 2,
+  });
+  return `${salt}:${Buffer.from(key).toString("hex")}`;
+}
 
 async function main() {
   console.log("Cleaning database...");
@@ -52,15 +75,15 @@ async function main() {
 
   console.log("Seeding database...");
 
-  const passwordHash = await bcrypt.hash("password123", 12);
+  const passwordHash = await scryptHash("password123");
 
   await db.transaction(async (tx) => {
     // Insert Users with text IDs (5 users total for UI variety)
+    // Note: passwordHash is not set here - better-auth stores passwords in accounts table
     const u1 = (await tx.insert(users).values({
       id: nanoid(),
       name: "Admin User",
       email: "admin@example.com",
-      passwordHash,
       role: "admin",
       emailVerified: true,
     }).returning())[0];
@@ -69,7 +92,6 @@ async function main() {
       id: nanoid(),
       name: "Test User",
       email: "test@example.com",
-      passwordHash,
       role: "member",
       emailVerified: true,
     }).returning())[0];
@@ -78,7 +100,6 @@ async function main() {
       id: nanoid(),
       name: "Viewer User",
       email: "viewer@example.com",
-      passwordHash,
       role: "viewer",
       emailVerified: true,
     }).returning())[0];
@@ -87,7 +108,6 @@ async function main() {
       id: nanoid(),
       name: "Elena Rodriguez",
       email: "elena@example.com",
-      passwordHash,
       role: "owner",
       emailVerified: true,
     }).returning())[0];
@@ -96,18 +116,18 @@ async function main() {
       id: nanoid(),
       name: "James Chen",
       email: "james@example.com",
-      passwordHash,
       role: "member",
       emailVerified: true,
     }).returning())[0];
 
     // Insert Accounts for BetterAuth
+    // accountId must be the user ID and providerId must be "credential" for email/password auth
     await tx.insert(accounts).values([
-      { id: "acc-1", accountId: "admin-account", providerId: "email", userId: u1.id, password: passwordHash },
-      { id: "acc-2", accountId: "test-account", providerId: "email", userId: u2.id, password: passwordHash },
-      { id: "acc-3", accountId: "viewer-account", providerId: "email", userId: u3.id, password: passwordHash },
-      { id: "acc-4", accountId: "elena-account", providerId: "email", userId: u4.id, password: passwordHash },
-      { id: "acc-5", accountId: "james-account", providerId: "email", userId: u5.id, password: passwordHash },
+      { id: nanoid(), accountId: u1.id, providerId: "credential", userId: u1.id, password: passwordHash },
+      { id: nanoid(), accountId: u2.id, providerId: "credential", userId: u2.id, password: passwordHash },
+      { id: nanoid(), accountId: u3.id, providerId: "credential", userId: u3.id, password: passwordHash },
+      { id: nanoid(), accountId: u4.id, providerId: "credential", userId: u4.id, password: passwordHash },
+      { id: nanoid(), accountId: u5.id, providerId: "credential", userId: u5.id, password: passwordHash },
     ]);
 
     // Insert Projects (5 projects with varied statuses)
