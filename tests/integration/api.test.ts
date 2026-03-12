@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+// Sanity check for Husky trigger
 import { NextRequest } from 'next/server';
 import { cleanDatabase, createTestUser, createTestProject, testDb } from '../helpers';
 import * as schema from '@/db/schema';
