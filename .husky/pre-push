@@ -2,8 +2,22 @@
 # .husky/pre-push
 set -euo pipefail
 
-# Add common Windows paths for Git and Node tools to PATH
-export PATH="$PATH:/c/Program Files/Git/bin:/c/Program Files/nodejs:/c/Users/Admin/AppData/Roaming/npm"
+# ─── Environment Setup ────────────────────────────────────────────────────────
+# Load local huskyrc if it exists (standard husky behavior for cross-platform env)
+[ -f ~/.huskyrc ] && . ~/.huskyrc
+
+# Add common Windows paths for Git and Node tools to PATH if on Windows
+case "$(uname -s)" in
+  MSYS*|MINGW*|CYGWIN*)
+    # On Windows, we might need to add paths if they are not in the shell's PATH
+    export PATH="$PATH:/c/Program Files/nodejs:/c/Program Files/Git/cmd"
+    # Try to find npm global path for pnpm
+    if command -v npm >/dev/null 2>&1; then
+      NPM_GLOBAL_PATH=$(npm config get prefix 2>/dev/null | sed 's/\\/\//g' | sed 's/C:/\/c/')
+      [ -n "$NPM_GLOBAL_PATH" ] && export PATH="$PATH:$NPM_GLOBAL_PATH"
+    fi
+    ;;
+esac
 
 echo "🔍 Running pre-push checks..."
 echo ""
