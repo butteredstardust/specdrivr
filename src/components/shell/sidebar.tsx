@@ -2,9 +2,9 @@
 
 import React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { PxlKitIcon, AnimatedPxlKitIcon } from '@pxlkit/core';
+import { PxlKitIcon } from '@pxlkit/core';
 import { Home, List, History, Settings } from '@pxlkit/ui';
-import { PixelBadge, PixelPulse, PxlKitButton, PixelTooltip } from '@pxlkit/ui-kit';
+import { PixelBadge, PixelPulse } from '@pxlkit/ui-kit';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { ProjectSwitcher } from '@/components/shell/project-switcher';
 import { useShell } from '@/components/providers/shell-provider';
@@ -27,10 +27,8 @@ export function Sidebar() {
   const blockedCount = 0;
   const sessionRunning = false;
   const sessionPaused = false;
-  const runningTaskId = '1';
-
-  let daemonStatusNode = null;
-  let daemonExpression: any = 'idle';
+    let daemonStatusNode = null;
+  let daemonExpression: 'idle' | 'working' | 'error' | 'success' = 'idle';
 
   if (blockedCount > 0) {
     daemonStatusNode = (
@@ -38,7 +36,7 @@ export function Sidebar() {
         <PixelBadge tone="gold">⚠ {blockedCount} BLOCKED</PixelBadge>
       </button>
     );
-    daemonExpression = 'blocked';
+    daemonExpression = 'error';
   } else if (sessionRunning) {
     daemonStatusNode = (
       <PixelPulse>

@@ -47,7 +47,7 @@ export async function cleanDatabase() {
   for (const table of tables) {
     try {
       await testDb.execute(sql.raw(`TRUNCATE TABLE "${table}" CASCADE`));
-    } catch (e) {
+    } catch {
       // Ignore missing tables
     }
   }
