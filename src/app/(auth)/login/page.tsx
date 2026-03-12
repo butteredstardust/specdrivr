@@ -1,181 +1,143 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { toast } from 'sonner';
-import { LockOpen1Icon, PersonIcon, EyeOpenIcon, EyeClosedIcon, TargetIcon } from '@radix-ui/react-icons';
+import { PixelInput, PixelPasswordInput, PixelButton, PixelAlert, PixelCard } from '@pxlkit/ui-kit';
+import { DaemonMascot } from '@/components/ui/daemon-mascot';
 
 function LoginContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
 
-    // Get redirect path from URL params, default to '/'
-    const callbackURL = searchParams.get('next') || searchParams.get('callbackUrl') || '/';
+    const callbackURL = searchParams.get('next') || '/';
 
     try {
-      const result = await authClient.signIn.email({
+      const { error: signInError } = await authClient.signIn.email({
         email,
         password,
         callbackURL,
       });
 
-      if (result.error) {
-        toast.error(result.error.message || 'Login failed. Please check your credentials.');
+      if (signInError) {
+        setError('Invalid email or password.');
       } else {
-        toast.success('Login successful! Redirecting...');
+        router.push(callbackURL);
       }
+    } catch {
+      setError('Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const togglePasswordVisibility = () => setShowPassword(!showPassword);
+  const signInAs = async (demoEmail: string) => {
+    setIsLoading(true);
+    setError(null);
+    const callbackURL = searchParams.get('next') || '/';
+
+    try {
+      const { error: signInError } = await authClient.signIn.email({
+        email: demoEmail,
+        password: 'Password123!',
+        callbackURL,
+      });
+
+      if (signInError) {
+        setError('Invalid email or password.');
+      } else {
+        router.push(callbackURL);
+      }
+    } catch {
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
-        {/* Logo and title */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <TargetIcon className="h-10 w-10 text-primary" />
-            <h1 className="text-3xl font-bold">Specdrivr</h1>
+    <div className="w-full max-w-[400px]">
+      <div className="bg-[--bg-surface] border-[--border-default] p-8 flex flex-col items-center">
+        <DaemonMascot size="lg" state={isLoading ? 'working' : error ? 'error' : 'idle'} className="mb-4" />
+        <h1 className="font-mono font-bold text-2xl mb-1 text-[--text-primary]">SPECDRIVR</h1>
+        <p className="text-sm text-[--text-muted] mb-8">Build what you spec.</p>
+
+        {error && (
+          <div className="w-full mb-6">
+            <PixelAlert tone="red" title="Error" message={error} />
           </div>
-          <p className="text-muted-foreground">Sign in to your account</p>
-        </div>
+        )}
 
-        {/* Login card */}
-        <Card className="border-2">
-          <CardHeader>
-            <CardTitle className="text-2xl">Welcome Back</CardTitle>
-            <CardDescription>
-              Enter your credentials to access your workspace
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form className="space-y-5" onSubmit={handleLogin}>
-              {/* Email input */}
-              <div className="space-y-2">
-                <Label htmlFor="email">Email address</Label>
-                <div className="relative">
-                  <PersonIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    required
-                    autoComplete="email"
-                    className="pl-10"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={isLoading}
-                  />
-                </div>
-              </div>
+        <form className="w-full flex flex-col gap-4" onSubmit={handleLogin}>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="email" className="text-xs font-medium text-[--text-secondary]">EMAIL</label>
+            <PixelInput
+              id="email"
+              type="email"
+              tone="purple"
+              autoFocus
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
 
-              {/* Password input */}
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <div className="relative">
-                  <LockOpen1Icon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    required
-                    autoComplete="current-password"
-                    className="pl-10 pr-10"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={isLoading}
-                  />
-                  <button
-                    type="button"
-                    onClick={togglePasswordVisibility}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                    tabIndex={-1}
-                  >
-                    {showPassword ? (
-                      <EyeClosedIcon className="h-4 w-4" />
-                    ) : (
-                      <EyeOpenIcon className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="password" className="text-xs font-medium text-[--text-secondary]">PASSWORD</label>
+            <PixelPasswordInput
+              id="password"
+              tone="purple"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
 
-              {/* Forgot password link */}
-              <div className="flex items-center justify-end">
-                <Button type="button" variant="link" className="h-auto p-0 text-sm" asChild>
-                  <a href="/forgot-password">Forgot password?</a>
-                </Button>
-              </div>
+          <div className="mt-2">
+            <PixelButton
+              type="submit"
+              tone="purple"
+              className="w-full"
+              loading={isLoading}
+            >
+              Sign In
+            </PixelButton>
+          </div>
 
-              {/* Submit button */}
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Signing in...' : (
-                  <>
-                    Sign In
-                    <ArrowRightIcon className="ml-2 h-4 w-4" />
-                  </>
-                )}
-              </Button>
-            </form>
-
-            <Separator className="my-6" />
-
-            {/* Sign up link */}
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">
-                Don&apos;t have an account?{' '}
-                <Button variant="link" className="h-auto p-0 text-sm" asChild>
-                  <a href="/signup">Sign up</a>
-                </Button>
-              </p>
-            </div>
-          </CardContent>
-
-          <CardFooter className="flex flex-col space-y-2">
-            {/* Demo credentials hint */}
-            <div className="w-full p-3 rounded-lg bg-muted/50">
-              <p className="text-xs text-muted-foreground mb-2">
-                Demo credentials (from seed):
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="outline" className="text-xs">admin@example.com</Badge>
-                <Badge variant="outline" className="text-xs">test@example.com</Badge>
-                <Badge variant="outline" className="text-xs">viewer@example.com</Badge>
-                <Badge variant="outline" className="text-xs">elena@example.com</Badge>
-                <Badge variant="outline" className="text-xs">james@example.com</Badge>
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                Password: password123
-              </p>
-            </div>
-          </CardFooter>
-        </Card>
-
-        {/* Back to home */}
-        <div className="mt-6 text-center">
-          <Button variant="ghost" className="h-auto p-0 text-sm text-muted-foreground" asChild>
-            <Link href="/">Back to home</Link>
-          </Button>
-        </div>
+          <div className="text-right mt-2">
+            <Link href="/forgot-password" className="text-sm text-[--accent-violet] hover:underline">
+              Forgot password?
+            </Link>
+          </div>
+        </form>
       </div>
+
+      {process.env.NODE_ENV === 'development' && (
+        <div className="mt-4 border border-dashed border-[--border-muted] rounded-lg p-4">
+          <p className="text-xs text-[--text-muted] mb-3 font-mono uppercase tracking-wider">
+            DEMO ACCESS
+          </p>
+          <div className="flex gap-2 flex-wrap">
+            <PixelButton tone="neutral" size="sm" onClick={() => signInAs('admin@example.com')} loading={isLoading}>
+              Admin
+            </PixelButton>
+            <PixelButton tone="neutral" size="sm" onClick={() => signInAs('test@example.com')} loading={isLoading}>
+              Member
+            </PixelButton>
+            <PixelButton tone="neutral" size="sm" onClick={() => signInAs('viewer@example.com')} loading={isLoading}>
+              Viewer
+            </PixelButton>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -183,31 +145,12 @@ function LoginContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-md text-center">Loading...</div>
+      <div className="w-full max-w-[400px] text-center text-[--text-muted]">
+        <DaemonMascot size="lg" state="working" className="mx-auto mb-4" />
+        Loading...
       </div>
     }>
       <LoginContent />
     </Suspense>
-  );
-}
-
-function ArrowRightIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M5 12h14" />
-      <path d="m12 5 7 7-7 7" />
-    </svg>
   );
 }
