@@ -1,5 +1,5 @@
 import { db } from '@/db';
-import { projects, type ProjectSelect as Project } from '@/db/schema';
+import { projects, projectMembers, agentConfig, auditLog, type ProjectSelect as Project } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, ValidationError, DatabaseError } from '@/lib/errors';
@@ -73,15 +73,33 @@ export class ProjectRepository extends BaseRepository {
       throw new ValidationError('Project description cannot exceed 1000 characters');
     }
 
-    const [project] = await this.execQuery(() =>
-      db.insert(projects).values(cleanData).returning()
-    ) as unknown as unknown[];
+    const project = await this.execQuery(async () => {
+      return await db.transaction(async (tx) => {
+        const [newProject] = await tx.insert(projects).values(cleanData).returning();
 
-    if (!project) {
-      throw new DatabaseError('Failed to create project');
-    }
+        if (!newProject) {
+          throw new DatabaseError('Failed to create project');
+        }
 
-    return project as unknown as Project;
+        // Initialize agent config with defaults
+        await tx.insert(agentConfig).values({
+          projectId: newProject.id,
+        });
+
+        if (cleanData.createdBy) {
+          await tx.insert(projectMembers).values({
+            projectId: newProject.id,
+            userId: cleanData.createdBy,
+            role: 'owner',
+            status: 'active',
+          });
+        }
+
+        return newProject as unknown as Project;
+      });
+    });
+
+    return project;
   }
 
   async update(id: number, data: UpdateProjectData): Promise<Project> {
@@ -148,6 +166,42 @@ export class ProjectRepository extends BaseRepository {
 
   async archive(id: number): Promise<Project> {
     return this.update(id, { status: 'archived' });
+  }
+
+  async getAgentConfig(projectId: number) {
+    const result = await this.execQuery(() =>
+      db.select().from(agentConfig).where(eq(agentConfig.projectId, projectId)).limit(1)
+    );
+    return result[0] || null;
+  }
+
+  async updateAgentConfig(projectId: number, data: Partial<import('@/db/schema').AgentConfigInsert>, actorId: string) {
+    return await this.execQuery(async () => {
+      return await db.transaction(async (tx) => {
+        const [updated] = await tx
+          .update(agentConfig)
+          .set({ ...data, updatedAt: new Date() })
+          .where(eq(agentConfig.projectId, projectId))
+          .returning();
+
+        if (!updated) {
+          // If for some reason config doesn't exist, create it
+          const [created] = await tx.insert(agentConfig).values({ ...data, projectId } as import('@/db/schema').AgentConfigInsert).returning();
+          return created;
+        }
+
+        await tx.insert(auditLog).values({
+          projectId,
+          userId: actorId,
+          action: 'update_agent_config',
+          targetType: 'agent_config',
+          targetId: String(updated.id),
+          detail: data,
+        });
+
+        return updated;
+      });
+    });
   }
 }
 

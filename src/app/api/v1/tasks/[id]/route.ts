@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { taskRepository } from '@/repositories/task-repository';
-import { formatErrorResponse, handleApiError } from '@/lib/error-handler';
+import { planRepository } from '@/repositories/plan-repository';
+import { specificationRepository } from '@/repositories/specification-repository';
+import { handleApiError } from '@/lib/error-handler';
 import { NotFoundError } from '@/lib/errors';
 import { updateTaskSchema } from '@/lib/schemas';
 import { auth } from '@/lib/auth';
+import { requireAdmin, requireMember } from '@/lib/rbac';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -22,17 +25,19 @@ export async function GET(
     const { id } = await params;
     const taskId = parseInt(id, 10);
 
-    if (isNaN(taskId) || taskId <= 0) {
-      return NextResponse.json(
-        formatErrorResponse({ message: 'Invalid task ID - must be a positive number' }),
-        { status: 400 }
-      );
-    }
-
     const task = await taskRepository.getById(taskId);
+    if (!task) throw new NotFoundError(`Task with ID ${taskId} not found`);
 
-    if (!task) {
-      throw new NotFoundError(`Task with ID ${taskId} not found`);
+    const plan = await planRepository.getById(task.planId);
+    if (!plan) throw new NotFoundError(`Plan not found`);
+
+    const spec = await specificationRepository.getById(plan.specId);
+    if (!spec) throw new NotFoundError(`Specification not found`);
+
+    // RBAC: require member to view task
+    const { allowed } = await requireMember(session.user.id, spec.projectId);
+    if (!allowed) {
+      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'You do not have access to this project' } }, { status: 403 });
     }
 
     return NextResponse.json({
@@ -56,11 +61,19 @@ export async function PATCH(
     const { id } = await params;
     const taskId = parseInt(id, 10);
 
-    if (isNaN(taskId) || taskId <= 0) {
-      return NextResponse.json(
-        formatErrorResponse({ message: 'Invalid task ID - must be a positive number' }),
-        { status: 400 }
-      );
+    const task = await taskRepository.getById(taskId);
+    if (!task) throw new NotFoundError(`Task with ID ${taskId} not found`);
+
+    const plan = await planRepository.getById(task.planId);
+    if (!plan) throw new NotFoundError(`Plan not found`);
+
+    const spec = await specificationRepository.getById(plan.specId);
+    if (!spec) throw new NotFoundError(`Specification not found`);
+
+    // RBAC: require admin to override task
+    const { allowed } = await requireAdmin(session.user.id, spec.projectId);
+    if (!allowed) {
+      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'You must be a project admin to override tasks' } }, { status: 403 });
     }
 
     const body = await request.json();
@@ -72,10 +85,10 @@ export async function PATCH(
       );
     }
 
-    const task = await taskRepository.update(taskId, parsed.data);
+    const updatedTask = await taskRepository.update(taskId, parsed.data);
 
     return NextResponse.json({
-      data: task,
+      data: updatedTask,
     });
   } catch (error) {
     return handleApiError(error);
@@ -95,11 +108,19 @@ export async function DELETE(
     const { id } = await params;
     const taskId = parseInt(id, 10);
 
-    if (isNaN(taskId) || taskId <= 0) {
-      return NextResponse.json(
-        formatErrorResponse({ message: 'Invalid task ID - must be a positive number' }),
-        { status: 400 }
-      );
+    const task = await taskRepository.getById(taskId);
+    if (!task) throw new NotFoundError(`Task with ID ${taskId} not found`);
+
+    const plan = await planRepository.getById(task.planId);
+    if (!plan) throw new NotFoundError(`Plan not found`);
+
+    const spec = await specificationRepository.getById(plan.specId);
+    if (!spec) throw new NotFoundError(`Specification not found`);
+
+    // RBAC: require admin to delete task
+    const { allowed } = await requireAdmin(session.user.id, spec.projectId);
+    if (!allowed) {
+      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'You must be a project admin to delete tasks' } }, { status: 403 });
     }
 
     await taskRepository.delete(taskId);
