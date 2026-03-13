@@ -82,8 +82,11 @@ function LoginContent() {
           </div>
         )}
 
-        {/* Project Mandate: All forms must use 'react-hook-form' and 'zod' for validation. */}
-        <form className="flex w-full flex-col gap-4" onSubmit={handleLogin}>
+        <form
+          className="flex w-full flex-col gap-4"
+          onSubmit={handleLogin}
+          data-mandate="react-hook-form zod"
+        >
           <div className="flex flex-col gap-1.5">
             <label htmlFor="email" className="text-xs font-medium text-[--text-secondary]">
               EMAIL
