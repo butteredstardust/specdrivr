@@ -6,7 +6,7 @@ import { NotFoundError, DatabaseError } from '@/lib/errors';
 
 export class MemberRepository extends BaseRepository {
   async getByProjectId(projectId: number, limit = 50, offset = 0) {
-    return await this.execQuery(() =>
+    return await this.executeQuery(() =>
       db
         .select({
           id: users.id,
@@ -25,7 +25,7 @@ export class MemberRepository extends BaseRepository {
   }
 
   async updateRole(projectId: number, userId: string, role: UserRole, actorId: string) {
-    return await this.execQuery(async () => {
+    return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         const [updated] = await tx
           .update(projectMembers)
@@ -50,7 +50,7 @@ export class MemberRepository extends BaseRepository {
   }
 
   async remove(projectId: number, userId: string, actorId: string) {
-    return await this.execQuery(async () => {
+    return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         // Prevent removing the last owner
         const owners = await tx
@@ -84,7 +84,7 @@ export class MemberRepository extends BaseRepository {
   }
 
   async createInvite(data: { projectId: number; email: string; role: UserRole; invitedBy: string }) {
-    return await this.execQuery(async () => {
+    return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         const token = crypto.randomUUID();
         const expiresAt = new Date();
