@@ -12,10 +12,11 @@
 
 import { appendFileSync, existsSync, mkdirSync, readFileSync } from "fs";
 import { execSync } from "child_process";
+import { fileURLToPath } from "url";
 import path from "path";
 import os from "os";
 
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, "..");
 const auditDir = path.join(projectRoot, ".husky", "audit");
 

@@ -67,9 +67,9 @@ if [ ! -f ".env.local" ]; then
   fi
 fi
 
-# Push database schema
+# Run migrations
 echo "Applying database schema..."
-pnpm db:push
+pnpm db:migrate
 
 # Optional: Seed demo data
 echo "Seeding demo data..."
@@ -94,6 +94,6 @@ pnpm typecheck
 echo "=== Bootstrap Complete ==="
 echo "Next steps:"
 echo "1. Review and update .env.local with any other required variables"
-echo "2. Run: pnpm db:push (if needed)"
+echo "2. Run: pnpm db:migrate (if new migrations exist)"
 echo "3. Optional: pnpm db:seed"
 echo "4. Start development: pnpm dev"
