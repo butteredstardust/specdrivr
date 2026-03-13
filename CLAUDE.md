@@ -1,292 +1,353 @@
-# CLAUDE.md | AI Constraints | Keep under 500 lines
+# CLAUDE.md | Claude Code Assistant | Keep under 500 lines
 
-Claude Code is the AI assistant for Specdrivr, an AI-native orchestration platform. This document defines behavioral anchors, technical constraints, and expectations for AI-generated code and interactions.
+**Specdrivr AI-native orchestration platform**
 
-For operational policies, see `AGENTS.md`. For human-centric best practices, see `documentation/DEVELOPMENT.md`.
+---
 
-## Role Identity
+## Core Principles
 
-You are an expert AI Systems Architect and a Senior Next.js/TypeScript Engineer working on Specdrivr. Your designs prioritize type safety, security, scalability, and developer experience.
-
-## Tone & Communication
-
-- **Brevity First:** Prioritize concise answers unless technical depth is requested.
-- **Direct & Analytical:** Eliminate filler phrases and apologies. Be objective and precise.
-- **Action-Oriented:** Focus on solution, architecture decisions, or code changes immediately.
-- **No Emojis:** Never use emojis in code, scripts, or documentation.
-
-## Tech Stack Reference
-
-| Category | Technology & Version |
-|----------|---------------------|
-| Framework | Next.js 16.1.6 (App Router) |
-| React | 19.2.4 |
-| TypeScript | 5.9.3 |
-| Styling | Tailwind CSS 4.2.1 |
-| UI (tier 1) | @pxlkit/core, @pxlkit/ui, @pxlkit/feedback, @pxlkit/social, @pxlkit/gamification, @pxlkit/weather, @pxlkit/effects |
-| UI (tier 2) | pxlkit/ui or shadcn/ui (Radix UI primitives) |
-| Base UI | @base-ui/react 1.2.0 |
-| Icons | @pxlkit/core, @pxlkit/feedback, @pxlkit/social, @pxlkit/gamification, @pxlkit/weather, @pxlkit/effects ; Lucide React as fallback |
-| Database | PostgreSQL |
-| ORM | Drizzle ORM 0.45.1 |
+### Technical Stack
+| Component | Version |
+|-----------|---------|
+| Framework | Next.js 16.1.6 + React 19.2.4 + TypeScript 5.9.3 |
+| Database | PostgreSQL + Drizzle ORM 0.45.1 |
+| UI | pxlkit/ui, shadcn/ui, Tailwind CSS 4.2.1 |
 | Auth | better-auth 1.5.4 |
 | Validation | Zod 3.22.0 |
-| Testing | Vitest 4, Playwright 1.42 |
-| Drag-drop | @dnd-kit |
-| Markdown | @uiw/react-md-editor |
-| Security | bcryptjs, @upstash/ratelimit, @upstash/redis, RBAC, lock-manager |
-| Logging | pino + pino-pretty |
-| Utilities | clsx, tailwind-merge, next-themes, DOMPurify |
+| Testing | Vitest 4 + Playwright 1.42 |
+| Package | `pnpm` (never npm/yarn) |
 
-## Technical Constraints & Behavioral Anchors
+### Project Fundamentals
+- **Zero `any` types** - Use explicit types or `unknown` + type guards
+- **No `as Type`** - Use type guards
+- **Repository pattern** - Never import `db` directly
+- **`executeQuery` wrapper** on all repository methods
+- **Zod validation** at every boundary
+- **`await auth()` FIRST** before other awaits
+- **Never throw** from Server Actions
+- **Pino logging** only (`/lib/logger.ts`)
+- **No bypassing hooks** - Multi-layer protection
 
-### TypeScript & Types
+---
 
-- **Strict Typing:** Never use `any`. Always use explicit types or `unknown` with type guards.
-- **Validation over Casting:** Use type guards instead of `as` casts. Example:
+## Project Structure
 
-  ```typescript
-  function isProject(obj: unknown): obj is Project {
-    return typeof obj === 'object' && obj !== null && 'id' in obj;
-  }
-  ```
-- **Explicit return types** on all functions and methods.
-- **Infer, never duplicate:** Use `typeof table.$inferSelect`, `typeof table.$inferInsert`, and `z.infer<typeof schema>`. Never write Drizzle or Zod types by hand.
-- **Extended Types:** When passing DB models to UI components, extend via mapped types. Use component props types (e.g., `ProjectCardProps['project']`) for UI-specific fields.
-- **Use interfaces** for object shapes; **type aliases** for unions/primitives.
-- **Prefer `import type`** for type-only imports.
-- **No Temporary Fix Scripts:** Never commit temporary fix scripts. Make changes directly to source files.
-- **Temporary Work Location:** For one-off scripts, use `/tmp/` or `pnpm exec tsx --eval`. Only commit scripts that are part of the reproducible build.
-- **Artifact Prevention:** Never commit `*_output.txt`, `*_results.txt`, `*.exp`, or `db/migrate-*.ts`.
-
-### Database & ORM
-
-- **Drizzle ORM:** Use Drizzle exclusively. Never raw SQL.
-- **Repository pattern:** Never import `db` directly in components or pages. Always use `src/repositories/`.
-- **`executeQuery` wrapper:** Wrap all repository methods in `executeQuery` (from base-repository) for connection handling and error logging.
-- **Transactions:** Multi-step writes must use `db.transaction(async (tx) => { ... })`.
-- **Schema Management:** Run `pnpm db:generate` for schema changes. Do not delete migration files in `drizzle/`.
-- **`relations()` scope:** Drizzle `relations()` affects the relational query API only — it does not create FK constraints in the database schema.
-- **Query Optimization:** For complex date/time filtering, fetch timestamp fields as JS Date and filter in JavaScript for cross-database compatibility.
-
-### UI Component Hierarchy
-
-Before building any UI element, consult `DESIGN_SYSTEM.md` for visual language, tokens, and interaction patterns. Consult `USER_INTERFACE.md` for the planned screen inventory and navigation flow.
-
-**Component selection order — exhaust each tier before dropping to the next:**
-
-| Tier | Source | When to use |
-|------|--------|-------------|
-| 1 | `@pxlkit/*` | First choice for all UI. Pick the most semantically appropriate package. |
-| 2 | `pxlkit/ui or shadcn/ui` (`@/components/ui/`) | When no pxlkit component covers the need. Never modify shadcn source files. |
-| 3 | Custom component | Last resort only. Must be fully informed by `DESIGN_SYSTEM.md`. |
-
-**pxlkit package responsibilities:**
-
-| Package | Covers |
-|---------|--------|
-| `@pxlkit/core` | Foundational types, base components, SVG engine |
-| `@pxlkit/ui` | Interface controls, navigation, layout primitives |
-| `@pxlkit/feedback` | Alerts, status indicators, notifications, toasts |
-| `@pxlkit/social` | Community UI, emoji pickers, messaging components |
-| `@pxlkit/gamification` | RPG elements, achievements, rewards, progress |
-| `@pxlkit/weather` | Climate, moon phase, temperature displays |
-| `@pxlkit/effects` | Animated VFX, particle systems |
-
-**Hard rules:**
-- Never write a custom component when a pxlkit or pxlkit/ui or shadcn/ui equivalent exists.
-- Never hardcode visual values in custom components. Always reference `DESIGN_SYSTEM.md` tokens and `src/app/globals.css` CSS variables.
-- All new screens must align with existing screens. Check `USER_INTERFACE.md` before starting layout work.
-- Recurring style values that appear more than once belong in the token system, not inline.
-
-### UI & Styling
-
-- **Design System:** Strictly use CSS variables from `src/app/globals.css` (e.g., `var(--brand-primary)`). No hardcoded hex values.
-- **Linear Patterns:** Follow Linear design system patterns in `src/lib/ios-styles.ts`.
-- **CSS Specificity:** Use `!` prefix in Tailwind classes within JSX (e.g., `!text-slate-500`) instead of `!important`.
-- **XSS Prevention:** Always sanitize user-generated HTML with `DOMPurify.sanitize()` before passing to `dangerouslySetInnerHTML`. Never use `dangerouslySetInnerHTML` without sanitization.
-
-### Component Architecture
-
-- **Server-First:** Server Components by default. Apply `"use client"` only for interactivity or client-side hooks.
-- **Data Fetching:** Do not use `useEffect` for primary data fetching. Rely on Server Components calling repository methods directly.
-- **Boundary leakage:** Never import a Server Component into a Client Component — it is silently downgraded to a client component. Pass server-fetched data via props or `children` slots.
-- **Loading states:** Use `loading.tsx` for route-level loading. Use `<Suspense>` for component-level streaming; key Suspense boundaries on dynamic params to force re-suspension on navigation.
-- **Error boundaries:** Add `error.tsx` at each significant route segment. Never swallow errors silently.
-- **Repository Pattern:** Never direct DB calls in components. Always use `src/repositories/`.
-
-### API & Validation
-
-- **Strict Boundary Validation:** Never skip Zod validation. Validate all API route inputs.
-- **`.safeParse()` at boundaries:** Use `.safeParse()` at API/action boundaries; `.parse()` only in internal trusted contexts.
-- **Error Handling:** Return structured JSON: `{ success: false, error: string }` with appropriate HTTP status.
-- **Consistent Formatting:** All API routes use repository pattern and handle errors with `handleApiError()`.
-- **Await dynamic APIs:** `params`, `searchParams`, `cookies`, and `headers` must all be `await`ed in Next.js 16.
-
-### Server Actions
-
-- **`'use server'` directive** at the very top of every action file.
-- **Call `await auth()` first** — before any other `await` in the function body.
-- **Never throw** from a Server Action. Always return `{ success: false, error: { code, message } }`.
-- **Validate with Zod `.safeParse()`** and return structured validation errors.
-- **Cache invalidation:** Use `revalidatePath` or `revalidateTag` after mutations. Never use `revalidatePath('/')` globally — it flushes the entire cache.
-- **Canonical location:** `src/actions/`.
-
-### Middleware
-
-- **One file only:** `src/middleware.ts`. Never add middleware inside `app/`.
-- **Always export a `matcher` config** to scope execution and exclude static assets.
-- **No heavy imports:** Never import Drizzle, repositories, or server modules into middleware. Lightweight JWT/cookie checks only.
-- **`next-env.d.ts` is auto-generated** by Next.js. Never edit it manually.
-
-### Environment Configuration
-
-```typescript
-import { env } from '@/lib/env';        // Next.js code (server-only protected)
-import { env } from '@/lib/env-script'; // Standalone Node.js scripts
+```
+src/
+├── app/              # Next.js App Router pages
+│   ├── api/         # API routes
+│   ├── layout.tsx   # Root layout
+│   ├── page.tsx     # Home page
+│   └── error.tsx    # Error boundary
+├── components/      # React components
+│   └── ui/         # pxlkit/ui or shadcn/ui (do not modify)
+├── repositories/    # Data access layer (use this, never db directly)
+├── lib/            # Utilities (logger, env, errors, schemas, auth)
+├── db/             # Database connection and Drizzle schema
+├── types/          # Type definitions
+├── hooks/          # Custom hooks (client-only)
+└── actions/        # Server actions
 ```
 
-**Never import directly from `env-core.ts`** — use wrappers above.
-**`NEXTAUTH_SECRET`** is intentionally kept as the env var name (legacy compatibility; serves as Better Auth secret).
+**Key paths:** `@/lib/logger`, `@/lib/env` (Next.js), `@/lib/env-script` (standalone)
 
-### Logging
+---
 
-- **Use Pino via `@/lib/logger.ts`.** Never use `console.log`/`console.error`.
-- **Log levels:** `debug`, `info`, `warn`, `error`.
-- **Never log PII, passwords, raw request bodies.**
-- **Include correlation IDs** when handling requests.
-- **Development transport:** `pino-pretty` auto-enabled in non-production.
+## Naming Conventions
 
-### Testing & QA
+| Category | Convention | Examples |
+|----------|-----------|----------|
+| Components | PascalCase.tsx | `UserProfile.tsx`, `ProjectList.tsx` |
+| Utilities | kebab-case.ts | `format-date.ts`, `api-client.ts` |
+| Repositories | kebab-case-repository.ts | `user-repository.ts` |
+| API Routes | kebab-case/ directory | `api/users/route.ts` |
+| Constants | UPPER_SNAKE_CASE | `API_BASE_URL`, `MAX_RETRY_COUNT` |
+| Functions | camelCase, action-oriented | `fetchUser()`, `createProject()` |
+| Booleans | is/has/should prefix | `isLoading`, `hasPermission` |
+| Arrays | Plural names | `users`, `projects` |
+| Interfaces | PascalCase | `UserData`, `ProjectConfig` |
+| Types | PascalCase | `UserId`, `ProjectStatus` |
 
-- **Unit tests:** Vitest 4.x. Target >80% coverage for repository/lib logic. Mock external dependencies; do not mock system under test.
-- **E2E tests:** Playwright 1.42.x. Use ARIA selectors (`getByRole`). Intercept APIs in `tests/mocks` for deterministic runs.
-- **Write tests alongside implementation.** Avoid flaky tests; keep them idempotent and fast.
+---
 
-### CI & Testing Best Practices
+## Import Guidelines
 
-- **Middleware Bypassing:** Always ensure `proxy.ts` (middleware) ignores paths with dots (`.includes('.')`) to prevent static asset redirect loops and MIME type errors.
-- **CI Networking:** Use `127.0.0.1` instead of `localhost` in CI to avoid IPv6 resolution issues. Set `NODE_OPTIONS="--dns-result-order=ipv4first"` in workflows.
-- **Database Enums:** Strictly align TypeScript enums with the established database migrations. The SQL migration is the single source of truth.
-- **Test Environment:** Provide 32-character "safe" defaults for secrets in `env-core.ts` when `process.env.VITEST` is active to satisfy Zod validation without real credentials.
-- **Workflow Parity:** Ensure all workflows (e.g., `test.yml`, `code-quality.yml`) share identical service container and environment variable configurations.
+**Order:**
+1. React, Next.js (`import { useState } from 'react'`)
+2. External libraries (`import { z } from 'zod'`)
+3. Internal lib files (`import { logger } from '@/lib/logger'`)
+4. Components (`import { Button } from '@/components/ui/button'`)
+5. Relative imports (`import { helper } from './helper'`)
 
-### Package Management
+**Use path mapping:** `@/` alias, no relative paths from deep directories
 
-- **Always use pnpm.** Never `npm` or `yarn`.
-- **Frozen lockfile in CI:** `pnpm install --frozen-lockfile`.
-- **Security:** Run `pnpm audit` regularly. Fix vulnerabilities via package updates or pnpm overrides.
+**Prefer:** `import type` for type-only imports
 
-### Performance Requirements
+---
 
-- Bundle size optimization (code splitting, tree-shaking).
-- Database query optimization with indexes; avoid N+1.
-- Server-side rendering first; minimize client hydration.
-- Use React `memo`, `useMemo`, `useCallback` where beneficial.
-- Proper caching: HTTP, SWR/Redis, Next.js `revalidatePath`/`revalidateTag`.
+## Essential Commands
 
-### Security Requirements
+```bash
+pnpm install --frozen-lockfile    # Install
+pnpm dev                         # Dev server
+pnpm build                       # Production
+pnpm lint                        # Lint
+pnpm test                        # Unit tests
+pnpm test:e2e                    # E2E tests
+pnpm db:generate                 # Generate migrations
+pnpm db:push                     # Push schema (local)
+pnpm db:migrate                  # Apply migration (prod)
+```
 
-- **Strict TypeScript:** Enforce strict mode with no `any` types.
-- **Authentication:** Always verify using `await auth()` first; enforce project-level RBAC; protect with rate limiting.
-- **XSS:** Sanitize all user HTML with DOMPurify before rendering.
-- **Audit Logging:** Log critical state changes within DB transaction with actor ID, action, resource info.
-- **Secrets:** Never commit secrets; use `.env.local` and validated `env` objects.
-- **pnpm Overrides:** Use overrides to address dependency vulnerabilities immediately.
+---
 
-### Husky Hook Protection
+## Code Patterns
 
-**Multi-layered defense against bypassing pre-commit/pre-push quality checks:**
+### TypeScript Type Inference
+```typescript
+// Always infer from Drizzle/Zod
+type User = typeof users.$inferSelect;
+type NewUser = typeof users.$inferInsert;
+type UserSchema = z.infer<typeof userSchema>;
 
-**1. Hook Integrity Verification**
-- Hook files (`.husky/pre-push`, `.husky/pre-commit`) have SHA256 checksums in `.husky/hooks-checksum.txt`
-- Local pre-push verifies checksums via `node scripts/verify-hooks.js verify`
-- CI workflows run same verification - bypassing locally fails in CI
-- After legitimate hook updates: `node scripts/verify-hooks.js generate`
+// Type guard over assertion
+function isUser(obj: unknown): obj is User {
+  return typeof obj === 'object' && obj !== null && 'id' in obj;
+}
+```
 
-**2. Git Config Bypass Detection**
-- Detects before running checks:
-  - `git config core.hooksPath /dev/null` → Warning shown, checks still run
-  - `git config init.templateDir` bypass → Warning logged
-  - `git commit/push --no-verify` → Logged to audit trail
-- Implementation: Early checks in `.husky/pre-push` and `.husky/pre-commit`
+### Repository Pattern (Required)
+```typescript
+import { executeQuery } from '@/lib/base-repository';
 
-**3. CI/CD Guard**
-- GitHub Actions workflows verify hooks before running tests/lint:
-  ```bash
-  node scripts/verify-hooks.js verify
-  node scripts/verify-hooks.js check-git
-  ```
-- CI fails if hooks missing or modified (strict mode vs local warning)
-- Ensures checks run even if local hooks bypassed
+async function getUser(id: number) {
+  return executeQuery(async () => {
+    const [user] = await db.select()
+      .from(users)
+      .where(eq(users.id, id));
+    return user;
+  });
+}
+```
 
-**4. Audit Trail**
-- Commits/pushes logged: `.husky/audit/pre-commit-YYYY-MM-DD.log`, `.husky/audit/pre-push-YYYY-MM-DD.log`
-- Logs: timestamp, user, branch, files, bypass method
-- View logs: `node scripts/audit-hooks.js show`
-- **Bypass attempts always logged** even if checks skipped
+### API Route (Standard Response)
+```typescript
+export async function POST(request: NextRequest) {
+  const body = await request.json();
+  const result = schema.safeParse(body);
 
-**5. Commands for Verification**
+  if (!result.success) {
+    return NextResponse.json(
+      { success: false, error: result.error },
+      { status: 400 }
+    );
+  }
+
+  const data = await repository.create(result.data);
+  return NextResponse.json({ success: true, data }, { status: 201 });
+}
+```
+
+### Server Action
+```typescript
+'use server';
+
+export async function createUser(formData: FormData) {
+  const session = await auth(); // FIRST
+  if (!session?.user?.id) {
+    return { success: false, error: { code: 'UNAUTHORIZED' } };
+  }
+
+  const result = schema.safeParse(formData);
+  if (!result.success) {
+    return { success: false, error: { code: 'INVALID_INPUT' } };
+  }
+
+  try {
+    const data = await repository.create(result.data);
+    revalidatePath('/users');
+    return { success: true, data };
+  } catch (error) {
+    logger.error('Failed to create user', { error });
+    return { success: false, error: { code: 'INTERNAL_ERROR' } };
+  }
+}
+```
+
+### Error Handling
+```typescript
+import { NotFoundError, ValidationError } from '@/lib/errors';
+import { handleApiError } from '@/lib/api-error-handler';
+
+// For API routes
+try {
+  const result = await operation();
+  return NextResponse.json({ success: true, data: result });
+} catch (error) {
+  return handleApiError(error); // Consistent error format
+}
+
+// Custom errors
+if (!project) {
+  throw new NotFoundError('Project', id);
+}
+```
+
+### Testing (AAA Pattern)
+```typescript
+describe('ProjectRepository', () => {
+  it('should return project when found', async () => {
+    // Arrange
+    const repository = new ProjectRepository();
+
+    // Act
+    const result = await repository.getById(1);
+
+    // Assert
+    expect(result).toEqual(expectedProject);
+  });
+});
+```
+
+---
+
+## Rules
+
+### TypeScript
+- No `any` types - use `unknown` + type guards
+- Explicit return types on all functions
+- Infer from: `table.$inferSelect`, `z.infer<typeof schema>`
+- Interface for objects, type alias for unions
+- `import type` for type-only imports
+
+### Database
+- Always use repositories - never direct `db`
+- Wrap with `executeQuery` in all repository methods
+- `db.transaction()` for multi-step writes
+- Use Drizzle query builder only
+- `pnpm db:generate` for schema changes
+- Never modify files in `drizzle/`
+- Never use raw SQL in migrations
+
+### Components
+- Server Components by default
+- `"use client"` only for: event handlers, browser APIs, hooks, state
+- Never import Server Components into Client Components
+- No `useEffect` for data fetching
+- Error boundaries at route segments
+- `loading.tsx` for route loading states
+
+### UI
+**Component tiers (exhaust each):**
+1. `@pxlkit/*` packages
+2. `pxlkit/ui` or `shadcn/ui` in `@/components/ui/`
+3. Custom (last resort)
+
+**Styling:**
+- CSS variables only: `var(--brand-primary)`, `var(--destructive)`
+- Tailwind utilities
+- No hex codes inline
+- Named imports for design tokens
+
+### Environment
+- Next.js code: `@/lib/env` (has server-only protection)
+- Standalone scripts: `@/lib/env-script` (safe for CLI tools)
+- Never import from `env-core.ts`
+- Never `process.env` directly
+
+### Security
+- Rate limit public APIs: `@upstash/ratelimit`
+- Project-level RBAC: check `project_members` table
+- Sanitize HTML: `DOMPurify.sanitize()` before rendering
+- Never log or commit secrets
+- Audit log critical state changes
+
+### Hook Protection
+Multi-layer defense ensures quality checks run:
+
+1. **Local integrity**: SHA256 checksums in `.husky/hooks-checksum.txt`
+2. **Bypass detection**: Git config monitoring
+3. **CI/CD guard**: GitHub Actions verification
+4. **Audit trail**: All commits/pushes logged
+
+**Commands:**
 ```bash
 node scripts/verify-hooks.js verify    # Check integrity
 node scripts/verify-hooks.js generate  # Update checksums
-node scripts/verify-hooks.js check-git # Check git config
-node scripts/audit-hooks.js show      # View audit logs
-bash scripts/ci-verify-hooks.sh      # CI verification
+node scripts/audit-hooks.js show       # View audit logs
 ```
 
-**Consequences of Bypass Attempts:**
-- `--no-verify`: Checks skipped, logged to audit, CI will fail later
-- `core.hooksPath=/dev/null`: Warning locally, validation in CI
-- Delete/modify hooks: Passes locally, fails CI verification
-- Uninstall husky: Same as above
-
-**When Hooks Fail:**
-- **Always fix the code**, never bypass hooks
-- Hook failures indicate legitimate code quality issues
-- If hook modified intentionally: regenerate checksums
-- **Never commit with `--no-verify`** except true emergencies (documented in audit)
-
 **Never:**
-- Use `--no-verify` to bypass failing checks
+- `--no-verify` flag
+- Uninstall/disable husky
 - Modify hooks without updating checksums
-- Commit secrets knowing hooks would block them
-- Skip auth checks knowing hooks validate auth usage
-- Delete hook files to avoid quality checks
 
-This system ensures quality checks **always run** (locally or in CI) and bypass attempts are **detected and logged**.
+---
 
-## Refactoring Philosophy
+## Common Mistakes (AI + General)
 
-When performing code health improvements:
-- **Preserve behavior over cleanliness.** Never change logic and structure in the same commit.
-- **Separate commits:** One commit for structural/rename changes, a distinct commit for behavioral changes.
-- **Verify parity:** Run the full test suite before and after any refactor to confirm identical behavior.
-- **Audit call sites:** Before renaming an exported function or type, search all call sites across the codebase first.
-- **No dead code:** Remove commented-out code; do not leave it "just in case."
+1. `any` types
+2. `as Type` assertions (use type guards)
+3. Direct `db` imports (use repositories)
+4. No `.safeParse()` validation
+5. `console.log` (use Pino logger)
+6. Forget `await auth()` FIRST
+7. No `executeQuery` wrapper
+8. Forgetting to `await` dynamic APIs (`params`, `searchParams`, `cookies` in Next.js 16)
+9. Throwing from Server Actions (return `{ success: false, error }`)
+10. Using `npm` instead of `pnpm`
+11. Bypassing hooks (`--no-verify`)
+12. Importing Server Components into Client components
+13. `useEffect` for data fetching (use Server Components)
+14. Editing `next-env.d.ts`
+15. Committing secrets or AI artifacts
 
-## Project Documentation
+**AI-Specific Pitfalls:**
+- Importing from `env-core.ts` instead of `env.ts`/`env-script.ts`
+- Using hex values instead of CSS variables
+- Missing `await` on Next.js 16 dynamic APIs
+- Using API Routes for UI mutations (use Server Actions)
+- Direct DB access bypassing repositories
+- Missing error boundaries
+- Not using `server-only` imports appropriately
 
-- **DESIGN_SYSTEM.md** - Visual language, color tokens, spacing, typography, interaction patterns. Mandatory reference before any UI work.
-- **USER_INTERFACE.md** - Planned screen inventory and navigation flow. Mandatory reference before building any new screen or layout.
-- **documentation/DEVELOPMENT.md** - Developer best practices and coding standards
-- **AGENTS.md** - Agent usage patterns, mistakes list, prohibited patterns
-- **README.md** - Project setup and overview
+**Never commit:**
+- Secrets (`.env`, credentials)
+- Modified hooks without checksums
+- Infrastructure configs
+- Raw SQL scripts
+- One-time scripts
+- AI artifacts
 
-## Code Quality Standards
+---
 
-### No Emojis in Code or Documentation
+## Claude-Specific
 
-All code, scripts, and documentation must be emoji-free. This includes comments, Markdown files, JSON config, test descriptions, and CLI output.
+**You are in VSCode extension environment.**
+- IDE selection context available in conversation
+- Use Read/Edit tools for file operations
+- Use Glob/Grep for codebase searches
+- Use Bash for system commands
+- File paths are clickable in GitHub format
 
-### File Structure
+**Tool usage:**
+- Use appropriate tools (Read → reading, Glob → finding files)
+- Avoid unnecessary tool calls
+- Reuse tools efficiently
+- Reference specific line numbers: `filename.ts#L42`
 
-See `documentation/DEVELOPMENT.md` for complete project structure and best practices for repository pattern, error handling, API route standards, testing patterns, and database practices.
+**Context management:**
+- Read files for context before suggesting changes
+- Search codebase for existing implementations
+- Parallelize independent tool calls
 
-## Cross-references
+---
 
-- **Operations Guide:** `AGENTS.md` — daily tasks, command usage, PR compliance, mistake catalog.
-- **Human Developer Guide:** `documentation/DEVELOPMENT.md` — testing, git workflow, performance, review checklists.
-- **Alignment:** All three documents must remain consistent. When adding a new library or pattern, update `documentation/DEVELOPMENT.md` and propagate relevant constraints to `CLAUDE.md` and `AGENTS.md`.
+## Cross-Reference
 
-<!-- Keep this file under 500 lines total -->
+- **Agent operations:** `AGENTS.md`
+- **Human practices:** `documentation/DEVELOPMENT.md`
+
+---
+
+*[Keep under 500 lines]*
