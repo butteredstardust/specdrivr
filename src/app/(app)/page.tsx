@@ -12,7 +12,7 @@ export default function MissionControlPage() {
 
   // We need the active session ID to pass to EventLog and NeedsAttentionBanner
   // The session panel already polls, but we poll here to coordinate state
-  const { data: sessionData } = usePolling<{ data: unknown }>({
+  const { data: sessionData } = usePolling<{ data: { id: string } }>({
     url: `/api/v1/sessions?projectId=${activeProjectId}&status=running&limit=1`,
     interval: 3000,
     enabled: !!activeProjectId,
@@ -22,7 +22,7 @@ export default function MissionControlPage() {
   const activeSessionId = sessionData?.data?.id;
 
   // Poll for blocked tasks if we have an active project
-  const { data: blockedData } = usePolling<{ data: unknown[] }>({
+  const { data: blockedData } = usePolling<{ data: { id: string; externalId: string }[] }>({
     url: activeProjectId ? `/api/v1/tasks?projectId=${activeProjectId}&status=blocked` : '',
     interval: 5000,
     enabled: !!activeProjectId,
