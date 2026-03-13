@@ -2,17 +2,39 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { PixelInput, PixelButton, PixelAlert } from '@pxlkit/ui-kit';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 
+const forgotPasswordSchema = z.object({
+  email: z.string().email('Invalid email address'),
+});
+
+type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;
+
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<ForgotPasswordValues>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: '',
+    },
+  });
+
+  const emailValue = watch('email');
+
+  const onForgotPassword = async (data: ForgotPasswordValues) => {
     setIsLoading(true);
     setError(null);
 
@@ -20,7 +42,7 @@ export default function ForgotPasswordPage() {
       const res = await fetch('/api/v1/auth/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: data.email }),
       });
 
       if (!res.ok) {
@@ -73,7 +95,7 @@ export default function ForgotPasswordPage() {
           </div>
         )}
 
-        <form className="flex w-full flex-col gap-6" onSubmit={handleSubmit}>
+        <form className="flex w-full flex-col gap-6" onSubmit={handleSubmit(onForgotPassword)}>
           <div className="flex flex-col gap-1.5">
             <label htmlFor="email" className="text-xs font-medium text-[--text-secondary]">
               EMAIL
@@ -83,10 +105,13 @@ export default function ForgotPasswordPage() {
               type="email"
               tone="purple"
               autoFocus
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              {...register('email')}
+              onChange={(e) => setValue('email', e.target.value)}
+              value={emailValue}
             />
+            {errors.email && (
+              <p className="text-[10px] text-[--status-error]">{errors.email.message}</p>
+            )}
           </div>
 
           <PixelButton type="submit" tone="purple" className="w-full" loading={isLoading}>
