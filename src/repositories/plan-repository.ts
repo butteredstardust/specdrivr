@@ -10,13 +10,13 @@ export { type PlanSelect as Plan } from '@/db/schema';
 
 export class PlanRepository extends BaseRepository {
   async getAll(): Promise<Plan[]> {
-    return await this.execQuery(() =>
+    return await this.executeQuery(() =>
       db.select().from(plans)
     );
   }
 
   async getById(id: number): Promise<Plan | null> {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.select().from(plans).where(eq(plans.id, id)).limit(1)
     );
 
@@ -24,13 +24,13 @@ export class PlanRepository extends BaseRepository {
   }
 
   async getBySpecId(specId: number): Promise<Plan[]> {
-    return await this.execQuery(() =>
+    return await this.executeQuery(() =>
       db.select().from(plans).where(eq(plans.specId, specId))
     );
   }
 
   async getBySpecVersionId(specVersionId: number): Promise<Plan | null> {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.select().from(plans).where(eq(plans.specVersionId, specVersionId)).limit(1)
     );
 
@@ -42,7 +42,7 @@ export class PlanRepository extends BaseRepository {
       throw new DatabaseError('specId is required to create a plan');
     }
 
-    const [plan] = await this.execQuery(() =>
+    const [plan] = await this.executeQuery(() =>
       db.insert(plans).values(data as import('@/db/schema').PlanInsert).returning()
     );
 
@@ -75,7 +75,7 @@ export class PlanRepository extends BaseRepository {
   }
 
   async update(id: number, data: Partial<import('@/db/schema').PlanInsert>): Promise<Plan> {
-    const [updatedPlan] = await this.execQuery(() =>
+    const [updatedPlan] = await this.executeQuery(() =>
       db
         .update(plans)
         .set({ ...data })
@@ -91,7 +91,7 @@ export class PlanRepository extends BaseRepository {
   }
 
   async delete(id: number): Promise<void> {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.delete(plans).where(eq(plans.id, id)).returning()
     );
 
@@ -115,7 +115,7 @@ export class PlanRepository extends BaseRepository {
       throw new BusinessError(`Plan is in ${plan.status} state and cannot be approved`, 'INVALID_STATE');
     }
 
-    return await this.execQuery(async () => {
+    return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         // 1. Update plan status
         const [updatedPlan] = await tx.update(plans)
@@ -197,7 +197,7 @@ export class PlanRepository extends BaseRepository {
     const plan = await this.getById(data.planId);
     if (!plan) throw new NotFoundError(`Plan with ID ${data.planId} not found`);
 
-    return await this.execQuery(async () => {
+    return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         // 1. Update plan
         const [updatedPlan] = await tx.update(plans)
@@ -265,7 +265,7 @@ export class PlanRepository extends BaseRepository {
     const plan = await this.getById(data.planId);
     if (!plan) throw new NotFoundError(`Plan with ID ${data.planId} not found`);
 
-    return await this.execQuery(async () => {
+    return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         // 1. Update plan
         const [updatedPlan] = await tx.update(plans)
@@ -332,7 +332,7 @@ export class PlanRepository extends BaseRepository {
     const plan = await this.getById(data.planId);
     if (!plan) throw new NotFoundError(`Plan with ID ${data.planId} not found`);
 
-    return await this.execQuery(async () => {
+    return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         const [updatedPlan] = await tx.update(plans)
           .set({ status: 'abandoned' })

@@ -20,7 +20,7 @@ export { type ProjectSelect as Project } from '@/db/schema';
 
 export class ProjectRepository extends BaseRepository {
   async getAll(limit = 50, offset = 0): Promise<Project[]> {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.select().from(projects).limit(limit).offset(offset)
     );
 
@@ -28,7 +28,7 @@ export class ProjectRepository extends BaseRepository {
   }
 
   async getById(id: number): Promise<Project | null> {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.select().from(projects).where(eq(projects.id, id)).limit(1)
     );
 
@@ -36,7 +36,7 @@ export class ProjectRepository extends BaseRepository {
   }
 
   async getByUserId(userId: string, limit = 50, offset = 0): Promise<Project[]> {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.select().from(projects).where(eq(projects.createdBy, userId)).limit(limit).offset(offset)
     );
 
@@ -44,7 +44,7 @@ export class ProjectRepository extends BaseRepository {
   }
 
   async getActive(): Promise<Project[]> {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.select().from(projects).where(eq(projects.status, 'active'))
     );
 
@@ -73,7 +73,7 @@ export class ProjectRepository extends BaseRepository {
       throw new ValidationError('Project description cannot exceed 1000 characters');
     }
 
-    const project = await this.execQuery(async () => {
+    const project = await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         const [newProject] = await tx.insert(projects).values(cleanData).returning();
 
@@ -137,7 +137,7 @@ export class ProjectRepository extends BaseRepository {
       throw new ValidationError('No fields to update');
     }
 
-    const [updatedProject] = await this.execQuery(() =>
+    const [updatedProject] = await this.executeQuery(() =>
       db
         .update(projects)
         .set(updateData)
@@ -159,7 +159,7 @@ export class ProjectRepository extends BaseRepository {
       throw new NotFoundError(`Project with ID ${id} not found`);
     }
 
-    await this.execQuery(() =>
+    await this.executeQuery(() =>
       db.delete(projects).where(eq(projects.id, id))
     );
   }
@@ -169,14 +169,14 @@ export class ProjectRepository extends BaseRepository {
   }
 
   async getAgentConfig(projectId: number) {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.select().from(agentConfig).where(eq(agentConfig.projectId, projectId)).limit(1)
     );
     return result[0] || null;
   }
 
   async updateAgentConfig(projectId: number, data: Partial<import('@/db/schema').AgentConfigInsert>, actorId: string) {
-    return await this.execQuery(async () => {
+    return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         const [updated] = await tx
           .update(agentConfig)
