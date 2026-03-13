@@ -1,3 +1,4 @@
+import { clientLogger } from '@/lib/logger-client';
 'use client';
 
 import React, { Component, type ReactNode } from 'react';
@@ -24,11 +25,11 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    console.error('Error caught by ErrorBoundary:', error, errorInfo);
+    clientLogger.error('Error caught by ErrorBoundary:', error, errorInfo);
 
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
       window.addEventListener('error', () => {
-        console.error('Global error event:', error);
+        clientLogger.error('Global error event:', error);
       });
     }
   }
@@ -46,7 +47,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 
   handlePromiseRejection = (event: PromiseRejectionEvent): void => {
-    console.error('Unhandled promise rejection:', event.reason);
+    clientLogger.error('Unhandled promise rejection:', event.reason);
     this.setState({ hasError: true, error: event.reason as Error });
   };
 
