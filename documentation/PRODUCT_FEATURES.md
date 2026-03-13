@@ -11,28 +11,34 @@ Spec-driven autonomous code execution for engineering teams
 ## Table of Contents
 
 **Part 1 — Authentication & Authorization**
+
 - 1.1 Login Page
 - 1.2 Forgot Password
 - 1.3 Reset Password
 - 1.4 Accept Invite
 
 **Part 2 — User Management & RBAC**
+
 - 2.1 Roles & Permissions
 - 2.2 Team Management
 - 2.3 Member Profile
 
 **Part 3 — Plan Review & Rejection**
+
 - 3.1 Plan Review Actions
 - 3.2 Audit Trail
 
 **Part 4 — Onboarding**
+
 - 4.1 Onboarding Flow
 
 **Part 5 — Notifications**
+
 - 5.1 Notification Bell
 - 5.2 Notifications Page
 
 **Part 6 — Settings**
+
 - 6.1 Profile Settings
 - 6.2 Security Settings
 - 6.3 Notification Preferences
@@ -59,26 +65,31 @@ Spec-driven autonomous code execution for engineering teams
 **Redirect rule**: Any unauthenticated request to any route redirects to `/login?next=[original-path]`. After login, redirect to `next` or `/` if absent.
 
 ### Layout
+
 - Background: `#0a0a0b` (same as app)
 - Centered card (400px wide, `bg-[#111113]`, `border border-[#1e1e21]`, `rounded-xl`, `p-8`)
 - Top of card: DAEMON `idle` sprite (48px) + `"SPECDRIVR"` wordmark (mono, `text-xl`)
 - Tagline below wordmark: `"Spec-driven development."` (muted, `text-sm`)
 
 ### Form Fields
+
 - Email (`type="email"`, label: `EMAIL`, mono uppercase label style, autofocus)
 - Password (`type="password"`, label: `PASSWORD`)
 - `[Sign In]` button (primary violet, full width)
 - `Forgot password?` link (right-aligned below password field, muted, small)
 
 ### Validation
+
 - Email: must be valid email format — inline error on blur: `"Enter a valid email address."`
 - Password: required — inline error on submit: `"Password is required."`
 - `[Sign In]` disabled only while request is in-flight (not while fields are empty — let the server validate)
 
 ### On `[Sign In]` Click
+
 - Button: spinner + `"Signing in..."`
 
 ### Data Operation
+
 ```ts
 // POST /api/auth/signin
 // { email, password }
@@ -87,20 +98,25 @@ Spec-driven autonomous code execution for engineering teams
 ```
 
 ### Success
+
 Redirect to `next` param or `/`
 
 ### Error UI
+
 - `[Sign In]` re-enables
 - Red banner below the button (NOT inline on fields — never indicate which field is wrong for security):
   `"Invalid email or password."` — no DAEMON here, this is a security surface, keep it sterile
 - Password field cleared, email field retains value
 
 ### Bottom of Card
+
 - `"Don't have an account? Contact your administrator."` (muted, `text-xs`, centered)
 - No self-signup. Accounts are admin-provisioned only (developer tool, not a SaaS).
 
 ### Demo Login Shortcut (development mode only)
+
 Shown when `NODE_ENV !== 'production'`:
+
 - Dashed border section below the card: `"DEMO ACCESS"` (mono, amber, uppercase)
 - `[Sign in as Admin]` · `[Sign in as Member]` — one-click demo login with seeded credentials
 - This section is completely hidden in production
@@ -114,12 +130,14 @@ Shown when `NODE_ENV !== 'production'`:
 **Form**: Email field only. `[Send Reset Link]` button.
 
 **Data operation**:
+
 ```ts
 // POST /api/auth/forgot-password { email }
 // Always returns success — never confirm if email exists (security)
 ```
 
 **Success UI** (always shown, regardless of whether email exists):
+
 - Form replaced by: DAEMON `success` (32px) + `"Check your email."` + `"If that address is registered, a reset link is on its way."` + `[Back to Sign In]` link
 
 ---
@@ -131,11 +149,13 @@ Shown when `NODE_ENV !== 'production'`:
 **Form**: New Password · Confirm New Password. `[Set New Password]` button.
 
 ### Validation
+
 - Password min 12 characters — inline strength indicator (4 segments: weak/fair/good/strong) using color only (red/amber/amber/emerald). No text labels on strength bar.
 - Passwords must match — inline error on second field blur: `"Passwords don't match."`
 - Token validation: if token is invalid or expired, show full-card error on page load: DAEMON `error` + `"This link has expired."` + `[Request a new link]` → `/forgot-password`
 
 **Data operation**:
+
 ```ts
 // POST /api/auth/reset-password { token, newPassword }
 ```
@@ -153,6 +173,7 @@ Shown when `NODE_ENV !== 'production'`:
 **Form**: Name (text, required) · Password · Confirm Password. `[Accept Invite & Sign In]` button.
 
 **Data operation**:
+
 ```ts
 // POST /api/auth/accept-invite { token, name, password }
 // Creates user record, sets role from invite, invalidates token
@@ -169,12 +190,12 @@ Shown when `NODE_ENV !== 'production'`:
 
 Three roles. Role is **per-project**, not global (a user can be Admin on Project A and Member on Project B, except for the Owner role which is global).
 
-| Role | Capabilities |
-|---|---|
-| **Owner** | Everything. Can delete the organisation. Only one Owner per account. Can transfer ownership. |
-| **Admin** | All project actions. Invite/remove users. Change roles (up to Admin). Cannot delete the org or change Owner. |
-| **Member** | Create specs, generate plans, view all data. Cannot approve plans, invite users, or change settings. |
-| **Viewer** | Read-only. Can view specs, plans, tasks, sessions, changes. Cannot create or modify anything. |
+| Role       | Capabilities                                                                                                 |
+| ---------- | ------------------------------------------------------------------------------------------------------------ |
+| **Owner**  | Everything. Can delete the organisation. Only one Owner per account. Can transfer ownership.                 |
+| **Admin**  | All project actions. Invite/remove users. Change roles (up to Admin). Cannot delete the org or change Owner. |
+| **Member** | Create specs, generate plans, view all data. Cannot approve plans, invite users, or change settings.         |
+| **Viewer** | Read-only. Can view specs, plans, tasks, sessions, changes. Cannot create or modify anything.                |
 
 **Approval gate rule**: Only `Admin` and `Owner` roles can approve a plan. `Member` sees the `[APPROVE & EXECUTE]` button but it is disabled with a Tooltip: `"Only Admins can approve execution."` — never hide the button entirely, always show the affordance.
 
@@ -187,11 +208,14 @@ Three roles. Role is **per-project**, not global (a user can be Admin on Project
 **Route**: `/settings/team` (sub-page within Settings, appears in Settings left sub-nav as `Team`)
 
 ### Members Table
+
 Full-width table.
 Columns: `Avatar + Name` · `Email` · `Role` (editable dropdown, see below) · `Status` (badge: `active` / `invited` / `suspended`) · `Last Active` (relative) · `⋯` menu
 
 ### Role Dropdown
+
 Inline, per row:
+
 - Clicking role cell opens a small popover with role options
 - Cannot set a role higher than your own (Admin cannot create another Owner)
 - Cannot change your own role
@@ -202,6 +226,7 @@ Inline, per row:
 - Sonner toast: `"Role updated for [Name]."`
 
 ### Member Menu Options
+
 - `View Profile` → opens Member Profile Sheet (see below)
 - `Resend Invite` (only if status = `invited`) → resends invite email → toast: `"Invite resent to [email]."`
 - `Suspend` (only if status = `active`) → opens AlertDialog: `"Suspend [Name]? They will lose access immediately."` → on confirm: status → `suspended`, session invalidated
@@ -209,7 +234,9 @@ Inline, per row:
 - `Remove from Project` → AlertDialog: `"Remove [Name] from [Project]? Their work will not be deleted."` → on confirm: removes member
 
 ### Invite Section
+
 `INVITE TEAM MEMBER` section header (mono, muted).
+
 - Email input + Role dropdown (Member / Admin / Viewer) + `[Send Invite]` button (same row)
 - Sending invite:
   ```ts
@@ -228,6 +255,7 @@ Inline, per row:
 **Component**: shadcn Sheet, right side, 400px
 
 **Contents**:
+
 - Avatar (initials-based, generated: first letter of first + last name, coloured by hash of name) + full name + email
 - Role badge
 - Status badge
@@ -248,7 +276,9 @@ The existing approval flow (FLOW 5) is a binary approve/cancel. Real-world plan 
 When `plan.status === 'pending_approval'`, the PLAN tab renders a full review panel:
 
 ### Plan Review Header
+
 Amber surface: `bg-amber-950/20 border border-amber-900/40 rounded-lg p-4`:
+
 - Left: DAEMON `idle` (20px) + `"Plan ready for review"` (bold) + `"Generated [time ago] · v[N] · [N] tasks · [N] architecture decisions"`
 - Right: Three action buttons (right-aligned):
   - `[Request Changes]` (outline amber)
@@ -258,6 +288,7 @@ Amber surface: `bg-amber-950/20 border border-amber-900/40 rounded-lg p-4`:
 ### Request Changes
 
 **Data operation**:
+
 ```ts
 // UPDATE plans SET status = 'changes_requested'
 // INSERT into plan_reviews: { planId, userId, action: 'changes_requested', notes: textareaValue, createdAt: now() }
@@ -266,6 +297,7 @@ Amber surface: `bg-amber-950/20 border border-amber-900/40 rounded-lg p-4`:
 ```
 
 **Success UI**:
+
 - Review panel closes
 - Amber banner replaced by a `"Changes Requested"` banner (amber outline):
   - `"[Your Name] requested changes [time ago]"`
@@ -275,6 +307,7 @@ Amber surface: `bg-amber-950/20 border border-amber-900/40 rounded-lg p-4`:
 - Sonner toast: `"Changes requested. The spec author will be notified."`
 
 **Inside Spec Editor after "Changes Requested"**:
+
 - Amber sticky banner at top of editor (above CodeMirror):
   ```
   CHANGES REQUESTED by [Reviewer Name] · [time ago]
@@ -286,6 +319,7 @@ Amber surface: `bg-amber-950/20 border border-amber-900/40 rounded-lg p-4`:
 ### Reject Plan
 
 **Data operation**:
+
 ```ts
 // UPDATE plans SET status = 'rejected'
 // INSERT into plan_reviews: { planId, userId, action: 'rejected', notes, createdAt: now() }
@@ -293,6 +327,7 @@ Amber surface: `bg-amber-950/20 border border-amber-900/40 rounded-lg p-4`:
 ```
 
 **Success UI**:
+
 - PLAN tab switches to a `rejected` state (different from the empty state):
   - DAEMON `error` (32px)
   - `"Plan rejected"` (bold)
@@ -327,6 +362,7 @@ Notes are stored in `plan_reviews` with `action: 'approved'`. Shown in Review Hi
 At the bottom of the PLAN tab (below the plan content, always visible regardless of state): a `REVIEW HISTORY` collapsible section.
 
 Each review entry (newest first):
+
 ```
 ✓ Approved       Admin User · Jan 12 14:32
 ⚠ Changes req.  Admin User · Jan 11 09:14   "Add error handling to auth tasks"
@@ -364,6 +400,7 @@ No skip button. Three steps take 30 seconds total.
 ### Step 2 of 3 — The Flow
 
 Visual flow diagram (built with divs, not a library):
+
 ```
   [Write Spec]  →  [I Generate a Plan]  →  [You Approve]  →  [I Build It]
 ```
@@ -377,6 +414,7 @@ Short description below: `"You stay in control. I never execute without your app
 ### Step 3 of 3 — Create your first project
 
 Inline mini-form (inside the modal, not navigating away):
+
 - Project name (text, required)
 - Repository URL (text, required)
 - Branch (default `main`)
@@ -397,11 +435,13 @@ Add a bell icon to the top bar (right side, left of any user avatar). Shows an a
 **Click**: opens a Notification Panel — a Popover (shadcn Popover) anchored to the bell, 380px wide, max 480px tall, scrollable.
 
 **Notification Panel**:
+
 - Header: `NOTIFICATIONS` (mono, muted, uppercase, small) + `[Mark all read]` link (right)
 - List of notifications, newest first (no grouping by date in this panel — keep it simple)
 - Footer: `[View all notifications →]` → `/notifications` page
 
 **Each notification row** (48px, hover bg tint):
+
 - Unread: violet left border + slightly brighter text
 - Read: no border
 - Avatar (16px initials circle, or DAEMON sprite for system events) + text description + relative timestamp
@@ -409,19 +449,20 @@ Add a bell icon to the top bar (right side, left of any user avatar). Shows an a
 
 **Notification types and their destinations**:
 
-| Event | Notification text | Destination |
-|---|---|---|
-| Plan generated (for my spec) | `"DAEMON generated a plan for [Spec Name]. Review before executing."` | `/specs/[id]?tab=plan` |
-| Plan approved (I'm member) | `"[Admin] approved the plan for [Spec Name]. Execution has started."` | `/specs/[id]?tab=tasks` |
-| Plan rejected (my spec) | `"[Admin] rejected the plan for [Spec Name]."` | `/specs/[id]?tab=plan` |
-| Changes requested (my spec) | `"[Admin] requested changes to the plan for [Spec Name]."` | `/specs/[id]/edit` |
-| Session complete | `"Execution of [Spec Name] is complete. [22/22] tasks succeeded."` | `/specs/[id]?tab=changes` |
-| Task blocked (I'm watcher) | `"DAEMON is blocked on [T-042] in [Spec Name]. Input needed."` | `/specs/[id]?tab=tasks` → opens drawer |
-| Session failed | `"Execution of [Spec Name] failed on [T-019]."` | `/specs/[id]?tab=activity` |
-| Invited to project | `"[Admin] invited you to [Project Name]."` | `/projects` |
-| Role changed | `"Your role in [Project Name] was changed to [Role]."` | `/settings/team` |
+| Event                        | Notification text                                                     | Destination                            |
+| ---------------------------- | --------------------------------------------------------------------- | -------------------------------------- |
+| Plan generated (for my spec) | `"DAEMON generated a plan for [Spec Name]. Review before executing."` | `/specs/[id]?tab=plan`                 |
+| Plan approved (I'm member)   | `"[Admin] approved the plan for [Spec Name]. Execution has started."` | `/specs/[id]?tab=tasks`                |
+| Plan rejected (my spec)      | `"[Admin] rejected the plan for [Spec Name]."`                        | `/specs/[id]?tab=plan`                 |
+| Changes requested (my spec)  | `"[Admin] requested changes to the plan for [Spec Name]."`            | `/specs/[id]/edit`                     |
+| Session complete             | `"Execution of [Spec Name] is complete. [22/22] tasks succeeded."`    | `/specs/[id]?tab=changes`              |
+| Task blocked (I'm watcher)   | `"DAEMON is blocked on [T-042] in [Spec Name]. Input needed."`        | `/specs/[id]?tab=tasks` → opens drawer |
+| Session failed               | `"Execution of [Spec Name] failed on [T-019]."`                       | `/specs/[id]?tab=activity`             |
+| Invited to project           | `"[Admin] invited you to [Project Name]."`                            | `/projects`                            |
+| Role changed                 | `"Your role in [Project Name] was changed to [Role]."`                | `/settings/team`                       |
 
 **Data model**:
+
 ```ts
 interface Notification {
   id: string;
@@ -432,7 +473,7 @@ interface Notification {
   linkUrl: string;
   readAt: Date | null;
   createdAt: Date;
-  actorUserId: string | null;  // null for system (DAEMON) events
+  actorUserId: string | null; // null for system (DAEMON) events
 }
 ```
 
@@ -444,6 +485,7 @@ interface Notification {
 **Nav**: Not in sidebar. Accessed only from `View all →` in the bell panel.
 
 **Contents**:
+
 - Filter tabs: `All` · `Unread` · `Mentions` (mono uppercase, pill style)
 - Full-width list, same row format as the panel but with more whitespace (56px rows)
 - `[Mark all read]` button (top right)
@@ -477,16 +519,19 @@ DANGER ZONE
 ## 6.1 Profile Settings (`/settings/profile`)
 
 **Avatar section**:
+
 - Large initials avatar (64px, same deterministic colour as member table)
 - `"Avatar is generated from your name. Custom avatars are not supported."` (muted, `text-xs`)
 
 **Form fields**:
+
 - Display Name (text, required)
 - Email (text, read-only, greyed — cannot change email without support)
   - Small note: `"To change your email, contact your administrator."`
 - `[Save Profile]` button
 
 **Data operation**:
+
 ```ts
 // UPDATE users SET name = displayName WHERE id = currentUser.id
 // Recalculates avatarInitials and avatarColor
@@ -497,12 +542,14 @@ DANGER ZONE
 ## 6.2 Security Settings (`/settings/security`)
 
 ### Change Password Section
+
 - Current Password (required)
 - New Password (required, same strength indicator as reset flow)
 - Confirm New Password (required)
 - `[Update Password]` button
 
 ### Active Sessions Section
+
 Header: `ACTIVE SESSIONS` (mono, muted)
 
 Table: Device/Browser · Location (IP-based, e.g. `London, UK`) · Last active · `[Revoke]` button per row
@@ -512,17 +559,20 @@ Current session row: highlighted with `(this session)` label — no Revoke butto
 `[Revoke all other sessions]` link below table (red, muted) → AlertDialog → on confirm: invalidates all other sessions.
 
 ### API Tokens Section
+
 Header: `API TOKENS` (mono, muted)
 Description: `"Use tokens to authenticate the DAEMON agent or external integrations."`
 
 Table: Token name · Prefix (e.g. `sdk_...`) · Created · Last used · Expires · `[Revoke]`
 
 `[+ Generate Token]` button → Dialog:
+
 - Token Name (text, required, e.g. `"CI Pipeline"`)
 - Expiry: radio group — `30 days` / `90 days` / `1 year` / `Never` (default: 90 days)
 - `[Generate]` button
 
 After generation: **one-time reveal dialog** (cannot be shown again):
+
 ```
 [DAEMON success sprite]
 Your new API token:
@@ -545,17 +595,17 @@ sdk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 Two columns: Email · In-app (toggles)
 
-| Event | Email | In-app |
-|---|---|---|
-| Plan generated for my spec | ○ | ● (default on) |
-| Plan approved | ○ | ● |
-| Plan rejected | ● (default on) | ● |
-| Changes requested on my spec | ● | ● |
-| Session complete | ○ | ● |
-| Task blocked (specs I own) | ● | ● |
-| Session failed | ● | ● |
-| Team invitation sent | ● | ● |
-| Role changed | ● | ● |
+| Event                        | Email          | In-app         |
+| ---------------------------- | -------------- | -------------- |
+| Plan generated for my spec   | ○              | ● (default on) |
+| Plan approved                | ○              | ●              |
+| Plan rejected                | ● (default on) | ●              |
+| Changes requested on my spec | ●              | ●              |
+| Session complete             | ○              | ●              |
+| Task blocked (specs I own)   | ●              | ●              |
+| Session failed               | ●              | ●              |
+| Team invitation sent         | ●              | ●              |
+| Role changed                 | ●              | ●              |
 
 Each row: event name (left) · email toggle (shadcn Switch) · in-app toggle
 
@@ -566,6 +616,7 @@ Each row: event name (left) · email toggle (shadcn Switch) · in-app toggle
 ## 6.4 General Project Settings (`/settings/general`)
 
 **Fields**:
+
 - Project Name (text, required)
 - Project Description (textarea, 3 rows)
 - Repository URL (text, with `[Verify Connection]` button inline — pings the repo and returns ✓ or ✕ + error)
@@ -574,7 +625,9 @@ Each row: event name (left) · email toggle (shadcn Switch) · in-app toggle
 - `[Save Changes]` button
 
 ### Repository Verification
+
 Inline, triggered by `[Verify Connection]`:
+
 - Button: spinner + `"Checking..."`
 - Success: green checkmark + `"Connected · [N] commits ahead on main"` (muted)
 - Failure: red ✕ + `"Could not connect. Check the URL and your AGENT_TOKEN permissions."`
@@ -598,9 +651,11 @@ Inline, triggered by `[Verify Connection]`:
   ```
 
 ### Webhook Events Section
+
 Below cards, only shown if GitHub connected:
 
 Checkboxes for which events trigger notifications:
+
 - `push` to watched branch → `"Notify me when commits are pushed to [branch]"`
 - `pull_request` opened → `"Notify when PRs reference my specs"`
 
@@ -661,6 +716,7 @@ Checkboxes for which events trigger notifications:
 Columns: `Timestamp` (mono, full datetime) · `Actor` (avatar + name) · `Action` (mono badge) · `Target` · `Details`
 
 **Action types** (mono, coloured badges):
+
 - `PLAN_APPROVED` (emerald)
 - `PLAN_REJECTED` (red)
 - `CHANGES_REQUESTED` (amber)
@@ -690,22 +746,26 @@ These actions are irreversible. Proceed carefully.
 ```
 
 ### 1. Abandon All Running Sessions
+
 - Description: `"Immediately stop all running agent sessions. In-progress tasks will be marked failed."`
 - Button: `[Abandon All Sessions]` (outline amber)
 - Confirmation: AlertDialog — `"Abandon [N] running sessions?"` · `[Keep Running]` · `[Abandon All]` (amber)
 - No type-to-confirm needed (recoverable — specs/plans are preserved)
 
 ### 2. Reset All Agent Settings to Defaults
+
 - Description: `"Resets timeouts, retries, concurrency, and approval settings to factory defaults."`
 - Button: `[Reset Agent Settings]` (outline amber)
 - Confirmation: AlertDialog — simple confirm, no type-to-confirm
 
 ### 3. Delete All Specs & Plans
+
 - Description: `"Permanently deletes all specifications, plans, tasks, and session history for this project. The project itself and team members are preserved."`
 - Button: `[Delete All Specs & Plans]` (outline red)
 - Confirmation: type project name to confirm (same pattern as FLOW 26)
 
 ### 4. Delete Project
+
 - Description: `"Permanently deletes this project and everything in it. This cannot be undone."`
 - Button: `[Delete Project]` (solid red, `bg-red-600`)
 - Confirmation: two-step:
@@ -721,6 +781,7 @@ Add a user avatar/menu to the top-right of the top bar (persistent across all ap
 **Component**: shadcn DropdownMenu anchored to an initials avatar (32px circle).
 
 **Menu items**:
+
 ```
 [Avatar + Name + email]  ← read-only header, not clickable
 ────────────────────────
@@ -734,6 +795,7 @@ Sign Out
 ```
 
 **Sign Out**:
+
 - No confirmation dialog — sign out immediately
 - Clear session cookie
 - Redirect to `/login`
@@ -745,34 +807,38 @@ Sign Out
 
 Every empty state must have unique copy, a DAEMON expression, and a primary CTA. Never reuse copy across contexts.
 
-| Page / Context | DAEMON expression | Heading | Subtext | CTA |
-|---|---|---|---|---|
-| `/projects` (no projects) | `idle` | `"No projects yet."` | `"Point me at a repository and I'll get to work."` | `[Initialize First Project]` |
-| `/specs` (no specs) | `idle` | `"No specifications."` | `"Write what you want to build. I'll figure out the how."` | `[Write First Spec]` |
-| PLAN tab (no plan) | `idle` | `"No plan generated."` | `"Run me on this spec and I'll produce an architecture and execution plan."` | `[Generate Plan]` |
-| PLAN tab (rejected) | `error` | `"Plan rejected."` | `"[Reviewer] rejected this plan. Generate a new one or edit the spec first."` | `[Generate New Plan]` |
-| TASKS tab (no tasks) | `idle` | `"No tasks yet."` | `"Tasks are created when a plan is approved."` | `[Go to Plan →]` |
-| CHANGES tab (no changes) | `idle` | `"No file changes."` | `"Changes will appear here once DAEMON starts executing tasks."` | `[View Tasks →]` |
-| ACTIVITY tab (no activity) | `idle` | `"No sessions yet."` | `"Approve a plan to start the first execution session."` | `[Go to Plan →]` |
-| Task Drawer CHANGES (no changes) | `idle` | `"No changes yet."` | `"DAEMON hasn't modified any files for this task."` | none |
-| `/sessions` (no sessions) | `idle` | `"No sessions recorded."` | `"Sessions appear here once execution begins."` | none |
-| `/notifications` (empty) | `idle` | `"All caught up."` | `"No notifications. DAEMON has nothing to report."` | none |
-| `/settings/audit` (no entries) | `idle` | `"No audit entries."` | `"Administrative actions will be logged here."` | none |
-| Team page (no members) | `idle` | `"Just you."` | `"Invite your team to collaborate on specs and review plans."` | `[Invite Someone]` |
-| 404 | `error` | `"404 — Not found."` | `"This page doesn't exist or you don't have access."` | `[Go to Mission Control]` |
+| Page / Context                   | DAEMON expression | Heading                   | Subtext                                                                       | CTA                          |
+| -------------------------------- | ----------------- | ------------------------- | ----------------------------------------------------------------------------- | ---------------------------- |
+| `/projects` (no projects)        | `idle`            | `"No projects yet."`      | `"Point me at a repository and I'll get to work."`                            | `[Initialize First Project]` |
+| `/specs` (no specs)              | `idle`            | `"No specifications."`    | `"Write what you want to build. I'll figure out the how."`                    | `[Write First Spec]`         |
+| PLAN tab (no plan)               | `idle`            | `"No plan generated."`    | `"Run me on this spec and I'll produce an architecture and execution plan."`  | `[Generate Plan]`            |
+| PLAN tab (rejected)              | `error`           | `"Plan rejected."`        | `"[Reviewer] rejected this plan. Generate a new one or edit the spec first."` | `[Generate New Plan]`        |
+| TASKS tab (no tasks)             | `idle`            | `"No tasks yet."`         | `"Tasks are created when a plan is approved."`                                | `[Go to Plan →]`             |
+| CHANGES tab (no changes)         | `idle`            | `"No file changes."`      | `"Changes will appear here once DAEMON starts executing tasks."`              | `[View Tasks →]`             |
+| ACTIVITY tab (no activity)       | `idle`            | `"No sessions yet."`      | `"Approve a plan to start the first execution session."`                      | `[Go to Plan →]`             |
+| Task Drawer CHANGES (no changes) | `idle`            | `"No changes yet."`       | `"DAEMON hasn't modified any files for this task."`                           | none                         |
+| `/sessions` (no sessions)        | `idle`            | `"No sessions recorded."` | `"Sessions appear here once execution begins."`                               | none                         |
+| `/notifications` (empty)         | `idle`            | `"All caught up."`        | `"No notifications. DAEMON has nothing to report."`                           | none                         |
+| `/settings/audit` (no entries)   | `idle`            | `"No audit entries."`     | `"Administrative actions will be logged here."`                               | none                         |
+| Team page (no members)           | `idle`            | `"Just you."`             | `"Invite your team to collaborate on specs and review plans."`                | `[Invite Someone]`           |
+| 404                              | `error`           | `"404 — Not found."`      | `"This page doesn't exist or you don't have access."`                         | `[Go to Mission Control]`    |
 
 ---
 
 # Part 9 — Edge Cases & Micro-Interactions
 
 ## Spec Name Collision
+
 If a user tries to save a spec with the same name as an existing spec in the project:
+
 - Server returns a 409
 - Inline error below the name field: `"A spec named '[name]' already exists in this project."`
 - Suggestion: `"Try '[name] v2' or '[name] — [date]'
 
 ## Session Auto-Recovery
+
 If a running session's server process dies unexpectedly (e.g. deployment, crash):
+
 - On next app load or poll: session status is detected as `running` but `lastHeartbeatAt` is > 60 seconds ago
 - A yellow banner appears on Mission Control and Spec Detail:
   ```
@@ -783,44 +849,60 @@ If a running session's server process dies unexpectedly (e.g. deployment, crash)
 - `[Abandon Session]` → same as cancel flow
 
 ## Concurrent Edit Warning
+
 If two users open the same Spec Editor simultaneously:
+
 - On second user's page load: amber banner in editor: `"[Name] is currently editing this spec. Your changes may conflict."`
 - No locking — both can edit, but the warning prevents confusion
 - On save: if `currentVersionId` has changed since the editor opened: server returns 409
   - Error banner in editor (red): `"This spec was updated by [Name] while you were editing. [View their changes] or [Save anyway and create a new version]"
 
 ## Task Dependency Violation (UI Guard)
+
 If a user manually tries to mark a task `done` when its dependencies are not yet done:
+
 - `[MARK DONE]` click → server returns 422
 - AlertDialog (not a toast): `"T-042 depends on T-038 and T-039 which are not complete. Mark it done anyway?"`
 - `[Cancel]` · `[Force Mark Done]` — if forced, proceeds with `verificationPassed: true` and a `forced` flag on the task record
 
 ## Long-Running Plan Generation (> 30 seconds)
+
 If plan generation takes longer than 30 seconds:
+
 - The DAEMON `working` animation on the PLAN tab continues
 - After 30s: a subtle text update below the animation: `"Still working... complex specs take a moment."` (no panic, just reassurance)
 - After 2 minutes with no response: show DAEMON `error` + `"Plan generation is taking longer than expected."` + `[Check again]` button (re-polls) + `[Cancel generation]` link
 
 ## Plan Approval by Non-Admin (UI State)
+
 Members who cannot approve see the `[APPROVE & EXECUTE]` button rendered but disabled:
+
 - Tooltip on hover: `"Only Admins can approve execution. Contact [Admin Name] to proceed."`
 - `[Admin Name]` is the name of an actual Admin on the project (pulled from team list)
 - `[Request Approval]` secondary button (outline, enabled for Members): sends a notification to all Admins: `"[Member] is requesting approval for the plan on [Spec Name]."` → Admins receive in-app + email notification → clicking routes to the PLAN tab
 
 ## First Login After Invite (RBAC context)
+
 If user signs in for the first time as a `viewer`:
+
 - Onboarding flow (Part 4) still runs, but Step 2 of the flow is adapted: `"You have Viewer access. You can review specs, plans, and agent output but cannot create or approve."` — no deception about capabilities.
 
 ## Session Limit Warning
+
 If `maxConcurrentTasks` is set to 1 and a task is already running, attempting to re-run another task via Task Drawer shows:
+
 - `[RE-RUN]` button: clicking shows an inline note (not a toast): `"Max concurrent tasks (1) reached. This task will queue and start when the current task completes."` + `[Queue Anyway]` · `[Cancel]`
 
 ## Notification Badge Update on New Event
+
 The bell icon badge updates in real time (3-second poll — same interval as session polling). No WebSocket required.
+
 - If the user has the notification panel open when a new notification arrives: it slides into the top of the list with a subtle fade-in (Motion), no panel close/reopen needed.
 
 ## Keyboard Navigation in Task List
+
 The task list in TASKS tab is keyboard navigable:
+
 - `↑` / `↓`: move focus between rows (visible focus ring, violet)
 - `Enter` or `Space`: expand/collapse the focused row
 - `O`: open Task Drawer for focused row (mnemonic: **O**pen detail)
@@ -828,7 +910,9 @@ The task list in TASKS tab is keyboard navigable:
 - These shortcuts only activate when focus is inside the task list (not globally)
 
 ## Copy-to-Clipboard Pattern (Used Throughout)
+
 Any mono ID (`T-042`, `SPEC-003`, `SES-0091`), file path, or token uses a consistent copy interaction:
+
 - Hover: a copy icon (`Copy` from Lucide) fades in to the right of the value
 - Click: icon becomes a checkmark for 1.5 seconds, then reverts
 - No toast for copy actions — the inline checkmark is sufficient feedback

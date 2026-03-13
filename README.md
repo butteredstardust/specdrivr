@@ -15,6 +15,7 @@ Simple AI-native orchestration platform demo.
 We use [nvm](https://github.com/nvm-sh/nvm) to manage Node versions.
 
 After installing nvm:
+
 ```bash
 nvm use  # Uses version from .nvmrc
 pnpm install
@@ -23,11 +24,13 @@ pnpm install
 ### Steps
 
 1. Install dependencies:
+
    ```bash
    pnpm install
    ```
 
 2. Set up database:
+
    ```bash
    # Copy .env.example to .env.local and configure DATABASE_URL
    pnpm db:push
@@ -61,6 +64,5 @@ Open [http://localhost:3000](http://localhost:3000) to view the app.
 - Security headers configured
 - Zero `any` types
 - No emojis in code
-// dummy
-// dummy
-
+  // dummy
+  // dummy

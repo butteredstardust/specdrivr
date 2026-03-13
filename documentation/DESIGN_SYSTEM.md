@@ -226,7 +226,7 @@ The app shell is a fixed layout - sidebar and top bar never unmount during navig
 
 - Header: EVENT LOG (mono, muted, uppercase, small). Last 30 agent events.
 - Row format: timestamp (mono) · \[EVENT_TYPE\] (colour-coded) · entity ID · description.
-- Colour coding: \[TASK_DONE\] emerald · \[BLOCKED\] amber · \[ERROR\] red · \[PLAN_\*\] violet.
+- Colour coding: \[TASK*DONE\] emerald · \[BLOCKED\] amber · \[ERROR\] red · \[PLAN*\*\] violet.
 - Newest row has pulsing dot if session active. View all → link to /sessions.
 
 ## **11.3 Projects (/projects)**
@@ -479,8 +479,6 @@ The app shell is a fixed layout - sidebar and top bar never unmount during navig
 - Bell badge: amber background, white text, max displayed "9+". Updates via 3-second poll on GET /api/v1/notifications?unread=true&count=true.
 - Click notification row: marks as read (PATCH /api/v1/notifications/{id}) + navigates to linkUrl. Single action, no separate mark-read step.
 - \[Mark all read\]: POST /api/v1/notifications/read-all. Badge clears immediately (optimistic).
-
-
 
 ## Development Gaps & Technical Debt
 

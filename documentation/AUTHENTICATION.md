@@ -16,7 +16,7 @@ _Spec-driven autonomous code execution for engineering teams_
 - Passwords: bcrypt, cost factor 12. Never stored in plain text. Never logged.
 - Password reset: time-limited token (UUID, 1 hour TTL) stored in the `verifications` table.
 - Invite flow: unique UUID token, 7-day TTL, single-use. Stored in invites table. On use, user is created and token is invalidated in one transaction.
-- API tokens: generated as sdk_{projectSlug}\_{48 random hex chars}. Stored as bcrypt hash. Shown to user exactly once on creation.
+- API tokens: generated as sdk\_{projectSlug}\_{48 random hex chars}. Stored as bcrypt hash. Shown to user exactly once on creation.
 
 ## **7.2 RBAC - Roles & Permissions**
 
@@ -41,4 +41,3 @@ Roles are per-project. A user can be Admin on Project A and Member on Project B.
 | Transfer ownership                          | ✗          | ✗          | ✗         | ✓         |
 
 UI Rule: Never hide permission-gated actions from lower roles - always show them in a disabled state with a Tooltip explaining the required role. Visibility without access teaches users what is possible and how to request it.
-

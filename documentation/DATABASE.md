@@ -17,35 +17,45 @@ pnpm db:seed     # Seed database with test data
 ## Database Enums
 
 ### `agent_status`
+
 Status of agent sessions: `idle`, `running`, `paused`, `stopped`, `error`
 
 ### `log_level`
+
 Logging levels: `debug`, `info`, `warn`, `error`
 
 ### `plan_status`
+
 Plan lifecycle: `pending_approval`, `approved`, `rejected`, `abandoned`, `changes_requested`, `complete`
 
 ### `project_status`
+
 Project states: `active`, `archived`
 
 ### `spec_status`
+
 Specification states: `drafting`, `pending_plan`, `pending_approval`, `executing`, `completed`, `stalled`, `archived`
 
 ### `task_status`
+
 Task workflow: `todo`, `in_progress`, `done`, `blocked`, `failed`, `skipped`
 
 ### `session_status`
+
 Agent session states: `running`, `paused`, `completed`, `failed`, `cancelled`
 
 ### `user_role`
+
 User permissions: `owner`, `admin`, `member`, `viewer`
 
 ### `task_attempt_status`
+
 Attempt workflow: `running`, `succeeded`, `failed`
 
 ## Core Tables
 
 ### `projects`
+
 Main project container for all work.
 
 ```sql
@@ -64,10 +74,12 @@ updated_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 **Indexes:**
+
 - `project_slug_idx` (unique) on slug
 - `project_created_by_idx` on created_by
 
 ### `specifications`
+
 User-written specifications that drive plan generation.
 
 ```sql
@@ -82,6 +94,7 @@ updated_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 ### `spec_versions`
+
 Historical versions of specifications.
 
 ```sql
@@ -94,6 +107,7 @@ created_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 ### `plans`
+
 AI-generated execution plans containing multiple tasks.
 
 ```sql
@@ -115,6 +129,7 @@ created_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 ### `plan_reviews`
+
 Audit trail for plan approval workflow.
 
 ```sql
@@ -127,6 +142,7 @@ created_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 ### `tasks`
+
 Individual work items within a plan.
 
 ```sql
@@ -164,6 +180,7 @@ updated_at: timestamp with time zone NOT NULL DEFAULT now()
 ## Agent Orchestration Tables
 
 ### `agent_config`
+
 Per-project agent configuration and integration settings.
 
 ```sql
@@ -198,6 +215,7 @@ updated_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 ### `agent_sessions`
+
 Long-running agent sessions executing plans.
 
 ```sql
@@ -226,6 +244,7 @@ ended_at: timestamp with time zone
 ```
 
 ### `agent_events`
+
 Session-scoped event log for Mission Control feed.
 
 ```sql
@@ -241,6 +260,7 @@ created_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 ### `agent_logs`
+
 Structured logging from agent task execution.
 
 ```sql
@@ -256,6 +276,7 @@ timestamp: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 ### `agent_tokens`
+
 API tokens for agent authentication.
 
 ```sql
@@ -274,6 +295,7 @@ created_at: timestamp with time zone NOT NULL DEFAULT now()
 ## Task Execution Tables
 
 ### `task_attempts`
+
 Individual execution attempts for tasks (supports retries).
 
 ```sql
@@ -293,6 +315,7 @@ ended_at: timestamp with time zone
 ```
 
 ### `file_changes`
+
 Files modified during task execution.
 
 ```sql
@@ -313,6 +336,7 @@ created_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 ### `test_results`
+
 Test execution results for verification.
 
 ```sql
@@ -326,6 +350,7 @@ created_at: timestamp with time zone NOT NULL DEFAULT now()
 ## User Management Tables
 
 ### `users`
+
 Application users with role-based access.
 
 ```sql
@@ -348,6 +373,7 @@ last_active_at: timestamp with time zone
 ```
 
 ### `invites`
+
 Project invitation management.
 
 ```sql
@@ -365,6 +391,7 @@ created_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 ### `project_members`
+
 Mapping of users to projects with roles.
 
 ```sql
@@ -379,6 +406,7 @@ created_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 ### `sessions`
+
 Authentication sessions for Better Auth.
 
 ```sql
@@ -393,6 +421,7 @@ user_id: text NOT NULL REFERENCES users(id) ON DELETE CASCADE
 ```
 
 ### `accounts`
+
 External accounts linked to users (for OAuth/Credentials).
 
 ```sql
@@ -412,6 +441,7 @@ updated_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 ### `verifications`
+
 Verification tokens for email verification and password resets.
 
 ```sql
@@ -426,6 +456,7 @@ updated_at: timestamp with time zone
 ## Integration & Audit Tables
 
 ### `webhooks`
+
 Project-level outgoing webhooks.
 
 ```sql
@@ -440,6 +471,7 @@ created_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 ### `webhook_deliveries`
+
 Webhook delivery tracking and retry logging.
 
 ```sql
@@ -460,6 +492,7 @@ created_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 ### `git_commits`
+
 Git commit tracking linked to tasks.
 
 ```sql
@@ -475,6 +508,7 @@ committed_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 ### `apiRequestLogs`
+
 API request monitoring and rate limiting.
 
 ```sql
@@ -489,6 +523,7 @@ requested_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 ### `audit_log`
+
 Comprehensive audit trail for security compliance.
 
 ```sql
@@ -504,6 +539,7 @@ created_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 ### `usage_snapshots`
+
 Daily usage aggregation for cost tracking.
 
 ```sql
@@ -522,9 +558,11 @@ created_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 **Indexes:**
+
 - `usage_date_project_idx` (unique) on project_id, date
 
 ### `notification_preferences`
+
 User notification channel preferences.
 
 ```sql
@@ -538,16 +576,19 @@ updated_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 **Indexes:**
+
 - `notif_pref_user_event_idx` (unique) on user_id, event_type
 
 ## Schema Notes
 
 ### Key Foreign Key Relationships
+
 - Projects cascade delete to most child tables (specifications, agent_config, agent_sessions, webhooks, etc.)
 - Cascading maintains referential integrity throughout the system
 - Soft deletes not used - deleted records are permanently removed to comply with GDPR
 
 ### Conventions
+
 - All tables use `serial` primary keys unless specified
 - Timestamps use `timestamptz` to avoid timezone issues
 - `id` and `created_at` columns on all tables for consistency
@@ -555,6 +596,7 @@ updated_at: timestamp with time zone NOT NULL DEFAULT now()
 - JSONB fields used for flexible metadata storage
 
 ### Performance Optimizations
+
 - Indexes on foreign keys and frequently queried columns
 - Composite index on usage_snapshots for dashboard queries
 - Denormalized counters (task_count, tasks_executed) for display

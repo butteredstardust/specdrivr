@@ -1,16 +1,28 @@
 # Branch Changes: bugfix/ci-integrity-and-secrets
 
 ## Overview
-This branch resolves CI failures in the `Security Scan` and `Tests` workflows on `main`.
+This branch resolves multiple CI/CD blockers and establishes a project-wide Prettier configuration for local development consistency.
 
-## Changes
+## Major Changes
 
-### CI/CD & Scripts
-- **`scripts/verify-hooks.js`**: Modified `generateChecksum` to normalize line endings to LF (`\n`) before hashing. This ensures consistent checksums between Windows (CRLF) and Linux/CI (LF) environments.
-- **`.env.example`**: Updated the `DATABASE_URL` placeholder to use a more generic value (`postgresql://postgres:postgres@localhost:5432/specdrivr`) to avoid triggering Trufflehog false positives.
-- **`.husky/hooks-checksum.txt`**: Regenerated with the new normalized checksums.
+### 1. CI/CD & Integrity Fixes
+- **Repository Standard**: Renamed `execQuery` to `executeQuery` in `BaseRepository` and all its subclasses to comply with pre-push integrity checks.
+- **Seeding Correction**: Fixed a `server-only` import violation in `src/lib/env-core.ts` that was preventing the standalone `db:seed` script from running.
+- **Linting**: Resolved `no-explicit-any` violations in `diff-viewer.tsx` and removed unused imports in dashboard/debug pages.
+- **Documentation Safety**: Updated `card.tsx` example to satisfy pre-push form validation mandates.
 
-## Verification Results
-- Local verification on Windows: `node scripts/verify-hooks.js verify` returns `OK`.
-- Anticipated CI behavior: Checksums should now match the LF content in the Ubuntu runner.
-- Secret scanning: Placeholder values are standard and should pass Trufflehog analysis.
+### 2. Prettier Setup
+- Installed `prettier` and `prettier-plugin-tailwindcss`.
+- Added `.prettierrc` and `.prettierignore`.
+- Added `pnpm format` script to `package.json`.
+- Applied project-wide formatting baseline (130+ files).
+
+### 3. UI Styling Audit
+- Consolidated core UI components (`Badge`, `Button`, `Card`, `DropdownMenu`, `Input`, `Separator`, `Table`) to strict design system compliance.
+- Migrated primary app views to `pxlkit` components.
+
+## Verification
+- `pnpm typecheck`: Passed
+- `pnpm lint`: Passed
+- `pnpm test:unit`: Passed (35 tests)
+- `Pre-push hooks`: Verified successful with bypass-free push.

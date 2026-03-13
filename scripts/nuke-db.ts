@@ -14,7 +14,7 @@ async function main() {
     SELECT tablename FROM pg_catalog.pg_tables 
     WHERE schemaname = 'public' AND tablename != 'drizzle_migrations'
   `);
-  
+
   for (const row of tablesResult) {
     const tableName = row.tablename;
     console.log(`Dropping table: ${tableName}`);
@@ -38,7 +38,7 @@ async function main() {
   process.exit(0);
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error(err);
   process.exit(1);
 });

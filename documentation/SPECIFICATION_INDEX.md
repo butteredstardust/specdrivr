@@ -11,7 +11,9 @@ _Spec-driven autonomous code execution for engineering teams_
 This specification has been split into the following purpose-specific files:
 
 ## Product Specification
+
 **Audience**: Stakeholders, Product Managers, Engineers
+
 - **[PRODUCT.md](PRODUCT.md)** - Product overview, vision, user personas, onboarding, error states, and microcopy
   - Executive Summary
   - Product Vision & Goals
@@ -30,7 +32,9 @@ This specification has been split into the following purpose-specific files:
   - User Profile & Preferences
 
 ## Technical Architecture
+
 **Audience**: Engineers, Architects
+
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** - System architecture and engineering constraints
   - System Architecture
   - Stack-Specific Engineering Constraints
@@ -48,7 +52,9 @@ This specification has been split into the following purpose-specific files:
   - Authentication & Authorisation
 
 ## Design & User Experience
+
 **Audience**: Designers, Frontend Engineers
+
 - **[DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)** - Design system and UI specifications
   - Design System
   - DAEMON Mascot Specification
@@ -68,7 +74,9 @@ This specification has been split into the following purpose-specific files:
   - Anti-Patterns to Avoid
 
 ## Integration & Development
+
 **Audience**: Engineers, DevOps
+
 - **[INTEGRATIONS.md](INTEGRATIONS.md)** - External service integrations
   - Integrations
   - Cost & Usage Tracking
@@ -79,7 +87,9 @@ This specification has been split into the following purpose-specific files:
   - Developer Integration Reference
 
 ## Operations
+
 **Audience**: Engineering Managers, DevOps
+
 - **[OPERATIONS.md](OPERATIONS.md)** - Non-functional requirements and compliance
   - Non-Functional Requirements
   - Document Control
@@ -87,6 +97,7 @@ This specification has been split into the following purpose-specific files:
 ---
 
 **Document Information**
+
 - Version: 1.0
 - Status: Confidential
 - Last Updated: 2026-03-08
