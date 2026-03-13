@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, DatabaseError, BusinessError } from '@/lib/errors';
 import { dispatchWebhookEvent } from '@/lib/webhooks';
+import { logger } from '@/lib/logger';
 
 export { type PlanSelect as Plan } from '@/db/schema';
 
@@ -66,7 +67,7 @@ export class PlanRepository extends BaseRepository {
         }
       } catch (err) {
         // Log error but don't throw from repository
-        console.error('Failed to dispatch plan.generated webhook', err);
+        logger.error({ err }, 'Failed to dispatch plan.generated webhook');
       }
     })();
 
@@ -178,7 +179,7 @@ export class PlanRepository extends BaseRepository {
             });
           }
         } catch (err) {
-          console.error('Failed to dispatch plan.approved webhook', err);
+          logger.error({ err }, 'Failed to dispatch plan.approved webhook');
         }
       })();
       return result;
@@ -246,7 +247,7 @@ export class PlanRepository extends BaseRepository {
             });
           }
         } catch (err) {
-          console.error('Failed to dispatch plan.rejected webhook', err);
+          logger.error({ err }, 'Failed to dispatch plan.rejected webhook');
         }
       })();
       return updatedPlan;
@@ -314,7 +315,7 @@ export class PlanRepository extends BaseRepository {
             });
           }
         } catch (err) {
-          console.error('Failed to dispatch plan.changes_requested webhook', err);
+          logger.error({ err }, 'Failed to dispatch plan.changes_requested webhook');
         }
       })();
       return updatedPlan;
