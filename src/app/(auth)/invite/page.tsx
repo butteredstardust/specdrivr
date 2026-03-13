@@ -5,6 +5,22 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { PixelInput, PixelPasswordInput, PixelButton, PixelAlert } from '@pxlkit/ui-kit';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { twMerge } from 'tailwind-merge';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+
+const inviteSchema = z
+  .object({
+    name: z.string().min(2, 'Name must be at least 2 characters'),
+    password: z.string().min(12, 'Password must be at least 12 characters'),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
+
+type InviteValues = z.infer<typeof inviteSchema>;
 
 function getPasswordStrength(password: string): number {
   if (!password) return 0;
@@ -52,10 +68,26 @@ function InviteContent() {
     isExistingUser: boolean;
   } | null>(null);
 
-  const [name, setName] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<InviteValues>({
+    resolver: zodResolver(inviteSchema),
+    defaultValues: {
+      name: '',
+      password: '',
+      confirmPassword: '',
+    },
+  });
+
+  const nameValue = watch('name');
+  const passwordValue = watch('password');
+  const confirmPasswordValue = watch('confirmPassword');
 
   useEffect(() => {
     if (!token) {
@@ -84,17 +116,7 @@ function InviteContent() {
     fetchInvite();
   }, [token]);
 
-  const handleNewUserSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password !== confirmPassword) {
-      setError('Passwords do not match.');
-      return;
-    }
-    if (password.length < 12) {
-      setError('Password must be at least 12 characters.');
-      return;
-    }
-
+  const handleNewUserSubmit = async (data: InviteValues) => {
     setIsSubmitting(true);
     setError(null);
 
@@ -103,20 +125,18 @@ function InviteContent() {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, password, name }),
+        body: JSON.stringify({
+          token,
+          password: data.password,
+          name: data.name,
+        }),
       });
 
-      const data = await res.json();
+      const result = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error?.message || 'Failed to accept invite');
+        throw new Error(result.error?.message || 'Failed to accept invite');
       }
-
-      // New user is automatically signed in by the backend BetterAuth signUpEmail if we implement it correctly,
-      // but let's be safe and sign them in via client just in case they need the session cookie set locally properly
-      // Actually, the backend creates the user, but we might need to establish the session.
-      // Assuming the backend handles cookie setting, we can just redirect.
-      // Wait, `signUpEmail` sets the cookie. So we just redirect.
 
       router.push('/');
     } catch (err) {
@@ -222,13 +242,7 @@ function InviteContent() {
           Create your account to get started.
         </p>
 
-        {error && (
-          <div className="mb-6 w-full">
-            <PixelAlert tone="red" title="Error" message={error} />
-          </div>
-        )}
-
-        <form className="flex w-full flex-col gap-5" onSubmit={handleNewUserSubmit}>
+        <form className="flex w-full flex-col gap-5" onSubmit={handleSubmit(handleNewUserSubmit)}>
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-medium text-[--text-secondary]">EMAIL</label>
             <div className="flex items-center gap-2 rounded border border-[--border-muted] bg-[--bg-base] px-3 py-2 text-sm text-[--text-muted]">
@@ -246,9 +260,9 @@ function InviteContent() {
               type="text"
               tone="purple"
               autoFocus
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              {...register('name')}
+              onChange={(e) => setValue('name', e.target.value)}
+              value={nameValue}
             />
           </div>
 
@@ -259,11 +273,11 @@ function InviteContent() {
             <PixelPasswordInput
               id="password"
               tone="purple"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              {...register('password')}
+              onChange={(e) => setValue('password', e.target.value)}
+              value={passwordValue}
             />
-            <PasswordStrengthIndicator password={password} />
+            <PasswordStrengthIndicator password={passwordValue} />
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -276,15 +290,25 @@ function InviteContent() {
             <PixelPasswordInput
               id="confirmPassword"
               tone="purple"
-              required
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              {...register('confirmPassword')}
+              onChange={(e) => setValue('confirmPassword', e.target.value)}
+              value={confirmPasswordValue}
             />
           </div>
 
           <PixelButton type="submit" tone="purple" className="mt-2 w-full" loading={isSubmitting}>
             Accept Invite & Sign In
           </PixelButton>
+
+          {(error || Object.keys(errors).length > 0) && (
+            <div className="mt-4 w-full">
+              <PixelAlert
+                tone="red"
+                title="Error"
+                message={error || Object.values(errors)[0]?.message || 'Invalid input.'}
+              />
+            </div>
+          )}
         </form>
       </div>
     </div>

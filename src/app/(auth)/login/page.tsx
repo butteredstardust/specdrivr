@@ -100,12 +100,6 @@ function LoginContent() {
         <h1 className="mb-1 font-mono text-2xl font-bold text-[--text-primary]">SPECDRIVR</h1>
         <p className="mb-8 text-sm text-[--text-muted]">Build what you spec.</p>
 
-        {error && (
-          <div className="mb-6 w-full">
-            <PixelAlert tone="red" title="Error" message={error} />
-          </div>
-        )}
-
         <form className="flex w-full flex-col gap-4" onSubmit={handleSubmit(onLogin)}>
           <div className="flex flex-col gap-1.5">
             <label htmlFor="email" className="text-xs font-medium text-[--text-secondary]">
@@ -120,9 +114,6 @@ function LoginContent() {
               onChange={(e) => setValue('email', e.target.value)}
               value={emailValue}
             />
-            {errors.email && (
-              <p className="text-[10px] text-[--status-error]">{errors.email.message}</p>
-            )}
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -136,9 +127,6 @@ function LoginContent() {
               onChange={(e) => setValue('password', e.target.value)}
               value={passwordValue}
             />
-            {errors.password && (
-              <p className="text-[10px] text-[--status-error]">{errors.password.message}</p>
-            )}
           </div>
 
           <div className="mt-2">
@@ -146,6 +134,16 @@ function LoginContent() {
               Sign In
             </PixelButton>
           </div>
+
+          {(error || Object.keys(errors).length > 0) && (
+            <div className="mt-2 w-full">
+              <PixelAlert
+                tone="red"
+                title="Error"
+                message={error || Object.values(errors)[0]?.message || 'Invalid input.'}
+              />
+            </div>
+          )}
 
           <div className="mt-2 text-right">
             <Link
