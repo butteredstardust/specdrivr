@@ -6,7 +6,7 @@ import { NotFoundError, DatabaseError } from '@/lib/errors';
 
 export class MemberRepository extends BaseRepository {
   async getByProjectId(projectId: number, limit = 50, offset = 0) {
-    return await this.execQuery(() =>
+    return await this.executeQuery(() =>
       db
         .select({
           id: users.id,
@@ -25,7 +25,7 @@ export class MemberRepository extends BaseRepository {
   }
 
   async updateRole(projectId: number, userId: string, role: UserRole, actorId: string) {
-    return await this.execQuery(async () => {
+    return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         const [updated] = await tx
           .update(projectMembers)
@@ -50,14 +50,14 @@ export class MemberRepository extends BaseRepository {
   }
 
   async remove(projectId: number, userId: string, actorId: string) {
-    return await this.execQuery(async () => {
+    return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         // Prevent removing the last owner
         const owners = await tx
           .select()
           .from(projectMembers)
           .where(and(eq(projectMembers.projectId, projectId), eq(projectMembers.role, 'owner')));
-        
+
         const memberToRemove = await tx
           .select()
           .from(projectMembers)
@@ -83,21 +83,29 @@ export class MemberRepository extends BaseRepository {
     });
   }
 
-  async createInvite(data: { projectId: number; email: string; role: UserRole; invitedBy: string }) {
-    return await this.execQuery(async () => {
+  async createInvite(data: {
+    projectId: number;
+    email: string;
+    role: UserRole;
+    invitedBy: string;
+  }) {
+    return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         const token = crypto.randomUUID();
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiry
 
-        const [invite] = await tx.insert(invites).values({
-          projectId: data.projectId,
-          email: data.email,
-          role: data.role,
-          invitedBy: data.invitedBy,
-          token,
-          expiresAt,
-        }).returning();
+        const [invite] = await tx
+          .insert(invites)
+          .values({
+            projectId: data.projectId,
+            email: data.email,
+            role: data.role,
+            invitedBy: data.invitedBy,
+            token,
+            expiresAt,
+          })
+          .returning();
 
         await tx.insert(auditLog).values({
           projectId: data.projectId,

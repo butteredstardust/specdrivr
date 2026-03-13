@@ -20,13 +20,13 @@ export function UserMenu() {
     <PixelDropdown
       label={user.name}
       items={[
-        { value: 'profile',    label: 'Profile Settings' },
-        { value: 'security',   label: 'Security' },
+        { value: 'profile', label: 'Profile Settings' },
+        { value: 'security', label: 'Security' },
         { value: 'notifications', label: 'Notifications' },
         { value: '__divider__', label: '---' },
-        { value: 'shortcuts',  label: 'Keyboard Shortcuts' },
+        { value: 'shortcuts', label: 'Keyboard Shortcuts' },
         { value: '__divider2__', label: '---' },
-        { value: 'signout',    label: 'Sign Out' },
+        { value: 'signout', label: 'Sign Out' },
       ]}
       onSelect={async (value) => {
         if (value.startsWith('__divider')) return;

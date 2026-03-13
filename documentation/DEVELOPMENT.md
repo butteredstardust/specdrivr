@@ -7,6 +7,7 @@ Development standards and best practices for Specdrivr, an AI-native orchestrati
 ## Code Standards
 
 ### TypeScript
+
 - **Strict mode enabled** - No exceptions
 - **No `any` type** - Use `unknown` or explicit types
 - **Prefer interfaces** for object shapes, **type aliases** for unions
@@ -14,6 +15,7 @@ Development standards and best practices for Specdrivr, an AI-native orchestrati
 - **No type assertions** (`as Type`) - use type guards instead
 
 ### Component Architecture
+
 - **Server Components by default**
 - Add `"use client"` directive only when needed:
   - Event handlers
@@ -22,6 +24,7 @@ Development standards and best practices for Specdrivr, an AI-native orchestrati
 - **Never use `useEffect` for data fetching** - use Server Components instead
 
 ### Database Access
+
 - **Always use repositories** - No direct DB calls in components
 - **Wrap operations in executeQuery** for error handling
 - **Retry logic** for transient failures (connection drops)
@@ -36,18 +39,21 @@ const projects = await db.select().from(projects);
 ```
 
 ### Error Handling
+
 - **Use custom error classes** from `src/lib/errors.ts`
 - **Consistent error responses** from `src/lib/error-handler.ts`
 - **Error boundaries** at route and component level
 - **Never swallow errors** - log and re-throw or handle
 
 ### Validation
+
 - **Zod schemas** for all API inputs
 - **Validate at boundaries** (API routes, form submissions)
 - **Descriptive validation errors**
 - **Never trust client input**
 
 ### Styling
+
 - **pxlkit/ui or shadcn/ui components** - Use provided components
 - **Design tokens** from CSS variables in `src/app/globals.css`
 - **Tailwind utility classes** - No custom CSS unless necessary
@@ -62,6 +68,7 @@ background: var(--destructive);
 ```
 
 ### Imports
+
 - **Group imports**:
   1. React, Next.js
   2. External libraries
@@ -86,18 +93,21 @@ This ensures consistent behavior across all environments. The current project re
 Environment variables must be validated with Zod and protected from client exposure using the `server-only` package.
 
 **For Next.js code (server components, API routes, server actions, repositories):**
+
 ```typescript
-import { env } from '@/lib/env';  // Has server-only protection
+import { env } from '@/lib/env'; // Has server-only protection
 ```
 
 **For standalone Node.js scripts (seed, migrations, CLI tools):**
+
 ```typescript
-import { env } from '@/lib/env-script';  // No server-only, safe for scripts
+import { env } from '@/lib/env-script'; // No server-only, safe for scripts
 ```
 
 **Never import directly from `env-core.ts`** - use one of the wrapper files above.
 
 **Rationale:**
+
 - `server-only` is a Next.js runtime package that throws when imported outside Next.js environment
 - We decouple validation logic (`env-core.ts`) from the security boundary (`env.ts`)
 - Standalone scripts use `env-script.ts` which bypasses the server-only import
@@ -153,18 +163,21 @@ src/
 ## Naming Conventions
 
 ### Files
+
 - **Components:** `PascalCase.tsx`
 - **Utilities:** `kebab-case.ts`
 - **API routes:** `kebab-case/` directories with `route.ts`
 - **Repositories:** `kebab-case-repository.ts`
 
 ### Variables
+
 - **Constants:** `UPPER_SNAKE_CASE`
 - **Functions:** `camelCase` with action-oriented names (`fetchUser`, `createProject`)
 - **Booleans:** Prefixed with `is`, `has`, `should` (`isLoading`, `hasPermission`)
 - **Arrays:** Plural names (`users`, `projects`)
 
 ### Types/Interfaces
+
 - **Interfaces:** `PascalCase` (`UserInterface`, `ProjectConfig`)
 - **Types:** `PascalCase` (`UserId`, `ProjectStatus`)
 - **Generics:** `Single uppercase letter` (`T`, `K`, `V`)
@@ -172,6 +185,7 @@ src/
 ## API Route Standards
 
 ### Structure
+
 ```typescript
 // GET /api/projects
 export async function GET(request: NextRequest) {
@@ -191,6 +205,7 @@ export async function GET(request: NextRequest) {
 ```
 
 ### Response Format
+
 ```typescript
 // Success
 {
@@ -206,6 +221,7 @@ export async function GET(request: NextRequest) {
 ```
 
 ### Status Codes
+
 - `200` - Success
 - `201` - Created
 - `400` - Bad Request (validation errors)
@@ -217,16 +233,14 @@ export async function GET(request: NextRequest) {
 ## Error Handling Patterns
 
 ### Try-Catch
+
 ```typescript
 try {
   const result = await operation();
   return { success: true, data: result };
 } catch (error) {
   if (error instanceof ValidationError) {
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 400 }
-    );
+    return NextResponse.json({ success: false, error: error.message }, { status: 400 });
   }
 
   return handleApiError(error);
@@ -234,6 +248,7 @@ try {
 ```
 
 ### Custom Errors
+
 ```typescript
 import { DatabaseError, NotFoundError, ValidationError } from '@/lib/errors';
 
@@ -254,6 +269,7 @@ if (!isValid) {
 ```
 
 ### Error Boundaries
+
 ```typescript
 // For routes
 export default function ErrorPage({
@@ -282,6 +298,7 @@ export default function ErrorPage({
 - **Mocking**: Use test factories (tests/factories) rather than fixtures
 
 ### Unit Tests
+
 ```typescript
 describe('ProjectRepository', () => {
   describe('getById', () => {
@@ -305,17 +322,20 @@ describe('ProjectRepository', () => {
 ```
 
 ### Test Organization
+
 - **Describe blocks** for class/function being tested
 - **Nested describes** for methods
 - **Clear test names** - "should [action] when [condition]"
 - **AAA pattern:** Arrange, Act, Assert
 
 ### Mocking
+
 - **Mock external dependencies** (APIs, DB)
 - **Don't mock** the system under test
 - **Use factories** for test data, not fixtures
 
 ### E2E Tests
+
 ```typescript
 test('should create new project', async ({ page }) => {
   // Navigate
@@ -334,6 +354,7 @@ test('should create new project', async ({ page }) => {
 ## Database Practices
 
 ### Schema Changes
+
 - **Never modify old migrations** - Create new ones
 - **Test migrations** in staging before production
 - **Backup data** before destructive operations
@@ -352,18 +373,17 @@ pnpm db:seed      # TypeScript seeding with Drizzle ORM
 ```
 
 ### Query Patterns
+
 ```typescript
 // Use Drizzle query builder
-const result = await db
-  .select()
-  .from(projects)
-  .where(eq(projects.id, id));
+const result = await db.select().from(projects).where(eq(projects.id, id));
 
 // Never use raw SQL
 const result = await db.execute('SELECT * FROM projects WHERE id = ?', [id]);
 ```
 
 ### Performance
+
 - **Add indexes** for frequently queried columns
 - **Use pagination** for large result sets
 - **Fetch only needed fields**
@@ -372,6 +392,7 @@ const result = await db.execute('SELECT * FROM projects WHERE id = ?', [id]);
 ## Security Libraries
 
 ### Rate Limiting (`src/lib/rate-limiter.ts`)
+
 Uses `@upstash/ratelimit` with Redis to protect API routes from abuse. This implements token bucket algorithm across distributed systems.
 
 ```typescript
@@ -384,6 +405,7 @@ if (!success) {
 ```
 
 ### RBAC (`src/lib/rbac.ts`)
+
 Role-based access control utilities. Use to check project membership and permissions before database operations.
 
 ```typescript
@@ -395,6 +417,7 @@ if (!(await canAccessProject(userId, projectId))) {
 ```
 
 ### Lock Manager (`src/lib/lock-manager.ts`)
+
 Distributed locking via Redis for concurrency control (e.g., task assignment, project locks).
 
 ```typescript
@@ -411,6 +434,7 @@ if (lockAcquired) {
 ```
 
 ### Auth Utilities (`src/lib/auth.ts`)
+
 Better Auth integration. Always use the `auth()` helper to retrieve the current session in Server Components and API routes.
 
 ```typescript
@@ -423,11 +447,13 @@ if (!session) {
 ```
 
 ### Redis Utilities (`src/lib/redis.ts`)
+
 Abstracted access to Redis through `@upstash/redis`. Used for rate limiting, auth sessions, and caching. Never connect directly using raw Redis clients.
 
 ## Git Workflow
 
 ### Commit Messages
+
 ```
 type(scope): description
 
@@ -440,6 +466,7 @@ chore: update dependencies
 ```
 
 ### Branch Names
+
 ```
 feature/user-authentication
 bugfix/login-redirect
@@ -447,6 +474,7 @@ refactor/project-repository
 ```
 
 ### Pull Requests
+
 - **Small scope** - One feature or fix per PR
 - **Tests included** - Unit and E2E tests
 - **Documentation** - Update docs for API changes
@@ -460,18 +488,21 @@ refactor/project-repository
 ## Performance Best Practices
 
 ### Client-Side
+
 - **Code splitting** - Route-based with Next.js
 - **Image optimization** - Use Next.js Image component
 - **Memoization** - useMemo/useCallback where beneficial
 - **Bundle analysis** - Keep bundle size small
 
 ### Server-Side
+
 - **Streaming** - Use React streaming for large responses
 - **Caching** - Cache DB queries where appropriate
 - **Connection pooling** - Reuse DB connections
 - **Lazy loading** - Load heavy libraries on demand
 
 ### Database
+
 - **Index foreign keys**
 - **Normalize data** - But denormalize for read-heavy operations
 - **Query optimization** - Use EXPLAIN ANALYZE
@@ -496,6 +527,7 @@ refactor/project-repository
 15. **Don't bypass type safety** - Avoid `as Type` assertions; use type guards
 
 ### Package Manager Security
+
 When pnpm audit reveals vulnerabilities, address them using pnpm overrides in package.json:
 
 ```bash
@@ -537,12 +569,14 @@ If an AI-generated snippet fails review, correct it following the patterns in th
 ## Code Review Checklist
 
 ### Functionality
+
 - [ ] Feature works as expected
 - [ ] Edge cases handled
 - [ ] Error states handled
 - [ ] Loading states handled
 
 ### Code Quality
+
 - [ ] TypeScript strict mode passes
 - [ ] ESLint passes with no overrides
 - [ ] No `any` types
@@ -550,24 +584,28 @@ If an AI-generated snippet fails review, correct it following the patterns in th
 - [ ] Functions are small and focused
 
 ### Testing
+
 - [ ] Unit tests added/updated
 - [ ] E2E tests added/updated
 - [ ] Tests cover happy paths and error cases
 - [ ] Test coverage maintains or improves
 
 ### Documentation
+
 - [ ] JSDoc comments for public APIs
 - [ ] README updated if needed
 - [ ] Inline comments for complex logic
 - [ ] Type definitions are clear
 
 ### Security
+
 - [ ] Input validation added
 - [ ] No sensitive data in responses
 - [ ] No SQL injection vulnerabilities
 - [ ] Dependencies have no vulnerabilities
 
 ### Performance
+
 - [ ] No unnecessary re-renders
 - [ ] Efficient queries
 - [ ] Proper caching strategy

@@ -17,9 +17,10 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
 
     const { id } = await context.params;
 
-    const existing = await db.select().from(notifications).where(
-        and(eq(notifications.id, Number(id)), eq(notifications.userId, session.user.id))
-    );
+    const existing = await db
+      .select()
+      .from(notifications)
+      .where(and(eq(notifications.id, Number(id)), eq(notifications.userId, session.user.id)));
 
     if (existing.length === 0) {
       return NextResponse.json(
@@ -28,7 +29,10 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
       );
     }
 
-    await db.update(notifications).set({ readAt: new Date() }).where(eq(notifications.id, Number(id)));
+    await db
+      .update(notifications)
+      .set({ readAt: new Date() })
+      .where(eq(notifications.id, Number(id)));
 
     return NextResponse.json({ data: { success: true } });
   } catch (error) {

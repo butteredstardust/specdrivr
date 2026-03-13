@@ -5,6 +5,7 @@ import { createHighlighter, type Highlighter } from 'shiki';
 import { twMerge } from 'tailwind-merge';
 import { PixelEmptyState } from '@pxlkit/ui-kit';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { clientLogger } from '@/lib/logger-client';
 
 // Module-scoped highlighter promise to initialise only once
 let highlighterPromise: Promise<Highlighter> | null = null;
@@ -96,14 +97,16 @@ export function DiffViewer({ diff, language = 'typescript', className }: DiffVie
         }
 
         setLines(processedLines);
-      } catch (error) {
-        console.error('Failed to parse or highlight diff:', error);
+      } catch (error: unknown) {
+        clientLogger.error('Failed to parse or highlight diff:', error);
         // Fallback to raw text without highlighting
         setLines(
-          diff.split('\n').map(line => {
+          diff.split('\n').map((line) => {
             if (line.startsWith('@@')) return { content: line, type: 'header' };
-            if (line.startsWith('+') && !line.startsWith('+++')) return { content: line, type: 'add' };
-            if (line.startsWith('-') && !line.startsWith('---')) return { content: line, type: 'remove' };
+            if (line.startsWith('+') && !line.startsWith('+++'))
+              return { content: line, type: 'add' };
+            if (line.startsWith('-') && !line.startsWith('---'))
+              return { content: line, type: 'remove' };
             return { content: line, type: 'context' };
           })
         );
@@ -126,9 +129,15 @@ export function DiffViewer({ diff, language = 'typescript', className }: DiffVie
 
   if (!diff) {
     return (
-      <div className={twMerge('p-8 border border-[--border-default] rounded-md bg-[--bg-surface]', className)}>
+      <div
+        className={twMerge(
+          'rounded-md border border-[--border-default] bg-[--bg-surface] p-8',
+          className
+        )}
+      >
         <PixelEmptyState
-          title="No file changes yet." description="No changes to display."
+          title="No file changes yet."
+          description="No changes to display."
           icon={<DaemonMascot size="lg" state="idle" />}
         />
       </div>
@@ -137,7 +146,12 @@ export function DiffViewer({ diff, language = 'typescript', className }: DiffVie
 
   if (loading) {
     return (
-      <div className={twMerge('p-4 border border-[--border-default] rounded-md bg-[--bg-surface] text-[--text-muted] font-mono text-[13px]', className)}>
+      <div
+        className={twMerge(
+          'rounded-md border border-[--border-default] bg-[--bg-surface] p-4 font-mono text-[13px] text-[--text-muted]',
+          className
+        )}
+      >
         Loading diff...
       </div>
     );
@@ -146,38 +160,44 @@ export function DiffViewer({ diff, language = 'typescript', className }: DiffVie
   return (
     <div
       className={twMerge(
-        'terminal-surface font-mono text-[13px] bg-[--bg-surface] rounded-md overflow-x-auto border border-[--border-default]',
+        'terminal-surface overflow-x-auto rounded-md border border-[--border-default] bg-[--bg-surface] font-mono text-[13px]',
         className
       )}
     >
-      <div className="min-w-max py-2 relative z-10">
+      <div className="relative z-10 min-w-max py-2">
         {lines.map((line, i) => {
-          let lineClass = "px-4 py-0.5 whitespace-pre flex hover:bg-[--bg-elevated] transition-colors ";
-          let prefix = " ";
+          let lineClass =
+            'px-4 py-0.5 whitespace-pre flex hover:bg-[--bg-elevated] transition-colors ';
+          let prefix = ' ';
 
           if (line.type === 'add') {
-            lineClass += "bg-green-950/40 text-[--status-emerald]";
-            prefix = "+";
+            lineClass += 'bg-green-950/40 text-[--status-emerald]';
+            prefix = '+';
           } else if (line.type === 'remove') {
-            lineClass += "bg-red-950/40 text-[--status-red]";
-            prefix = "-";
+            lineClass += 'bg-red-950/40 text-[--status-red]';
+            prefix = '-';
           } else if (line.type === 'header') {
-            lineClass += "text-[--text-muted] italic bg-[--bg-base] mt-2 mb-1 border-y border-[--border-muted]";
-            prefix = "";
+            lineClass +=
+              'text-[--text-muted] italic bg-[--bg-base] mt-2 mb-1 border-y border-[--border-muted]';
+            prefix = '';
           } else {
-            lineClass += "text-[--text-primary]";
+            lineClass += 'text-[--text-primary]';
           }
 
           return (
             <div key={i} className={lineClass}>
-              <span className="select-none text-[--text-muted] w-12 shrink-0 inline-block text-right pr-4 border-r border-[--border-muted] mr-4 opacity-50">
+              <span className="mr-4 inline-block w-12 shrink-0 border-r border-[--border-muted] pr-4 text-right text-[--text-muted] opacity-50 select-none">
                 {line.type !== 'header' ? i + 1 : ''}
               </span>
-              <span className="w-4 shrink-0 select-none text-[--text-muted]">{prefix}</span>
+              <span className="w-4 shrink-0 text-[--text-muted] select-none">{prefix}</span>
               {line.highlightedHtml ? (
                 <span dangerouslySetInnerHTML={{ __html: line.highlightedHtml }} />
               ) : (
-                <span>{line.content.substring(line.type !== 'header' && line.content.length > 0 ? 1 : 0)}</span>
+                <span>
+                  {line.content.substring(
+                    line.type !== 'header' && line.content.length > 0 ? 1 : 0
+                  )}
+                </span>
               )}
             </div>
           );

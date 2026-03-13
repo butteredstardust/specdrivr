@@ -6,17 +6,17 @@ import { requireAdmin } from '@/lib/rbac';
 import { updateWebhookSchema } from '@/lib/schemas';
 
 interface RouteParams {
-  params: Promise<{ id: string, webhookId: string }>;
+  params: Promise<{ id: string; webhookId: string }>;
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: RouteParams
-) {
+export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        { status: 401 }
+      );
     }
 
     const { id, webhookId } = await params;
@@ -25,7 +25,10 @@ export async function PATCH(
 
     const { allowed } = await requireAdmin(session.user.id, projectId);
     if (!allowed) {
-      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'You must be a project admin to manage webhooks' } }, { status: 403 });
+      return NextResponse.json(
+        { error: { code: 'FORBIDDEN', message: 'You must be a project admin to manage webhooks' } },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();
@@ -38,14 +41,14 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  _request: NextRequest,
-  { params }: RouteParams
-) {
+export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        { status: 401 }
+      );
     }
 
     const { id, webhookId } = await params;
@@ -54,7 +57,10 @@ export async function DELETE(
 
     const { allowed } = await requireAdmin(session.user.id, projectId);
     if (!allowed) {
-      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'You must be a project admin to manage webhooks' } }, { status: 403 });
+      return NextResponse.json(
+        { error: { code: 'FORBIDDEN', message: 'You must be a project admin to manage webhooks' } },
+        { status: 403 }
+      );
     }
 
     await webhookRepository.delete(wId);

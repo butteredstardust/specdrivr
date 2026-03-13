@@ -12,7 +12,7 @@ describe('Seed Script Smoke Test', () => {
   function runSeed() {
     execSync('pnpm db:seed', {
       env: { ...process.env, DATABASE_URL: process.env.DATABASE_URL },
-      stdio: 'inherit'
+      stdio: 'inherit',
     });
   }
 
@@ -36,8 +36,14 @@ describe('Seed Script Smoke Test', () => {
     expect(planCount.value).toBe(4);
 
     // spec_001 plan status is pending_approval
-    const [spec1] = await testDb.select().from(schema.specifications).where(eq(schema.specifications.id, 1));
-    const [plan1] = await testDb.select().from(schema.plans).where(eq(schema.plans.specId, spec1.id));
+    const [spec1] = await testDb
+      .select()
+      .from(schema.specifications)
+      .where(eq(schema.specifications.id, 1));
+    const [plan1] = await testDb
+      .select()
+      .from(schema.plans)
+      .where(eq(schema.plans.specId, spec1.id));
     expect(plan1.status).toBe('pending_approval');
 
     // task_105 status is blocked with non-empty blockedReason
@@ -46,7 +52,10 @@ describe('Seed Script Smoke Test', () => {
     expect(task105.blockedReason).toBeTruthy();
 
     // Exactly one session with status running
-    const [runningSessions] = await testDb.select({ value: count() }).from(schema.agentSessions).where(eq(schema.agentSessions.status, 'running'));
+    const [runningSessions] = await testDb
+      .select({ value: count() })
+      .from(schema.agentSessions)
+      .where(eq(schema.agentSessions.status, 'running'));
     expect(runningSessions.value).toBe(1);
   });
 

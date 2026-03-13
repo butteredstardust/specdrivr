@@ -7,7 +7,7 @@ import { logger } from '@/lib/logger';
 
 const ResetPasswordSchema = z.object({
   token: z.string().min(1),
-  password: z.string().min(8)
+  password: z.string().min(8),
 });
 
 export async function POST(req: Request) {
@@ -17,12 +17,12 @@ export async function POST(req: Request) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { 
-          error: { 
-            code: 'VALIDATION_ERROR', 
-            message: 'Invalid inputs', 
-            details: parsed.error.errors 
-          } 
+        {
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Invalid inputs',
+            details: parsed.error.errors,
+          },
         },
         { status: 400 }
       );
@@ -35,16 +35,18 @@ export async function POST(req: Request) {
         body: {
           token,
           newPassword: password,
-        }
+        },
       });
-      
-      return NextResponse.json(
-        { data: { success: true } },
-        { status: 200 }
-      );
+
+      return NextResponse.json({ data: { success: true } }, { status: 200 });
     } catch (error: unknown) {
       // BetterAuth throws token invalid or expired error
-      if (error && typeof error === 'object' && 'code' in error && (error.code === 'INVALID_TOKEN' || error.code === 'EXPIRED_TOKEN')) {
+      if (
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        (error.code === 'INVALID_TOKEN' || error.code === 'EXPIRED_TOKEN')
+      ) {
         return NextResponse.json(
           { error: { code: 'INVALID_TOKEN', message: 'Token is invalid or expired' } },
           { status: 400 }

@@ -20,14 +20,14 @@ const InviteMemberSchema = z.object({
   role: z.enum(['owner', 'admin', 'member', 'viewer']).default('viewer'),
 });
 
-export async function GET(
-  request: NextRequest,
-  { params }: RouteParams
-) {
+export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        { status: 401 }
+      );
     }
 
     const { id } = await params;
@@ -39,14 +39,17 @@ export async function GET(
     // RBAC: require member to view member list
     const { allowed } = await requireMember(session.user.id, projectId);
     if (!allowed) {
-      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'You do not have access to this project' } }, { status: 403 });
+      return NextResponse.json(
+        { error: { code: 'FORBIDDEN', message: 'You do not have access to this project' } },
+        { status: 403 }
+      );
     }
 
     const members = await memberRepository.getByProjectId(projectId, query.limit, query.offset);
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       data: members,
-      meta: { limit: query.limit, offset: query.offset, count: members.length }
+      meta: { limit: query.limit, offset: query.offset, count: members.length },
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -59,14 +62,14 @@ export async function GET(
   }
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: RouteParams
-) {
+export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        { status: 401 }
+      );
     }
 
     const { id } = await params;
@@ -75,7 +78,10 @@ export async function POST(
     // RBAC: require admin to invite members
     const { allowed } = await requireAdmin(session.user.id, projectId);
     if (!allowed) {
-      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'You must be a project admin to invite members' } }, { status: 403 });
+      return NextResponse.json(
+        { error: { code: 'FORBIDDEN', message: 'You must be a project admin to invite members' } },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();

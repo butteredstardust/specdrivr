@@ -1,41 +1,41 @@
-import { db } from "@/db";
-import { users, type UserSelect as User, type UserInsert } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import { BaseRepository } from "./base-repository";
-import { DatabaseError } from "@/lib/errors";
+import { db } from '@/db';
+import { users, type UserSelect as User, type UserInsert } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+import { BaseRepository } from './base-repository';
+import { DatabaseError } from '@/lib/errors';
 
-export { type UserSelect as User } from "@/db/schema";
+export { type UserSelect as User } from '@/db/schema';
 
 export class UserRepository extends BaseRepository {
   async getById(id: string): Promise<User | null> {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.select().from(users).where(eq(users.id, id)).limit(1)
     );
     return (result[0] as unknown as User) || null;
   }
 
   async getByEmail(email: string): Promise<User | null> {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.select().from(users).where(eq(users.email, email)).limit(1)
     );
     return (result[0] as unknown as User) || null;
   }
 
   async create(data: UserInsert): Promise<User> {
-    const user = await this.execQuery(async () => {
+    const user = await this.executeQuery(async () => {
       const [newUser] = await db.insert(users).values(data).returning();
       return newUser;
     });
 
     if (!user) {
-      throw new DatabaseError("Failed to create user");
+      throw new DatabaseError('Failed to create user');
     }
 
     return user as unknown as User;
   }
 
   async update(id: string, data: Partial<UserInsert>): Promise<User> {
-    const updatedUser = await this.execQuery(async () => {
+    const updatedUser = await this.executeQuery(async () => {
       const [user] = await db
         .update(users)
         .set({ ...data, updatedAt: new Date() })
@@ -45,16 +45,14 @@ export class UserRepository extends BaseRepository {
     });
 
     if (!updatedUser) {
-      throw new DatabaseError("Failed to update user");
+      throw new DatabaseError('Failed to update user');
     }
 
     return updatedUser as unknown as User;
   }
 
   async delete(id: string): Promise<void> {
-    await this.execQuery(() =>
-      db.delete(users).where(eq(users.id, id))
-    );
+    await this.executeQuery(() => db.delete(users).where(eq(users.id, id)));
   }
 }
 

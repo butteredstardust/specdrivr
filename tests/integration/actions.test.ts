@@ -60,7 +60,15 @@ describe('Team Management Server Actions', () => {
       expect(result.error?.message).toContain('Only owners');
 
       // Verify role did not change
-      const [updatedMember] = await testDb.select().from(schema.projectMembers).where(and(eq(schema.projectMembers.projectId, project.id), eq(schema.projectMembers.userId, member.id)));
+      const [updatedMember] = await testDb
+        .select()
+        .from(schema.projectMembers)
+        .where(
+          and(
+            eq(schema.projectMembers.projectId, project.id),
+            eq(schema.projectMembers.userId, member.id)
+          )
+        );
       expect(updatedMember.role).toBe('member');
     });
 
@@ -94,7 +102,15 @@ describe('Team Management Server Actions', () => {
       expect(result.error?.message).toContain('Only owners');
 
       // Verify role did not change
-      const [updatedOwner] = await testDb.select().from(schema.projectMembers).where(and(eq(schema.projectMembers.projectId, project.id), eq(schema.projectMembers.userId, owner.id)));
+      const [updatedOwner] = await testDb
+        .select()
+        .from(schema.projectMembers)
+        .where(
+          and(
+            eq(schema.projectMembers.projectId, project.id),
+            eq(schema.projectMembers.userId, owner.id)
+          )
+        );
       expect(updatedOwner.role).toBe('owner');
     });
 
@@ -126,7 +142,15 @@ describe('Team Management Server Actions', () => {
       expect(result.success).toBe(true);
 
       // Verify role changed
-      const [updatedAdmin] = await testDb.select().from(schema.projectMembers).where(and(eq(schema.projectMembers.projectId, project.id), eq(schema.projectMembers.userId, admin.id)));
+      const [updatedAdmin] = await testDb
+        .select()
+        .from(schema.projectMembers)
+        .where(
+          and(
+            eq(schema.projectMembers.projectId, project.id),
+            eq(schema.projectMembers.userId, admin.id)
+          )
+        );
       expect(updatedAdmin.role).toBe('owner');
     });
   });

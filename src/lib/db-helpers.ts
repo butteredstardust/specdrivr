@@ -16,7 +16,8 @@ const DEFAULT_RETRY_OPTIONS: Required<RetryOptions> = {
 };
 
 function isTransientError(error: unknown): boolean {
-  const errorMessage = error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+  const errorMessage =
+    error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
 
   return (
     errorMessage.includes('connection terminated') ||
@@ -87,20 +88,17 @@ export async function safeSelect<T extends PgTable>(
   }
 }
 
-export type QueryResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: DatabaseError };
+export type QueryResult<T> = { success: true; data: T } | { success: false; error: DatabaseError };
 
-export async function executeQuery<T>(
-  operation: () => Promise<T>
-): Promise<QueryResult<T>> {
+export async function executeQuery<T>(operation: () => Promise<T>): Promise<QueryResult<T>> {
   try {
     const data = await safeQuery(operation);
     return { success: true, data };
   } catch (error) {
-    const databaseError = error instanceof DatabaseError
-      ? error
-      : new DatabaseError('Query execution failed', error instanceof Error ? error : undefined);
+    const databaseError =
+      error instanceof DatabaseError
+        ? error
+        : new DatabaseError('Query execution failed', error instanceof Error ? error : undefined);
 
     return { success: false, error: databaseError };
   }

@@ -146,7 +146,7 @@ export async function sendSlackNotification(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${config.botToken}`,
+        Authorization: `Bearer ${config.botToken}`,
       },
       body: JSON.stringify({
         channel: config.channelId,

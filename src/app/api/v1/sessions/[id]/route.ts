@@ -17,14 +17,14 @@ const UpdateSessionSchema = z.object({
   tasksFailed: z.number().int().nonnegative().optional(),
 });
 
-export async function GET(
-  _request: NextRequest,
-  { params }: RouteParams
-) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        { status: 401 }
+      );
     }
 
     const { id } = await params;
@@ -37,7 +37,10 @@ export async function GET(
 
     const { allowed } = await requireMember(session.user.id, agentSession.projectId);
     if (!allowed) {
-      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'You do not have access to this project' } }, { status: 403 });
+      return NextResponse.json(
+        { error: { code: 'FORBIDDEN', message: 'You do not have access to this project' } },
+        { status: 403 }
+      );
     }
 
     return NextResponse.json({ data: agentSession });
@@ -46,14 +49,14 @@ export async function GET(
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: RouteParams
-) {
+export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        { status: 401 }
+      );
     }
 
     const { id } = await params;
@@ -66,7 +69,10 @@ export async function PATCH(
 
     const { allowed } = await requireMember(session.user.id, agentSession.projectId);
     if (!allowed) {
-      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'You do not have access to this project' } }, { status: 403 });
+      return NextResponse.json(
+        { error: { code: 'FORBIDDEN', message: 'You do not have access to this project' } },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();
@@ -74,7 +80,13 @@ export async function PATCH(
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: { code: 'VALIDATION_ERROR', message: 'Invalid session data', details: parsed.error.errors } },
+        {
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Invalid session data',
+            details: parsed.error.errors,
+          },
+        },
         { status: 400 }
       );
     }

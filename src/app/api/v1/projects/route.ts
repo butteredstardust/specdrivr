@@ -12,15 +12,25 @@ const ProjectQuerySchema = z.object({
 });
 
 const CreateProjectSchema = z.object({
-  name: z.string().min(1, 'Project name is required').max(255, 'Project name cannot exceed 255 characters'),
-  description: z.string().max(1000, 'Description cannot exceed 1000 characters').optional().nullable(),
+  name: z
+    .string()
+    .min(1, 'Project name is required')
+    .max(255, 'Project name cannot exceed 255 characters'),
+  description: z
+    .string()
+    .max(1000, 'Description cannot exceed 1000 characters')
+    .optional()
+    .nullable(),
 });
 
 export async function GET(request: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        { status: 401 }
+      );
     }
 
     const { searchParams } = new URL(request.url);
@@ -36,7 +46,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (query.status) {
-      projects = projects.filter(p => p.status === query.status);
+      projects = projects.filter((p) => p.status === query.status);
     }
 
     return NextResponse.json({
@@ -45,7 +55,7 @@ export async function GET(request: NextRequest) {
         limit: query.limit,
         offset: query.offset,
         count: projects.length,
-      }
+      },
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -62,7 +72,10 @@ export async function POST(request: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        { status: 401 }
+      );
     }
 
     const body = await request.json();
@@ -74,9 +87,12 @@ export async function POST(request: NextRequest) {
       createdBy: session.user.id,
     });
 
-    return NextResponse.json({
-      data: project,
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        data: project,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
