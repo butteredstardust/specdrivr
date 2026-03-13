@@ -125,19 +125,21 @@ export class AgentSessionRepository extends BaseRepository {
    */
   private async notifySlack(sessionId: number, event: SlackEventType): Promise<void> {
     try {
-      const [context] = await db
-        .select({
-          projectId: projects.id,
-          projectName: projects.name,
-          specId: specifications.id,
-          specName: specifications.name,
-          totalCostUsd: agentSessions.totalCostUsd,
-        })
-        .from(agentSessions)
-        .innerJoin(projects, eq(agentSessions.projectId, projects.id))
-        .leftJoin(specifications, eq(agentSessions.specId, specifications.id))
-        .where(eq(agentSessions.id, sessionId))
-        .limit(1);
+      const [context] = await this.execQuery(() =>
+        db
+          .select({
+            projectId: projects.id,
+            projectName: projects.name,
+            specId: specifications.id,
+            specName: specifications.name,
+            totalCostUsd: agentSessions.totalCostUsd,
+          })
+          .from(agentSessions)
+          .innerJoin(projects, eq(agentSessions.projectId, projects.id))
+          .leftJoin(specifications, eq(agentSessions.specId, specifications.id))
+          .where(eq(agentSessions.id, sessionId))
+          .limit(1)
+      );
 
       if (!context) return;
 
