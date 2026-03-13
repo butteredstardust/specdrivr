@@ -5,18 +5,10 @@
     "src/lib/lock-manager.ts",
     "src/lib/pricing.ts",
     "src/lib/rate-limiter.ts",
-    "src/lib/rbac.ts",
     "scripts/fix-enum-data.ts",
     "scripts/health-check.js",
     "scripts/nuke-db.ts",
     "scripts/restore-spec-status.ts",
-    "src/actions/github.ts",
-    "src/actions/plans.ts",
-    "src/actions/projects.ts",
-    "src/actions/settings.ts",
-    "src/actions/specifications.ts",
-    "src/actions/tasks.ts",
-    "src/actions/webhooks.ts",
     "src/components/ui/alert.tsx",
     "src/components/ui/form.tsx",
     "tests/generate-slack-json.js",
@@ -59,5 +51,8 @@
     "exports": "off",
     "types": "off",
     "unlisted": "off"
-  }
+  },
+  "entry": [
+    "src/actions/**/*.ts"
+  ]
 }
