@@ -12,13 +12,13 @@ export { type AgentSessionSelect as AgentSession } from '@/db/schema';
 
 export class AgentSessionRepository extends BaseRepository {
   async getAll(limit = 50, offset = 0): Promise<AgentSession[]> {
-    return await this.execQuery(() =>
+    return await this.executeQuery(() =>
       db.select().from(agentSessions).limit(limit).offset(offset).orderBy(desc(agentSessions.startedAt))
     );
   }
 
   async getById(id: number): Promise<AgentSession | null> {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.select().from(agentSessions).where(eq(agentSessions.id, id)).limit(1)
     );
 
@@ -26,19 +26,19 @@ export class AgentSessionRepository extends BaseRepository {
   }
 
   async getByProjectId(projectId: number, limit = 50, offset = 0): Promise<AgentSession[]> {
-    return await this.execQuery(() =>
+    return await this.executeQuery(() =>
       db.select().from(agentSessions).where(eq(agentSessions.projectId, projectId)).limit(limit).offset(offset).orderBy(desc(agentSessions.startedAt))
     );
   }
 
   async getByStatus(status: import('@/db/schema').SessionStatus): Promise<AgentSession[]> {
-    return await this.execQuery(() =>
+    return await this.executeQuery(() =>
       db.select().from(agentSessions).where(eq(agentSessions.status, status))
     );
   }
 
   async create(data: { projectId: number; specId?: number; planId?: number; startedBy?: string }): Promise<AgentSession> {
-    const [session] = await this.execQuery(() =>
+    const [session] = await this.executeQuery(() =>
       db.insert(agentSessions).values({
         projectId: data.projectId,
         specId: data.specId || null,
@@ -66,7 +66,7 @@ export class AgentSessionRepository extends BaseRepository {
   }
 
   async update(id: number, data: Partial<import('@/db/schema').AgentSessionInsert>, actorId?: string): Promise<AgentSession> {
-    return await this.execQuery(async () => {
+    return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         const [updatedSession] = await tx
           .update(agentSessions)
@@ -125,7 +125,7 @@ export class AgentSessionRepository extends BaseRepository {
    */
   private async notifySlack(sessionId: number, event: SlackEventType): Promise<void> {
     try {
-      const [context] = await this.execQuery(() =>
+      const [context] = await this.executeQuery(() =>
         db
           .select({
             projectId: projects.id,
@@ -159,7 +159,7 @@ export class AgentSessionRepository extends BaseRepository {
   }
 
   async delete(id: number): Promise<void> {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.delete(agentSessions).where(eq(agentSessions.id, id)).returning()
     );
 

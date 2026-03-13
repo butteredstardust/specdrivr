@@ -36,7 +36,7 @@ export interface UpdateTaskData {
 
 export class TaskRepository extends BaseRepository {
   async getAll(): Promise<Task[]> {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.select().from(tasks).orderBy(desc(tasks.createdAt))
     );
 
@@ -44,7 +44,7 @@ export class TaskRepository extends BaseRepository {
   }
 
   async getById(id: number): Promise<Task | null> {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.select().from(tasks).where(eq(tasks.id, id)).limit(1)
     );
 
@@ -52,7 +52,7 @@ export class TaskRepository extends BaseRepository {
   }
 
   async getByPlanId(planId: number): Promise<Task[]> {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.select()
         .from(tasks)
         .where(eq(tasks.planId, planId))
@@ -65,7 +65,7 @@ export class TaskRepository extends BaseRepository {
   async getByStatus(
     status: TaskStatus
   ): Promise<Task[]> {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.select().from(tasks).where(eq(tasks.status, status)).orderBy(desc(tasks.createdAt))
     );
 
@@ -100,7 +100,7 @@ export class TaskRepository extends BaseRepository {
       expectedFiles: [],
     };
 
-    const [task] = (await this.execQuery(() =>
+    const [task] = (await this.executeQuery(() =>
       db.insert(tasks).values(cleanData).returning()
     )) as unknown as unknown[];
 
@@ -154,7 +154,7 @@ export class TaskRepository extends BaseRepository {
 
     updateData.updatedAt = new Date();
 
-    const [updatedTask] = (await this.execQuery(() =>
+    const [updatedTask] = (await this.executeQuery(() =>
       db
         .update(tasks)
         .set(updateData)
@@ -204,7 +204,7 @@ export class TaskRepository extends BaseRepository {
       throw new NotFoundError(`Task with ID ${id} not found`);
     }
 
-    await this.execQuery(() =>
+    await this.executeQuery(() =>
       db.delete(tasks).where(eq(tasks.id, id))
     );
   }
@@ -221,7 +221,7 @@ export class TaskRepository extends BaseRepository {
    * Respects dependencies: a task is only claimable if all tasks in its 'dependsOn' array are 'done'.
    */
   async claimNextTaskForProject(projectId: number): Promise<Task | null> {
-    return await this.execQuery(async () => {
+    return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         // 1. Find next task that is 'todo' AND has all dependencies met
         // We use a subquery to ensure NO tasks exist in the same plan that:
@@ -315,7 +315,7 @@ export class TaskRepository extends BaseRepository {
     const task = await this.getById(id);
     if (!task) throw new NotFoundError(`Task with ID ${id} not found`);
 
-    return await this.execQuery(async () => {
+    return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         const [updatedTask] = await tx.update(tasks)
           .set({ 
@@ -368,7 +368,7 @@ export class TaskRepository extends BaseRepository {
     const task = await this.getById(id);
     if (!task) throw new NotFoundError(`Task with ID ${id} not found`);
 
-    return await this.execQuery(async () => {
+    return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         const [updatedTask] = await tx.update(tasks)
           .set({ 
@@ -423,7 +423,7 @@ export class TaskRepository extends BaseRepository {
     const task = await this.getById(id);
     if (!task) throw new NotFoundError(`Task with ID ${id} not found`);
 
-    return await this.execQuery(async () => {
+    return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         const [updatedTask] = await tx.update(tasks)
           .set({ 
@@ -485,7 +485,7 @@ export class TaskRepository extends BaseRepository {
   }
 
   async getAttempts(taskId: number): Promise<(typeof schema.taskAttempts.$inferSelect)[]> {
-    return this.execQuery(() =>
+    return this.executeQuery(() =>
       db.select()
         .from(schema.taskAttempts)
         .where(eq(schema.taskAttempts.taskId, taskId))
@@ -494,7 +494,7 @@ export class TaskRepository extends BaseRepository {
   }
 
   async getFileChanges(taskId: number): Promise<(typeof schema.fileChanges.$inferSelect)[]> {
-    return this.execQuery(() =>
+    return this.executeQuery(() =>
       db.select()
         .from(schema.fileChanges)
         .where(eq(schema.fileChanges.taskId, taskId))

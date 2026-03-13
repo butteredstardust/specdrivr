@@ -6,26 +6,26 @@ import { NotFoundError, DatabaseError } from '@/lib/errors';
 
 export class WebhookRepository extends BaseRepository {
   async getAll(): Promise<Webhook[]> {
-    return await this.execQuery(() =>
+    return await this.executeQuery(() =>
       db.select().from(webhooks)
     );
   }
 
   async getById(id: number): Promise<Webhook | null> {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.select().from(webhooks).where(eq(webhooks.id, id)).limit(1)
     );
     return result[0] || null;
   }
 
   async getByProjectId(projectId: number): Promise<Webhook[]> {
-    return await this.execQuery(() =>
+    return await this.executeQuery(() =>
       db.select().from(webhooks).where(eq(webhooks.projectId, projectId))
     );
   }
 
   async create(data: { projectId: number; url: string; secret?: string | null; events: string[] }): Promise<Webhook> {
-    const [webhook] = await this.execQuery(() =>
+    const [webhook] = await this.executeQuery(() =>
       db.insert(webhooks).values({
         projectId: data.projectId,
         url: data.url,
@@ -42,7 +42,7 @@ export class WebhookRepository extends BaseRepository {
   }
 
   async update(id: number, data: Partial<{ url: string; secret: string | null; events: string[]; isActive: boolean }>): Promise<Webhook> {
-    const [updated] = await this.execQuery(() =>
+    const [updated] = await this.executeQuery(() =>
       db.update(webhooks).set(data).where(eq(webhooks.id, id)).returning()
     );
 
@@ -54,7 +54,7 @@ export class WebhookRepository extends BaseRepository {
   }
 
   async delete(id: number): Promise<void> {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.delete(webhooks).where(eq(webhooks.id, id)).returning()
     );
 
@@ -77,7 +77,7 @@ export class WebhookRepository extends BaseRepository {
     durationMs?: number;
     attempt?: number;
   }): Promise<WebhookDelivery> {
-    const [delivery] = await this.execQuery(() =>
+    const [delivery] = await this.executeQuery(() =>
       db.insert(webhookDeliveries).values({
         webhookId: data.webhookId,
         projectId: data.projectId,
@@ -100,7 +100,7 @@ export class WebhookRepository extends BaseRepository {
   }
 
   async getActiveWebhooksForEvent(projectId: number, event: string): Promise<Webhook[]> {
-    return await this.execQuery(() =>
+    return await this.executeQuery(() =>
       db.select()
       .from(webhooks)
       .where(
@@ -116,7 +116,7 @@ export class WebhookRepository extends BaseRepository {
 
   async setErrorStatus(id: number): Promise<void> {
     // Set status to 'error' to allow UI to show failure state
-    await this.execQuery(() =>
+    await this.executeQuery(() =>
       db.update(webhooks)
         .set({ status: 'error' })
         .where(eq(webhooks.id, id))

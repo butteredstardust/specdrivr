@@ -9,13 +9,13 @@ export { type SpecificationSelect as Specification } from '@/db/schema';
 
 export class SpecificationRepository extends BaseRepository {
   async getAll(): Promise<Specification[]> {
-    return await this.execQuery(() =>
+    return await this.executeQuery(() =>
       db.select().from(specifications)
     );
   }
 
   async getById(id: number): Promise<Specification | null> {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.select().from(specifications).where(eq(specifications.id, id)).limit(1)
     );
 
@@ -23,13 +23,13 @@ export class SpecificationRepository extends BaseRepository {
   }
 
   async getByProjectId(projectId: number): Promise<Specification[]> {
-    return await this.execQuery(() =>
+    return await this.executeQuery(() =>
       db.select().from(specifications).where(eq(specifications.projectId, projectId))
     );
   }
 
   async create(data: { projectId: number; name: string; createdBy?: string }): Promise<Specification> {
-    const [spec] = await this.execQuery(() =>
+    const [spec] = await this.executeQuery(() =>
       db.insert(specifications).values({
         projectId: data.projectId,
         name: data.name,
@@ -60,7 +60,7 @@ export class SpecificationRepository extends BaseRepository {
     markdownContent: string; 
     createdBy: string;
   }): Promise<Specification> {
-    return await this.execQuery(async () => {
+    return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         // 1. Create the specification
         const [spec] = await tx.insert(specifications).values({
@@ -121,7 +121,7 @@ export class SpecificationRepository extends BaseRepository {
     const spec = await this.getById(data.specId);
     if (!spec) throw new NotFoundError(`Specification with ID ${data.specId} not found`);
 
-    return await this.execQuery(async () => {
+    return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         // 1. Get latest version number
         const latestVersion = await tx.select({ num: specVersions.versionNumber })
@@ -186,7 +186,7 @@ export class SpecificationRepository extends BaseRepository {
   }
 
   async update(id: number, data: Partial<Specification>): Promise<Specification> {
-    const [updatedSpec] = await this.execQuery(() =>
+    const [updatedSpec] = await this.executeQuery(() =>
       db
         .update(specifications)
         .set({ ...data, updatedAt: new Date() })
@@ -208,7 +208,7 @@ export class SpecificationRepository extends BaseRepository {
   }
 
   async delete(id: number): Promise<void> {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.delete(specifications).where(eq(specifications.id, id)).returning()
     );
 
