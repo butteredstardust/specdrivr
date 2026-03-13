@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { clientLogger } from '@/lib/logger-client';
+import { PixelButton } from '@pxlkit/ui-kit';
 
 interface ErrorPageProps {
   error: Error & { digest?: string };
@@ -36,18 +37,12 @@ export default function Error({ error, reset }: ErrorPageProps) {
           </div>
         )}
         <div className="flex justify-center gap-2">
-          <button
-            onClick={reset}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-4 py-2"
-          >
+          <PixelButton onClick={reset} tone="purple" size="md">
             Try Again
-          </button>
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-md px-4 py-2"
-          >
+          </PixelButton>
+          <PixelButton onClick={() => window.location.reload()} tone="neutral" size="md">
             Reload Page
-          </button>
+          </PixelButton>
         </div>
       </div>
     </div>
