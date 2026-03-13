@@ -5,6 +5,7 @@ import { createHighlighter, type Highlighter } from 'shiki';
 import { twMerge } from 'tailwind-merge';
 import { PixelEmptyState } from '@pxlkit/ui-kit';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { clientLogger } from '@/lib/logger-client';
 
 // Module-scoped highlighter promise to initialise only once
 let highlighterPromise: Promise<Highlighter> | null = null;
@@ -96,8 +97,8 @@ export function DiffViewer({ diff, language = 'typescript', className }: DiffVie
         }
 
         setLines(processedLines);
-      } catch (error) {
-        console.error('Failed to parse or highlight diff:', error);
+      } catch (error: unknown) {
+        clientLogger.error('Failed to parse or highlight diff:', error);
         // Fallback to raw text without highlighting
         setLines(
           diff.split('\n').map(line => {
