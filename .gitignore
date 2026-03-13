@@ -109,3 +109,4 @@ fix-*.sh
 *_output.txt     # Build/generate output logs
 *_results.txt    # Test/lint result dumps
 migrate-*.ts     # One-time migration scripts (unless in drizzle/)
+next-env.d.ts
