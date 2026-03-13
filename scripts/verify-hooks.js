@@ -30,7 +30,9 @@ const criticalHooks = ["pre-push", "pre-commit"];
  */
 function generateChecksum(filePath) {
   try {
-    const content = readFileSync(filePath, "utf-8");
+    const rawContent = readFileSync(filePath, "utf-8");
+    // Normalize line endings to LF for consistent checksums across platforms
+    const content = rawContent.replace(/\r\n/g, "\n");
     return createHash("sha256").update(content).digest("hex");
   } catch (error) {
     console.error(`Error reading file ${filePath}:`, error.message);
