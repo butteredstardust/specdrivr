@@ -10,7 +10,10 @@ import { requireAdmin } from '@/lib/rbac';
 export async function createProjectAction(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) {
-    return { success: false, error: { code: 'UNAUTHORIZED', message: 'Please sign in to create a project' } };
+    return {
+      success: false,
+      error: { code: 'UNAUTHORIZED', message: 'Please sign in to create a project' },
+    };
   }
 
   const rawData = {
@@ -30,24 +33,30 @@ export async function createProjectAction(formData: FormData) {
       description: result.data.description,
       createdBy: session.user.id,
     });
-    
+
     // Invalidate the projects list cache
     revalidatePath('/projects');
     revalidatePath('/dashboard');
-    
+
     return { success: true, data: project };
   } catch (error: unknown) {
-    logger.error({ 
-      error: error instanceof Error ? error.message : String(error), 
-      userId: session.user.id 
-    }, 'Failed to create project');
-    
-    return { 
-      success: false, 
-      error: { 
-        code: 'INTERNAL_ERROR', 
-        message: error instanceof Error ? error.message : 'An unexpected error occurred while creating the project' 
-      } 
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        userId: session.user.id,
+      },
+      'Failed to create project'
+    );
+
+    return {
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'An unexpected error occurred while creating the project',
+      },
     };
   }
 }
@@ -55,7 +64,10 @@ export async function createProjectAction(formData: FormData) {
 export async function updateProjectAction(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) {
-    return { success: false, error: { code: 'UNAUTHORIZED', message: 'Please sign in to update a project' } };
+    return {
+      success: false,
+      error: { code: 'UNAUTHORIZED', message: 'Please sign in to update a project' },
+    };
   }
 
   const idStr = formData.get('id');
@@ -77,37 +89,46 @@ export async function updateProjectAction(formData: FormData) {
   try {
     const existingProject = await projectRepository.getById(result.data.id);
     if (!existingProject) {
-         return { success: false, error: { code: 'NOT_FOUND', message: 'Project not found' } };
+      return { success: false, error: { code: 'NOT_FOUND', message: 'Project not found' } };
     }
 
     const { allowed } = await requireAdmin(session.user.id, result.data.id);
     if (!allowed) {
-      return { success: false, error: { code: 'FORBIDDEN', message: 'You must be a project admin to update this project' } };
+      return {
+        success: false,
+        error: { code: 'FORBIDDEN', message: 'You must be a project admin to update this project' },
+      };
     }
 
     const project = await projectRepository.update(result.data.id, {
       name: result.data.name,
       description: result.data.description,
     });
-    
+
     revalidatePath('/projects');
     revalidatePath(`/projects/${project.id}`);
     revalidatePath('/dashboard');
-    
+
     return { success: true, data: project };
   } catch (error: unknown) {
-    logger.error({ 
-      error: error instanceof Error ? error.message : String(error), 
-      userId: session.user.id,
-      projectId: result.data.id
-    }, 'Failed to update project');
-    
-    return { 
-      success: false, 
-      error: { 
-        code: 'INTERNAL_ERROR', 
-        message: error instanceof Error ? error.message : 'An unexpected error occurred while updating the project' 
-      } 
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        userId: session.user.id,
+        projectId: result.data.id,
+      },
+      'Failed to update project'
+    );
+
+    return {
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'An unexpected error occurred while updating the project',
+      },
     };
   }
 }

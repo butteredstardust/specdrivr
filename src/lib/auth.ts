@@ -1,18 +1,18 @@
 import 'server-only';
-import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "@better-auth/drizzle-adapter";
-import { db } from "@/db";
-import * as schema from "@/db/schema";
-import { env } from "./env";
-import { headers } from "next/headers";
-import { sendEmail } from "./email";
+import { betterAuth } from 'better-auth';
+import { drizzleAdapter } from '@better-auth/drizzle-adapter';
+import { db } from '@/db';
+import * as schema from '@/db/schema';
+import { env } from './env';
+import { headers } from 'next/headers';
+import { sendEmail } from './email';
 
 export const authInstance = betterAuth({
   baseURL: env.NEXTAUTH_URL,
   basePath: '/api/auth',
   trustedOrigins: [env.NEXTAUTH_URL],
   database: drizzleAdapter(db, {
-    provider: "pg",
+    provider: 'pg',
     schema: {
       user: schema.users,
       session: schema.sessions,
@@ -22,24 +22,24 @@ export const authInstance = betterAuth({
   }),
   user: {
     additionalFields: {
-      role: { type: "string", required: false, defaultValue: "viewer" },
-      isActive: { type: "boolean", required: false, defaultValue: true },
-      timezone: { type: "string", required: false },
-      locale: { type: "string", required: false },
-      onboardingStep: { type: "number", required: false, defaultValue: 0 },
-      theme: { type: "string", required: false, defaultValue: "dark" },
-    }
+      role: { type: 'string', required: false, defaultValue: 'viewer' },
+      isActive: { type: 'boolean', required: false, defaultValue: true },
+      timezone: { type: 'string', required: false },
+      locale: { type: 'string', required: false },
+      onboardingStep: { type: 'number', required: false, defaultValue: 0 },
+      theme: { type: 'string', required: false, defaultValue: 'dark' },
+    },
   },
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
     sendResetPassword: async ({ user, url }: { user: { email: string }; url: string }) => {
-    // Note: Actual email sending requires a valid RESEND_API_KEY in the environment.
-    // In CI or environments without a token, the sendEmail call will log an error but return success: false.
-    await sendEmail(
-    user.email,
-    'Reset your Specdrivr password',
-    `
+      // Note: Actual email sending requires a valid RESEND_API_KEY in the environment.
+      // In CI or environments without a token, the sendEmail call will log an error but return success: false.
+      await sendEmail(
+        user.email,
+        'Reset your Specdrivr password',
+        `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">     
     <h2 style="color: #333;">Reset your Specdrivr password</h2>
     <p style="color: #555; line-height: 1.6;">Hello,</p>
@@ -52,10 +52,10 @@ export const authInstance = betterAuth({
     <p style="color: #888; font-size: 12px; text-align: center;">DAEMON &copy; Specdrivr</p>
     </div>
     `
-    );
+      );
     },
     sendVerificationEmail: async () => {
-    // Not required for MVP — leave as a no-op but add the handler stub
+      // Not required for MVP — leave as a no-op but add the handler stub
     },
   },
   session: {

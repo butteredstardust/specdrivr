@@ -4,11 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { taskRepository } from '@/repositories/task-repository';
 import { auth } from '@/lib/auth';
 import { logger } from '@/lib/logger';
-import { 
-  unblockTaskSchema, 
-  overrideTaskStatusSchema,
-  taskStatusSchema
-} from '@/lib/schemas';
+import { unblockTaskSchema, overrideTaskStatusSchema, taskStatusSchema } from '@/lib/schemas';
 import { requireAdmin, requireMember } from '@/lib/rbac';
 import { planRepository } from '@/repositories/plan-repository';
 import { specificationRepository } from '@/repositories/specification-repository';
@@ -34,27 +30,40 @@ export async function retryTaskAction(formData: FormData) {
   if (!plan) return { success: false, error: { code: 'NOT_FOUND', message: 'Plan not found' } };
 
   const spec = await specificationRepository.getById(plan.specId);
-  if (!spec) return { success: false, error: { code: 'NOT_FOUND', message: 'Specification not found' } };
+  if (!spec)
+    return { success: false, error: { code: 'NOT_FOUND', message: 'Specification not found' } };
 
   const { allowed } = await requireMember(session.user.id, spec.projectId);
   if (!allowed) {
-    return { success: false, error: { code: 'FORBIDDEN', message: 'You do not have permission to retry tasks in this project' } };
+    return {
+      success: false,
+      error: {
+        code: 'FORBIDDEN',
+        message: 'You do not have permission to retry tasks in this project',
+      },
+    };
   }
 
   try {
     const updatedTask = await taskRepository.retryTask(taskId, session.user.id);
 
     revalidatePath(`/specs/${spec.id}`);
-    
+
     return { success: true, data: updatedTask };
   } catch (error: unknown) {
-    logger.error({ 
-      error: error instanceof Error ? error.message : String(error), 
-      userId: session.user.id,
-      taskId
-    }, 'Failed to retry task');
-    
-    return { success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } };
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        userId: session.user.id,
+        taskId,
+      },
+      'Failed to retry task'
+    );
+
+    return {
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' },
+    };
   }
 }
 
@@ -81,27 +90,44 @@ export async function unblockTaskAction(formData: FormData) {
   if (!plan) return { success: false, error: { code: 'NOT_FOUND', message: 'Plan not found' } };
 
   const spec = await specificationRepository.getById(plan.specId);
-  if (!spec) return { success: false, error: { code: 'NOT_FOUND', message: 'Specification not found' } };
+  if (!spec)
+    return { success: false, error: { code: 'NOT_FOUND', message: 'Specification not found' } };
 
   const { allowed } = await requireMember(session.user.id, spec.projectId);
   if (!allowed) {
-    return { success: false, error: { code: 'FORBIDDEN', message: 'You do not have permission to unblock tasks in this project' } };
+    return {
+      success: false,
+      error: {
+        code: 'FORBIDDEN',
+        message: 'You do not have permission to unblock tasks in this project',
+      },
+    };
   }
 
   try {
-    const updatedTask = await taskRepository.unblockTask(result.data.id, result.data.humanContext, session.user.id);
+    const updatedTask = await taskRepository.unblockTask(
+      result.data.id,
+      result.data.humanContext,
+      session.user.id
+    );
 
     revalidatePath(`/specs/${spec.id}`);
-    
+
     return { success: true, data: updatedTask };
   } catch (error: unknown) {
-    logger.error({ 
-      error: error instanceof Error ? error.message : String(error), 
-      userId: session.user.id,
-      taskId: result.data.id
-    }, 'Failed to unblock task');
-    
-    return { success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } };
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        userId: session.user.id,
+        taskId: result.data.id,
+      },
+      'Failed to unblock task'
+    );
+
+    return {
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' },
+    };
   }
 }
 
@@ -129,31 +155,41 @@ export async function overrideTaskStatusAction(formData: FormData) {
   if (!plan) return { success: false, error: { code: 'NOT_FOUND', message: 'Plan not found' } };
 
   const spec = await specificationRepository.getById(plan.specId);
-  if (!spec) return { success: false, error: { code: 'NOT_FOUND', message: 'Specification not found' } };
+  if (!spec)
+    return { success: false, error: { code: 'NOT_FOUND', message: 'Specification not found' } };
 
   const { allowed } = await requireAdmin(session.user.id, spec.projectId);
   if (!allowed) {
-    return { success: false, error: { code: 'FORBIDDEN', message: 'You must be a project admin to override task status' } };
+    return {
+      success: false,
+      error: { code: 'FORBIDDEN', message: 'You must be a project admin to override task status' },
+    };
   }
 
   try {
     const updatedTask = await taskRepository.overrideStatus(
-      result.data.id, 
-      result.data.status as TaskStatus, 
-      session.user.id, 
+      result.data.id,
+      result.data.status as TaskStatus,
+      session.user.id,
       result.data.notes
     );
 
     revalidatePath(`/specs/${spec.id}`);
-    
+
     return { success: true, data: updatedTask };
   } catch (error: unknown) {
-    logger.error({ 
-      error: error instanceof Error ? error.message : String(error), 
-      userId: session.user.id,
-      taskId: result.data.id
-    }, 'Failed to override task status');
-    
-    return { success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } };
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        userId: session.user.id,
+        taskId: result.data.id,
+      },
+      'Failed to override task status'
+    );
+
+    return {
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' },
+    };
   }
 }

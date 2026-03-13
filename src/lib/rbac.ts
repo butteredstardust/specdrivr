@@ -14,19 +14,11 @@ export function roleAtLeast(userRole: UserRole, required: UserRole): boolean {
 /**
  * Returns the user's role on a project, or null if not a member.
  */
-export async function getProjectRole(
-  userId: string,
-  projectId: number
-): Promise<UserRole | null> {
+export async function getProjectRole(userId: string, projectId: number): Promise<UserRole | null> {
   const rows = await db
     .select({ role: projectMembers.role })
     .from(projectMembers)
-    .where(
-      and(
-        eq(projectMembers.userId, userId),
-        eq(projectMembers.projectId, projectId)
-      )
-    )
+    .where(and(eq(projectMembers.userId, userId), eq(projectMembers.projectId, projectId)))
     .limit(1);
 
   return rows[0]?.role ?? null;
@@ -69,20 +61,20 @@ export async function requireOwner(userId: string, projectId: number) {
  * Use these constants in route handlers for self-documenting checks.
  */
 export const PERMISSIONS = {
-  VIEW_SPECS:         'member'   as UserRole, // viewer+
-  CREATE_EDIT_SPEC:   'member'   as UserRole,
-  GENERATE_PLAN:      'member'   as UserRole,
-  APPROVE_PLAN:       'admin'    as UserRole,
-  REJECT_PLAN:        'admin'    as UserRole,
-  REQUEST_CHANGES:    'admin'    as UserRole,
-  CONTROL_SESSION:    'admin'    as UserRole,
-  UNBLOCK_TASK:       'member'   as UserRole,
-  OVERRIDE_TASK:      'admin'    as UserRole,
-  INVITE_MEMBERS:     'admin'    as UserRole,
-  CHANGE_ROLES:       'admin'    as UserRole,
-  VIEW_AUDIT_LOG:     'admin'    as UserRole,
-  EDIT_SETTINGS:      'admin'    as UserRole,
-  MANAGE_INTEGRATIONS:'admin'    as UserRole,
-  DELETE_PROJECT:     'owner'    as UserRole,
-  TRANSFER_OWNERSHIP: 'owner'    as UserRole,
+  VIEW_SPECS: 'member' as UserRole, // viewer+
+  CREATE_EDIT_SPEC: 'member' as UserRole,
+  GENERATE_PLAN: 'member' as UserRole,
+  APPROVE_PLAN: 'admin' as UserRole,
+  REJECT_PLAN: 'admin' as UserRole,
+  REQUEST_CHANGES: 'admin' as UserRole,
+  CONTROL_SESSION: 'admin' as UserRole,
+  UNBLOCK_TASK: 'member' as UserRole,
+  OVERRIDE_TASK: 'admin' as UserRole,
+  INVITE_MEMBERS: 'admin' as UserRole,
+  CHANGE_ROLES: 'admin' as UserRole,
+  VIEW_AUDIT_LOG: 'admin' as UserRole,
+  EDIT_SETTINGS: 'admin' as UserRole,
+  MANAGE_INTEGRATIONS: 'admin' as UserRole,
+  DELETE_PROJECT: 'owner' as UserRole,
+  TRANSFER_OWNERSHIP: 'owner' as UserRole,
 } as const;

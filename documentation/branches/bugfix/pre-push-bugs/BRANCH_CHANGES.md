@@ -1,5 +1,5 @@
-| File Name | Summary of Changes | Summary Reason for Change | Expected Impact | Best Practice Evaluation Score | Reason for Deletion |
-| --- | --- | --- | --- | --- | --- |
-| [.husky/pre-push](file:///Users/tuxgeek/Dev/specdrivr/.husky/pre-push) | Fixed `process.env` false positive and `xargs grep` errors on deleted files. | To prevent the pre-push hook from blocking legitimate pushes or throwing raw errors contextually. | Stabilizes the pre-push hook for complex commit scenarios. | 10/10 | not deleted |
+| File Name                                                              | Summary of Changes                                                           | Summary Reason for Change                                                                         | Expected Impact                                            | Best Practice Evaluation Score | Reason for Deletion |
+| ---------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- | ------------------------------ | ------------------- |
+| [.husky/pre-push](file:///Users/tuxgeek/Dev/specdrivr/.husky/pre-push) | Fixed `process.env` false positive and `xargs grep` errors on deleted files. | To prevent the pre-push hook from blocking legitimate pushes or throwing raw errors contextually. | Stabilizes the pre-push hook for complex commit scenarios. | 10/10                          | not deleted         |
 
 No changes to CI config or test files.

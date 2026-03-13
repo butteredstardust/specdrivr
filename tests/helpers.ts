@@ -4,7 +4,8 @@ import * as schema from '@/db/schema';
 import { sql } from 'drizzle-orm';
 
 // Directly read from process.env to avoid env-core.ts initialization issues during Vitest
-const databaseUrl = process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/specdrivr';
+const databaseUrl =
+  process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/specdrivr';
 
 const testQueryClient = postgres(databaseUrl, { max: 1 });
 export const testDb = drizzle(testQueryClient, { schema });
@@ -40,24 +41,31 @@ export async function cleanDatabase() {
     'git_commits',
     'agent_tokens',
     'api_request_logs',
-    'verifications'
+    'verifications',
   ];
 
-  const query = `TRUNCATE TABLE ${tables.map(t => `"${t}"`).join(', ')} RESTART IDENTITY CASCADE`;
+  const query = `TRUNCATE TABLE ${tables.map((t) => `"${t}"`).join(', ')} RESTART IDENTITY CASCADE`;
   await testDb.execute(sql.raw(query));
 }
 
 /**
  * Helper to create a test user
  */
-export async function createTestUser(id: string, email: string, role: 'owner' | 'admin' | 'member' | 'viewer' = 'member') {
-  const [user] = await testDb.insert(schema.users).values({
-    id,
-    name: email.split('@')[0],
-    email,
-    role,
-    onboardingStep: 3,
-  }).returning();
+export async function createTestUser(
+  id: string,
+  email: string,
+  role: 'owner' | 'admin' | 'member' | 'viewer' = 'member'
+) {
+  const [user] = await testDb
+    .insert(schema.users)
+    .values({
+      id,
+      name: email.split('@')[0],
+      email,
+      role,
+      onboardingStep: 3,
+    })
+    .returning();
   return user;
 }
 
@@ -66,12 +74,15 @@ export async function createTestUser(id: string, email: string, role: 'owner' | 
  */
 export async function createTestProject(name: string, ownerId: string) {
   const slug = `${name.toLowerCase().replace(/ /g, '-')}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
-  const [project] = await testDb.insert(schema.projects).values({
-    name,
-    slug,
-    createdBy: ownerId,
-    isDemo: true,
-  }).returning();
+  const [project] = await testDb
+    .insert(schema.projects)
+    .values({
+      name,
+      slug,
+      createdBy: ownerId,
+      isDemo: true,
+    })
+    .returning();
 
   await testDb.insert(schema.projectMembers).values({
     projectId: project.id,

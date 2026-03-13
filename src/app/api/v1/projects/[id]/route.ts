@@ -10,24 +10,23 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
-export async function GET(
-  _request: NextRequest,
-  { params }: RouteParams
-) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        { status: 401 }
+      );
     }
 
     const { id } = await params;
     const projectId = parseInt(id, 10);
 
     if (isNaN(projectId) || projectId <= 0) {
-      return NextResponse.json(
-        formatErrorResponse({ message: 'Invalid project ID' }),
-        { status: 400 }
-      );
+      return NextResponse.json(formatErrorResponse({ message: 'Invalid project ID' }), {
+        status: 400,
+      });
     }
 
     // RBAC: Ensure user is at least a member to view project details
@@ -53,31 +52,35 @@ export async function GET(
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: RouteParams
-) {
+export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        { status: 401 }
+      );
     }
 
     const { id } = await params;
     const projectId = parseInt(id, 10);
 
     if (isNaN(projectId) || projectId <= 0) {
-      return NextResponse.json(
-        formatErrorResponse({ message: 'Invalid project ID' }),
-        { status: 400 }
-      );
+      return NextResponse.json(formatErrorResponse({ message: 'Invalid project ID' }), {
+        status: 400,
+      });
     }
 
     // RBAC: require admin to update project
     const { allowed } = await requireAdmin(session.user.id, projectId);
     if (!allowed) {
       return NextResponse.json(
-        { error: { code: 'FORBIDDEN', message: 'You must be a project admin to update this project' } },
+        {
+          error: {
+            code: 'FORBIDDEN',
+            message: 'You must be a project admin to update this project',
+          },
+        },
         { status: 403 }
       );
     }
@@ -95,24 +98,23 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  _request: NextRequest,
-  { params }: RouteParams
-) {
+export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        { status: 401 }
+      );
     }
 
     const { id } = await params;
     const projectId = parseInt(id, 10);
 
     if (isNaN(projectId) || projectId <= 0) {
-      return NextResponse.json(
-        formatErrorResponse({ message: 'Invalid project ID' }),
-        { status: 400 }
-      );
+      return NextResponse.json(formatErrorResponse({ message: 'Invalid project ID' }), {
+        status: 400,
+      });
     }
 
     // RBAC: require owner to delete project

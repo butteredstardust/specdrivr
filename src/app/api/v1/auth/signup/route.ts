@@ -11,7 +11,7 @@ import { logger } from '@/lib/logger';
 const SignupSchema = z.object({
   name: z.string().min(2),
   email: z.string().email(),
-  password: z.string().min(8)
+  password: z.string().min(8),
 });
 
 export async function POST(req: Request) {
@@ -21,12 +21,12 @@ export async function POST(req: Request) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { 
-          error: { 
-            code: 'VALIDATION_ERROR', 
-            message: 'Invalid input', 
-            details: parsed.error.errors 
-          } 
+        {
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Invalid input',
+            details: parsed.error.errors,
+          },
         },
         { status: 400 }
       );
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
           email,
           password,
           name,
-        }
+        },
       });
 
       if (!result || !result.user) {
@@ -50,25 +50,28 @@ export async function POST(req: Request) {
       }
 
       // 2. Post-signup logic: update onboardingStep
-      await db.update(users)
-        .set({ onboardingStep: 1 })
-        .where(eq(users.id, result.user.id));
+      await db.update(users).set({ onboardingStep: 1 }).where(eq(users.id, result.user.id));
 
       return NextResponse.json(
-        { 
-          data: { 
-            user: { 
-              id: result.user.id, 
-              email: result.user.email, 
-              name: result.user.name 
-            } 
-          } 
+        {
+          data: {
+            user: {
+              id: result.user.id,
+              email: result.user.email,
+              name: result.user.name,
+            },
+          },
         },
         { status: 201 }
       );
     } catch (error: unknown) {
       // BetterAuth throws error objects
-      if (error && typeof error === 'object' && 'code' in error && error.code === 'USER_ALREADY_EXISTS') {
+      if (
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        error.code === 'USER_ALREADY_EXISTS'
+      ) {
         return NextResponse.json(
           { error: { code: 'CONFLICT', message: 'Email already registered' } },
           { status: 409 }

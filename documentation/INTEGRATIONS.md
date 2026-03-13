@@ -105,4 +105,3 @@ alertType TEXT -- "email" | "webhook" | "both"
 triggeredAt TIMESTAMPTZ -- last time this alert fired
 
 createdAt TIMESTAMPTZ DEFAULT NOW()
-

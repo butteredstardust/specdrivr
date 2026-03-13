@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { taskRepository } from '@/repositories/task-repository';
-import { type TaskSelect as Task } from "@/db/schema";
+import { type TaskSelect as Task } from '@/db/schema';
 import { handleApiError } from '@/lib/error-handler';
 import { taskQuerySchema, createTaskSchema } from '@/lib/schemas';
 import { auth } from '@/lib/auth';
@@ -9,7 +9,10 @@ export async function GET(request: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        { status: 401 }
+      );
     }
 
     const searchParams = request.nextUrl.searchParams;
@@ -22,7 +25,13 @@ export async function GET(request: NextRequest) {
 
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: { code: 'VALIDATION_ERROR', message: 'Invalid query parameters', details: validationResult.error.errors } },
+        {
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Invalid query parameters',
+            details: validationResult.error.errors,
+          },
+        },
         { status: 400 }
       );
     }
@@ -33,7 +42,7 @@ export async function GET(request: NextRequest) {
     if (planId) {
       tasks = await taskRepository.getByPlanId(planId);
       if (status) {
-        tasks = tasks.filter(task => task.status === status);
+        tasks = tasks.filter((task) => task.status === status);
       }
     } else if (status) {
       tasks = await taskRepository.getByStatus(status as import('@/db/schema').TaskStatus);
@@ -51,7 +60,10 @@ export async function POST(request: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        { status: 401 }
+      );
     }
 
     const body = await request.json();
@@ -59,7 +71,13 @@ export async function POST(request: NextRequest) {
 
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: { code: 'VALIDATION_ERROR', message: 'Invalid task data', details: validationResult.error.errors } },
+        {
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Invalid task data',
+            details: validationResult.error.errors,
+          },
+        },
         { status: 400 }
       );
     }
@@ -69,14 +87,11 @@ export async function POST(request: NextRequest) {
       externalId: `T-${Date.now()}`,
       title: data.description.substring(0, 50),
       ...data,
-      createdBy: session.user.id
+      createdBy: session.user.id,
     };
     const newTask = await taskRepository.create(taskData);
 
-    return NextResponse.json(
-      { data: newTask },
-      { status: 201 }
-    );
+    return NextResponse.json({ data: newTask }, { status: 201 });
   } catch (error) {
     return handleApiError(error);
   }

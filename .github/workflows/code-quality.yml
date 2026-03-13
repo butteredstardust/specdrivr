@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 env:
-  NODE_OPTIONS: "--dns-result-order=ipv4first"
+  NODE_OPTIONS: '--dns-result-order=ipv4first'
 
 jobs:
   code-quality:
@@ -73,7 +73,7 @@ jobs:
             "db_backup.sql"
             "debug.log"
           )
-          
+
           FOUND=0
           for pattern in "${FORBIDDEN_PATTERNS[@]}"; do
             if ls $pattern 1> /dev/null 2>&1; then

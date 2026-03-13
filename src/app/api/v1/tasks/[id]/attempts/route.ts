@@ -11,14 +11,14 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
-export async function GET(
-  _request: NextRequest,
-  { params }: RouteParams
-) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        { status: 401 }
+      );
     }
 
     const { id } = await params;
@@ -36,7 +36,10 @@ export async function GET(
     // RBAC: require member to view attempts
     const { allowed } = await requireMember(session.user.id, spec.projectId);
     if (!allowed) {
-      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'You do not have access to this project' } }, { status: 403 });
+      return NextResponse.json(
+        { error: { code: 'FORBIDDEN', message: 'You do not have access to this project' } },
+        { status: 403 }
+      );
     }
 
     const attempts = await taskRepository.getAttempts(taskId);

@@ -27,7 +27,10 @@ export async function createWebhookAction(formData: FormData) {
 
   const { allowed } = await requireAdmin(session.user.id, result.data.projectId);
   if (!allowed) {
-    return { success: false, error: { code: 'FORBIDDEN', message: 'You must be a project admin to manage webhooks' } };
+    return {
+      success: false,
+      error: { code: 'FORBIDDEN', message: 'You must be a project admin to manage webhooks' },
+    };
   }
 
   try {
@@ -35,12 +38,18 @@ export async function createWebhookAction(formData: FormData) {
     revalidatePath(`/projects/${result.data.projectId}/settings`);
     return { success: true, data: webhook };
   } catch (error: unknown) {
-    logger.error({ 
-      error: error instanceof Error ? error.message : String(error), 
-      userId: session.user.id,
-      projectId: result.data.projectId
-    }, 'Failed to create webhook');
-    return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to create webhook' } };
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        userId: session.user.id,
+        projectId: result.data.projectId,
+      },
+      'Failed to create webhook'
+    );
+    return {
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'Failed to create webhook' },
+    };
   }
 }
 
@@ -64,11 +73,15 @@ export async function updateWebhookAction(formData: FormData) {
   }
 
   const webhook = await webhookRepository.getById(result.data.id);
-  if (!webhook) return { success: false, error: { code: 'NOT_FOUND', message: 'Webhook not found' } };
+  if (!webhook)
+    return { success: false, error: { code: 'NOT_FOUND', message: 'Webhook not found' } };
 
   const { allowed } = await requireAdmin(session.user.id, webhook.projectId);
   if (!allowed) {
-    return { success: false, error: { code: 'FORBIDDEN', message: 'You must be a project admin to manage webhooks' } };
+    return {
+      success: false,
+      error: { code: 'FORBIDDEN', message: 'You must be a project admin to manage webhooks' },
+    };
   }
 
   try {
@@ -76,12 +89,18 @@ export async function updateWebhookAction(formData: FormData) {
     revalidatePath(`/projects/${webhook.projectId}/settings`);
     return { success: true, data: updated };
   } catch (error: unknown) {
-    logger.error({ 
-      error: error instanceof Error ? error.message : String(error), 
-      userId: session.user.id,
-      webhookId: result.data.id
-    }, 'Failed to update webhook');
-    return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to update webhook' } };
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        userId: session.user.id,
+        webhookId: result.data.id,
+      },
+      'Failed to update webhook'
+    );
+    return {
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'Failed to update webhook' },
+    };
   }
 }
 
@@ -96,7 +115,10 @@ export async function deleteWebhookAction(formData: FormData) {
 
   const { allowed } = await requireAdmin(session.user.id, projectId);
   if (!allowed) {
-    return { success: false, error: { code: 'FORBIDDEN', message: 'You must be a project admin to manage webhooks' } };
+    return {
+      success: false,
+      error: { code: 'FORBIDDEN', message: 'You must be a project admin to manage webhooks' },
+    };
   }
 
   try {
@@ -104,11 +126,17 @@ export async function deleteWebhookAction(formData: FormData) {
     revalidatePath(`/projects/${projectId}/settings`);
     return { success: true };
   } catch (error: unknown) {
-    logger.error({ 
-      error: error instanceof Error ? error.message : String(error), 
-      userId: session.user.id,
-      webhookId: id
-    }, 'Failed to delete webhook');
-    return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to delete webhook' } };
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        userId: session.user.id,
+        webhookId: id,
+      },
+      'Failed to delete webhook'
+    );
+    return {
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'Failed to delete webhook' },
+    };
   }
 }

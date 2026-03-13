@@ -42,7 +42,7 @@ export async function dispatchWebhookEvent(
 ): Promise<void> {
   try {
     const webhooks = await webhookRepository.getActiveWebhooksForEvent(projectId, event);
-    
+
     if (webhooks.length === 0) {
       return;
     }
@@ -55,11 +55,11 @@ export async function dispatchWebhookEvent(
     };
 
     // Fire all in parallel, do not await sequentially
-    Promise.allSettled(
-      webhooks.map((webhook) => dispatchWithRetry(webhook, fullPayload))
-    ).catch((err) => {
-      logger.error({ err, projectId, event }, 'Unhandled error in webhook Promise.allSettled');
-    });
+    Promise.allSettled(webhooks.map((webhook) => dispatchWithRetry(webhook, fullPayload))).catch(
+      (err) => {
+        logger.error({ err, projectId, event }, 'Unhandled error in webhook Promise.allSettled');
+      }
+    );
   } catch (error) {
     logger.error({ error, projectId, event }, 'Failed to initiate webhook dispatch');
   }
@@ -80,10 +80,7 @@ async function dispatchWithRetry(
   };
 
   if (webhook.secret) {
-    const signature = crypto
-      .createHmac('sha256', webhook.secret)
-      .update(rawBody)
-      .digest('hex');
+    const signature = crypto.createHmac('sha256', webhook.secret).update(rawBody).digest('hex');
     headers['X-Specdrivr-Signature'] = `sha256=${signature}`;
   }
 
@@ -100,7 +97,7 @@ async function dispatchWithRetry(
 
     statusCode = response.status;
     responseBody = await response.text();
-    
+
     if (response.ok) {
       status = 'delivered';
     }
@@ -126,7 +123,7 @@ async function dispatchWithRetry(
       responseStatus: statusCode ?? undefined,
       responseBody: responseBody?.slice(0, 500) ?? undefined,
       durationMs,
-      attempt: attempt + 1
+      attempt: attempt + 1,
     });
   } catch (logError) {
     logger.error({ logError, webhookId: webhook.id }, 'Failed to log webhook delivery');
@@ -136,25 +133,31 @@ async function dispatchWithRetry(
   if (status === 'failed' && attempt < RETRY_DELAYS.length) {
     const delay = RETRY_DELAYS[attempt];
     const nextAttempt = attempt + 1;
-    
-    logger.info({ 
-      webhookId: webhook.id, 
-      attempt: nextAttempt + 1, 
-      delay, 
-      projectId: payload.projectId 
-    }, 'Retrying webhook delivery');
-    
+
+    logger.info(
+      {
+        webhookId: webhook.id,
+        attempt: nextAttempt + 1,
+        delay,
+        projectId: payload.projectId,
+      },
+      'Retrying webhook delivery'
+    );
+
     await new Promise((resolve) => setTimeout(resolve, delay));
     return dispatchWithRetry(webhook, payload, nextAttempt);
   }
 
   // Mark as permanent error if all attempts exhausted
   if (status === 'error') {
-    logger.error({ 
-      webhookId: webhook.id, 
-      projectId: payload.projectId 
-    }, 'Webhook delivery exhausted all retries (4), marking as error');
-    
+    logger.error(
+      {
+        webhookId: webhook.id,
+        projectId: payload.projectId,
+      },
+      'Webhook delivery exhausted all retries (4), marking as error'
+    );
+
     try {
       await webhookRepository.setErrorStatus(webhook.id);
     } catch (err: unknown) {
@@ -165,10 +168,16 @@ async function dispatchWithRetry(
 
 // Add a legacy wrapper for actions that expect the old webhookService
 export const webhookService = {
-  dispatch: async (projectId: number, event: WebhookEventType, data: unknown, options: Record<string, unknown> = {}) => {
+  dispatch: async (
+    projectId: number,
+    event: WebhookEventType,
+    data: unknown,
+    options: Record<string, unknown> = {}
+  ) => {
     return dispatchWebhookEvent(projectId, event, {
       ...options,
-      data: typeof data === 'object' && data !== null ? (data as Record<string, unknown>) : { data }
+      data:
+        typeof data === 'object' && data !== null ? (data as Record<string, unknown>) : { data },
     });
-  }
+  },
 };

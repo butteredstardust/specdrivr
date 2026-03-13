@@ -43,20 +43,25 @@ export function ProjectSwitcher() {
     fetchProjects();
   }, [activeProjectId]);
 
-  const activeProject = projects.find(p => p.id === activeProjectId);
+  const activeProject = projects.find((p) => p.id === activeProjectId);
 
   if (loading) {
-    return <div className="animate-pulse h-8 w-40 bg-[--bg-elevated] rounded" />;
+    return <div className="h-8 w-40 animate-pulse rounded bg-[--bg-elevated]" />;
   }
 
   if (projects.length === 0) {
     return (
       <div className="p-2">
         <PixelEmptyState
-          title="No projects" description="You don't have any projects yet."
+          title="No projects"
+          description="You don't have any projects yet."
           action={
-            <PxlKitButton label="Initialize →" tone="purple" icon={<PxlKitIcon icon={Check} size={16} />} onClick={() => router.push('/projects')}>
-              </PxlKitButton>
+            <PxlKitButton
+              label="Initialize →"
+              tone="purple"
+              icon={<PxlKitIcon icon={Check} size={16} />}
+              onClick={() => router.push('/projects')}
+            ></PxlKitButton>
           }
         />
       </div>
@@ -65,7 +70,7 @@ export function ProjectSwitcher() {
 
   // pxlkit fallback: Using custom label string prefix since PixelDropdown might not support ReactNode items
   const items = [
-    ...projects.map(p => ({
+    ...projects.map((p) => ({
       value: p.id,
       label: p.id === activeProjectId ? `✓ ${p.name}` : `  ${p.name}`,
     })),

@@ -7,7 +7,7 @@ import { twMerge } from 'tailwind-merge';
 export type TaskRowProps = {
   task: {
     id: string;
-    externalId: string;        // "T-042"
+    externalId: string; // "T-042"
     title: string;
     status: 'todo' | 'in_progress' | 'done' | 'blocked' | 'failed';
     estimatedMinutes?: number;
@@ -25,7 +25,11 @@ export type TaskRowProps = {
 
 const statusConfig = {
   todo: { char: '○', color: 'text-[--text-muted]', tone: 'neutral' as const },
-  in_progress: { char: '▶', color: 'text-[--accent-violet] animate-[blink_1s_infinite]', tone: 'purple' as const },
+  in_progress: {
+    char: '▶',
+    color: 'text-[--accent-violet] animate-[blink_1s_infinite]',
+    tone: 'purple' as const,
+  },
   blocked: { char: '⚠', color: 'text-[--phosphor-amber]', tone: 'gold' as const },
   done: { char: '✓', color: 'text-[--status-emerald]', tone: 'green' as const },
   failed: { char: '✕', color: 'text-[--status-red]', tone: 'red' as const },
@@ -88,32 +92,33 @@ export function TaskRow({
     >
       {/* Collapsed Row */}
       <div
-        className="flex items-center h-[36px] px-3 gap-3 cursor-pointer hover:bg-[--bg-elevated]"
+        className="flex h-[36px] cursor-pointer items-center gap-3 px-3 hover:bg-[--bg-elevated]"
         onClick={onToggle}
       >
-        <span className={twMerge('text-[13px] font-mono shrink-0 w-4 text-center', config.color)}>
+        <span className={twMerge('w-4 shrink-0 text-center font-mono text-[13px]', config.color)}>
           {config.char}
         </span>
 
-        <span className="font-mono text-xs text-[--phosphor-amber] bg-amber-950/30 rounded-sm px-1 shrink-0">
+        <span className="shrink-0 rounded-sm bg-amber-950/30 px-1 font-mono text-xs text-[--phosphor-amber]">
           {task.externalId}
         </span>
 
-        <span className="text-sm text-[--text-primary] truncate flex-1 font-medium">
+        <span className="flex-1 truncate text-sm font-medium text-[--text-primary]">
           {task.title}
         </span>
 
-        <PixelBadge tone={config.tone} >
-          {task.status.replace('_', ' ').toUpperCase()}
-        </PixelBadge>
+        <PixelBadge tone={config.tone}>{task.status.replace('_', ' ').toUpperCase()}</PixelBadge>
 
         {task.actualDurationMs && (
-          <span className="text-xs text-[--text-muted] font-mono shrink-0 w-16 text-right">
+          <span className="w-16 shrink-0 text-right font-mono text-xs text-[--text-muted]">
             {formatDuration(task.actualDurationMs)}
           </span>
         )}
 
-        <div className="shrink-0 ml-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
+        <div
+          className="ml-2 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100"
+          onClick={(e) => e.stopPropagation()}
+        >
           <PixelDropdown
             label="⋯"
             items={getMenuItems()}
@@ -127,8 +132,8 @@ export function TaskRow({
 
       {/* Expanded Content */}
       <PixelCollapsible defaultOpen={isExpanded} label="Details">
-        <div className="pl-10 pr-4 pb-4 pt-1 flex flex-col gap-2 text-sm text-[--text-secondary] border-t border-[--border-muted] mt-1">
-          <div className="flex font-mono text-xs text-[--text-muted] gap-4">
+        <div className="mt-1 flex flex-col gap-2 border-t border-[--border-muted] pt-1 pr-4 pb-4 pl-10 text-sm text-[--text-secondary]">
+          <div className="flex gap-4 font-mono text-xs text-[--text-muted]">
             {task.estimatedMinutes && <span>Estimated: {task.estimatedMinutes}m</span>}
             {task.actualDurationMs && <span>Actual: {formatDuration(task.actualDurationMs)}</span>}
             {task.dependencyTaskId && <span>Depends on: {task.dependencyTaskId}</span>}
@@ -139,14 +144,14 @@ export function TaskRow({
               e.stopPropagation();
               onOpenDrawer?.(task.id);
             }}
-            className="text-[--accent-violet] hover:text-[--accent-violet-dim] hover:underline self-start font-medium text-xs uppercase tracking-wider mt-1"
+            className="mt-1 self-start text-xs font-medium tracking-wider text-[--accent-violet] uppercase hover:text-[--accent-violet-dim] hover:underline"
           >
             Open Detail →
           </button>
 
           {task.status === 'blocked' && task.blockedReason && (
-            <div className="mt-2 p-2 bg-amber-950/20 border border-[--phosphor-amber]/20 rounded text-[--phosphor-amber] text-xs">
-              <span className="font-bold mr-2">Blocked reason:</span>
+            <div className="mt-2 rounded border border-[--phosphor-amber]/20 bg-amber-950/20 p-2 text-xs text-[--phosphor-amber]">
+              <span className="mr-2 font-bold">Blocked reason:</span>
               {task.blockedReason}
             </div>
           )}

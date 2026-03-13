@@ -8,10 +8,18 @@ const pnpm = isWindows ? 'pnpm.cmd' : 'pnpm';
 function runCommand(name, command) {
   console.log(`Running: ${name}...`);
   try {
-    const output = execSync(command, { stdio: 'pipe', encoding: 'utf-8', env: { ...process.env, CI: 'true' } });
+    const output = execSync(command, {
+      stdio: 'pipe',
+      encoding: 'utf-8',
+      env: { ...process.env, CI: 'true' },
+    });
     return { name, success: true, output };
   } catch (error) {
-    return { name, success: false, output: (error.stdout || '') + (error.stderr || '') || error.message };
+    return {
+      name,
+      success: false,
+      output: (error.stdout || '') + (error.stderr || '') || error.message,
+    };
   }
 }
 
@@ -19,13 +27,28 @@ async function main() {
   const results = [];
 
   // 1. Forbidden Artifacts
-  const forbiddenPatterns = [/fix-.*\.sh$/, /fix-.*\.cjs$/, /temp-.*\.ts$/, /.*\.tmp$/, /.*\.bak$/, /\.env\.local$/, /.*\.orig$/, /db_backup\.sql$/, /debug\.log$/];
+  const forbiddenPatterns = [
+    /fix-.*\.sh$/,
+    /fix-.*\.cjs$/,
+    /temp-.*\.ts$/,
+    /.*\.tmp$/,
+    /.*\.bak$/,
+    /\.env\.local$/,
+    /.*\.orig$/,
+    /db_backup\.sql$/,
+    /debug\.log$/,
+  ];
   const rootFiles = fs.readdirSync('.');
-  const foundForbidden = rootFiles.filter(file => forbiddenPatterns.some(pattern => pattern.test(file)));
+  const foundForbidden = rootFiles.filter((file) =>
+    forbiddenPatterns.some((pattern) => pattern.test(file))
+  );
   results.push({
     name: 'Forbidden Artifacts',
     success: foundForbidden.length === 0,
-    output: foundForbidden.length === 0 ? 'No forbidden artifacts found.' : `Found: ${foundForbidden.join(', ')}`
+    output:
+      foundForbidden.length === 0
+        ? 'No forbidden artifacts found.'
+        : `Found: ${foundForbidden.join(', ')}`,
   });
 
   // 2. Security Audit
@@ -53,10 +76,12 @@ async function main() {
   // Generate Report
   let report = `# Health Check Report - ${new Date().toLocaleString()}\n\n`;
   report += `## Summary\n`;
-  const allPassed = results.every(r => r.success);
-  report += allPassed ? `✅ **PASS**: All quality gates are green.\n\n` : `❌ **FAIL**: Some quality gates failed. See details below.\n\n`;
+  const allPassed = results.every((r) => r.success);
+  report += allPassed
+    ? `✅ **PASS**: All quality gates are green.\n\n`
+    : `❌ **FAIL**: Some quality gates failed. See details below.\n\n`;
 
-  results.forEach(res => {
+  results.forEach((res) => {
     report += `### ${res.success ? '✅' : '❌'} ${res.name}\n`;
     report += `\`\`\`text\n${res.output.trim()}\n\`\`\`\n\n`;
   });

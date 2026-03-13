@@ -14,23 +14,22 @@ import { z } from 'zod';
  * Task Status Enum
  * Represents the possible states a task can be in
  */
-export const taskStatusSchema = z.enum([
-  'todo',
-  'in_progress',
-  'done',
-  'blocked',
-  'failed',
-  'skipped'
-], {
-  errorMap: () => ({ message: "Status must be one of: 'todo', 'in_progress', 'done', 'blocked', 'failed', or 'skipped'" })
-});
+export const taskStatusSchema = z.enum(
+  ['todo', 'in_progress', 'done', 'blocked', 'failed', 'skipped'],
+  {
+    errorMap: () => ({
+      message:
+        "Status must be one of: 'todo', 'in_progress', 'done', 'blocked', 'failed', or 'skipped'",
+    }),
+  }
+);
 
 /**
  * Recommended Model Enum
  * AI models that can be used for task execution
  */
 export const recommendedModelSchema = z.enum(['sonnet', 'opus', 'haiku'], {
-  errorMap: () => ({ message: "Recommended model must be one of: 'sonnet', 'opus', or 'haiku'" })
+  errorMap: () => ({ message: "Recommended model must be one of: 'sonnet', 'opus', or 'haiku'" }),
 });
 
 /**
@@ -65,9 +64,7 @@ export const createTaskSchema = z.object({
     .optional()
     .nullable(),
 
-  status: taskStatusSchema
-    .optional()
-    .default('todo'),
+  status: taskStatusSchema.optional().default('todo'),
 
   priority: z
     .number({
@@ -104,9 +101,7 @@ export const createTaskSchema = z.object({
     .optional()
     .nullable(),
 
-  recommendedModel: recommendedModelSchema
-    .optional()
-    .default('sonnet'),
+  recommendedModel: recommendedModelSchema.optional().default('sonnet'),
 
   createdByUserId: z
     .string({
@@ -185,10 +180,9 @@ export const updateTaskSchema = z
       .optional()
       .nullable(),
   })
-  .refine(
-    (data) => Object.keys(data).length > 0,
-    { message: 'At least one field to update is required' }
-  );
+  .refine((data) => Object.keys(data).length > 0, {
+    message: 'At least one field to update is required',
+  });
 
 /**
  * Query parameters for GET /api/tasks
@@ -233,17 +227,15 @@ export const taskQuerySchema = z.object({
  * Specification Status Enum
  * Represents the possible states a specification can be in
  */
-export const specStatusSchema = z.enum([
-  'drafting',
-  'pending_plan',
-  'pending_approval',
-  'executing',
-  'completed',
-  'stalled',
-  'archived'
-], {
-  errorMap: () => ({ message: "Status must be one of: 'drafting', 'pending_plan', 'pending_approval', 'executing', 'completed', 'stalled', or 'archived'" })
-});
+export const specStatusSchema = z.enum(
+  ['drafting', 'pending_plan', 'pending_approval', 'executing', 'completed', 'stalled', 'archived'],
+  {
+    errorMap: () => ({
+      message:
+        "Status must be one of: 'drafting', 'pending_plan', 'pending_approval', 'executing', 'completed', 'stalled', or 'archived'",
+    }),
+  }
+);
 
 /**
  * Schema for creating a new specification
@@ -258,18 +250,20 @@ export const createSpecificationSchema = z.object({
 /**
  * Schema for updating an existing specification
  */
-export const updateSpecificationSchema = z.object({
-  id: z.number().int().positive('Specification ID is required'),
-  name: z.string().min(1, 'Name cannot be empty').max(255, 'Name too long').optional(),
-  status: specStatusSchema.optional(),
-}).refine(
-  (data) => {
-    const rest = { ...data } as Record<string, unknown>;
-    delete rest.id;
-    return Object.keys(rest).some(key => rest[key] !== undefined);
-  },
-  { message: 'At least one field to update is required' }
-);
+export const updateSpecificationSchema = z
+  .object({
+    id: z.number().int().positive('Specification ID is required'),
+    name: z.string().min(1, 'Name cannot be empty').max(255, 'Name too long').optional(),
+    status: specStatusSchema.optional(),
+  })
+  .refine(
+    (data) => {
+      const rest = { ...data } as Record<string, unknown>;
+      delete rest.id;
+      return Object.keys(rest).some((key) => rest[key] !== undefined);
+    },
+    { message: 'At least one field to update is required' }
+  );
 
 /**
  * Schema for creating a new specification version
@@ -297,16 +291,15 @@ export const specQuerySchema = z.object({
  * Plan Status Enum
  * Represents the possible states a plan can be in
  */
-export const planStatusSchema = z.enum([
-  'pending_approval',
-  'executing',
-  'rejected',
-  'abandoned',
-  'changes_requested',
-  'completed'
-], {
-  errorMap: () => ({ message: "Status must be one of: 'pending_approval', 'executing', 'rejected', 'abandoned', 'changes_requested', or 'completed'" })
-});
+export const planStatusSchema = z.enum(
+  ['pending_approval', 'executing', 'rejected', 'abandoned', 'changes_requested', 'completed'],
+  {
+    errorMap: () => ({
+      message:
+        "Status must be one of: 'pending_approval', 'executing', 'rejected', 'abandoned', 'changes_requested', or 'completed'",
+    }),
+  }
+);
 
 /**
  * Schema for approving a plan
@@ -329,7 +322,10 @@ export const rejectPlanSchema = z.object({
  */
 export const requestChangesSchema = z.object({
   id: z.number().int().positive('Plan ID is required'),
-  notes: z.string().min(1, 'Notes are required when requesting changes').max(2000, 'Notes too long'),
+  notes: z
+    .string()
+    .min(1, 'Notes are required when requesting changes')
+    .max(2000, 'Notes too long'),
 });
 
 /**
@@ -344,7 +340,10 @@ export const abandonPlanSchema = z.object({
  */
 export const unblockTaskSchema = z.object({
   id: z.number().int().positive('Task ID is required'),
-  humanContext: z.string().min(1, 'Context is required to unblock a task').max(5000, 'Context too long'),
+  humanContext: z
+    .string()
+    .min(1, 'Context is required to unblock a task')
+    .max(5000, 'Context too long'),
 });
 
 /**
@@ -360,13 +359,8 @@ export const overrideTaskStatusSchema = z.object({
  * User Role Enum
  * Represents the hierarchical roles in a project
  */
-export const userRoleSchema = z.enum([
-  'owner',
-  'admin',
-  'member',
-  'viewer'
-], {
-  errorMap: () => ({ message: "Role must be one of: 'owner', 'admin', 'member', or 'viewer'" })
+export const userRoleSchema = z.enum(['owner', 'admin', 'member', 'viewer'], {
+  errorMap: () => ({ message: "Role must be one of: 'owner', 'admin', 'member', or 'viewer'" }),
 });
 
 /**
@@ -446,23 +440,36 @@ export const updateWebhookSchema = z.object({
 });
 
 export const createProjectSchema = z.object({
-  name: z.string().min(1, 'Project name is required').max(255, 'Project name cannot exceed 255 characters'),
-  description: z.string().max(1000, 'Description cannot exceed 1000 characters').optional().nullable(),
+  name: z
+    .string()
+    .min(1, 'Project name is required')
+    .max(255, 'Project name cannot exceed 255 characters'),
+  description: z
+    .string()
+    .max(1000, 'Description cannot exceed 1000 characters')
+    .optional()
+    .nullable(),
   createdBy: z.string().optional().nullable(),
 });
 
 /**
  * Schema for updating an existing project
  */
-export const updateProjectSchema = z.object({
-  id: z.number().int().positive('Valid project ID is required'),
-  name: z.string().min(1, 'Project name cannot be empty').max(255, 'Project name too long').optional(),
-  description: z.string().max(1000, 'Description too long').optional().nullable(),
-}).refine(
-  (data) => {
-    const rest = { ...data } as Record<string, unknown>;
-    delete rest.id;
-    return Object.keys(rest).some(key => rest[key] !== undefined);
-  },
-  { message: 'At least one field to update is required' }
-);
+export const updateProjectSchema = z
+  .object({
+    id: z.number().int().positive('Valid project ID is required'),
+    name: z
+      .string()
+      .min(1, 'Project name cannot be empty')
+      .max(255, 'Project name too long')
+      .optional(),
+    description: z.string().max(1000, 'Description too long').optional().nullable(),
+  })
+  .refine(
+    (data) => {
+      const rest = { ...data } as Record<string, unknown>;
+      delete rest.id;
+      return Object.keys(rest).some((key) => rest[key] !== undefined);
+    },
+    { message: 'At least one field to update is required' }
+  );

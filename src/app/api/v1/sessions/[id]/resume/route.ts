@@ -3,13 +3,13 @@ import { auth } from '@/lib/auth';
 import { agentSessionRepository } from '@/repositories';
 import { handleApiError } from '@/lib/error-handler';
 
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session) {
-    return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+    return NextResponse.json(
+      { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+      { status: 401 }
+    );
   }
 
   const { id } = await params;

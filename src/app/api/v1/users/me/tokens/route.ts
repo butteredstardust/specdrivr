@@ -16,20 +16,24 @@ const createTokenSchema = z.object({
 export async function GET() {
   const session = await auth();
   if (!session) {
-    return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+    return NextResponse.json(
+      { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+      { status: 401 }
+    );
   }
 
   try {
-    const tokens = await db.select({
-      id: agentTokens.id,
-      name: agentTokens.name,
-      prefix: agentTokens.prefix,
-      lastUsedAt: agentTokens.lastUsedAt,
-      expiresAt: agentTokens.expiresAt,
-      createdAt: agentTokens.createdAt,
-    })
-    .from(agentTokens)
-    .where(eq(agentTokens.userId, session.user.id));
+    const tokens = await db
+      .select({
+        id: agentTokens.id,
+        name: agentTokens.name,
+        prefix: agentTokens.prefix,
+        lastUsedAt: agentTokens.lastUsedAt,
+        expiresAt: agentTokens.expiresAt,
+        createdAt: agentTokens.createdAt,
+      })
+      .from(agentTokens)
+      .where(eq(agentTokens.userId, session.user.id));
 
     return NextResponse.json({ data: tokens });
   } catch (error) {
@@ -40,7 +44,10 @@ export async function GET() {
 export async function POST(request: Request) {
   const session = await auth();
   if (!session) {
-    return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+    return NextResponse.json(
+      { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+      { status: 401 }
+    );
   }
 
   try {
@@ -51,20 +58,23 @@ export async function POST(request: Request) {
     const prefix = token.slice(0, 10);
     const tokenHash = await bcrypt.hash(token, 12);
 
-    const [inserted] = await db.insert(agentTokens).values({
-      userId: session.user.id,
-      projectId,
-      name,
-      tokenHash,
-      prefix,
-    }).returning();
+    const [inserted] = await db
+      .insert(agentTokens)
+      .values({
+        userId: session.user.id,
+        projectId,
+        name,
+        tokenHash,
+        prefix,
+      })
+      .returning();
 
-    return NextResponse.json({ 
-      data: { 
+    return NextResponse.json({
+      data: {
         id: inserted.id,
         name: inserted.name,
-        token // Return full token ONCE
-      } 
+        token, // Return full token ONCE
+      },
     });
   } catch (error) {
     return handleApiError(error);

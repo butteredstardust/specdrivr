@@ -1,5 +1,11 @@
 import { db } from '@/db';
-import { projects, projectMembers, agentConfig, auditLog, type ProjectSelect as Project } from '@/db/schema';
+import {
+  projects,
+  projectMembers,
+  agentConfig,
+  auditLog,
+  type ProjectSelect as Project,
+} from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, ValidationError, DatabaseError } from '@/lib/errors';
@@ -20,15 +26,17 @@ export { type ProjectSelect as Project } from '@/db/schema';
 
 export class ProjectRepository extends BaseRepository {
   async getAll(limit = 50, offset = 0): Promise<Project[]> {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.select().from(projects).limit(limit).offset(offset)
     );
 
-    return result.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()) as unknown as Project[];
+    return result.sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+    ) as unknown as Project[];
   }
 
   async getById(id: number): Promise<Project | null> {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.select().from(projects).where(eq(projects.id, id)).limit(1)
     );
 
@@ -36,7 +44,7 @@ export class ProjectRepository extends BaseRepository {
   }
 
   async getByUserId(userId: string, limit = 50, offset = 0): Promise<Project[]> {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.select().from(projects).where(eq(projects.createdBy, userId)).limit(limit).offset(offset)
     );
 
@@ -44,7 +52,7 @@ export class ProjectRepository extends BaseRepository {
   }
 
   async getActive(): Promise<Project[]> {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.select().from(projects).where(eq(projects.status, 'active'))
     );
 
@@ -52,7 +60,10 @@ export class ProjectRepository extends BaseRepository {
   }
 
   async create(data: CreateProjectData): Promise<Project> {
-    const slugBase = data.name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const slugBase = data.name
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-');
     const cleanData = {
       name: data.name.trim(),
       slug: `${slugBase}-${Date.now()}`,
@@ -73,7 +84,7 @@ export class ProjectRepository extends BaseRepository {
       throw new ValidationError('Project description cannot exceed 1000 characters');
     }
 
-    const project = await this.execQuery(async () => {
+    const project = await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         const [newProject] = await tx.insert(projects).values(cleanData).returning();
 
@@ -124,7 +135,11 @@ export class ProjectRepository extends BaseRepository {
 
     if (data.description !== undefined) {
       updateData.description = data.description;
-      if (updateData.description && typeof updateData.description === 'string' && updateData.description.length > 1000) {
+      if (
+        updateData.description &&
+        typeof updateData.description === 'string' &&
+        updateData.description.length > 1000
+      ) {
         throw new ValidationError('Project description cannot exceed 1000 characters');
       }
     }
@@ -137,13 +152,9 @@ export class ProjectRepository extends BaseRepository {
       throw new ValidationError('No fields to update');
     }
 
-    const [updatedProject] = await this.execQuery(() =>
-      db
-        .update(projects)
-        .set(updateData)
-        .where(eq(projects.id, id))
-        .returning()
-    ) as unknown as unknown[];
+    const [updatedProject] = (await this.executeQuery(() =>
+      db.update(projects).set(updateData).where(eq(projects.id, id)).returning()
+    )) as unknown as unknown[];
 
     if (!updatedProject) {
       throw new DatabaseError('Failed to update project');
@@ -159,9 +170,7 @@ export class ProjectRepository extends BaseRepository {
       throw new NotFoundError(`Project with ID ${id} not found`);
     }
 
-    await this.execQuery(() =>
-      db.delete(projects).where(eq(projects.id, id))
-    );
+    await this.executeQuery(() => db.delete(projects).where(eq(projects.id, id)));
   }
 
   async archive(id: number): Promise<Project> {
@@ -169,14 +178,18 @@ export class ProjectRepository extends BaseRepository {
   }
 
   async getAgentConfig(projectId: number) {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.select().from(agentConfig).where(eq(agentConfig.projectId, projectId)).limit(1)
     );
     return result[0] || null;
   }
 
-  async updateAgentConfig(projectId: number, data: Partial<import('@/db/schema').AgentConfigInsert>, actorId: string) {
-    return await this.execQuery(async () => {
+  async updateAgentConfig(
+    projectId: number,
+    data: Partial<import('@/db/schema').AgentConfigInsert>,
+    actorId: string
+  ) {
+    return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         const [updated] = await tx
           .update(agentConfig)
@@ -186,7 +199,10 @@ export class ProjectRepository extends BaseRepository {
 
         if (!updated) {
           // If for some reason config doesn't exist, create it
-          const [created] = await tx.insert(agentConfig).values({ ...data, projectId } as import('@/db/schema').AgentConfigInsert).returning();
+          const [created] = await tx
+            .insert(agentConfig)
+            .values({ ...data, projectId } as import('@/db/schema').AgentConfigInsert)
+            .returning();
           return created;
         }
 

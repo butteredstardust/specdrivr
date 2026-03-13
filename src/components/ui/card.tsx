@@ -51,7 +51,6 @@ export interface CardTitleProps extends React.HTMLAttributes<HTMLHeadingElement>
 
 export type CardDescriptionProps = React.HTMLAttributes<HTMLParagraphElement>;
 
-
 export interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Optional: Padding size
@@ -157,11 +156,11 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
           // Layout
           'relative rounded-lg',
           // Typography
-          'text-[var(--content-primary)]',
+          'text-[--text-primary]',
           // Variant background
           getVariantStyles(variant),
           // Border (optional, using design system)
-          bordered && 'border border-[var(--border-primary)]',
+          bordered && 'border border-[--border-default]',
           // Shadow (consistent with design system)
           'shadow-sm',
           // Hover effect (subtle, for interactive feel)
@@ -189,7 +188,7 @@ export const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
           // Layout
           'flex flex-col space-y-1.5 p-6 pb-4',
           // Optional divider
-          divider && 'border-b border-[var(--border-primary)]',
+          divider && 'border-b border-[--border-muted]',
           className
         )}
         {...props}
@@ -210,7 +209,7 @@ export const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
         ref={ref}
         className={cn(
           // Typography
-          'font-semibold leading-none tracking-tight',
+          'leading-none font-semibold tracking-tight',
           // Size based on heading level (matching design system)
           Component === 'h1' && 'text-2xl',
           Component === 'h2' && 'text-xl',
@@ -219,7 +218,7 @@ export const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
           Component === 'h5' && 'text-sm',
           Component === 'h6' && 'text-xs',
           // Color
-          'text-[var(--content-primary)]',
+          'text-[--text-primary]',
           className
         )}
         {...props}
@@ -233,24 +232,23 @@ CardTitle.displayName = 'CardTitle';
 // Card Description Component
 // ============================================
 
-export const CardDescription = React.forwardRef<
-  HTMLParagraphElement,
-  CardDescriptionProps
->(({ className, ...props }, ref) => {
-  return (
-    <p
-      ref={ref}
-      className={cn(
-        // Typography
-        'text-sm',
-        // Color (subtle content)
-        'text-[var(--content-secondary)]',
-        className
-      )}
-      {...props}
-    />
-  );
-});
+export const CardDescription = React.forwardRef<HTMLParagraphElement, CardDescriptionProps>(
+  ({ className, ...props }, ref) => {
+    return (
+      <p
+        ref={ref}
+        className={cn(
+          // Typography
+          'text-sm',
+          // Color (subtle content)
+          'text-[--text-secondary]',
+          className
+        )}
+        {...props}
+      />
+    );
+  }
+);
 CardDescription.displayName = 'CardDescription';
 
 // ============================================
@@ -336,7 +334,7 @@ CardFooter.displayName = 'CardFooter';
  *       </CardHeader>
  *       <CardContent>
  *         <div className="flex justify-between text-sm">
- *           <span className="text-[var(--content-secondary)]">Status:</span>
+ *           <span className="text-[--text-secondary]">Status:</span>
  *           <span>{project.status}</span>
  *         </div>
  *       </CardContent>
@@ -353,6 +351,7 @@ CardFooter.displayName = 'CardFooter';
  * EXAMPLE 2: Settings Card with Glass Variant
  *
  * import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+ * // Project Mandate: All forms must use 'react-hook-form' and 'zod' for validation.
  *
  * export function SettingsCard() {
  *   return (

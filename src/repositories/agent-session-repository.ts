@@ -1,23 +1,35 @@
 import { db } from '@/db';
-import { agentSessions, auditLog, type AgentSessionSelect as AgentSession, projects, specifications } from '@/db/schema';
+import {
+  agentSessions,
+  auditLog,
+  type AgentSessionSelect as AgentSession,
+  projects,
+  specifications,
+} from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, DatabaseError } from '@/lib/errors';
 import { dispatchWebhookEvent, type WebhookEventType } from '@/lib/webhooks';
 import { sendSlackNotification, type SlackEventType } from '@/lib/slack';
 import { env } from '@/lib/env';
+import { logger } from '@/lib/logger';
 
 export { type AgentSessionSelect as AgentSession } from '@/db/schema';
 
 export class AgentSessionRepository extends BaseRepository {
   async getAll(limit = 50, offset = 0): Promise<AgentSession[]> {
-    return await this.execQuery(() =>
-      db.select().from(agentSessions).limit(limit).offset(offset).orderBy(desc(agentSessions.startedAt))
+    return await this.executeQuery(() =>
+      db
+        .select()
+        .from(agentSessions)
+        .limit(limit)
+        .offset(offset)
+        .orderBy(desc(agentSessions.startedAt))
     );
   }
 
   async getById(id: number): Promise<AgentSession | null> {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.select().from(agentSessions).where(eq(agentSessions.id, id)).limit(1)
     );
 
@@ -25,26 +37,40 @@ export class AgentSessionRepository extends BaseRepository {
   }
 
   async getByProjectId(projectId: number, limit = 50, offset = 0): Promise<AgentSession[]> {
-    return await this.execQuery(() =>
-      db.select().from(agentSessions).where(eq(agentSessions.projectId, projectId)).limit(limit).offset(offset).orderBy(desc(agentSessions.startedAt))
+    return await this.executeQuery(() =>
+      db
+        .select()
+        .from(agentSessions)
+        .where(eq(agentSessions.projectId, projectId))
+        .limit(limit)
+        .offset(offset)
+        .orderBy(desc(agentSessions.startedAt))
     );
   }
 
   async getByStatus(status: import('@/db/schema').SessionStatus): Promise<AgentSession[]> {
-    return await this.execQuery(() =>
+    return await this.executeQuery(() =>
       db.select().from(agentSessions).where(eq(agentSessions.status, status))
     );
   }
 
-  async create(data: { projectId: number; specId?: number; planId?: number; startedBy?: string }): Promise<AgentSession> {
-    const [session] = await this.execQuery(() =>
-      db.insert(agentSessions).values({
-        projectId: data.projectId,
-        specId: data.specId || null,
-        planId: data.planId || null,
-        startedBy: data.startedBy || null,
-        status: 'running',
-      }).returning()
+  async create(data: {
+    projectId: number;
+    specId?: number;
+    planId?: number;
+    startedBy?: string;
+  }): Promise<AgentSession> {
+    const [session] = await this.executeQuery(() =>
+      db
+        .insert(agentSessions)
+        .values({
+          projectId: data.projectId,
+          specId: data.specId || null,
+          planId: data.planId || null,
+          startedBy: data.startedBy || null,
+          status: 'running',
+        })
+        .returning()
     );
 
     if (!session) {
@@ -55,7 +81,7 @@ export class AgentSessionRepository extends BaseRepository {
     void dispatchWebhookEvent(session.projectId, 'session.started', {
       sessionId: session.id,
       specId: session.specId || undefined,
-      data: {}
+      data: {},
     });
 
     // Trigger Slack notification
@@ -64,8 +90,12 @@ export class AgentSessionRepository extends BaseRepository {
     return session;
   }
 
-  async update(id: number, data: Partial<import('@/db/schema').AgentSessionInsert>, actorId?: string): Promise<AgentSession> {
-    return await this.execQuery(async () => {
+  async update(
+    id: number,
+    data: Partial<import('@/db/schema').AgentSessionInsert>,
+    actorId?: string
+  ): Promise<AgentSession> {
+    return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         const [updatedSession] = await tx
           .update(agentSessions)
@@ -98,13 +128,13 @@ export class AgentSessionRepository extends BaseRepository {
           failed: 'session.failed',
           cancelled: 'session.cancelled',
         };
-        
+
         const event = eventMap[data.status];
         if (event) {
           void dispatchWebhookEvent(updatedSession.projectId, event, {
             sessionId: updatedSession.id,
             specId: updatedSession.specId || undefined,
-            data: data.status === 'completed' ? { totalCostUsd: updatedSession.totalCostUsd } : {}
+            data: data.status === 'completed' ? { totalCostUsd: updatedSession.totalCostUsd } : {},
           });
 
           // Trigger Slack notification
@@ -124,19 +154,21 @@ export class AgentSessionRepository extends BaseRepository {
    */
   private async notifySlack(sessionId: number, event: SlackEventType): Promise<void> {
     try {
-      const [context] = await db
-        .select({
-          projectId: projects.id,
-          projectName: projects.name,
-          specId: specifications.id,
-          specName: specifications.name,
-          totalCostUsd: agentSessions.totalCostUsd,
-        })
-        .from(agentSessions)
-        .innerJoin(projects, eq(agentSessions.projectId, projects.id))
-        .leftJoin(specifications, eq(agentSessions.specId, specifications.id))
-        .where(eq(agentSessions.id, sessionId))
-        .limit(1);
+      const [context] = await this.executeQuery(() =>
+        db
+          .select({
+            projectId: projects.id,
+            projectName: projects.name,
+            specId: specifications.id,
+            specName: specifications.name,
+            totalCostUsd: agentSessions.totalCostUsd,
+          })
+          .from(agentSessions)
+          .innerJoin(projects, eq(agentSessions.projectId, projects.id))
+          .leftJoin(specifications, eq(agentSessions.specId, specifications.id))
+          .where(eq(agentSessions.id, sessionId))
+          .limit(1)
+      );
 
       if (!context) return;
 
@@ -151,12 +183,12 @@ export class AgentSessionRepository extends BaseRepository {
       });
     } catch (err) {
       // Never throw from notification helper
-      console.error('Failed to send session Slack notification', err);
+      logger.error({ err }, 'Failed to send session Slack notification');
     }
   }
 
   async delete(id: number): Promise<void> {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.delete(agentSessions).where(eq(agentSessions.id, id)).returning()
     );
 

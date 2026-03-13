@@ -6,7 +6,10 @@ import { handleApiError } from '@/lib/error-handler';
 export async function GET() {
   const session = await auth();
   if (!session) {
-    return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+    return NextResponse.json(
+      { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+      { status: 401 }
+    );
   }
 
   try {
@@ -21,7 +24,10 @@ export async function GET() {
 export async function PATCH(request: Request) {
   const session = await auth();
   if (!session) {
-    return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+    return NextResponse.json(
+      { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+      { status: 401 }
+    );
   }
 
   try {

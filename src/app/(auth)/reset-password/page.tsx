@@ -6,6 +6,21 @@ import { authClient } from '@/lib/auth-client';
 import { PixelPasswordInput, PixelButton, PixelAlert } from '@pxlkit/ui-kit';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { twMerge } from 'tailwind-merge';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+
+const resetPasswordSchema = z
+  .object({
+    password: z.string().min(12, 'Password must be at least 12 characters'),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
+
+type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;
 
 function getPasswordStrength(password: string): number {
   if (!password) return 0;
@@ -33,11 +48,11 @@ function PasswordStrengthIndicator({ password }: { password: string }) {
   };
 
   return (
-    <div className="flex gap-1 w-full h-1 mt-2">
-      <div className={twMerge("flex-1 rounded-full transition-colors", getSegmentClass(1))} />
-      <div className={twMerge("flex-1 rounded-full transition-colors", getSegmentClass(2))} />
-      <div className={twMerge("flex-1 rounded-full transition-colors", getSegmentClass(3))} />
-      <div className={twMerge("flex-1 rounded-full transition-colors", getSegmentClass(4))} />
+    <div className="mt-2 flex h-1 w-full gap-1">
+      <div className={twMerge('flex-1 rounded-full transition-colors', getSegmentClass(1))} />
+      <div className={twMerge('flex-1 rounded-full transition-colors', getSegmentClass(2))} />
+      <div className={twMerge('flex-1 rounded-full transition-colors', getSegmentClass(3))} />
+      <div className={twMerge('flex-1 rounded-full transition-colors', getSegmentClass(4))} />
     </div>
   );
 }
@@ -47,15 +62,29 @@ function ResetPasswordContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
 
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [isValidatingToken, setIsValidatingToken] = useState(true);
   const [isTokenValid, setIsTokenValid] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<ResetPasswordValues>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      password: '',
+      confirmPassword: '',
+    },
+  });
+
+  const passwordValue = watch('password');
+  const confirmPasswordValue = watch('confirmPassword');
 
   useEffect(() => {
     if (!token) {
@@ -72,21 +101,9 @@ function ResetPasswordContent() {
     setIsTokenValid(true);
   }, [token]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-
-    if (password.length < 12) {
-      setError("Password must be at least 12 characters.");
-      return;
-    }
-
+  const onResetPassword = async (data: ResetPasswordValues) => {
     if (!token) {
-      setError("Invalid or missing token.");
+      setError('Invalid or missing token.');
       return;
     }
 
@@ -95,7 +112,7 @@ function ResetPasswordContent() {
 
     try {
       const { error: resetError } = await authClient.resetPassword({
-        newPassword: password,
+        newPassword: data.password,
         token,
       });
 
@@ -124,13 +141,17 @@ function ResetPasswordContent() {
   if (!isTokenValid && !isSuccess) {
     return (
       <div className="w-full max-w-[400px]">
-        <div className="bg-[--bg-surface] border-[--border-default] p-8 flex flex-col items-center text-center">
+        <div className="flex flex-col items-center border-[--border-default] bg-[--bg-surface] p-8 text-center">
           <DaemonMascot size="lg" state="error" className="mb-4" />
-          <h1 className="font-bold text-lg mb-2 text-[--text-primary]">This link has expired.</h1>
-          <p className="text-sm text-[--text-muted] mb-8">
+          <h1 className="mb-2 text-lg font-bold text-[--text-primary]">This link has expired.</h1>
+          <p className="mb-8 text-sm text-[--text-muted]">
             Password reset links are valid for 1 hour.
           </p>
-          <PixelButton tone="neutral" className="w-full" onClick={() => router.push('/forgot-password')}>
+          <PixelButton
+            tone="neutral"
+            className="w-full"
+            onClick={() => router.push('/forgot-password')}
+          >
             Request a new link
           </PixelButton>
         </div>
@@ -141,9 +162,9 @@ function ResetPasswordContent() {
   if (isSuccess) {
     return (
       <div className="w-full max-w-[400px]">
-        <div className="bg-[--bg-surface] border-[--border-default] p-8 flex flex-col items-center text-center">
+        <div className="flex flex-col items-center border-[--border-default] bg-[--bg-surface] p-8 text-center">
           <DaemonMascot size="lg" state="success" className="mb-4" />
-          <h1 className="font-bold text-lg mb-8 text-[--text-primary]">Password updated.</h1>
+          <h1 className="mb-8 text-lg font-bold text-[--text-primary]">Password updated.</h1>
           <PixelButton tone="purple" className="w-full" onClick={() => router.push('/login')}>
             Sign in
           </PixelButton>
@@ -154,49 +175,61 @@ function ResetPasswordContent() {
 
   return (
     <div className="w-full max-w-[400px]">
-      <div className="bg-[--bg-surface] border-[--border-default] p-8 flex flex-col items-center">
-        <DaemonMascot size="lg" state={isLoading ? 'working' : error ? 'error' : 'idle'} className="mb-4" />
-        <h1 className="font-bold text-lg mb-8 text-[--text-primary] tracking-widest uppercase">RESET PASSWORD</h1>
+      <div className="flex flex-col items-center border-[--border-default] bg-[--bg-surface] p-8">
+        <DaemonMascot
+          size="lg"
+          state={isLoading ? 'working' : error ? 'error' : 'idle'}
+          className="mb-4"
+        />
+        <h1 className="mb-8 text-lg font-bold tracking-widest text-[--text-primary] uppercase">
+          RESET PASSWORD
+        </h1>
 
-        {error && (
-          <div className="w-full mb-6">
-            <PixelAlert tone="red" title="Error" message={error} />
-          </div>
-        )}
-
-        <form className="w-full flex flex-col gap-6" onSubmit={handleSubmit}>
+        <form className="flex w-full flex-col gap-6" onSubmit={handleSubmit(onResetPassword)}>
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="password" className="text-xs font-medium text-[--text-secondary]">NEW PASSWORD</label>
+            <label htmlFor="password" className="text-xs font-medium text-[--text-secondary]">
+              NEW PASSWORD
+            </label>
             <PixelPasswordInput
               id="password"
               tone="purple"
               autoFocus
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              {...register('password')}
+              onChange={(e) => setValue('password', e.target.value)}
+              value={passwordValue}
             />
-            <PasswordStrengthIndicator password={password} />
+            <PasswordStrengthIndicator password={passwordValue} />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="confirmPassword" className="text-xs font-medium text-[--text-secondary]">CONFIRM PASSWORD</label>
+            <label
+              htmlFor="confirmPassword"
+              className="text-xs font-medium text-[--text-secondary]"
+            >
+              CONFIRM PASSWORD
+            </label>
             <PixelPasswordInput
               id="confirmPassword"
               tone="purple"
-              required
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              {...register('confirmPassword')}
+              onChange={(e) => setValue('confirmPassword', e.target.value)}
+              value={confirmPasswordValue}
             />
           </div>
 
-          <PixelButton
-            type="submit"
-            tone="purple"
-            className="w-full mt-2"
-            loading={isLoading}
-          >
+          <PixelButton type="submit" tone="purple" className="mt-2 w-full" loading={isLoading}>
             Set New Password
           </PixelButton>
+
+          {(error || Object.keys(errors).length > 0) && (
+            <div className="mt-2 w-full">
+              <PixelAlert
+                tone="red"
+                title="Error"
+                message={error || Object.values(errors)[0]?.message || 'Invalid input.'}
+              />
+            </div>
+          )}
         </form>
       </div>
     </div>
@@ -205,12 +238,14 @@ function ResetPasswordContent() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={
-      <div className="w-full max-w-[400px] text-center text-[--text-muted]">
-        <DaemonMascot size="lg" state="working" className="mx-auto mb-4" />
-        Loading...
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="w-full max-w-[400px] text-center text-[--text-muted]">
+          <DaemonMascot size="lg" state="working" className="mx-auto mb-4" />
+          Loading...
+        </div>
+      }
+    >
       <ResetPasswordContent />
     </Suspense>
   );

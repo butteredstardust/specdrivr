@@ -1,5 +1,13 @@
 import { db } from '@/db';
-import { tasks, auditLog, plans, specifications, agentSessions, type TaskSelect as Task, type TaskStatus } from '@/db/schema';
+import {
+  tasks,
+  auditLog,
+  plans,
+  specifications,
+  agentSessions,
+  type TaskSelect as Task,
+  type TaskStatus,
+} from '@/db/schema';
 import * as schema from '@/db/schema';
 import { eq, desc, sql, and, asc } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
@@ -7,6 +15,7 @@ import { NotFoundError, ValidationError, DatabaseError } from '@/lib/errors';
 import { dispatchWebhookEvent, type WebhookEventType } from '@/lib/webhooks';
 import { sendSlackNotification } from '@/lib/slack';
 import { env } from '@/lib/env';
+import { logger } from '@/lib/logger';
 
 export interface CreateTaskData {
   externalId: string;
@@ -35,7 +44,7 @@ export interface UpdateTaskData {
 
 export class TaskRepository extends BaseRepository {
   async getAll(): Promise<Task[]> {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.select().from(tasks).orderBy(desc(tasks.createdAt))
     );
 
@@ -43,7 +52,7 @@ export class TaskRepository extends BaseRepository {
   }
 
   async getById(id: number): Promise<Task | null> {
-    const result = await this.execQuery(() =>
+    const result = await this.executeQuery(() =>
       db.select().from(tasks).where(eq(tasks.id, id)).limit(1)
     );
 
@@ -51,20 +60,15 @@ export class TaskRepository extends BaseRepository {
   }
 
   async getByPlanId(planId: number): Promise<Task[]> {
-    const result = await this.execQuery(() =>
-      db.select()
-        .from(tasks)
-        .where(eq(tasks.planId, planId))
-        .orderBy(desc(tasks.createdAt))
+    const result = await this.executeQuery(() =>
+      db.select().from(tasks).where(eq(tasks.planId, planId)).orderBy(desc(tasks.createdAt))
     );
 
     return result as Task[];
   }
 
-  async getByStatus(
-    status: TaskStatus
-  ): Promise<Task[]> {
-    const result = await this.execQuery(() =>
+  async getByStatus(status: TaskStatus): Promise<Task[]> {
+    const result = await this.executeQuery(() =>
       db.select().from(tasks).where(eq(tasks.status, status)).orderBy(desc(tasks.createdAt))
     );
 
@@ -91,7 +95,7 @@ export class TaskRepository extends BaseRepository {
       externalId: data.externalId,
       title: data.title,
       planId: data.planId ?? 1,
-      status: data.status ?? 'todo' as const,
+      status: data.status ?? ('todo' as const),
       estimatedMinutes: data.estimateHours ? data.estimateHours * 60 : null,
       recommendedModel: data.recommendedModel ?? 'sonnet',
       attemptCount: 0,
@@ -99,7 +103,7 @@ export class TaskRepository extends BaseRepository {
       expectedFiles: [],
     };
 
-    const [task] = (await this.execQuery(() =>
+    const [task] = (await this.executeQuery(() =>
       db.insert(tasks).values(cleanData).returning()
     )) as unknown as unknown[];
 
@@ -153,12 +157,8 @@ export class TaskRepository extends BaseRepository {
 
     updateData.updatedAt = new Date();
 
-    const [updatedTask] = (await this.execQuery(() =>
-      db
-        .update(tasks)
-        .set(updateData)
-        .where(eq(tasks.id, id))
-        .returning()
+    const [updatedTask] = (await this.executeQuery(() =>
+      db.update(tasks).set(updateData).where(eq(tasks.id, id)).returning()
     )) as unknown as unknown[];
 
     if (!updatedTask) {
@@ -172,23 +172,36 @@ export class TaskRepository extends BaseRepository {
       (async () => {
         try {
           const [plan] = await db.select().from(plans).where(eq(plans.id, t.planId)).limit(1);
-          const [spec] = await db.select({ pid: specifications.projectId }).from(specifications).where(eq(specifications.id, plan.specId)).limit(1);
-          const [session] = await db.select({ id: agentSessions.id }).from(agentSessions).where(eq(agentSessions.planId, plan.id)).orderBy(desc(agentSessions.startedAt)).limit(1);
-          
+          const [spec] = await db
+            .select({ pid: specifications.projectId })
+            .from(specifications)
+            .where(eq(specifications.id, plan.specId))
+            .limit(1);
+          const [session] = await db
+            .select({ id: agentSessions.id })
+            .from(agentSessions)
+            .where(eq(agentSessions.planId, plan.id))
+            .orderBy(desc(agentSessions.startedAt))
+            .limit(1);
+
           if (spec) {
-            void dispatchWebhookEvent(spec.pid, data.status === 'blocked' ? 'task.blocked' : 'task.done', {
-              taskId: t.id,
-              specId: plan.specId,
-              sessionId: session?.id,
-              data: data.status === 'blocked' ? { blockedReason: t.blockedReason } : {}
-            });
+            void dispatchWebhookEvent(
+              spec.pid,
+              data.status === 'blocked' ? 'task.blocked' : 'task.done',
+              {
+                taskId: t.id,
+                specId: plan.specId,
+                sessionId: session?.id,
+                data: data.status === 'blocked' ? { blockedReason: t.blockedReason } : {},
+              }
+            );
 
             if (data.status === 'blocked') {
               void this.notifySlackTaskBlocked(t.id);
             }
           }
         } catch (err) {
-          console.error(`Failed to dispatch task.${data.status} webhook`, err);
+          logger.error({ err }, `Failed to dispatch task.${data.status} webhook`);
         }
       })();
     }
@@ -203,9 +216,7 @@ export class TaskRepository extends BaseRepository {
       throw new NotFoundError(`Task with ID ${id} not found`);
     }
 
-    await this.execQuery(() =>
-      db.delete(tasks).where(eq(tasks.id, id))
-    );
+    await this.executeQuery(() => db.delete(tasks).where(eq(tasks.id, id)));
   }
 
   async markAsCompleted(id: number): Promise<Task> {
@@ -220,27 +231,30 @@ export class TaskRepository extends BaseRepository {
    * Respects dependencies: a task is only claimable if all tasks in its 'dependsOn' array are 'done'.
    */
   async claimNextTaskForProject(projectId: number): Promise<Task | null> {
-    return await this.execQuery(async () => {
+    return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         // 1. Find next task that is 'todo' AND has all dependencies met
         // We use a subquery to ensure NO tasks exist in the same plan that:
         // - have an externalId present in the current task's dependsOn array
         // - and are NOT 'done'
-        const [nextTask] = await tx.select({ task: tasks })
+        const [nextTask] = await tx
+          .select({ task: tasks })
           .from(tasks)
           .innerJoin(agentSessions, eq(tasks.planId, agentSessions.planId))
-          .where(and(
-            eq(agentSessions.projectId, projectId),
-            eq(agentSessions.status, 'running'),
-            eq(tasks.status, 'todo'),
-            // Dependency Gate:
-            sql`NOT EXISTS (
+          .where(
+            and(
+              eq(agentSessions.projectId, projectId),
+              eq(agentSessions.status, 'running'),
+              eq(tasks.status, 'todo'),
+              // Dependency Gate:
+              sql`NOT EXISTS (
               SELECT 1 FROM ${tasks} AS t2 
               WHERE t2.plan_id = ${tasks.planId} 
               AND t2.external_id = ANY(${tasks.dependsOn}) 
               AND t2.status != 'done'
             )`
-          ))
+            )
+          )
           .orderBy(asc(tasks.executionOrder))
           .limit(1)
           .for('update', { skipLocked: true });
@@ -248,11 +262,12 @@ export class TaskRepository extends BaseRepository {
         if (!nextTask) return null;
 
         // 2. Mark as in_progress
-        const [updatedTask] = await tx.update(tasks)
-          .set({ 
+        const [updatedTask] = await tx
+          .update(tasks)
+          .set({
             status: 'in_progress',
             startedAt: new Date(),
-            updatedAt: new Date() 
+            updatedAt: new Date(),
           })
           .where(eq(tasks.id, nextTask.task.id))
           .returning();
@@ -261,7 +276,7 @@ export class TaskRepository extends BaseRepository {
       });
     }).then((updatedTask) => {
       if (!updatedTask) return updatedTask;
-      
+
       const t = updatedTask as Task;
 
       // Trigger task.blocked if status is blocked
@@ -269,37 +284,55 @@ export class TaskRepository extends BaseRepository {
         (async () => {
           try {
             const [plan] = await db.select().from(plans).where(eq(plans.id, t.planId)).limit(1);
-            const [spec] = await db.select({ pid: specifications.projectId }).from(specifications).where(eq(specifications.id, plan.specId)).limit(1);
-            const [session] = await db.select({ id: agentSessions.id }).from(agentSessions).where(eq(agentSessions.planId, plan.id)).orderBy(desc(agentSessions.startedAt)).limit(1);
+            const [spec] = await db
+              .select({ pid: specifications.projectId })
+              .from(specifications)
+              .where(eq(specifications.id, plan.specId))
+              .limit(1);
+            const [session] = await db
+              .select({ id: agentSessions.id })
+              .from(agentSessions)
+              .where(eq(agentSessions.planId, plan.id))
+              .orderBy(desc(agentSessions.startedAt))
+              .limit(1);
             if (spec) {
               void dispatchWebhookEvent(spec.pid, 'task.blocked', {
                 taskId: t.id,
                 specId: plan.specId,
                 sessionId: session?.id,
-                data: { blockedReason: t.blockedReason }
+                data: { blockedReason: t.blockedReason },
               });
               void this.notifySlackTaskBlocked(t.id);
             }
           } catch (err) {
-            console.error('Failed to dispatch task.blocked webhook', err);
+            logger.error({ err }, 'Failed to dispatch task.blocked webhook');
           }
         })();
       } else if (t.status === 'done') {
         (async () => {
           try {
             const [plan] = await db.select().from(plans).where(eq(plans.id, t.planId)).limit(1);
-            const [spec] = await db.select({ pid: specifications.projectId }).from(specifications).where(eq(specifications.id, plan.specId)).limit(1);
-            const [session] = await db.select({ id: agentSessions.id }).from(agentSessions).where(eq(agentSessions.planId, plan.id)).orderBy(desc(agentSessions.startedAt)).limit(1);
+            const [spec] = await db
+              .select({ pid: specifications.projectId })
+              .from(specifications)
+              .where(eq(specifications.id, plan.specId))
+              .limit(1);
+            const [session] = await db
+              .select({ id: agentSessions.id })
+              .from(agentSessions)
+              .where(eq(agentSessions.planId, plan.id))
+              .orderBy(desc(agentSessions.startedAt))
+              .limit(1);
             if (spec) {
               void dispatchWebhookEvent(spec.pid, 'task.done', {
                 taskId: t.id,
                 specId: plan.specId,
                 sessionId: session?.id,
-                data: {}
+                data: {},
               });
             }
           } catch (err) {
-            console.error('Failed to dispatch task.done webhook', err);
+            logger.error({ err }, 'Failed to dispatch task.done webhook');
           }
         })();
       }
@@ -314,19 +347,26 @@ export class TaskRepository extends BaseRepository {
     const task = await this.getById(id);
     if (!task) throw new NotFoundError(`Task with ID ${id} not found`);
 
-    return await this.execQuery(async () => {
+    return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
-        const [updatedTask] = await tx.update(tasks)
-          .set({ 
-            status: 'todo', 
+        const [updatedTask] = await tx
+          .update(tasks)
+          .set({
+            status: 'todo',
             attemptCount: sql`${tasks.attemptCount} + 1`,
-            updatedAt: new Date() 
+            updatedAt: new Date(),
           })
           .where(eq(tasks.id, id))
           .returning();
 
         const plan = (await tx.select().from(plans).where(eq(plans.id, task.planId)).limit(1))[0];
-        const projectId = (await tx.select({ pid: specifications.projectId }).from(specifications).where(eq(specifications.id, plan.specId)).limit(1))[0].pid;
+        const projectId = (
+          await tx
+            .select({ pid: specifications.projectId })
+            .from(specifications)
+            .where(eq(specifications.id, plan.specId))
+            .limit(1)
+        )[0].pid;
 
         // 2. Audit log
         await tx.insert(auditLog).values({
@@ -343,17 +383,25 @@ export class TaskRepository extends BaseRepository {
       // Trigger task.retried webhook after transaction commits
       (async () => {
         try {
-          const plan = (await db.select().from(plans).where(eq(plans.id, updatedTask.planId)).limit(1))[0];
-          const spec = (await db.select({ pid: specifications.projectId }).from(specifications).where(eq(specifications.id, plan.specId)).limit(1))[0];
+          const plan = (
+            await db.select().from(plans).where(eq(plans.id, updatedTask.planId)).limit(1)
+          )[0];
+          const spec = (
+            await db
+              .select({ pid: specifications.projectId })
+              .from(specifications)
+              .where(eq(specifications.id, plan.specId))
+              .limit(1)
+          )[0];
           if (spec) {
             void dispatchWebhookEvent(spec.pid, 'task.retried', {
               taskId: updatedTask.id,
               specId: plan.specId,
-              data: { attemptCount: updatedTask.attemptCount }
+              data: { attemptCount: updatedTask.attemptCount },
             });
           }
         } catch (err) {
-          console.error('Failed to dispatch task.retried webhook', err);
+          logger.error({ err }, 'Failed to dispatch task.retried webhook');
         }
       })();
       return updatedTask;
@@ -367,20 +415,27 @@ export class TaskRepository extends BaseRepository {
     const task = await this.getById(id);
     if (!task) throw new NotFoundError(`Task with ID ${id} not found`);
 
-    return await this.execQuery(async () => {
+    return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
-        const [updatedTask] = await tx.update(tasks)
-          .set({ 
-            status: 'todo', 
+        const [updatedTask] = await tx
+          .update(tasks)
+          .set({
+            status: 'todo',
             humanContext,
             blockedReason: null,
-            updatedAt: new Date() 
+            updatedAt: new Date(),
           })
           .where(eq(tasks.id, id))
           .returning();
 
         const plan = (await tx.select().from(plans).where(eq(plans.id, task.planId)).limit(1))[0];
-        const projectId = (await tx.select({ pid: specifications.projectId }).from(specifications).where(eq(specifications.id, plan.specId)).limit(1))[0].pid;
+        const projectId = (
+          await tx
+            .select({ pid: specifications.projectId })
+            .from(specifications)
+            .where(eq(specifications.id, plan.specId))
+            .limit(1)
+        )[0].pid;
 
         // 2. Audit log
         await tx.insert(auditLog).values({
@@ -398,17 +453,25 @@ export class TaskRepository extends BaseRepository {
       // Trigger task.unblocked webhook after transaction commits
       (async () => {
         try {
-          const plan = (await db.select().from(plans).where(eq(plans.id, updatedTask.planId)).limit(1))[0];
-          const spec = (await db.select({ pid: specifications.projectId }).from(specifications).where(eq(specifications.id, plan.specId)).limit(1))[0];
+          const plan = (
+            await db.select().from(plans).where(eq(plans.id, updatedTask.planId)).limit(1)
+          )[0];
+          const spec = (
+            await db
+              .select({ pid: specifications.projectId })
+              .from(specifications)
+              .where(eq(specifications.id, plan.specId))
+              .limit(1)
+          )[0];
           if (spec) {
             void dispatchWebhookEvent(spec.pid, 'task.unblocked', {
               taskId: updatedTask.id,
               specId: plan.specId,
-              data: { humanContext }
+              data: { humanContext },
             });
           }
         } catch (err) {
-          console.error('Failed to dispatch task.unblocked webhook', err);
+          logger.error({ err }, 'Failed to dispatch task.unblocked webhook');
         }
       })();
       return updatedTask;
@@ -418,23 +481,35 @@ export class TaskRepository extends BaseRepository {
   /**
    * Manually overrides a task status.
    */
-  async overrideStatus(id: number, status: TaskStatus, userId: string, notes?: string | null): Promise<Task> {
+  async overrideStatus(
+    id: number,
+    status: TaskStatus,
+    userId: string,
+    notes?: string | null
+  ): Promise<Task> {
     const task = await this.getById(id);
     if (!task) throw new NotFoundError(`Task with ID ${id} not found`);
 
-    return await this.execQuery(async () => {
+    return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
-        const [updatedTask] = await tx.update(tasks)
-          .set({ 
-            status, 
+        const [updatedTask] = await tx
+          .update(tasks)
+          .set({
+            status,
             completedAt: status === 'done' ? new Date() : task.completedAt,
-            updatedAt: new Date() 
+            updatedAt: new Date(),
           })
           .where(eq(tasks.id, id))
           .returning();
 
         const plan = (await tx.select().from(plans).where(eq(plans.id, task.planId)).limit(1))[0];
-        const projectId = (await tx.select({ pid: specifications.projectId }).from(specifications).where(eq(specifications.id, plan.specId)).limit(1))[0].pid;
+        const projectId = (
+          await tx
+            .select({ pid: specifications.projectId })
+            .from(specifications)
+            .where(eq(specifications.id, plan.specId))
+            .limit(1)
+        )[0].pid;
 
         // 2. Audit log
         await tx.insert(auditLog).values({
@@ -452,22 +527,35 @@ export class TaskRepository extends BaseRepository {
       // Trigger appropriate task webhook after transaction commits
       (async () => {
         try {
-          const [plan] = await db.select().from(plans).where(eq(plans.id, updatedTask.planId)).limit(1);
-          const [spec] = await db.select({ pid: specifications.projectId }).from(specifications).where(eq(specifications.id, plan.specId)).limit(1);
-          const [session] = await db.select({ id: agentSessions.id }).from(agentSessions).where(eq(agentSessions.planId, plan.id)).orderBy(desc(agentSessions.startedAt)).limit(1);
-          
+          const [plan] = await db
+            .select()
+            .from(plans)
+            .where(eq(plans.id, updatedTask.planId))
+            .limit(1);
+          const [spec] = await db
+            .select({ pid: specifications.projectId })
+            .from(specifications)
+            .where(eq(specifications.id, plan.specId))
+            .limit(1);
+          const [session] = await db
+            .select({ id: agentSessions.id })
+            .from(agentSessions)
+            .where(eq(agentSessions.planId, plan.id))
+            .orderBy(desc(agentSessions.startedAt))
+            .limit(1);
+
           if (spec) {
             // Mapping for standard events, fallback to generic task.done or task.blocked if applicable
             let event: WebhookEventType | null = null;
             if (updatedTask.status === 'blocked') event = 'task.blocked';
             else if (updatedTask.status === 'done') event = 'task.done';
-            
+
             if (event) {
               void dispatchWebhookEvent(spec.pid, event, {
                 taskId: updatedTask.id,
                 specId: plan.specId,
                 sessionId: session?.id,
-                data: { from: task.status, to: updatedTask.status, notes }
+                data: { from: task.status, to: updatedTask.status, notes },
               });
 
               if (updatedTask.status === 'blocked') {
@@ -476,7 +564,7 @@ export class TaskRepository extends BaseRepository {
             }
           }
         } catch (err) {
-          console.error('Failed to dispatch task webhook in overrideStatus', err);
+          logger.error({ err }, 'Failed to dispatch task webhook in overrideStatus');
         }
       })();
       return updatedTask;
@@ -484,8 +572,9 @@ export class TaskRepository extends BaseRepository {
   }
 
   async getAttempts(taskId: number): Promise<(typeof schema.taskAttempts.$inferSelect)[]> {
-    return this.execQuery(() =>
-      db.select()
+    return this.executeQuery(() =>
+      db
+        .select()
         .from(schema.taskAttempts)
         .where(eq(schema.taskAttempts.taskId, taskId))
         .orderBy(desc(schema.taskAttempts.seq))
@@ -493,8 +582,9 @@ export class TaskRepository extends BaseRepository {
   }
 
   async getFileChanges(taskId: number): Promise<(typeof schema.fileChanges.$inferSelect)[]> {
-    return this.execQuery(() =>
-      db.select()
+    return this.executeQuery(() =>
+      db
+        .select()
         .from(schema.fileChanges)
         .where(eq(schema.fileChanges.taskId, taskId))
         .orderBy(desc(schema.fileChanges.createdAt))
@@ -535,7 +625,7 @@ export class TaskRepository extends BaseRepository {
         appUrl: env.NEXT_PUBLIC_APP_URL,
       });
     } catch (err) {
-      console.error('Failed to send task blocked Slack notification', err);
+      logger.error({ err }, 'Failed to send task blocked Slack notification');
     }
   }
 }
