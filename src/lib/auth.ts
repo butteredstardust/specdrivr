@@ -10,7 +10,7 @@ import { sendEmail } from './email';
 export const authInstance = betterAuth({
   baseURL: env.NEXTAUTH_URL,
   basePath: '/api/auth',
-  trustedOrigins: [env.NEXTAUTH_URL],
+  trustedOrigins: [env.NEXTAUTH_URL, 'http://localhost:3001'],
   database: drizzleAdapter(db, {
     provider: 'pg',
     schema: {

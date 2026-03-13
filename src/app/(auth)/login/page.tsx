@@ -165,7 +165,7 @@ function LoginContent() {
             <PixelButton
               tone="neutral"
               size="sm"
-              onClick={() => signInAs('admin@example.com')}
+              onClick={() => signInAs('alex@specdrivr.dev')}
               loading={isLoading}
             >
               Admin
@@ -173,7 +173,7 @@ function LoginContent() {
             <PixelButton
               tone="neutral"
               size="sm"
-              onClick={() => signInAs('test@example.com')}
+              onClick={() => signInAs('sam@specdrivr.dev')}
               loading={isLoading}
             >
               Member
@@ -181,7 +181,7 @@ function LoginContent() {
             <PixelButton
               tone="neutral"
               size="sm"
-              onClick={() => signInAs('viewer@example.com')}
+              onClick={() => signInAs('jordan@specdrivr.dev')}
               loading={isLoading}
             >
               Viewer
