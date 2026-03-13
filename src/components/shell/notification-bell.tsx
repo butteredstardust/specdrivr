@@ -16,8 +16,9 @@ export function NotificationBell() {
         const res = await fetch('/api/v1/notifications?unreadOnly=true&limit=1', { credentials: 'include' });
         if (res.ok) {
           const data = await res.json();
-          // Assuming { meta: { unreadCount: N } } or { count: N }
-          setUnreadCount(data?.meta?.unreadCount ?? data?.count ?? 0);
+          const notifications: Array<{ read: boolean }> = data.data ?? [];
+          const currentUnreadCount = notifications.filter(n => !n.read).length;
+          setUnreadCount(currentUnreadCount);
         }
       } catch {
         // fail silently for polling
