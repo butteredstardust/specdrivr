@@ -8,10 +8,18 @@ import { useRouter } from 'next/navigation';
 import { useShell } from '@/components/providers/shell-provider';
 import { NewProjectDialog } from '@/components/projects/new-project-dialog';
 
+interface Project {
+  id: string;
+  name: string;
+  repositoryUrl: string | null;
+  repositoryBranch: string | null;
+  status: 'active' | 'archived';
+}
+
 export default function ProjectsPage() {
   const router = useRouter();
   const { setActiveProjectId } = useShell();
-  const [projects, setProjects] = useState<unknown[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

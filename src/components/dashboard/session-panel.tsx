@@ -11,7 +11,7 @@ import {
   PixelTypewriter,
   PixelAlert,
 } from '@pxlkit/ui-kit';
-import { TerminalLog } from '@/components/ui/terminal-log';
+import { TerminalLog, LogLine } from '@/components/ui/terminal-log';
 import Link from 'next/link';
 
 // Helper type for polling response
@@ -137,7 +137,7 @@ export function SessionPanel() {
   }
 
   // TODO: Actual log polling will be separate or passed down, mocked here for layout
-  const logLines: unknown[] = [];
+  const logLines: LogLine[] = [];
 
   if (isCompleted) {
     return (
