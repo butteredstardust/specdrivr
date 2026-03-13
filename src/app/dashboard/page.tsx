@@ -1,33 +1,16 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
+  PixelButton,
+  PixelCard,
+  PixelBadge,
+  PixelProgress,
+  PixelAvatar,
+  PixelTable,
+  PixelDropdown,
+  PixelStatCard,
+  PixelDivider,
+} from '@pxlkit/ui-kit';
 import { projectRepository } from '@/repositories/project-repository';
 import { taskRepository } from '@/repositories/task-repository';
 import { specificationRepository } from '@/repositories/specification-repository';
@@ -44,7 +27,7 @@ import {
 export default async function DashboardPage() {
   const session = await auth();
 
-  if (!session) {
+  if (!session || !session.user) {
     redirect('/login');
   }
 
@@ -75,48 +58,32 @@ export default async function DashboardPage() {
             </div>
             <div className="flex items-center gap-4">
               {/* Theme toggle would go here */}
-              <Button variant="ghost" size="icon">
+              <PixelButton variant="ghost" size="sm">
                 <MoonIcon className="h-5 w-5" />
-              </Button>
+              </PixelButton>
 
-              {/* User menu */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                    <Avatar>
-                      <AvatarImage src={session.user.image || undefined} />
-                      <AvatarFallback>
-                        {session.user.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end">
-                  <DropdownMenuLabel>
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium">{session.user.name}</p>
-                      <p className="text-xs text-muted-foreground">{session.user.email}</p>
-                      <Badge variant="outline" className="self-start text-xs mt-1">
-                        {session.user.role}
-                      </Badge>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <PersonIcon className="mr-2 h-4 w-4" />
-                    Profile
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <GearIcon className="mr-2 h-4 w-4" />
-                    Settings
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <ExitIcon className="mr-2 h-4 w-4" />
-                    Sign out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {/* User menu using PixelDropdown */}
+              <PixelDropdown
+                label={session.user.name || 'User'}
+                icon={
+                  <PixelAvatar
+                    name={session.user.name || 'U'}
+                    src={session.user.image || undefined}
+                    size="sm"
+                  />
+                }
+                items={[
+                  { label: session.user.email || '', value: 'email', icon: <PersonIcon /> },
+                  { label: 'Profile', value: 'profile', icon: <PersonIcon /> },
+                  { label: 'Settings', value: 'settings', icon: <GearIcon /> },
+                  { label: 'Sign out', value: 'signout', icon: <ExitIcon /> },
+                ]}
+                onSelect={(val) => {
+                  if (val === 'signout') {
+                    // Sign out logic
+                  }
+                }}
+              />
             </div>
           </div>
         </div>
@@ -131,252 +98,168 @@ export default async function DashboardPage() {
 
         {/* Stat cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard
+          <PixelStatCard
             label="Active Projects"
-            value={activeProjects.length}
-            icon={FolderIcon}
-            description={`${allProjects.length} total projects`}
+            value={activeProjects.length.toString()}
+            icon={<FolderIcon />}
+            trend={`${allProjects.length} total`}
           />
-          <StatCard
+          <PixelStatCard
             label="Pending Tasks"
-            value={pendingTasks.length}
-            icon={ClockIcon}
-            description={`${inProgressTasks.length} in progress`}
-            variant="warning"
+            value={pendingTasks.length.toString()}
+            icon={<ClockIcon />}
+            tone="gold"
+            trend={`${inProgressTasks.length} in progress`}
           />
-          <StatCard
+          <PixelStatCard
             label="Blocked Items"
-            value={blockedTasks.length}
-            icon={ExclamationTriangleIcon}
-            description="Requires attention"
-            variant="danger"
+            value={blockedTasks.length.toString()}
+            icon={<ExclamationTriangleIcon />}
+            tone="red"
+            trend="Requires attention"
           />
-          <StatCard
+          <PixelStatCard
             label="Completed"
-            value={completedTasks.length}
-            icon={CheckCircledIcon}
-            description={`${completedPercentage}% complete`}
-            variant="success"
+            value={completedTasks.length.toString()}
+            icon={<CheckCircledIcon />}
+            tone="green"
+            trend={`${completedPercentage}% complete`}
           />
         </div>
 
         {/* Progress overview */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Overall Progress</CardTitle>
-            <CardDescription>Task completion across all projects</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Total Progress</span>
-                <span className="font-medium">{completedPercentage}%</span>
+        <PixelCard title="Overall Progress">
+          <div className="space-y-4">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Total Progress</span>
+              <span className="font-medium">{completedPercentage}%</span>
+            </div>
+            <PixelProgress value={completedPercentage} tone="purple" />
+            <div className="grid grid-cols-4 gap-4 pt-4 text-center">
+              <div>
+                <p className="text-2xl font-bold">{totalTasks.length}</p>
+                <p className="text-xs text-muted-foreground">Total</p>
               </div>
-              <Progress value={completedPercentage} className="h-3" />
-              <div className="grid grid-cols-4 gap-4 pt-4 text-center">
-                <div>
-                  <p className="text-2xl font-bold">{totalTasks.length}</p>
-                  <p className="text-xs text-muted-foreground">Total</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-green-600">{completedTasks.length}</p>
-                  <p className="text-xs text-muted-foreground">Done</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-blue-600">{inProgressTasks.length}</p>
-                  <p className="text-xs text-muted-foreground">In Progress</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-orange-600">{pendingTasks.length}</p>
-                  <p className="text-xs text-muted-foreground">Pending</p>
-                </div>
+              <div>
+                <p className="text-2xl font-bold text-green-600">{completedTasks.length}</p>
+                <p className="text-xs text-muted-foreground">Done</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-blue-600">{inProgressTasks.length}</p>
+                <p className="text-xs text-muted-foreground">In Progress</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-orange-600">{pendingTasks.length}</p>
+                <p className="text-xs text-muted-foreground">Pending</p>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </PixelCard>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Active Projects */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Active Projects</CardTitle>
-                  <CardDescription>Projects you&apos;re currently working on</CardDescription>
-                </div>
-                <Button size="sm" variant="outline">
-                  <PlusIcon className="mr-1 h-4 w-4" />
-                  New
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {activeProjects.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <FolderIcon className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p>No active projects</p>
-                  </div>
-                ) : (
-                  activeProjects.slice(0, 5).map((project) => (
-                    <div key={project.id} className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent transition-colors">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg flex items-center justify-center text-white font-medium" style={{ backgroundColor: project.avatarColor || '#7c5cfc' }}>
-                          {project.name.substring(0, 2).toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="font-medium">{project.name}</p>
-                          <p className="text-sm text-muted-foreground">{project.slug}</p>
-                        </div>
-                      </div>
-                      <Badge variant="outline">{project.status}</Badge>
-                    </div>
-                  ))
-                )}
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button variant="link" className="w-full" asChild>
+          <PixelCard
+            title="Active Projects"
+            footer={
+              <PixelButton variant="ghost" className="w-full">
                 <a href="/projects">View all projects</a>
-              </Button>
-            </CardFooter>
-          </Card>
+              </PixelButton>
+            }
+          >
+            <div className="space-y-4">
+              {activeProjects.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <FolderIcon className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <p>No active projects</p>
+                </div>
+              ) : (
+                activeProjects.slice(0, 5).map((project) => (
+                  <div key={project.id} className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-lg flex items-center justify-center text-white font-medium" style={{ backgroundColor: project.avatarColor || '#7c5cfc' }}>
+                        {project.name.substring(0, 2).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="font-medium">{project.name}</p>
+                        <p className="text-sm text-muted-foreground">{project.slug}</p>
+                      </div>
+                    </div>
+                    <PixelBadge tone="neutral">{project.status}</PixelBadge>
+                  </div>
+                ))
+              )}
+            </div>
+          </PixelCard>
 
           {/* Recent Specifications */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Recent Specifications</CardTitle>
-                  <CardDescription>Latest specs and plans</CardDescription>
-                </div>
-                <Button size="sm" variant="outline">
-                  <PlusIcon className="mr-1 h-4 w-4" />
-                  Create
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Specification</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentSpecs.slice(0, 5).map((spec) => (
-                    <TableRow key={spec.id}>
-                      <TableCell className="font-medium">{spec.name}</TableCell>
-                      <TableCell>
-                        <StatusBadge status={spec.status} />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-            <CardFooter>
-              <Button variant="link" className="w-full" asChild>
+          <PixelCard
+            title="Recent Specifications"
+            footer={
+              <PixelButton variant="ghost" className="w-full">
                 <a href="/specifications">View all specifications</a>
-              </Button>
-            </CardFooter>
-          </Card>
+              </PixelButton>
+            }
+          >
+            <PixelTable
+              columns={[
+                { key: 'name', header: 'Specification' },
+                { key: 'status', header: 'Status' }
+              ]}
+              data={recentSpecs.slice(0, 5).map((spec) => ({
+                id: spec.id,
+                name: spec.name,
+                status: <StatusBadge status={spec.status} />
+              }))}
+            />
+          </PixelCard>
         </div>
 
         {/* Blocked Tasks Alert */}
         {blockedTasks.length > 0 && (
-          <Card className="border-orange-200 dark:border-orange-900/50 bg-orange-50/50 dark:bg-orange-950/10">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-orange-900 dark:text-orange-100">
-                <ExclamationTriangleIcon className="h-5 w-5" />
-                Blocked Tasks Need Attention
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {blockedTasks.slice(0, 3).map((task) => (
-                  <div key={task.id} className="flex items-start justify-between p-3 rounded-lg border bg-card">
-                    <div className="flex items-start gap-3">
-                      <QuestionMarkCircledIcon className="h-5 w-5 text-orange-500 mt-0.5" />
-                      <div>
-                        <p className="font-medium">{task.title}</p>
-                        <p className="text-sm text-muted-foreground">{task.blockedReason}</p>
-                      </div>
+          <PixelCard
+            title="Blocked Tasks Need Attention"
+            icon={<ExclamationTriangleIcon />}
+          >
+            <div className="space-y-3">
+              {blockedTasks.slice(0, 3).map((task) => (
+                <div key={task.id} className="flex items-start justify-between p-3 rounded-lg border bg-card">
+                  <div className="flex items-start gap-3">
+                    <QuestionMarkCircledIcon className="h-5 w-5 text-orange-500 mt-0.5" />
+                    <div>
+                      <p className="font-medium">{task.title}</p>
+                      <p className="text-sm text-muted-foreground">{task.blockedReason}</p>
                     </div>
-                    <Badge variant="outline" className="text-orange-700 bg-orange-100 dark:text-orange-300 dark:bg-orange-900/50">
-                      Blocked
-                    </Badge>
                   </div>
-                ))}
+                  <PixelBadge tone="red">Blocked</PixelBadge>
+                </div>
+              ))}
+              <div className="pt-4">
+                <PixelButton variant="ghost" className="w-full">
+                  <a href="/tasks?status=blocked">View all blocked tasks</a>
+                </PixelButton>
               </div>
-            </CardContent>
-            <CardFooter>
-              <Button variant="outline" asChild>
-                <a href="/tasks?status=blocked">View all blocked tasks</a>
-              </Button>
-            </CardFooter>
-          </Card>
+            </div>
+          </PixelCard>
         )}
       </div>
     </div>
   );
 }
 
-function StatCard({
-  label,
-  value,
-  icon: Icon,
-  description,
-  variant = 'default',
-}: {
-  label: string;
-  value: number;
-  icon: React.ElementType;
-  description?: string;
-  variant?: 'default' | 'success' | 'warning' | 'danger';
-}) {
-  const variantStyles = {
-    default: 'text-primary',
-    success: 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/30',
-    warning: 'text-orange-600 bg-orange-100 dark:text-orange-400 dark:bg-orange-900/30',
-    danger: 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/30',
-  };
-
-  return (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${variantStyles[variant]}`}>
-              <Icon className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">{label}</p>
-              <p className="text-2xl font-bold mt-1">{value}</p>
-              {description && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
 function StatusBadge({ status }: { status: string }) {
-  const statusMap: Record<string, { variant: 'default' | 'secondary' | 'outline' | 'destructive'; label: string }> = {
-    drafting: { variant: 'outline', label: 'Drafting' },
-    pending_plan: { variant: 'secondary', label: 'Planning' },
-    pending_approval: { variant: 'outline', label: 'Review' },
-    executing: { variant: 'default', label: 'Executing' },
-    completed: { variant: 'outline', label: 'Completed' },
-    stalled: { variant: 'destructive', label: 'Stalled' },
-    archived: { variant: 'secondary', label: 'Archived' },
+  const statusMap: Record<string, { tone: 'neutral' | 'purple' | 'gold' | 'red' | 'green' | 'cyan'; label: string }> = {
+    drafting: { tone: 'neutral', label: 'Drafting' },
+    pending_plan: { tone: 'purple', label: 'Planning' },
+    pending_approval: { tone: 'neutral', label: 'Review' },
+    executing: { tone: 'cyan', label: 'Executing' },
+    completed: { tone: 'green', label: 'Completed' },
+    stalled: { tone: 'red', label: 'Stalled' },
+    archived: { tone: 'neutral', label: 'Archived' },
   };
 
-  const config = statusMap[status] || { variant: 'outline', label: status };
+  const config = statusMap[status] || { tone: 'neutral', label: status };
 
-  return <Badge variant={config.variant}>{config.label}</Badge>;
+  return <PixelBadge tone={config.tone}>{config.label}</PixelBadge>;
 }
 
 function MoonIcon({ className }: { className?: string }) {
