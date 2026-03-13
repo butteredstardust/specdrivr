@@ -1,10 +1,10 @@
-import { db } from "@/db";
-import { users, type UserSelect as User, type UserInsert } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import { BaseRepository } from "./base-repository";
-import { DatabaseError } from "@/lib/errors";
+import { db } from '@/db';
+import { users, type UserSelect as User, type UserInsert } from '@/db/schema';
+import { eq } from 'drizzle-orm';
+import { BaseRepository } from './base-repository';
+import { DatabaseError } from '@/lib/errors';
 
-export { type UserSelect as User } from "@/db/schema";
+export { type UserSelect as User } from '@/db/schema';
 
 export class UserRepository extends BaseRepository {
   async getById(id: string): Promise<User | null> {
@@ -28,7 +28,7 @@ export class UserRepository extends BaseRepository {
     });
 
     if (!user) {
-      throw new DatabaseError("Failed to create user");
+      throw new DatabaseError('Failed to create user');
     }
 
     return user as unknown as User;
@@ -45,16 +45,14 @@ export class UserRepository extends BaseRepository {
     });
 
     if (!updatedUser) {
-      throw new DatabaseError("Failed to update user");
+      throw new DatabaseError('Failed to update user');
     }
 
     return updatedUser as unknown as User;
   }
 
   async delete(id: string): Promise<void> {
-    await this.executeQuery(() =>
-      db.delete(users).where(eq(users.id, id))
-    );
+    await this.executeQuery(() => db.delete(users).where(eq(users.id, id)));
   }
 }
 

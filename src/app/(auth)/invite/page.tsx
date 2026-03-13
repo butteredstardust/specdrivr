@@ -29,11 +29,11 @@ function PasswordStrengthIndicator({ password }: { password: string }) {
   };
 
   return (
-    <div className="flex gap-1 w-full h-1 mt-2">
-      <div className={twMerge("flex-1 rounded-full transition-colors", getSegmentClass(1))} />
-      <div className={twMerge("flex-1 rounded-full transition-colors", getSegmentClass(2))} />
-      <div className={twMerge("flex-1 rounded-full transition-colors", getSegmentClass(3))} />
-      <div className={twMerge("flex-1 rounded-full transition-colors", getSegmentClass(4))} />
+    <div className="mt-2 flex h-1 w-full gap-1">
+      <div className={twMerge('flex-1 rounded-full transition-colors', getSegmentClass(1))} />
+      <div className={twMerge('flex-1 rounded-full transition-colors', getSegmentClass(2))} />
+      <div className={twMerge('flex-1 rounded-full transition-colors', getSegmentClass(3))} />
+      <div className={twMerge('flex-1 rounded-full transition-colors', getSegmentClass(4))} />
     </div>
   );
 }
@@ -46,7 +46,11 @@ function InviteContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [inviteData, setInviteData] = useState<{ email: string; projectName: string; isExistingUser: boolean } | null>(null);
+  const [inviteData, setInviteData] = useState<{
+    email: string;
+    projectName: string;
+    isExistingUser: boolean;
+  } | null>(null);
 
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
@@ -55,7 +59,7 @@ function InviteContent() {
 
   useEffect(() => {
     if (!token) {
-      setError("This invite link has expired.");
+      setError('This invite link has expired.');
       setIsLoading(false);
       return;
     }
@@ -66,12 +70,12 @@ function InviteContent() {
         const json = await res.json();
 
         if (!res.ok) {
-          setError("This invite link has expired.");
+          setError('This invite link has expired.');
         } else {
           setInviteData(json.data);
         }
       } catch {
-        setError("This invite link has expired.");
+        setError('This invite link has expired.');
       } finally {
         setIsLoading(false);
       }
@@ -83,11 +87,11 @@ function InviteContent() {
   const handleNewUserSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError('Passwords do not match.');
       return;
     }
     if (password.length < 12) {
-      setError("Password must be at least 12 characters.");
+      setError('Password must be at least 12 characters.');
       return;
     }
 
@@ -161,12 +165,12 @@ function InviteContent() {
   if (error || !inviteData) {
     return (
       <div className="w-full max-w-[400px]">
-        <div className="bg-[--bg-surface] border-[--border-default] p-8 flex flex-col items-center text-center">
+        <div className="flex flex-col items-center border-[--border-default] bg-[--bg-surface] p-8 text-center">
           <DaemonMascot size="lg" state="error" className="mb-4" />
-          <h1 className="font-bold text-lg mb-2 text-[--text-primary]">This invite link has expired.</h1>
-          <p className="text-sm text-[--text-muted] mb-8">
-            Ask a team admin to send a new invite.
-          </p>
+          <h1 className="mb-2 text-lg font-bold text-[--text-primary]">
+            This invite link has expired.
+          </h1>
+          <p className="mb-8 text-sm text-[--text-muted]">Ask a team admin to send a new invite.</p>
         </div>
       </div>
     );
@@ -175,20 +179,27 @@ function InviteContent() {
   if (inviteData.isExistingUser) {
     return (
       <div className="w-full max-w-[400px]">
-        <div className="bg-[--bg-surface] border-[--border-default] p-8 flex flex-col items-center text-center">
+        <div className="flex flex-col items-center border-[--border-default] bg-[--bg-surface] p-8 text-center">
           <DaemonMascot size="lg" state="idle" className="mb-4" />
-          <h1 className="font-bold text-lg mb-2 text-[--text-primary]">You've been invited to {inviteData.projectName}</h1>
-          <p className="text-sm text-[--text-muted] mb-8">
+          <h1 className="mb-2 text-lg font-bold text-[--text-primary]">
+            You've been invited to {inviteData.projectName}
+          </h1>
+          <p className="mb-8 text-sm text-[--text-muted]">
             Sign in to your existing account to accept.
           </p>
 
           {error && (
-            <div className="w-full mb-6">
+            <div className="mb-6 w-full">
               <PixelAlert tone="red" title="Error" message={error} />
             </div>
           )}
 
-          <PixelButton tone="purple" className="w-full" onClick={handleExistingUserSubmit} loading={isSubmitting}>
+          <PixelButton
+            tone="purple"
+            className="w-full"
+            onClick={handleExistingUserSubmit}
+            loading={isSubmitting}
+          >
             Sign In & Accept
           </PixelButton>
         </div>
@@ -198,30 +209,38 @@ function InviteContent() {
 
   return (
     <div className="w-full max-w-[400px]">
-      <div className="bg-[--bg-surface] border-[--border-default] p-8 flex flex-col items-center">
-        <DaemonMascot size="lg" state={isSubmitting ? 'working' : error ? 'error' : 'idle'} className="mb-4" />
-        <h1 className="font-bold text-lg mb-2 text-[--text-primary] text-center">You've been invited to {inviteData.projectName}</h1>
-        <p className="text-sm text-[--text-muted] mb-8 text-center">
+      <div className="flex flex-col items-center border-[--border-default] bg-[--bg-surface] p-8">
+        <DaemonMascot
+          size="lg"
+          state={isSubmitting ? 'working' : error ? 'error' : 'idle'}
+          className="mb-4"
+        />
+        <h1 className="mb-2 text-center text-lg font-bold text-[--text-primary]">
+          You've been invited to {inviteData.projectName}
+        </h1>
+        <p className="mb-8 text-center text-sm text-[--text-muted]">
           Create your account to get started.
         </p>
 
         {error && (
-          <div className="w-full mb-6">
+          <div className="mb-6 w-full">
             <PixelAlert tone="red" title="Error" message={error} />
           </div>
         )}
 
-        <form className="w-full flex flex-col gap-5" onSubmit={handleNewUserSubmit}>
+        <form className="flex w-full flex-col gap-5" onSubmit={handleNewUserSubmit}>
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-medium text-[--text-secondary]">EMAIL</label>
-            <div className="flex items-center gap-2 px-3 py-2 bg-[--bg-base] border border-[--border-muted] rounded text-sm text-[--text-muted]">
+            <div className="flex items-center gap-2 rounded border border-[--border-muted] bg-[--bg-base] px-3 py-2 text-sm text-[--text-muted]">
               <span className="flex-1 truncate">{inviteData.email}</span>
               <span>✓</span>
             </div>
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="name" className="text-xs font-medium text-[--text-secondary]">YOUR NAME</label>
+            <label htmlFor="name" className="text-xs font-medium text-[--text-secondary]">
+              YOUR NAME
+            </label>
             <PixelInput
               id="name"
               type="text"
@@ -234,7 +253,9 @@ function InviteContent() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="password" className="text-xs font-medium text-[--text-secondary]">PASSWORD</label>
+            <label htmlFor="password" className="text-xs font-medium text-[--text-secondary]">
+              PASSWORD
+            </label>
             <PixelPasswordInput
               id="password"
               tone="purple"
@@ -246,7 +267,12 @@ function InviteContent() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="confirmPassword" className="text-xs font-medium text-[--text-secondary]">CONFIRM PASSWORD</label>
+            <label
+              htmlFor="confirmPassword"
+              className="text-xs font-medium text-[--text-secondary]"
+            >
+              CONFIRM PASSWORD
+            </label>
             <PixelPasswordInput
               id="confirmPassword"
               tone="purple"
@@ -256,12 +282,7 @@ function InviteContent() {
             />
           </div>
 
-          <PixelButton
-            type="submit"
-            tone="purple"
-            className="w-full mt-2"
-            loading={isSubmitting}
-          >
+          <PixelButton type="submit" tone="purple" className="mt-2 w-full" loading={isSubmitting}>
             Accept Invite & Sign In
           </PixelButton>
         </form>
@@ -272,12 +293,14 @@ function InviteContent() {
 
 export default function InvitePage() {
   return (
-    <Suspense fallback={
-      <div className="w-full max-w-[400px] text-center text-[--text-muted]">
-        <DaemonMascot size="lg" state="working" className="mx-auto mb-4" />
-        Loading...
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="w-full max-w-[400px] text-center text-[--text-muted]">
+          <DaemonMascot size="lg" state="working" className="mx-auto mb-4" />
+          Loading...
+        </div>
+      }
+    >
       <InviteContent />
     </Suspense>
   );

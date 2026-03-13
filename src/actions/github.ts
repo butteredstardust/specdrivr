@@ -33,7 +33,10 @@ export async function createPullRequestAction(formData: FormData) {
 
   const { allowed } = await requireAdmin(session.user.id, result.data.projectId);
   if (!allowed) {
-    return { success: false, error: { code: 'FORBIDDEN', message: 'You must be a project admin to create pull requests' } };
+    return {
+      success: false,
+      error: { code: 'FORBIDDEN', message: 'You must be a project admin to create pull requests' },
+    };
   }
 
   try {
@@ -44,7 +47,13 @@ export async function createPullRequestAction(formData: FormData) {
 
     const ghConfig = await getGitHubConfig(project.id);
     if (!ghConfig) {
-      return { success: false, error: { code: 'PRECONDITION_FAILED', message: 'Project does not have GitHub integration configured' } };
+      return {
+        success: false,
+        error: {
+          code: 'PRECONDITION_FAILED',
+          message: 'Project does not have GitHub integration configured',
+        },
+      };
     }
 
     const agentSession = await agentSessionRepository.getById(result.data.sessionId);
@@ -58,7 +67,8 @@ export async function createPullRequestAction(formData: FormData) {
       title: result.data.title,
       head: result.data.headBranch,
       base: result.data.baseBranch,
-      body: result.data.body || `Automatically generated from Specdrivr session #${agentSession.id}`,
+      body:
+        result.data.body || `Automatically generated from Specdrivr session #${agentSession.id}`,
     });
 
     // 1. Audit log
@@ -80,15 +90,24 @@ export async function createPullRequestAction(formData: FormData) {
     });
 
     revalidatePath(`/sessions/${agentSession.id}`);
-    
+
     return { success: true, data: pr };
   } catch (error: unknown) {
-    logger.error({ 
-      error: error instanceof Error ? error.message : String(error), 
-      userId: session.user.id,
-      projectId: result.data.projectId
-    }, 'Failed to create PR');
-    
-    return { success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred while creating the PR' } };
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        userId: session.user.id,
+        projectId: result.data.projectId,
+      },
+      'Failed to create PR'
+    );
+
+    return {
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'An unexpected error occurred while creating the PR',
+      },
+    };
   }
 }

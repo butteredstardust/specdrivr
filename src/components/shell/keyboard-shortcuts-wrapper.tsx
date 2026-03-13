@@ -7,10 +7,5 @@ import { KeyboardShortcutsModal } from '@/components/shell/keyboard-shortcuts-mo
 export function KeyboardShortcutsWrapper() {
   const { shortcutsOpen, setShortcutsOpen } = useShell();
 
-  return (
-    <KeyboardShortcutsModal
-      open={shortcutsOpen}
-      onClose={() => setShortcutsOpen(false)}
-    />
-  );
+  return <KeyboardShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />;
 }

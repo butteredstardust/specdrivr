@@ -94,7 +94,7 @@ describe('Slack Service', () => {
         expect.objectContaining({
           method: 'POST',
           headers: expect.objectContaining({
-            'Authorization': 'Bearer xoxb-123',
+            Authorization: 'Bearer xoxb-123',
           }),
         })
       );

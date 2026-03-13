@@ -16,17 +16,14 @@ interface RateLimitResult {
  *   agent_endpoints  — 1000 req / 60s per token
  */
 const TIERS = {
-  auth:  { limit: 10,   windowMs: 60_000 },
-  api:   { limit: 100,  windowMs: 60_000 },
+  auth: { limit: 10, windowMs: 60_000 },
+  api: { limit: 100, windowMs: 60_000 },
   agent: { limit: 1000, windowMs: 60_000 },
 } as const;
 
 type Tier = keyof typeof TIERS;
 
-export async function checkRateLimit(
-  tier: Tier,
-  identifier: string
-): Promise<RateLimitResult> {
+export async function checkRateLimit(tier: Tier, identifier: string): Promise<RateLimitResult> {
   const { limit, windowMs } = TIERS[tier];
   const key = `rl:${tier}:${identifier}`;
   const now = Date.now();

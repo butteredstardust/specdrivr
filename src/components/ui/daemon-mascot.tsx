@@ -16,11 +16,7 @@ interface DaemonMascotProps {
   className?: string;
 }
 
-export function DaemonMascot({ 
-  state = 'idle', 
-  size = 'md', 
-  className 
-}: DaemonMascotProps) {
+export function DaemonMascot({ state = 'idle', size = 'md', className }: DaemonMascotProps) {
   const sizeMap = {
     sm: 'w-8 h-8',
     md: 'w-16 h-16',
@@ -40,15 +36,15 @@ export function DaemonMascot({
   };
 
   return (
-    <div 
+    <div
       className={cn(
-        'relative rounded-full flex items-center justify-center overflow-hidden transition-all duration-300',
+        'relative flex items-center justify-center overflow-hidden rounded-full transition-all duration-300',
         sizeMap[size],
         colorMap[state],
         className
       )}
     >
-      <div className="text-white font-bold select-none">
+      <div className="font-bold text-white select-none">
         {state === 'idle' && '◕◡◕'}
         {state === 'thinking' && '⊙_⊙'}
         {state === 'error' && 'ಠ_ಠ'}
@@ -56,9 +52,9 @@ export function DaemonMascot({
         {state === 'success' && '◉◡◉'}
         {state === 'working' && '⚙'}
       </div>
-      
+
       {state === 'thinking' && (
-        <div className="absolute inset-0 border-4 border-indigo-200 border-t-transparent rounded-full animate-spin" />
+        <div className="absolute inset-0 animate-spin rounded-full border-4 border-indigo-200 border-t-transparent" />
       )}
     </div>
   );

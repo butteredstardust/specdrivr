@@ -29,7 +29,10 @@ export async function getGitHubConfig(projectId: number): Promise<{
       .limit(1);
 
     if (!config || !config.token || !config.repo || !config.branch) {
-      logger.info({ projectId, tokenConfigured: !!config?.token }, 'GitHub config not found or incomplete');
+      logger.info(
+        { projectId, tokenConfigured: !!config?.token },
+        'GitHub config not found or incomplete'
+      );
       return null;
     }
 
@@ -125,9 +128,10 @@ export function getAgentCommitMessage(externalId: string, taskTitle: string): st
   }
 
   const remainingLength = maxLength - prefix.length;
-  const truncatedTitle = taskTitle.length > remainingLength
-    ? taskTitle.slice(0, Math.max(0, remainingLength - 3)) + '...'
-    : taskTitle;
+  const truncatedTitle =
+    taskTitle.length > remainingLength
+      ? taskTitle.slice(0, Math.max(0, remainingLength - 3)) + '...'
+      : taskTitle;
 
   return `${prefix}${truncatedTitle}`;
 }
@@ -162,7 +166,7 @@ export async function verifyRepoAccess(
     const parts = repo.split('/');
     const owner = parts[0];
     const name = parts[1];
-    
+
     if (!owner || !name) {
       return { valid: false, error: 'Invalid repository format. Use "owner/repo-name"' };
     }
@@ -173,7 +177,7 @@ export async function verifyRepoAccess(
     });
 
     const { data } = await octokit.repos.get({ owner, repo: name });
-    
+
     // Check permissions
     const canPush = data.permissions?.push;
     if (!canPush) {
@@ -182,7 +186,10 @@ export async function verifyRepoAccess(
 
     return { valid: true };
   } catch (error: unknown) {
-    return { valid: false, error: error instanceof Error ? error.message : 'Failed to verify repository access' };
+    return {
+      valid: false,
+      error: error instanceof Error ? error.message : 'Failed to verify repository access',
+    };
   }
 }
 
@@ -235,7 +242,10 @@ export async function createPullRequest(params: {
 
     return response.data;
   } catch (error: unknown) {
-    logger.error({ error: error instanceof Error ? error.message : String(error), repo: params.repo }, 'Failed to create GitHub PR');
+    logger.error(
+      { error: error instanceof Error ? error.message : String(error), repo: params.repo },
+      'Failed to create GitHub PR'
+    );
     throw error;
   }
 }

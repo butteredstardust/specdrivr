@@ -1,12 +1,6 @@
 import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
-import {
-  AppError,
-  DatabaseError,
-  NotFoundError,
-  ValidationError,
-  BusinessError,
-} from './errors';
+import { AppError, DatabaseError, NotFoundError, ValidationError, BusinessError } from './errors';
 
 export interface ErrorResponse {
   error: {
@@ -68,7 +62,7 @@ export function formatErrorResponse(error: unknown): ErrorResponse {
 
 export function handleApiError(error: unknown) {
   return NextResponse.json(formatErrorResponse(error), {
-    status: (error instanceof AppError) ? error.statusCode : 500,
+    status: error instanceof AppError ? error.statusCode : 500,
   });
 }
 

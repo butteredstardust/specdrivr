@@ -26,15 +26,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     clientLogger.error('Error caught by ErrorBoundary:', error, errorInfo);
-
-
   }
-
-
-
-
-
-
 
   render(): ReactNode {
     if (this.state.hasError) {
@@ -45,28 +37,30 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
       const errorMessage = this.state.error?.message || 'Something went wrong';
 
       return (
-        <div className="min-h-screen flex items-center justify-center bg-[--bg-base] p-4">
-          <div className="max-w-md w-full text-center">
+        <div className="flex min-h-screen items-center justify-center bg-[--bg-base] p-4">
+          <div className="w-full max-w-md text-center">
             <div className="mb-4">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[--status-red]/10 text-[--status-red]">
+              <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-[--status-red]/10 text-[--status-red]">
                 <span className="text-2xl font-bold">!</span>
               </div>
             </div>
-            <h1 className="text-2xl font-bold text-[--text-primary] mb-2">Something went wrong</h1>
-            <p className="text-[--text-muted] mb-4">We apologize for the inconvenience. Please try again later.</p>
-            <div className="bg-[--bg-surface] rounded-lg border p-4">
-              <p className="text-sm text-[--text-primary] break-words">{errorMessage}</p>
+            <h1 className="mb-2 text-2xl font-bold text-[--text-primary]">Something went wrong</h1>
+            <p className="mb-4 text-[--text-muted]">
+              We apologize for the inconvenience. Please try again later.
+            </p>
+            <div className="rounded-lg border bg-[--bg-surface] p-4">
+              <p className="text-sm break-words text-[--text-primary]">{errorMessage}</p>
             </div>
-            <div className="mt-6 flex gap-2 justify-center">
+            <div className="mt-6 flex justify-center gap-2">
               <button
                 onClick={() => this.setState({ hasError: false, error: undefined })}
-                className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-4 py-2"
               >
                 Try Again
               </button>
               <button
                 onClick={() => window.location.reload()}
-                className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80"
+                className="bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-md px-4 py-2"
               >
                 Reload Page
               </button>

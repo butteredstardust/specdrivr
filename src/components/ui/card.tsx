@@ -51,7 +51,6 @@ export interface CardTitleProps extends React.HTMLAttributes<HTMLHeadingElement>
 
 export type CardDescriptionProps = React.HTMLAttributes<HTMLParagraphElement>;
 
-
 export interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Optional: Padding size
@@ -210,7 +209,7 @@ export const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
         ref={ref}
         className={cn(
           // Typography
-          'font-semibold leading-none tracking-tight',
+          'leading-none font-semibold tracking-tight',
           // Size based on heading level (matching design system)
           Component === 'h1' && 'text-2xl',
           Component === 'h2' && 'text-xl',
@@ -233,24 +232,23 @@ CardTitle.displayName = 'CardTitle';
 // Card Description Component
 // ============================================
 
-export const CardDescription = React.forwardRef<
-  HTMLParagraphElement,
-  CardDescriptionProps
->(({ className, ...props }, ref) => {
-  return (
-    <p
-      ref={ref}
-      className={cn(
-        // Typography
-        'text-sm',
-        // Color (subtle content)
-        'text-[--text-secondary]',
-        className
-      )}
-      {...props}
-    />
-  );
-});
+export const CardDescription = React.forwardRef<HTMLParagraphElement, CardDescriptionProps>(
+  ({ className, ...props }, ref) => {
+    return (
+      <p
+        ref={ref}
+        className={cn(
+          // Typography
+          'text-sm',
+          // Color (subtle content)
+          'text-[--text-secondary]',
+          className
+        )}
+        {...props}
+      />
+    );
+  }
+);
 CardDescription.displayName = 'CardDescription';
 
 // ============================================

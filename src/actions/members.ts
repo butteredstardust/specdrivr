@@ -27,7 +27,10 @@ export async function inviteMemberAction(formData: FormData) {
 
   const { allowed } = await requireAdmin(session.user.id, result.data.projectId);
   if (!allowed) {
-    return { success: false, error: { code: 'FORBIDDEN', message: 'You must be a project admin to invite members' } };
+    return {
+      success: false,
+      error: { code: 'FORBIDDEN', message: 'You must be a project admin to invite members' },
+    };
   }
 
   try {
@@ -37,18 +40,24 @@ export async function inviteMemberAction(formData: FormData) {
       role: result.data.role as UserRole,
       invitedBy: session.user.id,
     });
-    
+
     revalidatePath(`/projects/${result.data.projectId}/settings`);
-    
+
     return { success: true, data: invite };
   } catch (error: unknown) {
-    logger.error({ 
-      error: error instanceof Error ? error.message : String(error), 
-      userId: session.user.id,
-      projectId: result.data.projectId
-    }, 'Failed to create invite');
-    
-    return { success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } };
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        userId: session.user.id,
+        projectId: result.data.projectId,
+      },
+      'Failed to create invite'
+    );
+
+    return {
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' },
+    };
   }
 }
 
@@ -71,7 +80,10 @@ export async function updateMemberRoleAction(formData: FormData) {
 
   const { allowed, role: actorRole } = await requireAdmin(session.user.id, result.data.projectId);
   if (!allowed || !actorRole) {
-    return { success: false, error: { code: 'FORBIDDEN', message: 'You must be a project admin to update roles' } };
+    return {
+      success: false,
+      error: { code: 'FORBIDDEN', message: 'You must be a project admin to update roles' },
+    };
   }
 
   // Get target user's current role
@@ -82,12 +94,18 @@ export async function updateMemberRoleAction(formData: FormData) {
 
   // Guard: Cannot demote an Owner unless you are the owner
   if (targetCurrentRole === 'owner' && actorRole !== 'owner') {
-    return { success: false, error: { code: 'FORBIDDEN', message: 'Only owners can modify other owners' } };
+    return {
+      success: false,
+      error: { code: 'FORBIDDEN', message: 'Only owners can modify other owners' },
+    };
   }
 
   // Guard: Cannot escalate a user to Owner unless you are the owner
   if (result.data.role === 'owner' && actorRole !== 'owner') {
-    return { success: false, error: { code: 'FORBIDDEN', message: 'Only owners can appoint new owners' } };
+    return {
+      success: false,
+      error: { code: 'FORBIDDEN', message: 'Only owners can appoint new owners' },
+    };
   }
 
   try {
@@ -97,18 +115,24 @@ export async function updateMemberRoleAction(formData: FormData) {
       result.data.role as UserRole,
       session.user.id
     );
-    
+
     revalidatePath(`/projects/${result.data.projectId}/settings`);
-    
+
     return { success: true, data: updated };
   } catch (error: unknown) {
-    logger.error({ 
-      error: error instanceof Error ? error.message : String(error), 
-      userId: session.user.id,
-      targetUserId: result.data.userId
-    }, 'Failed to update member role');
-    
-    return { success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } };
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        userId: session.user.id,
+        targetUserId: result.data.userId,
+      },
+      'Failed to update member role'
+    );
+
+    return {
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' },
+    };
   }
 }
 
@@ -122,31 +146,49 @@ export async function removeMemberAction(formData: FormData) {
   const userId = formData.get('userId') as string;
 
   if (isNaN(projectId) || !userId) {
-    return { success: false, error: { code: 'INVALID_INPUT', message: 'Project ID and User ID are required' } };
+    return {
+      success: false,
+      error: { code: 'INVALID_INPUT', message: 'Project ID and User ID are required' },
+    };
   }
 
   const { allowed } = await requireAdmin(session.user.id, projectId);
   if (!allowed) {
-    return { success: false, error: { code: 'FORBIDDEN', message: 'You must be a project admin to remove members' } };
+    return {
+      success: false,
+      error: { code: 'FORBIDDEN', message: 'You must be a project admin to remove members' },
+    };
   }
 
   if (userId === session.user.id) {
-    return { success: false, error: { code: 'FORBIDDEN', message: 'You cannot remove yourself from the project' } };
+    return {
+      success: false,
+      error: { code: 'FORBIDDEN', message: 'You cannot remove yourself from the project' },
+    };
   }
 
   try {
     await memberRepository.remove(projectId, userId, session.user.id);
-    
+
     revalidatePath(`/projects/${projectId}/settings`);
-    
+
     return { success: true };
   } catch (error: unknown) {
-    logger.error({ 
-      error: error instanceof Error ? error.message : String(error), 
-      userId: session.user.id,
-      targetUserId: userId
-    }, 'Failed to remove member');
-    
-    return { success: false, error: { code: 'INTERNAL_ERROR', message: error instanceof Error ? error.message : 'An unexpected error occurred' } };
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        userId: session.user.id,
+        targetUserId: userId,
+      },
+      'Failed to remove member'
+    );
+
+    return {
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: error instanceof Error ? error.message : 'An unexpected error occurred',
+      },
+    };
   }
 }

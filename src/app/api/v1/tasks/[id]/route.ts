@@ -21,14 +21,14 @@ const UpdateTaskSchema = z.object({
   humanContext: z.string().max(5000).optional(),
 });
 
-export async function GET(
-  _request: NextRequest,
-  { params }: RouteParams
-) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        { status: 401 }
+      );
     }
 
     const { id } = await params;
@@ -46,7 +46,10 @@ export async function GET(
     // RBAC: require member to view task
     const { allowed } = await requireMember(session.user.id, spec.projectId);
     if (!allowed) {
-      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'You do not have access to this project' } }, { status: 403 });
+      return NextResponse.json(
+        { error: { code: 'FORBIDDEN', message: 'You do not have access to this project' } },
+        { status: 403 }
+      );
     }
 
     return NextResponse.json({
@@ -57,14 +60,14 @@ export async function GET(
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: RouteParams
-) {
+export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        { status: 401 }
+      );
     }
 
     const { id } = await params;
@@ -82,7 +85,10 @@ export async function PATCH(
     // RBAC: require admin to override task
     const { allowed } = await requireAdmin(session.user.id, spec.projectId);
     if (!allowed) {
-      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'You must be a project admin to override tasks' } }, { status: 403 });
+      return NextResponse.json(
+        { error: { code: 'FORBIDDEN', message: 'You must be a project admin to override tasks' } },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();
@@ -104,14 +110,14 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  _request: NextRequest,
-  { params }: RouteParams
-) {
+export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        { status: 401 }
+      );
     }
 
     const { id } = await params;
@@ -129,7 +135,10 @@ export async function DELETE(
     // RBAC: require admin to delete task
     const { allowed } = await requireAdmin(session.user.id, spec.projectId);
     if (!allowed) {
-      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'You must be a project admin to delete tasks' } }, { status: 403 });
+      return NextResponse.json(
+        { error: { code: 'FORBIDDEN', message: 'You must be a project admin to delete tasks' } },
+        { status: 403 }
+      );
     }
 
     await taskRepository.delete(taskId);

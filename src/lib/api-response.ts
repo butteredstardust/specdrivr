@@ -29,10 +29,7 @@ export type ApiError = {
 
 export type ApiResponse<T> = ApiSuccess<T> | ApiError;
 
-export function apiSuccess<T>(
-  data: T,
-  status = 200
-): NextResponse<ApiSuccess<T>> {
+export function apiSuccess<T>(data: T, status = 200): NextResponse<ApiSuccess<T>> {
   return NextResponse.json({ success: true, data } as const, { status });
 }
 
@@ -42,8 +39,7 @@ export function apiError(
   status = 500,
   details?: unknown
 ): NextResponse<ApiError> {
-  return NextResponse.json(
-    { success: false, error: { code, message, details } } as const,
-    { status }
-  );
+  return NextResponse.json({ success: false, error: { code, message, details } } as const, {
+    status,
+  });
 }

@@ -13,11 +13,13 @@ export function NotificationBell() {
   useEffect(() => {
     async function checkNotifications() {
       try {
-        const res = await fetch('/api/v1/notifications?unreadOnly=true&limit=1', { credentials: 'include' });
+        const res = await fetch('/api/v1/notifications?unreadOnly=true&limit=1', {
+          credentials: 'include',
+        });
         if (res.ok) {
           const data = await res.json();
           const notifications: Array<{ read: boolean }> = data.data ?? [];
-          const currentUnreadCount = notifications.filter(n => !n.read).length;
+          const currentUnreadCount = notifications.filter((n) => !n.read).length;
           setUnreadCount(currentUnreadCount);
         }
       } catch {
@@ -34,7 +36,7 @@ export function NotificationBell() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="relative p-2 rounded-md hover:bg-[--bg-elevated] text-[--text-secondary] transition-colors"
+        className="relative rounded-md p-2 text-[--text-secondary] transition-colors hover:bg-[--bg-elevated]"
         aria-label="Notifications"
       >
         {unreadCount > 0 ? (
@@ -44,7 +46,7 @@ export function NotificationBell() {
         )}
 
         {unreadCount > 0 && (
-          <span className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2">
+          <span className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 transform">
             <PixelBadge tone="gold">{unreadCount > 9 ? '9+' : unreadCount}</PixelBadge>
           </span>
         )}
@@ -52,7 +54,8 @@ export function NotificationBell() {
 
       <PixelModal open={open} title="NOTIFICATIONS" onClose={() => setOpen(false)}>
         <PixelEmptyState
-          title="Nothing to report." description="You're all caught up."
+          title="Nothing to report."
+          description="You're all caught up."
           icon={<PxlKitIcon icon={Bell} size={20} />}
         />
       </PixelModal>

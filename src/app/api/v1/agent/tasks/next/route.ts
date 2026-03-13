@@ -11,7 +11,10 @@ import { logger } from '@/lib/logger';
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('Authorization');
   if (!authHeader?.startsWith('Bearer ')) {
-    return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Missing token' } }, { status: 401 });
+    return NextResponse.json(
+      { error: { code: 'UNAUTHORIZED', message: 'Missing token' } },
+      { status: 401 }
+    );
   }
 
   const token = authHeader.replace('Bearer ', '');
@@ -19,18 +22,31 @@ export async function GET(request: NextRequest) {
 
   try {
     // 1. Verify token
-    const [agentToken] = await db.select().from(agentTokens).where(eq(agentTokens.prefix, prefix)).limit(1);
+    const [agentToken] = await db
+      .select()
+      .from(agentTokens)
+      .where(eq(agentTokens.prefix, prefix))
+      .limit(1);
     if (!agentToken) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Invalid token' } }, { status: 401 });
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Invalid token' } },
+        { status: 401 }
+      );
     }
 
     const isValid = await bcrypt.compare(token, agentToken.tokenHash);
     if (!isValid) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Invalid token' } }, { status: 401 });
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Invalid token' } },
+        { status: 401 }
+      );
     }
 
     if (!agentToken.projectId) {
-      return NextResponse.json({ error: { code: 'INTERNAL_ERROR', message: 'Token not associated with a project' } }, { status: 500 });
+      return NextResponse.json(
+        { error: { code: 'INTERNAL_ERROR', message: 'Token not associated with a project' } },
+        { status: 500 }
+      );
     }
 
     // 2. Find and claim next task
@@ -54,17 +70,20 @@ export async function GET(request: NextRequest) {
       };
     }
 
-    logger.info({ 
-      projectId: agentToken.projectId, 
-      taskId: nextTask.id, 
-      githubConfigIncluded: !!githubConfig 
-    }, 'Agent claimed next task');
+    logger.info(
+      {
+        projectId: agentToken.projectId,
+        taskId: nextTask.id,
+        githubConfigIncluded: !!githubConfig,
+      },
+      'Agent claimed next task'
+    );
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       data: {
         ...nextTask,
-        githubConfig
-      }
+        githubConfig,
+      },
     });
   } catch (error) {
     return handleApiError(error);

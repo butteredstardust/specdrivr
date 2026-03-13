@@ -57,7 +57,7 @@ export class MemberRepository extends BaseRepository {
           .select()
           .from(projectMembers)
           .where(and(eq(projectMembers.projectId, projectId), eq(projectMembers.role, 'owner')));
-        
+
         const memberToRemove = await tx
           .select()
           .from(projectMembers)
@@ -83,21 +83,29 @@ export class MemberRepository extends BaseRepository {
     });
   }
 
-  async createInvite(data: { projectId: number; email: string; role: UserRole; invitedBy: string }) {
+  async createInvite(data: {
+    projectId: number;
+    email: string;
+    role: UserRole;
+    invitedBy: string;
+  }) {
     return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         const token = crypto.randomUUID();
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiry
 
-        const [invite] = await tx.insert(invites).values({
-          projectId: data.projectId,
-          email: data.email,
-          role: data.role,
-          invitedBy: data.invitedBy,
-          token,
-          expiresAt,
-        }).returning();
+        const [invite] = await tx
+          .insert(invites)
+          .values({
+            projectId: data.projectId,
+            email: data.email,
+            role: data.role,
+            invitedBy: data.invitedBy,
+            token,
+            expiresAt,
+          })
+          .returning();
 
         await tx.insert(auditLog).values({
           projectId: data.projectId,

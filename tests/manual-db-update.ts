@@ -10,8 +10,16 @@ const db = drizzle(queryClient, { schema });
 
 async function main() {
   console.log('Updating session for test...');
-  await db.update(agentSessions)
-    .set({ status: 'completed', startedAt: new Date(), totalPromptTokens: 1000, totalCompletionTokens: 500, totalCostUsd: 0.05, tasksExecuted: 10 })
+  await db
+    .update(agentSessions)
+    .set({
+      status: 'completed',
+      startedAt: new Date(),
+      totalPromptTokens: 1000,
+      totalCompletionTokens: 500,
+      totalCostUsd: 0.05,
+      tasksExecuted: 10,
+    })
     .where(eq(agentSessions.id, 1));
   console.log('Session updated.');
   process.exit(0);

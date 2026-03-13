@@ -1,5 +1,11 @@
 import { db } from '@/db';
-import { specifications, specVersions, plans, auditLog, type SpecificationSelect as Specification } from '@/db/schema';
+import {
+  specifications,
+  specVersions,
+  plans,
+  auditLog,
+  type SpecificationSelect as Specification,
+} from '@/db/schema';
 import { eq, and, ne, desc } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, DatabaseError } from '@/lib/errors';
@@ -9,9 +15,7 @@ export { type SpecificationSelect as Specification } from '@/db/schema';
 
 export class SpecificationRepository extends BaseRepository {
   async getAll(): Promise<Specification[]> {
-    return await this.executeQuery(() =>
-      db.select().from(specifications)
-    );
+    return await this.executeQuery(() => db.select().from(specifications));
   }
 
   async getById(id: number): Promise<Specification | null> {
@@ -28,14 +32,21 @@ export class SpecificationRepository extends BaseRepository {
     );
   }
 
-  async create(data: { projectId: number; name: string; createdBy?: string }): Promise<Specification> {
+  async create(data: {
+    projectId: number;
+    name: string;
+    createdBy?: string;
+  }): Promise<Specification> {
     const [spec] = await this.executeQuery(() =>
-      db.insert(specifications).values({
-        projectId: data.projectId,
-        name: data.name,
-        createdBy: data.createdBy || null,
-        status: 'drafting',
-      }).returning()
+      db
+        .insert(specifications)
+        .values({
+          projectId: data.projectId,
+          name: data.name,
+          createdBy: data.createdBy || null,
+          status: 'drafting',
+        })
+        .returning()
     );
 
     if (!spec) {
@@ -45,7 +56,7 @@ export class SpecificationRepository extends BaseRepository {
     // Trigger spec.created webhook
     void dispatchWebhookEvent(spec.projectId, 'spec.created', {
       specId: spec.id,
-      data: {}
+      data: {},
     });
 
     return spec;
@@ -54,36 +65,43 @@ export class SpecificationRepository extends BaseRepository {
   /**
    * Creates a specification and its initial version in a transaction.
    */
-  async createWithVersion(data: { 
-    projectId: number; 
-    name: string; 
-    markdownContent: string; 
+  async createWithVersion(data: {
+    projectId: number;
+    name: string;
+    markdownContent: string;
     createdBy: string;
   }): Promise<Specification> {
     return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         // 1. Create the specification
-        const [spec] = await tx.insert(specifications).values({
-          projectId: data.projectId,
-          name: data.name,
-          createdBy: data.createdBy,
-          status: 'drafting',
-        }).returning();
+        const [spec] = await tx
+          .insert(specifications)
+          .values({
+            projectId: data.projectId,
+            name: data.name,
+            createdBy: data.createdBy,
+            status: 'drafting',
+          })
+          .returning();
 
         if (!spec) throw new DatabaseError('Failed to create specification');
 
         // 2. Create the first version
-        const [version] = await tx.insert(specVersions).values({
-          specId: spec.id,
-          versionNumber: 1,
-          markdownContent: data.markdownContent,
-          createdBy: data.createdBy,
-        }).returning();
+        const [version] = await tx
+          .insert(specVersions)
+          .values({
+            specId: spec.id,
+            versionNumber: 1,
+            markdownContent: data.markdownContent,
+            createdBy: data.createdBy,
+          })
+          .returning();
 
         if (!version) throw new DatabaseError('Failed to create initial specification version');
 
         // 3. Link back to current version
-        const [updatedSpec] = await tx.update(specifications)
+        const [updatedSpec] = await tx
+          .update(specifications)
           .set({ currentVersionId: version.id })
           .where(eq(specifications.id, spec.id))
           .returning();
@@ -104,7 +122,7 @@ export class SpecificationRepository extends BaseRepository {
       // Trigger spec.created webhook after transaction commits
       void dispatchWebhookEvent(updatedSpec.projectId, 'spec.created', {
         specId: updatedSpec.id,
-        data: {}
+        data: {},
       });
       return updatedSpec;
     });
@@ -124,38 +142,46 @@ export class SpecificationRepository extends BaseRepository {
     return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         // 1. Get latest version number
-        const latestVersion = await tx.select({ num: specVersions.versionNumber })
+        const latestVersion = await tx
+          .select({ num: specVersions.versionNumber })
           .from(specVersions)
           .where(eq(specVersions.specId, data.specId))
           .orderBy(desc(specVersions.versionNumber))
           .limit(1);
-        
+
         const nextVersionNumber = latestVersion.length > 0 ? latestVersion[0].num + 1 : 1;
 
         // 2. Create the new version
-        const [version] = await tx.insert(specVersions).values({
-          specId: data.specId,
-          versionNumber: nextVersionNumber,
-          markdownContent: data.markdownContent,
-          createdBy: data.createdBy,
-        }).returning();
+        const [version] = await tx
+          .insert(specVersions)
+          .values({
+            specId: data.specId,
+            versionNumber: nextVersionNumber,
+            markdownContent: data.markdownContent,
+            createdBy: data.createdBy,
+          })
+          .returning();
 
         if (!version) throw new DatabaseError('Failed to create new specification version');
 
         // 3. Abandon any non-complete plans for this specification
         // Non-complete = anything that isn't 'completed', 'rejected', or 'abandoned' already
-        await tx.update(plans)
+        await tx
+          .update(plans)
           .set({ status: 'abandoned' })
-          .where(and(
-            eq(plans.specId, data.specId),
-            ne(plans.status, 'completed'),
-            ne(plans.status, 'rejected'),
-            ne(plans.status, 'abandoned')
-          ));
+          .where(
+            and(
+              eq(plans.specId, data.specId),
+              ne(plans.status, 'completed'),
+              ne(plans.status, 'rejected'),
+              ne(plans.status, 'abandoned')
+            )
+          );
 
         // 4. Update the specification
-        const [updatedSpec] = await tx.update(specifications)
-          .set({ 
+        const [updatedSpec] = await tx
+          .update(specifications)
+          .set({
             currentVersionId: version.id,
             status: 'drafting', // Reset status when edited
             updatedAt: new Date(),
@@ -179,7 +205,7 @@ export class SpecificationRepository extends BaseRepository {
       // Trigger spec.updated webhook after transaction commits
       void dispatchWebhookEvent(updatedSpec.projectId, 'spec.updated', {
         specId: updatedSpec.id,
-        data: {}
+        data: {},
       });
       return updatedSpec;
     });
@@ -201,7 +227,7 @@ export class SpecificationRepository extends BaseRepository {
     // Trigger spec.updated webhook
     void dispatchWebhookEvent(updatedSpec.projectId, 'spec.updated', {
       specId: updatedSpec.id,
-      data: {}
+      data: {},
     });
 
     return updatedSpec;
