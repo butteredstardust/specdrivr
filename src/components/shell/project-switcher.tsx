@@ -41,7 +41,7 @@ export function ProjectSwitcher() {
       }
     }
     fetchProjects();
-  }, [activeProjectId, setActiveProjectId]);
+  }, [activeProjectId]);
 
   const activeProject = projects.find(p => p.id === activeProjectId);
 
