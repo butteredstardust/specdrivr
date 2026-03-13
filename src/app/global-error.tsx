@@ -1,5 +1,7 @@
 'use client';
 
+import { PixelButton } from '@pxlkit/ui-kit';
+
 interface GlobalErrorProps {
   error: Error & { digest?: string };
   reset: () => void;
@@ -31,18 +33,12 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
               </div>
             )}
             <div className="flex justify-center gap-2">
-              <button
-                onClick={reset}
-                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-4 py-2"
-              >
+              <PixelButton onClick={reset} tone="purple" size="md">
                 Try to Restore
-              </button>
-              <button
-                onClick={() => (window.location.href = '/')}
-                className="bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-md px-4 py-2"
-              >
+              </PixelButton>
+              <PixelButton onClick={() => (window.location.href = '/')} tone="neutral" size="md">
                 Go to Home
-              </button>
+              </PixelButton>
             </div>
           </div>
         </div>
