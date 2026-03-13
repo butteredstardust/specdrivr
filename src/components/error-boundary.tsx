@@ -1,5 +1,5 @@
-import { clientLogger } from '@/lib/logger-client';
 'use client';
+import { clientLogger } from '@/lib/logger-client';
 
 import React, { Component, type ReactNode } from 'react';
 import type { ErrorInfo } from 'react';
