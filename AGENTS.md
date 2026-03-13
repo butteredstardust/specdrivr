@@ -516,3 +516,8 @@ Specdrivr enforces strict type safety, security, and performance standards. Alwa
 Remember: your changes will be reviewed by humans and automated systems. Follow these guidelines precisely.
 
 <!-- Keep this file under 500 lines total -->
+
+- **Wrong component library:** Using shadcn Button/Input/Badge when pxlkit PixelButton/PixelInput/PixelBadge exists. Always check pxlkit first. Add `// pxlkit fallback: reason` comment when shadcn is used deliberately.
+- **Wrong design system tokens:** Using bg-background, text-foreground, bg-destructive — these shadcn tokens don't exist in this project. Use bg-[--bg-base], text-[--text-primary], bg-[--status-red] etc.
+- **Missing credentials on fetch:** All client fetches to authenticated routes require `{ credentials: 'include' }`.
+- **Direct console calls:** Never use console.log/error/warn in feature code. Use clientLogger (client) or logger (server).
