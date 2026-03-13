@@ -176,7 +176,7 @@ export default async function DashboardPage() {
                 activeProjects.slice(0, 5).map((project) => (
                   <div key={project.id} className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent transition-colors">
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-lg flex items-center justify-center text-white font-medium" style={{ backgroundColor: project.avatarColor || '#7c5cfc' }}>
+                      <div className="h-10 w-10 rounded-lg flex items-center justify-center text-white font-medium" style={{ backgroundColor: project.avatarColor || 'var(--brand-primary)' }}>
                         {project.name.substring(0, 2).toUpperCase()}
                       </div>
                       <div>
