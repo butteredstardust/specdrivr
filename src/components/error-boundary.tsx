@@ -1,5 +1,6 @@
 'use client';
 import { clientLogger } from '@/lib/logger-client';
+import { PixelButton } from '@pxlkit/ui-kit';
 
 import React, { Component, type ReactNode } from 'react';
 import type { ErrorInfo } from 'react';
@@ -52,18 +53,16 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
               <p className="text-sm break-words text-[--text-primary]">{errorMessage}</p>
             </div>
             <div className="mt-6 flex justify-center gap-2">
-              <button
+              <PixelButton
                 onClick={() => this.setState({ hasError: false, error: undefined })}
-                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-4 py-2"
+                tone="purple"
+                size="md"
               >
                 Try Again
-              </button>
-              <button
-                onClick={() => window.location.reload()}
-                className="bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-md px-4 py-2"
-              >
+              </PixelButton>
+              <PixelButton onClick={() => window.location.reload()} tone="neutral" size="md">
                 Reload Page
-              </button>
+              </PixelButton>
             </div>
           </div>
         </div>

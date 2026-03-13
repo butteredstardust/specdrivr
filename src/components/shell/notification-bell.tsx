@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { AnimatedPxlKitIcon, PxlKitIcon } from '@pxlkit/core';
 import { ShakingBell } from '@pxlkit/ui';
 import { Bell } from '@pxlkit/feedback';
-import { PixelBadge, PixelModal, PixelEmptyState } from '@pxlkit/ui-kit';
+import { PixelBadge, PixelModal, PixelEmptyState, PixelButton } from '@pxlkit/ui-kit';
 
 export function NotificationBell() {
   const [unreadCount, setUnreadCount] = useState(0);
@@ -34,9 +34,10 @@ export function NotificationBell() {
 
   return (
     <>
-      <button
+      <PixelButton
+        variant="ghost"
         onClick={() => setOpen(true)}
-        className="relative rounded-md p-2 text-[--text-secondary] transition-colors hover:bg-[--bg-elevated]"
+        className="relative h-10 w-10 p-2 text-[--text-secondary] transition-colors hover:bg-[--bg-elevated]"
         aria-label="Notifications"
       >
         {unreadCount > 0 ? (
@@ -50,7 +51,7 @@ export function NotificationBell() {
             <PixelBadge tone="gold">{unreadCount > 9 ? '9+' : unreadCount}</PixelBadge>
           </span>
         )}
-      </button>
+      </PixelButton>
 
       <PixelModal open={open} title="NOTIFICATIONS" onClose={() => setOpen(false)}>
         <PixelEmptyState
