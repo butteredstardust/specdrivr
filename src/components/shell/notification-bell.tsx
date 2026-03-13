@@ -13,7 +13,7 @@ export function NotificationBell() {
   useEffect(() => {
     async function checkNotifications() {
       try {
-        const res = await fetch('/api/v1/notifications?unreadOnly=true&limit=1');
+        const res = await fetch('/api/v1/notifications?unreadOnly=true&limit=1', { credentials: 'include' });
         if (res.ok) {
           const data = await res.json();
           // Assuming { meta: { unreadCount: N } } or { count: N }

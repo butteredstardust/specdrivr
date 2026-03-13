@@ -34,7 +34,7 @@ export function ShellProvider({
   const [devMode, _setDevMode] = useState<boolean>(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const firstKeyRef = useRef<string | null>(null);
-  const keyTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const keyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Initialize from localStorage
   useEffect(() => {
