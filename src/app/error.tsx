@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { clientLogger } from '@/lib/logger-client';
 
 interface ErrorPageProps {
   error: Error & { digest?: string };
@@ -9,7 +10,7 @@ interface ErrorPageProps {
 
 export default function Error({ error, reset }: ErrorPageProps) {
   useEffect(() => {
-    console.error('Error boundary caught error:', error);
+    clientLogger.error('Page error', error);
   }, [error]);
 
   const errorMessage = process.env.NODE_ENV === 'development'
@@ -17,20 +18,20 @@ export default function Error({ error, reset }: ErrorPageProps) {
     : 'Something went wrong';
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen flex items-center justify-center bg-[--bg-base] p-4">
       <div className="max-w-md w-full text-center">
         <div className="mb-4">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-destructive/10 text-destructive">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[--status-red]/10 text-[--status-red]">
             <span className="text-2xl font-bold">!</span>
           </div>
         </div>
-        <h1 className="text-2xl font-bold text-foreground mb-2">Something went wrong</h1>
-        <p className="text-muted-foreground mb-4">
+        <h1 className="text-2xl font-bold text-[--text-primary] mb-2">Something went wrong</h1>
+        <p className="text-[--text-muted] mb-4">
           We apologize for the inconvenience. Please try again later.
         </p>
         {process.env.NODE_ENV === 'development' && (
-          <div className="mb-4 bg-card rounded-lg border p-4 overflow-auto">
-            <p className="text-sm text-destructive font-mono whitespace-pre-wrap break-words">
+          <div className="mb-4 bg-[--bg-surface] rounded-lg border p-4 overflow-auto">
+            <p className="text-sm text-[--status-red] font-mono whitespace-pre-wrap break-words">
               {errorMessage}
             </p>
           </div>

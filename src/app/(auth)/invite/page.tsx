@@ -97,6 +97,7 @@ function InviteContent() {
     try {
       const res = await fetch('/api/v1/auth/invite', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, password, name }),
       });
@@ -127,6 +128,7 @@ function InviteContent() {
     try {
       const res = await fetch('/api/v1/auth/invite', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token }),
       });

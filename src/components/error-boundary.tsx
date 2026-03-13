@@ -27,29 +27,14 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     clientLogger.error('Error caught by ErrorBoundary:', error, errorInfo);
 
-    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-      window.addEventListener('error', () => {
-        clientLogger.error('Global error event:', error);
-      });
-    }
+
   }
 
-  componentDidMount(): void {
-    if (typeof window !== 'undefined') {
-      window.addEventListener('unhandledrejection', this.handlePromiseRejection);
-    }
-  }
 
-  componentWillUnmount(): void {
-    if (typeof window !== 'undefined') {
-      window.removeEventListener('unhandledrejection', this.handlePromiseRejection);
-    }
-  }
 
-  handlePromiseRejection = (event: PromiseRejectionEvent): void => {
-    clientLogger.error('Unhandled promise rejection:', event.reason);
-    this.setState({ hasError: true, error: event.reason as Error });
-  };
+
+
+
 
   render(): ReactNode {
     if (this.state.hasError) {
@@ -60,17 +45,17 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
       const errorMessage = this.state.error?.message || 'Something went wrong';
 
       return (
-        <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="min-h-screen flex items-center justify-center bg-[--bg-base] p-4">
           <div className="max-w-md w-full text-center">
             <div className="mb-4">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-destructive/10 text-destructive">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[--status-red]/10 text-[--status-red]">
                 <span className="text-2xl font-bold">!</span>
               </div>
             </div>
-            <h1 className="text-2xl font-bold text-foreground mb-2">Something went wrong</h1>
-            <p className="text-muted-foreground mb-4">We apologize for the inconvenience. Please try again later.</p>
-            <div className="bg-card rounded-lg border p-4">
-              <p className="text-sm text-card-foreground break-words">{errorMessage}</p>
+            <h1 className="text-2xl font-bold text-[--text-primary] mb-2">Something went wrong</h1>
+            <p className="text-[--text-muted] mb-4">We apologize for the inconvenience. Please try again later.</p>
+            <div className="bg-[--bg-surface] rounded-lg border p-4">
+              <p className="text-sm text-[--text-primary] break-words">{errorMessage}</p>
             </div>
             <div className="mt-6 flex gap-2 justify-center">
               <button
