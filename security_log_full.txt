@@ -1,0 +1,440 @@
+security	Set up job	﻿2026-03-13T15:35:13.6188799Z Current runner version: '2.332.0'
+security	Set up job	2026-03-13T15:35:13.6215519Z ##[group]Runner Image Provisioner
+security	Set up job	2026-03-13T15:35:13.6216332Z Hosted Compute Agent
+security	Set up job	2026-03-13T15:35:13.6216988Z Version: 20260213.493
+security	Set up job	2026-03-13T15:35:13.6217612Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+security	Set up job	2026-03-13T15:35:13.6218273Z Build Date: 2026-02-13T00:28:41Z
+security	Set up job	2026-03-13T15:35:13.6219023Z Worker ID: {c97336f3-63e4-4d3c-be80-ff2422144068}
+security	Set up job	2026-03-13T15:35:13.6219847Z Azure Region: centralus
+security	Set up job	2026-03-13T15:35:13.6220454Z ##[endgroup]
+security	Set up job	2026-03-13T15:35:13.6221954Z ##[group]Operating System
+security	Set up job	2026-03-13T15:35:13.6222682Z Ubuntu
+security	Set up job	2026-03-13T15:35:13.6223160Z 24.04.3
+security	Set up job	2026-03-13T15:35:13.6223674Z LTS
+security	Set up job	2026-03-13T15:35:13.6224191Z ##[endgroup]
+security	Set up job	2026-03-13T15:35:13.6224667Z ##[group]Runner Image
+security	Set up job	2026-03-13T15:35:13.6225279Z Image: ubuntu-24.04
+security	Set up job	2026-03-13T15:35:13.6225792Z Version: 20260302.42.1
+security	Set up job	2026-03-13T15:35:13.6226805Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260302.42/images/ubuntu/Ubuntu2404-Readme.md
+security	Set up job	2026-03-13T15:35:13.6228984Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260302.42
+security	Set up job	2026-03-13T15:35:13.6230051Z ##[endgroup]
+security	Set up job	2026-03-13T15:35:13.6231206Z ##[group]GITHUB_TOKEN Permissions
+security	Set up job	2026-03-13T15:35:13.6233251Z Contents: read
+security	Set up job	2026-03-13T15:35:13.6233820Z Metadata: read
+security	Set up job	2026-03-13T15:35:13.6234453Z Packages: read
+security	Set up job	2026-03-13T15:35:13.6234916Z ##[endgroup]
+security	Set up job	2026-03-13T15:35:13.6236959Z Secret source: Actions
+security	Set up job	2026-03-13T15:35:13.6237983Z Prepare workflow directory
+security	Set up job	2026-03-13T15:35:13.6589039Z Prepare all required actions
+security	Set up job	2026-03-13T15:35:13.6630370Z Getting action download info
+security	Set up job	2026-03-13T15:35:14.0628650Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+security	Set up job	2026-03-13T15:35:14.2052439Z Download action repository 'pnpm/action-setup@v4' (SHA:fc06bc1257f339d1d5d8b3a19a8cae5388b55320)
+security	Set up job	2026-03-13T15:35:14.7656158Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+security	Set up job	2026-03-13T15:35:14.8661000Z Download action repository 'trufflesecurity/trufflehog@main' (SHA:d17df4845197a68cbc37d33ad0e7f325b45c0033)
+security	Set up job	2026-03-13T15:35:16.2787137Z Complete job name: security
+security	Run actions/checkout@v4	﻿2026-03-13T15:35:16.3589414Z ##[group]Run actions/checkout@v4
+security	Run actions/checkout@v4	2026-03-13T15:35:16.3590306Z with:
+security	Run actions/checkout@v4	2026-03-13T15:35:16.3590591Z   repository: butteredstardust/specdrivr
+security	Run actions/checkout@v4	2026-03-13T15:35:16.3591185Z   token: ***
+security	Run actions/checkout@v4	2026-03-13T15:35:16.3591417Z   ssh-strict: true
+security	Run actions/checkout@v4	2026-03-13T15:35:16.3591650Z   ssh-user: git
+security	Run actions/checkout@v4	2026-03-13T15:35:16.3591882Z   persist-credentials: true
+security	Run actions/checkout@v4	2026-03-13T15:35:16.3592136Z   clean: true
+security	Run actions/checkout@v4	2026-03-13T15:35:16.3592372Z   sparse-checkout-cone-mode: true
+security	Run actions/checkout@v4	2026-03-13T15:35:16.3592648Z   fetch-depth: 1
+security	Run actions/checkout@v4	2026-03-13T15:35:16.3592869Z   fetch-tags: false
+security	Run actions/checkout@v4	2026-03-13T15:35:16.3593098Z   show-progress: true
+security	Run actions/checkout@v4	2026-03-13T15:35:16.3593356Z   lfs: false
+security	Run actions/checkout@v4	2026-03-13T15:35:16.3593560Z   submodules: false
+security	Run actions/checkout@v4	2026-03-13T15:35:16.3593800Z   set-safe-directory: true
+security	Run actions/checkout@v4	2026-03-13T15:35:16.3594264Z ##[endgroup]
+security	Run actions/checkout@v4	2026-03-13T15:35:16.4789540Z Syncing repository: butteredstardust/specdrivr
+security	Run actions/checkout@v4	2026-03-13T15:35:16.4791585Z ##[group]Getting Git version info
+security	Run actions/checkout@v4	2026-03-13T15:35:16.4792082Z Working directory is '/home/runner/work/specdrivr/specdrivr'
+security	Run actions/checkout@v4	2026-03-13T15:35:16.4792749Z [command]/usr/bin/git version
+security	Run actions/checkout@v4	2026-03-13T15:35:16.4901717Z git version 2.53.0
+security	Run actions/checkout@v4	2026-03-13T15:35:16.4929863Z ##[endgroup]
+security	Run actions/checkout@v4	2026-03-13T15:35:16.4954310Z Temporarily overriding HOME='/home/runner/work/_temp/7b656c61-bf89-4101-84e0-697af5c1d37a' before making global git config changes
+security	Run actions/checkout@v4	2026-03-13T15:35:16.4955362Z Adding repository directory to the temporary git global config as a safe directory
+security	Run actions/checkout@v4	2026-03-13T15:35:16.4960212Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/specdrivr/specdrivr
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5010100Z Deleting the contents of '/home/runner/work/specdrivr/specdrivr'
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5013816Z ##[group]Initializing the repository
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5018856Z [command]/usr/bin/git init /home/runner/work/specdrivr/specdrivr
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5140405Z hint: Using 'master' as the name for the initial branch. This default branch name
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5142075Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5143021Z hint: to use in all of your new repositories, which will suppress this warning,
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5143555Z hint: call:
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5143811Z hint:
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5144267Z hint: 	git config --global init.defaultBranch <name>
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5144937Z hint:
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5145551Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5146640Z hint: 'development'. The just-created branch can be renamed via this command:
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5147498Z hint:
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5147954Z hint: 	git branch -m <name>
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5148429Z hint:
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5149178Z hint: Disable this message with "git config set advice.defaultBranchName false"
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5150553Z Initialized empty Git repository in /home/runner/work/specdrivr/specdrivr/.git/
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5158907Z [command]/usr/bin/git remote add origin https://github.com/butteredstardust/specdrivr
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5200830Z ##[endgroup]
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5201609Z ##[group]Disabling automatic garbage collection
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5206725Z [command]/usr/bin/git config --local gc.auto 0
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5241672Z ##[endgroup]
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5242524Z ##[group]Setting up auth
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5250722Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5288646Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5681628Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5720761Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+security	Run actions/checkout@v4	2026-03-13T15:35:16.5993500Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+security	Run actions/checkout@v4	2026-03-13T15:35:16.6041880Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+security	Run actions/checkout@v4	2026-03-13T15:35:16.6312792Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+security	Run actions/checkout@v4	2026-03-13T15:35:16.6361747Z ##[endgroup]
+security	Run actions/checkout@v4	2026-03-13T15:35:16.6375898Z ##[group]Fetching the repository
+security	Run actions/checkout@v4	2026-03-13T15:35:16.6377016Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +777a2a8bee3ec636496095f667319d88de4948d8:refs/remotes/origin/main
+security	Run actions/checkout@v4	2026-03-13T15:35:17.2508470Z From https://github.com/butteredstardust/specdrivr
+security	Run actions/checkout@v4	2026-03-13T15:35:17.2511534Z  * [new ref]         777a2a8bee3ec636496095f667319d88de4948d8 -> origin/main
+security	Run actions/checkout@v4	2026-03-13T15:35:17.2551562Z ##[endgroup]
+security	Run actions/checkout@v4	2026-03-13T15:35:17.2552298Z ##[group]Determining the checkout info
+security	Run actions/checkout@v4	2026-03-13T15:35:17.2554663Z ##[endgroup]
+security	Run actions/checkout@v4	2026-03-13T15:35:17.2561463Z [command]/usr/bin/git sparse-checkout disable
+security	Run actions/checkout@v4	2026-03-13T15:35:17.2617721Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+security	Run actions/checkout@v4	2026-03-13T15:35:17.2653545Z ##[group]Checking out the ref
+security	Run actions/checkout@v4	2026-03-13T15:35:17.2658604Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+security	Run actions/checkout@v4	2026-03-13T15:35:17.2901525Z Switched to a new branch 'main'
+security	Run actions/checkout@v4	2026-03-13T15:35:17.2903142Z branch 'main' set up to track 'origin/main'.
+security	Run actions/checkout@v4	2026-03-13T15:35:17.2912757Z ##[endgroup]
+security	Run actions/checkout@v4	2026-03-13T15:35:17.2959533Z [command]/usr/bin/git log -1 --format=%H
+security	Run actions/checkout@v4	2026-03-13T15:35:17.2987800Z 777a2a8bee3ec636496095f667319d88de4948d8
+security	Setup pnpm	﻿2026-03-13T15:35:17.3214776Z ##[group]Run pnpm/action-setup@v4
+security	Setup pnpm	2026-03-13T15:35:17.3215115Z with:
+security	Setup pnpm	2026-03-13T15:35:17.3215280Z   version: 9
+security	Setup pnpm	2026-03-13T15:35:17.3215461Z   dest: ~/setup-pnpm
+security	Setup pnpm	2026-03-13T15:35:17.3215646Z   run_install: null
+security	Setup pnpm	2026-03-13T15:35:17.3216031Z   cache: false
+security	Setup pnpm	2026-03-13T15:35:17.3216223Z   cache_dependency_path: pnpm-lock.yaml
+security	Setup pnpm	2026-03-13T15:35:17.3216489Z   package_json_file: package.json
+security	Setup pnpm	2026-03-13T15:35:17.3216710Z   standalone: false
+security	Setup pnpm	2026-03-13T15:35:17.3216892Z ##[endgroup]
+security	Setup pnpm	2026-03-13T15:35:17.4772465Z ##[group]Running self-installer...
+security	Setup pnpm	2026-03-13T15:35:17.9077085Z (node:2301) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+security	Setup pnpm	2026-03-13T15:35:17.9078926Z (Use `node --trace-deprecation ...` to show where the warning was created)
+security	Setup pnpm	2026-03-13T15:35:18.1196602Z Progress: resolved 1, reused 0, downloaded 0, added 0
+security	Setup pnpm	2026-03-13T15:35:18.1298401Z Packages: +1
+security	Setup pnpm	2026-03-13T15:35:18.1299008Z +
+security	Setup pnpm	2026-03-13T15:35:18.5820264Z Progress: resolved 1, reused 0, downloaded 1, added 1, done
+security	Setup pnpm	2026-03-13T15:35:18.6078879Z 
+security	Setup pnpm	2026-03-13T15:35:18.6079489Z dependencies:
+security	Setup pnpm	2026-03-13T15:35:18.6080175Z + pnpm 9.15.9 (10.32.1 is available)
+security	Setup pnpm	2026-03-13T15:35:18.6080461Z 
+security	Setup pnpm	2026-03-13T15:35:18.6109128Z Done in 951ms
+security	Setup pnpm	2026-03-13T15:35:18.6310997Z ##[endgroup]
+security	Setup pnpm	2026-03-13T15:35:18.6315826Z Installation Completed!
+security	Setup Node.js	﻿2026-03-13T15:35:18.6508269Z ##[group]Run actions/setup-node@v4
+security	Setup Node.js	2026-03-13T15:35:18.6508576Z with:
+security	Setup Node.js	2026-03-13T15:35:18.6508797Z   node-version: 20
+security	Setup Node.js	2026-03-13T15:35:18.6508983Z   cache: pnpm
+security	Setup Node.js	2026-03-13T15:35:18.6509165Z   always-auth: false
+security	Setup Node.js	2026-03-13T15:35:18.6509358Z   check-latest: false
+security	Setup Node.js	2026-03-13T15:35:18.6509952Z   token: ***
+security	Setup Node.js	2026-03-13T15:35:18.6510148Z env:
+security	Setup Node.js	2026-03-13T15:35:18.6510388Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+security	Setup Node.js	2026-03-13T15:35:18.6510686Z ##[endgroup]
+security	Setup Node.js	2026-03-13T15:35:18.8455704Z Found in cache @ /opt/hostedtoolcache/node/20.20.0/x64
+security	Setup Node.js	2026-03-13T15:35:18.8464128Z ##[group]Environment details
+security	Setup Node.js	2026-03-13T15:35:19.2175063Z node: v20.20.0
+security	Setup Node.js	2026-03-13T15:35:19.2175765Z npm: 10.8.2
+security	Setup Node.js	2026-03-13T15:35:19.2176095Z yarn: 1.22.22
+security	Setup Node.js	2026-03-13T15:35:19.2177752Z ##[endgroup]
+security	Setup Node.js	2026-03-13T15:35:19.2208275Z [command]/home/runner/setup-pnpm/node_modules/.bin/pnpm store path --silent
+security	Setup Node.js	2026-03-13T15:35:19.6343741Z /home/runner/setup-pnpm/node_modules/.bin/store/v3
+security	Setup Node.js	2026-03-13T15:35:19.8639826Z pnpm cache is not found
+security	Check for forbidden artifacts	﻿2026-03-13T15:35:19.8782692Z ##[group]Run if [ -f "fix-tsc.sh" ] || [ -f "fix-lint2.sh" ] || ls fix-*.mjs 1> /dev/null 2>&1; then
+security	Check for forbidden artifacts	2026-03-13T15:35:19.8783441Z [36;1mif [ -f "fix-tsc.sh" ] || [ -f "fix-lint2.sh" ] || ls fix-*.mjs 1> /dev/null 2>&1; then[0m
+security	Check for forbidden artifacts	2026-03-13T15:35:19.8783926Z [36;1m  echo "Error: Temporary fix scripts found."[0m
+security	Check for forbidden artifacts	2026-03-13T15:35:19.8784211Z [36;1m  exit 1[0m
+security	Check for forbidden artifacts	2026-03-13T15:35:19.8784391Z [36;1mfi[0m
+security	Check for forbidden artifacts	2026-03-13T15:35:19.8845448Z shell: /usr/bin/bash -e {0}
+security	Check for forbidden artifacts	2026-03-13T15:35:19.8845798Z env:
+security	Check for forbidden artifacts	2026-03-13T15:35:19.8846058Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+security	Check for forbidden artifacts	2026-03-13T15:35:19.8846406Z ##[endgroup]
+security	Install dependencies	﻿2026-03-13T15:35:19.9007018Z ##[group]Run pnpm install --frozen-lockfile
+security	Install dependencies	2026-03-13T15:35:19.9007407Z [36;1mpnpm install --frozen-lockfile[0m
+security	Install dependencies	2026-03-13T15:35:19.9058210Z shell: /usr/bin/bash -e {0}
+security	Install dependencies	2026-03-13T15:35:19.9058534Z env:
+security	Install dependencies	2026-03-13T15:35:19.9058782Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+security	Install dependencies	2026-03-13T15:35:19.9059101Z ##[endgroup]
+security	Install dependencies	2026-03-13T15:35:20.4036044Z Lockfile is up to date, resolution step is skipped
+security	Install dependencies	2026-03-13T15:35:20.5360624Z Progress: resolved 1, reused 0, downloaded 0, added 0
+security	Install dependencies	2026-03-13T15:35:20.7263338Z Packages: +1204
+security	Install dependencies	2026-03-13T15:35:20.7265615Z ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+security	Install dependencies	2026-03-13T15:35:21.5385821Z Progress: resolved 1204, reused 0, downloaded 24, added 13
+security	Install dependencies	2026-03-13T15:35:22.5385906Z Progress: resolved 1204, reused 0, downloaded 65, added 53
+security	Install dependencies	2026-03-13T15:35:23.5461489Z Progress: resolved 1204, reused 0, downloaded 233, added 229
+security	Install dependencies	2026-03-13T15:35:24.5488782Z Progress: resolved 1204, reused 0, downloaded 466, added 464
+security	Install dependencies	2026-03-13T15:35:25.5495731Z Progress: resolved 1204, reused 0, downloaded 535, added 528
+security	Install dependencies	2026-03-13T15:35:26.5551620Z Progress: resolved 1204, reused 0, downloaded 699, added 689
+security	Install dependencies	2026-03-13T15:35:27.5549174Z Progress: resolved 1204, reused 0, downloaded 949, added 942
+security	Install dependencies	2026-03-13T15:35:28.5554247Z Progress: resolved 1204, reused 0, downloaded 1203, added 1203
+security	Install dependencies	2026-03-13T15:35:29.8268704Z Progress: resolved 1204, reused 0, downloaded 1204, added 1203
+security	Install dependencies	2026-03-13T15:35:29.9806721Z Progress: resolved 1204, reused 0, downloaded 1204, added 1204, done
+security	Install dependencies	2026-03-13T15:35:30.5578249Z .../node_modules/@prisma/engines postinstall$ node scripts/postinstall.js
+security	Install dependencies	2026-03-13T15:35:30.5842306Z .../node_modules/msw postinstall$ node -e "import('./config/scripts/postinstall.js').catch(() => void 0)"
+security	Install dependencies	2026-03-13T15:35:30.5844630Z .../sharp@0.34.5/node_modules/sharp install$ node install/check.js || npm run build
+security	Install dependencies	2026-03-13T15:35:30.5848814Z .../node_modules/unrs-resolver postinstall$ napi-postinstall unrs-resolver 1.11.1 check
+security	Install dependencies	2026-03-13T15:35:30.6790840Z .../esbuild@0.25.12/node_modules/esbuild postinstall$ node install.js
+security	Install dependencies	2026-03-13T15:35:30.7593847Z .../node_modules/msw postinstall: Done
+security	Install dependencies	2026-03-13T15:35:30.7741450Z .../node_modules/unrs-resolver postinstall: Done
+security	Install dependencies	2026-03-13T15:35:30.8611950Z .../esbuild@0.25.12/node_modules/esbuild postinstall: Done
+security	Install dependencies	2026-03-13T15:35:30.9001399Z .../sharp@0.34.5/node_modules/sharp install: Done
+security	Install dependencies	2026-03-13T15:35:31.6075627Z .../node_modules/@prisma/engines postinstall: Done
+security	Install dependencies	2026-03-13T15:35:31.7058562Z .../node_modules/prisma preinstall$ node scripts/preinstall-entry.js
+security	Install dependencies	2026-03-13T15:35:31.8200858Z .../node_modules/prisma preinstall: Done
+security	Install dependencies	2026-03-13T15:35:32.4079047Z 
+security	Install dependencies	2026-03-13T15:35:32.4080012Z dependencies:
+security	Install dependencies	2026-03-13T15:35:32.4080462Z + @base-ui/react 1.2.0
+security	Install dependencies	2026-03-13T15:35:32.4080957Z + @better-auth/drizzle-adapter 1.5.4
+security	Install dependencies	2026-03-13T15:35:32.4081429Z + @dnd-kit/core 6.3.1
+security	Install dependencies	2026-03-13T15:35:32.4081820Z + @dnd-kit/sortable 10.0.0
+security	Install dependencies	2026-03-13T15:35:32.4082296Z + @dnd-kit/utilities 3.2.2
+security	Install dependencies	2026-03-13T15:35:32.4082701Z + @hookform/resolvers 5.2.2
+security	Install dependencies	2026-03-13T15:35:32.4083212Z + @next/eslint-plugin-next 16.1.6
+security	Install dependencies	2026-03-13T15:35:32.4083641Z + @noble/hashes 2.0.1
+security	Install dependencies	2026-03-13T15:35:32.4084013Z + @octokit/rest 22.0.1
+security	Install dependencies	2026-03-13T15:35:32.4084408Z + @pxlkit/core 1.0.1
+security	Install dependencies	2026-03-13T15:35:32.4084754Z + @pxlkit/effects 1.0.1
+security	Install dependencies	2026-03-13T15:35:32.4085125Z + @pxlkit/feedback 1.0.1
+security	Install dependencies	2026-03-13T15:35:32.4085526Z + @pxlkit/gamification 1.0.1
+security	Install dependencies	2026-03-13T15:35:32.4085919Z + @pxlkit/social 1.0.1
+security	Install dependencies	2026-03-13T15:35:32.4086271Z + @pxlkit/ui 1.0.1
+security	Install dependencies	2026-03-13T15:35:32.4086601Z + @pxlkit/ui-kit 1.0.5
+security	Install dependencies	2026-03-13T15:35:32.4086964Z + @pxlkit/weather 1.0.1
+security	Install dependencies	2026-03-13T15:35:32.4087397Z + @radix-ui/react-avatar 1.1.11
+security	Install dependencies	2026-03-13T15:35:32.4087882Z + @radix-ui/react-dropdown-menu 2.1.16
+security	Install dependencies	2026-03-13T15:35:32.4088357Z + @radix-ui/react-icons 1.3.2
+security	Install dependencies	2026-03-13T15:35:32.4088765Z + @radix-ui/react-label 2.1.8
+security	Install dependencies	2026-03-13T15:35:32.4089224Z + @radix-ui/react-progress 1.1.8
+security	Install dependencies	2026-03-13T15:35:32.4089899Z + @radix-ui/react-separator 1.1.8
+security	Install dependencies	2026-03-13T15:35:32.4090349Z + @radix-ui/react-slot 1.2.4
+security	Install dependencies	2026-03-13T15:35:32.4091166Z + @tailwindcss/postcss 4.2.1
+security	Install dependencies	2026-03-13T15:35:32.4091569Z + @types/dompurify 3.2.0
+security	Install dependencies	2026-03-13T15:35:32.4091966Z + @uiw/react-md-editor 4.0.11
+security	Install dependencies	2026-03-13T15:35:32.4092377Z + @upstash/ratelimit 2.0.8
+security	Install dependencies	2026-03-13T15:35:32.4092753Z + @upstash/redis 1.36.3
+security	Install dependencies	2026-03-13T15:35:32.4093112Z + ansi-to-html 0.7.2
+security	Install dependencies	2026-03-13T15:35:32.4093435Z + bcryptjs 3.0.3
+security	Install dependencies	2026-03-13T15:35:32.4093827Z + class-variance-authority 0.7.1
+security	Install dependencies	2026-03-13T15:35:32.4094220Z + clsx 2.1.1
+security	Install dependencies	2026-03-13T15:35:32.4094520Z + dompurify 3.3.2
+security	Install dependencies	2026-03-13T15:35:32.4094823Z + dotenv 16.6.1
+security	Install dependencies	2026-03-13T15:35:32.4095148Z + drizzle-orm 0.45.1
+security	Install dependencies	2026-03-13T15:35:32.4095466Z + ioredis 5.10.0
+security	Install dependencies	2026-03-13T15:35:32.4095830Z + isomorphic-dompurify 3.0.0
+security	Install dependencies	2026-03-13T15:35:32.4096226Z + lucide-react 0.577.0
+security	Install dependencies	2026-03-13T15:35:32.4096550Z + nanoid 5.1.6
+security	Install dependencies	2026-03-13T15:35:32.4096841Z + next 16.1.6
+security	Install dependencies	2026-03-13T15:35:32.4097186Z + next-remove-imports 1.0.12
+security	Install dependencies	2026-03-13T15:35:32.4097577Z + next-themes 0.4.6
+security	Install dependencies	2026-03-13T15:35:32.4097891Z + pg 8.20.0
+security	Install dependencies	2026-03-13T15:35:32.4098180Z + pino 10.3.1
+security	Install dependencies	2026-03-13T15:35:32.4098499Z + pino-pretty 13.1.3
+security	Install dependencies	2026-03-13T15:35:32.4099040Z + postgres 3.4.8
+security	Install dependencies	2026-03-13T15:35:32.4099337Z + react 19.2.4
+security	Install dependencies	2026-03-13T15:35:32.4099951Z + react-dom 19.2.4
+security	Install dependencies	2026-03-13T15:35:32.4100328Z + react-hook-form 7.71.2
+security	Install dependencies	2026-03-13T15:35:32.4100716Z + rehype-sanitize 6.0.0
+security	Install dependencies	2026-03-13T15:35:32.4101044Z + resend 6.9.3
+security	Install dependencies	2026-03-13T15:35:32.4101361Z + server-only 0.0.1
+security	Install dependencies	2026-03-13T15:35:32.4101662Z + shiki 4.0.2
+security	Install dependencies	2026-03-13T15:35:32.4101951Z + sonner 2.0.7
+security	Install dependencies	2026-03-13T15:35:32.4102276Z + tailwind-merge 3.5.0
+security	Install dependencies	2026-03-13T15:35:32.4102619Z + ts-morph 27.0.2
+security	Install dependencies	2026-03-13T15:35:32.4102961Z + tw-animate-css 1.4.0
+security	Install dependencies	2026-03-13T15:35:32.4103336Z + typescript-eslint 8.56.1
+security	Install dependencies	2026-03-13T15:35:32.4103694Z + zod 3.25.76
+security	Install dependencies	2026-03-13T15:35:32.4103865Z 
+security	Install dependencies	2026-03-13T15:35:32.4104008Z devDependencies:
+security	Install dependencies	2026-03-13T15:35:32.4104345Z + @eslint/eslintrc 3.3.5
+security	Install dependencies	2026-03-13T15:35:32.4104726Z + @faker-js/faker 10.3.0
+security	Install dependencies	2026-03-13T15:35:32.4105106Z + @playwright/test 1.58.2
+security	Install dependencies	2026-03-13T15:35:32.4105596Z + @testing-library/dom 10.4.1
+security	Install dependencies	2026-03-13T15:35:32.4106105Z + @testing-library/jest-dom 6.9.1
+security	Install dependencies	2026-03-13T15:35:32.4106597Z + @testing-library/react 16.3.2
+security	Install dependencies	2026-03-13T15:35:32.4107007Z + @types/bcryptjs 2.4.6
+security	Install dependencies	2026-03-13T15:35:32.4107374Z + @types/node 20.19.37
+security	Install dependencies	2026-03-13T15:35:32.4107726Z + @types/react 19.2.14
+security	Install dependencies	2026-03-13T15:35:32.4108081Z + @types/react-dom 19.2.3
+security	Install dependencies	2026-03-13T15:35:32.4108476Z + @vitejs/plugin-react 5.1.4
+security	Install dependencies	2026-03-13T15:35:32.4108856Z + @vitest/ui 4.0.18
+security	Install dependencies	2026-03-13T15:35:32.4109197Z + autoprefixer 10.4.27
+security	Install dependencies	2026-03-13T15:35:32.4109546Z + better-auth 1.5.5
+security	Install dependencies	2026-03-13T15:35:32.4110065Z + drizzle-kit 0.31.9
+security	Install dependencies	2026-03-13T15:35:32.4110384Z + eslint 9.39.4
+security	Install dependencies	2026-03-13T15:35:32.4110724Z + eslint-config-next 16.1.6
+security	Install dependencies	2026-03-13T15:35:32.4111137Z + eslint-plugin-react 7.37.5
+security	Install dependencies	2026-03-13T15:35:32.4111629Z + eslint-plugin-react-hooks 7.0.1
+security	Install dependencies	2026-03-13T15:35:32.4112026Z + husky 9.1.7
+security	Install dependencies	2026-03-13T15:35:32.4112314Z + jsdom 28.1.0
+security	Install dependencies	2026-03-13T15:35:32.4112590Z + knip 5.86.0
+security	Install dependencies	2026-03-13T15:35:32.4112908Z + lint-staged 16.3.3
+security	Install dependencies	2026-03-13T15:35:32.4113255Z + postcss 8.5.8
+security	Install dependencies	2026-03-13T15:35:32.4113548Z + shadcn 4.0.2
+security	Install dependencies	2026-03-13T15:35:32.4113876Z + tailwindcss 4.2.1
+security	Install dependencies	2026-03-13T15:35:32.4114179Z + tsx 4.21.0
+security	Install dependencies	2026-03-13T15:35:32.4114491Z + typescript 5.9.3
+security	Install dependencies	2026-03-13T15:35:32.4114806Z + vitest 4.0.18
+security	Install dependencies	2026-03-13T15:35:32.4114984Z 
+security	Install dependencies	2026-03-13T15:35:32.4791690Z 
+security	Install dependencies	2026-03-13T15:35:32.4792559Z > specdrivr@0.1.0 prepare /home/runner/work/specdrivr/specdrivr
+security	Install dependencies	2026-03-13T15:35:32.4793227Z > husky
+security	Install dependencies	2026-03-13T15:35:32.4793388Z 
+security	Install dependencies	2026-03-13T15:35:32.5771946Z Done in 12.6s using pnpm v9.15.9
+security	Run pnpm audit	﻿2026-03-13T15:35:32.6503303Z ##[group]Run pnpm audit --prod
+security	Run pnpm audit	2026-03-13T15:35:32.6503671Z [36;1mpnpm audit --prod[0m
+security	Run pnpm audit	2026-03-13T15:35:32.6554670Z shell: /usr/bin/bash -e {0}
+security	Run pnpm audit	2026-03-13T15:35:32.6554931Z env:
+security	Run pnpm audit	2026-03-13T15:35:32.6555182Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+security	Run pnpm audit	2026-03-13T15:35:32.6555491Z ##[endgroup]
+security	Run pnpm audit	2026-03-13T15:35:33.5339940Z No known vulnerabilities found
+security	Check for secrets in codebase	﻿2026-03-13T15:35:33.5534438Z ##[group]Run trufflesecurity/trufflehog@main
+security	Check for secrets in codebase	2026-03-13T15:35:33.5534754Z with:
+security	Check for secrets in codebase	2026-03-13T15:35:33.5534929Z   path: ./
+security	Check for secrets in codebase	2026-03-13T15:35:33.5535145Z   head: 777a2a8bee3ec636496095f667319d88de4948d8
+security	Check for secrets in codebase	2026-03-13T15:35:33.5535411Z   version: latest
+security	Check for secrets in codebase	2026-03-13T15:35:33.5535581Z env:
+security	Check for secrets in codebase	2026-03-13T15:35:33.5535796Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+security	Check for secrets in codebase	2026-03-13T15:35:33.5536079Z ##[endgroup]
+security	Check for secrets in codebase	2026-03-13T15:35:33.5676942Z ##[group]Run ##########################################
+security	Check for secrets in codebase	2026-03-13T15:35:33.5677328Z [36;1m##########################################[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5677624Z [36;1m## ADVANCED USAGE                       ##[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5677918Z [36;1m## Scan by BASE & HEAD user inputs      ##[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5678207Z [36;1m## If BASE == HEAD, exit with error     ##[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5678477Z [36;1m##########################################[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5678764Z [36;1m# Check if jq is installed, if not, install it[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5679073Z [36;1mif ! command -v jq &> /dev/null[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5679379Z [36;1mthen[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5679959Z [36;1m  echo "jq could not be found, installing..."[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5680661Z [36;1m  apt-get -y update && apt-get install -y jq[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5680946Z [36;1mfi[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5681110Z [36;1m[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5681375Z [36;1mgit status >/dev/null  # make sure we are in a git repository[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5681743Z [36;1mif [ -n "$BASE" ] || [ -n "$HEAD" ]; then[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5682024Z [36;1m  if [ -n "$BASE" ]; then[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5682348Z [36;1m    base_commit=$(git rev-parse "$BASE" 2>/dev/null) || true[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5682668Z [36;1m  else[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5682853Z [36;1m    base_commit=""[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5683097Z [36;1m  fi[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5683274Z [36;1m  if [ -n "$HEAD" ]; then[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5683581Z [36;1m    head_commit=$(git rev-parse "$HEAD" 2>/dev/null) || true[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5683907Z [36;1m  else[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5684083Z [36;1m    head_commit=""[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5684279Z [36;1m  fi[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5684506Z [36;1m  if [ "$base_commit" == "$head_commit" ] ; then[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5685360Z [36;1m    echo "::error::BASE and HEAD commits are the same. TruffleHog won't scan anything. Please see documentation (https://github.com/trufflesecurity/trufflehog#octocat-trufflehog-github-action)."[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5686141Z [36;1m    exit 1[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5686334Z [36;1m  fi[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5686530Z [36;1m##########################################[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5686828Z [36;1m## Scan commits based on event type     ##[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5687115Z [36;1m##########################################[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5687379Z [36;1melse[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5687577Z [36;1m  if [ "push" == "push" ]; then[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5687897Z [36;1m    COMMIT_LENGTH=$(printenv COMMIT_IDS | jq length)[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5688223Z [36;1m    if [ $COMMIT_LENGTH == "0" ]; then[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5688494Z [36;1m      echo "No commits to scan"[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5688751Z [36;1m      exit 0[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5688930Z [36;1m    fi[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5689166Z [36;1m    HEAD=777a2a8bee3ec636496095f667319d88de4948d8[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5689959Z [36;1m    if [ 3660a3e2379182dccbed0b5a0d8f2aa25367252e == "0000000000000000000000000000000000000000" ]; then[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5690428Z [36;1m      BASE=""[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5690633Z [36;1m    else[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5690867Z [36;1m      BASE=3660a3e2379182dccbed0b5a0d8f2aa25367252e[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5691158Z [36;1m    fi[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5691439Z [36;1m  elif [ "push" == "workflow_dispatch" ] || [ "push" == "schedule" ]; then[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5691792Z [36;1m    BASE=""[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5691974Z [36;1m    HEAD=""[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5692194Z [36;1m  elif [ "push" == "pull_request" ]; then[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5692837Z [36;1m    BASE=[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5693014Z [36;1m    HEAD=[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5693186Z [36;1m  fi[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5693366Z [36;1mfi[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5693560Z [36;1m##########################################[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5693832Z [36;1m##          Run TruffleHog              ##[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5694102Z [36;1m##########################################[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5694379Z [36;1mdocker run --rm -v .:/tmp -w /tmp \[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5694710Z [36;1mghcr.io/trufflesecurity/trufflehog:${VERSION} \[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5695025Z [36;1mgit file:///tmp/ \[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5695244Z [36;1m--since-commit \[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5695456Z [36;1m${BASE:-''} \[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5695650Z [36;1m--branch \[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5695836Z [36;1m${HEAD:-''} \[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5696020Z [36;1m--fail \[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5696205Z [36;1m--no-update \[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5696407Z [36;1m--github-actions \[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5696624Z [36;1m${ARGS:-''}[0m
+security	Check for secrets in codebase	2026-03-13T15:35:33.5750044Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+security	Check for secrets in codebase	2026-03-13T15:35:33.5750611Z env:
+security	Check for secrets in codebase	2026-03-13T15:35:33.5750852Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+security	Check for secrets in codebase	2026-03-13T15:35:33.5751142Z   BASE: 
+security	Check for secrets in codebase	2026-03-13T15:35:33.5751331Z   HEAD: 777a2a8bee3ec636496095f667319d88de4948d8
+security	Check for secrets in codebase	2026-03-13T15:35:33.5751595Z   ARGS: 
+security	Check for secrets in codebase	2026-03-13T15:35:33.5752878Z   COMMIT_IDS: [
+security	Check for secrets in codebase	  "20e74da85d040ad57e1ce805cd50729f8a43c6fd",
+security	Check for secrets in codebase	  "d10b2ea1f021c4f2543336b1269343ac79477297",
+security	Check for secrets in codebase	  "1d2e9be9f482d249fdc7e071c18a89f974061fc1",
+security	Check for secrets in codebase	  "46b7cfedf5caaa7e55e2237310c6b23353355dc7",
+security	Check for secrets in codebase	  "d91bf2a5bb697bb66e9ead4ed0304137ffb20e8e",
+security	Check for secrets in codebase	  "44662f8dc128b60433c5bc0cdb5cbf2fad3e140e",
+security	Check for secrets in codebase	  "454b0e8c84bbcc5f061e9094c074e177ed497d4f",
+security	Check for secrets in codebase	  "777a2a8bee3ec636496095f667319d88de4948d8"
+security	Check for secrets in codebase	]
+security	Check for secrets in codebase	2026-03-13T15:35:33.5754286Z   VERSION: latest
+security	Check for secrets in codebase	2026-03-13T15:35:33.5754471Z ##[endgroup]
+security	Check for secrets in codebase	2026-03-13T15:35:33.6952015Z Unable to find image 'ghcr.io/trufflesecurity/trufflehog:latest' locally
+security	Check for secrets in codebase	2026-03-13T15:35:34.2204898Z latest: Pulling from trufflesecurity/trufflehog
+security	Check for secrets in codebase	2026-03-13T15:35:34.3264467Z d49a2dee86fb: Pulling fs layer
+security	Check for secrets in codebase	2026-03-13T15:35:34.3265090Z 755f9c0ca6f5: Pulling fs layer
+security	Check for secrets in codebase	2026-03-13T15:35:34.3265440Z 4f4fb700ef54: Pulling fs layer
+security	Check for secrets in codebase	2026-03-13T15:35:34.3265736Z feece529880b: Pulling fs layer
+security	Check for secrets in codebase	2026-03-13T15:35:34.3265992Z bb86363e7ecb: Pulling fs layer
+security	Check for secrets in codebase	2026-03-13T15:35:34.3266222Z feece529880b: Waiting
+security	Check for secrets in codebase	2026-03-13T15:35:34.3266430Z bb86363e7ecb: Waiting
+security	Check for secrets in codebase	2026-03-13T15:35:34.5611095Z d49a2dee86fb: Verifying Checksum
+security	Check for secrets in codebase	2026-03-13T15:35:34.5612194Z d49a2dee86fb: Download complete
+security	Check for secrets in codebase	2026-03-13T15:35:34.5961454Z 755f9c0ca6f5: Verifying Checksum
+security	Check for secrets in codebase	2026-03-13T15:35:34.5963231Z 755f9c0ca6f5: Download complete
+security	Check for secrets in codebase	2026-03-13T15:35:34.6924796Z d49a2dee86fb: Pull complete
+security	Check for secrets in codebase	2026-03-13T15:35:34.7321271Z 4f4fb700ef54: Verifying Checksum
+security	Check for secrets in codebase	2026-03-13T15:35:34.7321908Z 4f4fb700ef54: Download complete
+security	Check for secrets in codebase	2026-03-13T15:35:34.7765601Z bb86363e7ecb: Verifying Checksum
+security	Check for secrets in codebase	2026-03-13T15:35:34.7766210Z bb86363e7ecb: Download complete
+security	Check for secrets in codebase	2026-03-13T15:35:34.9165952Z feece529880b: Verifying Checksum
+security	Check for secrets in codebase	2026-03-13T15:35:34.9166620Z feece529880b: Download complete
+security	Check for secrets in codebase	2026-03-13T15:35:36.4562376Z 755f9c0ca6f5: Pull complete
+security	Check for secrets in codebase	2026-03-13T15:35:36.4663720Z 4f4fb700ef54: Pull complete
+security	Check for secrets in codebase	2026-03-13T15:35:36.6726948Z feece529880b: Pull complete
+security	Check for secrets in codebase	2026-03-13T15:35:36.6823832Z bb86363e7ecb: Pull complete
+security	Check for secrets in codebase	2026-03-13T15:35:36.6934537Z Digest: sha256:b356cc273ab8c786fe2a54f20d2bec1f67438df4ca070e5c7d5a1283e18917cb
+security	Check for secrets in codebase	2026-03-13T15:35:36.6944753Z Status: Downloaded newer image for ghcr.io/trufflesecurity/trufflehog:latest
+security	Check for secrets in codebase	2026-03-13T15:35:39.0083496Z 🐷🔑🐷  TruffleHog. Unearth your secrets. 🐷🔑🐷
+security	Check for secrets in codebase	2026-03-13T15:35:39.0083821Z 
+security	Check for secrets in codebase	2026-03-13T15:35:39.0979542Z 2026-03-13T15:35:39Z	info-0	trufflehog	running source	{"source_manager_worker_id": "ardCJ", "with_units": true}
+security	Check for secrets in codebase	2026-03-13T15:35:39.0988811Z 2026-03-13T15:35:39Z	info-0	trufflehog	scanning repo	{"source_manager_worker_id": "ardCJ", "unit_kind": "dir", "unit": "/tmp/trufflehog-18-556658588", "repo": "file:///tmp", "head": "777a2a8bee3ec636496095f667319d88de4948d8"}
+security	Check for secrets in codebase	2026-03-13T15:35:39.2278764Z ##[warning]Found unverified Postgres result 🐷🔑
+security	Check for secrets in codebase	2026-03-13T15:35:39.2281900Z 2026-03-13T15:35:39Z	info-0	trufflehog	finished scanning	{"chunks": 341, "bytes": 1598997, "verified_secrets": 0, "unverified_secrets": 1, "scan_duration": "212.834505ms", "trufflehog_version": "3.93.8", "verification_caching": {"Hits":0,"Misses":1,"HitsWasted":0,"AttemptsSaved":0,"VerificationTimeSpentMS":111}}
+security	Check for secrets in codebase	2026-03-13T15:35:39.3064038Z ##[error]Process completed with exit code 183.
+security	Post Setup pnpm	﻿2026-03-13T15:35:39.3151277Z Post job cleanup.
+security	Post Setup pnpm	2026-03-13T15:35:39.4641256Z Pruning is unnecessary.
+security	Post Run actions/checkout@v4	﻿2026-03-13T15:35:39.4778166Z Post job cleanup.
+security	Post Run actions/checkout@v4	2026-03-13T15:35:39.5855137Z [command]/usr/bin/git version
+security	Post Run actions/checkout@v4	2026-03-13T15:35:39.5910000Z git version 2.53.0
+security	Post Run actions/checkout@v4	2026-03-13T15:35:39.5969889Z Temporarily overriding HOME='/home/runner/work/_temp/943cd2bd-9341-4e5b-a220-506de35d88ab' before making global git config changes
+security	Post Run actions/checkout@v4	2026-03-13T15:35:39.5971520Z Adding repository directory to the temporary git global config as a safe directory
+security	Post Run actions/checkout@v4	2026-03-13T15:35:39.5987175Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/specdrivr/specdrivr
+security	Post Run actions/checkout@v4	2026-03-13T15:35:39.6034048Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+security	Post Run actions/checkout@v4	2026-03-13T15:35:39.6075643Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+security	Post Run actions/checkout@v4	2026-03-13T15:35:39.6366622Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+security	Post Run actions/checkout@v4	2026-03-13T15:35:39.6392714Z http.https://github.com/.extraheader
+security	Post Run actions/checkout@v4	2026-03-13T15:35:39.6407892Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+security	Post Run actions/checkout@v4	2026-03-13T15:35:39.6449092Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+security	Post Run actions/checkout@v4	2026-03-13T15:35:39.6739523Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+security	Post Run actions/checkout@v4	2026-03-13T15:35:39.6781109Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+security	Complete job	﻿2026-03-13T15:35:39.7216625Z Cleaning up orphan processes
+security	Complete job	2026-03-13T15:35:39.7691736Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4, actions/setup-node@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
