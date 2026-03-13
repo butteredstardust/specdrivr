@@ -189,7 +189,7 @@ if echo "$changed_files" | grep -q "package\.json" \
 fi
 
 # ─── 5. Sensitive File Detection ──────────────────────────────────────────────
-echo "$changed_files" | grep -qE "(^|/)\.env(\.[a-z]+)?$" && \
+echo "$changed_files" | grep -v "\.env\.example" | grep -qE "(^|/)\.env(\.[a-z]+)?$" && \
   die "Environment files cannot be committed. Verify your .gitignore."
 
 echo "$changed_files" | grep -q "\.log$" && \
