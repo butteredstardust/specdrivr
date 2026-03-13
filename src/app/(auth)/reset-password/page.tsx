@@ -185,12 +185,6 @@ function ResetPasswordContent() {
           RESET PASSWORD
         </h1>
 
-        {error && (
-          <div className="mb-6 w-full">
-            <PixelAlert tone="red" title="Error" message={error} />
-          </div>
-        )}
-
         <form className="flex w-full flex-col gap-6" onSubmit={handleSubmit(onResetPassword)}>
           <div className="flex flex-col gap-1.5">
             <label htmlFor="password" className="text-xs font-medium text-[--text-secondary]">
@@ -204,9 +198,6 @@ function ResetPasswordContent() {
               onChange={(e) => setValue('password', e.target.value)}
               value={passwordValue}
             />
-            {errors.password && (
-              <p className="text-[10px] text-[--status-error]">{errors.password.message}</p>
-            )}
             <PasswordStrengthIndicator password={passwordValue} />
           </div>
 
@@ -224,14 +215,21 @@ function ResetPasswordContent() {
               onChange={(e) => setValue('confirmPassword', e.target.value)}
               value={confirmPasswordValue}
             />
-            {errors.confirmPassword && (
-              <p className="text-[10px] text-[--status-error]">{errors.confirmPassword.message}</p>
-            )}
           </div>
 
           <PixelButton type="submit" tone="purple" className="mt-2 w-full" loading={isLoading}>
             Set New Password
           </PixelButton>
+
+          {(error || Object.keys(errors).length > 0) && (
+            <div className="mt-2 w-full">
+              <PixelAlert
+                tone="red"
+                title="Error"
+                message={error || Object.values(errors)[0]?.message || 'Invalid input.'}
+              />
+            </div>
+          )}
         </form>
       </div>
     </div>

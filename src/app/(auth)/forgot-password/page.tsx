@@ -89,12 +89,6 @@ export default function ForgotPasswordPage() {
           Enter your email and we'll send a reset link.
         </p>
 
-        {error && (
-          <div className="mb-6 w-full">
-            <PixelAlert tone="red" title="Error" message={error} />
-          </div>
-        )}
-
         <form className="flex w-full flex-col gap-6" onSubmit={handleSubmit(onForgotPassword)}>
           <div className="flex flex-col gap-1.5">
             <label htmlFor="email" className="text-xs font-medium text-[--text-secondary]">
@@ -109,14 +103,21 @@ export default function ForgotPasswordPage() {
               onChange={(e) => setValue('email', e.target.value)}
               value={emailValue}
             />
-            {errors.email && (
-              <p className="text-[10px] text-[--status-error]">{errors.email.message}</p>
-            )}
           </div>
 
           <PixelButton type="submit" tone="purple" className="w-full" loading={isLoading}>
             Send Reset Link
           </PixelButton>
+
+          {(error || Object.keys(errors).length > 0) && (
+            <div className="mt-2 w-full">
+              <PixelAlert
+                tone="red"
+                title="Error"
+                message={error || Object.values(errors)[0]?.message || 'Invalid input.'}
+              />
+            </div>
+          )}
 
           <div className="mt-2 text-center">
             <Link
