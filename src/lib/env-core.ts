@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { config } from 'dotenv';
 import fs from 'fs';
 import path from 'path';
+import { logger } from './logger-cli';
 
 export const envSchema = z.object({
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required').url('DATABASE_URL must be a valid URL'),
@@ -54,14 +55,14 @@ export function parseEnv(): Env {
   };
 
   if (process.env.VITEST && !process.env.DATABASE_URL) {
-    console.warn('Warning: DATABASE_URL is missing during Vitest execution.');
+    logger.warn('DATABASE_URL is missing during Vitest execution.');
   }
 
   try {
     return envSchema.parse(envToParse);
   } catch (error) {
     if (process.env.VITEST) {
-      console.error('Environment validation failed during Vitest:', JSON.stringify(error, null, 2));
+      logger.error({ error }, 'Environment validation failed during Vitest');
     }
     throw error;
   }
