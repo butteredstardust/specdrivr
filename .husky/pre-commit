@@ -1,0 +1,99 @@
+#!/usr/bin/env sh
+# .husky/pre-commit
+# Pre-commit hook: Runs checks on staged files before committing
+
+set -e
+
+echo "🔍 Running pre-commit checks..."
+echo ""
+
+# ─── Configuration Bypass Detection ─────────────────────────────────────────
+early_bypass_warn() {
+  echo ""
+  echo "⚠️  WARNING: Git configuration suggests possible hook bypass:"
+  echo "   $1"
+  echo ""
+  echo "Git config bypass to /dev/null might be intentional if you're"
+  echo "debugging something, but please revert with:"
+  echo "  git config --unset core.hooksPath"
+  echo ""
+  echo "Hooks will still run now as you're in a repository with hooks."
+  echo ""
+}
+
+# Check if git is configured to bypass hooks
+if git config --get core.hooksPath >/dev/null 2>&1; then
+  hooks_path=$(git config --get core.hooksPath 2>/dev/null)
+  if [ -n "$hooks_path" ] && [ "$hooks_path" != ".husky" ]; then
+    early_bypass_warn "core.hooksPath is set to '$hooks_path'"
+  fi
+fi
+
+# Audit logging (log before checks)
+if command -v node >/dev/null 2>&1 && [ -f "scripts/audit-hooks.js" ]; then
+  # Get staged files for logging
+  staged_files=$(git diff --cached --name-only | wc -l)
+  node scripts/audit-hooks.js pre-commit "$(git config user.name || echo 'unknown')" "running" "files:$staged_files" 2>/dev/null || true
+fi
+
+# Ensure lint-staged is available
+if ! command -v lint-staged >/dev/null 2>&1; then
+  echo "❌ lint-staged is not installed."
+  echo ""
+  echo "To fix: Run 'pnpm install' to install dependencies."
+  echo ""
+  echo "If you need to commit urgently and skip checks (not recommended):"
+  echo "  git commit --no-verify -m 'your message'"
+  exit 1
+fi
+
+# Run lint-staged
+echo "📦 Checking staged files..."
+echo ""
+if pnpm lint-staged; then
+  echo "✅ Pre-commit checks passed!"
+  # Audit logging (log success)
+  if command -v node >/dev/null 2>&1 && [ -f "scripts/audit-hooks.js" ]; then
+    node scripts/audit-hooks.js pre-commit "$(git config user.name || echo 'unknown')" "passed" "files:$staged_files" 2>/dev/null || true
+  fi
+  exit 0
+else
+  echo ""
+  echo "❌ Pre-commit checks failed."
+  # Audit logging (log failure)
+  if command -v node >/dev/null 2>&1 && [ -f "scripts/audit-hooks.js" ]; then
+    node scripts/audit-hooks.js pre-commit "$(git config user.name || echo 'unknown')" "failed" "files:$staged_files" 2>/dev/null || true
+  fi
+  echo ""
+  echo "Errors were detected in your staged files. Please fix them:"
+  echo ""
+  echo "🔧 Common issues & fixes:"
+  echo ""
+  echo "1. ESLint errors:"
+  echo "   - Review the error messages above"
+  echo "   - Fix the code issues in the affected files"
+  echo "   - Common fixes:"
+  echo "     • Remove unused variables"
+  echo "     • Add missing type annotations"
+  echo "     • Fix import/export issues"
+  echo ""
+  echo "2. Prettier formatting:"
+  echo "   - Some files may have been auto-formatted"
+  echo "   - Run 'git status' to see which files were changed"
+  echo "   - Stage the formatted files with 'git add .'"
+  echo ""
+  echo "3. If you see 'command not found' errors:"
+  echo "   - Run 'pnpm install' to install missing dependencies"
+  echo ""
+  echo "💡 How to proceed:"
+  echo "   - Fix the issues shown above"
+  echo "   - Re-stage your changes:"
+  echo "     git add ."
+  echo "   - Try committing again:"
+  echo "     git commit -m 'your message'"
+  echo ""
+  echo "⚠️  Emergency bypass (use with caution):"
+  echo "   git commit --no-verify -m 'your message'"
+  echo "   Only use this if you understand why checks are failing"
+  exit 1
+fi

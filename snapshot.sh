@@ -63,15 +63,13 @@ else
     echo "Warning: pg_isready not found, skipping wait. Ensure PostgreSQL is running."
 fi
 
-# 5. Database Schema Push
+# 5. Database Schema Migration
 echo "Applying database schema..."
-pnpm run db:push
+pnpm run db:migrate
 
 # 6. Database Seeding
-# Currently, there is no active database seed script.
-# Setup documentation for `db:seed` commands should be avoided until a seed script is formally introduced.
-# We skip the seed step to respect current project state.
-echo "Skipping database seeding (no seed script configured)."
+echo "Ensuring database is seeded..."
+pnpm run db:seed || echo "Warning: Seeding skipped or failed."
 
 echo "=== Snapshot Initialization Complete ==="
 

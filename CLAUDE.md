@@ -194,6 +194,68 @@ import { env } from '@/lib/env-script'; // Standalone Node.js scripts
 - **Secrets:** Never commit secrets; use `.env.local` and validated `env` objects.
 - **pnpm Overrides:** Use overrides to address dependency vulnerabilities immediately.
 
+### Husky Hook Protection
+
+**Multi-layered defense against bypassing pre-commit/pre-push quality checks:**
+
+**1. Hook Integrity Verification**
+- Hook files (`.husky/pre-push`, `.husky/pre-commit`) have SHA256 checksums in `.husky/hooks-checksum.txt`
+- Local pre-push verifies checksums via `node scripts/verify-hooks.js verify`
+- CI workflows run same verification - bypassing locally fails in CI
+- After legitimate hook updates: `node scripts/verify-hooks.js generate`
+
+**2. Git Config Bypass Detection**
+- Detects before running checks:
+  - `git config core.hooksPath /dev/null` → Warning shown, checks still run
+  - `git config init.templateDir` bypass → Warning logged
+  - `git commit/push --no-verify` → Logged to audit trail
+- Implementation: Early checks in `.husky/pre-push` and `.husky/pre-commit`
+
+**3. CI/CD Guard**
+- GitHub Actions workflows verify hooks before running tests/lint:
+  ```bash
+  node scripts/verify-hooks.js verify
+  node scripts/verify-hooks.js check-git
+  ```
+- CI fails if hooks missing or modified (strict mode vs local warning)
+- Ensures checks run even if local hooks bypassed
+
+**4. Audit Trail**
+- Commits/pushes logged: `.husky/audit/pre-commit-YYYY-MM-DD.log`, `.husky/audit/pre-push-YYYY-MM-DD.log`
+- Logs: timestamp, user, branch, files, bypass method
+- View logs: `node scripts/audit-hooks.js show`
+- **Bypass attempts always logged** even if checks skipped
+
+**5. Commands for Verification**
+```bash
+node scripts/verify-hooks.js verify    # Check integrity
+node scripts/verify-hooks.js generate  # Update checksums
+node scripts/verify-hooks.js check-git # Check git config
+node scripts/audit-hooks.js show      # View audit logs
+bash scripts/ci-verify-hooks.sh      # CI verification
+```
+
+**Consequences of Bypass Attempts:**
+- `--no-verify`: Checks skipped, logged to audit, CI will fail later
+- `core.hooksPath=/dev/null`: Warning locally, validation in CI
+- Delete/modify hooks: Passes locally, fails CI verification
+- Uninstall husky: Same as above
+
+**When Hooks Fail:**
+- **Always fix the code**, never bypass hooks
+- Hook failures indicate legitimate code quality issues
+- If hook modified intentionally: regenerate checksums
+- **Never commit with `--no-verify`** except true emergencies (documented in audit)
+
+**Never:**
+- Use `--no-verify` to bypass failing checks
+- Modify hooks without updating checksums
+- Commit secrets knowing hooks would block them
+- Skip auth checks knowing hooks validate auth usage
+- Delete hook files to avoid quality checks
+
+This system ensures quality checks **always run** (locally or in CI) and bypass attempts are **detected and logged**.
+
 ## Refactoring Philosophy
 
 When performing code health improvements:

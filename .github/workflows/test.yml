@@ -62,6 +62,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Verify hook integrity
+        run: |
+          # Verify that hooks are configured correctly even if local hooks were bypassed
+          # This ensures our quality checks run in CI even if local checks are bypassed
+          node scripts/verify-hooks.js verify
+          node scripts/verify-hooks.js check-git
+          echo "✓ Hook integrity verified"
+
       - name: Debug Environment Variables
         run: |
           echo "DATABASE_URL: ${DATABASE_URL:-not set}"
