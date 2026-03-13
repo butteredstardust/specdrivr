@@ -15,7 +15,10 @@ export async function POST() {
       );
     }
 
-    await db.update(notifications).set({ readAt: new Date() }).where(eq(notifications.userId, session.user.id));
+    await db
+      .update(notifications)
+      .set({ readAt: new Date() })
+      .where(eq(notifications.userId, session.user.id));
 
     return NextResponse.json({ data: { success: true } });
   } catch (error) {

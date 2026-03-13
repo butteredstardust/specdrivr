@@ -70,8 +70,22 @@ const initialCounts: SystemCounts = {
 };
 
 const initialAuditLogs: AuditLogEntry[] = [
-  { id: '1', userId: 'abc123', action: 'project_created', resourceType: 'projects', resourceId: 'def456', timestamp: new Date() },
-  { id: '2', userId: 'abc123', action: 'spec_created', resourceType: 'specifications', resourceId: 'ghi789', timestamp: new Date(Date.now() - 300000) },
+  {
+    id: '1',
+    userId: 'abc123',
+    action: 'project_created',
+    resourceType: 'projects',
+    resourceId: 'def456',
+    timestamp: new Date(),
+  },
+  {
+    id: '2',
+    userId: 'abc123',
+    action: 'spec_created',
+    resourceType: 'specifications',
+    resourceId: 'ghi789',
+    timestamp: new Date(Date.now() - 300000),
+  },
 ];
 
 function StatusBadge({ status, label }: { status: 'ok' | 'error'; label: string }) {
@@ -96,9 +110,9 @@ function StatusCard({
   icon: React.ElementType;
 }) {
   return (
-    <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
+    <div className="bg-card flex items-center justify-between rounded-lg border p-4">
       <div className="flex items-center gap-3">
-        <Icon className="h-5 w-5 text-muted-foreground" />
+        <Icon className="text-muted-foreground h-5 w-5" />
         <span className="font-medium">{label}</span>
       </div>
       <StatusBadge status={status} label={status === 'ok' ? 'OK' : 'ERROR'} />
@@ -108,9 +122,9 @@ function StatusCard({
 
 function EnvRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between items-center p-3 rounded bg-muted border">
-      <span className="text-sm text-muted-foreground">{label}</span>
-      <code className="px-2 py-1 rounded bg-background text-sm font-mono">{value}</code>
+    <div className="bg-muted flex items-center justify-between rounded border p-3">
+      <span className="text-muted-foreground text-sm">{label}</span>
+      <code className="bg-background rounded px-2 py-1 font-mono text-sm">{value}</code>
     </div>
   );
 }
@@ -129,16 +143,16 @@ function QuickAction({
   return (
     <a
       href={href}
-      className="flex items-start gap-4 p-4 rounded-lg border bg-card hover:bg-accent hover:text-accent-foreground transition-colors group"
+      className="bg-card hover:bg-accent hover:text-accent-foreground group flex items-start gap-4 rounded-lg border p-4 transition-colors"
     >
-      <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-        <Icon className="h-5 w-5 text-primary" />
+      <div className="bg-primary/10 group-hover:bg-primary/20 rounded-lg p-2 transition-colors">
+        <Icon className="text-primary h-5 w-5" />
       </div>
       <div className="flex-1">
-        <h3 className="font-semibold mb-1">{label}</h3>
-        <p className="text-sm text-muted-foreground">{description}</p>
+        <h3 className="mb-1 font-semibold">{label}</h3>
+        <p className="text-muted-foreground text-sm">{description}</p>
       </div>
-      <ArrowRightIcon className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+      <ArrowRightIcon className="text-muted-foreground group-hover:text-foreground h-5 w-5 transition-colors" />
     </a>
   );
 }
@@ -155,9 +169,20 @@ function LoadingState() {
 
 function ArrowRightIcon({ className }: { className?: string }) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M5 12h14"/>
-      <path d="m12 5 7 7-7 7"/>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M5 12h14" />
+      <path d="m12 5 7 7-7 7" />
     </svg>
   );
 }
@@ -177,7 +202,7 @@ export default function DebugDashboard() {
   // Poll for status updates (in real app, this would fetch from API)
   useMemo(() => {
     const interval = setInterval(() => {
-      setStatus(prev => ({ ...prev }));
+      setStatus((prev) => ({ ...prev }));
     }, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -185,13 +210,13 @@ export default function DebugDashboard() {
   const overallHealth = status.db === 'ok' && status.redis === 'ok';
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="bg-background text-foreground min-h-screen">
       <div className="border-b">
-        <div className="max-w-7xl mx-auto px-8 py-6">
+        <div className="mx-auto max-w-7xl px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-3">
-                <TargetIcon className="h-8 w-8 text-primary" />
+                <TargetIcon className="text-primary h-8 w-8" />
                 <h1 className="text-3xl font-bold">Specdrivr Debug</h1>
                 <PixelBadge tone="neutral">v0.1.0</PixelBadge>
               </div>
@@ -209,10 +234,15 @@ export default function DebugDashboard() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-8 py-8 space-y-8">
+      <div className="mx-auto max-w-7xl space-y-8 px-8 py-8">
         {/* System Status */}
-        <PixelCard title="System Status" footer={<span className="text-xs text-muted-foreground">Core infrastructure health checks</span>}>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <PixelCard
+          title="System Status"
+          footer={
+            <span className="text-muted-foreground text-xs">Core infrastructure health checks</span>
+          }
+        >
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <StatusCard
               label="Overall Status"
               status={status.overall}
@@ -225,9 +255,14 @@ export default function DebugDashboard() {
           <div className="space-y-4">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">System Health</span>
-              <span className="font-medium">{overallHealth ? 'All systems operational' : 'Some services affected'}</span>
+              <span className="font-medium">
+                {overallHealth ? 'All systems operational' : 'Some services affected'}
+              </span>
             </div>
-            <PixelProgress value={overallHealth ? 100 : 50} tone={overallHealth ? 'green' : 'gold'} />
+            <PixelProgress
+              value={overallHealth ? 100 : 50}
+              tone={overallHealth ? 'green' : 'gold'}
+            />
           </div>
         </PixelCard>
 
@@ -250,16 +285,51 @@ export default function DebugDashboard() {
               columns={[
                 { key: 'icon', header: '' },
                 { key: 'entity', header: 'Entity' },
-                { key: 'count', header: 'Count', className: 'text-right' }
+                { key: 'count', header: 'Count', className: 'text-right' },
               ]}
               data={[
-                { id: 'users', icon: <PersonIcon className="h-4 w-4" />, entity: 'Users', count: <span className="font-mono">{counts.users}</span> },
-                { id: 'sessions', icon: <ClockIcon className="h-4 w-4" />, entity: 'Sessions', count: <span className="font-mono">{counts.sessions}</span> },
-                { id: 'projects', icon: <QuestionMarkCircledIcon className="h-4 w-4" />, entity: 'Projects', count: <span className="font-mono">{counts.projects}</span> },
-                { id: 'specifications', icon: <InfoCircledIcon className="h-4 w-4" />, entity: 'Specifications', count: <span className="font-mono">{counts.specifications}</span> },
-                { id: 'plans', icon: <TargetIcon className="h-4 w-4" />, entity: 'Plans', count: <span className="font-mono">{counts.plans}</span> },
-                { id: 'tasks', icon: <PlusIcon className="h-4 w-4" />, entity: 'Tasks', count: <span className="font-mono">{counts.tasks}</span> },
-                { id: 'agentSessions', icon: <UpdateIcon className="h-4 w-4" />, entity: 'Agent Sessions', count: <span className="font-mono">{counts.agentSessions}</span> },
+                {
+                  id: 'users',
+                  icon: <PersonIcon className="h-4 w-4" />,
+                  entity: 'Users',
+                  count: <span className="font-mono">{counts.users}</span>,
+                },
+                {
+                  id: 'sessions',
+                  icon: <ClockIcon className="h-4 w-4" />,
+                  entity: 'Sessions',
+                  count: <span className="font-mono">{counts.sessions}</span>,
+                },
+                {
+                  id: 'projects',
+                  icon: <QuestionMarkCircledIcon className="h-4 w-4" />,
+                  entity: 'Projects',
+                  count: <span className="font-mono">{counts.projects}</span>,
+                },
+                {
+                  id: 'specifications',
+                  icon: <InfoCircledIcon className="h-4 w-4" />,
+                  entity: 'Specifications',
+                  count: <span className="font-mono">{counts.specifications}</span>,
+                },
+                {
+                  id: 'plans',
+                  icon: <TargetIcon className="h-4 w-4" />,
+                  entity: 'Plans',
+                  count: <span className="font-mono">{counts.plans}</span>,
+                },
+                {
+                  id: 'tasks',
+                  icon: <PlusIcon className="h-4 w-4" />,
+                  entity: 'Tasks',
+                  count: <span className="font-mono">{counts.tasks}</span>,
+                },
+                {
+                  id: 'agentSessions',
+                  icon: <UpdateIcon className="h-4 w-4" />,
+                  entity: 'Agent Sessions',
+                  count: <span className="font-mono">{counts.agentSessions}</span>,
+                },
               ]}
             />
           )}
@@ -270,30 +340,30 @@ export default function DebugDashboard() {
           {isLoading ? (
             <LoadingState />
           ) : auditLogs.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <TargetIcon className="h-12 w-12 mx-auto mb-3 opacity-50" />
+            <div className="text-muted-foreground py-8 text-center">
+              <TargetIcon className="mx-auto mb-3 h-12 w-12 opacity-50" />
               <p>No recent activity</p>
             </div>
           ) : (
             <div className="space-y-3">
               {auditLogs.map((log) => (
-                <div key={log.id} className="p-4 rounded-lg border bg-card">
-                  <div className="flex items-center justify-between mb-2">
+                <div key={log.id} className="bg-card rounded-lg border p-4">
+                  <div className="mb-2 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <CheckCircledIcon className="h-4 w-4 text-green-500" />
                       <span className="font-medium">{log.action}</span>
                     </div>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-muted-foreground text-xs">
                       {log.timestamp.toLocaleString()}
                     </span>
                   </div>
                   {(log.resourceType || log.resourceId) && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="text-muted-foreground flex items-center gap-2 text-sm">
                       {log.resourceType && (
                         <PixelBadge tone="neutral">{log.resourceType}</PixelBadge>
                       )}
                       {log.resourceId && (
-                        <code className="text-xs bg-muted px-1 rounded">
+                        <code className="bg-muted rounded px-1 text-xs">
                           #{log.resourceId.slice(0, 8)}...
                         </code>
                       )}
@@ -307,7 +377,7 @@ export default function DebugDashboard() {
 
         {/* Quick Actions */}
         <PixelCard title="Quick Actions">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <QuickAction
               href="/login"
               icon={LockOpen1Icon}
@@ -334,7 +404,7 @@ export default function DebugDashboard() {
             />
           </div>
           <PixelDivider spacing="md" />
-          <div className="w-full flex items-center justify-between text-xs text-muted-foreground">
+          <div className="text-muted-foreground flex w-full items-center justify-between text-xs">
             <div className="flex items-center gap-2">
               <UpdateIcon className="h-3 w-3" />
               <span>Debug Dashboard | Specdrivr v0.1.0</span>

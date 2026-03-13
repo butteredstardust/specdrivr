@@ -14,7 +14,7 @@ export async function updateAgentConfigAction(formData: FormData) {
   }
 
   const projectId = Number(formData.get('projectId'));
-  
+
   // Extract and convert form data
   const rawData = {
     projectId,
@@ -45,22 +45,35 @@ export async function updateAgentConfigAction(formData: FormData) {
 
   const { allowed } = await requireAdmin(session.user.id, projectId);
   if (!allowed) {
-    return { success: false, error: { code: 'FORBIDDEN', message: 'You must be a project admin to update settings' } };
+    return {
+      success: false,
+      error: { code: 'FORBIDDEN', message: 'You must be a project admin to update settings' },
+    };
   }
 
   try {
-    const config = await projectRepository.updateAgentConfig(projectId, result.data, session.user.id);
-    
+    const config = await projectRepository.updateAgentConfig(
+      projectId,
+      result.data,
+      session.user.id
+    );
+
     revalidatePath(`/projects/${projectId}/settings`);
-    
+
     return { success: true, data: config };
   } catch (error: unknown) {
-    logger.error({ 
-      error: error instanceof Error ? error.message : String(error), 
-      userId: session.user.id,
-      projectId
-    }, 'Failed to update agent config');
-    
-    return { success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } };
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        userId: session.user.id,
+        projectId,
+      },
+      'Failed to update agent config'
+    );
+
+    return {
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' },
+    };
   }
 }

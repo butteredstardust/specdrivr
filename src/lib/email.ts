@@ -7,7 +7,7 @@ const resend = new Resend(env.RESEND_API_KEY);
 
 /**
  * Sends an email using the Resend service.
- * 
+ *
  * @param to - Recipient email address
  * @param subject - Email subject line
  * @param html - HTML content of the email

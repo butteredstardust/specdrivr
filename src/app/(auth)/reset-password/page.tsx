@@ -33,11 +33,11 @@ function PasswordStrengthIndicator({ password }: { password: string }) {
   };
 
   return (
-    <div className="flex gap-1 w-full h-1 mt-2">
-      <div className={twMerge("flex-1 rounded-full transition-colors", getSegmentClass(1))} />
-      <div className={twMerge("flex-1 rounded-full transition-colors", getSegmentClass(2))} />
-      <div className={twMerge("flex-1 rounded-full transition-colors", getSegmentClass(3))} />
-      <div className={twMerge("flex-1 rounded-full transition-colors", getSegmentClass(4))} />
+    <div className="mt-2 flex h-1 w-full gap-1">
+      <div className={twMerge('flex-1 rounded-full transition-colors', getSegmentClass(1))} />
+      <div className={twMerge('flex-1 rounded-full transition-colors', getSegmentClass(2))} />
+      <div className={twMerge('flex-1 rounded-full transition-colors', getSegmentClass(3))} />
+      <div className={twMerge('flex-1 rounded-full transition-colors', getSegmentClass(4))} />
     </div>
   );
 }
@@ -76,17 +76,17 @@ function ResetPasswordContent() {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError('Passwords do not match.');
       return;
     }
 
     if (password.length < 12) {
-      setError("Password must be at least 12 characters.");
+      setError('Password must be at least 12 characters.');
       return;
     }
 
     if (!token) {
-      setError("Invalid or missing token.");
+      setError('Invalid or missing token.');
       return;
     }
 
@@ -124,13 +124,17 @@ function ResetPasswordContent() {
   if (!isTokenValid && !isSuccess) {
     return (
       <div className="w-full max-w-[400px]">
-        <div className="bg-[--bg-surface] border-[--border-default] p-8 flex flex-col items-center text-center">
+        <div className="flex flex-col items-center border-[--border-default] bg-[--bg-surface] p-8 text-center">
           <DaemonMascot size="lg" state="error" className="mb-4" />
-          <h1 className="font-bold text-lg mb-2 text-[--text-primary]">This link has expired.</h1>
-          <p className="text-sm text-[--text-muted] mb-8">
+          <h1 className="mb-2 text-lg font-bold text-[--text-primary]">This link has expired.</h1>
+          <p className="mb-8 text-sm text-[--text-muted]">
             Password reset links are valid for 1 hour.
           </p>
-          <PixelButton tone="neutral" className="w-full" onClick={() => router.push('/forgot-password')}>
+          <PixelButton
+            tone="neutral"
+            className="w-full"
+            onClick={() => router.push('/forgot-password')}
+          >
             Request a new link
           </PixelButton>
         </div>
@@ -141,9 +145,9 @@ function ResetPasswordContent() {
   if (isSuccess) {
     return (
       <div className="w-full max-w-[400px]">
-        <div className="bg-[--bg-surface] border-[--border-default] p-8 flex flex-col items-center text-center">
+        <div className="flex flex-col items-center border-[--border-default] bg-[--bg-surface] p-8 text-center">
           <DaemonMascot size="lg" state="success" className="mb-4" />
-          <h1 className="font-bold text-lg mb-8 text-[--text-primary]">Password updated.</h1>
+          <h1 className="mb-8 text-lg font-bold text-[--text-primary]">Password updated.</h1>
           <PixelButton tone="purple" className="w-full" onClick={() => router.push('/login')}>
             Sign in
           </PixelButton>
@@ -154,19 +158,27 @@ function ResetPasswordContent() {
 
   return (
     <div className="w-full max-w-[400px]">
-      <div className="bg-[--bg-surface] border-[--border-default] p-8 flex flex-col items-center">
-        <DaemonMascot size="lg" state={isLoading ? 'working' : error ? 'error' : 'idle'} className="mb-4" />
-        <h1 className="font-bold text-lg mb-8 text-[--text-primary] tracking-widest uppercase">RESET PASSWORD</h1>
+      <div className="flex flex-col items-center border-[--border-default] bg-[--bg-surface] p-8">
+        <DaemonMascot
+          size="lg"
+          state={isLoading ? 'working' : error ? 'error' : 'idle'}
+          className="mb-4"
+        />
+        <h1 className="mb-8 text-lg font-bold tracking-widest text-[--text-primary] uppercase">
+          RESET PASSWORD
+        </h1>
 
         {error && (
-          <div className="w-full mb-6">
+          <div className="mb-6 w-full">
             <PixelAlert tone="red" title="Error" message={error} />
           </div>
         )}
 
-        <form className="w-full flex flex-col gap-6" onSubmit={handleSubmit}>
+        <form className="flex w-full flex-col gap-6" onSubmit={handleSubmit}>
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="password" className="text-xs font-medium text-[--text-secondary]">NEW PASSWORD</label>
+            <label htmlFor="password" className="text-xs font-medium text-[--text-secondary]">
+              NEW PASSWORD
+            </label>
             <PixelPasswordInput
               id="password"
               tone="purple"
@@ -179,7 +191,12 @@ function ResetPasswordContent() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="confirmPassword" className="text-xs font-medium text-[--text-secondary]">CONFIRM PASSWORD</label>
+            <label
+              htmlFor="confirmPassword"
+              className="text-xs font-medium text-[--text-secondary]"
+            >
+              CONFIRM PASSWORD
+            </label>
             <PixelPasswordInput
               id="confirmPassword"
               tone="purple"
@@ -189,12 +206,7 @@ function ResetPasswordContent() {
             />
           </div>
 
-          <PixelButton
-            type="submit"
-            tone="purple"
-            className="w-full mt-2"
-            loading={isLoading}
-          >
+          <PixelButton type="submit" tone="purple" className="mt-2 w-full" loading={isLoading}>
             Set New Password
           </PixelButton>
         </form>
@@ -205,12 +217,14 @@ function ResetPasswordContent() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={
-      <div className="w-full max-w-[400px] text-center text-[--text-muted]">
-        <DaemonMascot size="lg" state="working" className="mx-auto mb-4" />
-        Loading...
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="w-full max-w-[400px] text-center text-[--text-muted]">
+          <DaemonMascot size="lg" state="working" className="mx-auto mb-4" />
+          Loading...
+        </div>
+      }
+    >
       <ResetPasswordContent />
     </Suspense>
   );

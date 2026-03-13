@@ -2,21 +2,21 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { clientLogger } from '@/lib/logger-client';
 
 type UsePollingOptions<T> = {
-  url: string;                          // endpoint to poll
-  interval?: number;                    // ms between polls, default 3000
-  enabled?: boolean;                    // pause polling when false
-  stopWhen?: (data: T) => boolean;      // stop automatically when condition met
-  onData?: (data: T) => void;           // called on each successful response
-  onError?: (error: Error) => void;     // called on fetch failure
+  url: string; // endpoint to poll
+  interval?: number; // ms between polls, default 3000
+  enabled?: boolean; // pause polling when false
+  stopWhen?: (data: T) => boolean; // stop automatically when condition met
+  onData?: (data: T) => void; // called on each successful response
+  onError?: (error: Error) => void; // called on fetch failure
 };
 
 type UsePollingResult<T> = {
   data: T | null;
   error: Error | null;
-  isLoading: boolean;                   // true only on first fetch
+  isLoading: boolean; // true only on first fetch
   lastUpdated: Date | null;
-  stop: () => void;                     // manual stop
-  restart: () => void;                  // manual restart
+  stop: () => void; // manual stop
+  restart: () => void; // manual restart
 };
 
 /**
@@ -70,7 +70,6 @@ export function usePolling<T>({
     }
 
     let isMounted = true;
-
 
     const fetchData = async () => {
       try {

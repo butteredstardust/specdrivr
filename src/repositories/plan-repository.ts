@@ -1,5 +1,12 @@
 import { db } from '@/db';
-import { plans, specifications, agentSessions, planReviews, auditLog, type PlanSelect as Plan } from '@/db/schema';
+import {
+  plans,
+  specifications,
+  agentSessions,
+  planReviews,
+  auditLog,
+  type PlanSelect as Plan,
+} from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, DatabaseError, BusinessError } from '@/lib/errors';
@@ -10,9 +17,7 @@ export { type PlanSelect as Plan } from '@/db/schema';
 
 export class PlanRepository extends BaseRepository {
   async getAll(): Promise<Plan[]> {
-    return await this.executeQuery(() =>
-      db.select().from(plans)
-    );
+    return await this.executeQuery(() => db.select().from(plans));
   }
 
   async getById(id: number): Promise<Plan | null> {
@@ -24,9 +29,7 @@ export class PlanRepository extends BaseRepository {
   }
 
   async getBySpecId(specId: number): Promise<Plan[]> {
-    return await this.executeQuery(() =>
-      db.select().from(plans).where(eq(plans.specId, specId))
-    );
+    return await this.executeQuery(() => db.select().from(plans).where(eq(plans.specId, specId)));
   }
 
   async getBySpecVersionId(specVersionId: number): Promise<Plan | null> {
@@ -43,7 +46,10 @@ export class PlanRepository extends BaseRepository {
     }
 
     const [plan] = await this.executeQuery(() =>
-      db.insert(plans).values(data as import('@/db/schema').PlanInsert).returning()
+      db
+        .insert(plans)
+        .values(data as import('@/db/schema').PlanInsert)
+        .returning()
     );
 
     if (!plan) {
@@ -53,16 +59,17 @@ export class PlanRepository extends BaseRepository {
     // Trigger plan.generated webhook
     (async () => {
       try {
-        const [spec] = await db.select({ projectId: specifications.projectId })
+        const [spec] = await db
+          .select({ projectId: specifications.projectId })
           .from(specifications)
           .where(eq(specifications.id, plan.specId))
           .limit(1);
-        
+
         if (spec) {
           void dispatchWebhookEvent(spec.projectId, 'plan.generated', {
             planId: plan.id,
             specId: plan.specId,
-            data: {}
+            data: {},
           });
         }
       } catch (err) {
@@ -112,18 +119,22 @@ export class PlanRepository extends BaseRepository {
     if (!plan) throw new NotFoundError(`Plan with ID ${data.planId} not found`);
 
     if (plan.status !== 'pending_approval') {
-      throw new BusinessError(`Plan is in ${plan.status} state and cannot be approved`, 'INVALID_STATE');
+      throw new BusinessError(
+        `Plan is in ${plan.status} state and cannot be approved`,
+        'INVALID_STATE'
+      );
     }
 
     return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         // 1. Update plan status
-        const [updatedPlan] = await tx.update(plans)
-          .set({ 
+        const [updatedPlan] = await tx
+          .update(plans)
+          .set({
             status: 'executing',
             approvedAt: new Date(),
             approvedBy: data.userId,
-            reviewerNotes: data.notes
+            reviewerNotes: data.notes,
           })
           .where(eq(plans.id, data.planId))
           .returning();
@@ -137,22 +148,38 @@ export class PlanRepository extends BaseRepository {
         });
 
         // 3. Update specification status
-        await tx.update(specifications)
+        await tx
+          .update(specifications)
           .set({ status: 'executing' })
           .where(eq(specifications.id, plan.specId));
 
         // 4. Create agent session
-        const [session] = await tx.insert(agentSessions).values({
-          projectId: (await tx.select({ pid: specifications.projectId }).from(specifications).where(eq(specifications.id, plan.specId)).limit(1))[0].pid,
-          specId: plan.specId,
-          planId: plan.id,
-          status: 'running',
-          startedBy: data.userId,
-        }).returning();
+        const [session] = await tx
+          .insert(agentSessions)
+          .values({
+            projectId: (
+              await tx
+                .select({ pid: specifications.projectId })
+                .from(specifications)
+                .where(eq(specifications.id, plan.specId))
+                .limit(1)
+            )[0].pid,
+            specId: plan.specId,
+            planId: plan.id,
+            status: 'running',
+            startedBy: data.userId,
+          })
+          .returning();
 
         // 5. Audit log
         await tx.insert(auditLog).values({
-          projectId: (await tx.select({ pid: specifications.projectId }).from(specifications).where(eq(specifications.id, plan.specId)).limit(1))[0].pid,
+          projectId: (
+            await tx
+              .select({ pid: specifications.projectId })
+              .from(specifications)
+              .where(eq(specifications.id, plan.specId))
+              .limit(1)
+          )[0].pid,
           userId: data.userId,
           action: 'approve_plan',
           targetType: 'plan',
@@ -166,16 +193,17 @@ export class PlanRepository extends BaseRepository {
       // Trigger plan.approved webhook after transaction commits
       (async () => {
         try {
-          const [spec] = await db.select({ projectId: specifications.projectId })
+          const [spec] = await db
+            .select({ projectId: specifications.projectId })
             .from(specifications)
             .where(eq(specifications.id, result.plan.specId))
             .limit(1);
-          
+
           if (spec) {
             void dispatchWebhookEvent(spec.projectId, 'plan.approved', {
               planId: result.plan.id,
               specId: result.plan.specId,
-              data: { approvedBy: data.userId }
+              data: { approvedBy: data.userId },
             });
           }
         } catch (err) {
@@ -189,18 +217,15 @@ export class PlanRepository extends BaseRepository {
   /**
    * Rejects a plan in a transaction.
    */
-  async rejectPlan(data: {
-    planId: number;
-    userId: string;
-    notes: string;
-  }): Promise<Plan> {
+  async rejectPlan(data: { planId: number; userId: string; notes: string }): Promise<Plan> {
     const plan = await this.getById(data.planId);
     if (!plan) throw new NotFoundError(`Plan with ID ${data.planId} not found`);
 
     return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         // 1. Update plan
-        const [updatedPlan] = await tx.update(plans)
+        const [updatedPlan] = await tx
+          .update(plans)
           .set({ status: 'rejected', reviewerNotes: data.notes })
           .where(eq(plans.id, data.planId))
           .returning();
@@ -214,13 +239,20 @@ export class PlanRepository extends BaseRepository {
         });
 
         // 3. Update specification status back to drafting
-        await tx.update(specifications)
+        await tx
+          .update(specifications)
           .set({ status: 'drafting' })
           .where(eq(specifications.id, plan.specId));
 
         // 4. Audit log
         await tx.insert(auditLog).values({
-          projectId: (await tx.select({ pid: specifications.projectId }).from(specifications).where(eq(specifications.id, plan.specId)).limit(1))[0].pid,
+          projectId: (
+            await tx
+              .select({ pid: specifications.projectId })
+              .from(specifications)
+              .where(eq(specifications.id, plan.specId))
+              .limit(1)
+          )[0].pid,
           userId: data.userId,
           action: 'reject_plan',
           targetType: 'plan',
@@ -234,16 +266,17 @@ export class PlanRepository extends BaseRepository {
       // Trigger plan.rejected webhook after transaction commits
       (async () => {
         try {
-          const [spec] = await db.select({ projectId: specifications.projectId })
+          const [spec] = await db
+            .select({ projectId: specifications.projectId })
             .from(specifications)
             .where(eq(specifications.id, updatedPlan.specId))
             .limit(1);
-          
+
           if (spec) {
             void dispatchWebhookEvent(spec.projectId, 'plan.rejected', {
               planId: updatedPlan.id,
               specId: updatedPlan.specId,
-              data: { notes: data.notes, userId: data.userId }
+              data: { notes: data.notes, userId: data.userId },
             });
           }
         } catch (err) {
@@ -257,18 +290,15 @@ export class PlanRepository extends BaseRepository {
   /**
    * Requests changes on a plan in a transaction.
    */
-  async requestChanges(data: {
-    planId: number;
-    userId: string;
-    notes: string;
-  }): Promise<Plan> {
+  async requestChanges(data: { planId: number; userId: string; notes: string }): Promise<Plan> {
     const plan = await this.getById(data.planId);
     if (!plan) throw new NotFoundError(`Plan with ID ${data.planId} not found`);
 
     return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         // 1. Update plan
-        const [updatedPlan] = await tx.update(plans)
+        const [updatedPlan] = await tx
+          .update(plans)
           .set({ status: 'changes_requested', reviewerNotes: data.notes })
           .where(eq(plans.id, data.planId))
           .returning();
@@ -282,13 +312,20 @@ export class PlanRepository extends BaseRepository {
         });
 
         // 3. Update specification status back to drafting
-        await tx.update(specifications)
+        await tx
+          .update(specifications)
           .set({ status: 'drafting' })
           .where(eq(specifications.id, plan.specId));
 
         // 4. Audit log
         await tx.insert(auditLog).values({
-          projectId: (await tx.select({ pid: specifications.projectId }).from(specifications).where(eq(specifications.id, plan.specId)).limit(1))[0].pid,
+          projectId: (
+            await tx
+              .select({ pid: specifications.projectId })
+              .from(specifications)
+              .where(eq(specifications.id, plan.specId))
+              .limit(1)
+          )[0].pid,
           userId: data.userId,
           action: 'request_changes',
           targetType: 'plan',
@@ -302,16 +339,17 @@ export class PlanRepository extends BaseRepository {
       // Trigger plan.changes_requested webhook after transaction commits
       (async () => {
         try {
-          const [spec] = await db.select({ projectId: specifications.projectId })
+          const [spec] = await db
+            .select({ projectId: specifications.projectId })
             .from(specifications)
             .where(eq(specifications.id, updatedPlan.specId))
             .limit(1);
-          
+
           if (spec) {
             void dispatchWebhookEvent(spec.projectId, 'plan.changes_requested', {
               planId: updatedPlan.id,
               specId: updatedPlan.specId,
-              data: { notes: data.notes, userId: data.userId }
+              data: { notes: data.notes, userId: data.userId },
             });
           }
         } catch (err) {
@@ -325,16 +363,14 @@ export class PlanRepository extends BaseRepository {
   /**
    * Abandons a plan.
    */
-  async abandonPlan(data: {
-    planId: number;
-    userId: string;
-  }): Promise<Plan> {
+  async abandonPlan(data: { planId: number; userId: string }): Promise<Plan> {
     const plan = await this.getById(data.planId);
     if (!plan) throw new NotFoundError(`Plan with ID ${data.planId} not found`);
 
     return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
-        const [updatedPlan] = await tx.update(plans)
+        const [updatedPlan] = await tx
+          .update(plans)
           .set({ status: 'abandoned' })
           .where(eq(plans.id, data.planId))
           .returning();
@@ -347,7 +383,13 @@ export class PlanRepository extends BaseRepository {
 
         // 4. Audit log
         await tx.insert(auditLog).values({
-          projectId: (await tx.select({ pid: specifications.projectId }).from(specifications).where(eq(specifications.id, plan.specId)).limit(1))[0].pid,
+          projectId: (
+            await tx
+              .select({ pid: specifications.projectId })
+              .from(specifications)
+              .where(eq(specifications.id, plan.specId))
+              .limit(1)
+          )[0].pid,
           userId: data.userId,
           action: 'abandon_plan',
           targetType: 'plan',

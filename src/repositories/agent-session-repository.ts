@@ -1,5 +1,11 @@
 import { db } from '@/db';
-import { agentSessions, auditLog, type AgentSessionSelect as AgentSession, projects, specifications } from '@/db/schema';
+import {
+  agentSessions,
+  auditLog,
+  type AgentSessionSelect as AgentSession,
+  projects,
+  specifications,
+} from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, DatabaseError } from '@/lib/errors';
@@ -13,7 +19,12 @@ export { type AgentSessionSelect as AgentSession } from '@/db/schema';
 export class AgentSessionRepository extends BaseRepository {
   async getAll(limit = 50, offset = 0): Promise<AgentSession[]> {
     return await this.executeQuery(() =>
-      db.select().from(agentSessions).limit(limit).offset(offset).orderBy(desc(agentSessions.startedAt))
+      db
+        .select()
+        .from(agentSessions)
+        .limit(limit)
+        .offset(offset)
+        .orderBy(desc(agentSessions.startedAt))
     );
   }
 
@@ -27,7 +38,13 @@ export class AgentSessionRepository extends BaseRepository {
 
   async getByProjectId(projectId: number, limit = 50, offset = 0): Promise<AgentSession[]> {
     return await this.executeQuery(() =>
-      db.select().from(agentSessions).where(eq(agentSessions.projectId, projectId)).limit(limit).offset(offset).orderBy(desc(agentSessions.startedAt))
+      db
+        .select()
+        .from(agentSessions)
+        .where(eq(agentSessions.projectId, projectId))
+        .limit(limit)
+        .offset(offset)
+        .orderBy(desc(agentSessions.startedAt))
     );
   }
 
@@ -37,15 +54,23 @@ export class AgentSessionRepository extends BaseRepository {
     );
   }
 
-  async create(data: { projectId: number; specId?: number; planId?: number; startedBy?: string }): Promise<AgentSession> {
+  async create(data: {
+    projectId: number;
+    specId?: number;
+    planId?: number;
+    startedBy?: string;
+  }): Promise<AgentSession> {
     const [session] = await this.executeQuery(() =>
-      db.insert(agentSessions).values({
-        projectId: data.projectId,
-        specId: data.specId || null,
-        planId: data.planId || null,
-        startedBy: data.startedBy || null,
-        status: 'running',
-      }).returning()
+      db
+        .insert(agentSessions)
+        .values({
+          projectId: data.projectId,
+          specId: data.specId || null,
+          planId: data.planId || null,
+          startedBy: data.startedBy || null,
+          status: 'running',
+        })
+        .returning()
     );
 
     if (!session) {
@@ -56,7 +81,7 @@ export class AgentSessionRepository extends BaseRepository {
     void dispatchWebhookEvent(session.projectId, 'session.started', {
       sessionId: session.id,
       specId: session.specId || undefined,
-      data: {}
+      data: {},
     });
 
     // Trigger Slack notification
@@ -65,7 +90,11 @@ export class AgentSessionRepository extends BaseRepository {
     return session;
   }
 
-  async update(id: number, data: Partial<import('@/db/schema').AgentSessionInsert>, actorId?: string): Promise<AgentSession> {
+  async update(
+    id: number,
+    data: Partial<import('@/db/schema').AgentSessionInsert>,
+    actorId?: string
+  ): Promise<AgentSession> {
     return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         const [updatedSession] = await tx
@@ -99,13 +128,13 @@ export class AgentSessionRepository extends BaseRepository {
           failed: 'session.failed',
           cancelled: 'session.cancelled',
         };
-        
+
         const event = eventMap[data.status];
         if (event) {
           void dispatchWebhookEvent(updatedSession.projectId, event, {
             sessionId: updatedSession.id,
             specId: updatedSession.specId || undefined,
-            data: data.status === 'completed' ? { totalCostUsd: updatedSession.totalCostUsd } : {}
+            data: data.status === 'completed' ? { totalCostUsd: updatedSession.totalCostUsd } : {},
           });
 
           // Trigger Slack notification

@@ -16,24 +16,23 @@ const CreateSpecificationSchema = z.object({
   markdownContent: z.string().min(1, 'Initial content is required'),
 });
 
-export async function GET(
-  _request: NextRequest,
-  { params }: RouteParams
-) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        { status: 401 }
+      );
     }
 
     const { id } = await params;
     const projectId = parseInt(id, 10);
 
     if (isNaN(projectId) || projectId <= 0) {
-      return NextResponse.json(
-        formatErrorResponse({ message: 'Invalid project ID' }),
-        { status: 400 }
-      );
+      return NextResponse.json(formatErrorResponse({ message: 'Invalid project ID' }), {
+        status: 400,
+      });
     }
 
     // RBAC: require member to list specs
@@ -55,31 +54,35 @@ export async function GET(
   }
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: RouteParams
-) {
+export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        { status: 401 }
+      );
     }
 
     const { id } = await params;
     const projectId = parseInt(id, 10);
 
     if (isNaN(projectId) || projectId <= 0) {
-      return NextResponse.json(
-        formatErrorResponse({ message: 'Invalid project ID' }),
-        { status: 400 }
-      );
+      return NextResponse.json(formatErrorResponse({ message: 'Invalid project ID' }), {
+        status: 400,
+      });
     }
 
     // RBAC: require member to create spec
     const { allowed } = await requireMember(session.user.id, projectId);
     if (!allowed) {
       return NextResponse.json(
-        { error: { code: 'FORBIDDEN', message: 'You do not have permission to create specifications in this project' } },
+        {
+          error: {
+            code: 'FORBIDDEN',
+            message: 'You do not have permission to create specifications in this project',
+          },
+        },
         { status: 403 }
       );
     }
@@ -89,9 +92,14 @@ export async function POST(
 
     // Check for name conflict
     const existing = await specificationRepository.getByProjectId(projectId);
-    if (existing.some(s => s.name === parsed.name)) {
+    if (existing.some((s) => s.name === parsed.name)) {
       return NextResponse.json(
-        { error: { code: 'CONFLICT', message: `Specification with name "${parsed.name}" already exists in this project` } },
+        {
+          error: {
+            code: 'CONFLICT',
+            message: `Specification with name "${parsed.name}" already exists in this project`,
+          },
+        },
         { status: 409 }
       );
     }
@@ -103,9 +111,12 @@ export async function POST(
       createdBy: session.user.id,
     });
 
-    return NextResponse.json({
-      data: spec,
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        data: spec,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(

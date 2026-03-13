@@ -17,14 +17,14 @@ const CreateSpecVersionSchema = z.object({
   markdownContent: z.string().min(1, 'Markdown content is required'),
 });
 
-export async function GET(
-  _request: NextRequest,
-  { params }: RouteParams
-) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        { status: 401 }
+      );
     }
 
     const { id } = await params;
@@ -32,13 +32,19 @@ export async function GET(
 
     const spec = await specificationRepository.getById(specId);
     if (!spec) {
-      return NextResponse.json({ error: { code: 'NOT_FOUND', message: 'Specification not found' } }, { status: 404 });
+      return NextResponse.json(
+        { error: { code: 'NOT_FOUND', message: 'Specification not found' } },
+        { status: 404 }
+      );
     }
 
     // RBAC: require member to view versions
     const { allowed } = await requireMember(session.user.id, spec.projectId);
     if (!allowed) {
-      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'You do not have access to this project' } }, { status: 403 });
+      return NextResponse.json(
+        { error: { code: 'FORBIDDEN', message: 'You do not have access to this project' } },
+        { status: 403 }
+      );
     }
 
     const versions = await db
@@ -53,14 +59,14 @@ export async function GET(
   }
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: RouteParams
-) {
+export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        { status: 401 }
+      );
     }
 
     const { id } = await params;
@@ -68,13 +74,24 @@ export async function POST(
 
     const spec = await specificationRepository.getById(specId);
     if (!spec) {
-      return NextResponse.json({ error: { code: 'NOT_FOUND', message: 'Specification not found' } }, { status: 404 });
+      return NextResponse.json(
+        { error: { code: 'NOT_FOUND', message: 'Specification not found' } },
+        { status: 404 }
+      );
     }
 
     // RBAC: require member to add version
     const { allowed } = await requireMember(session.user.id, spec.projectId);
     if (!allowed) {
-      return NextResponse.json({ error: { code: 'FORBIDDEN', message: 'You do not have permission to update this specification' } }, { status: 403 });
+      return NextResponse.json(
+        {
+          error: {
+            code: 'FORBIDDEN',
+            message: 'You do not have permission to update this specification',
+          },
+        },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();

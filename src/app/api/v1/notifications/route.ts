@@ -8,11 +8,15 @@ import { eq, desc } from 'drizzle-orm';
 export async function GET() {
   const session = await auth();
   if (!session) {
-    return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+    return NextResponse.json(
+      { error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+      { status: 401 }
+    );
   }
 
   try {
-    const list = await db.select()
+    const list = await db
+      .select()
       .from(notifications)
       .where(eq(notifications.userId, session.user.id))
       .orderBy(desc(notifications.createdAt));

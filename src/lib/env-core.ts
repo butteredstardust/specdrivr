@@ -5,12 +5,23 @@ import path from 'path';
 import { logger } from './logger-cli';
 
 export const envSchema = z.object({
-  DATABASE_URL: z.string().min(1, 'DATABASE_URL is required').url('DATABASE_URL must be a valid URL'),
-  NEXTAUTH_SECRET: z.string().min(32, 'NEXTAUTH_SECRET must be at least 32 characters for security'),
-  BETTER_AUTH_SECRET: z.string().min(32, 'BETTER_AUTH_SECRET must be at least 32 characters for security'),
+  DATABASE_URL: z
+    .string()
+    .min(1, 'DATABASE_URL is required')
+    .url('DATABASE_URL must be a valid URL'),
+  NEXTAUTH_SECRET: z
+    .string()
+    .min(32, 'NEXTAUTH_SECRET must be at least 32 characters for security'),
+  BETTER_AUTH_SECRET: z
+    .string()
+    .min(32, 'BETTER_AUTH_SECRET must be at least 32 characters for security'),
   NEXTAUTH_URL: z.string().url('NEXTAUTH_URL must be a valid URL').default('http://localhost:3000'),
   NEXT_PUBLIC_APP_URL: z.string().url().default('http://localhost:3000'),
-  REDIS_URL: z.string().url('REDIS_URL must be a valid URL').optional().default('redis://localhost:6379'),
+  REDIS_URL: z
+    .string()
+    .url('REDIS_URL must be a valid URL')
+    .optional()
+    .default('redis://localhost:6379'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   GITHUB_TOKEN: z.string().optional(),
   GITHUB_WEBHOOK_SECRET: z.string().optional(),
@@ -41,8 +52,10 @@ export function parseEnv(): Env {
 
   const envToParse = {
     DATABASE_URL: process.env.DATABASE_URL,
-    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || (process.env.VITEST ? 'a'.repeat(32) : undefined),
-    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET || (process.env.VITEST ? 'a'.repeat(32) : undefined),
+    NEXTAUTH_SECRET:
+      process.env.NEXTAUTH_SECRET || (process.env.VITEST ? 'a'.repeat(32) : undefined),
+    BETTER_AUTH_SECRET:
+      process.env.BETTER_AUTH_SECRET || (process.env.VITEST ? 'a'.repeat(32) : undefined),
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL,
     REDIS_URL: process.env.REDIS_URL,
@@ -50,7 +63,8 @@ export function parseEnv(): Env {
     GITHUB_TOKEN: process.env.GITHUB_TOKEN,
     GITHUB_WEBHOOK_SECRET: process.env.GITHUB_WEBHOOK_SECRET,
     CRON_SECRET: process.env.CRON_SECRET || (process.env.VITEST ? 'a'.repeat(32) : undefined),
-    RESEND_API_KEY: process.env.RESEND_API_KEY || (process.env.VITEST ? 're_dummy_key_for_testing' : undefined),
+    RESEND_API_KEY:
+      process.env.RESEND_API_KEY || (process.env.VITEST ? 're_dummy_key_for_testing' : undefined),
     RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
   };
 

@@ -6,11 +6,7 @@ import { Sidebar } from '@/components/shell/sidebar';
 import { TopBar } from '@/components/shell/top-bar';
 import { KeyboardShortcutsWrapper } from '@/components/shell/keyboard-shortcuts-wrapper';
 
-export default async function AppLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
 
   if (!session?.user) {
@@ -19,14 +15,19 @@ export default async function AppLayout({
   }
 
   return (
-    <ShellProvider user={{ id: session.user.id, name: session.user.name, email: session.user.email, avatarUrl: session.user.image || undefined }}>
-      <div className="flex h-screen bg-[--bg-base] overflow-hidden">
+    <ShellProvider
+      user={{
+        id: session.user.id,
+        name: session.user.name,
+        email: session.user.email,
+        avatarUrl: session.user.image || undefined,
+      }}
+    >
+      <div className="flex h-screen overflow-hidden bg-[--bg-base]">
         <Sidebar />
-        <div className="flex flex-col flex-1 min-w-0">
+        <div className="flex min-w-0 flex-1 flex-col">
           <TopBar title="SPECDRIVR" />
-          <main className="flex-1 overflow-auto">
-            {children}
-          </main>
+          <main className="flex-1 overflow-auto">{children}</main>
         </div>
       </div>
 

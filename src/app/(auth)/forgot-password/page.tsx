@@ -38,10 +38,10 @@ export default function ForgotPasswordPage() {
   if (isSuccess) {
     return (
       <div className="w-full max-w-[400px]">
-        <div className="bg-[--bg-surface] border-[--border-default] p-8 flex flex-col items-center text-center">
+        <div className="flex flex-col items-center border-[--border-default] bg-[--bg-surface] p-8 text-center">
           <DaemonMascot size="lg" state="success" className="mb-4" />
-          <h1 className="font-bold text-lg mb-2 text-[--text-primary]">Check your email.</h1>
-          <p className="text-sm text-[--text-muted] mb-8">
+          <h1 className="mb-2 text-lg font-bold text-[--text-primary]">Check your email.</h1>
+          <p className="mb-8 text-sm text-[--text-muted]">
             If an account exists, a reset link is on its way.
           </p>
           <Link href="/login" className="text-sm text-[--accent-violet] hover:underline">
@@ -54,22 +54,30 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="w-full max-w-[400px]">
-      <div className="bg-[--bg-surface] border-[--border-default] p-8 flex flex-col items-center">
-        <DaemonMascot size="lg" state={isLoading ? 'working' : error ? 'error' : 'idle'} className="mb-4" />
-        <h1 className="font-bold text-lg mb-2 text-[--text-primary] tracking-widest uppercase">FORGOT PASSWORD</h1>
-        <p className="text-sm text-[--text-muted] mb-8 text-center">
+      <div className="flex flex-col items-center border-[--border-default] bg-[--bg-surface] p-8">
+        <DaemonMascot
+          size="lg"
+          state={isLoading ? 'working' : error ? 'error' : 'idle'}
+          className="mb-4"
+        />
+        <h1 className="mb-2 text-lg font-bold tracking-widest text-[--text-primary] uppercase">
+          FORGOT PASSWORD
+        </h1>
+        <p className="mb-8 text-center text-sm text-[--text-muted]">
           Enter your email and we'll send a reset link.
         </p>
 
         {error && (
-          <div className="w-full mb-6">
+          <div className="mb-6 w-full">
             <PixelAlert tone="red" title="Error" message={error} />
           </div>
         )}
 
-        <form className="w-full flex flex-col gap-6" onSubmit={handleSubmit}>
+        <form className="flex w-full flex-col gap-6" onSubmit={handleSubmit}>
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="email" className="text-xs font-medium text-[--text-secondary]">EMAIL</label>
+            <label htmlFor="email" className="text-xs font-medium text-[--text-secondary]">
+              EMAIL
+            </label>
             <PixelInput
               id="email"
               type="email"
@@ -81,17 +89,15 @@ export default function ForgotPasswordPage() {
             />
           </div>
 
-          <PixelButton
-            type="submit"
-            tone="purple"
-            className="w-full"
-            loading={isLoading}
-          >
+          <PixelButton type="submit" tone="purple" className="w-full" loading={isLoading}>
             Send Reset Link
           </PixelButton>
 
-          <div className="text-center mt-2">
-            <Link href="/login" className="text-sm text-[--text-muted] hover:text-[--text-primary] hover:underline">
+          <div className="mt-2 text-center">
+            <Link
+              href="/login"
+              className="text-sm text-[--text-muted] hover:text-[--text-primary] hover:underline"
+            >
               ← Back to sign in
             </Link>
           </div>

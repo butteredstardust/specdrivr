@@ -109,15 +109,19 @@ export async function aggregateUsageForDate(date: Date): Promise<{
 }
 
 // CLI entrypoint
-const isMain = process.argv[1]?.endsWith('aggregate-usage.ts') || process.argv[1]?.endsWith('aggregate-usage.js');
+const isMain =
+  process.argv[1]?.endsWith('aggregate-usage.ts') ||
+  process.argv[1]?.endsWith('aggregate-usage.js');
 
 if (isMain) {
   const dateArg = process.argv[2];
-  const targetDate = dateArg ? new Date(dateArg) : (() => {
-    const yesterday = new Date();
-    yesterday.setUTCDate(yesterday.getUTCDate() - 1);
-    return yesterday;
-  })();
+  const targetDate = dateArg
+    ? new Date(dateArg)
+    : (() => {
+        const yesterday = new Date();
+        yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+        return yesterday;
+      })();
 
   if (isNaN(targetDate.getTime())) {
     logger.error({ dateArg }, 'Invalid date argument provided');

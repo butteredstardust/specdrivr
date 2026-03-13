@@ -4,11 +4,11 @@ import { revalidatePath } from 'next/cache';
 import { planRepository } from '@/repositories/plan-repository';
 import { auth } from '@/lib/auth';
 import { logger } from '@/lib/logger';
-import { 
-  approvePlanSchema, 
-  rejectPlanSchema, 
+import {
+  approvePlanSchema,
+  rejectPlanSchema,
   requestChangesSchema,
-  abandonPlanSchema
+  abandonPlanSchema,
 } from '@/lib/schemas';
 import { requireAdmin, requireMember } from '@/lib/rbac';
 import { specificationRepository } from '@/repositories/specification-repository';
@@ -33,11 +33,15 @@ export async function approvePlanAction(formData: FormData) {
   if (!plan) return { success: false, error: { code: 'NOT_FOUND', message: 'Plan not found' } };
 
   const spec = await specificationRepository.getById(plan.specId);
-  if (!spec) return { success: false, error: { code: 'NOT_FOUND', message: 'Specification not found' } };
+  if (!spec)
+    return { success: false, error: { code: 'NOT_FOUND', message: 'Specification not found' } };
 
   const { allowed } = await requireAdmin(session.user.id, spec.projectId);
   if (!allowed) {
-    return { success: false, error: { code: 'FORBIDDEN', message: 'You must be a project admin to approve plans' } };
+    return {
+      success: false,
+      error: { code: 'FORBIDDEN', message: 'You must be a project admin to approve plans' },
+    };
   }
 
   try {
@@ -49,16 +53,22 @@ export async function approvePlanAction(formData: FormData) {
 
     revalidatePath(`/specs/${plan.specId}`);
     revalidatePath('/dashboard');
-    
+
     return { success: true, data: { plan: updatedPlan, sessionId } };
   } catch (error: unknown) {
-    logger.error({ 
-      error: error instanceof Error ? error.message : String(error), 
-      userId: session.user.id,
-      planId: result.data.id
-    }, 'Failed to approve plan');
-    
-    return { success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } };
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        userId: session.user.id,
+        planId: result.data.id,
+      },
+      'Failed to approve plan'
+    );
+
+    return {
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' },
+    };
   }
 }
 
@@ -82,11 +92,15 @@ export async function rejectPlanAction(formData: FormData) {
   if (!plan) return { success: false, error: { code: 'NOT_FOUND', message: 'Plan not found' } };
 
   const spec = await specificationRepository.getById(plan.specId);
-  if (!spec) return { success: false, error: { code: 'NOT_FOUND', message: 'Specification not found' } };
+  if (!spec)
+    return { success: false, error: { code: 'NOT_FOUND', message: 'Specification not found' } };
 
   const { allowed } = await requireAdmin(session.user.id, spec.projectId);
   if (!allowed) {
-    return { success: false, error: { code: 'FORBIDDEN', message: 'You must be a project admin to reject plans' } };
+    return {
+      success: false,
+      error: { code: 'FORBIDDEN', message: 'You must be a project admin to reject plans' },
+    };
   }
 
   try {
@@ -97,16 +111,22 @@ export async function rejectPlanAction(formData: FormData) {
     });
 
     revalidatePath(`/specs/${plan.specId}`);
-    
+
     return { success: true, data: updatedPlan };
   } catch (error: unknown) {
-    logger.error({ 
-      error: error instanceof Error ? error.message : String(error), 
-      userId: session.user.id,
-      planId: result.data.id
-    }, 'Failed to reject plan');
-    
-    return { success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } };
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        userId: session.user.id,
+        planId: result.data.id,
+      },
+      'Failed to reject plan'
+    );
+
+    return {
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' },
+    };
   }
 }
 
@@ -130,11 +150,15 @@ export async function requestChangesAction(formData: FormData) {
   if (!plan) return { success: false, error: { code: 'NOT_FOUND', message: 'Plan not found' } };
 
   const spec = await specificationRepository.getById(plan.specId);
-  if (!spec) return { success: false, error: { code: 'NOT_FOUND', message: 'Specification not found' } };
+  if (!spec)
+    return { success: false, error: { code: 'NOT_FOUND', message: 'Specification not found' } };
 
   const { allowed } = await requireAdmin(session.user.id, spec.projectId);
   if (!allowed) {
-    return { success: false, error: { code: 'FORBIDDEN', message: 'You must be a project admin to request changes' } };
+    return {
+      success: false,
+      error: { code: 'FORBIDDEN', message: 'You must be a project admin to request changes' },
+    };
   }
 
   try {
@@ -145,16 +169,22 @@ export async function requestChangesAction(formData: FormData) {
     });
 
     revalidatePath(`/specs/${plan.specId}`);
-    
+
     return { success: true, data: updatedPlan };
   } catch (error: unknown) {
-    logger.error({ 
-      error: error instanceof Error ? error.message : String(error), 
-      userId: session.user.id,
-      planId: result.data.id
-    }, 'Failed to request changes on plan');
-    
-    return { success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } };
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        userId: session.user.id,
+        planId: result.data.id,
+      },
+      'Failed to request changes on plan'
+    );
+
+    return {
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' },
+    };
   }
 }
 
@@ -177,11 +207,15 @@ export async function abandonPlanAction(formData: FormData) {
   if (!plan) return { success: false, error: { code: 'NOT_FOUND', message: 'Plan not found' } };
 
   const spec = await specificationRepository.getById(plan.specId);
-  if (!spec) return { success: false, error: { code: 'NOT_FOUND', message: 'Specification not found' } };
+  if (!spec)
+    return { success: false, error: { code: 'NOT_FOUND', message: 'Specification not found' } };
 
   const { allowed } = await requireMember(session.user.id, spec.projectId);
   if (!allowed) {
-    return { success: false, error: { code: 'FORBIDDEN', message: 'You must be a project member to abandon plans' } };
+    return {
+      success: false,
+      error: { code: 'FORBIDDEN', message: 'You must be a project member to abandon plans' },
+    };
   }
 
   try {
@@ -189,17 +223,23 @@ export async function abandonPlanAction(formData: FormData) {
       planId: result.data.id,
       userId: session.user.id,
     });
-    
+
     revalidatePath(`/specs/${plan.specId}`);
-    
+
     return { success: true, data: updatedPlan };
   } catch (error: unknown) {
-    logger.error({ 
-      error: error instanceof Error ? error.message : String(error), 
-      userId: session.user.id,
-      planId: result.data.id
-    }, 'Failed to abandon plan');
-    
-    return { success: false, error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' } };
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        userId: session.user.id,
+        planId: result.data.id,
+      },
+      'Failed to abandon plan'
+    );
+
+    return {
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' },
+    };
   }
 }

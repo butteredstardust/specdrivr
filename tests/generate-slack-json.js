@@ -6,7 +6,7 @@ const payload = {
   taskId: 105,
   taskName: 'Handle refund flow',
   blockedReason: 'Cannot proceed — refund policy not defined in spec.',
-  appUrl: 'http://localhost:3000'
+  appUrl: 'http://localhost:3000',
 };
 
 function buildTaskBlockedBlocks(payload) {

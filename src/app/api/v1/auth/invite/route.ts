@@ -11,9 +11,8 @@ import { logger } from '@/lib/logger';
 const AcceptInviteSchema = z.object({
   token: z.string().min(1),
   password: z.string().min(8).optional(),
-  name: z.string().min(2).optional()
+  name: z.string().min(2).optional(),
 });
-
 
 export async function GET(req: Request) {
   try {
@@ -21,7 +20,10 @@ export async function GET(req: Request) {
     const token = searchParams.get('token');
 
     if (!token) {
-      return NextResponse.json({ error: { code: 'INVALID_TOKEN', message: 'Missing token' } }, { status: 400 });
+      return NextResponse.json(
+        { error: { code: 'INVALID_TOKEN', message: 'Missing token' } },
+        { status: 400 }
+      );
     }
 
     const [invite] = await db
@@ -33,16 +35,14 @@ export async function GET(req: Request) {
       })
       .from(invites)
       .innerJoin(projects, eq(invites.projectId, projects.id))
-      .where(
-        and(
-          eq(invites.token, token),
-          gt(invites.expiresAt, new Date())
-        )
-      )
+      .where(and(eq(invites.token, token), gt(invites.expiresAt, new Date())))
       .limit(1);
 
     if (!invite) {
-      return NextResponse.json({ error: { code: 'INVALID_TOKEN', message: 'Token invalid or expired' } }, { status: 400 });
+      return NextResponse.json(
+        { error: { code: 'INVALID_TOKEN', message: 'Token invalid or expired' } },
+        { status: 400 }
+      );
     }
 
     const [existingUser] = await db
@@ -55,15 +55,17 @@ export async function GET(req: Request) {
       data: {
         email: invite.email,
         projectName: invite.projectName,
-        isExistingUser: !!existingUser
-      }
+        isExistingUser: !!existingUser,
+      },
     });
   } catch (error) {
     logger.error({ error }, 'Failed to validate invite token');
-    return NextResponse.json({ error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } }, { status: 500 });
+    return NextResponse.json(
+      { error: { code: 'INTERNAL_ERROR', message: 'Internal server error' } },
+      { status: 500 }
+    );
   }
 }
-
 
 export async function POST(req: Request) {
   try {
@@ -72,7 +74,13 @@ export async function POST(req: Request) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: { code: 'VALIDATION_ERROR', message: 'Invalid inputs', details: parsed.error.errors } },
+        {
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Invalid inputs',
+            details: parsed.error.errors,
+          },
+        },
         { status: 400 }
       );
     }
@@ -119,7 +127,8 @@ export async function POST(req: Request) {
             .onConflictDoNothing();
 
           // Invalidate invite (set used_at)
-          await tx.update(invites)
+          await tx
+            .update(invites)
             .set({ expiresAt: new Date(0) }) // Using expiresAt as proxy for used since schema might not have usedAt
             .where(eq(invites.id, invite.id));
         });
@@ -138,7 +147,7 @@ export async function POST(req: Request) {
       let newUser;
       try {
         newUser = await authInstance.api.signUpEmail({
-          body: { email: invite.email, password: password!, name: name! }
+          body: { email: invite.email, password: password!, name: name! },
         });
       } catch (error: unknown) {
         logger.error({ error, email: invite.email }, 'signUpEmail failed');
@@ -146,7 +155,10 @@ export async function POST(req: Request) {
       }
 
       if (!newUser || !newUser.user) {
-        return NextResponse.json({ error: { code: 'INTERNAL_ERROR', message: 'Failed to create user' } }, { status: 500 });
+        return NextResponse.json(
+          { error: { code: 'INTERNAL_ERROR', message: 'Failed to create user' } },
+          { status: 500 }
+        );
       }
 
       userId = newUser.user.id;
@@ -159,7 +171,10 @@ export async function POST(req: Request) {
             role: invite.role,
           });
 
-          await tx.update(invites).set({ expiresAt: new Date(0) }).where(eq(invites.id, invite.id));
+          await tx
+            .update(invites)
+            .set({ expiresAt: new Date(0) })
+            .where(eq(invites.id, invite.id));
         });
       } catch (error) {
         logger.error({ error, userId }, 'Transaction failed');

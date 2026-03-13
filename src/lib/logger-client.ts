@@ -1,10 +1,10 @@
-const isDev = process.env.NODE_ENV === 'development'
+const isDev = process.env.NODE_ENV === 'development';
 
 export const clientLogger = {
   error: (msg: string, ...args: unknown[]) => {
-    if (isDev) console.error('[specdrivr]', msg, ...args)
+    if (isDev) console.error('[specdrivr]', msg, ...args);
   },
   warn: (msg: string, ...args: unknown[]) => {
-    if (isDev) console.warn('[specdrivr]', msg, ...args)
+    if (isDev) console.warn('[specdrivr]', msg, ...args);
   },
-}
+};

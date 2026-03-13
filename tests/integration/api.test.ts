@@ -57,7 +57,9 @@ describe('API Route Integration Tests', () => {
       const project = await createTestProject('P1', user.id);
       await mockSession(user.id, user.email);
 
-      await testDb.insert(schema.specifications).values({ projectId: project.id, name: 'Existing' });
+      await testDb
+        .insert(schema.specifications)
+        .values({ projectId: project.id, name: 'Existing' });
 
       const req = new NextRequest(`http://localhost/api/v1/projects/${project.id}/specs`, {
         method: 'POST',
@@ -75,11 +77,14 @@ describe('API Route Integration Tests', () => {
       const project = await createTestProject('P1', user.id);
       await mockSession(user.id, user.email);
 
-      const [spec] = await testDb.insert(schema.specifications).values({
-        projectId: project.id,
-        name: 'Spec 1',
-        createdBy: user.id,
-      }).returning();
+      const [spec] = await testDb
+        .insert(schema.specifications)
+        .values({
+          projectId: project.id,
+          name: 'Spec 1',
+          createdBy: user.id,
+        })
+        .returning();
 
       await testDb.insert(schema.plans).values({
         specId: spec.id,
@@ -94,7 +99,10 @@ describe('API Route Integration Tests', () => {
       const res = await addVersion(req, { params: Promise.resolve({ id: String(spec.id) }) });
       expect(res.status).toBe(201);
 
-      const [plan] = await testDb.select().from(schema.plans).where(eq(schema.plans.specId, spec.id));
+      const [plan] = await testDb
+        .select()
+        .from(schema.plans)
+        .where(eq(schema.plans.specId, spec.id));
       expect(plan.status).toBe('abandoned');
     });
   });
@@ -104,11 +112,19 @@ describe('API Route Integration Tests', () => {
       const owner = await createTestUser('u1', 'u1@example.com', 'owner');
       const admin = await createTestUser('u2', 'u2@example.com', 'admin');
       const project = await createTestProject('P1', owner.id);
-      await testDb.insert(schema.projectMembers).values({ projectId: project.id, userId: admin.id, role: 'admin' });
+      await testDb
+        .insert(schema.projectMembers)
+        .values({ projectId: project.id, userId: admin.id, role: 'admin' });
       await mockSession(admin.id, admin.email);
 
-      const [spec] = await testDb.insert(schema.specifications).values({ projectId: project.id, name: 'S1' }).returning();
-      const [plan] = await testDb.insert(schema.plans).values({ specId: spec.id, status: 'pending_approval' }).returning();
+      const [spec] = await testDb
+        .insert(schema.specifications)
+        .values({ projectId: project.id, name: 'S1' })
+        .returning();
+      const [plan] = await testDb
+        .insert(schema.plans)
+        .values({ specId: spec.id, status: 'pending_approval' })
+        .returning();
 
       const req = new NextRequest(`http://localhost/api/v1/plans/${plan.id}/approve`, {
         method: 'POST',
@@ -123,8 +139,14 @@ describe('API Route Integration Tests', () => {
       const project = await createTestProject('P1', owner.id);
       await mockSession(owner.id, owner.email);
 
-      const [spec] = await testDb.insert(schema.specifications).values({ projectId: project.id, name: 'S1' }).returning();
-      const [plan] = await testDb.insert(schema.plans).values({ specId: spec.id, status: 'executing' }).returning();
+      const [spec] = await testDb
+        .insert(schema.specifications)
+        .values({ projectId: project.id, name: 'S1' })
+        .returning();
+      const [plan] = await testDb
+        .insert(schema.plans)
+        .values({ specId: spec.id, status: 'executing' })
+        .returning();
 
       const req = new NextRequest(`http://localhost/api/v1/plans/${plan.id}/approve`, {
         method: 'POST',
@@ -141,16 +163,25 @@ describe('API Route Integration Tests', () => {
       const admin = await createTestUser('u2', 'u2@example.com', 'admin');
       const member = await createTestUser('u3', 'u3@example.com', 'member');
       const project = await createTestProject('P1', owner.id);
-      await testDb.insert(schema.projectMembers).values({ projectId: project.id, userId: admin.id, role: 'admin' });
-      await testDb.insert(schema.projectMembers).values({ projectId: project.id, userId: member.id, role: 'member' });
+      await testDb
+        .insert(schema.projectMembers)
+        .values({ projectId: project.id, userId: admin.id, role: 'admin' });
+      await testDb
+        .insert(schema.projectMembers)
+        .values({ projectId: project.id, userId: member.id, role: 'member' });
       await mockSession(admin.id, admin.email);
 
-      const req = new NextRequest(`http://localhost/api/v1/projects/${project.id}/members/${member.id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ role: 'admin' }),
-      });
+      const req = new NextRequest(
+        `http://localhost/api/v1/projects/${project.id}/members/${member.id}`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify({ role: 'admin' }),
+        }
+      );
 
-      const res = await updateMemberRole(req, { params: Promise.resolve({ id: String(project.id), userId: member.id }) });
+      const res = await updateMemberRole(req, {
+        params: Promise.resolve({ id: String(project.id), userId: member.id }),
+      });
       expect(res.status).toBe(200);
     });
 
@@ -159,16 +190,25 @@ describe('API Route Integration Tests', () => {
       const admin = await createTestUser('u2', 'u2@example.com', 'admin');
       const member = await createTestUser('u3', 'u3@example.com', 'member');
       const project = await createTestProject('P1', owner.id);
-      await testDb.insert(schema.projectMembers).values({ projectId: project.id, userId: admin.id, role: 'admin' });
-      await testDb.insert(schema.projectMembers).values({ projectId: project.id, userId: member.id, role: 'member' });
+      await testDb
+        .insert(schema.projectMembers)
+        .values({ projectId: project.id, userId: admin.id, role: 'admin' });
+      await testDb
+        .insert(schema.projectMembers)
+        .values({ projectId: project.id, userId: member.id, role: 'member' });
       await mockSession(admin.id, admin.email);
 
-      const req = new NextRequest(`http://localhost/api/v1/projects/${project.id}/members/${member.id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ role: 'owner' }),
-      });
+      const req = new NextRequest(
+        `http://localhost/api/v1/projects/${project.id}/members/${member.id}`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify({ role: 'owner' }),
+        }
+      );
 
-      const res = await updateMemberRole(req, { params: Promise.resolve({ id: String(project.id), userId: member.id }) });
+      const res = await updateMemberRole(req, {
+        params: Promise.resolve({ id: String(project.id), userId: member.id }),
+      });
       expect(res.status).toBe(403);
     });
 
@@ -176,15 +216,22 @@ describe('API Route Integration Tests', () => {
       const owner = await createTestUser('u1', 'u1@example.com', 'owner');
       const admin = await createTestUser('u2', 'u2@example.com', 'admin');
       const project = await createTestProject('P1', owner.id);
-      await testDb.insert(schema.projectMembers).values({ projectId: project.id, userId: admin.id, role: 'admin' });
+      await testDb
+        .insert(schema.projectMembers)
+        .values({ projectId: project.id, userId: admin.id, role: 'admin' });
       await mockSession(owner.id, owner.email);
 
-      const req = new NextRequest(`http://localhost/api/v1/projects/${project.id}/members/${admin.id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ role: 'owner' }),
-      });
+      const req = new NextRequest(
+        `http://localhost/api/v1/projects/${project.id}/members/${admin.id}`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify({ role: 'owner' }),
+        }
+      );
 
-      const res = await updateMemberRole(req, { params: Promise.resolve({ id: String(project.id), userId: admin.id }) });
+      const res = await updateMemberRole(req, {
+        params: Promise.resolve({ id: String(project.id), userId: admin.id }),
+      });
       expect(res.status).toBe(200);
     });
 
@@ -192,30 +239,45 @@ describe('API Route Integration Tests', () => {
       const owner = await createTestUser('u1', 'u1@example.com', 'owner');
       const admin = await createTestUser('u2', 'u2@example.com', 'admin');
       const project = await createTestProject('P1', owner.id);
-      await testDb.insert(schema.projectMembers).values({ projectId: project.id, userId: admin.id, role: 'admin' });
+      await testDb
+        .insert(schema.projectMembers)
+        .values({ projectId: project.id, userId: admin.id, role: 'admin' });
       await mockSession(admin.id, admin.email);
 
-      const req = new NextRequest(`http://localhost/api/v1/projects/${project.id}/members/${owner.id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ role: 'member' }),
-      });
+      const req = new NextRequest(
+        `http://localhost/api/v1/projects/${project.id}/members/${owner.id}`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify({ role: 'member' }),
+        }
+      );
 
-      const res = await updateMemberRole(req, { params: Promise.resolve({ id: String(project.id), userId: owner.id }) });
+      const res = await updateMemberRole(req, {
+        params: Promise.resolve({ id: String(project.id), userId: owner.id }),
+      });
       expect(res.status).toBe(403);
     });
   });
-  
+
   // Existing tests follow...
   describe('POST /api/v1/plans/:id/reject', () => {
     it('allows admin to reject with notes', async () => {
       const owner = await createTestUser('u1', 'u1@example.com', 'owner');
       const admin = await createTestUser('u2', 'u2@example.com', 'admin');
       const project = await createTestProject('P1', owner.id);
-      await testDb.insert(schema.projectMembers).values({ projectId: project.id, userId: admin.id, role: 'admin' });
+      await testDb
+        .insert(schema.projectMembers)
+        .values({ projectId: project.id, userId: admin.id, role: 'admin' });
       await mockSession(admin.id, admin.email);
 
-      const [spec] = await testDb.insert(schema.specifications).values({ projectId: project.id, name: 'S1' }).returning();
-      const [plan] = await testDb.insert(schema.plans).values({ specId: spec.id, status: 'pending_approval' }).returning();
+      const [spec] = await testDb
+        .insert(schema.specifications)
+        .values({ projectId: project.id, name: 'S1' })
+        .returning();
+      const [plan] = await testDb
+        .insert(schema.plans)
+        .values({ specId: spec.id, status: 'pending_approval' })
+        .returning();
 
       const req = new NextRequest(`http://localhost/api/v1/plans/${plan.id}/reject`, {
         method: 'POST',
@@ -232,9 +294,15 @@ describe('API Route Integration Tests', () => {
       const project = await createTestProject('P1', user.id);
       await mockSession(user.id, user.email);
 
-      const [spec] = await testDb.insert(schema.specifications).values({ projectId: project.id, name: 'S1' }).returning();
+      const [spec] = await testDb
+        .insert(schema.specifications)
+        .values({ projectId: project.id, name: 'S1' })
+        .returning();
       const [plan] = await testDb.insert(schema.plans).values({ specId: spec.id }).returning();
-      const [task] = await testDb.insert(schema.tasks).values({ planId: plan.id, status: 'blocked', externalId: 'T-1', title: 'T1' }).returning();
+      const [task] = await testDb
+        .insert(schema.tasks)
+        .values({ planId: plan.id, status: 'blocked', externalId: 'T-1', title: 'T1' })
+        .returning();
 
       const req = new NextRequest(`http://localhost/api/v1/tasks/${task.id}/unblock`, {
         method: 'POST',
@@ -252,9 +320,15 @@ describe('API Route Integration Tests', () => {
       const project = await createTestProject('P1', user.id);
       await mockSession(user.id, user.email);
 
-      const [spec] = await testDb.insert(schema.specifications).values({ projectId: project.id, name: 'S1' }).returning();
+      const [spec] = await testDb
+        .insert(schema.specifications)
+        .values({ projectId: project.id, name: 'S1' })
+        .returning();
       const [plan] = await testDb.insert(schema.plans).values({ specId: spec.id }).returning();
-      const [task] = await testDb.insert(schema.tasks).values({ planId: plan.id, externalId: 'T-1', title: 'T1' }).returning();
+      const [task] = await testDb
+        .insert(schema.tasks)
+        .values({ planId: plan.id, externalId: 'T-1', title: 'T1' })
+        .returning();
 
       await testDb.insert(schema.taskAttempts).values({ taskId: task.id, seq: 1 });
       await testDb.insert(schema.taskAttempts).values({ taskId: task.id, seq: 2 });
@@ -274,9 +348,14 @@ describe('API Route Integration Tests', () => {
       const project = await createTestProject('P1', user.id);
       await mockSession(user.id, user.email);
 
-      const [session] = await testDb.insert(schema.agentSessions).values({ projectId: project.id, status: 'running' }).returning();
+      const [session] = await testDb
+        .insert(schema.agentSessions)
+        .values({ projectId: project.id, status: 'running' })
+        .returning();
 
-      const req = new NextRequest(`http://localhost/api/v1/sessions/${session.id}/cancel`, { method: 'POST' });
+      const req = new NextRequest(`http://localhost/api/v1/sessions/${session.id}/cancel`, {
+        method: 'POST',
+      });
       const res = await cancelSession(req, { params: Promise.resolve({ id: String(session.id) }) });
       expect(res.status).toBe(200);
     });
@@ -286,11 +365,11 @@ describe('API Route Integration Tests', () => {
     it('returns shouldStop and updates heartbeat', async () => {
       const user = await createTestUser('u1', 'u1@example.com', 'owner');
       const project = await createTestProject('P1', user.id);
-      
+
       const token = 'sdk_project-alpha_123456789012345678901234567890123456789012345678';
       const prefix = token.slice(0, 10);
       const tokenHash = await bcrypt.hash(token, 10);
-      
+
       await testDb.insert(schema.agentTokens).values({
         projectId: project.id,
         userId: user.id,
@@ -299,14 +378,19 @@ describe('API Route Integration Tests', () => {
         prefix,
       });
 
-      const [session] = await testDb.insert(schema.agentSessions).values({ projectId: project.id, status: 'running' }).returning();
+      const [session] = await testDb
+        .insert(schema.agentSessions)
+        .values({ projectId: project.id, status: 'running' })
+        .returning();
 
       const req = new NextRequest(`http://localhost/api/v1/sessions/${session.id}/heartbeat`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const res = await heartbeatSession(req, { params: Promise.resolve({ id: String(session.id) }) });
+      const res = await heartbeatSession(req, {
+        params: Promise.resolve({ id: String(session.id) }),
+      });
       expect(res.status).toBe(200);
     });
   });

@@ -6,7 +6,7 @@ import { auth } from '@/lib/auth';
 import { logger } from '@/lib/logger';
 import { handleApiError } from '@/lib/error-handler';
 
-export async function GET(req: Request, context: { params: Promise<{ id: string, vId: string }> }) {
+export async function GET(req: Request, context: { params: Promise<{ id: string; vId: string }> }) {
   try {
     const session = await auth();
     if (!session?.user) {
@@ -18,9 +18,10 @@ export async function GET(req: Request, context: { params: Promise<{ id: string,
 
     const { id, vId } = await context.params;
 
-    const existing = await db.select().from(specVersions).where(
-        and(eq(specVersions.specId, Number(id)), eq(specVersions.id, Number(vId)))
-    );
+    const existing = await db
+      .select()
+      .from(specVersions)
+      .where(and(eq(specVersions.specId, Number(id)), eq(specVersions.id, Number(vId))));
     if (existing.length === 0) {
       return NextResponse.json(
         { error: { code: 'NOT_FOUND', message: 'Specification version not found' } },
@@ -35,8 +36,8 @@ export async function GET(req: Request, context: { params: Promise<{ id: string,
         id: spec.id.toString(),
         versionNumber: spec.versionNumber,
         markdownContent: spec.markdownContent,
-        createdAt: spec.createdAt.toISOString()
-      }
+        createdAt: spec.createdAt.toISOString(),
+      },
     });
   } catch (error) {
     logger.error({ error }, 'Error fetching spec version by ID');

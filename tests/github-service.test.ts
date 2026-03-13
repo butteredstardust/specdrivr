@@ -21,10 +21,10 @@ describe('GitHub Service', () => {
     });
 
     it('should handle very long externalId', () => {
-        const longId = '1234567890'.repeat(10); // 100 chars
-        const msg = getAgentCommitMessage(longId, 'Title');
-        expect(msg.length).toBe(72);
-        expect(msg.startsWith('feat(T-1234567890')).toBe(true);
+      const longId = '1234567890'.repeat(10); // 100 chars
+      const msg = getAgentCommitMessage(longId, 'Title');
+      expect(msg.length).toBe(72);
+      expect(msg.startsWith('feat(T-1234567890')).toBe(true);
     });
   });
 

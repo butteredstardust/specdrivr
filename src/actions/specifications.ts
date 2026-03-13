@@ -4,11 +4,11 @@ import { revalidatePath } from 'next/cache';
 import { specificationRepository } from '@/repositories/specification-repository';
 import { auth } from '@/lib/auth';
 import { logger } from '@/lib/logger';
-import { 
-  createSpecificationSchema, 
-  updateSpecificationSchema, 
+import {
+  createSpecificationSchema,
+  updateSpecificationSchema,
   createSpecVersionSchema,
-  specStatusSchema
+  specStatusSchema,
 } from '@/lib/schemas';
 import { requireMember } from '@/lib/rbac';
 import type { z } from 'zod';
@@ -35,7 +35,13 @@ export async function createSpecificationAction(formData: FormData) {
 
   const { allowed } = await requireMember(session.user.id, result.data.projectId);
   if (!allowed) {
-    return { success: false, error: { code: 'FORBIDDEN', message: 'You do not have permission to create specifications in this project' } };
+    return {
+      success: false,
+      error: {
+        code: 'FORBIDDEN',
+        message: 'You do not have permission to create specifications in this project',
+      },
+    };
   }
 
   try {
@@ -48,20 +54,23 @@ export async function createSpecificationAction(formData: FormData) {
 
     revalidatePath(`/projects/${result.data.projectId}/specs`);
     revalidatePath('/dashboard');
-    
+
     return { success: true, data: spec };
   } catch (error: unknown) {
-    logger.error({ 
-      error: error instanceof Error ? error.message : String(error), 
-      userId: session.user.id 
-    }, 'Failed to create specification');
-    
-    return { 
-      success: false, 
-      error: { 
-        code: 'INTERNAL_ERROR', 
-        message: 'An unexpected error occurred' 
-      } 
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        userId: session.user.id,
+      },
+      'Failed to create specification'
+    );
+
+    return {
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'An unexpected error occurred',
+      },
     };
   }
 }
@@ -89,7 +98,13 @@ export async function createSpecVersionAction(formData: FormData) {
 
   const { allowed } = await requireMember(session.user.id, spec.projectId);
   if (!allowed) {
-    return { success: false, error: { code: 'FORBIDDEN', message: 'You do not have permission to update this specification' } };
+    return {
+      success: false,
+      error: {
+        code: 'FORBIDDEN',
+        message: 'You do not have permission to update this specification',
+      },
+    };
   }
 
   try {
@@ -101,21 +116,24 @@ export async function createSpecVersionAction(formData: FormData) {
 
     revalidatePath(`/specs/${result.data.specId}`);
     revalidatePath(`/projects/${spec.projectId}/specs`);
-    
+
     return { success: true, data: updatedSpec };
   } catch (error: unknown) {
-    logger.error({ 
-      error: error instanceof Error ? error.message : String(error), 
-      userId: session.user.id,
-      specId: result.data.specId
-    }, 'Failed to add spec version');
-    
-    return { 
-      success: false, 
-      error: { 
-        code: 'INTERNAL_ERROR', 
-        message: 'An unexpected error occurred' 
-      } 
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        userId: session.user.id,
+        specId: result.data.specId,
+      },
+      'Failed to add spec version'
+    );
+
+    return {
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'An unexpected error occurred',
+      },
     };
   }
 }
@@ -144,7 +162,13 @@ export async function updateSpecificationAction(formData: FormData) {
 
   const { allowed } = await requireMember(session.user.id, spec.projectId);
   if (!allowed) {
-    return { success: false, error: { code: 'FORBIDDEN', message: 'You do not have permission to update this specification' } };
+    return {
+      success: false,
+      error: {
+        code: 'FORBIDDEN',
+        message: 'You do not have permission to update this specification',
+      },
+    };
   }
 
   try {
@@ -155,21 +179,24 @@ export async function updateSpecificationAction(formData: FormData) {
 
     revalidatePath(`/specs/${result.data.id}`);
     revalidatePath(`/projects/${spec.projectId}/specs`);
-    
+
     return { success: true, data: updatedSpec };
   } catch (error: unknown) {
-    logger.error({ 
-      error: error instanceof Error ? error.message : String(error), 
-      userId: session.user.id,
-      specId: result.data.id
-    }, 'Failed to update specification');
-    
-    return { 
-      success: false, 
-      error: { 
-        code: 'INTERNAL_ERROR', 
-        message: 'An unexpected error occurred' 
-      } 
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        userId: session.user.id,
+        specId: result.data.id,
+      },
+      'Failed to update specification'
+    );
+
+    return {
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'An unexpected error occurred',
+      },
     };
   }
 }

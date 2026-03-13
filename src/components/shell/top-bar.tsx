@@ -13,11 +13,9 @@ type TopBarProps = {
 
 export function TopBar({ title, breadcrumb, actions }: TopBarProps) {
   return (
-    <header className="h-14 bg-[--bg-surface] border-b border-[--border-default] flex items-center justify-between px-6 flex-shrink-0">
+    <header className="flex h-14 flex-shrink-0 items-center justify-between border-b border-[--border-default] bg-[--bg-surface] px-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-lg font-bold text-[--text-primary] leading-tight">
-          {title}
-        </h1>
+        <h1 className="text-lg leading-tight font-bold text-[--text-primary]">{title}</h1>
         {breadcrumb && breadcrumb.length > 0 && (
           <div className="text-xs text-[--text-muted]">
             <PixelBreadcrumb items={breadcrumb} />

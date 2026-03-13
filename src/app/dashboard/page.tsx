@@ -41,18 +41,17 @@ export default async function DashboardPage() {
 
   // Calculate system health
   const totalTasks = await taskRepository.getAll();
-  const completedPercentage = totalTasks.length > 0
-    ? Math.round((completedTasks.length / totalTasks.length) * 100)
-    : 0;
+  const completedPercentage =
+    totalTasks.length > 0 ? Math.round((completedTasks.length / totalTasks.length) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="bg-background text-foreground min-h-screen">
       {/* Header */}
-      <header className="border-b bg-card/50 backdrop-blur">
-        <div className="max-w-7xl mx-auto px-8 py-4">
+      <header className="bg-card/50 border-b backdrop-blur">
+        <div className="mx-auto max-w-7xl px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <DashboardIcon className="h-6 w-6 text-primary" />
+              <DashboardIcon className="text-primary h-6 w-6" />
               <h1 className="text-2xl font-bold">Dashboard</h1>
             </div>
             <div className="flex items-center gap-4">
@@ -88,15 +87,17 @@ export default async function DashboardPage() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-8 py-8 space-y-8">
+      <div className="mx-auto max-w-7xl space-y-8 px-8 py-8">
         {/* Welcome section */}
         <div>
           <h2 className="text-2xl font-bold">Welcome back, {session.user.name}!</h2>
-          <p className="text-muted-foreground">Here&apos;s what&apos;s happening with your projects today.</p>
+          <p className="text-muted-foreground">
+            Here&apos;s what&apos;s happening with your projects today.
+          </p>
         </div>
 
         {/* Stat cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           <PixelStatCard
             label="Active Projects"
             value={activeProjects.length.toString()}
@@ -137,25 +138,25 @@ export default async function DashboardPage() {
             <div className="grid grid-cols-4 gap-4 pt-4 text-center">
               <div>
                 <p className="text-2xl font-bold">{totalTasks.length}</p>
-                <p className="text-xs text-muted-foreground">Total</p>
+                <p className="text-muted-foreground text-xs">Total</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-green-600">{completedTasks.length}</p>
-                <p className="text-xs text-muted-foreground">Done</p>
+                <p className="text-muted-foreground text-xs">Done</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-blue-600">{inProgressTasks.length}</p>
-                <p className="text-xs text-muted-foreground">In Progress</p>
+                <p className="text-muted-foreground text-xs">In Progress</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-orange-600">{pendingTasks.length}</p>
-                <p className="text-xs text-muted-foreground">Pending</p>
+                <p className="text-muted-foreground text-xs">Pending</p>
               </div>
             </div>
           </div>
         </PixelCard>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           {/* Active Projects */}
           <PixelCard
             title="Active Projects"
@@ -167,20 +168,26 @@ export default async function DashboardPage() {
           >
             <div className="space-y-4">
               {activeProjects.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <FolderIcon className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <div className="text-muted-foreground py-8 text-center">
+                  <FolderIcon className="mx-auto mb-3 h-12 w-12 opacity-50" />
                   <p>No active projects</p>
                 </div>
               ) : (
                 activeProjects.slice(0, 5).map((project) => (
-                  <div key={project.id} className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent transition-colors">
+                  <div
+                    key={project.id}
+                    className="bg-card hover:bg-accent flex items-center justify-between rounded-lg border p-3 transition-colors"
+                  >
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-lg flex items-center justify-center text-white font-medium" style={{ backgroundColor: project.avatarColor || 'var(--brand-primary)' }}>
+                      <div
+                        className="flex h-10 w-10 items-center justify-center rounded-lg font-medium text-white"
+                        style={{ backgroundColor: project.avatarColor || 'var(--brand-primary)' }}
+                      >
                         {project.name.substring(0, 2).toUpperCase()}
                       </div>
                       <div>
                         <p className="font-medium">{project.name}</p>
-                        <p className="text-sm text-muted-foreground">{project.slug}</p>
+                        <p className="text-muted-foreground text-sm">{project.slug}</p>
                       </div>
                     </div>
                     <PixelBadge tone="neutral">{project.status}</PixelBadge>
@@ -202,12 +209,12 @@ export default async function DashboardPage() {
             <PixelTable
               columns={[
                 { key: 'name', header: 'Specification' },
-                { key: 'status', header: 'Status' }
+                { key: 'status', header: 'Status' },
               ]}
               data={recentSpecs.slice(0, 5).map((spec) => ({
                 id: spec.id,
                 name: spec.name,
-                status: <StatusBadge status={spec.status} />
+                status: <StatusBadge status={spec.status} />,
               }))}
             />
           </PixelCard>
@@ -215,18 +222,18 @@ export default async function DashboardPage() {
 
         {/* Blocked Tasks Alert */}
         {blockedTasks.length > 0 && (
-          <PixelCard
-            title="Blocked Tasks Need Attention"
-            icon={<ExclamationTriangleIcon />}
-          >
+          <PixelCard title="Blocked Tasks Need Attention" icon={<ExclamationTriangleIcon />}>
             <div className="space-y-3">
               {blockedTasks.slice(0, 3).map((task) => (
-                <div key={task.id} className="flex items-start justify-between p-3 rounded-lg border bg-card">
+                <div
+                  key={task.id}
+                  className="bg-card flex items-start justify-between rounded-lg border p-3"
+                >
                   <div className="flex items-start gap-3">
-                    <QuestionMarkCircledIcon className="h-5 w-5 text-orange-500 mt-0.5" />
+                    <QuestionMarkCircledIcon className="mt-0.5 h-5 w-5 text-orange-500" />
                     <div>
                       <p className="font-medium">{task.title}</p>
-                      <p className="text-sm text-muted-foreground">{task.blockedReason}</p>
+                      <p className="text-muted-foreground text-sm">{task.blockedReason}</p>
                     </div>
                   </div>
                   <PixelBadge tone="red">Blocked</PixelBadge>
@@ -246,7 +253,10 @@ export default async function DashboardPage() {
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const statusMap: Record<string, { tone: 'neutral' | 'purple' | 'gold' | 'red' | 'green' | 'cyan'; label: string }> = {
+  const statusMap: Record<
+    string,
+    { tone: 'neutral' | 'purple' | 'gold' | 'red' | 'green' | 'cyan'; label: string }
+  > = {
     drafting: { tone: 'neutral', label: 'Drafting' },
     pending_plan: { tone: 'purple', label: 'Planning' },
     pending_approval: { tone: 'neutral', label: 'Review' },
@@ -298,7 +308,6 @@ function FolderIcon({ className }: { className?: string }) {
     </svg>
   );
 }
-
 
 function ExitIcon({ className }: { className?: string }) {
   return (

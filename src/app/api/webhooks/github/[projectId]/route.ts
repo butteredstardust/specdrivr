@@ -1,7 +1,14 @@
 import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { webhookDeliveries, agentLogs, notifications, projectMembers, tasks, auditLog } from '@/db/schema';
+import {
+  webhookDeliveries,
+  agentLogs,
+  notifications,
+  projectMembers,
+  tasks,
+  auditLog,
+} from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { verifyGitHubSignature, getGitHubConfig } from '@/lib/github';
 import { logger } from '@/lib/logger';
@@ -15,7 +22,10 @@ export async function POST(
     const projectId = parseInt(resolvedParams.projectId, 10);
 
     if (isNaN(projectId)) {
-      return NextResponse.json({ error: { code: 'VALIDATION_ERROR', message: 'Invalid project ID' } }, { status: 400 });
+      return NextResponse.json(
+        { error: { code: 'VALIDATION_ERROR', message: 'Invalid project ID' } },
+        { status: 400 }
+      );
     }
 
     // 1. Read raw body as text for HMAC validation
@@ -30,13 +40,19 @@ export async function POST(
     if (ghConfig?.webhookSecret) {
       if (!signature) {
         logger.warn({ projectId, event }, 'Missing GitHub webhook signature');
-        return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Missing signature' } }, { status: 401 });
+        return NextResponse.json(
+          { error: { code: 'UNAUTHORIZED', message: 'Missing signature' } },
+          { status: 401 }
+        );
       }
 
       const isValid = verifyGitHubSignature(rawBody, signature, ghConfig.webhookSecret);
       if (!isValid) {
         logger.warn({ projectId, event }, 'Invalid GitHub webhook signature');
-        return NextResponse.json({ error: { code: 'UNAUTHORIZED', message: 'Invalid signature' } }, { status: 401 });
+        return NextResponse.json(
+          { error: { code: 'UNAUTHORIZED', message: 'Invalid signature' } },
+          { status: 401 }
+        );
       }
     }
 
@@ -65,10 +81,14 @@ export async function POST(
   }
 }
 
-async function handlePush(projectId: number, payload: { ref?: string; pusher?: { name?: string }; commits?: { message: string }[] }, watchedBranch: string) {
+async function handlePush(
+  projectId: number,
+  payload: { ref?: string; pusher?: { name?: string }; commits?: { message: string }[] },
+  watchedBranch: string
+) {
   const ref = payload.ref || '';
   const branch = ref.replace('refs/heads/', '');
-  
+
   if (branch !== watchedBranch) {
     return;
   }
@@ -89,7 +109,8 @@ async function handlePush(projectId: number, payload: { ref?: string; pusher?: {
       const msgMatch = commit.message.match(/\bT-(\d+)\b/i);
       if (msgMatch) {
         // Find task by external ID
-        const [task] = await db.select({ id: tasks.id })
+        const [task] = await db
+          .select({ id: tasks.id })
           .from(tasks)
           .where(eq(tasks.externalId, `T-${msgMatch[1]}`))
           .limit(1);
@@ -121,7 +142,10 @@ async function handlePush(projectId: number, payload: { ref?: string; pusher?: {
   }
 
   // 3. Notify project members
-  const members = await db.select().from(projectMembers).where(eq(projectMembers.projectId, projectId));
+  const members = await db
+    .select()
+    .from(projectMembers)
+    .where(eq(projectMembers.projectId, projectId));
   const title = `New push to ${branch}`;
   const body = `Pushed by ${pusher} (${commitCount} commits)`;
 
@@ -137,7 +161,13 @@ async function handlePush(projectId: number, payload: { ref?: string; pusher?: {
   }
 }
 
-async function handlePullRequest(projectId: number, payload: { action: string; pull_request?: { number: number; title: string; body: string; html_url: string } }) {
+async function handlePullRequest(
+  projectId: number,
+  payload: {
+    action: string;
+    pull_request?: { number: number; title: string; body: string; html_url: string };
+  }
+) {
   const action = payload.action;
   if (action !== 'opened' && action !== 'synchronize') {
     return;
@@ -151,12 +181,15 @@ async function handlePullRequest(projectId: number, payload: { action: string; p
   const fullText = `${prTitle} ${prBody}`;
 
   const specMatch = fullText.match(/spec[-_]?(\w+)/i);
-  
+
   if (specMatch) {
     const specRef = specMatch[1];
-    
+
     // Notify project members
-    const members = await db.select().from(projectMembers).where(eq(projectMembers.projectId, projectId));
+    const members = await db
+      .select()
+      .from(projectMembers)
+      .where(eq(projectMembers.projectId, projectId));
     const title = `PR #${pr.number} references spec ${specRef}`;
     const body = `PR: "${prTitle}"`;
 
@@ -170,7 +203,7 @@ async function handlePullRequest(projectId: number, payload: { action: string; p
         linkUrl: pr.html_url || `/projects/${projectId}`,
       });
     }
-    
+
     // Log to audit log
     await db.insert(auditLog).values({
       projectId,
