@@ -1,4 +1,4 @@
-import { Toaster } from '@/components/ui/sonner';
+import { PixelToast } from '@pxlkit/core';
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { ShellProvider } from '@/components/providers/shell-provider';
@@ -31,7 +31,7 @@ export default async function AppLayout({
       </div>
 
       <KeyboardShortcutsWrapper />
-      <Toaster />
+      <PixelToast visible={false} title="" />
     </ShellProvider>
   );
 }
