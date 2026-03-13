@@ -6,6 +6,7 @@ import { PixelDropdown, PixelEmptyState, PxlKitButton } from '@pxlkit/ui-kit';
 import { PxlKitIcon } from '@pxlkit/core';
 import { Check } from '@pxlkit/ui';
 import { useShell } from '@/components/providers/shell-provider';
+import { clientLogger } from '@/lib/logger-client';
 
 type Project = {
   id: string;
@@ -22,7 +23,7 @@ export function ProjectSwitcher() {
   useEffect(() => {
     async function fetchProjects() {
       try {
-        const res = await fetch('/api/v1/projects');
+        const res = await fetch('/api/v1/projects', { credentials: 'include' });
         if (res.ok) {
           const data = await res.json();
           // Adjust based on the actual API envelope returned by backend
@@ -34,7 +35,7 @@ export function ProjectSwitcher() {
           }
         }
       } catch (err) {
-        console.error('Failed to fetch projects', err);
+        clientLogger.error('Failed to fetch projects', err);
       } finally {
         setLoading(false);
       }

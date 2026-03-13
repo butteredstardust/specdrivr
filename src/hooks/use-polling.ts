@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { clientLogger } from '@/lib/logger-client';
 
 type UsePollingOptions<T> = {
   url: string;                          // endpoint to poll
@@ -108,7 +109,7 @@ export function usePolling<T>({
         errorCountRef.current += 1;
         const currentError = err instanceof Error ? err : new Error(String(err));
 
-        console.error(`Polling error for ${url}:`, currentError);
+        clientLogger.error(`Polling error for ${url}:`, currentError);
 
         if (errorCountRef.current >= 5) {
           setError(currentError);
