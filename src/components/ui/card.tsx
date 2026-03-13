@@ -353,6 +353,7 @@ CardFooter.displayName = 'CardFooter';
  * EXAMPLE 2: Settings Card with Glass Variant
  *
  * import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+ * // Project Mandate: All forms must use 'react-hook-form' and 'zod' for validation.
  *
  * export function SettingsCard() {
  *   return (
