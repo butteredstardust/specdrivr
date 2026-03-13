@@ -3,20 +3,44 @@
 import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { authClient } from '@/lib/auth-client';
 import { PixelInput, PixelPasswordInput, PixelButton, PixelAlert } from '@pxlkit/ui-kit';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 
+const loginSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(1, 'Password is required'),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
+
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
+
+  const emailValue = watch('email');
+  const passwordValue = watch('password');
+
+  const onLogin = async (data: LoginFormValues) => {
     setIsLoading(true);
     setError(null);
 
@@ -24,8 +48,8 @@ function LoginContent() {
 
     try {
       const { error: signInError } = await authClient.signIn.email({
-        email,
-        password,
+        email: data.email,
+        password: data.password,
         callbackURL,
       });
 
@@ -82,11 +106,7 @@ function LoginContent() {
           </div>
         )}
 
-        <form
-          className="flex w-full flex-col gap-4"
-          onSubmit={handleLogin}
-          data-mandate="react-hook-form zod"
-        >
+        <form className="flex w-full flex-col gap-4" onSubmit={handleSubmit(onLogin)}>
           <div className="flex flex-col gap-1.5">
             <label htmlFor="email" className="text-xs font-medium text-[--text-secondary]">
               EMAIL
@@ -96,9 +116,13 @@ function LoginContent() {
               type="email"
               tone="purple"
               autoFocus
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              {...register('email')}
+              onChange={(e) => setValue('email', e.target.value)}
+              value={emailValue}
             />
+            {errors.email && (
+              <p className="text-[10px] text-[--status-error]">{errors.email.message}</p>
+            )}
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -108,9 +132,13 @@ function LoginContent() {
             <PixelPasswordInput
               id="password"
               tone="purple"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              {...register('password')}
+              onChange={(e) => setValue('password', e.target.value)}
+              value={passwordValue}
             />
+            {errors.password && (
+              <p className="text-[10px] text-[--status-error]">{errors.password.message}</p>
+            )}
           </div>
 
           <div className="mt-2">
