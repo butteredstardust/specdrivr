@@ -52,7 +52,5 @@
     "types": "off",
     "unlisted": "off"
   },
-  "entry": [
-    "src/actions/**/*.ts"
-  ]
+  "entry": ["src/actions/**/*.ts"]
 }

@@ -17,26 +17,26 @@ You are an expert AI Systems Architect and a Senior Next.js/TypeScript Engineer 
 
 ## Tech Stack Reference
 
-| Category | Technology & Version |
-|----------|---------------------|
-| Framework | Next.js 16.1.6 (App Router) |
-| React | 19.2.4 |
-| TypeScript | 5.9.3 |
-| Styling | Tailwind CSS 4.2.1 |
-| UI (tier 1) | @pxlkit/core, @pxlkit/ui, @pxlkit/feedback, @pxlkit/social, @pxlkit/gamification, @pxlkit/weather, @pxlkit/effects |
-| UI (tier 2) | pxlkit/ui or shadcn/ui (Radix UI primitives) |
-| Base UI | @base-ui/react 1.2.0 |
-| Icons | @pxlkit/core, @pxlkit/feedback, @pxlkit/social, @pxlkit/gamification, @pxlkit/weather, @pxlkit/effects ; Lucide React as fallback |
-| Database | PostgreSQL |
-| ORM | Drizzle ORM 0.45.1 |
-| Auth | better-auth 1.5.4 |
-| Validation | Zod 3.22.0 |
-| Testing | Vitest 4, Playwright 1.42 |
-| Drag-drop | @dnd-kit |
-| Markdown | @uiw/react-md-editor |
-| Security | bcryptjs, @upstash/ratelimit, @upstash/redis, RBAC, lock-manager |
-| Logging | pino + pino-pretty |
-| Utilities | clsx, tailwind-merge, next-themes, DOMPurify |
+| Category    | Technology & Version                                                                                                              |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Framework   | Next.js 16.1.6 (App Router)                                                                                                       |
+| React       | 19.2.4                                                                                                                            |
+| TypeScript  | 5.9.3                                                                                                                             |
+| Styling     | Tailwind CSS 4.2.1                                                                                                                |
+| UI (tier 1) | @pxlkit/core, @pxlkit/ui, @pxlkit/feedback, @pxlkit/social, @pxlkit/gamification, @pxlkit/weather, @pxlkit/effects                |
+| UI (tier 2) | pxlkit/ui or shadcn/ui (Radix UI primitives)                                                                                      |
+| Base UI     | @base-ui/react 1.2.0                                                                                                              |
+| Icons       | @pxlkit/core, @pxlkit/feedback, @pxlkit/social, @pxlkit/gamification, @pxlkit/weather, @pxlkit/effects ; Lucide React as fallback |
+| Database    | PostgreSQL                                                                                                                        |
+| ORM         | Drizzle ORM 0.45.1                                                                                                                |
+| Auth        | better-auth 1.5.4                                                                                                                 |
+| Validation  | Zod 3.22.0                                                                                                                        |
+| Testing     | Vitest 4, Playwright 1.42                                                                                                         |
+| Drag-drop   | @dnd-kit                                                                                                                          |
+| Markdown    | @uiw/react-md-editor                                                                                                              |
+| Security    | bcryptjs, @upstash/ratelimit, @upstash/redis, RBAC, lock-manager                                                                  |
+| Logging     | pino + pino-pretty                                                                                                                |
+| Utilities   | clsx, tailwind-merge, next-themes, DOMPurify                                                                                      |
 
 ## Technical Constraints & Behavioral Anchors
 
@@ -50,6 +50,7 @@ You are an expert AI Systems Architect and a Senior Next.js/TypeScript Engineer 
     return typeof obj === 'object' && obj !== null && 'id' in obj;
   }
   ```
+
 - **Explicit return types** on all functions and methods.
 - **Infer, never duplicate:** Use `typeof table.$inferSelect`, `typeof table.$inferInsert`, and `z.infer<typeof schema>`. Never write Drizzle or Zod types by hand.
 - **Extended Types:** When passing DB models to UI components, extend via mapped types. Use component props types (e.g., `ProjectCardProps['project']`) for UI-specific fields.
@@ -75,25 +76,26 @@ Before building any UI element, consult `DESIGN_SYSTEM.md` for visual language, 
 
 **Component selection order — exhaust each tier before dropping to the next:**
 
-| Tier | Source | When to use |
-|------|--------|-------------|
-| 1 | `@pxlkit/*` | First choice for all UI. Pick the most semantically appropriate package. |
-| 2 | `pxlkit/ui or shadcn/ui` (`@/components/ui/`) | When no pxlkit component covers the need. Never modify shadcn source files. |
-| 3 | Custom component | Last resort only. Must be fully informed by `DESIGN_SYSTEM.md`. |
+| Tier | Source                                        | When to use                                                                 |
+| ---- | --------------------------------------------- | --------------------------------------------------------------------------- |
+| 1    | `@pxlkit/*`                                   | First choice for all UI. Pick the most semantically appropriate package.    |
+| 2    | `pxlkit/ui or shadcn/ui` (`@/components/ui/`) | When no pxlkit component covers the need. Never modify shadcn source files. |
+| 3    | Custom component                              | Last resort only. Must be fully informed by `DESIGN_SYSTEM.md`.             |
 
 **pxlkit package responsibilities:**
 
-| Package | Covers |
-|---------|--------|
-| `@pxlkit/core` | Foundational types, base components, SVG engine |
-| `@pxlkit/ui` | Interface controls, navigation, layout primitives |
-| `@pxlkit/feedback` | Alerts, status indicators, notifications, toasts |
-| `@pxlkit/social` | Community UI, emoji pickers, messaging components |
-| `@pxlkit/gamification` | RPG elements, achievements, rewards, progress |
-| `@pxlkit/weather` | Climate, moon phase, temperature displays |
-| `@pxlkit/effects` | Animated VFX, particle systems |
+| Package                | Covers                                            |
+| ---------------------- | ------------------------------------------------- |
+| `@pxlkit/core`         | Foundational types, base components, SVG engine   |
+| `@pxlkit/ui`           | Interface controls, navigation, layout primitives |
+| `@pxlkit/feedback`     | Alerts, status indicators, notifications, toasts  |
+| `@pxlkit/social`       | Community UI, emoji pickers, messaging components |
+| `@pxlkit/gamification` | RPG elements, achievements, rewards, progress     |
+| `@pxlkit/weather`      | Climate, moon phase, temperature displays         |
+| `@pxlkit/effects`      | Animated VFX, particle systems                    |
 
 **Hard rules:**
+
 - Never write a custom component when a pxlkit or pxlkit/ui or shadcn/ui equivalent exists.
 - Never hardcode visual values in custom components. Always reference `DESIGN_SYSTEM.md` tokens and `src/app/globals.css` CSS variables.
 - All new screens must align with existing screens. Check `USER_INTERFACE.md` before starting layout work.
@@ -142,7 +144,7 @@ Before building any UI element, consult `DESIGN_SYSTEM.md` for visual language, 
 ### Environment Configuration
 
 ```typescript
-import { env } from '@/lib/env';        // Next.js code (server-only protected)
+import { env } from '@/lib/env'; // Next.js code (server-only protected)
 import { env } from '@/lib/env-script'; // Standalone Node.js scripts
 ```
 
@@ -199,12 +201,14 @@ import { env } from '@/lib/env-script'; // Standalone Node.js scripts
 **Multi-layered defense against bypassing pre-commit/pre-push quality checks:**
 
 **1. Hook Integrity Verification**
+
 - Hook files (`.husky/pre-push`, `.husky/pre-commit`) have SHA256 checksums in `.husky/hooks-checksum.txt`
 - Local pre-push verifies checksums via `node scripts/verify-hooks.js verify`
 - CI workflows run same verification - bypassing locally fails in CI
 - After legitimate hook updates: `node scripts/verify-hooks.js generate`
 
 **2. Git Config Bypass Detection**
+
 - Detects before running checks:
   - `git config core.hooksPath /dev/null` → Warning shown, checks still run
   - `git config init.templateDir` bypass → Warning logged
@@ -212,6 +216,7 @@ import { env } from '@/lib/env-script'; // Standalone Node.js scripts
 - Implementation: Early checks in `.husky/pre-push` and `.husky/pre-commit`
 
 **3. CI/CD Guard**
+
 - GitHub Actions workflows verify hooks before running tests/lint:
   ```bash
   node scripts/verify-hooks.js verify
@@ -221,12 +226,14 @@ import { env } from '@/lib/env-script'; // Standalone Node.js scripts
 - Ensures checks run even if local hooks bypassed
 
 **4. Audit Trail**
+
 - Commits/pushes logged: `.husky/audit/pre-commit-YYYY-MM-DD.log`, `.husky/audit/pre-push-YYYY-MM-DD.log`
 - Logs: timestamp, user, branch, files, bypass method
 - View logs: `node scripts/audit-hooks.js show`
 - **Bypass attempts always logged** even if checks skipped
 
 **5. Commands for Verification**
+
 ```bash
 node scripts/verify-hooks.js verify    # Check integrity
 node scripts/verify-hooks.js generate  # Update checksums
@@ -236,18 +243,21 @@ bash scripts/ci-verify-hooks.sh      # CI verification
 ```
 
 **Consequences of Bypass Attempts:**
+
 - `--no-verify`: Checks skipped, logged to audit, CI will fail later
 - `core.hooksPath=/dev/null`: Warning locally, validation in CI
 - Delete/modify hooks: Passes locally, fails CI verification
 - Uninstall husky: Same as above
 
 **When Hooks Fail:**
+
 - **Always fix the code**, never bypass hooks
 - Hook failures indicate legitimate code quality issues
 - If hook modified intentionally: regenerate checksums
 - **Never commit with `--no-verify`** except true emergencies (documented in audit)
 
 **Never:**
+
 - Use `--no-verify` to bypass failing checks
 - Modify hooks without updating checksums
 - Commit secrets knowing hooks would block them
@@ -259,6 +269,7 @@ This system ensures quality checks **always run** (locally or in CI) and bypass 
 ## Refactoring Philosophy
 
 When performing code health improvements:
+
 - **Preserve behavior over cleanliness.** Never change logic and structure in the same commit.
 - **Separate commits:** One commit for structural/rename changes, a distinct commit for behavioral changes.
 - **Verify parity:** Run the full test suite before and after any refactor to confirm identical behavior.

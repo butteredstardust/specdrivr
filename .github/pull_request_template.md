@@ -1,15 +1,18 @@
 # Pull Request
 
 ## Description
+
 Brief description of the changes
 
 ## Type of Change
+
 - [ ] Bug fix
 - [ ] New feature
 - [ ] Breaking change
 - [ ] Documentation update
 
 ## Code Quality Checklist
+
 - [ ] No temporary fix scripts (`fix-*.sh`) committed
 - [ ] `pnpm lint` passes
 - [ ] `pnpm tsc --noEmit` passes

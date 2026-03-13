@@ -10,16 +10,16 @@ async function main() {
   console.log('Restoring spec_status data in database...');
 
   // Use a temporary enum value if needed, but since I haven't run db:push yet to remove 'completed', it should work.
-  // Actually, I already ran db:push multiple times. 
+  // Actually, I already ran db:push multiple times.
   // Let me check what's in the DB first.
-  
+
   await db.execute(sql`UPDATE specifications SET status = 'complete' WHERE status = 'completed'`);
 
   console.log('Data restored.');
   process.exit(0);
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error(err);
   process.exit(1);
 });

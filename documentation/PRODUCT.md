@@ -147,8 +147,6 @@ DAEMON error expression (large, centred) + "404 - Not found." + "This page doesn
 | 404                          | error      | 404 - Not found.      | This page doesn't exist or you don't have access.                        | \[Go to Mission Control\]    |
 | Mission Control (idle)       | idle       | SYSTEM READY          | No active session. Open a spec to begin.                                 | link to /specs               |
 
-
-
 ## Development Gaps & Technical Debt
 
 - **As-Built vs Specified:** The original specification (like API envelope strictness and some webhook flows) has been adapted during implementation (e.g., using `better-auth` for auth, simpler Drizzle schema mappings) leaving a few feature gaps mostly in the UI (app shell, detailed spec editors) and integrations (GitHub, Slack).
