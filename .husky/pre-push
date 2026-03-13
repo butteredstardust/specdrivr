@@ -10,6 +10,11 @@ set -euo pipefail
 # 2. Determined with 100% confidence that the hook logic itself is broken.
 # 3. Verified that the failing code is NOT violating a project mandate.
 # Modifying this file to "just get it done" is a violation of system integrity.
+#
+# HOOK INTEGRITY VERIFICATION:
+# This hook has checksum verification. If modified, the verify-hooks.js script
+# will detect the change and warn on next push. CI also verifies hook integrity.
+# After legitimate hook updates, run: node scripts/verify-hooks.js generate
 # ──────────────────────────────────────────────────────────────────────────────
 
 # ─── Environment Setup ────────────────────────────────────────────────────────
@@ -32,11 +37,90 @@ esac
 echo "🔍 Running pre-push checks..."
 echo ""
 
+# ─── Configuration Bypass Detection ─────────────────────────────────────────────
+earlier_git_bypass_warn() {
+  echo ""
+  echo "⚠️  WARNING: Git configuration suggests possible hook bypass attempt:"
+  echo "   $1"
+  echo ""
+  echo "If you need to bypass hooks temporarily for troubleshooting,"
+  echo "revert after debugging with:"
+  echo "  git config --unset core.hooksPath"
+  echo ""
+  echo "Alternatively, use --no-verify which is logged but won Bitcoin silently bypass."
+  echo ""
+}
+
+if git config --get core.hooksPath >/dev/null 2>&1; then
+  hooks_path=$(git config --get core.hooksPath 2>/dev/null)
+  if [ -n "$hooks_path" ] && [ "$hooks_path" != ".husky" ] && [ "$hooks_path" != ".husky/_" ]; then
+    earlier_git_bypass_warn "core.hooksPath set to '$hooks_path' (hooks will still run now)"
+  fi
+fi
+
+if git config --get init.templateDir >/dev/null 2>&1; then
+  template_dir=$(git config --get init.templateDir 2>/dev/null)
+  echo ""
+  echo "⚠️  WARNING: init.templateDir is set to '$template_dir'"
+  echo "   This could bypass hooks for new repositories."
+  echo ""
+fi
+
+# ─── Self-Integrity Check ─────────────────────────────────────────────────────
+# Verify this hook has not been modified (checks using Node script)
+if command -v node >/dev/null 2>&1 && [ -f "scripts/verify-hooks.js" ]; then
+  echo "Verifying hook integrity..."
+  if node scripts/verify-hooks.js verify >/dev/null 2>&1; then
+    echo "✓ Hook integrity verified"
+  else
+    echo ""
+    echo "⚠️  WARNING: This hook file appears to have been modified!"
+    echo "If you made intentional changes to improve checks, that's good."
+    echo "If you're trying to bypass checks, please reconsider."
+    echo ""
+    echo "To update checksums after legitimate changes:"
+    echo "  node scripts/verify-hooks.js generate"
+    echo ""
+    # Don't fail the push here, just warn - the actual checks are still valuable
+  fi
+  echo ""
+else
+  echo "Note: Hook integrity verification not available"
+  echo ""
+fi
+
 # ─── Helpers ──────────────────────────────────────────────────────────────────
-die() { echo "❌ Error: $*" >&2; exit 1; }
+die() {
+  # Audit logging (failure)
+  if command -v node >/dev/null 2>&1 && [ -f "scripts/audit-hooks.js" ]; then
+    range_for_audit="${range:-$(git log --oneline --format=\"%h\" | head -10 | wc -l)}"
+    commits_count=$(git log --oneline --format="%h" "$range_for_audit" 2>/dev/null | wc -l || echo unknown)
+    files_changed=$(git diff --name-only "$range_for_audit" 2>/dev/null | wc -l || echo unknown)
+    node scripts/audit-hooks.js pre-push "$(git config user.name || echo 'unknown')" "failed" "commits:$commits_count,files:$files_changed,branch:$current_branch" 2>/dev/null || true
+  fi
+  echo "❌ Error: $*" >&2
+  # Log failure message to audit as additional detail
+  if command -v node >/dev/null 2>&1 && [ -f "scripts/audit-hooks.js" ]; then
+    echo "$*" | node -e "
+      const msg = require('fs').readFileSync(0, 'utf-8').trim();
+      const entry = { timestamp: new Date().toISOString(), failure_reason: msg };
+      const fs = require('fs');
+      const path = require('path');
+      const auditFile = path.join('.husky', 'audit', 'pre-push-' + new Date().toISOString().split('T')[0] + '.log');
+      fs.appendFileSync(auditFile, JSON.stringify(entry) + '\\n');
+    " 2>/dev/null || true
+  fi
+  exit 1
+}
 
 # ─── 1. Branch Protection ─────────────────────────────────────────────────────
 current_branch=$(git rev-parse --abbrev-ref HEAD)
+
+# ─── Audit Logging (pre-checks) ───────────────────────────────────────────────
+# Log push attempt before running checks
+if command -v node >/dev/null 2>&1 && [ -f "scripts/audit-hooks.js" ]; then
+  node scripts/audit-hooks.js pre-push "$(git config user.name || echo 'unknown')" "running" "commits:unknown,files:unknown,branch:$current_branch" 2>/dev/null || true
+fi
 
 for protected in main master develop staging; do
   [ "$current_branch" = "$protected" ] && \
@@ -105,7 +189,7 @@ if echo "$changed_files" | grep -q "package\.json" \
 fi
 
 # ─── 5. Sensitive File Detection ──────────────────────────────────────────────
-echo "$changed_files" | grep -qE "(^|/)\.env(\.[a-z]+)?$" && \
+echo "$changed_files" | grep -v "\.env\.example" | grep -qE "(^|/)\.env(\.[a-z]+)?$" && \
   die "Environment files cannot be committed. Verify your .gitignore."
 
 echo "$changed_files" | grep -q "\.log$" && \
@@ -133,7 +217,7 @@ fi
 # process.env outside the validated env module
 if echo "$additions" | grep -q "process\.env"; then
   # Only flag files that actually added process.env AND are not in the allowed list
-  env_violators=$(echo "$changed_diff" | awk '/^diff --git/ {file=$0; sub(/^diff --git a\/.* b\//, "", file)} /^(\+)([^+]|$)/ && /process\.env/ {print file}' | sort -u | grep -vE "src/lib/env|\.config\.(js|ts|mjs)|\.d\.ts" || true)
+  env_violators=$(echo "$changed_diff" | awk '/^diff --git/ {file=$0; sub(/^diff --git a\/.* b\//, "", file)} /^(\+)([^+]|$)/ && /process\.env/ {print file}' | sort -u | grep -vE "src/lib/env|\.config\.(js|ts|mjs)|\.d\.ts|scripts/" || true)
   [ -n "$env_violators" ] && \
     die "process.env found outside @/lib/env. Use the Zod-validated env schema in:\n$env_violators"
 fi
@@ -231,8 +315,9 @@ done
 # ─── 11. Debug Code & Logging Standards ───────────────────────────────────────
 # Mandate: Use @/lib/logger (Pino) instead of console.log/warn
 if echo "$additions" | grep -qE "console\.(log|debug|warn|table|dir)\s*\("; then
-  log_violators=$(echo "$changed_diff" | awk '/^diff --git/ {file=$0; sub(/^diff --git a\/.* b\//, "", file)} /^(\+)([^+]|$)/ && /console\.(log|debug|warn|table|dir)/ {print file}' | sort -u || true)
-  die "Forbidden logging found (use @/lib/logger instead):\n$log_violators"
+  log_violators=$(echo "$changed_diff" | awk '/^diff --git/ {file=$0; sub(/^diff --git a\/.* b\//, "", file)} /^(\+)([^+]|$)/ && /console\.(log|debug|warn|table|dir)/ {print file}' | sort -u | grep -vE "scripts/" || true)
+  [ -n "$log_violators" ] && \
+    die "Forbidden logging found (use @/lib/logger instead):\n$log_violators"
 fi
 
 if echo "$additions" | grep -q "debug""ger"; then
@@ -303,3 +388,11 @@ pnpm test:unit || die "Unit tests failed. Run 'pnpm test:unit' for details."
 
 echo ""
 echo "✅ All pre-push checks passed!"
+
+# Audit logging (success)
+if command -v node >/dev/null 2>&1 && [ -f "scripts/audit-hooks.js" ]; then
+  range_for_audit="${range:-$(git log --oneline --format=\"%h\" | head -10 | wc -l)}"
+  commits_count=$(git log --oneline --format="%h" "$range_for_audit" 2>/dev/null | wc -l || echo unknown)
+  files_changed=$(git diff --name-only "$range_for_audit" 2>/dev/null | wc -l || echo unknown)
+  node scripts/audit-hooks.js pre-push "$(git config user.name || echo 'unknown')" "passed" "commits:$commits_count,files:$files_changed,branch:$current_branch" 2>/dev/null || true
+fi

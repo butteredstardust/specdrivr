@@ -95,6 +95,9 @@ Thumbs.db
 .claude/
 .mcp.json
 
+# Gemini AI files
+.gemini/
+
 # Cleanup scripts
 knip-baseline.json
 audit-report.json
