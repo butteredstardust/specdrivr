@@ -1,3 +1,4 @@
+import { Toaster } from '@/components/ui/sonner';
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { ShellProvider } from '@/components/providers/shell-provider';
@@ -30,6 +31,7 @@ export default async function AppLayout({
       </div>
 
       <KeyboardShortcutsWrapper />
+      <Toaster />
     </ShellProvider>
   );
 }
