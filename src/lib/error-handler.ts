@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextResponse } from 'next/server';
 import {
   AppError,
@@ -45,7 +46,7 @@ export function formatErrorResponse(error: unknown): ErrorResponse {
   }
 
   if (error instanceof Error) {
-    console.error('Unexpected error:', error);
+    logger.error({ error }, 'Unexpected error');
 
     return {
       error: {
@@ -76,12 +77,12 @@ export function createErrorHandler() {
     onError: (error: unknown) => {
       if (error instanceof AppError) {
         if (error.isOperational) {
-          console.error(`Operational error: ${error.name} - ${error.message}`);
+          logger.error({ error }, 'Operational error');
         } else {
-          console.error(`Programming error: ${error.name} - ${error.message}`);
+          logger.error({ error }, 'Programming error');
         }
       } else {
-        console.error('Unexpected error:', error);
+        logger.error({ error }, 'Unexpected error');
       }
     },
   };
