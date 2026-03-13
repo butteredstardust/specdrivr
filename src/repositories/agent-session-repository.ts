@@ -6,6 +6,7 @@ import { NotFoundError, DatabaseError } from '@/lib/errors';
 import { dispatchWebhookEvent, type WebhookEventType } from '@/lib/webhooks';
 import { sendSlackNotification, type SlackEventType } from '@/lib/slack';
 import { env } from '@/lib/env';
+import { logger } from '@/lib/logger';
 
 export { type AgentSessionSelect as AgentSession } from '@/db/schema';
 
@@ -151,7 +152,7 @@ export class AgentSessionRepository extends BaseRepository {
       });
     } catch (err) {
       // Never throw from notification helper
-      console.error('Failed to send session Slack notification', err);
+      logger.error({ err }, 'Failed to send session Slack notification');
     }
   }
 

@@ -7,6 +7,7 @@ import { NotFoundError, ValidationError, DatabaseError } from '@/lib/errors';
 import { dispatchWebhookEvent, type WebhookEventType } from '@/lib/webhooks';
 import { sendSlackNotification } from '@/lib/slack';
 import { env } from '@/lib/env';
+import { logger } from '@/lib/logger';
 
 export interface CreateTaskData {
   externalId: string;
@@ -188,7 +189,7 @@ export class TaskRepository extends BaseRepository {
             }
           }
         } catch (err) {
-          console.error(`Failed to dispatch task.${data.status} webhook`, err);
+          logger.error({ err }, `Failed to dispatch task.${data.status} webhook`);
         }
       })();
     }
@@ -281,7 +282,7 @@ export class TaskRepository extends BaseRepository {
               void this.notifySlackTaskBlocked(t.id);
             }
           } catch (err) {
-            console.error('Failed to dispatch task.blocked webhook', err);
+            logger.error({ err }, 'Failed to dispatch task.blocked webhook');
           }
         })();
       } else if (t.status === 'done') {
@@ -299,7 +300,7 @@ export class TaskRepository extends BaseRepository {
               });
             }
           } catch (err) {
-            console.error('Failed to dispatch task.done webhook', err);
+            logger.error({ err }, 'Failed to dispatch task.done webhook');
           }
         })();
       }
@@ -353,7 +354,7 @@ export class TaskRepository extends BaseRepository {
             });
           }
         } catch (err) {
-          console.error('Failed to dispatch task.retried webhook', err);
+          logger.error({ err }, 'Failed to dispatch task.retried webhook');
         }
       })();
       return updatedTask;
@@ -408,7 +409,7 @@ export class TaskRepository extends BaseRepository {
             });
           }
         } catch (err) {
-          console.error('Failed to dispatch task.unblocked webhook', err);
+          logger.error({ err }, 'Failed to dispatch task.unblocked webhook');
         }
       })();
       return updatedTask;
@@ -476,7 +477,7 @@ export class TaskRepository extends BaseRepository {
             }
           }
         } catch (err) {
-          console.error('Failed to dispatch task webhook in overrideStatus', err);
+          logger.error({ err }, 'Failed to dispatch task webhook in overrideStatus');
         }
       })();
       return updatedTask;
@@ -535,7 +536,7 @@ export class TaskRepository extends BaseRepository {
         appUrl: env.NEXT_PUBLIC_APP_URL,
       });
     } catch (err) {
-      console.error('Failed to send task blocked Slack notification', err);
+      logger.error({ err }, 'Failed to send task blocked Slack notification');
     }
   }
 }
