@@ -53,7 +53,7 @@ earlier_git_bypass_warn() {
 
 if git config --get core.hooksPath >/dev/null 2>&1; then
   hooks_path=$(git config --get core.hooksPath 2>/dev/null)
-  if [ -n "$hooks_path" ] && [ "$hooks_path" != ".husky" ]; then
+  if [ -n "$hooks_path" ] && [ "$hooks_path" != ".husky" ] && [ "$hooks_path" != ".husky/_" ]; then
     earlier_git_bypass_warn "core.hooksPath set to '$hooks_path' (hooks will still run now)"
   fi
 fi
