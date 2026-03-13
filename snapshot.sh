@@ -36,23 +36,34 @@ if [ ! -f ".env.local" ]; then
         echo "Creating .env.local from .env.example..."
         cp .env.example .env.local
     else
-        echo "Warning: .env.example not found. Ensure environment variables are set."
+        echo "Error: .env.example not found"
+        exit 1
     fi
+fi
+
+# Validate environment variables (check for placeholders)
+echo "Validating environment variables..."
+PLACEHOLDER_COUNT=$(grep -Eo 'your-|example-' .env.local | wc -l)
+if [ "$PLACEHOLDER_COUNT" -gt 0 ]; then
+    echo "⚠️  Warning: .env.local contains placeholder values that need to be replaced."
+    echo "   Please edit .env.local and set real values for:"
+    grep -Eo 'your-|example-' .env.local | sed 's/.*=//' | sort -u | while read -r var; do
+        echo "   - $var"
+    done
+    echo ""
+    echo "The application may not work correctly until these are updated."
 fi
 
 # 3. Install Dependencies
 echo "Installing project dependencies..."
-# We use pnpm install to ensure node_modules is up to date based on pnpm-lock.yaml
 pnpm install --frozen-lockfile
 
-# 4. Wait for PostgreSQL and setup database
+# 4. Wait for PostgreSQL
 echo "Checking PostgreSQL..."
-# Start postgresql service if not running (useful in some container environments based on ubuntu)
 if command -v sudo &> /dev/null && command -v systemctl &> /dev/null; then
     sudo systemctl start postgresql || true
 fi
 
-# Wait until pg_isready is successful
 if command -v pg_isready &> /dev/null; then
     echo "Waiting for PostgreSQL to be ready..."
     until pg_isready -U postgres -h localhost >/dev/null 2>&1; do
@@ -63,15 +74,30 @@ else
     echo "Warning: pg_isready not found, skipping wait. Ensure PostgreSQL is running."
 fi
 
+# 4b. Wait for Redis (if redis-cli is available)
+echo "Checking Redis..."
+if command -v redis-cli &> /dev/null; then
+    echo "Waiting for Redis to be ready..."
+    until redis-cli ping &>/dev/null; do
+        sleep 1
+    done
+    echo "Redis is ready."
+else
+    echo "Warning: redis-cli not found, skipping Redis check. Ensure Redis is running."
+fi
+
 # 5. Database Schema Push
 echo "Applying database schema..."
 pnpm run db:push
 
 # 6. Database Seeding
-# Currently, there is no active database seed script.
-# Setup documentation for `db:seed` commands should be avoided until a seed script is formally introduced.
-# We skip the seed step to respect current project state.
-echo "Skipping database seeding (no seed script configured)."
+# Seed only if a seed script is configured
+if pnpm run db:seed --help &>/dev/null; then
+    echo "Seeding demo data..."
+    pnpm db:seed || echo "Seed failed or not fully configured"
+else
+    echo "Skipping database seeding (no seed script configured)."
+fi
 
 echo "=== Snapshot Initialization Complete ==="
 

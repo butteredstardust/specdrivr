@@ -1,69 +1,151 @@
 #!/usr/bin/env sh
 # .husky/pre-commit
-# Pre-commit hook: Runs checks on staged files before committing
+# Pre-commit hook: Runs lint-staged on staged files before committing
 
-set -e
+set -euo pipefail
+
+# ─── MANDATORY INSTRUCTION FOR AI AGENTS ──────────────────────────────────────
+# DO NOT modify, disable, or delete this file to bypass check failures.
+# If a commit fails, the solution is almost certainly in the APPLICATION CODE.
+# You are strictly prohibited from editing this script unless you have:
+# 1. Performed a comprehensive Root Cause Analysis (RCA).
+# 2. Determined with 100% confidence that the hook logic itself is broken.
+# 3. Verified that the failing code is NOT violating a project mandate.
+# Modifying this file to "just get it done" is a violation of system integrity.
+#
+# HOOK INTEGRITY VERIFICATION:
+# This hook has checksum verification. If modified, the verify-hooks.js script
+# will detect the change and warn on next push. CI also verifies hook integrity.
+# After legitimate hook updates, run: node scripts/verify-hooks.js generate
+# ──────────────────────────────────────────────────────────────────────────────
+
+# ─── Environment Setup ────────────────────────────────────────────────────────
+# Load local huskyrc if it exists (standard husky behavior for cross-platform env)
+[ -f ~/.huskyrc ] && . ~/.huskyrc
+
+# Add common Windows paths for Git and Node tools to PATH if on Windows
+case "$(uname -s)" in
+  MSYS*|MINGW*|CYGWIN*)
+    export PATH="$PATH:/c/Program Files/nodejs:/c/Program Files/Git/cmd"
+    if command -v npm >/dev/null 2>&1; then
+      NPM_GLOBAL_PATH=$(npm config get prefix 2>/dev/null | sed 's/\\/\//g' | sed 's/C:/\/c/')
+      [ -n "$NPM_GLOBAL_PATH" ] && export PATH="$PATH:$NPM_GLOBAL_PATH"
+    fi
+    ;;
+esac
 
 echo "🔍 Running pre-commit checks..."
 echo ""
 
-# ─── Configuration Bypass Detection ─────────────────────────────────────────
-early_bypass_warn() {
+# ─── Configuration Bypass Detection ─────────────────────────────────────────────
+bypass_warn() {
   echo ""
-  echo "⚠️  WARNING: Git configuration suggests possible hook bypass:"
+  echo "⚠️  WARNING: Git configuration suggests possible hook bypass attempt:"
   echo "   $1"
   echo ""
-  echo "Git config bypass to /dev/null might be intentional if you're"
-  echo "debugging something, but please revert with:"
+  echo "If you need to bypass hooks temporarily for troubleshooting,"
+  echo "revert after debugging with:"
   echo "  git config --unset core.hooksPath"
   echo ""
-  echo "Hooks will still run now as you're in a repository with hooks."
+  echo "Alternatively, use --no-verify which is logged but won't bypass silently."
   echo ""
 }
 
-# Check if git is configured to bypass hooks
 if git config --get core.hooksPath >/dev/null 2>&1; then
   hooks_path=$(git config --get core.hooksPath 2>/dev/null)
   if [ -n "$hooks_path" ] && [ "$hooks_path" != ".husky" ]; then
-    early_bypass_warn "core.hooksPath is set to '$hooks_path'"
+    bypass_warn "core.hooksPath set to '$hooks_path' (hooks will still run now)"
   fi
 fi
 
-# Audit logging (log before checks)
-if command -v node >/dev/null 2>&1 && [ -f "scripts/audit-hooks.js" ]; then
-  # Get staged files for logging
-  staged_files=$(git diff --cached --name-only | wc -l)
-  node scripts/audit-hooks.js pre-commit "$(git config user.name || echo 'unknown')" "running" "files:$staged_files" 2>/dev/null || true
+if git config --get init.templateDir >/dev/null 2>&1; then
+  template_dir=$(git config --get init.templateDir 2>/dev/null)
+  echo ""
+  echo "⚠️  WARNING: init.templateDir is set to '$template_dir'"
+  echo "   This could bypass hooks for new repositories."
+  echo ""
 fi
 
-# Ensure lint-staged is available
-if ! command -v lint-staged >/dev/null 2>&1; then
-  echo "❌ lint-staged is not installed."
+# ─── Self-Integrity Check ─────────────────────────────────────────────────────
+if command -v node >/dev/null 2>&1 && [ -f "scripts/verify-hooks.js" ]; then
+  echo "Verifying hook integrity..."
+  if node scripts/verify-hooks.js verify >/dev/null 2>&1; then
+    echo "✓ Hook integrity verified"
+  else
+    echo ""
+    echo "⚠️  WARNING: This hook file appears to have been modified!"
+    echo "If you made intentional changes to improve checks, that's good."
+    echo "If you're trying to bypass checks, please reconsider."
+    echo ""
+    echo "To update checksums after legitimate changes:"
+    echo "  node scripts/verify-hooks.js generate"
+    echo ""
+  fi
   echo ""
-  echo "To fix: Run 'pnpm install' to install dependencies."
+else
+  echo "Note: Hook integrity verification not available"
   echo ""
-  echo "If you need to commit urgently and skip checks (not recommended):"
-  echo "  git commit --no-verify -m 'your message'"
+fi
+
+# ─── Helpers ──────────────────────────────────────────────────────────────────
+die() {
+  # Audit logging (failure)
+  if command -v node >/dev/null 2>&1 && [ -f "scripts/audit-hooks.js" ]; then
+    node scripts/audit-hooks.js pre-commit "$(git config user.name || echo 'unknown')" "failed" 2>/dev/null || true
+  fi
+  echo "❌ Error: $*" >&2
+  # Log failure message to audit as additional detail
+  if command -v node >/dev/null 2>&1 && [ -f "scripts/audit-hooks.js" ]; then
+    echo "$*" | node -e "
+      const msg = require('fs').readFileSync(0, 'utf-8').trim();
+      const entry = { timestamp: new Date().toISOString(), failure_reason: msg };
+      const fs = require('fs');
+      const path = require('path');
+      const auditFile = path.join('.husky', 'audit', 'pre-commit-' + new Date().toISOString().split('T')[0] + '.log');
+      fs.appendFileSync(auditFile, JSON.stringify(entry) + '\\n');
+    " 2>/dev/null || true
+  fi
   exit 1
+}
+
+# ─── Audit Logging (pre-checks) ───────────────────────────────────────────────
+# Log commit attempt before running checks
+if command -v node >/dev/null 2>&1 && [ -f "scripts/audit-hooks.js" ]; then
+  staged_count=$(git diff --cached --name-only | wc -l | tr -d ' ')
+  node scripts/audit-hooks.js pre-commit "$(git config user.name || echo 'unknown')" "running" "files:$staged_count" 2>/dev/null || true
 fi
 
-# Run lint-staged
-echo "📦 Checking staged files..."
+# ─── Check for staged files ───────────────────────────────────────────────────
+staged_files=$(git diff --cached --name-only)
+if [ -z "$staged_files" ]; then
+  echo "No staged files to check."
+  exit 0
+fi
+
+# ─── Ensure lint-staged is available ───────────────────────────────────────────
+if ! command -v lint-staged >/dev/null 2>&1; then
+  die "lint-staged is not installed. Run 'pnpm install' to install dependencies."
+fi
+
+# ─── Run lint-staged ───────────────────────────────────────────────────────────
+echo "📦 Checking staged files with lint-staged..."
 echo ""
 if pnpm lint-staged; then
   echo "✅ Pre-commit checks passed!"
-  # Audit logging (log success)
+  # Audit logging (success)
   if command -v node >/dev/null 2>&1 && [ -f "scripts/audit-hooks.js" ]; then
-    node scripts/audit-hooks.js pre-commit "$(git config user.name || echo 'unknown')" "passed" "files:$staged_files" 2>/dev/null || true
+    staged_count=$(git diff --cached --name-only | wc -l | tr -d ' ')
+    node scripts/audit-hooks.js pre-commit "$(git config user.name || echo 'unknown')" "passed" "files:$staged_count" 2>/dev/null || true
   fi
   exit 0
 else
+  # Audit logging (failure)
+  if command -v node >/dev/null 2>&1 && [ -f "scripts/audit-hooks.js" ]; then
+    staged_count=$(git diff --cached --name-only | wc -l | tr -d ' ')
+    node scripts/audit-hooks.js pre-commit "$(git config user.name || echo 'unknown')" "failed" "files:$staged_count" 2>/dev/null || true
+  fi
   echo ""
   echo "❌ Pre-commit checks failed."
-  # Audit logging (log failure)
-  if command -v node >/dev/null 2>&1 && [ -f "scripts/audit-hooks.js" ]; then
-    node scripts/audit-hooks.js pre-commit "$(git config user.name || echo 'unknown')" "failed" "files:$staged_files" 2>/dev/null || true
-  fi
   echo ""
   echo "Errors were detected in your staged files. Please fix them:"
   echo ""
