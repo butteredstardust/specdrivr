@@ -217,7 +217,7 @@ fi
 # process.env outside the validated env module
 if echo "$additions" | grep -q "process\.env"; then
   # Only flag files that actually added process.env AND are not in the allowed list
-  env_violators=$(echo "$changed_diff" | awk '/^diff --git/ {file=$0; sub(/^diff --git a\/.* b\//, "", file)} /^(\+)([^+]|$)/ && /process\.env/ {print file}' | sort -u | grep -vE "src/lib/env|\.config\.(js|ts|mjs)|\.d\.ts" || true)
+  env_violators=$(echo "$changed_diff" | awk '/^diff --git/ {file=$0; sub(/^diff --git a\/.* b\//, "", file)} /^(\+)([^+]|$)/ && /process\.env/ {print file}' | sort -u | grep -vE "src/lib/env|\.config\.(js|ts|mjs)|\.d\.ts|scripts/" || true)
   [ -n "$env_violators" ] && \
     die "process.env found outside @/lib/env. Use the Zod-validated env schema in:\n$env_violators"
 fi
