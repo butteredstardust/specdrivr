@@ -316,7 +316,8 @@ done
 # Mandate: Use @/lib/logger (Pino) instead of console.log/warn
 if echo "$additions" | grep -qE "console\.(log|debug|warn|table|dir)\s*\("; then
   log_violators=$(echo "$changed_diff" | awk '/^diff --git/ {file=$0; sub(/^diff --git a\/.* b\//, "", file)} /^(\+)([^+]|$)/ && /console\.(log|debug|warn|table|dir)/ {print file}' | sort -u | grep -vE "scripts/" || true)
-  die "Forbidden logging found (use @/lib/logger instead):\n$log_violators"
+  [ -n "$log_violators" ] && \
+    die "Forbidden logging found (use @/lib/logger instead):\n$log_violators"
 fi
 
 if echo "$additions" | grep -q "debug""ger"; then
