@@ -4,7 +4,7 @@ import React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { PxlKitIcon } from '@pxlkit/core';
 import { Home, List, History, Settings } from '@pxlkit/ui';
-import { PixelBadge, PixelPulse } from '@pxlkit/ui-kit';
+import { PixelBadge, PixelPulse, PixelButton } from '@pxlkit/ui-kit';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { ProjectSwitcher } from '@/components/shell/project-switcher';
 import { useShell } from '@/components/providers/shell-provider';
@@ -32,9 +32,13 @@ export function Sidebar() {
 
   if (blockedCount > 0) {
     daemonStatusNode = (
-      <button onClick={() => router.push('/')} className="transition-opacity hover:opacity-80">
+      <PixelButton
+        variant="ghost"
+        onClick={() => router.push('/')}
+        className="h-auto p-0 transition-opacity hover:opacity-80"
+      >
         <PixelBadge tone="gold">⚠ {blockedCount} BLOCKED</PixelBadge>
-      </button>
+      </PixelButton>
     );
     daemonExpression = 'error';
   } else if (sessionRunning) {
@@ -74,11 +78,12 @@ export function Sidebar() {
           const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
 
           return (
-            <button
+            <PixelButton
               key={item.href}
+              variant="ghost"
               onClick={() => router.push(item.href)}
               className={twMerge(
-                'flex w-full items-center gap-3 px-4 py-2 text-left text-sm font-medium transition-colors',
+                'flex w-full items-center justify-start gap-3 rounded-none px-4 py-2 text-left text-sm font-medium transition-colors',
                 isActive
                   ? 'border-l-2 border-[--accent-violet] bg-[--accent-violet]/5 text-[--accent-violet]'
                   : 'border-l-2 border-transparent text-[--text-secondary] hover:bg-[--bg-elevated] hover:text-[--text-primary]'
@@ -86,7 +91,7 @@ export function Sidebar() {
             >
               <PxlKitIcon icon={item.icon} size={16} color="currentColor" />
               {item.label}
-            </button>
+            </PixelButton>
           );
         })}
       </nav>
