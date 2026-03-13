@@ -6,6 +6,21 @@ import { authClient } from '@/lib/auth-client';
 import { PixelPasswordInput, PixelButton, PixelAlert } from '@pxlkit/ui-kit';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { twMerge } from 'tailwind-merge';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+
+const resetPasswordSchema = z
+  .object({
+    password: z.string().min(12, 'Password must be at least 12 characters'),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
+
+type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;
 
 function getPasswordStrength(password: string): number {
   if (!password) return 0;
@@ -47,15 +62,29 @@ function ResetPasswordContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
 
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [isValidatingToken, setIsValidatingToken] = useState(true);
   const [isTokenValid, setIsTokenValid] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<ResetPasswordValues>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      password: '',
+      confirmPassword: '',
+    },
+  });
+
+  const passwordValue = watch('password');
+  const confirmPasswordValue = watch('confirmPassword');
 
   useEffect(() => {
     if (!token) {
@@ -72,19 +101,7 @@ function ResetPasswordContent() {
     setIsTokenValid(true);
   }, [token]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match.');
-      return;
-    }
-
-    if (password.length < 12) {
-      setError('Password must be at least 12 characters.');
-      return;
-    }
-
+  const onResetPassword = async (data: ResetPasswordValues) => {
     if (!token) {
       setError('Invalid or missing token.');
       return;
@@ -95,7 +112,7 @@ function ResetPasswordContent() {
 
     try {
       const { error: resetError } = await authClient.resetPassword({
-        newPassword: password,
+        newPassword: data.password,
         token,
       });
 
@@ -174,7 +191,7 @@ function ResetPasswordContent() {
           </div>
         )}
 
-        <form className="flex w-full flex-col gap-6" onSubmit={handleSubmit}>
+        <form className="flex w-full flex-col gap-6" onSubmit={handleSubmit(onResetPassword)}>
           <div className="flex flex-col gap-1.5">
             <label htmlFor="password" className="text-xs font-medium text-[--text-secondary]">
               NEW PASSWORD
@@ -183,11 +200,14 @@ function ResetPasswordContent() {
               id="password"
               tone="purple"
               autoFocus
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              {...register('password')}
+              onChange={(e) => setValue('password', e.target.value)}
+              value={passwordValue}
             />
-            <PasswordStrengthIndicator password={password} />
+            {errors.password && (
+              <p className="text-[10px] text-[--status-error]">{errors.password.message}</p>
+            )}
+            <PasswordStrengthIndicator password={passwordValue} />
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -200,10 +220,13 @@ function ResetPasswordContent() {
             <PixelPasswordInput
               id="confirmPassword"
               tone="purple"
-              required
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              {...register('confirmPassword')}
+              onChange={(e) => setValue('confirmPassword', e.target.value)}
+              value={confirmPasswordValue}
             />
+            {errors.confirmPassword && (
+              <p className="text-[10px] text-[--status-error]">{errors.confirmPassword.message}</p>
+            )}
           </div>
 
           <PixelButton type="submit" tone="purple" className="mt-2 w-full" loading={isLoading}>
