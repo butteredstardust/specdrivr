@@ -199,6 +199,95 @@ Before building any UI, consult `DESIGN_SYSTEM.md` for visual language, spacing,
 ### Audit Logging
 - Critical state changes (user creation, project updates, permission changes) must log to `audit_log` within same DB transaction. Include actor ID, action, resource type, resource ID, timestamp.
 
+### Husky Hook Protection
+
+The project has **multi-layered protection** against bypassing pre-commit and pre-push quality checks. These guards protect code quality even if local hooks are disabled or modified.
+
+**How the protection works:**
+
+**1. Local Hook Integrity (Self-Verification)**
+- Hook files have SHA256 checksums stored in `.husky/hooks-checksum.txt`
+- Each push verifies hooks haven't been modified: `node scripts/verify-hooks.js verify`
+- If modified, a warning appears but checks still run (we warn, not block, to allow legitimate updates)
+- After legitimate hook updates, regenerate checksums: `node scripts/verify-hooks.js generate`
+
+**2. Git Config Bypass Detection**
+- Detects common bypass attempts **before** running checks:
+  - `git config core.hooksPath /dev/null` → Shows warning, still runs checks
+  - `git config init.templateDir` with custom hooks → Warning logged
+  - `--no-verify` flag usage → Logged to audit trail
+- These checks happen in `.husky/pre-push` and `.husky/pre-commit`
+
+**3. CI/CD Guard (Server-Side)**
+- GitHub Actions runs `node scripts/verify-hooks.js verify` in both workflows:
+  - `.github/workflows/code-quality.yml`
+  - `.github/workflows/test.yml`
+- CI fails if hooks are missing or modified (different from local behavior)
+- CI runs the **same checks** that pre-push runs (lint, typecheck, tests), so bypassing locally only delays failure
+
+**4. Audit Trail**
+- Every commit/push is logged to `.husky/audit/pre-commit-YYYY-MM-DD.log` and `.husky/audit/pre-push-YYYY-MM-DD.log`
+- Logs include: timestamp, user, branch, files changed, bypass method (if any)
+- Run `node scripts/audit-hooks.js show` to view recent logs
+- **Bypass is logged** even if checks are skipped
+
+**Common Bypass Attempts (and why they fail):**
+
+| Bypass Method | What Happens | Why It Fails
+|---------------|--------------|-------------
+| `git config core.hooksPath /dev/null` | Shows warning, hooks still run | Git config is read by hooks before checking
+| `git commit/push --no-verify` | Checks skipped, **logged as bypass** | Audit trail captures bypass; CI will fail later
+| Delete `.husky/pre-push` | Passes locally | CI verification fails because script is missing
+| Modify hook file | Warning on next push, runs anyway | CI verification fails with different checksum
+| Uninstall husky | Passes locally | Fails in CI, which verifies hooks present
+
+**Legitimate Hook Updates:**
+
+To modify hooks legitimately:
+
+1. Edit `.husky/pre-push` or `.husky/pre-commit` as needed
+2. Test thoroughly: `pnpm lint && pnpm test && pnpm typecheck`
+3. Update checksums: `node scripts/verify-hooks.js generate`
+4. Commit hook changes **separately** from other changes
+5. Document why the hook change is needed in the commit message
+
+**What to do when hooks detect a problem:**
+
+Hooks only fail when they find **legitimate issues in your code**. The solution is **fixing the code**, not disabling the hooks.
+
+**When you see "Hook integrity FAILED":**
+
+- **If you modified the hook intentionally:** Regenerate checksums (`node scripts/verify-hooks.js generate`)
+- **If you didn't modify it:** Investigate immediately - could be filesystem corruption
+- **Never bypass** without understanding why the hook failed
+
+**Never commit anything with:**
+
+- `--no-verify` (bypasses all checks, logged to audit trail)
+- Modified hook files without updating checksums
+- Deleted/renamed hook files
+
+**Commands:**
+
+```bash
+# Verify hooks haven't been tampered with
+node scripts/verify-hooks.js verify
+
+# Regenerate checksums after legitimate hook updates
+node scripts/verify-hooks.js generate
+
+# Check git config for bypass attempts
+node scripts/verify-hooks.js check-git
+
+# View recent audit logs
+node scripts/audit-hooks.js show
+
+# Run CI hook verification
+bash scripts/ci-verify-hooks.sh
+```
+
+This system ensures that **quality checks always run** - either locally before commit, or in CI after push. Bypass attempts are detected and logged, but never prevent the checks from running in CI.
+
 ### XSS Prevention
 - Sanitize all user-generated HTML before rendering with `dangerouslySetInnerHTML` using `DOMPurify.sanitize()`.
 - **Never use `dangerouslySetInnerHTML`** without sanitization.
