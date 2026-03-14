@@ -33,7 +33,7 @@
 
 - [ ] Step 1: Remove deprecated/replaced packages
   ```bash
-  pnpm remove @uiw/react-md-editor @pxlkit/core @pxlkit/effects @pxlkit/feedback @pxlkit/gamification @pxlkit/social @pxlkit/ui @pxlkit/ui-kit @pxlkit/weather
+  pnpm remove @uiw/react-md-editor @pxlkit/core @pxlkit/effects @pxlkit/feedback @pxlkit/gamification @pxlkit/social @pxlkit/ui @pxlkit/ui-kit
   ```
 
 - [ ] Step 2: Add required new packages
@@ -781,7 +781,7 @@ interface ShellProviderProps {
   ```tsx
   import { render, screen, act } from '@testing-library/react';
   import userEvent from '@testing-library/user-event';
-  import { expect, test, describe, beforeEach } from 'vitest';
+  import { expect, test, describe, vi, beforeEach } from 'vitest';
   import { ShellProvider, useShell } from '@/components/shell/shell-context';
 
   const mockUser = { id: '1', name: 'Test User', email: 'test@example.com' };
@@ -968,7 +968,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <ShellProvider user={session.user}>
       <div className="flex h-screen overflow-hidden">
-        <Sidebar projects={projects} userRole="member" />
+        <Sidebar projects={projects} />
+        {/* NOTE: userRole is resolved client-side inside Sidebar via useShell() + a
+            membership lookup. Sidebar receives the full user object from ShellContext
+            and resolves the role for the active project. Do NOT pass a hardcoded role here. */}
         <div className="flex flex-col flex-1 overflow-hidden">
           <TopBar />
           <main className="flex-1 overflow-y-auto p-6">
@@ -1052,10 +1055,31 @@ interface OnboardingWizardProps {
 - `GET /api/v1/sessions/{id}/events?limit=30`
 - Auth: `const session = await auth()` — 401 if null
 - Fetch session, check project membership via `requireMember()`
-- Query `agentEvents` table via `agentSessionRepository` (add `getEvents(sessionId, limit)` method) or query inline
+- Query `agentEvents` via `agentSessionRepository.getEvents(sessionId, limit)` — **MUST use the repository, never import `db` directly in a route** (architectural mandate)
+- First add `getEvents` to `src/repositories/agent-session-repository.ts`
 - Response envelope: `{ data: AgentEventSelect[] }`
 - Sorted by `createdAt` ascending (chronological order for log display)
 
+**Step 1a — Add `getEvents` to `src/repositories/agent-session-repository.ts`:**
+```ts
+// Add this import at the top if not already present:
+import { agentEvents } from '@/db/schema';
+import { eq, desc } from 'drizzle-orm';
+
+// Add this method to AgentSessionRepository class:
+async getEvents(sessionId: number, limit: number): Promise<AgentEventSelect[]> {
+  const rows = await this.executeQuery(() =>
+    db.select().from(agentEvents)
+      .where(eq(agentEvents.sessionId, sessionId))
+      .orderBy(desc(agentEvents.createdAt))
+      .limit(limit)
+  );
+  return rows.reverse(); // chronological order for log display
+}
+```
+Also add `import type { AgentEventSelect } from '@/db/schema'` if not present.
+
+**Step 1b — Create `src/app/api/v1/sessions/[id]/events/route.ts`:**
 ```ts
 // src/app/api/v1/sessions/[id]/events/route.ts
 import { NextRequest, NextResponse } from 'next/server';
@@ -1064,9 +1088,6 @@ import { agentSessionRepository } from '@/repositories/agent-session-repository'
 import { handleApiError } from '@/lib/error-handler';
 import { NotFoundError } from '@/lib/errors';
 import { requireMember } from '@/lib/rbac';
-import { db } from '@/db';
-import { agentEvents } from '@/db/schema';
-import { eq, desc } from 'drizzle-orm';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -1099,26 +1120,22 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const limitParam = request.nextUrl.searchParams.get('limit');
     const limit = limitParam ? Math.min(parseInt(limitParam, 10), 100) : 30;
 
-    const events = await db
-      .select()
-      .from(agentEvents)
-      .where(eq(agentEvents.sessionId, sessionId))
-      .orderBy(desc(agentEvents.createdAt))
-      .limit(limit);
-
-    return NextResponse.json({ data: events.reverse() });
+    const events = await agentSessionRepository.getEvents(sessionId, limit);
+    return NextResponse.json({ data: events });
   } catch (error) {
     return handleApiError(error);
   }
 }
 ```
 
-- [ ] Step 1: Create the directory and implement the route
+- [ ] Step 1: Add `getEvents` method to `src/repositories/agent-session-repository.ts` (Step 1a above)
 
-- [ ] Step 2: Commit
+- [ ] Step 2: Create `src/app/api/v1/sessions/[id]/events/route.ts` (Step 1b above)
+
+- [ ] Step 3: Commit
   ```bash
-  git add src/app/api/v1/sessions/
-  git commit -m "feat: add GET /api/v1/sessions/[id]/events endpoint"
+  git add src/repositories/agent-session-repository.ts src/app/api/v1/sessions/
+  git commit -m "feat: add getEvents to repository and GET /api/v1/sessions/[id]/events endpoint"
   ```
 
 ---
@@ -1473,12 +1490,12 @@ interface SpecEditorProps {
 **`layout.tsx`** — Server Component, suppresses shell (same pattern as new):
 - `<div className="h-screen bg-[--bg-base]">{children}</div>`
 
-**`page.tsx`** — Server Component:
-- `const session = await auth()` — redirect to `/login` if null
-- Fetches spec: `specificationRepository.getById(specId)` — 404 if not found or user lacks access
-- Verifies user has `member` role on project
-- Passes `initialContent` and `specStatus` to `<SpecEditor>`
-- `onSave` server action: `PATCH /api/v1/specs/{id}` with `credentials: 'include'`
+**`page.tsx`** — `'use client'` (same as `/specs/new/page.tsx`):
+- Use `useParams()` to get spec ID, `useRouter()` for navigation
+- On mount, `GET /api/v1/specs/{id}` with `credentials: 'include'` to fetch spec
+- Redirect to `/login` if 401, show 404 page if spec not found
+- `onSave` calls `PATCH /api/v1/specs/{id}` (version) with `credentials: 'include'` from the client
+- Note: Do NOT make this a Server Component — `SpecEditor` is `'use client'` and you cannot pass async event handlers across the Server/Client boundary in Next.js App Router
 
 - [ ] Step 1: Implement both files
 
@@ -1812,8 +1829,8 @@ Run all checks from spec §9 in order:
 - [ ] Step 6: Verify editor layouts suppress shell
   ```bash
   grep -rn "Sidebar\|TopBar\|ShellProvider" \
-    "src/app/(app)/specs/new/layout.tsx" \
-    "src/app/(app)/specs/[id]/edit/layout.tsx"
+    src/app/\(app\)/specs/new/layout.tsx \
+    src/app/\(app\)/specs/\[id\]/edit/layout.tsx
   ```
   Expected: zero results
 
