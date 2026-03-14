@@ -72,9 +72,11 @@ async function resetSequences() {
   for (const table of tables) {
     try {
       await db.execute(
-        sql.raw(`SELECT setval(pg_get_serial_sequence('"${table}"', 'id'), coalesce(max(id), 1), max(id) IS NOT NULL) FROM "${table}";`)
+        sql.raw(
+          `SELECT setval(pg_get_serial_sequence('"${table}"', 'id'), coalesce(max(id), 1), max(id) IS NOT NULL) FROM "${table}";`
+        )
       );
-    } catch (err) {
+    } catch {
       // Some tables might not have serial 'id' or might not exist yet, skip them
       logger.debug({ table }, 'Skipped sequence reset for table (likely no serial id)');
     }
