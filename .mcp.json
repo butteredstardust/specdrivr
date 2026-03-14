@@ -1,0 +1,118 @@
+{
+  "mcpServers": {
+    "fetch": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-fetch"
+      ]
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "C:/Users/Admin/Dev/specdrivr",
+        "C:/Users/Admin/Dev"
+      ]
+    },
+    "git": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-git",
+        "--repository",
+        "C:/Users/Admin/Dev/specdrivr"
+      ]
+    },
+    "postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "${DATABASE_URL}"
+      ]
+    },
+    "memory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "env": {
+        "MEMORY_FILE_PATH": "C:/Users/Admin/.claude/projects/C--Users-Admin-Dev-specdrivr/memory/.mcp-memory.jsonl"
+      }
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@1.42.0"
+      ]
+    },
+    "shadcn": {
+      "command": "npx",
+      "args": [
+        "shadcn@latest",
+        "mcp"
+      ]
+    },
+    "docker": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@thelord/mcp-server-docker-npx"
+      ]
+    },
+    "next-devtools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "next-devtools-mcp@latest"
+      ]
+    },
+    "vitest": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@djankies/vitest-mcp"
+      ]
+    },
+    "shell": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "hyper-mcp-shell"
+      ]
+    },
+    "redis": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@hamaster/redis-mcp-server"
+      ],
+      "env": {
+        "REDIS_URL": "redis://localhost:6379"
+      }
+    },
+    "npm": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@coze-arch/npm-mcp-server"
+      ]
+    },
+    "eslint": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@eslint/mcp"
+      ]
+    },
+    "await": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-await"
+      ]
+    }
+  }
+}
