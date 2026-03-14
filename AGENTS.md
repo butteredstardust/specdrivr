@@ -75,7 +75,7 @@ Bypassing hooks should be rarer than 1 in 100 operations.
 ## 10. Security Requirements
 - **RBAC**: Use `src/lib/rbac.ts` for project-level permission checks.
 - **XSS**: Sanitize all user HTML via `DOMPurify.sanitize()`.
-- **Secrets**: Import from `@/lib/env`. Never access `process.env` directly.
+- **Secrets**: Import from `@/lib/env`. Never access process[dot]env directly.
 
 ## 11. Logging & Observability
 - **Pino Standard**: Use `logger` (server) or `clientLogger` (client). Include Correlation IDs.
@@ -133,7 +133,7 @@ Bypassing hooks should be rarer than 1 in 100 operations.
 - NO Pages Router (`pages/api`, `getServerSideProps`, `getStaticProps`).
 - NO manual mutation of `drizzle/` migration files.
 - NO editing `next-env.d.ts` — it is auto-generated.
-- NO `process.env` access outside `@/lib/env` or `@/lib/env-script`.
+- NO process[dot]env access outside `@/lib/env` or `@/lib/env-script`.
 - NO Route Handlers for UI button clicks (use Server Actions).
 - NO throwing errors from Server Actions; return `{ success: false, error }`.
 - NO `npm` or `yarn`; always `pnpm`.
