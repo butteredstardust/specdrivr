@@ -171,7 +171,7 @@ tests
 - Next.js: ^16.1.6
 - React: ^19.2.4
 - Drizzle ORM: ^0.45.1
-- Auth Library (next-auth): ^5.0.0-beta.19
+- Auth Library (better-auth): ^1.5.5
 - UI Component Library (shadcn): ^4.0.0
 - Zod: ^3.22.0
 - Redis Client: Missing (needs to be added)
@@ -391,19 +391,19 @@ Implements the definitive database seed script to meet exact product demonstrati
 
 ### Context
 
-Setup BetterAuth v5 (next-auth v5), configure bcrypt password hashing, and implement Redis-based session storage. Applies [DECISION-008] using `ioredis`.
+Setup BetterAuth v1.5.x, configure bcrypt password hashing, and implement Redis-based session storage. Applies [DECISION-008] using `ioredis`.
 
 ### Acceptance criteria
 
-- [ ] `src/lib/auth.ts` exists and exports standard NextAuth primitives (auth, signIn, signOut).
-- [ ] Redis client is correctly initialized and configured as the NextAuth session store.
+- [ ] `src/lib/auth.ts` exists and exports standard BetterAuth primitives (auth, signIn, signOut).
+- [ ] Redis client is correctly initialized and configured as the BetterAuth session store.
 - [ ] API routes for authentication are mounted.
 - [ ] Validated users can login using credentials provider with bcrypt cost 12.
 
 ### Implementation notes
 
-- **File:** `src/lib/auth.ts`, `src/lib/redis.ts`, `src/app/api/auth/[...nextauth]/route.ts`
-- **Endpoint:** `POST /api/auth/[...nextauth]`
+- **File:** `src/lib/auth.ts`, `src/lib/redis.ts`, `src/app/api/auth/[...all]/route.ts`
+- **Endpoint:** `POST /api/auth/[...all]`
 - **Zod schema:** `CredentialsSchema = z.object({ email: z.string().email(), password: z.string().min(8) })`
 - **Database query pattern:** `db.select().from(users).where(eq(users.email, email))`
 
@@ -456,7 +456,7 @@ Implements signup and password reset.
 
 ### Implementation notes
 
-- **File:** `src/app/api/v1/auth/signup/route.ts`, `src/app/api/v1/auth/reset-password/route.ts`, `src/app/api/auth/[...nextauth]/route.ts`
+- **File:** `src/app/api/v1/auth/signup/route.ts`, `src/app/api/v1/auth/reset-password/route.ts`, `src/app/api/auth/[...all]/route.ts`
 
 **Endpoint: POST /api/auth/signin**
 Request body: `{ email: string, password: string }`
@@ -1193,7 +1193,7 @@ Login page.
 
 ### Acceptance criteria
 
-- [ ] `/login` accepts credentials, validates, and uses NextAuth `signIn`.
+- [ ] `/login` accepts credentials, validates, and uses BetterAuth `signIn`.
 - [ ] Shows error states properly.
 - [ ] Demo access panel below card (dashed border) displaying preset users (Alex Rivera, Sam Okafor, Jordan Chen) to quick-login by POSTing credentials without typing.
 - [ ] Status bar shows `DEMO MODE` when env flag is set.
