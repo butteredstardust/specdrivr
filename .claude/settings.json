@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "postToolUse": {
+      "Edit": "pnpm format && pnpm lint --fix",
+      "Write": "pnpm format && pnpm lint --fix"
+    },
+    "preToolUse": {
+      "Edit": {
+        "description": "Block edits to .env and lock files",
+        "condition": "if echo '{file}' | grep -qE '\\.env(\\..*)?$' && ! echo '{file}' | grep -q '\\.env\\.example$'; then exit 1; fi; if echo '{file}' | grep -qE '(pnpm-lock\\.yaml|package-lock\\.json|yarn\\.lock)$'; then exit 1; fi"
+      },
+      "Write": {
+        "description": "Block writes to .env and lock files",
+        "condition": "if echo '{file}' | grep -qE '\\.env(\\..*)?$' && ! echo '{file}' | grep -q '\\.env\\.example$'; then exit 1; fi; if echo '{file}' | grep -qE '(pnpm-lock\\.yaml|package-lock\\.json|yarn\\.lock)$'; then exit 1; fi"
+      }
+    }
+  }
+}

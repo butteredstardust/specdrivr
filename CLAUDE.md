@@ -19,13 +19,11 @@ The project has a modular expertise library in `.agents/skills/`. You MUST refer
 ## Claude Code Subagents
 The project includes a suite of specialized Claude Code subagents in `.claude/agents/`:
 - **Fullstack**: `fullstack-developer.md`
-- **Next.js**: `nextjs-developer.md`
-- **TypeScript**: `typescript-pro.md`
-- **SQL**: `sql-pro.md`
-- **Docker**: `docker-pro.md`
 - **DevOps**: `devops-engineer.md`
 - **Utility**: `agent-installer.md`
 - **Product Manager**: `product-manager.md`
+
+See `SUBAGENTS-SUMMARY.md` and `TECH-STACK-AGENTS-SUMMARY.md` for the full list of 24 auditor/builder agents.
 
 ## 1. Architectural Mandates
 - **Repository Pattern**: Never import `db` in UI components. Use `src/repositories/`. Always use `executeQuery`.
