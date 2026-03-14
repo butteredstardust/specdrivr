@@ -82,6 +82,7 @@ export function DaemonMascot({
         <defs>
           <linearGradient id="daemon-body-gradient" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#9b7ffd" />
+            <stop offset="50%" stopColor="#7c5cfc" />
             <stop offset="100%" stopColor="#5b3fd4" />
           </linearGradient>
         </defs>
