@@ -20,7 +20,7 @@ _Spec-driven autonomous code execution for engineering teams_
 | Cache / Queues     | Redis (Upstash)                                   | Rate limiting; agent task queue; pub/sub for live events                |
 | File storage       | S3-compatible (AWS or self-hosted MinIO)          | Spec attachments; diff snapshots for long sessions                      |
 | Email              | Resend                                            | Transactional email for invites, notifications, password reset          |
-| UI components      | pxlkit/ui or shadcn/ui (Radix + Tailwind)         | Accessible, unstyled primitives; customisable without overrides         |
+| UI components      | shadcn/ui (Radix + Tailwind)                      | Accessible, unstyled primitives; customisable without overrides         |
 | Animation          | Motion (Framer Motion v11)                        | DAEMON expressions; page transitions; boot sequence                     |
 | Drawer             | Vaul                                              | Task detail drawer; same author as shadcn; superior snap-point UX       |
 | Syntax highlight   | Shiki                                             | Server-side diff rendering; vesper theme; zero client JS weight         |

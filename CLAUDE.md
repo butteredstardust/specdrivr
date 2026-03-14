@@ -51,8 +51,8 @@ The project includes a suite of specialized Claude Code subagents in `.claude/ag
 ## 5. Prohibited Patterns
 - NO `npm` or `yarn`.
 - NO `useEffect` for data fetching.
-- **NO Default/Deep Imports**: Use `import { Component } from '@pxlkit/ui'`.
-- **NO Manual Icons**: Use `import { IconName } from '@pxlkit/core'`.
+- **NO Custom UI if standard exists**: Use `shadcn/ui` equivalents when available.
+- **NO Manual Icons**: Use `lucide-react` or standard icons.
 - NO `pnpm db:push` for schema changes.
 - **Secrets**: Use `@/lib/env`. Never use `process[dot]env`.
 - NO bypassing Husky hooks without RCA and user confirmation.

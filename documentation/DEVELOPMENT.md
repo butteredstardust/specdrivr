@@ -53,15 +53,13 @@ const projects = await db.select().from(projects);
 - **Never trust client input**
 
 ### UI Components
-Always follow the tiered selection process defined in `AGENTS.md`:
-1. Use `@pxlkit/*` for premium/domain-specific components first.
-2. Use local `pxlkit/ui` or `shadcn/ui` components from `@/components/ui/` as a fallback.
-3. Only build custom components if no library equivalent exists.
+- **shadcn/ui** - Prefer standard components. Use `@/components/ui/*`.
+- **Custom Components** - Only build custom components if no `shadcn/ui` equivalent exists.
 
 ### Styling
 
-- **Named `@pxlkit/*` Imports Only** - No default or deep imports.
-- **pxlkit/ui or shadcn/ui components** - Use provided components
+- **Standard Imports** - Standard component imports from `@/components/ui/`.
+- **shadcn/ui components** - Use provided components
 - **Design tokens** from CSS variables in `src/app/globals.css`
 - **Tailwind utility classes** - No custom CSS unless necessary
 - **Consistent spacing** - Use Tailwind scale (sm, md, lg, etc.)
@@ -120,19 +118,7 @@ import { env } from '@/lib/env-script'; // No server-only, safe for scripts
 - Standalone scripts use `env-script.ts` which bypasses the server-only import
 - This maintains security boundaries while enabling script usage
 
-## 2. Pxlkit Import Standards
-Components and icons must be imported from their respective namespaces using **named imports**.
 
-### Module Mapping
-- **UI Primitives**: `@pxlkit/ui` (Button, Input, Card)
-- **Icons**: `@pxlkit/core` (IconCheck, IconUser)
-- **Specialized UI**: `@pxlkit/feedback`, `@pxlkit/social`, `@pxlkit/gamification`, `@pxlkit/weather`, `@pxlkit/effects`
-
-### Rules
-- **Named Only**: `import { Button } from '@pxlkit/ui'` — NEVER default imports.
-- **Flat Only**: NEVER deep import internal paths (e.g., `@pxlkit/ui/button`).
-- **Order**: 1. React/Next, 2. Libs, 3. `@pxlkit/*`, 4. `@/lib`, 5. `@/components`.
-- **Hierarchy**: Check `@pxlkit/*` -> `pxlkit/ui` or `shadcn/ui` -> Custom.
 
 ## 3. Architecture & Component Rules
 ## 4. Technical Stack
@@ -162,7 +148,7 @@ src/
 │   ├── error.tsx        # Error boundary
 │   └── global-error.tsx # Global error handler
 ├── components/          # React components
-│   └── ui/              # pxlkit/ui or shadcn/ui components (do not modify)
+│   └── ui/              # shadcn/ui components (do not modify)
 ├── repositories/        # Data access layer
 │   ├── base-repository.ts
 │   └── project-repository.ts
