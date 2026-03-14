@@ -17,13 +17,14 @@ _Spec-driven autonomous code execution for engineering teams_
 | Database           | PostgreSQL 16                                     | ACID transactions; JSONB for log lines and metadata                     |
 | ORM                | Drizzle ORM + drizzle-kit                         | Type-safe queries; schema-first migrations; no code generation          |
 | Auth               | [Better Auth](https://www.better-auth.com/)       | Credentials + Email/Password; session in httpOnly cookie; CSRF built-in |
-| Cache / Queues     | Redis (Upstash)                                   | Rate limiting; agent task queue; pub/sub for live events                |
+| Cache / Queues     | Redis (Upstash)                                   | Rate limiting; agent task queue; @upstash/redis (HTTP) ONLY; NO ioredis |
 | File storage       | S3-compatible (AWS or self-hosted MinIO)          | Spec attachments; diff snapshots for long sessions                      |
 | Email              | Resend                                            | Transactional email for invites, notifications, password reset          |
 | UI components      | shadcn/ui (Radix + Tailwind)                      | Accessible, unstyled primitives; customisable without overrides         |
 | Animation          | Motion (Framer Motion v11)                        | DAEMON expressions; page transitions; boot sequence                     |
 | Drawer             | Vaul                                              | Task detail drawer; same author as shadcn; superior snap-point UX       |
 | Syntax highlight   | Shiki                                             | Server-side diff rendering; vesper theme; zero client JS weight         |
+| Sanitization       | DOMPurify (isomorphic-dompurify)                  | Mandatory sanitization for all Markdown/Spec rendering                  |
 | Markdown editor    | @uiw/react-codemirror + @codemirror/lang-markdown | CodeMirror 6 in React; live preview; line numbers                       |
 | Terminal           | @xterm/xterm + @xterm/addon-fit                   | Real ANSI terminal rendering; auto-scroll; same engine as VS Code       |
 | Keyboard shortcuts | react-hotkeys-hook                                | Declarative shortcut binding; respects focus traps                      |
@@ -76,7 +77,7 @@ This section documents known pitfalls and required mitigations for the specific 
 
 | **Pitfall**                                                                                                                              | **Mitigation**                                                                                                                                                |
 | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Using ioredis (TCP) in serverless: Vercel Lambda functions do not maintain persistent TCP connections. ioredis will fail on cold starts. | Use @upstash/redis which uses HTTP fetch under the hood. Safe for serverless. Do not install ioredis in this project.                                         |
+| Using ioredis (TCP) in serverless: Vercel Lambda functions do not maintain persistent TCP connections. ioredis will fail on cold starts. | Use @upstash/redis which uses HTTP fetch under the hood. Safe for serverless and edge. **ioredis is strictly forbidden in this project.**                       |
 | Redis keys: rate limiting and queue management.                                                                                          | Prefix all keys: ratelimit:{ip}:{endpoint}, queue:task:{taskId}. Never store a bare key.                                                                      |
 | Rate limit bypass via header spoofing: using X-Forwarded-For as the rate limit key allows clients to spoof IP addresses.                 | Extract real IP from Vercel's trusted x-vercel-forwarded-for header in production. In development, fall back to req.ip. Never trust X-Forwarded-For directly. |
 

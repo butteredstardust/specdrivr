@@ -91,10 +91,11 @@ Spec-driven autonomous code execution for engineering teams
 ### Data Operation
 
 ```ts
-// POST /api/auth/signin
+// POST /api/auth/sign-in
 // { email, password }
-// Uses better-auth credentials provider
-// Returns: session token set as httpOnly cookie
+// Handled by BetterAuth catch-all at /api/auth/[...auth]
+// Uses BetterAuth credentials provider
+// Returns: session token set as httpOnly cookie, session cached in Upstash Redis
 ```
 
 ### Success
@@ -869,9 +870,11 @@ If a user manually tries to mark a task `done` when its dependencies are not yet
 
 If plan generation takes longer than 30 seconds:
 
-- The DAEMON `working` animation on the PLAN tab continues
-- After 30s: a subtle text update below the animation: `"Still working... complex specs take a moment."` (no panic, just reassurance)
-- After 2 minutes with no response: show DAEMON `error` + `"Plan generation is taking longer than expected."` + `[Check again]` button (re-polls) + `[Cancel generation]` link
+- The Plan generation is an asynchronous background process (via Upstash QStash).
+- The DAEMON `working` animation on the PLAN tab continues.
+- After 30s: a subtle text update below the animation: `"Still working... complex specs take a moment."` (no panic, just reassurance).
+- The UI polls `GET /api/v1/specs/:id/plan` every 3 seconds.
+- After 2 minutes with no response: show DAEMON `error` + `"Plan generation is taking longer than expected."` + `[Check again]` button (re-polls) + `[Cancel generation]` link.
 
 ## Plan Approval by Non-Admin (UI State)
 

@@ -609,10 +609,7 @@ Always use pnpm commands for schema management:
 # Generate migration from schema changes
 pnpm db:generate
 
-# Apply schema changes in development
-pnpm db:push
-
-# Apply migrations in production
+# Apply migrations
 pnpm db:migrate
 
 # View and edit data
@@ -621,6 +618,8 @@ pnpm db:studio
 # Seed test data
 pnpm db:seed
 ```
+
+**CRITICAL:** Never use `pnpm db:push` in this project. It bypasses migration tracking and leads to schema drift. All changes MUST be captured in `drizzle/` migration files via `pnpm db:generate` then applied via `pnpm db:migrate`.
 
 **Important:** Never manually edit files in the `drizzle/` directory. Always generate migrations from the schema defined in `src/db/schema.ts`.
 
