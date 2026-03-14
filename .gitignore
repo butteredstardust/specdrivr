@@ -101,7 +101,6 @@ Thumbs.db
 
 # Agent & CI files
 .agents/
-!.agents/skills/
 .ci/
 .playwright-mcp/
 
