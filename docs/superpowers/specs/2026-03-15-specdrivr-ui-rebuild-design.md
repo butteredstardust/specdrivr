@@ -2,7 +2,7 @@
 
 **Date:** 2026-03-15
 **Branch:** `refactor/architecture-compliance`
-**Status:** Approved for implementation
+**Status:** Pending spec review approval
 
 ---
 
@@ -11,6 +11,8 @@
 Complete greenfield rebuild of the Specdrivr frontend. The backend is fully operational — all API routes, repositories, server actions, auth, and database schema are in place. The UI layer was deliberately purged (commit `6c4c64e`) and will be rebuilt from scratch according to this spec.
 
 **Scope:** Only touch `src/app/` (UI pages), `src/components/`, `src/hooks/`, and `src/lib/logger-client.ts`. Everything else is off-limits.
+
+**⚠ Pre-requisite backend route (C1):** The EventLog component requires `GET /api/v1/sessions/{id}/events?limit=30`. This route does not exist yet — the `agentEvents` table is in the schema but has no API endpoint. This route must be created before or alongside the Mission Control page. It is the only backend change needed.
 
 ---
 
@@ -24,6 +26,7 @@ Complete greenfield rebuild of the Specdrivr frontend. The backend is fully oper
 | Styling | Tailwind CSS | 4.2.1 |
 | Components | shadcn/ui (install as needed via `npx shadcn@latest add`) | latest |
 | Icons | lucide-react (already installed) | 0.577.0 |
+| Theme | next-themes with `forcedTheme="dark"` (already installed) | 0.4.6 |
 | Auth | BetterAuth client | 1.5.5 |
 | Toasts | sonner | 2.0.7 |
 | Drawer | vaul | **to be added** |
@@ -33,14 +36,18 @@ Complete greenfield rebuild of the Specdrivr frontend. The backend is fully oper
 | Syntax highlight | shiki | 4.0.2 |
 
 **Package changes required:**
-- Remove: `@uiw/react-md-editor`
+- Remove: `@uiw/react-md-editor`, `@pxlkit/core`, `@pxlkit/effects`, `@pxlkit/feedback`, `@pxlkit/gamification`, `@pxlkit/social`, `@pxlkit/ui`, `@pxlkit/ui-kit`
 - Add: `@uiw/react-codemirror`, `@codemirror/lang-markdown`, `react-markdown`, `vaul`
+- Keep: `next-themes` — wrap root layout with `<ThemeProvider forcedTheme="dark">`, add `class="dark"` to `<html>`
+- Do NOT use `@radix-ui/react-icons` — use `lucide-react` exclusively for all icons
 
 ---
 
 ## 3. Design System
 
-### Theme (dark-only, set `class="dark"` on `<html>`)
+### Theme (dark-only)
+
+Wrap root layout with `<ThemeProvider forcedTheme="dark">` from `next-themes`. Set `class="dark"` on `<html>`. No light mode or system theme.
 
 Specdrivr custom shadcn CSS variable overrides in `src/app/globals.css`:
 
@@ -66,7 +73,7 @@ Semantic custom tokens (used directly in className with `bg-[--token]` syntax):
 - **Clean/modern**: layout chrome — sidebar, top bar, nav, cards
 - Mono IDs: `font-mono text-xs text-[--phosphor-amber] bg-[--phosphor-amber]/10 px-1.5 py-0.5 rounded-sm`
 - Retro headers: `text-xs font-mono font-semibold uppercase tracking-widest text-[--text-muted]`
-- Status chars: `○` todo · `▶` in_progress (blink, violet) · `⚠` blocked (amber) · `✓` done (emerald) · `✕` failed (red)
+- Status chars: `○` todo · `▶` in_progress (blink, violet) · `⚠` blocked (amber) · `✓` done (emerald) · `✕` failed (red) · `-` skipped (muted dim)
 
 ### RBAC rule (critical)
 Permission-gated buttons are **never hidden**. Always render disabled with a shadcn `Tooltip` explaining required role. Use `<Button disabled={!canDo}>` + tooltip, never `{canDo && <Button>}`.
@@ -108,9 +115,11 @@ src/app/
 ### App Shell
 
 `(app)/layout.tsx` is a **Server Component** that:
-1. Calls `auth.api.getSession({ headers: await headers() })` — redirects to `/login` if null
-2. Fetches `onboardingStep` from session user
-3. If `onboardingStep === 0`, renders `<OnboardingWizard>` alongside shell
+1. Calls `const session = await auth()` — redirects to `/login` if null.
+   - Import: `import { auth } from '@/lib/auth'`
+   - The exported `auth` is an async function: `const session = await auth()` (NOT `auth.api.getSession()`).
+   - `session.user.onboardingStep` is available (configured as `additionalFields` in BetterAuth).
+2. If `session.user.onboardingStep === 0`, renders `<OnboardingWizard>` alongside shell.
 
 Shell layout: `flex h-screen overflow-hidden`
 - `<Sidebar />` — 240px fixed
@@ -120,12 +129,12 @@ Shell layout: `flex h-screen overflow-hidden`
 Wraps `(app)` children. Provides:
 - `activeProjectId` — persisted to `localStorage:specdrivr:activeProjectId`
 - `devMode` — persisted to `localStorage:specdrivr:devMode`
-- `user` — from server-fetched session
+- `user` — from server-fetched session, passed as prop to provider
 - Keyboard shortcuts: `?` shortcuts modal, `Ctrl+`` devMode toggle, `g+m/s/a` navigation, `Escape` close modal
 
 ### Auth pattern
-- Server: `import { auth } from '@/lib/auth'` + `auth.api.getSession()`
-- Client: `import { authClient } from '@/lib/auth-client'`
+- **Server components**: `import { auth } from '@/lib/auth'`, call `const session = await auth()`
+- **Client components**: `import { authClient } from '@/lib/auth-client'`
 - All client fetches to auth'd endpoints: `{ credentials: 'include' }`
 
 ### Logging
@@ -138,7 +147,7 @@ Wraps `(app)` children. Provides:
 
 ### Foundation (build first)
 1. **`src/components/ui/daemon-mascot.tsx`** — SVG robot, 5 expressions, 3 size tiers
-2. **`src/hooks/use-polling.ts`** — Generic polling hook (replace existing), 5-error circuit breaker, `stopWhen`, `clearInterval` cleanup
+2. **`src/hooks/use-polling.ts`** — Verify existing hook satisfies spec; update only if needed. Required interface: `url: string | null`, 5-error circuit breaker, `stopWhen`, `clearInterval` cleanup, first fetch on mount.
 
 ### UI Primitives
 3. **`src/components/ui/terminal-log.tsx`** — ANSI-to-HTML, scanlines, auto-scroll pause
@@ -168,12 +177,25 @@ Wraps `(app)` children. Provides:
 ## 7. Key Behavioral Specs
 
 ### usePolling
+
+Interface:
+```ts
+interface UsePollingOptions<T> {
+  url: string | null    // null = pause
+  interval?: number     // default 3000ms
+  enabled?: boolean     // default true
+  stopWhen?: (data: T) => boolean
+  onError?: (err: Error) => void
+}
+```
+
+Behavior:
 - First fetch fires immediately on mount
 - `credentials: 'include'` on every fetch
 - Response envelope: `{ data: T }`
-- 5 consecutive errors → stop + `onError()`
-- `stopWhen(data)` → permanent stop
-- `url: null` or `enabled: false` → pause
+- 5 consecutive errors → stop permanently + call `onError()`
+- `stopWhen(data)` returns true → stop permanently
+- `url: null` or `enabled: false` → pause polling (resume when changed)
 - Cleanup: `clearInterval` (NOT `clearTimeout`)
 
 ### TerminalLog
@@ -188,7 +210,7 @@ Wraps `(app)` children. Provides:
 ### DAEMON Mascot
 - SVG `viewBox="0 0 34 40"`, violet gradient body, amber eyes, antenna
 - Size tiers: ≤16 silhouette only, ≤24 simplified, ≥32 full
-- Expressions affect eyes/mouth/antenna: idle, working, success, blocked, error
+- Expressions affect eyes/mouth/antenna: `idle`, `working`, `success`, `blocked`, `error`
 
 ### Spec Editor
 - `@uiw/react-codemirror` left pane + `react-markdown` right pane
@@ -196,28 +218,56 @@ Wraps `(app)` children. Provides:
 - Warning banners for: active plan, changes_requested, concurrent edit
 
 ### Plan Review (Spec Detail → PLAN tab)
-- `pending_plan`: polls every 3s; 30s timeout message; 2min error state
-- Approval button never hidden — disabled + Tooltip for non-admin roles
+
+The "plan generating" state is driven by `spec.status === 'pending_plan'`, NOT by a plan status value. When `spec.status === 'pending_plan'`, the plan tab shows the DAEMON working animation and polls every 3s for status change. Once a plan record exists, its own `planStatus` drives the review UI.
+
+- `spec.status === 'pending_plan'`: polls spec every 3s; 30s → timeout message; 2min → DAEMON error state
+- `plan.status === 'pending_approval'`: shows review UI with approve/reject/request-changes buttons
+- Approval button never hidden — disabled + Tooltip for non-admin/owner roles
 - Slide-down panels for Request Changes / Reject (required Textarea before submit)
 
 ### Mission Control
 - NeedsAttentionBanner: amber strip, clickable task pills, session-dismiss only
-- SessionPanel: idle/running/paused/completed/boot-sequence states
+- SessionPanel: `idle` (UI concept — no active session) / `running` / `paused` / `completed` / `failed` / `cancelled` states mapped from `session.status`
 - EventLog: polls every 5s, `GET /api/v1/sessions/{id}/events?limit=30`
+  - **Note:** This route must be created as part of the build (see §1 pre-requisite)
+
+### Session status → UI state mapping
+```ts
+// session.status DB values: 'running' | 'paused' | 'completed' | 'failed' | 'cancelled'
+// SessionPanel adds a UI-only 'idle' state when no active session record exists
+const sessionPanelState =
+  !session ? 'idle'
+  : session.status === 'running' ? 'running'
+  : session.status === 'paused' ? 'paused'
+  : session.status === 'completed' ? 'completed'
+  : 'ended'  // covers 'failed' and 'cancelled'
+```
 
 ### Onboarding
 - 3-step Dialog, `onPointerDownOutside` + `onEscapeKeyDown` both call `e.preventDefault()`
 - Step 3 creates project → `PATCH /api/v1/users/me { onboardingStep: 3 }` on success
+- `onboardingStep` is available directly on `session.user` (BetterAuth `additionalFields`)
 
 ---
 
-## 8. Enum Values (exact — do not invent)
+## 8. Enum Values (exact — from DB schema)
 
 ```ts
+// From specStatusEnum
 type SpecStatus = 'drafting' | 'pending_plan' | 'pending_approval' | 'executing' | 'completed' | 'stalled' | 'archived'
-type PlanStatus = 'pending_plan' | 'pending_approval' | 'changes_requested' | 'rejected' | 'executing' | 'completed' | 'abandoned'
-type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'done' | 'failed'
-type AgentStatus = 'idle' | 'running' | 'paused' | 'stopped' | 'error'
+
+// From planStatusEnum — note: 'pending_plan' is NOT a plan status, it's a spec status
+type PlanStatus = 'pending_approval' | 'changes_requested' | 'rejected' | 'executing' | 'completed' | 'abandoned'
+
+// From taskStatusEnum — includes 'skipped'
+type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'done' | 'failed' | 'skipped'
+
+// From sessionStatusEnum — 'idle' is a UI concept only (no active session), not a DB value
+type SessionStatus = 'running' | 'paused' | 'completed' | 'failed' | 'cancelled'
+
+// No agentStatusEnum in DB — DAEMON expressions are UI-only
+type DaemonExpression = 'idle' | 'working' | 'success' | 'blocked' | 'error'
 ```
 
 ---
@@ -244,10 +294,13 @@ grep -rn "fetch(" src/components/ src/hooks/ src/app/\(auth\)/ src/app/\(app\)/ 
 # No pxlkit imports
 grep -rn "@pxlkit" src/ --include="*.tsx" --include="*.ts"
 
-# Editor layouts suppress shell
+# No @radix-ui/react-icons imports (use lucide-react only)
+grep -rn "@radix-ui/react-icons" src/ --include="*.tsx" --include="*.ts"
+
+# Editor layouts suppress shell — expect zero results
 grep -rn "Sidebar\|TopBar\|ShellProvider" \
   src/app/\(app\)/specs/new/layout.tsx \
-  src/app/\(app\)/specs/\[id\]/edit/layout.tsx 2>/dev/null
+  src/app/\(app\)/specs/\[id\]/edit/layout.tsx
 
 # Approve button never conditionally hidden
 grep -rn "canApprove &&\|userCanApprove &&\|isAdmin &&" \
@@ -256,25 +309,30 @@ grep -rn "canApprove &&\|userCanApprove &&\|isAdmin &&" \
 # clearInterval used in polling (not clearTimeout)
 grep -n "clearTimeout\|clearInterval" src/hooks/use-polling.ts
 
+# url accepts null in usePolling
+grep -n "url:" src/hooks/use-polling.ts
+
 # Typecheck, build, test
 pnpm typecheck 2>&1 | tail -10
 pnpm build 2>&1 | tail -10
 pnpm test 2>&1 | tail -15
 ```
 
+Expected: checks 1–8 produce zero results, check 9 shows `string | null`, checks 10–12 pass.
+
 ---
 
 ## 10. Build Order
 
-Phased to enable incremental testing:
+Phased to enable incremental testing. Auth pages are built before the shell to avoid 404s during development:
 
-1. **Setup** — globals.css tokens, package changes, root layout `class="dark"`
-2. **Foundation** — DaemonMascot, usePolling
+1. **Setup** — globals.css tokens, package changes (remove pxlkit/md-editor, add codemirror/vaul/react-markdown), root layout with ThemeProvider + `class="dark"`
+2. **Foundation** — DaemonMascot, verify/update usePolling
 3. **UI Primitives** — TerminalLog, DiffViewer, TaskRow
-4. **Shell** — ShellContext, Sidebar, TopBar, (app)/layout.tsx
-5. **Auth Pages** — Login, ForgotPassword, ResetPassword, Invite
+4. **Auth Pages** — Login, ForgotPassword, ResetPassword, Invite (build before shell so redirects don't 404)
+5. **Shell** — ShellContext, Sidebar, TopBar, `(app)/layout.tsx` with auth guard
 6. **Onboarding** — OnboardingWizard
-7. **Mission Control** — NeedsAttentionBanner, SessionPanel, EventLog
+7. **Mission Control** — NeedsAttentionBanner, SessionPanel, EventLog + create `GET /api/v1/sessions/{id}/events` route
 8. **Projects Page**
 9. **Specs List**
 10. **Spec Editor** — new + edit layouts, SpecEditor component
