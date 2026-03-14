@@ -1075,7 +1075,7 @@ Implements the core visual language, Tailwind configuration, and the DAEMON masc
 
 ### Acceptance criteria
 
-- [ ] Custom CSS variables mapped to pxlkit/ui or shadcn/ui base correctly in `globals.css`.
+- [ ] Custom CSS variables mapped to `shadcn/ui` base correctly in `globals.css`.
 - [ ] `DaemonMascot` component built, accepting `state` prop (`idle`, `thinking`, `error`, `success`, `working`) and sizes.
 - [ ] Font imports and Tailwind v4 arbitrary variants correctly configured.
 - [ ] Every empty state in the app uses the correct DAEMON expression from PRODUCT.md §20.
@@ -2373,7 +2373,7 @@ TASK-001 → TASK-002 → TASK-003 → TASK-004 → TASK-005 → TASK-008 → TA
 
 - **TASK-018 (App Shell & Navigation):** `src/app/layout.tsx` is present but the sidebar, DAEMON integration, and active navigation states defined in DESIGN_SYSTEM.md §10 are MISSING.
 - **TASK-004 (Seed Data Generation):** A `src/db/seed.ts` script exists but is empty/unimplemented. Local development currently lacks programmatic seed data, forcing manual DB entry.
-- **TASK-026 to TASK-037 (UI Pages):** Critical frontend screens (`dashboard/page.tsx`, `projects`, `specs`) are essentially empty stubs. Base `pxlkit/ui or shadcn/ui` components are present in `src/components/ui/` but are not composed into the views required by USER_INTERFACE.md.
+- **TASK-026 to TASK-037 (UI Pages):** Critical frontend screens (`dashboard/page.tsx`, `projects`, `specs`) are essentially empty stubs. Base `shadcn/ui` components are present in `src/components/ui/` but are not composed into the views required by USER_INTERFACE.md.
 - **TASK-058 & TASK-059 (Integrations):** While webhooks logic is scaffolded (`src/app/api/v1/webhooks/github/[projectId]/route.ts`), the actual Slack notification dispatcher and deeper GitHub integrations are not yet fully implemented.
 
 ### 6c. Technical Debt

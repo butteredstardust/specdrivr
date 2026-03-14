@@ -14,7 +14,7 @@ Specdrivr is built on a modern, high-performance stack optimized for AI-native d
 - **Database**: PostgreSQL @16+ with Drizzle ORM 0.45.1.
 - **Authentication**: `better-auth` 1.5.4 with Drizzle session management.
 - **Styling**: Tailwind CSS 4.2.1 for utility-first layout.
-- **UI Architecture**: Tiered system prioritizing `@pxlkit/*` and `shadcn/ui`.
+- **UI Architecture**: UI components are standardized on `shadcn/ui`.
 - **Safety**: Zod 3.22 for runtime validation; Pino 10.3 for structured logging.
 
 ## 3. Key Project Files & Directories
@@ -32,15 +32,12 @@ Orientation for agents navigating the codebase:
 *See `DESIGN_SYSTEM.md` for full specifications.*
 - **Visual Aesthetic**: "Linear" style—matte surfaces, subtle borders, high contrast, obsidian-tinted interactive states.
 - **Design Tokens**: Defined as CSS variables in `globals.css`. Never use hex codes.
-- **Tiered Selection**: 
-  1. **@pxlkit/***: Premium, domain-specific hooks and UI (Weather, Gamification, Effects).
-  2. **pxlkit/ui or shadcn/ui**: Standard interface controls (PixelButton, Input).
-  3. **Custom**: Last resort; must inherit from `DESIGN_SYSTEM.md`.
+- **Component Selection**: 
+  1. **shadcn/ui**: Standard interface controls (Button, Input). Prefer standard components.
+  2. **Custom**: Only use custom components when absolutely necessary; must inherit from `DESIGN_SYSTEM.md`.
 - **Import Standard**:
-  - Components: `import { Button } from '@pxlkit/ui'`.
-  - Icons: `import { IconCheck } from '@pxlkit/core'`.
-  - Specialized: `@pxlkit/feedback`, `@pxlkit/social`, `@pxlkit/gamification`, `@pxlkit/weather`, `@pxlkit/effects`.
-  - **Named imports only**. No default or deep imports.
+  - Components: `import { Button } from '@/components/ui/button'`.
+  - Icons: `import { Check } from 'lucide-react'` (or preferred icon set).
 
 ## 5. Git Hooks & Integrity Protection
 The project uses Husky to enforce quality at the local boundary.
@@ -89,15 +86,14 @@ Bypassing hooks should be rarer than 1 in 100 operations.
 - Direct `db` imports in components.
 - Hex codes in CSS/Tailwind (use design tokens).
 - Duplicating types instead of using `typeof`.
-- **Pxlkit Imports**: Using deep or default imports for `@pxlkit/*`.
+- **Custom UI**: Writing a custom component when a `shadcn/ui` equivalent exists.
 
 ## 14. Prohibited Patterns
 - NO `any` usage. 
 - NO unawaited Next.js dynamic APIs (`params`, `searchParams`, etc.).
 - NO `useEffect` for data fetching.
-- **NO Default Imports**: Always use `import { Component } from '@pxlkit/ui'`.
-- **NO Deep Imports**: Never import from `@pxlkit/ui/dist/...` or similar.
-- **NO Manual SVGs**: Always check `@pxlkit/core` for icons first.
+- NO writing custom components when a `shadcn/ui` equivalent exists.
+- NO visual decisions without consulting `DESIGN_SYSTEM.md`.
 
 ## 15. Standard Commands Reference
 | Scope | Command |
@@ -114,7 +110,7 @@ Bypassing hooks should be rarer than 1 in 100 operations.
 
 **Middleware** 34. Adding middleware inside `app/` directory instead of `src/middleware.ts`. 35. Missing `matcher` config — middleware runs on static assets. 36. Importing repositories or Drizzle into middleware. 37. Manually editing `next-env.d.ts`.
 
-**UI Components & Styling** 38. Writing a custom component when a `@pxlkit/*` equivalent exists. 39. Reaching for pxlkit/ui or shadcn/ui before checking `@pxlkit/*` packages. 40. Hardcoded hex colors; use design tokens from `src/app/globals.css`. 41. Adding custom CSS instead of Tailwind utility classes. 42. Creating new CSS files for minor tweaks; extend existing tokens. 43. Modifying pxlkit/ui or shadcn/ui source files in `@/components/ui/`; customize via CSS variables only. 44. Building a new screen without checking `USER_INTERFACE.md` for planned flow and layout. 45. Making visual decisions without consulting `DESIGN_SYSTEM.md`. 46. Using one-off inline styles for values that appear more than once — promote to a design token.
+**UI Components & Styling** 38. Writing a custom component when a `shadcn/ui` equivalent exists. 39. Hardcoded hex colors; use design tokens from `src/app/globals.css`. 40. Adding custom CSS instead of Tailwind utility classes. 41. Creating new CSS files for minor tweaks; extend existing tokens. 42. Modifying `shadcn/ui` source files in `@/components/ui/`; customize via CSS variables only. 43. Building a new screen without checking `USER_INTERFACE.md` for planned flow and layout. 44. Making visual decisions without consulting `DESIGN_SYSTEM.md`. 45. Using one-off inline styles for values that appear more than once — promote to a design token.
 
 **Component Architecture** 47. Importing a Server Component into a Client Component (silent downgrade). 48. Using `useEffect` for data fetching instead of Server Components.
 
@@ -146,7 +142,7 @@ Bypassing hooks should be rarer than 1 in 100 operations.
 - NO `dangerouslySetInnerHTML` without `DOMPurify.sanitize()`.
 - NO middleware files outside `src/middleware.ts`.
 - NO importing Server Components into Client Components.
-- NO custom component when a `@pxlkit/*` or pxlkit/ui or shadcn/ui equivalent exists.
+- NO custom component when a `shadcn/ui` equivalent exists.
 - NO visual decisions (color, spacing, typography, layout) without consulting `DESIGN_SYSTEM.md`.
 - NO new screens built without referencing `USER_INTERFACE.md` for flow and layout context.
 - NO hardcoded visual values in custom components; always use CSS variable design tokens.
@@ -230,7 +226,7 @@ Remember: your changes will be reviewed by humans and automated systems. Follow 
 
 <!-- Keep this file under 500 lines total -->
 
-- **Wrong component library:** Using shadcn Button/Input/Badge when pxlkit PixelButton/PixelInput/PixelBadge exists. Always check pxlkit first. Add `// pxlkit fallback: reason` comment when shadcn is used deliberately.
+- **Wrong component library:** Writing custom components when standard `shadcn/ui` components exist. Always use `shadcn/ui` first.
 - **Wrong design system tokens:** Using bg-background, text-foreground, bg-destructive — these shadcn tokens don't exist in this project. Use bg-[--bg-base], text-[--text-primary], bg-[--status-red] etc.
 - **Missing credentials on fetch:** All client fetches to authenticated routes require `{ credentials: 'include' }`.
 - **Direct console calls:** Never use console.log/error/warn in feature code. Use clientLogger (client) or logger (server).
