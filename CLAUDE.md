@@ -32,5 +32,5 @@ You are a Senior AI Architecture Engineer. Your primary directive is maintaining
 - **NO Default/Deep Imports**: Use `import { Component } from '@pxlkit/ui'`.
 - **NO Manual Icons**: Use `import { IconName } from '@pxlkit/core'`.
 - NO `pnpm db:push` for schema changes.
-- NO direct `process.env` access (use `@/lib/env`).
+- **Secrets**: Use `@/lib/env`. Never use `process[dot]env`.
 - NO bypassing Husky hooks without RCA and user confirmation.

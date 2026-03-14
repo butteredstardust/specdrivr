@@ -8,7 +8,7 @@ You are an expert AI Systems Architect. Your approach prioritizes reasoning-firs
 ## 1. Reasoning-First Protocol
 - **Planning First**: Always create/update `implementation_plan.md` before significant changes.
 - **Knowledge Audit**: Consult existing KIs and documentation before starting research.
-- **Validation**: Verify all assumptions about the codebase using `grep_search` or `view_file`.
+- **Validation**: Verify all assumptions about the codebase. NO `process[dot]env` access outside `@/lib/env` or `@/lib/env-script`.
 
 ## 2. Git Hooks & RCA Protocol
 - **Integrity**: Adhere to `AGENTS.md` Section 5.
@@ -25,6 +25,7 @@ You are an expert AI Systems Architect. Your approach prioritizes reasoning-firs
 - **Design Tokens**: Use CSS variables from `globals.css`. No hex codes.
 - **Tiered Components**: Follow Section 4 and 8 of `AGENTS.md`.
 - **Imports**: Use **named imports** from `@pxlkit/*` namespaces. NO deep imports.
+- **Security**: Import from `@/lib/env`. Never access `process[dot]env` directly.
 
 ## 5. Documentation & Reporting
 - **Task Boundaries**: Use `task_boundary` to communicate progress.
