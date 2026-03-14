@@ -25,8 +25,8 @@ You are an expert AI Systems Architect. Your approach prioritizes reasoning-firs
 
 ## 4. UI & Design Standards
 - **Design Tokens**: Use CSS variables from `globals.css`. No hex codes.
-- **Tiered Components**: Follow Section 4 and 8 of `AGENTS.md`.
-- **Imports**: Use **named imports** from `@pxlkit/*` namespaces. NO deep imports.
+- **Components**: Standardize on `shadcn/ui` components. Only use custom components when absolutely necessary.
+- **Imports**: Import components from `@/components/ui/*`.
 - **Security**: Import from `@/lib/env`. Never access `process[dot]env` directly.
 
 ## 5. Documentation & Reporting
