@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import AnsiToHtml from 'ansi-to-html';
+import DOMPurify from 'isomorphic-dompurify';
 import { twMerge } from 'tailwind-merge';
 
 export type LogLine = {
@@ -100,7 +101,7 @@ export function TerminalLog({
                 <span className="mr-3 shrink-0 text-[--text-muted] select-none">{time}</span>
                 <span
                   className="whitespace-pre-wrap"
-                  dangerouslySetInnerHTML={{ __html: htmlMessage }}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(htmlMessage) }}
                 />
               </div>
             );

@@ -28,10 +28,60 @@ jobs:
 
       - name: Check for forbidden artifacts
         run: |
-          if [ -f "fix-tsc.sh" ] || [ -f "fix-lint2.sh" ] || ls fix-*.mjs 1> /dev/null 2>&1; then
-            echo "Error: Temporary fix scripts found."
+          set -euo pipefail
+
+          # Patterns to block (AI agent artifacts, temp scripts, debug junk)
+          # Based on AGENTS.md and common AI agent naming conventions
+          FORBIDDEN_PATTERNS=(
+            "fix-*"
+            "debug-*"
+            "test-quick.*"
+            "tmp-*"
+            "repair-*"
+            "patch-*"
+            "ai-*"
+            "agent-*"
+            "experiment-*"
+            "scratch-*"
+            "local-*"
+            "migrate-*.ts"
+            "*.exp"
+            "*_output.txt"
+            "*_results.txt"
+          )
+
+          FOUND_FILES=""
+          
+          # Build search command
+          # Note: We exclude node_modules, .git, and project-specific documentation paths
+          SEARCH_CMD="find . -type f"
+          EXCLUDE_DIRS="-not -path '*/node_modules/*' -not -path '*/.git/*'"
+          
+          # Build the pattern matching part of the find command
+          PATTERN_ARGS=""
+          for i in "${!FORBIDDEN_PATTERNS[@]}"; do
+            if [ $i -eq 0 ]; then
+              PATTERN_ARGS="\( -name '${FORBIDDEN_PATTERNS[$i]}'"
+            else
+              PATTERN_ARGS="${PATTERN_ARGS} -o -name '${FORBIDDEN_PATTERNS[$i]}'"
+            fi
+          done
+          PATTERN_ARGS="${PATTERN_ARGS} \)"
+
+          # Execute search
+          OFFENDING_FILES=$(eval "${SEARCH_CMD} ${EXCLUDE_DIRS} ${PATTERN_ARGS}" | sort)
+
+          if [ -n "${OFFENDING_FILES}" ]; then
+            echo "::error title=Forbidden Artifacts Detected::Common temporary files or AI-generated scripts found."
+            echo "--------------------------------------------------"
+            echo "${OFFENDING_FILES}"
+            echo "--------------------------------------------------"
+            echo "CRITICAL: Do not commit temporary AI-generated artifacts, debug scripts,"
+            echo "patch files, or one-off fix utilities. Please remove these files."
             exit 1
           fi
+
+          echo "Success: No forbidden artifacts found."
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

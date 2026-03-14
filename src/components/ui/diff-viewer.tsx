@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import DOMPurify from 'isomorphic-dompurify';
 import { createHighlighter, type Highlighter } from 'shiki';
 import { twMerge } from 'tailwind-merge';
 import { PixelEmptyState } from '@pxlkit/ui-kit';
@@ -191,7 +192,9 @@ export function DiffViewer({ diff, language = 'typescript', className }: DiffVie
               </span>
               <span className="w-4 shrink-0 text-[--text-muted] select-none">{prefix}</span>
               {line.highlightedHtml ? (
-                <span dangerouslySetInnerHTML={{ __html: line.highlightedHtml }} />
+                <span
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(line.highlightedHtml) }}
+                />
               ) : (
                 <span>
                   {line.content.substring(

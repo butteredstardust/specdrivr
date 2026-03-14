@@ -25,6 +25,66 @@ const eslintConfig = [
     rules: {
       ...pluginNext.configs.recommended.rules,
       ...pluginNext.configs['core-web-vitals'].rules,
+
+      // ─── Specdrivr Architectural Guards ─────────────────────────────────────
+      '@typescript-eslint/no-explicit-any': 'warn',
+      'no-debugger': 'error',
+      'no-console': ['warn', { allow: ['info', 'error', 'warn'] }], // Prefer Pino logger
+
+      // Prevent direct process.env access (Use @/lib/env)
+      'no-restricted-properties': [
+        'warn',
+        {
+          object: 'process',
+          property: 'env',
+          message: 'Use Zod-validated env from "@/lib/env" instead of process.env.',
+        },
+      ],
+
+      // Boundary Preservation: No DB imports in components/pages
+      'no-restricted-imports': [
+        'warn',
+        {
+          paths: [
+            {
+              name: '@/db',
+              message: 'Direct DB access in components is prohibited. Use Repositories instead.',
+            },
+          ],
+          patterns: [
+            {
+              group: ['@/db/*'],
+              message: 'Direct DB access in components is prohibited. Use Repositories instead.',
+            },
+          ],
+        },
+      ],
+
+      // Enforce Repository Wrapper
+      'no-restricted-syntax': [
+        'warn',
+        // Guard: Repositories must use executeQuery
+        {
+          selector:
+            "ImportDeclaration[source.value='@/repositories'] ~ FunctionDeclaration:not(:has(CallExpression[callee.name='executeQuery']))",
+          message: "All repository methods must be wrapped in 'executeQuery'.",
+        },
+        // Guard: No raw HTML primitives for common components
+        {
+          selector: 'JSXOpeningElement[name.name=/^(button|input|select)$/]',
+          message:
+            'Use design system components (PixelButton, etc.) from @pxlkit/ui-kit instead of raw HTML primitives.',
+        },
+      ],
+    },
+  },
+  // Exclusions for tests and scripts where architectural rules are too strict
+  {
+    files: ['tests/**/*', 'scripts/**/*', 'next.config.js', 'eslint.config.js'],
+    rules: {
+      'no-console': 'off',
+      'no-restricted-properties': 'off',
+      'no-restricted-imports': 'off',
     },
   },
 ];
