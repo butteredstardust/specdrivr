@@ -95,15 +95,15 @@ Thumbs.db
 .gemini/
 
 # Claude system files
-.claude/
-!.claude/agents/
-.mcp.json
+#.claude/
+#!.claude/agents/
+#.mcp.json
 
 # Agent & CI files
-.agents/
-.ci/
-.playwright-mcp/
-.Jules/
+#.agents/
+#.ci/
+#.playwright-mcp/
+#.Jules/
 
 # Build & Tooling Cache
 .turbo/
