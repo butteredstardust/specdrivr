@@ -8,6 +8,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -55,7 +58,6 @@ function hasRole(userRole: UserRole, required: UserRole): boolean {
   return ROLE_RANK[userRole] >= ROLE_RANK[required];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function TaskRow({ task, userRole, onUnblock, onOverride, className }: TaskRowProps) {
   const [isOpen, setIsOpen] = useState(false);
   const canUnblock = hasRole(userRole, 'member');
@@ -111,19 +113,38 @@ export function TaskRow({ task, userRole, onUnblock, onOverride, className }: Ta
                     </TooltipTrigger>
                     {!canUnblock && <TooltipContent>Requires Member role or higher</TooltipContent>}
                   </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span>
-                        <DropdownMenuItem
-                          disabled={!canOverride}
-                          onClick={() => canOverride && setIsOpen(true)}
-                        >
-                          Override Status
-                        </DropdownMenuItem>
-                      </span>
-                    </TooltipTrigger>
-                    {!canOverride && <TooltipContent>Requires Admin role or higher</TooltipContent>}
-                  </Tooltip>
+                  <DropdownMenuSub>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span>
+                          <DropdownMenuSubTrigger disabled={!canOverride}>
+                            Override Status
+                          </DropdownMenuSubTrigger>
+                        </span>
+                      </TooltipTrigger>
+                      {!canOverride && (
+                        <TooltipContent>Requires Admin role or higher</TooltipContent>
+                      )}
+                    </Tooltip>
+                    {canOverride && (
+                      <DropdownMenuSubContent>
+                        {(
+                          [
+                            'todo',
+                            'in_progress',
+                            'blocked',
+                            'done',
+                            'failed',
+                            'skipped',
+                          ] as TaskStatus[]
+                        ).map((s) => (
+                          <DropdownMenuItem key={s} onClick={() => onOverride?.(task.id, s)}>
+                            {STATUS_CHAR[s]} {s.replace('_', ' ')}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuSubContent>
+                    )}
+                  </DropdownMenuSub>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
