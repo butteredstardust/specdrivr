@@ -270,7 +270,7 @@ export default function DebugDashboard() {
         <PixelCard title="Environment Configuration">
           <div className="space-y-3">
             <EnvRow label="NODE_ENV" value="development" />
-            <EnvRow label="NEXTAUTH_URL" value="http://localhost:3000" />
+            <EnvRow label="BETTER_AUTH_URL" value="http://localhost:3000" />
             <EnvRow label="Session Expiry" value="7 days" />
             <EnvRow label="Timezone" value="UTC" />
           </div>

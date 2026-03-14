@@ -9,8 +9,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/specdrivr_test
       - REDIS_URL=redis://redis:6379
-      - NEXTAUTH_URL=http://localhost:3000
-      - NEXTAUTH_SECRET=test-secret-for-ci-must-be-32-chars-long
+      - BETTER_AUTH_URL=http://localhost:3000
       - BETTER_AUTH_SECRET=test-secret-for-ci-must-be-32-chars-long
       - RESEND_API_KEY=re_dummy_key_for_ci
       - RESEND_FROM_EMAIL=noreply@specdrivr.dev
