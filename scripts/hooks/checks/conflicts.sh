@@ -25,6 +25,7 @@ FAILED=0
 CONFLICT_PATTERN='(<<<<<<<|=======|>>>>>>>)'
 
 for file in $pushed_files; do
+    if [[ "$file" == *"conflicts.sh"* ]]; then continue; fi # Skip self
     if [ ! -f "$file" ]; then continue; fi # Skip deleted
     
     violations=$(grep -nE "$CONFLICT_PATTERN" "$file" || true)
