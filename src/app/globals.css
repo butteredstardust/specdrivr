@@ -1,117 +1,21 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
-@import '@pxlkit/ui-kit/styles.css';
-@source '../node_modules/@pxlkit/ui-kit';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@custom-variant dark (&:is(.dark *));
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+  }
 
-@theme {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+  }
 }
 
-@theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-}
-
-:root {
-  /* Brand Colors */
-  --brand-primary: oklch(0.627 0.265 303.9);
-  --brand-secondary: oklch(0.446 0.3 303.9);
-
-  /* Status Colors */
-  --status-todo: oklch(0.708 0 0);
-  --status-in-progress: oklch(0.627 0.265 303.9);
-  --status-blocked: oklch(0.769 0.188 70);
-  --status-done: oklch(0.627 0.194 149.2);
-  --status-failed: oklch(0.627 0.258 23.5);
-
-  --radius: 0.5rem;
-
-  /* Retro Pxlkit Token Bridge */
-  --retro-bg: var(--bg-base);
-  --retro-surface: var(--bg-surface);
-  --retro-card: var(--bg-elevated);
-  --retro-border: var(--border-default);
-  --retro-purple: var(--accent-violet);
-  --retro-gold: var(--phosphor-amber);
-  --retro-green: var(--status-emerald);
-  --retro-red: var(--status-red);
-  --retro-cyan: #22d3ee;
-  --retro-neutral: var(--text-secondary);
-}
-
-/* Light theme - using shadcn/ui default variables */
-:root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: var(--brand-primary);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: var(--status-failed);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: var(--brand-primary);
-}
-
-/* Dark theme */
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.87 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.371 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-}
-
-* {
-  border-color: var(--border);
-}
-
-body {
-  background-color: var(--background);
-  color: var(--foreground);
-}
-
-/* Terminal Surface specific for agent logs */
-.terminal-surface::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0px,
-    transparent 3px,
-    rgba(0, 0, 0, 0.15) 3px,
-    rgba(0, 0, 0, 0.15) 4px
-  );
-}
-
-:root {
-  --terminal-bg: #0d0d0a;
+@layer base {
+  body {
+    @apply bg-background text-foreground;
+  }
 }
