@@ -4,6 +4,11 @@
 
 set -euo pipefail
 
+HOOK_DIR="scripts/hooks"
+CHECK_DIR="${HOOK_DIR}/checks"
+# shellcheck source=scripts/hooks/utils.sh
+source "${HOOK_DIR}/utils.sh"
+
 # Determine the range of commits to check
 if [ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]; then
     # For PRs, check all commits in the PR
@@ -27,12 +32,6 @@ export PUSH_RANGES
 # Execute the prepush orchestrator
 # We skip the "suite" check in pre-push during CI because CI runs them in separate steps anyway.
 # To do this, we can either modify prepush.sh to accept an ignore list or just run checks manually.
-
-HOOK_DIR="scripts/hooks"
-CHECK_DIR="${HOOK_DIR}/checks"
-source "${HOOK_DIR}/utils.sh"
-
-info "Running modular repository policy enforcement..."
 
 FAILED=0
 run_check() {
