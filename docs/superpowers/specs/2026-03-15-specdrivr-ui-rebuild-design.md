@@ -237,12 +237,21 @@ The "plan generating" state is driven by `spec.status === 'pending_plan'`, NOT b
 // session.status DB values: 'running' | 'paused' | 'completed' | 'failed' | 'cancelled'
 // SessionPanel adds a UI-only 'idle' state when no active session record exists
 const sessionPanelState =
-  !session ? 'idle'
-  : session.status === 'running' ? 'running'
-  : session.status === 'paused' ? 'paused'
-  : session.status === 'completed' ? 'completed'
-  : 'ended'  // covers 'failed' and 'cancelled'
+  !session                           ? 'idle'
+  : session.status === 'running'     ? 'running'
+  : session.status === 'paused'      ? 'paused'
+  : session.status === 'completed'   ? 'completed'
+  : session.status === 'failed'      ? 'failed'
+  : /* cancelled */                    'cancelled'
 ```
+
+SessionPanel rendering per state:
+- **`idle`**: DAEMON `idle` 48px + "SYSTEM READY" + "No active session." + link to /specs
+- **`running`**: pulsing dot + LIVE label + elapsed timer + progress + TerminalLog + Pause/Cancel buttons
+- **`paused`**: same layout but timer frozen + amber ⏸ PAUSED label + Resume button
+- **`completed`**: DAEMON `success` 48px + "Execution complete." + task counts + View Changes link (auto-clears after 60s)
+- **`failed`**: DAEMON `error` 48px + destructive Alert + `session.errorMessage` (if present) + "View last logs" collapsible + Retry/Dismiss buttons
+- **`cancelled`**: DAEMON `idle` 48px + muted "Session cancelled." + link to /specs
 
 ### Onboarding
 - 3-step Dialog, `onPointerDownOutside` + `onEscapeKeyDown` both call `e.preventDefault()`
