@@ -93,7 +93,7 @@ Spec-driven autonomous code execution for engineering teams
 ```ts
 // POST /api/auth/signin
 // { email, password }
-// Uses next-auth credentials provider
+// Uses better-auth credentials provider
 // Returns: session token set as httpOnly cookie
 ```
 
