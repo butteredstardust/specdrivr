@@ -97,7 +97,7 @@ export async function POST(req: Request) {
       let newUser;
       try {
         newUser = await authInstance.api.signUpEmail({
-          body: { email: invite.email, password: password!, name: name! },
+          body: { email: invite.email, password, name },
         });
       } catch (error: unknown) {
         logger.error({ error, email: invite.email }, 'signUpEmail failed');
