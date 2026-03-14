@@ -24,6 +24,29 @@ export class MemberRepository extends BaseRepository {
     );
   }
 
+  async getRoleForUser(userId: string, projectId: number): Promise<UserRole | null> {
+    const result = await this.executeQuery(() =>
+      db
+        .select({ role: projectMembers.role })
+        .from(projectMembers)
+        .where(and(eq(projectMembers.userId, userId), eq(projectMembers.projectId, projectId)))
+        .limit(1)
+    );
+
+    return result[0]?.role ?? null;
+  }
+
+  async getMemberUserIds(projectId: number): Promise<string[]> {
+    const result = await this.executeQuery(() =>
+      db
+        .select({ userId: projectMembers.userId })
+        .from(projectMembers)
+        .where(eq(projectMembers.projectId, projectId))
+    );
+
+    return result.map((r) => r.userId);
+  }
+
   async updateRole(projectId: number, userId: string, role: UserRole, actorId: string) {
     return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {

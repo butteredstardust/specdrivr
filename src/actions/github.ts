@@ -7,9 +7,8 @@ import { createPullRequestSchema } from '@/lib/schemas';
 import { requireAdmin } from '@/lib/rbac';
 import { projectRepository } from '@/repositories/project-repository';
 import { agentSessionRepository } from '@/repositories/agent-session-repository';
+import { auditRepository } from '@/repositories/audit-repository';
 import { getGitHubConfig, createPullRequest } from '@/lib/github';
-import { db } from '@/db';
-import { auditLog, agentEvents } from '@/db/schema';
 
 export async function createPullRequestAction(formData: FormData) {
   const session = await auth();
@@ -71,8 +70,7 @@ export async function createPullRequestAction(formData: FormData) {
         result.data.body || `Automatically generated from Specdrivr session #${agentSession.id}`,
     });
 
-    // 1. Audit log
-    await db.insert(auditLog).values({
+    await auditRepository.create({
       projectId: project.id,
       userId: session.user.id,
       action: 'create_github_pr',
@@ -81,8 +79,7 @@ export async function createPullRequestAction(formData: FormData) {
       detail: { url: pr.html_url, title: pr.title },
     });
 
-    // 2. Add event to session
-    await db.insert(agentEvents).values({
+    await agentSessionRepository.addEvent({
       sessionId: agentSession.id,
       eventType: 'info',
       message: `Created GitHub Pull Request #${pr.number}: ${pr.html_url}`,

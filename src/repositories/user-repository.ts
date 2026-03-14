@@ -51,6 +51,15 @@ export class UserRepository extends BaseRepository {
     return updatedUser as unknown as User;
   }
 
+  async updateOnboardingStep(userId: string, step: number): Promise<void> {
+    await this.executeQuery(() =>
+      db
+        .update(users)
+        .set({ onboardingStep: step, updatedAt: new Date() })
+        .where(eq(users.id, userId))
+    );
+  }
+
   async delete(id: string): Promise<void> {
     await this.executeQuery(() => db.delete(users).where(eq(users.id, id)));
   }

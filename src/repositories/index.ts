@@ -22,6 +22,10 @@ export { planRepository, PlanRepository } from './plan-repository';
 export { agentSessionRepository, AgentSessionRepository } from './agent-session-repository';
 export { memberRepository, MemberRepository } from './member-repository';
 export { webhookRepository, WebhookRepository } from './webhook-repository';
+export { notificationRepository, NotificationRepository } from './notification-repository';
+export { auditRepository, AuditRepository } from './audit-repository';
+export { tokenRepository, TokenRepository } from './token-repository';
+export { inviteRepository, InviteRepository } from './invite-repository';
 export { BaseRepository } from './base-repository';
 
 /**
