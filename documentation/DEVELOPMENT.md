@@ -52,8 +52,15 @@ const projects = await db.select().from(projects);
 - **Descriptive validation errors**
 - **Never trust client input**
 
+### UI Components
+Always follow the tiered selection process defined in `AGENTS.md`:
+1. Use `@pxlkit/*` for premium/domain-specific components first.
+2. Use local `pxlkit/ui` or `shadcn/ui` components from `@/components/ui/` as a fallback.
+3. Only build custom components if no library equivalent exists.
+
 ### Styling
 
+- **Named `@pxlkit/*` Imports Only** - No default or deep imports.
 - **pxlkit/ui or shadcn/ui components** - Use provided components
 - **Design tokens** from CSS variables in `src/app/globals.css`
 - **Tailwind utility classes** - No custom CSS unless necessary
@@ -113,13 +120,27 @@ import { env } from '@/lib/env-script'; // No server-only, safe for scripts
 - Standalone scripts use `env-script.ts` which bypasses the server-only import
 - This maintains security boundaries while enabling script usage
 
-## Tech Stack Overview
+## 2. Pxlkit Import Standards
+Components and icons must be imported from their respective namespaces using **named imports**.
 
-Specdrivr utilizes a modern, type-safe stack optimized for AI-native orchestration:
+### Module Mapping
+- **UI Primitives**: `@pxlkit/ui` (Button, Input, Card)
+- **Icons**: `@pxlkit/core` (IconCheck, IconUser)
+- **Specialized UI**: `@pxlkit/feedback`, `@pxlkit/social`, `@pxlkit/gamification`, `@pxlkit/weather`, `@pxlkit/effects`
 
-- **Framework**: Next.js 16.1.6 (App Router) with React 19.2.4, TypeScript 5.9.3
-- **Styling**: Tailwind CSS 4.2.1 with pxlkit/ui or shadcn/ui components and CSS variables
-- **Database**: PostgreSQL with Drizzle ORM 0.45.1
+### Rules
+- **Named Only**: `import { Button } from '@pxlkit/ui'` — NEVER default imports.
+- **Flat Only**: NEVER deep import internal paths (e.g., `@pxlkit/ui/button`).
+- **Order**: 1. React/Next, 2. Libs, 3. `@pxlkit/*`, 4. `@/lib`, 5. `@/components`.
+- **Hierarchy**: Check `@pxlkit/*` -> `pxlkit/ui` or `shadcn/ui` -> Custom.
+
+## 3. Architecture & Component Rules
+## 4. Technical Stack
+- **Framework**: Next.js 16.1.6 (App Router)
+- **Language**: TypeScript 5.9.3
+- **Database**: PostgreSQL (v16+) with Drizzle ORM 0.45.1
+- **Styling**: Tailwind CSS 4.2.1
+- **Auth**: better-auth 1.5.4
 - **Authentication**: better-auth 1.5.4 with Drizzle adapter
 - **Data Validation**: Zod 3.22.0
 - **Testing**: Vitest 4 (unit), Playwright 1.42 (E2E)
@@ -353,13 +374,10 @@ test('should create new project', async ({ page }) => {
 
 ## Database Practices
 
-### Schema Changes
-
-- **Never modify old migrations** - Create new ones
-- **Test migrations** in staging before production
-- **Backup data** before destructive operations
-- **Use drizzle-kit** commands properly
-- **Use TypeScript seed files** - Never raw SQL (use `tsx db/seed.ts`)
+### Database Schema Updates
+Never use `pnpm db:push` for schema changes. Follow the migration flow:
+1. `pnpm db:generate` - Create a new migration file.
+2. `pnpm db:migrate` - Apply the migration to the database.
 
 ```bash
 # Right
@@ -443,6 +461,24 @@ import { auth } from '@/lib/auth';
 const session = await auth();
 if (!session) {
   // handle unauthorized
+}
+
+// Good: Return structured object
+export async function createItem(data: unknown) {
+  const session = await auth(); // always first
+  if (!session) return { success: false, error: 'Unauthorized' };
+
+  try {
+    const result = await repository.create(data);
+    return { success: true, data: result };
+  } catch (error) {
+    return { success: false, error: 'Failed to create item' };
+  }
+}
+
+// Bad: Do not throw errors
+export async function badAction() {
+  throw new Error('This is prohibited');
 }
 ```
 
