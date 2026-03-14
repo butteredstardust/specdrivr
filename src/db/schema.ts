@@ -1,3 +1,4 @@
+import { relations, sql } from 'drizzle-orm';
 import {
   pgTable,
   serial,
@@ -493,7 +494,7 @@ export const agentLogs = pgTable(
       .notNull()
       .references(() => tasks.id, { onDelete: 'cascade' }),
     sessionId: integer('session_id').references(() => agentSessions.id, { onDelete: 'set null' }),
-    projectId: integer('project_id'),
+    projectId: integer('project_id').references(() => projects.id, { onDelete: 'cascade' }),
     level: logLevelEnum('level').notNull().default('info'),
     isInternal: boolean('is_internal').default(false),
     message: text('message').notNull(),
@@ -729,6 +730,163 @@ export const testResults = pgTable('test_results', {
   logs: text('logs'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
+
+// ---------------------------------------------------------------------------
+// Relations
+// ---------------------------------------------------------------------------
+
+export const usersRelations = relations(users, ({ many }) => ({
+  accounts: many(accounts),
+  sessions: many(sessions),
+  projectMembers: many(projectMembers),
+  specifications: many(specifications),
+  specVersions: many(specVersions),
+  plans: many(plans),
+  planReviews: many(planReviews),
+  notifications: many(notifications),
+  notificationPreferences: many(notificationPreferences),
+  agentSessions: many(agentSessions),
+  agentTokens: many(agentTokens),
+  auditLogs: many(auditLog),
+}));
+
+export const projectsRelations = relations(projects, ({ many, one }) => ({
+  members: many(projectMembers),
+  specifications: many(specifications),
+  agentSessions: many(agentSessions),
+  agentLogs: many(agentLogs),
+  agentConfig: one(agentConfig, {
+    fields: [projects.id],
+    references: [agentConfig.projectId],
+  }),
+  notifications: many(notifications),
+  webhooks: many(webhooks),
+  webhookDeliveries: many(webhookDeliveries),
+  usageSnapshots: many(usageSnapshots),
+  gitCommits: many(gitCommits),
+  auditLogs: many(auditLog),
+}));
+
+export const projectMembersRelations = relations(projectMembers, ({ one }) => ({
+  project: one(projects, {
+    fields: [projectMembers.projectId],
+    references: [projects.id],
+  }),
+  user: one(users, {
+    fields: [projectMembers.userId],
+    references: [users.id],
+  }),
+}));
+
+export const specificationsRelations = relations(specifications, ({ one, many }) => ({
+  project: one(projects, {
+    fields: [specifications.projectId],
+    references: [projects.id],
+  }),
+  versions: many(specVersions),
+  plans: many(plans),
+  tasks: many(tasks),
+  agentSessions: many(agentSessions),
+  agentEvents: many(agentEvents),
+}));
+
+export const specVersionsRelations = relations(specVersions, ({ one }) => ({
+  specification: one(specifications, {
+    fields: [specVersions.specId],
+    references: [specifications.id],
+  }),
+  creator: one(users, {
+    fields: [specVersions.createdBy],
+    references: [users.id],
+  }),
+}));
+
+export const plansRelations = relations(plans, ({ one, many }) => ({
+  specification: one(specifications, {
+    fields: [plans.specId],
+    references: [specifications.id],
+  }),
+  version: one(specVersions, {
+    fields: [plans.specVersionId],
+    references: [specVersions.id],
+  }),
+  tasks: many(tasks),
+  agentSessions: many(agentSessions),
+  reviews: many(planReviews),
+  creator: one(users, {
+    fields: [plans.createdBy],
+    references: [users.id],
+  }),
+  approver: one(users, {
+    fields: [plans.approvedBy],
+    references: [users.id],
+  }),
+}));
+
+export const tasksRelations = relations(tasks, ({ one, many }) => ({
+  plan: one(plans, {
+    fields: [tasks.planId],
+    references: [plans.id],
+  }),
+  specification: one(specifications, {
+    fields: [tasks.specId],
+    references: [specifications.id],
+  }),
+  attempts: many(taskAttempts),
+  fileChanges: many(fileChanges),
+  agentEvents: many(agentEvents),
+  agentLogs: many(agentLogs),
+  gitCommits: many(gitCommits),
+  testResults: many(testResults),
+}));
+
+export const taskAttemptsRelations = relations(taskAttempts, ({ one, many }) => ({
+  task: one(tasks, {
+    fields: [taskAttempts.taskId],
+    references: [tasks.id],
+  }),
+  fileChanges: many(fileChanges),
+}));
+
+export const agentSessionsRelations = relations(agentSessions, ({ one, many }) => ({
+  project: one(projects, {
+    fields: [agentSessions.projectId],
+    references: [projects.id],
+  }),
+  specification: one(specifications, {
+    fields: [agentSessions.specId],
+    references: [specifications.id],
+  }),
+  plan: one(plans, {
+    fields: [agentSessions.planId],
+    references: [plans.id],
+  }),
+  events: many(agentEvents),
+  logs: many(agentLogs),
+  starter: one(users, {
+    fields: [agentSessions.startedBy],
+    references: [users.id],
+  }),
+}));
+
+export const webhooksRelations = relations(webhooks, ({ one, many }) => ({
+  project: one(projects, {
+    fields: [webhooks.projectId],
+    references: [projects.id],
+  }),
+  deliveries: many(webhookDeliveries),
+}));
+
+export const auditLogRelations = relations(auditLog, ({ one }) => ({
+  project: one(projects, {
+    fields: [auditLog.projectId],
+    references: [projects.id],
+  }),
+  user: one(users, {
+    fields: [auditLog.userId],
+    references: [users.id],
+  }),
+}));
 
 // ---------------------------------------------------------------------------
 // Inferred types

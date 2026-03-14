@@ -9,30 +9,29 @@ async function main() {
 
   console.log('Nuking database schema to allow fresh migration...');
 
-  // 1. Drop all tables
-  const tablesResult = await db.execute(sql`
-    SELECT tablename FROM pg_catalog.pg_tables 
-    WHERE schemaname = 'public' AND tablename != 'drizzle_migrations'
+  // 1. Drop all tables in public schema
+  await db.execute(sql`
+    DO $$ DECLARE
+      r RECORD;
+    BEGIN
+      FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP
+        EXECUTE 'DROP TABLE IF EXISTS ' || quote_ident(r.tablename) || ' CASCADE';
+      END LOOP;
+    END $$;
   `);
+  console.log('Dropped all tables.');
 
-  for (const row of tablesResult) {
-    const tableName = row.tablename;
-    console.log(`Dropping table: ${tableName}`);
-    await db.execute(sql.raw(`DROP TABLE IF EXISTS "${tableName}" CASCADE`));
-  }
-
-  // 2. Drop all enums/types
-  const typesResult = await db.execute(sql`
-    SELECT typname FROM pg_type t 
-    JOIN pg_namespace n ON n.oid = t.typnamespace 
-    WHERE n.nspname = 'public' AND typtype = 'e'
+  // 2. Drop all enums/types in public schema
+  await db.execute(sql`
+    DO $$ DECLARE
+      r RECORD;
+    BEGIN
+      FOR r IN (SELECT typname FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace WHERE n.nspname = 'public' AND typtype = 'e') LOOP
+        EXECUTE 'DROP TYPE IF EXISTS ' || quote_ident(r.typname) || ' CASCADE';
+      END LOOP;
+    END $$;
   `);
-
-  for (const row of typesResult) {
-    const typeName = row.typname;
-    console.log(`Dropping type: ${typeName}`);
-    await db.execute(sql.raw(`DROP TYPE IF EXISTS "${typeName}" CASCADE`));
-  }
+  console.log('Dropped all types.');
 
   console.log('Database nuked.');
   process.exit(0);

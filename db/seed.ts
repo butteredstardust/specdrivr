@@ -16,7 +16,7 @@ import {
 import { env } from '../src/lib/env-script';
 import * as schema from '../src/db/schema';
 import { scryptAsync } from '@noble/hashes/scrypt.js';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { logger } from '../src/lib/logger-cli';
 
 const queryClient = postgres(env.DATABASE_URL, { max: 1 });
@@ -40,6 +40,45 @@ async function scryptHash(password: string): Promise<string> {
     maxmem: 128 * scryptParams.N * scryptParams.r * 2,
   });
   return `${salt}:${Buffer.from(key).toString('hex')}`;
+}
+
+async function resetSequences() {
+  logger.info('Resetting sequences...');
+  const tables = [
+    'projects',
+    'specifications',
+    'spec_versions',
+    'plans',
+    'plan_reviews',
+    'tasks',
+    'task_attempts',
+    'file_changes',
+    'agent_sessions',
+    'agent_events',
+    'agent_logs',
+    'notifications',
+    'notification_preferences',
+    'webhooks',
+    'webhook_deliveries',
+    'usage_snapshots',
+    'git_commits',
+    'api_request_logs',
+    'audit_log',
+    'test_results',
+    'agent_tokens',
+    'invites',
+  ];
+
+  for (const table of tables) {
+    try {
+      await db.execute(
+        sql.raw(`SELECT setval(pg_get_serial_sequence('"${table}"', 'id'), coalesce(max(id), 1), max(id) IS NOT NULL) FROM "${table}";`)
+      );
+    } catch (err) {
+      // Some tables might not have serial 'id' or might not exist yet, skip them
+      logger.debug({ table }, 'Skipped sequence reset for table (likely no serial id)');
+    }
+  }
 }
 
 async function main() {
@@ -296,9 +335,12 @@ async function main() {
 
       logger.info(
         { users: 3, projects: 2, specs: 6, plans: 4, tasks: 6, sessions: 1, webhooks: 2 },
-        'Seed complete'
+        'Seed data inserted'
       );
     });
+
+    await resetSequences();
+    logger.info('Seed complete');
   } catch (error) {
     logger.error(error, 'Seed failed');
     process.exit(1);
