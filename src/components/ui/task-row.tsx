@@ -2,12 +2,7 @@
 
 import { useState } from 'react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -60,6 +55,7 @@ function hasRole(userRole: UserRole, required: UserRole): boolean {
   return ROLE_RANK[userRole] >= ROLE_RANK[required];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function TaskRow({ task, userRole, onUnblock, onOverride, className }: TaskRowProps) {
   const [isOpen, setIsOpen] = useState(false);
   const canUnblock = hasRole(userRole, 'member');
@@ -77,9 +73,12 @@ export function TaskRow({ task, userRole, onUnblock, onOverride, className }: Ta
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <div className={cn('rounded-sm', rowBorderClass, className)}>
           <CollapsibleTrigger asChild>
-            <div className="flex h-9 cursor-pointer select-none items-center gap-2 px-3 hover:bg-[--bg-elevated]">
+            <div className="flex h-9 cursor-pointer items-center gap-2 px-3 select-none hover:bg-[--bg-elevated]">
               <span
-                className={cn('w-4 shrink-0 text-center font-mono text-sm', STATUS_CLASS[task.status])}
+                className={cn(
+                  'w-4 shrink-0 text-center font-mono text-sm',
+                  STATUS_CLASS[task.status]
+                )}
               >
                 {STATUS_CHAR[task.status]}
               </span>
@@ -110,9 +109,7 @@ export function TaskRow({ task, userRole, onUnblock, onOverride, className }: Ta
                         </DropdownMenuItem>
                       </span>
                     </TooltipTrigger>
-                    {!canUnblock && (
-                      <TooltipContent>Requires Member role or higher</TooltipContent>
-                    )}
+                    {!canUnblock && <TooltipContent>Requires Member role or higher</TooltipContent>}
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -125,9 +122,7 @@ export function TaskRow({ task, userRole, onUnblock, onOverride, className }: Ta
                         </DropdownMenuItem>
                       </span>
                     </TooltipTrigger>
-                    {!canOverride && (
-                      <TooltipContent>Requires Admin role or higher</TooltipContent>
-                    )}
+                    {!canOverride && <TooltipContent>Requires Admin role or higher</TooltipContent>}
                   </Tooltip>
                 </DropdownMenuContent>
               </DropdownMenu>
