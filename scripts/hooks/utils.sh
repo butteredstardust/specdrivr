@@ -80,6 +80,19 @@ get_git_object_size() {
     git cat-file -s "${rev}:${file}" 2>/dev/null || echo "0"
 }
 
+get_pushed_files() {
+    local filter="${1:-}"
+    local files=""
+    for range in $PUSH_RANGES; do
+        if [ -n "$filter" ]; then
+            files="${files}\n$(git diff --name-only --diff-filter=d "$range" | grep -E "$filter" || true)"
+        else
+            files="${files}\n$(git diff --name-only --diff-filter=d "$range" || true)"
+        fi
+    done
+    echo -e "$files" | sort -u | sed '/^$/d'
+}
+
 check_conventional_commits() {
     local range="$1"
     local pattern="^(feat|feature|fix|bugfix|docs|style|refactor|perf|test|build|ci|chore|revert|merge)(\(.+\))?(!)?: .{1,100}$"
