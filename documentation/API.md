@@ -16,13 +16,14 @@ Authentication: Pass the session cookie (browser clients) or Authorization: Bear
 
 | **Method** | **Path**                  | **Description**                                       | **Auth required** |
 | ---------- | ------------------------- | ----------------------------------------------------- | ----------------- |
-| **POST**   | /api/auth/sign-in/email   | Email + password login. Sets httpOnly session cookie. | No                |
-| **POST**   | /api/auth/sign-out        | Invalidates session cookie + DB session record.       | Yes               |
-| **POST**   | /api/auth/forget-password | Sends reset email (Better Auth flow).                 | No                |
-| **POST**   | /api/auth/reset-password  | Validates token and sets new password.                | No                |
-| **POST**   | /api/auth/get-session     | Returns current user and session data.                | Yes               |
+| **POST**   | /api/auth/sign-in         | Email + password login via BetterAuth.                | No                |
+| **POST**   | /api/auth/sign-out        | BetterAuth session invalidation.                      | Yes               |
+| **POST**   | /api/auth/forgot-password | BetterAuth password reset flow.                       | No                |
+| **POST**   | /api/auth/reset-password  | BetterAuth password reset execution.                  | No                |
+| **GET**    | /api/auth/get-session     | Returns current user and session data.                | Yes               |
 
-Note: These are handled by the Better Auth catch-all handler at `/api/auth/[...auth]`.
+Note: All authentication is handled by the BetterAuth catch-all handler at `/api/auth/[...auth]`. Custom `/api/v1/auth` routes are deprecated in favor of BetterAuth standard paths.
+
 
 ## **6.2 Projects**
 
@@ -110,7 +111,7 @@ Note: These are handled by the Better Auth catch-all handler at `/api/auth/[...a
 | --------------- | ------------------- | --------------------------------------------------------------------------------------- |
 | 400             | VALIDATION_ERROR    | Zod validation failed. Includes field-level errors array.                               |
 | 401             | UNAUTHORIZED        | No valid session or token.                                                              |
-| 403             | FORBIDDEN           | Authenticated but insufficient role for this action.                                    |
+| 403             | FORBIDDEN           | Authenticated but insufficient role (RBAC) for this action.                             |
 | 404             | NOT_FOUND           | Entity does not exist or does not belong to the active project.                         |
 | 409             | CONFLICT            | Duplicate name, stale version, or concurrent edit detected.                             |
 | 422             | PRECONDITION_FAILED | Action is valid but entity state prevents it (e.g. approving an already-rejected plan). |
@@ -118,6 +119,28 @@ Note: These are handled by the Better Auth catch-all handler at `/api/auth/[...a
 | 500             | INTERNAL_ERROR      | Unexpected server error. Request ID included for tracing.                               |
 
 ## **6.10 API Standards**
+
+### **Standard Response Envelope**
+
+All successful responses MUST use the following envelope:
+
+```json
+{
+  "data": [ ... ],
+  "meta": {
+    "page": 1,
+    "total": 100
+  }
+}
+```
+
+Single entity responses may omit the `meta` field:
+
+```json
+{
+  "data": { ... }
+}
+```
 
 ### **Error Handling**
 
