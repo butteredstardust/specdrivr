@@ -92,23 +92,23 @@ Thumbs.db
 .vercel/
 
 # Gemini AI files
-.gemini/
+#.gemini/
 
 # Claude system files
-.mcp.json
+#.mcp.json
 
 # Agent & CI files
-.agents/
-.ci/
-.playwright-mcp/
-.Jules/
+#.agents/
+#.ci/
+#.playwright-mcp/
+#.Jules/
 
 # Build & Tooling Cache
 .turbo/
 .pnpm-store/
 
 # Local configuration
-*.local
+#*.local
 
 # Cleanup scripts
 knip-baseline.json
