@@ -1,5 +1,5 @@
 ---
-name: "tech-stack-evaluator"
+name: tech-stack-evaluator
 description: Comprehensive evaluation of a project's technology stack for performance, maintainability, and security.
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: "senior-backend"
+name: senior-backend
 description: Backend engineering with Node.js, Express, and modern ORMs. Focuses on API design, security, and scalability.
 ---
 

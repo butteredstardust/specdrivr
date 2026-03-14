@@ -11,8 +11,8 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-filesystem",
-        "C:/Users/Admin/Dev/specdrivr",
-        "C:/Users/Admin/Dev"
+        "/Users/tuxgeek/Dev/specdrivr",
+        "/Users/tuxgeek/Dev"
       ]
     },
     "git": {
@@ -20,15 +20,7 @@
       "args": [
         "mcp-server-git",
         "--repository",
-        "C:/Users/Admin/Dev/specdrivr"
-      ]
-    },
-    "postgres": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-postgres",
-        "${DATABASE_URL}"
+        "/Users/tuxgeek/Dev/specdrivr"
       ]
     },
     "memory": {
@@ -38,28 +30,14 @@
         "@modelcontextprotocol/server-memory"
       ],
       "env": {
-        "MEMORY_FILE_PATH": "C:/Users/Admin/.claude/projects/C--Users-Admin-Dev-specdrivr/memory/.mcp-memory.jsonl"
+        "MEMORY_FILE_PATH": "/Users/tuxgeek/.claude/projects/specdrivr/memory/.mcp-memory.jsonl"
       }
-    },
-    "playwright": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@playwright/mcp@1.42.0"
-      ]
     },
     "shadcn": {
       "command": "npx",
       "args": [
         "shadcn@latest",
         "mcp"
-      ]
-    },
-    "docker": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@thelord/mcp-server-docker-npx"
       ]
     },
     "next-devtools": {
@@ -92,13 +70,6 @@
       "env": {
         "REDIS_URL": "redis://localhost:6379"
       }
-    },
-    "npm": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@coze-arch/npm-mcp-server"
-      ]
     },
     "eslint": {
       "command": "npx",

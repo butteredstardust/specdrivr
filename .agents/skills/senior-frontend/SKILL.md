@@ -1,5 +1,5 @@
 ---
-name: "senior-frontend"
+name: senior-frontend
 description: Expert frontend development using React, Next.js, and TypeScript. Focuses on performance, accessibility, and modern UI patterns.
 ---
 

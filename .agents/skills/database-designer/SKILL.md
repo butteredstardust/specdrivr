@@ -1,5 +1,5 @@
 ---
-name: "database-designer"
+name: database-designer
 description: Expert database schema design, optimization, and migration strategies.
 ---
 

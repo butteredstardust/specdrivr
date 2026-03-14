@@ -1,5 +1,5 @@
 ---
-name: "senior-architect"
+name: senior-architect
 description: Architecture design and analysis tools for making informed technical decisions. Use for ADRs, tech stack evaluation, system design reviews, and generating architecture diagrams.
 ---
 
