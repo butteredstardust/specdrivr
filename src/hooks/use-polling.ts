@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { clientLogger } from '@/lib/logger-client';
 
 type UsePollingOptions<T> = {
-  url: string; // endpoint to poll
+  url: string | null; // endpoint to poll; null pauses polling
   interval?: number; // ms between polls, default 3000
   enabled?: boolean; // pause polling when false
   stopWhen?: (data: T) => boolean; // stop automatically when condition met
@@ -66,6 +66,10 @@ export function usePolling<T>({
 
   useEffect(() => {
     if (!enabled || isStopped) {
+      return;
+    }
+
+    if (!url) {
       return;
     }
 
