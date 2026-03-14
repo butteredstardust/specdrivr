@@ -1,5 +1,5 @@
 ---
-name: "senior-qa"
+name: senior-qa
 description: Quality Assurance engineering focusing on automated testing, E2E flows, and bug detection.
 ---
 
