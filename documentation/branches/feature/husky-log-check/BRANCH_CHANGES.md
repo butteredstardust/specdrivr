@@ -1,5 +1,0 @@
-| File Name                                                              | Summary of Changes                 | Summary Reason for Change                                                         | Expected Impact                                                            | Best Practice Evaluation Score | Reason for Deletion |
-| ---------------------------------------------------------------------- | ---------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------ | ------------------- |
-| [.husky/pre-push](file:///Users/tuxgeek/Dev/specdrivr/.husky/pre-push) | Added check to block `.log` files. | To prevent accidental commitment of local log files as a second layer of defense. | Prevents repository bloat and potential leakage of local build/debug info. | 10/10                          | not deleted         |
-
-No changes to CI config or test files.

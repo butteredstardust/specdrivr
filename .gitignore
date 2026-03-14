@@ -91,13 +91,19 @@ Thumbs.db
 # Vercel
 .vercel/
 
+# Gemini AI files
+.gemini/
+
 # Claude system files
 .claude/
 !.claude/agents/
 .mcp.json
 
-# Gemini AI files
-.gemini/
+# Agent & CI files
+.agents/
+!.agents/skills/
+.ci/
+.playwright-mcp/
 
 # Cleanup scripts
 knip-baseline.json
