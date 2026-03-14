@@ -98,6 +98,12 @@ jobs:
           node scripts/verify-hooks.js check-git
           echo "✓ Hook integrity verified"
 
+      - name: Modular Repository Policy Enforcement
+        run: |
+          # Run the new modular security and quality checks in CI
+          bash scripts/ci-verify-hooks.sh
+          echo "✓ Repository policy enforcement verified"
+
       - name: Run database migrations
         run: pnpm db:migrate
 

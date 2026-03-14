@@ -437,6 +437,10 @@ if (lockAcquired) {
 }
 ```
 
+### Sanitization (`src/lib/sanitizer.ts`)
+
+Uses `isomorphic-dompurify`. Mandatory for all Markdown and Spec content rendering in the UI to prevent XSS. Always sanitize before using `dangerouslySetInnerHTML`.
+
 ### Auth Utilities (`src/lib/auth.ts`)
 
 Better Auth integration. Always use the `auth()` helper to retrieve the current session in Server Components and API routes.
@@ -470,7 +474,7 @@ export async function badAction() {
 
 ### Redis Utilities (`src/lib/redis.ts`)
 
-Abstracted access to Redis through `@upstash/redis`. Used for rate limiting, auth sessions, and caching. Never connect directly using raw Redis clients.
+Abstracted access to Redis through `@upstash/redis` (HTTP). **ioredis (TCP) is strictly forbidden.** Used for rate limiting, auth sessions, and distributed locking. Safe for Serverless/Edge.
 
 ## Git Workflow
 
