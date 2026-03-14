@@ -11,14 +11,14 @@ export class UserRepository extends BaseRepository {
     const result = await this.executeQuery(() =>
       db.select().from(users).where(eq(users.id, id)).limit(1)
     );
-    return (result[0] as unknown as User) || null;
+    return result[0] || null;
   }
 
   async getByEmail(email: string): Promise<User | null> {
     const result = await this.executeQuery(() =>
       db.select().from(users).where(eq(users.email, email)).limit(1)
     );
-    return (result[0] as unknown as User) || null;
+    return result[0] || null;
   }
 
   async create(data: UserInsert): Promise<User> {
@@ -31,7 +31,7 @@ export class UserRepository extends BaseRepository {
       throw new DatabaseError('Failed to create user');
     }
 
-    return user as unknown as User;
+    return user;
   }
 
   async update(id: string, data: Partial<UserInsert>): Promise<User> {
@@ -48,7 +48,7 @@ export class UserRepository extends BaseRepository {
       throw new DatabaseError('Failed to update user');
     }
 
-    return updatedUser as unknown as User;
+    return updatedUser;
   }
 
   async updateOnboardingStep(userId: string, step: number): Promise<void> {

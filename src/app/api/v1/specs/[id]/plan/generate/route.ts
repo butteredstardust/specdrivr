@@ -47,7 +47,7 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
           engine: 'mock-gpt-4',
         },
       },
-    } as unknown as PlanInsert);
+    } as PlanInsert);
 
     return NextResponse.json({ data: newPlan }, { status: 201 });
   } catch (error) {
