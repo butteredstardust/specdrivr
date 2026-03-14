@@ -80,8 +80,8 @@ export async function POST(req: Request) {
         newUser = await authInstance.api.signUpEmail({
           body: {
             email: invite.email,
-            password: password!,
-            name: name!,
+            password,
+            name,
           },
         });
       } catch (error: unknown) {
