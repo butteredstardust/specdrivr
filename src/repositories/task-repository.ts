@@ -111,15 +111,13 @@ export class TaskRepository extends BaseRepository {
       expectedFiles: [],
     };
 
-    const [task] = (await this.executeQuery(() =>
-      db.insert(tasks).values(cleanData).returning()
-    )) as unknown as unknown[];
+    const [task] = await this.executeQuery(() => db.insert(tasks).values(cleanData).returning());
 
     if (!task) {
       throw new DatabaseError('Failed to create task');
     }
 
-    return task as Task;
+    return task;
   }
 
   async update(id: number, data: UpdateTaskData): Promise<Task> {
@@ -165,15 +163,15 @@ export class TaskRepository extends BaseRepository {
 
     updateData.updatedAt = new Date();
 
-    const [updatedTask] = (await this.executeQuery(() =>
+    const [updatedTask] = await this.executeQuery(() =>
       db.update(tasks).set(updateData).where(eq(tasks.id, id)).returning()
-    )) as unknown as unknown[];
+    );
 
     if (!updatedTask) {
       throw new DatabaseError('Failed to update task');
     }
 
-    const t = updatedTask as Task;
+    const t = updatedTask;
 
     // Trigger task.blocked or task.done webhook
     if (data.status === 'blocked' || data.status === 'done') {
@@ -285,7 +283,7 @@ export class TaskRepository extends BaseRepository {
     }).then((updatedTask) => {
       if (!updatedTask) return updatedTask;
 
-      const t = updatedTask as Task;
+      const t = updatedTask;
 
       // Trigger task.blocked if status is blocked
       if (t.status === 'blocked') {
