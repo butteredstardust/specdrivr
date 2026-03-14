@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { taskRepository } from '@/repositories/task-repository';
-import { type TaskSelect as Task } from '@/db/schema';
+import type { TaskSelect as Task, TaskStatus } from '@/db/schema';
 import { handleApiError } from '@/lib/error-handler';
 import { taskQuerySchema, createTaskSchema } from '@/lib/schemas';
 import { auth } from '@/lib/auth';
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
         tasks = tasks.filter((task) => task.status === status);
       }
     } else if (status) {
-      tasks = await taskRepository.getByStatus(status as import('@/db/schema').TaskStatus);
+      tasks = await taskRepository.getByStatus(status as TaskStatus);
     } else {
       tasks = await taskRepository.getAll();
     }

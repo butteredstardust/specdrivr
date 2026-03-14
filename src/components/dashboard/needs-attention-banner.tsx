@@ -26,18 +26,21 @@ export function NeedsAttentionBanner({ blockedTasks }: NeedsAttentionBannerProps
           I need your help with {blockedTasks.length} task{blockedTasks.length !== 1 ? 's' : ''}
         </span>
         <div className="ml-2 flex flex-wrap gap-2">
-          {blockedTasks.map((task) => (
-            <button
-              key={task.id}
-              onClick={() => {
-                // TODO: Wire up when Task Drawer is built
-                // onOpenDrawer(task.id);
-              }}
-              className="hover:opacity-80 focus:ring-1 focus:ring-[--phosphor-amber] focus:outline-none"
-            >
-              <PixelBadge tone="gold">{task.externalId}</PixelBadge>
-            </button>
-          ))}
+          {blockedTasks.map((task) => {
+            return (
+              // eslint-disable-next-line no-restricted-syntax
+              <button
+                key={task.id}
+                onClick={() => {
+                  // TODO: Wire up when Task Drawer is built
+                  // onOpenDrawer(task.id);
+                }}
+                className="hover:opacity-80 focus:ring-1 focus:ring-[--phosphor-amber] focus:outline-none"
+              >
+                <PixelBadge tone="gold">{task.externalId}</PixelBadge>
+              </button>
+            );
+          })}
         </div>
       </div>
       <PixelButton tone="neutral" size="sm" onClick={() => setIsDismissed(true)}>
