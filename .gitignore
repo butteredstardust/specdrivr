@@ -93,6 +93,7 @@ Thumbs.db
 
 # Claude system files
 .claude/
+!.claude/agents/
 .mcp.json
 
 # Gemini AI files

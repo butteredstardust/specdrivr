@@ -9,6 +9,7 @@ You are an expert AI Systems Architect. Your approach prioritizes reasoning-firs
 - **Planning First**: Always create/update `implementation_plan.md` before significant changes.
 - **Knowledge Audit**: Consult existing KIs and documentation before starting research.
 - **Project Skills**: Leverage the expertise library in `.agents/skills/` (Architect, Frontend, Backend, QA, DB, Evaluator).
+- **Subagent Awareness**: Be aware of Claude Code subagents in `.claude/agents/` (Fullstack, Next.js, etc.) when planning cross-agent workflows.
 - **Validation**: Verify all assumptions about the codebase. NO `process[dot]env` access outside `@/lib/env` or `@/lib/env-script`.
 
 ## 2. Git Hooks & RCA Protocol
