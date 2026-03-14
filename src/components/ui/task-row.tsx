@@ -139,6 +139,7 @@ export function TaskRow({
             {task.dependencyTaskId && <span>Depends on: {task.dependencyTaskId}</span>}
           </div>
 
+          {/* eslint-disable-next-line no-restricted-syntax */}
           <button
             onClick={(e) => {
               e.stopPropagation();
