@@ -24,6 +24,15 @@
     "test": "pnpm test:unit && pnpm test:e2e",
     "prepare": "husky"
   },
+  "pnpm": {
+    "overrides": {
+      "undici": "^7.24.0",
+      "esbuild": "^0.25.0",
+      "@hono/node-server": "^1.19.10",
+      "hono": "^4.12.7",
+      "lodash": "^4.17.23"
+    }
+  },
   "dependencies": {
     "@base-ui/react": "^1.2.0",
     "@better-auth/drizzle-adapter": "^1.5.4",
@@ -87,12 +96,6 @@
     "typescript-eslint": "^8.56.1",
     "zod": "^3.22.0"
   },
-  "overrides": {
-    "next-auth": {
-      "next": "$next"
-    },
-    "esbuild": "^0.27.0"
-  },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.5",
     "@faker-js/faker": "^10.3.0",
@@ -125,14 +128,6 @@
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
-  },
-  "pnpm": {
-    "overrides": {
-      "esbuild": "^0.25.0",
-      "@hono/node-server": "^1.19.10",
-      "hono": "^4.12.7",
-      "lodash": "^4.17.23"
-    }
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [

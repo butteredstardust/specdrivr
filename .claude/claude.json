@@ -1,0 +1,116 @@
+{
+  "mcpServers": {
+
+    "fetch": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-fetch"
+      ]
+    },
+
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/tuxgeek/Dev/specdrivr",
+        "/Users/tuxgeek/Dev"
+      ]
+    },
+
+    "git": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-git",
+        "--repository",
+        "/Users/tuxgeek/Dev/specdrivr"
+      ]
+    },
+
+    "github": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "<YOUR_TOKEN>"
+      }
+    },
+
+    "postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://specdrivr:specdrivr_password@localhost:5432/specdrivr"
+      ]
+    },
+
+    "memory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "env": {
+        "MEMORY_FILE_PATH": "/Users/tuxgeek/Dev/specdrivr/.mcp-memory.jsonl"
+      }
+    },
+
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest"
+      ]
+    },
+
+    "shadcn": {
+      "command": "npx",
+      "args": [
+        "shadcn@latest",
+        "mcp"
+      ]
+    },
+
+    "docker": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@thelord/mcp-server-docker-npx"
+      ]
+    },
+
+    "next-devtools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "next-devtools-mcp@latest"
+      ]
+    },
+
+    "vitest": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@djankies/vitest-mcp"
+      ]
+    },
+
+    "shell": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "hyper-mcp-shell"
+      ]
+    }
+
+  }
+}
+
+
