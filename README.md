@@ -21,7 +21,7 @@ Specdrivr provides an orchestration layer with a "Linear" aesthetic, built on a 
 ### Key Features
 - **Deterministic Architecture**: Strict Repository Pattern for data access and Server Actions for mutations.
 - **AI-Native Optimization**: Dedicated `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` for seamless agentic workflows.
-- **Premium UI Foundation**: Tiered system prioritizing `@pxlkit/*` for a matte, obsidian-tinted interactive experience.
+- **Premium UI Foundation**: Built on `shadcn/ui` for a matte, obsidian-tinted interactive experience.
 - **Security by Default**: Auto-verified `auth()` in actions, RBAC governance, and runtime environment validation.
 - **Integrity Protection**: Pre-commit/Pre-push quality gates with SHA256 hook integrity checks.
 
@@ -63,7 +63,7 @@ src/app/           # Route segments, layouts, and global tokens
 src/repositories/  # Database access layer (Repositories)
 src/actions/       # Server Actions for UI mutations
 src/lib/           # Utilities, engine logic, RBAC, and environment
-src/components/ui/ # Local shadcn/pxlkit implementation
+src/components/ui/ # Local shadcn/ui implementation
 tests/             # Vitest (Unit) and Playwright (E2E) suites
 .husky/            # Quality gates (pre-commit/pre-push)
 ```
