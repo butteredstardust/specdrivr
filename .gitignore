@@ -103,6 +103,14 @@ Thumbs.db
 .agents/
 .ci/
 .playwright-mcp/
+.Jules/
+
+# Build & Tooling Cache
+.turbo/
+.pnpm-store/
+
+# Local configuration
+*.local
 
 # Cleanup scripts
 knip-baseline.json
