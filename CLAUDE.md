@@ -13,6 +13,8 @@ The project has a modular expertise library in `.agents/skills/`. You MUST refer
 - **QA & Testing**: `.agents/skills/senior-qa.md`
 - **Database**: `.agents/skills/database-designer.md`
 - **Stack Auditing**: `.agents/skills/tech-stack-evaluator.md`
+- **Project Planning**: `.agents/skills/senior-pm.md`
+- **Roadmapping**: `.agents/skills/roadmap-communicator.md`
 
 ## Claude Code Subagents
 The project includes a suite of specialized Claude Code subagents in `.claude/agents/`:
@@ -23,6 +25,7 @@ The project includes a suite of specialized Claude Code subagents in `.claude/ag
 - **Docker**: `docker-pro.md`
 - **DevOps**: `devops-engineer.md`
 - **Utility**: `agent-installer.md`
+- **Product Manager**: `product-manager.md`
 
 ## 1. Architectural Mandates
 - **Repository Pattern**: Never import `db` in UI components. Use `src/repositories/`. Always use `executeQuery`.
