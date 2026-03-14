@@ -1,47 +1,6 @@
 {
   "mcpServers": {
 
-    "fetch": {
-      "command": "uvx",
-      "args": [
-        "mcp-server-fetch"
-      ]
-    },
-
-    "filesystem": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "/Users/tuxgeek/Dev/specdrivr",
-        "/Users/tuxgeek/Dev"
-      ]
-    },
-
-    "git": {
-      "command": "uvx",
-      "args": [
-        "mcp-server-git",
-        "--repository",
-        "/Users/tuxgeek/Dev/specdrivr"
-      ]
-    },
-
-    "github": {
-      "command": "docker",
-      "args": [
-        "run",
-        "-i",
-        "--rm",
-        "-e",
-        "GITHUB_PERSONAL_ACCESS_TOKEN",
-        "ghcr.io/github/github-mcp-server"
-      ],
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "<YOUR_TOKEN>"
-      }
-    },
-
     "postgres": {
       "command": "npx",
       "args": [
@@ -102,15 +61,13 @@
       ]
     },
 
-    "shell": {
+    "context7": {
       "command": "npx",
       "args": [
         "-y",
-        "hyper-mcp-shell"
+        "@context7/mcp-server"
       ]
     }
 
   }
 }
-
-
