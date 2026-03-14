@@ -2,7 +2,6 @@ import { z } from 'zod';
 import { config } from 'dotenv';
 import fs from 'fs';
 import path from 'path';
-import { logger } from './logger-cli';
 
 export const envSchema = z.object({
   DATABASE_URL: z
@@ -60,21 +59,26 @@ export function parseEnv(): Env {
     NODE_ENV: process.env.NODE_ENV,
     GITHUB_TOKEN: process.env.GITHUB_TOKEN,
     GITHUB_WEBHOOK_SECRET: process.env.GITHUB_WEBHOOK_SECRET,
-    CRON_SECRET: process.env.CRON_SECRET || (process.env.VITEST ? 'a'.repeat(32) : undefined),
+    CRON_SECRET:
+      process.env.CRON_SECRET ||
+      (process.env.NODE_ENV === 'production' && process.env.CI ? undefined : 'a'.repeat(32)),
     RESEND_API_KEY:
-      process.env.RESEND_API_KEY || (process.env.VITEST ? 're_dummy_key_for_testing' : undefined),
+      process.env.RESEND_API_KEY ||
+      (process.env.NODE_ENV === 'production' && process.env.CI
+        ? undefined
+        : 're_dummy_key_for_testing'),
     RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
   };
 
   if (process.env.VITEST && !process.env.DATABASE_URL) {
-    logger.warn('DATABASE_URL is missing during Vitest execution.');
+    console.warn('DATABASE_URL is missing during Vitest execution.');
   }
 
   try {
     return envSchema.parse(envToParse);
   } catch (error) {
     if (process.env.VITEST) {
-      logger.error({ error }, 'Environment validation failed during Vitest');
+      console.error('Environment validation failed during Vitest:', error);
     }
     throw error;
   }
