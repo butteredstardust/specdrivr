@@ -1,7 +1,5 @@
 import 'server-only';
-import { db } from '@/db';
-import { agentConfig } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { projectRepository } from '@/repositories/project-repository';
 import { logger } from './logger';
 
 export type SlackEventType =
@@ -31,22 +29,15 @@ export async function getSlackConfig(projectId: number): Promise<{
   channelId: string;
 } | null> {
   try {
-    const [config] = await db
-      .select({
-        botToken: agentConfig.slackBotToken,
-        channelId: agentConfig.slackChannelId,
-      })
-      .from(agentConfig)
-      .where(eq(agentConfig.projectId, projectId))
-      .limit(1);
+    const config = await projectRepository.getAgentConfig(projectId);
 
-    if (!config || !config.botToken || !config.channelId) {
+    if (!config || !config.slackBotToken || !config.slackChannelId) {
       return null;
     }
 
     return {
-      botToken: config.botToken,
-      channelId: config.channelId,
+      botToken: config.slackBotToken,
+      channelId: config.slackChannelId,
     };
   } catch (error) {
     logger.error({ error, projectId }, 'Failed to retrieve Slack config');
@@ -59,24 +50,18 @@ export async function getSlackConfig(projectId: number): Promise<{
  */
 export async function setSlackConfig(
   projectId: number,
-  config: { botToken: string; channelId: string }
+  config: { botToken: string; channelId: string },
+  actorId: string
 ): Promise<void> {
   try {
-    await db
-      .insert(agentConfig)
-      .values({
-        projectId,
+    await projectRepository.updateAgentConfig(
+      projectId,
+      {
         slackBotToken: config.botToken,
         slackChannelId: config.channelId,
-      })
-      .onConflictDoUpdate({
-        target: agentConfig.projectId,
-        set: {
-          slackBotToken: config.botToken,
-          slackChannelId: config.channelId,
-          updatedAt: new Date(),
-        },
-      });
+      },
+      actorId
+    );
 
     logger.info({ projectId, slackConfigured: true }, 'Slack config updated');
   } catch (error) {
@@ -88,16 +73,16 @@ export async function setSlackConfig(
 /**
  * Remove Slack config for a project (disconnect).
  */
-export async function removeSlackConfig(projectId: number): Promise<void> {
+export async function removeSlackConfig(projectId: number, actorId: string): Promise<void> {
   try {
-    await db
-      .update(agentConfig)
-      .set({
+    await projectRepository.updateAgentConfig(
+      projectId,
+      {
         slackBotToken: null,
         slackChannelId: null,
-        updatedAt: new Date(),
-      })
-      .where(eq(agentConfig.projectId, projectId));
+      },
+      actorId
+    );
 
     logger.info({ projectId }, 'Slack config removed');
   } catch (error) {

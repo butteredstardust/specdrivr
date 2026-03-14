@@ -1,7 +1,5 @@
 import 'server-only';
-import { db } from '@/db';
-import { projectMembers } from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { memberRepository } from '@/repositories/member-repository';
 import type { UserRole } from '@/db/schema';
 
 // Role hierarchy — higher index = more permissions
@@ -15,13 +13,7 @@ export function roleAtLeast(userRole: UserRole, required: UserRole): boolean {
  * Returns the user's role on a project, or null if not a member.
  */
 export async function getProjectRole(userId: string, projectId: number): Promise<UserRole | null> {
-  const rows = await db
-    .select({ role: projectMembers.role })
-    .from(projectMembers)
-    .where(and(eq(projectMembers.userId, userId), eq(projectMembers.projectId, projectId)))
-    .limit(1);
-
-  return rows[0]?.role ?? null;
+  return memberRepository.getRoleForUser(userId, projectId);
 }
 
 /**

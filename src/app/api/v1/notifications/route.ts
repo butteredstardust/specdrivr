@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { db } from '@/db';
-import { notifications } from '@/db/schema';
+import { notificationRepository } from '@/repositories/notification-repository';
 import { handleApiError } from '@/lib/error-handler';
-import { eq, desc } from 'drizzle-orm';
 
 export async function GET() {
   const session = await auth();
@@ -15,12 +13,7 @@ export async function GET() {
   }
 
   try {
-    const list = await db
-      .select()
-      .from(notifications)
-      .where(eq(notifications.userId, session.user.id))
-      .orderBy(desc(notifications.createdAt));
-
+    const list = await notificationRepository.getByUserId(session.user.id);
     return NextResponse.json({ data: list });
   } catch (error) {
     return handleApiError(error);

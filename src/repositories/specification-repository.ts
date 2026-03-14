@@ -211,6 +211,28 @@ export class SpecificationRepository extends BaseRepository {
     });
   }
 
+  async getVersionsBySpecId(specId: number) {
+    return await this.executeQuery(() =>
+      db
+        .select()
+        .from(specVersions)
+        .where(eq(specVersions.specId, specId))
+        .orderBy(desc(specVersions.versionNumber))
+    );
+  }
+
+  async getVersionById(specId: number, versionId: number) {
+    const result = await this.executeQuery(() =>
+      db
+        .select()
+        .from(specVersions)
+        .where(and(eq(specVersions.specId, specId), eq(specVersions.id, versionId)))
+        .limit(1)
+    );
+
+    return result[0] || null;
+  }
+
   async update(id: number, data: Partial<Specification>): Promise<Specification> {
     const [updatedSpec] = await this.executeQuery(() =>
       db

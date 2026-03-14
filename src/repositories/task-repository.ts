@@ -75,6 +75,14 @@ export class TaskRepository extends BaseRepository {
     return result as Task[];
   }
 
+  async getByExternalId(externalId: string): Promise<Task | null> {
+    const result = await this.executeQuery(() =>
+      db.select().from(tasks).where(eq(tasks.externalId, externalId)).limit(1)
+    );
+
+    return (result[0] as Task) || null;
+  }
+
   async create(data: CreateTaskData): Promise<Task> {
     if (!data.description || data.description.trim().length === 0) {
       throw new ValidationError('Task description is required');

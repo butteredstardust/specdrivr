@@ -1,9 +1,8 @@
 import 'server-only';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { db } from '@/db';
-import { invites, projectMembers, users } from '@/db/schema';
-import { eq, and, gt } from 'drizzle-orm';
+import { inviteRepository } from '@/repositories/invite-repository';
+import { userRepository } from '@/repositories/user-repository';
 import { handleApiError } from '@/lib/error-handler';
 import { authInstance } from '@/lib/auth';
 import { logger } from '@/lib/logger';
@@ -35,12 +34,7 @@ export async function POST(req: Request) {
     const { token, password, name } = parsed.data;
 
     // 1. Validate invite token
-    const [invite] = await db
-      .select()
-      .from(invites)
-      .where(and(eq(invites.token, token), gt(invites.expiresAt, new Date())))
-      .limit(1);
-
+    const invite = await inviteRepository.getByToken(token);
     if (!invite) {
       return NextResponse.json(
         { error: { code: 'INVALID_TOKEN', message: 'Invite token not found or expired' } },
@@ -49,11 +43,7 @@ export async function POST(req: Request) {
     }
 
     // 2. Check if user already exists
-    const [existingUser] = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, invite.email))
-      .limit(1);
+    const existingUser = await inviteRepository.checkUserExists(invite.email);
 
     let userId: string;
 
@@ -62,20 +52,7 @@ export async function POST(req: Request) {
       userId = existingUser.id;
 
       try {
-        await db.transaction(async (tx) => {
-          // Insert into project_members
-          await tx
-            .insert(projectMembers)
-            .values({
-              projectId: invite.projectId,
-              userId: userId,
-              role: invite.role,
-            })
-            .onConflictDoNothing();
-
-          // Delete the invite row
-          await tx.delete(invites).where(eq(invites.id, invite.id));
-        });
+        await inviteRepository.accept(invite.id, userId, invite.projectId, invite.role);
       } catch (error) {
         logger.error(
           { error, inviteId: invite.id },
@@ -125,28 +102,15 @@ export async function POST(req: Request) {
       userId = newUser.user.id;
 
       try {
-        await db.transaction(async (tx) => {
-          // Insert into project_members
-          await tx.insert(projectMembers).values({
-            projectId: invite.projectId,
-            userId: userId,
-            role: invite.role,
-          });
-
-          // Delete the invite row
-          await tx.delete(invites).where(eq(invites.id, invite.id));
-        });
+        await inviteRepository.accept(invite.id, userId, invite.projectId, invite.role);
       } catch (error) {
         logger.error(
           { error, userId, inviteId: invite.id },
           'Transaction failed in accept-invite (Path A), cleaning up orphaned user'
         );
 
-        // Handle atomicity: if transaction fails, delete the orphaned user account
         try {
-          // BetterAuth doesn't expose a direct delete user API via authInstance.api easily for server side if not using a specific plugin.
-          // We'll delete directly from the database to ensure atomicity.
-          await db.delete(users).where(eq(users.id, userId));
+          await userRepository.delete(userId);
         } catch (cleanupError) {
           logger.error(
             { cleanupError, userId },
