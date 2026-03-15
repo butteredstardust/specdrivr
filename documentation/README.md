@@ -78,7 +78,3 @@ When updating specifications:
 2. Update only those files (no need to touch unrelated areas)
 3. Maintain section numbering within each file
 4. Update cross-references if sections move between files
-
-## Backup
-
-The original monolithic specification is preserved as `SPECIFICATION.md.bak` for reference and verification.
