@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { projectRepository } from '@/repositories/project-repository';
+import { memberRepository } from '@/repositories/member-repository';
+import { getProjectRole } from '@/lib/rbac';
 import type { UserRole } from '@/db/schema';
 import { ProfileForm } from '@/components/settings/profile-form';
 import { ProjectSettingsForm } from '@/components/settings/project-settings-form';
@@ -12,7 +14,15 @@ export default async function SettingsPage() {
 
   const projects = await projectRepository.getByUserId(session.user.id);
   const project = projects[0] ?? null;
-  const userRole = ((session.user as { role?: string }).role ?? 'viewer') as UserRole;
+
+  // Derive role from the user's actual membership in the active project,
+  // falling back to 'viewer' if there is no project yet.
+  const userRole: UserRole = project
+    ? ((await getProjectRole(session.user.id, project.id)) ?? 'viewer')
+    : 'viewer';
+
+  // Pre-fetch members server-side so MembersSection needs no useEffect fetch.
+  const initialMembers = project ? await memberRepository.getByProjectId(project.id) : [];
 
   return (
     <div className="flex max-w-2xl flex-col gap-8">
@@ -38,7 +48,13 @@ export default async function SettingsPage() {
         />
       )}
 
-      {project && <MembersSection projectId={project.id} userRole={userRole} />}
+      {project && (
+        <MembersSection
+          projectId={project.id}
+          userRole={userRole}
+          initialMembers={initialMembers}
+        />
+      )}
     </div>
   );
 }
