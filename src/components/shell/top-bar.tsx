@@ -29,6 +29,10 @@ interface NotificationData {
   meta: { total: number };
 }
 
+interface TopBarProps {
+  breadcrumbs?: Array<{ label: string; href?: string }>;
+}
+
 const PATH_LABELS: Record<string, string> = {
   '/': 'Mission Control',
   '/projects': 'Projects',
@@ -37,7 +41,7 @@ const PATH_LABELS: Record<string, string> = {
   '/settings': 'Settings',
 };
 
-export function TopBar() {
+export function TopBar({ breadcrumbs }: TopBarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, setShortcutsOpen } = useShell();
@@ -50,10 +54,11 @@ export function TopBar() {
   const unreadCount = notifData?.meta?.total ?? 0;
 
   const segments = pathname.split('/').filter(Boolean);
-  const crumbs = segments.map((seg, i) => ({
+  const autoCrumbs = segments.map((seg, i) => ({
     label: PATH_LABELS['/' + segments.slice(0, i + 1).join('/')] ?? seg,
     href: '/' + segments.slice(0, i + 1).join('/'),
   }));
+  const crumbs = breadcrumbs ?? autoCrumbs;
 
   const initials = user?.name
     ? user.name
@@ -86,7 +91,7 @@ export function TopBar() {
               <>
                 <BreadcrumbSeparator key={`sep-${i}`} />
                 <BreadcrumbItem key={crumb.href}>
-                  {i === crumbs.length - 1 ? (
+                  {i === crumbs.length - 1 || !crumb.href ? (
                     <BreadcrumbPage className="text-[--text-primary]">{crumb.label}</BreadcrumbPage>
                   ) : (
                     <BreadcrumbLink asChild>
@@ -144,6 +149,7 @@ export function TopBar() {
               <p className="truncate text-xs text-[--text-muted]">{user?.email}</p>
             </div>
             <DropdownMenuSeparator />
+            <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href="/settings">Settings</Link>
             </DropdownMenuItem>

@@ -22,7 +22,7 @@ interface SidebarProps {
 const NAV_ITEMS = [
   { href: '/', label: 'Mission Control', icon: LayoutDashboard, exact: true },
   { href: '/projects', label: 'Projects', icon: FolderKanban, exact: false },
-  { href: '/specs', label: 'Specifications', icon: FileText, exact: false },
+  { href: '/specs', label: 'Specs', icon: FileText, exact: false },
   { href: '/sessions', label: 'Sessions', icon: Terminal, exact: false },
   { href: '/settings', label: 'Settings', icon: Settings, exact: false },
 ];
@@ -83,7 +83,7 @@ export function Sidebar({ projects }: SidebarProps) {
               className={cn(
                 'flex items-center gap-3 px-4 py-2 text-sm transition-colors',
                 active
-                  ? 'border-l-2 border-[--accent-violet] bg-[--accent-violet]/5 text-[--accent-violet]'
+                  ? 'border-l-2 border-[--accent-violet] bg-[--accent-violet]/10 text-[--accent-violet]'
                   : 'border-l-2 border-transparent text-[--text-secondary] hover:bg-[--bg-elevated] hover:text-[--text-primary]'
               )}
             >
@@ -96,7 +96,7 @@ export function Sidebar({ projects }: SidebarProps) {
 
       {/* Bottom status */}
       <div className="flex items-center gap-2 border-t border-[--border-default] px-4 py-3">
-        <DaemonMascot size={16} expression="idle" />
+        <DaemonMascot size={24} expression="idle" />
         <span className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
           SYSTEM READY
         </span>
