@@ -44,6 +44,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       search: searchParams.get('search') ?? undefined,
       actor: searchParams.get('actor') ?? undefined,
       action: searchParams.get('action') ?? undefined,
+      from: searchParams.get('from') ?? undefined,
+      to: searchParams.get('to') ?? undefined,
     };
 
     const hasFilters = Object.values(filters).some(Boolean);
@@ -58,8 +60,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     ]);
 
     return NextResponse.json({
-      data: entries,
-      meta: { page, total, pageSize: PAGE_SIZE },
+      data: { items: entries, meta: { page, total, pageSize: PAGE_SIZE } },
     });
   } catch (error) {
     return handleApiError(error);

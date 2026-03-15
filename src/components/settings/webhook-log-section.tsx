@@ -16,8 +16,10 @@ interface DeliveryMeta {
   pageSize: number;
 }
 
+type DeliveryRow = WebhookDeliverySelect & { endpointUrl: string | null };
+
 interface WebhookDeliveriesPayload {
-  data: WebhookDeliverySelect[];
+  items: DeliveryRow[];
   meta: DeliveryMeta;
 }
 
@@ -50,7 +52,7 @@ function formatTs(date: string | Date): string {
   });
 }
 
-function DeliveryRow({ entry }: { entry: WebhookDeliverySelect }) {
+function DeliveryRow({ entry }: { entry: DeliveryRow }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -70,8 +72,7 @@ function DeliveryRow({ entry }: { entry: WebhookDeliverySelect }) {
           </span>
         </td>
         <td className="max-w-[160px] truncate px-4 py-2.5 font-mono text-xs text-[--text-muted]">
-          {/* Endpoint is the webhook URL — not stored on delivery; show webhook ID */}
-          webhook #{entry.webhookId ?? '—'}
+          {entry.endpointUrl ?? '—'}
         </td>
         <td className="px-4 py-2.5">
           <StatusBadge status={entry.status} />
@@ -121,13 +122,13 @@ function DeliveryRow({ entry }: { entry: WebhookDeliverySelect }) {
 
 export function WebhookLogSection({ projectId }: WebhookLogSectionProps) {
   const [page, setPage] = useState(1);
-  const [deliveries, setDeliveries] = useState<WebhookDeliverySelect[]>([]);
+  const [deliveries, setDeliveries] = useState<DeliveryRow[]>([]);
   const [meta, setMeta] = useState<DeliveryMeta | null>(null);
 
   const url = `/api/v1/projects/${projectId}/webhook-deliveries?page=${page}`;
 
   const stopWhen = useCallback((data: WebhookDeliveriesPayload) => {
-    setDeliveries(data.data);
+    setDeliveries(data.items);
     setMeta(data.meta);
     return true;
   }, []);
