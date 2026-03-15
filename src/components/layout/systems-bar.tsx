@@ -35,14 +35,17 @@ interface IndicatorProps {
   label: string;
   color: DotColor;
   tooltip: string;
+  collapsed?: boolean;
 }
 
-function Indicator({ label, color, tooltip }: IndicatorProps) {
+function Indicator({ label, color, tooltip, collapsed }: IndicatorProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <div className="flex flex-col items-center gap-0.5">
-          <span className="text-text-muted font-mono text-[9px] leading-none">{label}</span>
+          {!collapsed && (
+            <span className="text-text-muted font-mono text-[9px] leading-none">{label}</span>
+          )}
           <span className={`h-1.5 w-1.5 rounded-full ${DOT_CLASS[color]}`} />
         </div>
       </TooltipTrigger>
@@ -53,7 +56,7 @@ function Indicator({ label, color, tooltip }: IndicatorProps) {
   );
 }
 
-export function SystemsBar() {
+export function SystemsBar({ collapsed }: { collapsed?: boolean }) {
   const { activeProjectId } = useShell();
 
   const url = activeProjectId ? `/api/v1/health?projectId=${activeProjectId}` : '/api/v1/health';
@@ -89,10 +92,15 @@ export function SystemsBar() {
   return (
     <TooltipProvider>
       <div className="flex items-center justify-around px-4 py-2">
-        <Indicator label="GIT" color={gitColor} tooltip={gitTooltip} />
-        <Indicator label="API" color={apiColor} tooltip={apiTooltip} />
-        <Indicator label="AGT" color={agtStatus.color} tooltip={agtStatus.label} />
-        <Indicator label="PG" color={pgColor} tooltip={pgTooltip} />
+        <Indicator label="GIT" color={gitColor} tooltip={gitTooltip} collapsed={collapsed} />
+        <Indicator label="API" color={apiColor} tooltip={apiTooltip} collapsed={collapsed} />
+        <Indicator
+          label="AGT"
+          color={agtStatus.color}
+          tooltip={agtStatus.label}
+          collapsed={collapsed}
+        />
+        <Indicator label="PG" color={pgColor} tooltip={pgTooltip} collapsed={collapsed} />
       </div>
     </TooltipProvider>
   );

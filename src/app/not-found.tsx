@@ -17,11 +17,7 @@ export default function NotFound() {
         The requested path does not exist in the current specification. The system has encountered a
         non-recoverable routing error.
       </p>
-      <Button
-        asChild
-        variant="outline"
-        className="border-[--border-default] hover:bg-[color:var(--bg-elevated)]"
-      >
+      <Button asChild variant="outline" className="border-border-default hover:bg-bg-elevated">
         <Link href="/">Return to Mission Control</Link>
       </Button>
     </div>

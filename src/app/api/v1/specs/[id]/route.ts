@@ -11,7 +11,7 @@ interface RouteParams {
 }
 
 const UpdateSpecSchema = z.object({
-  title: z.string().optional(),
+  name: z.string().optional(),
   status: z.enum(specStatusEnum.enumValues).optional(),
 });
 
@@ -74,7 +74,12 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const { allowed } = await requireAdmin(session.user.id, spec.projectId);
     if (!allowed) {
       return NextResponse.json(
-        { error: { code: 'FORBIDDEN', message: 'You do not have permission to update this specification' } },
+        {
+          error: {
+            code: 'FORBIDDEN',
+            message: 'You do not have permission to update this specification',
+          },
+        },
         { status: 403 }
       );
     }
@@ -119,14 +124,21 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     const { allowed } = await requireAdmin(session.user.id, spec.projectId);
     if (!allowed) {
       return NextResponse.json(
-        { error: { code: 'FORBIDDEN', message: 'You do not have permission to delete this specification' } },
+        {
+          error: {
+            code: 'FORBIDDEN',
+            message: 'You do not have permission to delete this specification',
+          },
+        },
         { status: 403 }
       );
     }
 
     if (spec.status === 'executing') {
       return NextResponse.json(
-        { error: { code: 'CONFLICT', message: 'Cannot delete a spec that is currently executing' } },
+        {
+          error: { code: 'CONFLICT', message: 'Cannot delete a spec that is currently executing' },
+        },
         { status: 409 }
       );
     }

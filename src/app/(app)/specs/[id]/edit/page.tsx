@@ -9,33 +9,52 @@ import { clientLogger } from '@/lib/logger-client';
 
 interface Spec {
   id: number;
-  title: string;
-  content: string;
+  name: string;
   status: SpecStatus;
+  currentVersionId: number | null;
+}
+
+interface SpecVersion {
+  id: number;
+  versionNumber: number;
+  markdownContent: string;
 }
 
 export default function EditSpecPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [spec, setSpec] = useState<Spec | null>(null);
+  const [initialContent, setInitialContent] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchSpec = async () => {
       try {
-        const res = await fetch(`/api/v1/specs/${id}`, {
-          credentials: 'include',
-        });
-        if (res.status === 401) {
+        const [specRes, versionsRes] = await Promise.all([
+          fetch(`/api/v1/specs/${id}`, { credentials: 'include' }),
+          fetch(`/api/v1/specs/${id}/versions`, { credentials: 'include' }),
+        ]);
+
+        if (specRes.status === 401) {
           router.push('/login');
           return;
         }
-        if (res.status === 404) {
+        if (specRes.status === 404) {
           notFound();
           return;
         }
-        const data = (await res.json()) as { data: Spec };
-        setSpec(data.data);
+
+        const specData = (await specRes.json()) as { data: Spec };
+        setSpec(specData.data);
+
+        if (versionsRes.ok) {
+          const versionsData = (await versionsRes.json()) as { data: SpecVersion[] };
+          const versions = versionsData.data ?? [];
+          if (versions.length > 0) {
+            setInitialContent(versions[0]?.markdownContent ?? '');
+          }
+        }
+
         setIsLoading(false);
       } catch (e) {
         clientLogger.error('Failed to fetch spec', { error: e });
@@ -43,26 +62,44 @@ export default function EditSpecPage() {
       }
     };
     fetchSpec();
-  }, [id]);
+  }, [id, router]);
 
   const handleSave = async (
     title: string,
     content: string
   ): Promise<{ success: boolean; error?: string }> => {
     try {
-      const res = await fetch(`/api/v1/specs/${id}`, {
+      // Update spec name
+      const nameRes = await fetch(`/api/v1/specs/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ title, content }),
+        body: JSON.stringify({ name: title }),
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
+      if (!nameRes.ok) {
+        const err = await nameRes.json().catch(() => ({}));
         return {
           success: false,
           error: (err as { error?: { message?: string } })?.error?.message ?? 'Failed to save',
         };
       }
+
+      // Save content as a new version
+      const versionRes = await fetch(`/api/v1/specs/${id}/versions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ markdownContent: content }),
+      });
+      if (!versionRes.ok) {
+        const err = await versionRes.json().catch(() => ({}));
+        return {
+          success: false,
+          error:
+            (err as { error?: { message?: string } })?.error?.message ?? 'Failed to save content',
+        };
+      }
+
       return { success: true };
     } catch (e) {
       clientLogger.error('Failed to save spec', { error: e });
@@ -85,8 +122,8 @@ export default function EditSpecPage() {
   return (
     <SpecEditor
       specId={spec.id}
-      initialContent={spec.content}
-      initialTitle={spec.title}
+      initialContent={initialContent}
+      initialTitle={spec.name}
       specStatus={spec.status}
       onSave={handleSave}
     />

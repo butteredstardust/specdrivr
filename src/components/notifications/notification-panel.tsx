@@ -10,9 +10,10 @@ import { cn } from '@/lib/utils';
 
 interface Notification {
   id: number;
-  message: string;
+  title: string;
+  body: string;
   type: string;
-  isRead: boolean;
+  readAt: string | null;
   createdAt: string;
 }
 
@@ -40,7 +41,7 @@ export function NotificationPanel() {
   const list: Notification[] = (data?.notifications ??
     (data as unknown as Notification[]) ??
     []) as Notification[];
-  const hasUnread = list.some((n) => !n.isRead);
+  const hasUnread = list.some((n) => !n.readAt);
 
   const handleMarkAllRead = async () => {
     try {
@@ -59,7 +60,7 @@ export function NotificationPanel() {
   return (
     <div className="flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-[--border-default] px-4 py-3">
+      <div className="border-border-default flex items-center justify-between border-b px-4 py-3">
         <span className="text-text-muted font-mono text-xs font-semibold tracking-widest uppercase">
           NOTIFICATIONS
         </span>
@@ -85,14 +86,14 @@ export function NotificationPanel() {
           <div
             key={n.id}
             className={cn(
-              'flex h-12 items-center gap-3 border-b border-[--border-default] px-4 last:border-0',
-              !n.isRead
-                ? 'bg-accent-violet/5 border-l-2 border-[--accent-violet]'
+              'border-border-default flex h-12 items-center gap-3 border-b px-4 last:border-0',
+              !n.readAt
+                ? 'bg-accent-violet/5 border-accent-violet border-l-2'
                 : 'border-l-2 border-transparent'
             )}
           >
             <div className="min-w-0 flex-1">
-              <p className="text-text-primary truncate text-sm">{n.message}</p>
+              <p className="text-text-primary truncate text-sm">{n.title}</p>
             </div>
             <span className="text-text-muted shrink-0 font-mono text-xs">
               {formatRelativeTime(n.createdAt)}
@@ -102,7 +103,7 @@ export function NotificationPanel() {
       </div>
 
       {/* Footer */}
-      <div className="border-t border-[--border-default] px-4 py-2">
+      <div className="border-border-default border-t px-4 py-2">
         <Link
           href="/notifications"
           className="text-accent-violet font-mono text-xs hover:underline"
