@@ -464,6 +464,8 @@ export const updateProjectSchema = z
       .max(255, 'Project name too long')
       .optional(),
     description: z.string().max(1000, 'Description too long').optional().nullable(),
+    repositoryUrl: z.string().url('Invalid repository URL').max(1000).optional().nullable(),
+    repositoryBranch: z.string().max(255, 'Branch name too long').optional().nullable(),
   })
   .refine(
     (data) => {

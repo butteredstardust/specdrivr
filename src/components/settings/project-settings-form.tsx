@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { clientLogger } from '@/lib/logger-client';
 import type { UserRole } from '@/db/schema';
 import { Input } from '@/components/ui/input';
@@ -15,11 +16,14 @@ interface ProjectSettingsFormProps {
     name: string;
     description: string | null;
     repositoryUrl?: string | null;
+    repositoryBranch?: string | null;
   };
   userRole: UserRole;
   /** When true, renders only the Danger Zone section and hides the project fields form. */
   dangerZoneOnly?: boolean;
 }
+
+type VerifyStatus = 'idle' | 'checking' | 'connected' | 'unreachable';
 
 function canEdit(role: UserRole): boolean {
   return role === 'admin' || role === 'owner';
@@ -32,8 +36,10 @@ export function ProjectSettingsForm({
 }: ProjectSettingsFormProps) {
   const [name, setName] = useState(project.name);
   const [description, setDescription] = useState(project.description ?? '');
-  const [githubRepo, setGithubRepo] = useState(project.repositoryUrl ?? '');
+  const [repositoryUrl, setRepositoryUrl] = useState(project.repositoryUrl ?? '');
+  const [repositoryBranch, setRepositoryBranch] = useState(project.repositoryBranch ?? 'main');
   const [isSaving, setIsSaving] = useState(false);
+  const [verifyStatus, setVerifyStatus] = useState<VerifyStatus>('idle');
 
   const editable = canEdit(userRole);
 
@@ -47,7 +53,12 @@ export function ProjectSettingsForm({
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, description, githubRepo }),
+        body: JSON.stringify({
+          name,
+          description,
+          repositoryUrl: repositoryUrl || null,
+          repositoryBranch: repositoryBranch || null,
+        }),
       });
 
       if (!res.ok) {
@@ -62,6 +73,28 @@ export function ProjectSettingsForm({
       toast.error('Failed to update project');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleVerifyConnection = async () => {
+    const url = repositoryUrl.trim();
+    if (!url) {
+      toast.error('Enter a repository URL first.');
+      return;
+    }
+    setVerifyStatus('checking');
+    try {
+      const res = await fetch(`/api/v1/verify-repo?url=${encodeURIComponent(url)}`, {
+        credentials: 'include',
+      });
+      if (res.ok) {
+        setVerifyStatus('connected');
+      } else {
+        setVerifyStatus('unreachable');
+      }
+    } catch (err) {
+      clientLogger.error('Repo verify error', err instanceof Error ? err : new Error(String(err)));
+      setVerifyStatus('unreachable');
     }
   };
 
@@ -113,16 +146,83 @@ export function ProjectSettingsForm({
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="font-mono text-xs text-[--text-secondary]" htmlFor="project-github">
-                GitHub repo (owner/repo)
+              <label
+                className="font-mono text-xs text-[--text-secondary]"
+                htmlFor="project-repo-url"
+              >
+                REPOSITORY URL
+              </label>
+              <div className="flex items-center gap-2">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Input
+                      id="project-repo-url"
+                      value={repositoryUrl}
+                      onChange={(e) => {
+                        setRepositoryUrl(e.target.value);
+                        setVerifyStatus('idle');
+                      }}
+                      placeholder="https://github.com/owner/repo"
+                      disabled={!editable}
+                      className="flex-1"
+                    />
+                  </TooltipTrigger>
+                  {!editable && (
+                    <TooltipContent>Requires admin or owner role to edit</TooltipContent>
+                  )}
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span tabIndex={!editable ? 0 : undefined}>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleVerifyConnection}
+                        disabled={!editable || verifyStatus === 'checking'}
+                        className="shrink-0"
+                      >
+                        {verifyStatus === 'checking' ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          'Verify Connection'
+                        )}
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  {!editable && <TooltipContent>Requires admin or owner role</TooltipContent>}
+                </Tooltip>
+
+                {verifyStatus === 'connected' && (
+                  <span className="flex items-center gap-1 text-xs text-[--phosphor-amber]">
+                    <CheckCircle className="h-3.5 w-3.5" />
+                    Connected
+                  </span>
+                )}
+                {verifyStatus === 'unreachable' && (
+                  <span className="flex items-center gap-1 text-xs text-[--text-muted]">
+                    <XCircle className="h-3.5 w-3.5" />
+                    Unreachable
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label
+                className="font-mono text-xs text-[--text-secondary]"
+                htmlFor="project-repo-branch"
+              >
+                DEFAULT BRANCH
               </label>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Input
-                    id="project-github"
-                    value={githubRepo}
-                    onChange={(e) => setGithubRepo(e.target.value)}
-                    placeholder="owner/repo-name"
+                    id="project-repo-branch"
+                    value={repositoryBranch}
+                    onChange={(e) => setRepositoryBranch(e.target.value)}
+                    placeholder="main"
                     disabled={!editable}
                   />
                 </TooltipTrigger>
