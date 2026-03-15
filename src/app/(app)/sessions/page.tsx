@@ -7,6 +7,8 @@ import { usePolling } from '@/hooks/use-polling';
 import { EventLog } from '@/components/mission-control/event-log';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -50,16 +52,16 @@ function StatusDot({ status }: { status: Session['status'] }) {
   switch (status) {
     case 'running':
       return (
-        <span className="inline-block h-2 w-2 rounded-full bg-[--accent-violet] animate-pulse mr-1.5" />
+        <span className="mr-1.5 inline-block h-2 w-2 animate-pulse rounded-full bg-[--accent-violet]" />
       );
     case 'completed':
-      return <span className="inline-block h-2 w-2 rounded-full bg-emerald-400 mr-1.5" />;
+      return <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-emerald-400" />;
     case 'failed':
-      return <span className="inline-block h-2 w-2 rounded-full bg-red-400 mr-1.5" />;
+      return <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-red-400" />;
     case 'paused':
-      return <span className="inline-block h-2 w-2 rounded-full bg-[--phosphor-amber] mr-1.5" />;
+      return <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-[--phosphor-amber]" />;
     case 'cancelled':
-      return <span className="inline-block h-2 w-2 rounded-full bg-[--text-muted] mr-1.5" />;
+      return <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-[--text-muted]" />;
     default:
       return null;
   }
@@ -193,12 +195,12 @@ export default function SessionsPage() {
 
       {/* Filter bar */}
       <div className="flex flex-wrap items-center gap-2">
-        <input
+        <Input
           type="text"
           placeholder="Search sessions…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="h-8 rounded border border-[--border-default] bg-[--bg-elevated] px-3 text-xs text-[--text-primary] placeholder:text-[--text-muted] focus:outline-none focus:ring-1 focus:ring-[--accent-violet] w-48"
+          className="h-8 w-48 text-xs"
         />
 
         <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -229,27 +231,29 @@ export default function SessionsPage() {
           </SelectContent>
         </Select>
 
-        <input
+        <Input
           type="date"
           value={fromDate}
           onChange={(e) => setFromDate(e.target.value)}
-          className="h-8 rounded border border-[--border-default] bg-[--bg-elevated] px-3 text-xs text-[--text-primary] focus:outline-none focus:ring-1 focus:ring-[--accent-violet]"
+          className="h-8 text-xs"
         />
 
-        <input
+        <Input
           type="date"
           value={toDate}
           onChange={(e) => setToDate(e.target.value)}
-          className="h-8 rounded border border-[--border-default] bg-[--bg-elevated] px-3 text-xs text-[--text-primary] focus:outline-none focus:ring-1 focus:ring-[--accent-violet]"
+          className="h-8 text-xs"
         />
 
         {isAnyFilterActive && (
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={clearFilters}
-            className="h-8 rounded border border-[--border-default] bg-[--bg-elevated] px-3 text-xs text-[--text-muted] hover:text-[--text-primary] transition-colors"
+            className="h-8 text-xs text-[--text-muted]"
           >
             Clear filters
-          </button>
+          </Button>
         )}
       </div>
 
@@ -297,8 +301,8 @@ export default function SessionsPage() {
               {Array.from(groups.entries()).map(([label, groupSessions]) => (
                 <Fragment key={`group-${label}`}>
                   <tr>
-                    <td colSpan={6} className="px-0 py-0 pb-1 pt-3">
-                      <span className="font-mono text-xs font-semibold uppercase tracking-widest text-[--text-muted]">
+                    <td colSpan={6} className="px-0 py-0 pt-3 pb-1">
+                      <span className="font-mono text-xs font-semibold tracking-widest text-[--text-muted] uppercase">
                         {label}
                       </span>
                     </td>

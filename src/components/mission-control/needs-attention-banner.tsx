@@ -1,6 +1,7 @@
 'use client';
 
 import { TriangleAlert, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useTaskDrawer } from '@/components/shell/task-drawer-context';
 
 interface BlockedTask {
@@ -34,26 +35,28 @@ export function NeedsAttentionBanner({ blockedTasks, onDismiss }: NeedsAttention
       {/* Center: scrollable task pills */}
       <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto py-0.5">
         {blockedTasks.map((task) => (
-          <button
+          <Button
             key={task.id}
-            type="button"
+            variant="ghost"
+            size="sm"
             onClick={() => openDrawer(task.id)}
-            className="shrink-0 rounded border border-[--phosphor-amber]/30 bg-[--phosphor-amber]/10 px-2 py-0.5 font-mono text-xs text-[--phosphor-amber] transition-colors hover:bg-[--phosphor-amber]/20"
+            className="h-auto shrink-0 rounded border border-[--phosphor-amber]/30 bg-[--phosphor-amber]/10 px-2 py-0.5 font-mono text-xs text-[--phosphor-amber] transition-colors hover:bg-[--phosphor-amber]/20"
           >
             {task.title}
-          </button>
+          </Button>
         ))}
       </div>
 
       {/* Right: dismiss button */}
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="icon"
         onClick={onDismiss}
         aria-label="Dismiss"
-        className="shrink-0 rounded p-0.5 text-[--phosphor-amber]/70 transition-colors hover:text-[--phosphor-amber]"
+        className="h-6 w-6 shrink-0 text-[--phosphor-amber]/70 hover:text-[--phosphor-amber]"
       >
         <X className="h-4 w-4" aria-hidden="true" />
-      </button>
+      </Button>
     </div>
   );
 }
