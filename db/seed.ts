@@ -2,16 +2,31 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import {
   users,
-  projects,
-  specifications,
-  plans,
-  tasks,
-  agentSessions,
-  specVersions,
   accounts,
+  projects,
   projectMembers,
+  invites,
+  agentTokens,
+  specifications,
+  specVersions,
+  plans,
+  planReviews,
+  tasks,
+  taskAttempts,
+  fileChanges,
+  agentSessions,
+  agentEvents,
+  agentLogs,
   agentConfig,
+  notifications,
+  notificationPreferences,
   webhooks,
+  webhookDeliveries,
+  usageSnapshots,
+  gitCommits,
+  apiRequestLogs,
+  auditLog,
+  testResults,
 } from '../src/db/schema';
 import { env } from '../src/lib/env-script';
 import * as schema from '../src/db/schema';
@@ -42,6 +57,17 @@ async function scryptHash(password: string): Promise<string> {
   return `${salt}:${Buffer.from(key).toString('hex')}`;
 }
 
+// Reference date: 2026-03-15 (today in seed world)
+const daysAgo = (n: number): Date => {
+  const d = new Date('2026-03-15T00:00:00Z');
+  d.setDate(d.getDate() - n);
+  return d;
+};
+
+const hoursAgo = (h: number): Date => {
+  return new Date(new Date('2026-03-15T12:00:00Z').getTime() - h * 60 * 60 * 1000);
+};
+
 async function resetSequences() {
   logger.info('Resetting sequences...');
   const tables = [
@@ -67,6 +93,8 @@ async function resetSequences() {
     'test_results',
     'agent_tokens',
     'invites',
+    'project_members',
+    'agent_config',
   ];
 
   for (const table of tables) {
@@ -77,7 +105,6 @@ async function resetSequences() {
         )
       );
     } catch {
-      // Some tables might not have serial 'id' or might not exist yet, skip them
       logger.debug({ table }, 'Skipped sequence reset for table (likely no serial id)');
     }
   }
@@ -88,7 +115,9 @@ async function main() {
 
   try {
     await db.transaction(async (tx) => {
-      // 1. Users
+      // -------------------------------------------------------------------------
+      // 1. Users + Accounts
+      // -------------------------------------------------------------------------
       const passwordHash = await scryptHash('Password123!');
 
       const demoUsers = [
@@ -129,181 +158,802 @@ async function main() {
           .onConflictDoNothing();
       }
 
-      // 2. Projects
+      // -------------------------------------------------------------------------
+      // 2. Projects (5 projects, distinct completion states)
+      // -------------------------------------------------------------------------
       const demoProjects = [
         {
           id: 1,
-          name: 'Project Alpha',
-          slug: 'project-alpha',
+          name: 'Blaze UI Redesign',
+          slug: 'blaze-ui',
+          description: 'Full component library redesign with dark mode system.',
           createdBy: 'user_alex',
           isDemo: true,
+          createdAt: daysAgo(5),
         },
-        { id: 2, name: 'Project Beta', slug: 'project-beta', createdBy: 'user_sam', isDemo: true },
+        {
+          id: 2,
+          name: 'Auth Service',
+          slug: 'auth-service',
+          description: 'OAuth2 integration and session management overhaul.',
+          createdBy: 'user_sam',
+          isDemo: true,
+          createdAt: daysAgo(5),
+        },
+        {
+          id: 3,
+          name: 'Payments v2',
+          slug: 'payments-v2',
+          description: 'Stripe checkout flow and subscription billing.',
+          createdBy: 'user_alex',
+          isDemo: true,
+          createdAt: daysAgo(4),
+        },
+        {
+          id: 4,
+          name: 'Data Pipeline',
+          slug: 'data-pipeline',
+          description: 'Batch processor and stream ingestion infrastructure.',
+          createdBy: 'user_jordan',
+          isDemo: true,
+          createdAt: daysAgo(4),
+        },
+        {
+          id: 5,
+          name: 'API Gateway',
+          slug: 'api-gateway',
+          description: 'Centralized routing layer with rate limiting.',
+          createdBy: 'user_alex',
+          isDemo: true,
+          createdAt: daysAgo(1),
+        },
       ];
 
       for (const p of demoProjects) {
         await tx.insert(projects).values(p).onConflictDoNothing();
-        // Ensure agent config exists for projects
-        await tx
-          .insert(agentConfig)
-          .values({
-            projectId: p.id,
-          })
-          .onConflictDoNothing();
       }
 
-      // 3. Project Members
-      const members = [
-        { projectId: 1, userId: 'user_alex', role: 'owner' as const },
-        { projectId: 1, userId: 'user_sam', role: 'admin' as const },
-        { projectId: 1, userId: 'user_jordan', role: 'member' as const },
-        { projectId: 2, userId: 'user_sam', role: 'owner' as const },
-        { projectId: 2, userId: 'user_jordan', role: 'admin' as const },
+      // -------------------------------------------------------------------------
+      // 3. Agent Config (one per project, with per-project variations)
+      // -------------------------------------------------------------------------
+      await tx
+        .insert(agentConfig)
+        .values({
+          projectId: 1,
+          testCommand: 'pnpm test',
+          lintCommand: 'pnpm lint',
+        })
+        .onConflictDoNothing();
+
+      await tx
+        .insert(agentConfig)
+        .values({
+          projectId: 2,
+          requireApproval: true,
+          maxConcurrentTasks: 2,
+        })
+        .onConflictDoNothing();
+
+      await tx
+        .insert(agentConfig)
+        .values({
+          projectId: 3,
+          autoGeneratePlan: false,
+        })
+        .onConflictDoNothing();
+
+      await tx
+        .insert(agentConfig)
+        .values({
+          projectId: 4,
+          maxRetriesPerTask: 3,
+          taskTimeoutSeconds: 600,
+        })
+        .onConflictDoNothing();
+
+      await tx.insert(agentConfig).values({ projectId: 5 }).onConflictDoNothing();
+
+      // -------------------------------------------------------------------------
+      // 4. Project Members
+      // -------------------------------------------------------------------------
+      const projectMembersData = [
+        // P1: Blaze UI
+        { projectId: 1, userId: 'user_alex', role: 'owner' as const, joinedAt: daysAgo(5) },
+        { projectId: 1, userId: 'user_sam', role: 'admin' as const, joinedAt: daysAgo(5) },
+        { projectId: 1, userId: 'user_jordan', role: 'member' as const, joinedAt: daysAgo(5) },
+        // P2: Auth Service
+        { projectId: 2, userId: 'user_sam', role: 'owner' as const, joinedAt: daysAgo(5) },
+        { projectId: 2, userId: 'user_alex', role: 'admin' as const, joinedAt: daysAgo(5) },
+        { projectId: 2, userId: 'user_jordan', role: 'member' as const, joinedAt: daysAgo(5) },
+        // P3: Payments v2
+        { projectId: 3, userId: 'user_alex', role: 'owner' as const, joinedAt: daysAgo(4) },
+        { projectId: 3, userId: 'user_sam', role: 'admin' as const, joinedAt: daysAgo(4) },
+        // P4: Data Pipeline
+        { projectId: 4, userId: 'user_jordan', role: 'owner' as const, joinedAt: daysAgo(4) },
+        { projectId: 4, userId: 'user_alex', role: 'member' as const, joinedAt: daysAgo(4) },
+        // P5: API Gateway
+        { projectId: 5, userId: 'user_alex', role: 'owner' as const, joinedAt: daysAgo(1) },
+        { projectId: 5, userId: 'user_jordan', role: 'admin' as const, joinedAt: daysAgo(1) },
+        { projectId: 5, userId: 'user_sam', role: 'member' as const, joinedAt: daysAgo(1) },
       ];
 
-      for (const m of members) {
+      for (const m of projectMembersData) {
         await tx.insert(projectMembers).values(m).onConflictDoNothing();
       }
 
-      // 4. Specifications
-      const demoSpecs = [
-        { id: 1, projectId: 1, name: 'Authentication System', status: 'pending_approval' as const },
-        { id: 2, projectId: 1, name: 'Payment Integration', status: 'executing' as const },
-        { id: 3, projectId: 1, name: 'Dashboard UI', status: 'drafting' as const },
-        { id: 4, projectId: 2, name: 'API Gateway', status: 'pending_approval' as const },
-        { id: 5, projectId: 2, name: 'Data Pipeline', status: 'drafting' as const },
-        { id: 6, projectId: 2, name: 'Notification Service', status: 'drafting' as const },
-      ];
+      // -------------------------------------------------------------------------
+      // 5. Invites (2 pending)
+      // -------------------------------------------------------------------------
+      await tx
+        .insert(invites)
+        .values({
+          id: 1,
+          projectId: 3,
+          email: 'riley@example.com',
+          role: 'member' as const,
+          token: 'invite_token_riley_p3_seed',
+          invitedBy: 'user_alex',
+          expiresAt: daysAgo(-7),
+          createdAt: daysAgo(1),
+        })
+        .onConflictDoNothing();
 
-      const specContents: Record<number, string> = {
-        1: 'The authentication system must support OAuth2 and traditional email/password flows. Security is a top priority for this module. We need robust session management.',
-        2: 'Integrating Stripe for all payment processing. This includes handling one-time payments and recurring subscriptions. Webhook security must be strictly enforced.',
-        3: 'A modern, responsive dashboard providing high-level metrics at a glance. It should support both light and dark modes. Performance should be optimized for large datasets.',
-        4: 'Centralized entry point for all API requests. It handles rate limiting, authentication, and request routing to microservices. High availability is mandatory.',
-        5: 'Ingests raw data from multiple sources, cleans it, and stores it in the data warehouse. Scalability and data integrity are key requirements. Supports batch and stream processing.',
-        6: 'Unified service for sending emails, SMS, and push notifications. It should handle delivery retries and provide detailed logging for audit purposes.',
-      };
+      await tx
+        .insert(invites)
+        .values({
+          id: 2,
+          projectId: 5,
+          email: 'morgan@example.com',
+          role: 'admin' as const,
+          token: 'invite_token_morgan_p5_seed',
+          invitedBy: 'user_alex',
+          expiresAt: daysAgo(-7),
+          createdAt: daysAgo(0),
+        })
+        .onConflictDoNothing();
+
+      // -------------------------------------------------------------------------
+      // 6. Agent Tokens
+      // -------------------------------------------------------------------------
+      await tx
+        .insert(agentTokens)
+        .values({
+          id: 1,
+          userId: 'user_alex',
+          projectId: 2,
+          name: 'CI Runner',
+          tokenHash: 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2',
+          prefix: 'spd_ci_',
+          createdAt: daysAgo(4),
+        })
+        .onConflictDoNothing();
+
+      await tx
+        .insert(agentTokens)
+        .values({
+          id: 2,
+          userId: 'user_jordan',
+          projectId: 4,
+          name: 'Pipeline Bot',
+          tokenHash: 'b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3',
+          prefix: 'spd_pp_',
+          createdAt: daysAgo(4),
+        })
+        .onConflictDoNothing();
+
+      // -------------------------------------------------------------------------
+      // 7. Specifications (insert without currentVersionId first)
+      // -------------------------------------------------------------------------
+      const demoSpecs = [
+        // P1: Blaze UI — all completed
+        {
+          id: 1,
+          projectId: 1,
+          name: 'Component Library Refactor',
+          status: 'completed' as const,
+          createdBy: 'user_alex',
+          createdAt: daysAgo(5),
+        },
+        {
+          id: 2,
+          projectId: 1,
+          name: 'Dark Mode System',
+          status: 'completed' as const,
+          createdBy: 'user_alex',
+          createdAt: daysAgo(5),
+        },
+        // P2: Auth Service — one executing, one drafting
+        {
+          id: 3,
+          projectId: 2,
+          name: 'OAuth2 Integration',
+          status: 'executing' as const,
+          createdBy: 'user_sam',
+          createdAt: daysAgo(5),
+        },
+        {
+          id: 4,
+          projectId: 2,
+          name: 'Session Management',
+          status: 'drafting' as const,
+          createdBy: 'user_sam',
+          createdAt: daysAgo(3),
+        },
+        // P3: Payments v2 — pending_approval + drafting
+        {
+          id: 5,
+          projectId: 3,
+          name: 'Stripe Checkout Flow',
+          status: 'pending_approval' as const,
+          createdBy: 'user_alex',
+          createdAt: daysAgo(4),
+        },
+        {
+          id: 6,
+          projectId: 3,
+          name: 'Subscription Billing',
+          status: 'drafting' as const,
+          createdBy: 'user_alex',
+          createdAt: daysAgo(1),
+        },
+        // P4: Data Pipeline — stalled + drafting
+        {
+          id: 7,
+          projectId: 4,
+          name: 'Batch Processor',
+          status: 'stalled' as const,
+          createdBy: 'user_jordan',
+          createdAt: daysAgo(4),
+        },
+        {
+          id: 8,
+          projectId: 4,
+          name: 'Stream Ingestion',
+          status: 'drafting' as const,
+          createdBy: 'user_jordan',
+          createdAt: daysAgo(2),
+        },
+        // P5: API Gateway — drafting + pending_plan
+        {
+          id: 9,
+          projectId: 5,
+          name: 'Gateway Routing Layer',
+          status: 'drafting' as const,
+          createdBy: 'user_alex',
+          createdAt: daysAgo(1),
+        },
+        {
+          id: 10,
+          projectId: 5,
+          name: 'Rate Limiting Module',
+          status: 'pending_plan' as const,
+          createdBy: 'user_alex',
+          createdAt: daysAgo(0),
+        },
+      ];
 
       for (const s of demoSpecs) {
         await tx.insert(specifications).values(s).onConflictDoNothing();
-
-        // Spec Version 1
-        const [v1] = await tx
-          .insert(specVersions)
-          .values({
-            id: s.id, // using same ID for simplicity in seed
-            specId: s.id,
-            versionNumber: 1,
-            markdownContent: specContents[s.id],
-          })
-          .onConflictDoNothing()
-          .returning();
-
-        if (v1) {
-          await tx
-            .update(specifications)
-            .set({ currentVersionId: v1.id })
-            .where(eq(specifications.id, s.id));
-        }
       }
 
+      // -------------------------------------------------------------------------
+      // 8. Spec Versions
+      //    IDs 1-11 mapped to specs 1-10 (spec 1 has two versions: v1=id1, v2=id2)
+      // -------------------------------------------------------------------------
+      const specVersionsData = [
+        {
+          id: 1,
+          specId: 1,
+          versionNumber: 1,
+          markdownContent:
+            '# Component Library Refactor\n\nInitial draft. Audit all existing components and extract design tokens. Build new Button and Form component variants, write Storybook stories, and update documentation.',
+          createdBy: 'user_alex',
+          createdAt: daysAgo(5),
+        },
+        {
+          id: 2,
+          specId: 1,
+          versionNumber: 2,
+          markdownContent:
+            '# Component Library Refactor (v2)\n\nUpdated after review feedback. Audit all existing components and extract design tokens. Build new Button and Form component variants with accessibility improvements, write Storybook stories with interaction tests, and update documentation with migration guide.',
+          createdBy: 'user_alex',
+          createdAt: daysAgo(4),
+        },
+        {
+          id: 3,
+          specId: 2,
+          versionNumber: 1,
+          markdownContent:
+            '# Dark Mode System\n\nCreate a CSS variable system for theming. Implement a ThemeProvider component, apply dark tokens across all layouts, and test across major browsers.',
+          createdBy: 'user_alex',
+          createdAt: daysAgo(4),
+        },
+        {
+          id: 4,
+          specId: 3,
+          versionNumber: 1,
+          markdownContent:
+            '# OAuth2 Integration\n\nConfigure the OAuth2 provider, implement the callback handler, store tokens securely, add refresh token rotation, and write integration tests.',
+          createdBy: 'user_sam',
+          createdAt: daysAgo(5),
+        },
+        {
+          id: 5,
+          specId: 4,
+          versionNumber: 1,
+          markdownContent:
+            '# Session Management\n\nDesign and implement a robust session lifecycle with sliding expiry, device tracking, and forced logout capabilities.',
+          createdBy: 'user_sam',
+          createdAt: daysAgo(3),
+        },
+        {
+          id: 6,
+          specId: 5,
+          versionNumber: 1,
+          markdownContent:
+            '# Stripe Checkout Flow\n\nIntegrate Stripe Elements for secure card collection. Implement order creation, payment confirmation, and webhook handling for async events.',
+          createdBy: 'user_alex',
+          createdAt: daysAgo(4),
+        },
+        {
+          id: 7,
+          specId: 6,
+          versionNumber: 1,
+          markdownContent:
+            '# Subscription Billing\n\nImplement recurring billing using Stripe Subscriptions. Handle plan upgrades, downgrades, cancellations, and invoice webhooks.',
+          createdBy: 'user_alex',
+          createdAt: daysAgo(1),
+        },
+        {
+          id: 8,
+          specId: 7,
+          versionNumber: 1,
+          markdownContent:
+            '# Batch Processor\n\nBuild a job queue with worker logic, retry mechanism, and monitoring hooks. Load test to validate throughput requirements.',
+          createdBy: 'user_jordan',
+          createdAt: daysAgo(4),
+        },
+        {
+          id: 9,
+          specId: 8,
+          versionNumber: 1,
+          markdownContent:
+            '# Stream Ingestion\n\nReal-time event stream ingestion using Kafka. Handle back-pressure, dead-letter queues, and schema evolution.',
+          createdBy: 'user_jordan',
+          createdAt: daysAgo(2),
+        },
+        {
+          id: 10,
+          specId: 9,
+          versionNumber: 1,
+          markdownContent:
+            '# Gateway Routing Layer\n\nCentralized reverse proxy with path-based routing, header injection, and upstream health checks.',
+          createdBy: 'user_alex',
+          createdAt: daysAgo(1),
+        },
+        {
+          id: 11,
+          specId: 10,
+          versionNumber: 1,
+          markdownContent:
+            '# Rate Limiting Module\n\nToken bucket rate limiting per API key and IP. Redis-backed counters with configurable limits and burst allowance.',
+          createdBy: 'user_alex',
+          createdAt: daysAgo(0),
+        },
+      ];
+
+      for (const sv of specVersionsData) {
+        await tx.insert(specVersions).values(sv).onConflictDoNothing();
+      }
+
+      // Update currentVersionId on each spec
+      // spec 1 → v2 (id=2), all others → their single v1
+      const specCurrentVersionMap: Record<number, number> = {
+        1: 2,
+        2: 3,
+        3: 4,
+        4: 5,
+        5: 6,
+        6: 7,
+        7: 8,
+        8: 9,
+        9: 10,
+        10: 11,
+      };
+
+      for (const [specId, versionId] of Object.entries(specCurrentVersionMap)) {
+        await tx
+          .update(specifications)
+          .set({ currentVersionId: versionId })
+          .where(eq(specifications.id, Number(specId)));
+      }
+
+      // -------------------------------------------------------------------------
+      // 9. Plans
+      // -------------------------------------------------------------------------
       const demoPlans = [
-        { id: 1, specId: 1, status: 'pending_approval' as const, specVersionId: 1 },
+        {
+          id: 1,
+          specId: 1,
+          specVersionId: 2, // v2 of Component Library
+          status: 'completed' as const,
+          markdownContent:
+            '## Plan: Component Library Refactor\n\n1. Audit existing components\n2. Extract design tokens\n3. Build Button variants\n4. Build Form components\n5. Write Storybook stories\n6. Update documentation',
+          approvedAt: daysAgo(3),
+          approvedBy: 'user_sam',
+          taskCount: 6,
+          totalEstimatedMinutes: 240,
+          createdBy: 'user_alex',
+          createdAt: daysAgo(4),
+        },
         {
           id: 2,
           specId: 2,
-          status: 'executing' as const,
-          reviewerNotes: 'Approved by Alex',
-          specVersionId: 2,
-          approvedAt: new Date(),
+          specVersionId: 3, // v1 of Dark Mode
+          status: 'completed' as const,
+          markdownContent:
+            '## Plan: Dark Mode System\n\n1. Create CSS variable system\n2. Implement ThemeProvider\n3. Apply dark tokens to layouts\n4. Test across browsers',
+          approvedAt: daysAgo(3),
+          approvedBy: 'user_sam',
+          taskCount: 4,
+          totalEstimatedMinutes: 160,
+          createdBy: 'user_alex',
+          createdAt: daysAgo(4),
         },
         {
           id: 3,
           specId: 3,
-          status: 'abandoned' as const,
-          reviewerNotes: 'Spec was revised',
-          specVersionId: 3,
+          specVersionId: 4, // v1 of OAuth2
+          status: 'executing' as const,
+          markdownContent:
+            '## Plan: OAuth2 Integration\n\n1. Configure OAuth2 provider\n2. Implement callback handler\n3. Store OAuth tokens securely\n4. Add refresh token rotation\n5. Write integration tests',
+          approvedAt: daysAgo(3),
+          approvedBy: 'user_alex',
+          taskCount: 5,
+          totalEstimatedMinutes: 200,
+          createdBy: 'user_sam',
+          createdAt: daysAgo(4),
         },
-        { id: 4, specId: 4, status: 'pending_approval' as const, specVersionId: 4 },
+        {
+          id: 4,
+          specId: 5,
+          specVersionId: 6, // v1 of Stripe Checkout
+          status: 'pending_approval' as const,
+          markdownContent:
+            '## Plan: Stripe Checkout Flow\n\n1. Setup Stripe SDK\n2. Implement checkout session API\n3. Add webhook endpoint\n4. Handle payment confirmation\n5. Write E2E tests',
+          taskCount: 0,
+          totalEstimatedMinutes: 180,
+          createdBy: 'user_alex',
+          createdAt: daysAgo(1),
+        },
+        {
+          id: 5,
+          specId: 7,
+          specVersionId: 8, // v1 of Batch Processor
+          status: 'executing' as const,
+          markdownContent:
+            '## Plan: Batch Processor\n\n1. Setup job queue\n2. Implement worker logic\n3. Add retry mechanism\n4. Add monitoring hooks\n5. Write load tests',
+          approvedAt: daysAgo(3),
+          approvedBy: 'user_alex',
+          taskCount: 5,
+          totalEstimatedMinutes: 220,
+          createdBy: 'user_jordan',
+          createdAt: daysAgo(4),
+        },
+        {
+          id: 6,
+          specId: 1,
+          specVersionId: 1, // v1 of Component Library (old plan, replaced)
+          status: 'abandoned' as const,
+          reviewerNotes: 'Abandoned — spec updated to v2, new plan generated.',
+          taskCount: 0,
+          createdBy: 'user_alex',
+          createdAt: daysAgo(5),
+        },
       ];
 
       for (const p of demoPlans) {
         await tx.insert(plans).values(p).onConflictDoNothing();
       }
 
-      // 6. Agent Session
-      const session = {
-        id: 1,
-        specId: 2,
-        planId: 2,
-        status: 'running' as const,
-        projectId: 1,
-        lastHeartbeatAt: new Date(),
-        startedAt: new Date(),
-      };
-      await tx.insert(agentSessions).values(session).onConflictDoNothing();
+      // -------------------------------------------------------------------------
+      // 10. Plan Reviews
+      // -------------------------------------------------------------------------
+      const planReviewsData = [
+        // Plan 1: approved by Sam (day -3)
+        {
+          planId: 1,
+          userId: 'user_sam',
+          action: 'approved',
+          notes: 'LGTM — the v2 spec is much cleaner. Ship it.',
+          createdAt: daysAgo(3),
+        },
+        // Plan 2: approved by Sam (day -3)
+        {
+          planId: 2,
+          userId: 'user_sam',
+          action: 'approved',
+          notes: 'Good plan. Go ahead.',
+          createdAt: daysAgo(3),
+        },
+        // Plan 3: changes_requested by Sam (day -4), then approved by Alex (day -3)
+        {
+          planId: 3,
+          userId: 'user_sam',
+          action: 'changes_requested',
+          notes: 'Please add token rotation step and more thorough integration tests.',
+          createdAt: daysAgo(4),
+        },
+        {
+          planId: 3,
+          userId: 'user_alex',
+          action: 'approved',
+          notes: 'Updated plan looks good. Approved.',
+          createdAt: daysAgo(3),
+        },
+        // Plan 5: approved by Alex (day -3)
+        {
+          planId: 5,
+          userId: 'user_alex',
+          action: 'approved',
+          notes: 'Solid plan. Watch the OOM risk on the worker.',
+          createdAt: daysAgo(3),
+        },
+        // Plan 6: abandoned by Sam (day -4)
+        {
+          planId: 6,
+          userId: 'user_sam',
+          action: 'abandoned',
+          notes: 'Abandoning — spec was revised to v2. Use the new plan.',
+          createdAt: daysAgo(4),
+        },
+      ];
 
-      // 7. Tasks (Minimum 6 for plan_002 / spec_002)
+      for (const r of planReviewsData) {
+        await tx.insert(planReviews).values(r).onConflictDoNothing();
+      }
+
+      // -------------------------------------------------------------------------
+      // 11. Tasks
+      // -------------------------------------------------------------------------
       const demoTasks = [
+        // Plan 1 — Component Library (all done)
         {
           id: 101,
-          planId: 2,
-          specId: 2,
+          planId: 1,
+          specId: 1,
           externalId: 'T-101',
-          title: 'Setup payment provider SDK',
+          title: 'Audit existing components',
           status: 'done' as const,
           executionOrder: 1,
+          startedAt: daysAgo(3),
+          completedAt: new Date(daysAgo(3).getTime() + 2 * 3600 * 1000),
         },
         {
           id: 102,
-          planId: 2,
-          specId: 2,
+          planId: 1,
+          specId: 1,
           externalId: 'T-102',
-          title: 'Implement checkout API',
+          title: 'Extract design tokens',
           status: 'done' as const,
           executionOrder: 2,
           dependsOn: ['T-101'],
+          startedAt: new Date(daysAgo(3).getTime() + 2 * 3600 * 1000),
+          completedAt: new Date(daysAgo(3).getTime() + 5 * 3600 * 1000),
         },
         {
           id: 103,
-          planId: 2,
-          specId: 2,
+          planId: 1,
+          specId: 1,
           externalId: 'T-103',
-          title: 'Add webhook handler',
-          status: 'in_progress' as const,
+          title: 'Build Button variants',
+          status: 'done' as const,
           executionOrder: 3,
           dependsOn: ['T-102'],
+          startedAt: new Date(daysAgo(3).getTime() + 5 * 3600 * 1000),
+          completedAt: new Date(daysAgo(2).getTime() + 2 * 3600 * 1000),
         },
         {
           id: 104,
-          planId: 2,
-          specId: 2,
+          planId: 1,
+          specId: 1,
           externalId: 'T-104',
-          title: 'Write payment tests',
-          status: 'todo' as const,
+          title: 'Build Form components',
+          status: 'done' as const,
           executionOrder: 4,
-          dependsOn: ['T-103'],
+          dependsOn: ['T-102'],
+          startedAt: new Date(daysAgo(3).getTime() + 5 * 3600 * 1000),
+          completedAt: new Date(daysAgo(2).getTime() + 4 * 3600 * 1000),
         },
         {
           id: 105,
-          planId: 2,
-          specId: 2,
+          planId: 1,
+          specId: 1,
           externalId: 'T-105',
-          title: 'Handle refund flow',
-          status: 'blocked' as const,
-          blockedReason:
-            'Cannot proceed — refund policy not defined in spec. Requires product decision before implementation.',
+          title: 'Write Storybook stories',
+          status: 'done' as const,
           executionOrder: 5,
+          dependsOn: ['T-103', 'T-104'],
+          startedAt: new Date(daysAgo(2).getTime() + 4 * 3600 * 1000),
+          completedAt: new Date(daysAgo(2).getTime() + 7 * 3600 * 1000),
         },
         {
           id: 106,
-          planId: 2,
-          specId: 2,
+          planId: 1,
+          specId: 1,
           externalId: 'T-106',
           title: 'Update documentation',
-          status: 'todo' as const,
+          status: 'done' as const,
           executionOrder: 6,
-          dependsOn: ['T-104', 'T-105'],
+          dependsOn: ['T-105'],
+          startedAt: new Date(daysAgo(2).getTime() + 7 * 3600 * 1000),
+          completedAt: new Date(daysAgo(2).getTime() + 9 * 3600 * 1000),
+        },
+
+        // Plan 2 — Dark Mode (all done)
+        {
+          id: 201,
+          planId: 2,
+          specId: 2,
+          externalId: 'T-201',
+          title: 'Create CSS variable system',
+          status: 'done' as const,
+          executionOrder: 1,
+          startedAt: daysAgo(3),
+          completedAt: new Date(daysAgo(3).getTime() + 3 * 3600 * 1000),
+        },
+        {
+          id: 202,
+          planId: 2,
+          specId: 2,
+          externalId: 'T-202',
+          title: 'Implement ThemeProvider',
+          status: 'done' as const,
+          executionOrder: 2,
+          dependsOn: ['T-201'],
+          startedAt: new Date(daysAgo(2).getTime() + 1 * 3600 * 1000),
+          completedAt: new Date(daysAgo(2).getTime() + 4 * 3600 * 1000),
+        },
+        {
+          id: 203,
+          planId: 2,
+          specId: 2,
+          externalId: 'T-203',
+          title: 'Apply dark tokens to layouts',
+          status: 'done' as const,
+          executionOrder: 3,
+          dependsOn: ['T-202'],
+          startedAt: new Date(daysAgo(2).getTime() + 4 * 3600 * 1000),
+          completedAt: new Date(daysAgo(2).getTime() + 8 * 3600 * 1000),
+        },
+        {
+          id: 204,
+          planId: 2,
+          specId: 2,
+          externalId: 'T-204',
+          title: 'Test across browsers',
+          status: 'done' as const,
+          executionOrder: 4,
+          dependsOn: ['T-203'],
+          startedAt: new Date(daysAgo(1).getTime() + 1 * 3600 * 1000),
+          completedAt: new Date(daysAgo(1).getTime() + 4 * 3600 * 1000),
+        },
+
+        // Plan 3 — OAuth2 (in-progress)
+        {
+          id: 301,
+          planId: 3,
+          specId: 3,
+          externalId: 'T-301',
+          title: 'Configure OAuth2 provider',
+          status: 'done' as const,
+          executionOrder: 1,
+          startedAt: daysAgo(3),
+          completedAt: new Date(daysAgo(3).getTime() + 3 * 3600 * 1000),
+        },
+        {
+          id: 302,
+          planId: 3,
+          specId: 3,
+          externalId: 'T-302',
+          title: 'Implement callback handler',
+          status: 'done' as const,
+          executionOrder: 2,
+          dependsOn: ['T-301'],
+          startedAt: new Date(daysAgo(3).getTime() + 3 * 3600 * 1000),
+          completedAt: new Date(daysAgo(3).getTime() + 6 * 3600 * 1000),
+        },
+        {
+          id: 303,
+          planId: 3,
+          specId: 3,
+          externalId: 'T-303',
+          title: 'Store OAuth tokens securely',
+          status: 'in_progress' as const,
+          executionOrder: 3,
+          dependsOn: ['T-302'],
+          startedAt: hoursAgo(2),
+          currentAttemptId: 2,
+        },
+        {
+          id: 304,
+          planId: 3,
+          specId: 3,
+          externalId: 'T-304',
+          title: 'Add refresh token rotation',
+          status: 'todo' as const,
+          executionOrder: 4,
+          dependsOn: ['T-303'],
+        },
+        {
+          id: 305,
+          planId: 3,
+          specId: 3,
+          externalId: 'T-305',
+          title: 'Write integration tests',
+          status: 'todo' as const,
+          executionOrder: 5,
+          dependsOn: ['T-304'],
+        },
+
+        // Plan 5 — Batch Processor (stalled/failed)
+        {
+          id: 501,
+          planId: 5,
+          specId: 7,
+          externalId: 'T-501',
+          title: 'Setup job queue',
+          status: 'done' as const,
+          executionOrder: 1,
+          startedAt: daysAgo(3),
+          completedAt: new Date(daysAgo(3).getTime() + 2 * 3600 * 1000),
+        },
+        {
+          id: 502,
+          planId: 5,
+          specId: 7,
+          externalId: 'T-502',
+          title: 'Implement worker logic',
+          status: 'done' as const,
+          executionOrder: 2,
+          dependsOn: ['T-501'],
+          startedAt: new Date(daysAgo(3).getTime() + 2 * 3600 * 1000),
+          completedAt: new Date(daysAgo(3).getTime() + 5 * 3600 * 1000),
+        },
+        {
+          id: 503,
+          planId: 5,
+          specId: 7,
+          externalId: 'T-503',
+          title: 'Add retry mechanism',
+          status: 'failed' as const,
+          executionOrder: 3,
+          dependsOn: ['T-502'],
+          startedAt: new Date(daysAgo(2).getTime() + 1 * 3600 * 1000),
+          completedAt: new Date(daysAgo(2).getTime() + 3 * 3600 * 1000),
+          currentAttemptId: 4,
+          attemptCount: 2,
+        },
+        {
+          id: 504,
+          planId: 5,
+          specId: 7,
+          externalId: 'T-504',
+          title: 'Add monitoring hooks',
+          status: 'blocked' as const,
+          executionOrder: 4,
+          blockedReason:
+            'Blocked pending T-503 failure resolution — need to decide on retry strategy before instrumentation.',
+        },
+        {
+          id: 505,
+          planId: 5,
+          specId: 7,
+          externalId: 'T-505',
+          title: 'Write load tests',
+          status: 'todo' as const,
+          executionOrder: 5,
+          dependsOn: ['T-503'],
         },
       ];
 
@@ -311,32 +961,1214 @@ async function main() {
         await tx.insert(tasks).values(t).onConflictDoNothing();
       }
 
-      // 8. Webhooks
-      const demoWebhooks = [
+      // -------------------------------------------------------------------------
+      // 12. Task Attempts
+      // -------------------------------------------------------------------------
+      const taskAttemptsData = [
+        // T-102: 1 succeeded attempt (id=1)
+        {
+          id: 1,
+          taskId: 102,
+          seq: 1,
+          status: 'succeeded' as const,
+          startedAt: new Date(daysAgo(3).getTime() + 2 * 3600 * 1000),
+          endedAt: new Date(daysAgo(3).getTime() + 5 * 3600 * 1000),
+          exitCode: 0,
+          workingDirectory: '/workspace/blaze-ui',
+        },
+        // T-303: 1 running attempt (id=2)
+        {
+          id: 2,
+          taskId: 303,
+          seq: 1,
+          status: 'running' as const,
+          startedAt: hoursAgo(2),
+          workingDirectory: '/workspace/auth-service',
+        },
+        // T-503: 2 failed attempts (id=3, id=4)
+        {
+          id: 3,
+          taskId: 503,
+          seq: 1,
+          status: 'failed' as const,
+          startedAt: new Date(daysAgo(2).getTime() + 1 * 3600 * 1000),
+          endedAt: new Date(daysAgo(2).getTime() + 2 * 3600 * 1000),
+          exitCode: 1,
+          workingDirectory: '/workspace/data-pipeline',
+          errorMessage: 'Process killed — exceeded memory limit',
+        },
+        {
+          id: 4,
+          taskId: 503,
+          seq: 2,
+          status: 'failed' as const,
+          startedAt: new Date(daysAgo(2).getTime() + 2 * 3600 * 1000),
+          endedAt: new Date(daysAgo(2).getTime() + 3 * 3600 * 1000),
+          exitCode: 137,
+          workingDirectory: '/workspace/data-pipeline',
+          errorMessage:
+            'Worker process OOM killed (exit code 137) on retry attempt 2. Memory ceiling 512MB exceeded during retry loop initialization.',
+        },
+      ];
+
+      for (const a of taskAttemptsData) {
+        await tx.insert(taskAttempts).values(a).onConflictDoNothing();
+      }
+
+      // Update T-102 currentAttemptId now that attempt exists
+      await tx.update(tasks).set({ currentAttemptId: 1 }).where(eq(tasks.id, 102));
+
+      // -------------------------------------------------------------------------
+      // 13. File Changes
+      // -------------------------------------------------------------------------
+      const fileChangesData = [
+        // T-101: audit pass
+        {
+          taskId: 101,
+          filePath: 'src/components/index.ts',
+          changeType: 'modified',
+          language: 'typescript',
+          linesAdded: 42,
+          linesRemoved: 8,
+        },
+        {
+          taskId: 101,
+          filePath: 'src/components/audit-report.md',
+          changeType: 'created',
+          language: 'markdown',
+          linesAdded: 127,
+          linesRemoved: 0,
+        },
+        // T-201: CSS tokens
+        {
+          taskId: 201,
+          filePath: 'src/styles/tokens.css',
+          changeType: 'created',
+          language: 'css',
+          linesAdded: 89,
+          linesRemoved: 0,
+        },
+        {
+          taskId: 201,
+          filePath: 'tailwind.config.ts',
+          changeType: 'modified',
+          language: 'typescript',
+          linesAdded: 34,
+          linesRemoved: 12,
+        },
+        // T-302: OAuth callback
+        {
+          taskId: 302,
+          filePath: 'src/app/api/auth/callback/route.ts',
+          changeType: 'created',
+          language: 'typescript',
+          linesAdded: 76,
+          linesRemoved: 0,
+        },
+        // T-501: job queue
+        {
+          taskId: 501,
+          filePath: 'src/lib/queue.ts',
+          changeType: 'created',
+          language: 'typescript',
+          linesAdded: 143,
+          linesRemoved: 0,
+        },
+        {
+          taskId: 501,
+          filePath: 'docker-compose.yml',
+          changeType: 'modified',
+          language: 'yaml',
+          linesAdded: 18,
+          linesRemoved: 2,
+        },
+      ];
+
+      for (const fc of fileChangesData) {
+        await tx.insert(fileChanges).values(fc).onConflictDoNothing();
+      }
+
+      // -------------------------------------------------------------------------
+      // 14. Agent Sessions
+      // -------------------------------------------------------------------------
+      const agentSessionsData = [
         {
           id: 1,
           projectId: 1,
-          url: 'https://webhook.site/demo-active',
-          events: ['plan.approved', 'task.blocked'],
-          isActive: true,
-          status: 'active' as const,
+          specId: 1,
+          planId: 1,
+          status: 'completed' as const,
+          tasksExecuted: 6,
+          tasksSucceeded: 6,
+          tasksFailed: 0,
+          startedBy: 'user_alex',
+          startedAt: daysAgo(3),
+          endedAt: daysAgo(2),
+          gitBaseBranch: 'main',
+          agentVersion: 'specdrivr-agent/1.2.0',
         },
         {
           id: 2,
           projectId: 1,
-          url: 'https://webhook.site/demo-error',
-          events: ['*'],
-          isActive: false,
-          status: 'error' as const,
+          specId: 2,
+          planId: 2,
+          status: 'completed' as const,
+          tasksExecuted: 4,
+          tasksSucceeded: 4,
+          tasksFailed: 0,
+          startedBy: 'user_alex',
+          startedAt: daysAgo(3),
+          endedAt: daysAgo(1),
+          gitBaseBranch: 'main',
+          agentVersion: 'specdrivr-agent/1.2.0',
+        },
+        {
+          id: 3,
+          projectId: 2,
+          specId: 3,
+          planId: 3,
+          status: 'running' as const,
+          tasksExecuted: 2,
+          tasksSucceeded: 2,
+          tasksFailed: 0,
+          startedBy: 'user_sam',
+          startedAt: daysAgo(3),
+          lastHeartbeatAt: hoursAgo(0),
+          gitBaseBranch: 'main',
+          agentVersion: 'specdrivr-agent/1.2.1',
+        },
+        {
+          id: 4,
+          projectId: 4,
+          specId: 7,
+          planId: 5,
+          status: 'failed' as const,
+          tasksExecuted: 3,
+          tasksSucceeded: 2,
+          tasksFailed: 1,
+          errorMessage: 'Worker process OOM killed',
+          startedBy: 'user_jordan',
+          startedAt: daysAgo(3),
+          endedAt: daysAgo(2),
+          gitBaseBranch: 'main',
+          agentVersion: 'specdrivr-agent/1.2.0',
         },
       ];
 
-      for (const w of demoWebhooks) {
+      for (const s of agentSessionsData) {
+        await tx.insert(agentSessions).values(s).onConflictDoNothing();
+      }
+
+      // -------------------------------------------------------------------------
+      // 15. Agent Events
+      // -------------------------------------------------------------------------
+      const agentEventsData = [
+        // Session 1 — Component Library (completed)
+        {
+          sessionId: 1,
+          specId: 1,
+          eventType: 'SESSION_STARTED',
+          message: 'Agent session started for Component Library Refactor',
+          createdAt: daysAgo(3),
+        },
+        {
+          sessionId: 1,
+          specId: 1,
+          taskId: 101,
+          eventType: 'TASK_DONE',
+          message: 'T-101 Audit existing components — completed',
+          createdAt: new Date(daysAgo(3).getTime() + 2 * 3600 * 1000),
+        },
+        {
+          sessionId: 1,
+          specId: 1,
+          taskId: 102,
+          eventType: 'TASK_DONE',
+          message: 'T-102 Extract design tokens — completed',
+          createdAt: new Date(daysAgo(3).getTime() + 5 * 3600 * 1000),
+        },
+        {
+          sessionId: 1,
+          specId: 1,
+          taskId: 103,
+          eventType: 'TASK_DONE',
+          message: 'T-103 Build Button variants — completed',
+          createdAt: new Date(daysAgo(2).getTime() + 2 * 3600 * 1000),
+        },
+        {
+          sessionId: 1,
+          specId: 1,
+          taskId: 104,
+          eventType: 'TASK_DONE',
+          message: 'T-104 Build Form components — completed',
+          createdAt: new Date(daysAgo(2).getTime() + 4 * 3600 * 1000),
+        },
+        {
+          sessionId: 1,
+          specId: 1,
+          taskId: 105,
+          eventType: 'TASK_DONE',
+          message: 'T-105 Write Storybook stories — completed',
+          createdAt: new Date(daysAgo(2).getTime() + 7 * 3600 * 1000),
+        },
+        {
+          sessionId: 1,
+          specId: 1,
+          taskId: 106,
+          eventType: 'TASK_DONE',
+          message: 'T-106 Update documentation — completed',
+          createdAt: new Date(daysAgo(2).getTime() + 9 * 3600 * 1000),
+        },
+        {
+          sessionId: 1,
+          specId: 1,
+          eventType: 'SESSION_COMPLETED',
+          message: 'All 6 tasks completed successfully. Session closed.',
+          createdAt: new Date(daysAgo(2).getTime() + 9 * 3600 * 1000 + 60000),
+        },
+
+        // Session 2 — Dark Mode (completed)
+        {
+          sessionId: 2,
+          specId: 2,
+          eventType: 'SESSION_STARTED',
+          message: 'Agent session started for Dark Mode System',
+          createdAt: daysAgo(3),
+        },
+        {
+          sessionId: 2,
+          specId: 2,
+          taskId: 201,
+          eventType: 'TASK_DONE',
+          message: 'T-201 Create CSS variable system — completed',
+          createdAt: new Date(daysAgo(3).getTime() + 3 * 3600 * 1000),
+        },
+        {
+          sessionId: 2,
+          specId: 2,
+          taskId: 202,
+          eventType: 'TASK_DONE',
+          message: 'T-202 Implement ThemeProvider — completed',
+          createdAt: new Date(daysAgo(2).getTime() + 4 * 3600 * 1000),
+        },
+        {
+          sessionId: 2,
+          specId: 2,
+          taskId: 203,
+          eventType: 'TASK_DONE',
+          message: 'T-203 Apply dark tokens to layouts — completed',
+          createdAt: new Date(daysAgo(2).getTime() + 8 * 3600 * 1000),
+        },
+        {
+          sessionId: 2,
+          specId: 2,
+          taskId: 204,
+          eventType: 'TASK_DONE',
+          message: 'T-204 Test across browsers — completed',
+          createdAt: new Date(daysAgo(1).getTime() + 4 * 3600 * 1000),
+        },
+        {
+          sessionId: 2,
+          specId: 2,
+          eventType: 'SESSION_COMPLETED',
+          message: 'All 4 tasks completed successfully. Session closed.',
+          createdAt: new Date(daysAgo(1).getTime() + 4 * 3600 * 1000 + 60000),
+        },
+
+        // Session 3 — OAuth2 (running)
+        {
+          sessionId: 3,
+          specId: 3,
+          eventType: 'SESSION_STARTED',
+          message: 'Agent session started for OAuth2 Integration',
+          createdAt: daysAgo(3),
+        },
+        {
+          sessionId: 3,
+          specId: 3,
+          taskId: 301,
+          eventType: 'TASK_DONE',
+          message: 'T-301 Configure OAuth2 provider — completed',
+          createdAt: new Date(daysAgo(3).getTime() + 3 * 3600 * 1000),
+        },
+        {
+          sessionId: 3,
+          specId: 3,
+          taskId: 302,
+          eventType: 'TASK_DONE',
+          message: 'T-302 Implement callback handler — completed',
+          createdAt: new Date(daysAgo(3).getTime() + 6 * 3600 * 1000),
+        },
+
+        // Session 4 — Batch Processor (failed)
+        {
+          sessionId: 4,
+          specId: 7,
+          eventType: 'SESSION_STARTED',
+          message: 'Agent session started for Batch Processor',
+          createdAt: daysAgo(3),
+        },
+        {
+          sessionId: 4,
+          specId: 7,
+          taskId: 501,
+          eventType: 'TASK_DONE',
+          message: 'T-501 Setup job queue — completed',
+          createdAt: new Date(daysAgo(3).getTime() + 2 * 3600 * 1000),
+        },
+        {
+          sessionId: 4,
+          specId: 7,
+          taskId: 502,
+          eventType: 'TASK_DONE',
+          message: 'T-502 Implement worker logic — completed',
+          createdAt: new Date(daysAgo(3).getTime() + 5 * 3600 * 1000),
+        },
+        {
+          sessionId: 4,
+          specId: 7,
+          taskId: 503,
+          eventType: 'TASK_FAILED',
+          message: 'T-503 Add retry mechanism — failed after 2 attempts (OOM)',
+          metadata: { exitCode: 137, attempts: 2 },
+          createdAt: new Date(daysAgo(2).getTime() + 3 * 3600 * 1000),
+        },
+        {
+          sessionId: 4,
+          specId: 7,
+          taskId: 504,
+          eventType: 'TASK_BLOCKED',
+          message: 'T-504 Add monitoring hooks — blocked pending retry strategy decision on T-503',
+          createdAt: new Date(daysAgo(2).getTime() + 3 * 3600 * 1000 + 60000),
+        },
+        {
+          sessionId: 4,
+          specId: 7,
+          eventType: 'SESSION_FAILED',
+          message: 'Session failed — worker process OOM killed on T-503',
+          metadata: { errorMessage: 'Worker process OOM killed' },
+          createdAt: new Date(daysAgo(2).getTime() + 3 * 3600 * 1000 + 120000),
+        },
+      ];
+
+      for (const e of agentEventsData) {
+        await tx.insert(agentEvents).values(e).onConflictDoNothing();
+      }
+
+      // -------------------------------------------------------------------------
+      // 16. Agent Logs (~10 rows)
+      // -------------------------------------------------------------------------
+      const agentLogsData = [
+        // Session 1 logs
+        {
+          taskId: 101,
+          sessionId: 1,
+          projectId: 1,
+          level: 'info' as const,
+          message: 'Starting component audit — scanning src/components/**',
+          context: { taskId: 101, step: 'audit' },
+          timestamp: daysAgo(3),
+        },
+        {
+          taskId: 102,
+          sessionId: 1,
+          projectId: 1,
+          level: 'info' as const,
+          message:
+            'Design tokens extracted: 48 color tokens, 12 spacing tokens, 8 typography tokens',
+          context: { taskId: 102, tokens: 68 },
+          timestamp: new Date(daysAgo(3).getTime() + 4 * 3600 * 1000),
+        },
+        {
+          taskId: 102,
+          sessionId: 1,
+          projectId: 1,
+          level: 'debug' as const,
+          message: 'Writing tokens to tailwind.config.ts theme.extend',
+          isInternal: true,
+          context: { taskId: 102, file: 'tailwind.config.ts' },
+          timestamp: new Date(daysAgo(3).getTime() + 4.5 * 3600 * 1000),
+        },
+        // Session 2 logs
+        {
+          taskId: 201,
+          sessionId: 2,
+          projectId: 1,
+          level: 'info' as const,
+          message: 'CSS variable system created with light/dark token pairs',
+          context: { taskId: 201, variables: 96 },
+          timestamp: new Date(daysAgo(3).getTime() + 2.5 * 3600 * 1000),
+        },
+        {
+          taskId: 202,
+          sessionId: 2,
+          projectId: 1,
+          level: 'info' as const,
+          message: 'ThemeProvider wrapping app root — localStorage persistence enabled',
+          context: { taskId: 202 },
+          timestamp: new Date(daysAgo(2).getTime() + 3 * 3600 * 1000),
+        },
+        // Session 3 logs
+        {
+          taskId: 301,
+          sessionId: 3,
+          projectId: 2,
+          level: 'info' as const,
+          message: 'OAuth2 provider registered: google, github. Callback URIs configured.',
+          context: { taskId: 301, providers: ['google', 'github'] },
+          timestamp: new Date(daysAgo(3).getTime() + 2 * 3600 * 1000),
+        },
+        {
+          taskId: 302,
+          sessionId: 3,
+          projectId: 2,
+          level: 'debug' as const,
+          message: 'Callback route created at /api/auth/callback — handling code exchange',
+          isInternal: true,
+          context: { taskId: 302, route: '/api/auth/callback' },
+          timestamp: new Date(daysAgo(3).getTime() + 5 * 3600 * 1000),
+        },
+        // Session 4 logs
+        {
+          taskId: 501,
+          sessionId: 4,
+          projectId: 4,
+          level: 'info' as const,
+          message: 'BullMQ job queue initialized — Redis connection verified',
+          context: { taskId: 501, queue: 'batch-processor' },
+          timestamp: new Date(daysAgo(3).getTime() + 1 * 3600 * 1000),
+        },
+        {
+          taskId: 502,
+          sessionId: 4,
+          projectId: 4,
+          level: 'info' as const,
+          message: 'Worker concurrency set to 4 — processing test batch of 1000 records',
+          context: { taskId: 502, concurrency: 4 },
+          timestamp: new Date(daysAgo(3).getTime() + 3.5 * 3600 * 1000),
+        },
+        {
+          taskId: 503,
+          sessionId: 4,
+          projectId: 4,
+          level: 'error' as const,
+          message:
+            'Worker process killed by OOM killer (exit code 137). Memory usage peaked at 638MB — limit is 512MB.',
+          context: { taskId: 503, exitCode: 137, memoryMB: 638, limitMB: 512 },
+          timestamp: new Date(daysAgo(2).getTime() + 2.5 * 3600 * 1000),
+        },
+      ];
+
+      for (const l of agentLogsData) {
+        await tx.insert(agentLogs).values(l).onConflictDoNothing();
+      }
+
+      // -------------------------------------------------------------------------
+      // 17. Notifications (2+ per user)
+      // -------------------------------------------------------------------------
+      const notificationsData = [
+        // Alex
+        {
+          userId: 'user_alex',
+          type: 'plan_approved',
+          title: 'Plan approved',
+          body: 'Sam approved the plan for "Component Library Refactor".',
+          linkUrl: '/projects/blaze-ui/specs/1/plans/1',
+          actorUserId: 'user_sam',
+          projectId: 1,
+          resourceType: 'plan',
+          resourceId: '1',
+          createdAt: daysAgo(3),
+        },
+        {
+          userId: 'user_alex',
+          type: 'session_complete',
+          title: 'Session completed',
+          body: 'Agent session for "Component Library Refactor" completed — 6/6 tasks succeeded.',
+          linkUrl: '/projects/blaze-ui/specs/1/sessions/1',
+          projectId: 1,
+          resourceType: 'agent_session',
+          resourceId: '1',
+          createdAt: daysAgo(2),
+        },
+        // Sam
+        {
+          userId: 'user_sam',
+          type: 'plan_generated',
+          title: 'Plan ready for review',
+          body: 'A plan has been generated for "Stripe Checkout Flow" — awaiting approval.',
+          linkUrl: '/projects/payments-v2/specs/5/plans/4',
+          projectId: 3,
+          resourceType: 'plan',
+          resourceId: '4',
+          createdAt: daysAgo(1),
+        },
+        {
+          userId: 'user_sam',
+          type: 'task_blocked',
+          title: 'Task blocked',
+          body: 'T-504 "Add monitoring hooks" is blocked on Data Pipeline.',
+          linkUrl: '/projects/data-pipeline/specs/7/tasks/504',
+          projectId: 4,
+          resourceType: 'task',
+          resourceId: '504',
+          createdAt: daysAgo(2),
+        },
+        // Jordan
+        {
+          userId: 'user_jordan',
+          type: 'session_failed',
+          title: 'Session failed',
+          body: 'Agent session for "Batch Processor" failed — worker OOM killed.',
+          linkUrl: '/projects/data-pipeline/specs/7/sessions/4',
+          projectId: 4,
+          resourceType: 'agent_session',
+          resourceId: '4',
+          createdAt: daysAgo(2),
+        },
+        {
+          userId: 'user_jordan',
+          type: 'member_invited',
+          title: 'Added to project',
+          body: 'Alex Rivera added you to "Blaze UI Redesign" as a member.',
+          linkUrl: '/projects/blaze-ui',
+          actorUserId: 'user_alex',
+          projectId: 1,
+          createdAt: daysAgo(5),
+        },
+      ];
+
+      for (const n of notificationsData) {
+        await tx.insert(notifications).values(n).onConflictDoNothing();
+      }
+
+      // -------------------------------------------------------------------------
+      // 18. Notification Preferences (2+ per user = 6 rows)
+      // -------------------------------------------------------------------------
+      const notifPrefsData = [
+        { userId: 'user_alex', eventType: 'plan_approved', emailEnabled: true, inAppEnabled: true },
+        {
+          userId: 'user_alex',
+          eventType: 'session_complete',
+          emailEnabled: true,
+          inAppEnabled: true,
+        },
+        { userId: 'user_sam', eventType: 'plan_approved', emailEnabled: true, inAppEnabled: true },
+        {
+          userId: 'user_sam',
+          eventType: 'session_complete',
+          emailEnabled: true,
+          inAppEnabled: true,
+        },
+        {
+          userId: 'user_jordan',
+          eventType: 'plan_approved',
+          emailEnabled: true,
+          inAppEnabled: true,
+        },
+        {
+          userId: 'user_jordan',
+          eventType: 'session_complete',
+          emailEnabled: true,
+          inAppEnabled: true,
+        },
+      ];
+
+      for (const p of notifPrefsData) {
+        await tx.insert(notificationPreferences).values(p).onConflictDoNothing();
+      }
+
+      // -------------------------------------------------------------------------
+      // 19. Webhooks
+      // -------------------------------------------------------------------------
+      const webhooksData = [
+        {
+          id: 1,
+          projectId: 1,
+          url: 'https://hooks.example.com/p1',
+          events: ['plan.approved', 'session.completed'],
+          isActive: true,
+          status: 'active',
+          createdAt: daysAgo(5),
+        },
+        {
+          id: 2,
+          projectId: 2,
+          url: 'https://hooks.example.com/p2',
+          events: ['*'],
+          isActive: true,
+          status: 'active',
+          createdAt: daysAgo(5),
+        },
+        {
+          id: 3,
+          projectId: 4,
+          url: 'https://hooks.example.com/p4',
+          events: ['task.blocked', 'session.failed'],
+          isActive: true,
+          status: 'error',
+          createdAt: daysAgo(4),
+        },
+      ];
+
+      for (const w of webhooksData) {
         await tx.insert(webhooks).values(w).onConflictDoNothing();
       }
 
+      // -------------------------------------------------------------------------
+      // 20. Webhook Deliveries
+      // -------------------------------------------------------------------------
+      const webhookDeliveriesData = [
+        {
+          id: 1,
+          webhookId: 1,
+          projectId: 1,
+          eventType: 'plan.approved',
+          payload: { planId: 1, status: 'completed', approvedBy: 'user_sam' },
+          responseStatus: 200,
+          responseBody: '{"ok":true}',
+          durationMs: 142,
+          attempt: 1,
+          status: 'delivered',
+          deliveredAt: daysAgo(3),
+          createdAt: daysAgo(3),
+        },
+        {
+          id: 2,
+          webhookId: 1,
+          projectId: 1,
+          eventType: 'session.completed',
+          payload: { sessionId: 1, tasksSucceeded: 6, tasksFailed: 0 },
+          responseStatus: 200,
+          responseBody: '{"ok":true}',
+          durationMs: 98,
+          attempt: 1,
+          status: 'delivered',
+          deliveredAt: daysAgo(2),
+          createdAt: daysAgo(2),
+        },
+        {
+          id: 3,
+          webhookId: 3,
+          projectId: 4,
+          eventType: 'session.failed',
+          payload: { sessionId: 4, errorMessage: 'Worker process OOM killed' },
+          responseStatus: 500,
+          responseBody: 'Internal Server Error',
+          durationMs: 3201,
+          attempt: 1,
+          status: 'failed',
+          nextRetryAt: new Date(daysAgo(2).getTime() + 5 * 60 * 1000),
+          createdAt: daysAgo(2),
+        },
+        {
+          id: 4,
+          webhookId: 3,
+          projectId: 4,
+          eventType: 'session.failed',
+          payload: { sessionId: 4, errorMessage: 'Worker process OOM killed' },
+          responseStatus: 500,
+          responseBody: 'Internal Server Error',
+          durationMs: 30001,
+          attempt: 2,
+          status: 'exhausted',
+          createdAt: new Date(daysAgo(2).getTime() + 5 * 60 * 1000),
+        },
+      ];
+
+      for (const d of webhookDeliveriesData) {
+        await tx.insert(webhookDeliveries).values(d).onConflictDoNothing();
+      }
+
+      // -------------------------------------------------------------------------
+      // 21. Usage Snapshots (5 days × 3 projects = 15 rows)
+      // -------------------------------------------------------------------------
+      const usageSnapshotsData = [
+        // Project 1 — Blaze UI
+        {
+          projectId: 1,
+          date: daysAgo(4),
+          sessionsRun: 1,
+          tasksExecuted: 2,
+          tasksSucceeded: 2,
+          tasksFailed: 0,
+          specsCreated: 2,
+        },
+        {
+          projectId: 1,
+          date: daysAgo(3),
+          sessionsRun: 2,
+          tasksExecuted: 4,
+          tasksSucceeded: 4,
+          tasksFailed: 0,
+          specsCreated: 0,
+        },
+        {
+          projectId: 1,
+          date: daysAgo(2),
+          sessionsRun: 0,
+          tasksExecuted: 6,
+          tasksSucceeded: 6,
+          tasksFailed: 0,
+          specsCreated: 0,
+        },
+        {
+          projectId: 1,
+          date: daysAgo(1),
+          sessionsRun: 0,
+          tasksExecuted: 2,
+          tasksSucceeded: 2,
+          tasksFailed: 0,
+          specsCreated: 0,
+        },
+        {
+          projectId: 1,
+          date: daysAgo(0),
+          sessionsRun: 0,
+          tasksExecuted: 0,
+          tasksSucceeded: 0,
+          tasksFailed: 0,
+          specsCreated: 0,
+        },
+        // Project 2 — Auth Service
+        {
+          projectId: 2,
+          date: daysAgo(4),
+          sessionsRun: 0,
+          tasksExecuted: 0,
+          tasksSucceeded: 0,
+          tasksFailed: 0,
+          specsCreated: 0,
+        },
+        {
+          projectId: 2,
+          date: daysAgo(3),
+          sessionsRun: 1,
+          tasksExecuted: 0,
+          tasksSucceeded: 0,
+          tasksFailed: 0,
+          specsCreated: 0,
+        },
+        {
+          projectId: 2,
+          date: daysAgo(2),
+          sessionsRun: 0,
+          tasksExecuted: 1,
+          tasksSucceeded: 1,
+          tasksFailed: 0,
+          specsCreated: 0,
+        },
+        {
+          projectId: 2,
+          date: daysAgo(1),
+          sessionsRun: 0,
+          tasksExecuted: 1,
+          tasksSucceeded: 1,
+          tasksFailed: 0,
+          specsCreated: 1,
+        },
+        {
+          projectId: 2,
+          date: daysAgo(0),
+          sessionsRun: 0,
+          tasksExecuted: 0,
+          tasksSucceeded: 0,
+          tasksFailed: 0,
+          specsCreated: 0,
+        },
+        // Project 4 — Data Pipeline
+        {
+          projectId: 4,
+          date: daysAgo(4),
+          sessionsRun: 0,
+          tasksExecuted: 0,
+          tasksSucceeded: 0,
+          tasksFailed: 0,
+          specsCreated: 2,
+        },
+        {
+          projectId: 4,
+          date: daysAgo(3),
+          sessionsRun: 1,
+          tasksExecuted: 3,
+          tasksSucceeded: 2,
+          tasksFailed: 1,
+          specsCreated: 0,
+        },
+        {
+          projectId: 4,
+          date: daysAgo(2),
+          sessionsRun: 0,
+          tasksExecuted: 0,
+          tasksSucceeded: 0,
+          tasksFailed: 0,
+          specsCreated: 1,
+        },
+        {
+          projectId: 4,
+          date: daysAgo(1),
+          sessionsRun: 0,
+          tasksExecuted: 0,
+          tasksSucceeded: 0,
+          tasksFailed: 0,
+          specsCreated: 0,
+        },
+        {
+          projectId: 4,
+          date: daysAgo(0),
+          sessionsRun: 0,
+          tasksExecuted: 0,
+          tasksSucceeded: 0,
+          tasksFailed: 0,
+          specsCreated: 0,
+        },
+      ];
+
+      for (const snap of usageSnapshotsData) {
+        await tx.insert(usageSnapshots).values(snap).onConflictDoNothing();
+      }
+
+      // -------------------------------------------------------------------------
+      // 22. Git Commits (one per done task in sessions 1 & 2 = 10 rows)
+      // -------------------------------------------------------------------------
+      const doneTasksSession1 = [
+        {
+          id: 101,
+          externalId: 'T-101',
+          completedAt: new Date(daysAgo(3).getTime() + 2 * 3600 * 1000),
+        },
+        {
+          id: 102,
+          externalId: 'T-102',
+          completedAt: new Date(daysAgo(3).getTime() + 5 * 3600 * 1000),
+        },
+        {
+          id: 103,
+          externalId: 'T-103',
+          completedAt: new Date(daysAgo(2).getTime() + 2 * 3600 * 1000),
+        },
+        {
+          id: 104,
+          externalId: 'T-104',
+          completedAt: new Date(daysAgo(2).getTime() + 4 * 3600 * 1000),
+        },
+        {
+          id: 105,
+          externalId: 'T-105',
+          completedAt: new Date(daysAgo(2).getTime() + 7 * 3600 * 1000),
+        },
+        {
+          id: 106,
+          externalId: 'T-106',
+          completedAt: new Date(daysAgo(2).getTime() + 9 * 3600 * 1000),
+        },
+      ];
+
+      const doneTasksSession2 = [
+        {
+          id: 201,
+          externalId: 'T-201',
+          completedAt: new Date(daysAgo(3).getTime() + 3 * 3600 * 1000),
+        },
+        {
+          id: 202,
+          externalId: 'T-202',
+          completedAt: new Date(daysAgo(2).getTime() + 4 * 3600 * 1000),
+        },
+        {
+          id: 203,
+          externalId: 'T-203',
+          completedAt: new Date(daysAgo(2).getTime() + 8 * 3600 * 1000),
+        },
+        {
+          id: 204,
+          externalId: 'T-204',
+          completedAt: new Date(daysAgo(1).getTime() + 4 * 3600 * 1000),
+        },
+      ];
+
+      for (const t of doneTasksSession1) {
+        await tx
+          .insert(gitCommits)
+          .values({
+            projectId: 1,
+            taskId: t.id,
+            commitSha: `abc${t.id}def`,
+            branch: `daemon/task-${t.externalId.toLowerCase()}`,
+            message: `feat: complete ${t.externalId}`,
+            author: 'user_alex',
+            committedAt: t.completedAt,
+          })
+          .onConflictDoNothing();
+      }
+
+      for (const t of doneTasksSession2) {
+        await tx
+          .insert(gitCommits)
+          .values({
+            projectId: 1,
+            taskId: t.id,
+            commitSha: `abc${t.id}def`,
+            branch: `daemon/task-${t.externalId.toLowerCase()}`,
+            message: `feat: complete ${t.externalId}`,
+            author: 'user_alex',
+            committedAt: t.completedAt,
+          })
+          .onConflictDoNothing();
+      }
+
+      // -------------------------------------------------------------------------
+      // 23. API Request Logs (4 rows, using token 1 from P2)
+      // -------------------------------------------------------------------------
+      const apiRequestLogsData = [
+        {
+          tokenId: 1,
+          projectId: 2,
+          endpoint: '/api/v1/sessions',
+          method: 'POST',
+          statusCode: 201,
+          durationMs: 87,
+          requestedAt: daysAgo(3),
+        },
+        {
+          tokenId: 1,
+          projectId: 2,
+          endpoint: '/api/v1/specs/3',
+          method: 'GET',
+          statusCode: 200,
+          durationMs: 23,
+          requestedAt: new Date(daysAgo(3).getTime() + 1000),
+        },
+        {
+          tokenId: 1,
+          projectId: 2,
+          endpoint: '/api/v1/sessions/3/heartbeat',
+          method: 'POST',
+          statusCode: 200,
+          durationMs: 15,
+          requestedAt: hoursAgo(1),
+        },
+        {
+          tokenId: 1,
+          projectId: 2,
+          endpoint: '/api/v1/sessions/3/heartbeat',
+          method: 'POST',
+          statusCode: 200,
+          durationMs: 12,
+          requestedAt: hoursAgo(0),
+        },
+      ];
+
+      for (const r of apiRequestLogsData) {
+        await tx.insert(apiRequestLogs).values(r).onConflictDoNothing();
+      }
+
+      // -------------------------------------------------------------------------
+      // 24. Audit Log (15+ rows)
+      // -------------------------------------------------------------------------
+      const auditLogData = [
+        // project.created
+        {
+          projectId: 1,
+          userId: 'user_alex',
+          action: 'project.created',
+          targetType: 'project',
+          targetId: '1',
+          detail: { name: 'Blaze UI Redesign' },
+          createdAt: daysAgo(5),
+        },
+        {
+          projectId: 2,
+          userId: 'user_sam',
+          action: 'project.created',
+          targetType: 'project',
+          targetId: '2',
+          detail: { name: 'Auth Service' },
+          createdAt: daysAgo(5),
+        },
+        {
+          projectId: 3,
+          userId: 'user_alex',
+          action: 'project.created',
+          targetType: 'project',
+          targetId: '3',
+          detail: { name: 'Payments v2' },
+          createdAt: daysAgo(4),
+        },
+        {
+          projectId: 4,
+          userId: 'user_jordan',
+          action: 'project.created',
+          targetType: 'project',
+          targetId: '4',
+          detail: { name: 'Data Pipeline' },
+          createdAt: daysAgo(4),
+        },
+        {
+          projectId: 5,
+          userId: 'user_alex',
+          action: 'project.created',
+          targetType: 'project',
+          targetId: '5',
+          detail: { name: 'API Gateway' },
+          createdAt: daysAgo(1),
+        },
+        // spec.created
+        {
+          projectId: 1,
+          userId: 'user_alex',
+          action: 'spec.created',
+          targetType: 'specification',
+          targetId: '1',
+          detail: { name: 'Component Library Refactor' },
+          createdAt: daysAgo(5),
+        },
+        {
+          projectId: 2,
+          userId: 'user_sam',
+          action: 'spec.created',
+          targetType: 'specification',
+          targetId: '3',
+          detail: { name: 'OAuth2 Integration' },
+          createdAt: daysAgo(5),
+        },
+        {
+          projectId: 3,
+          userId: 'user_alex',
+          action: 'spec.created',
+          targetType: 'specification',
+          targetId: '5',
+          detail: { name: 'Stripe Checkout Flow' },
+          createdAt: daysAgo(4),
+        },
+        {
+          projectId: 4,
+          userId: 'user_jordan',
+          action: 'spec.created',
+          targetType: 'specification',
+          targetId: '7',
+          detail: { name: 'Batch Processor' },
+          createdAt: daysAgo(4),
+        },
+        // plan.approved
+        {
+          projectId: 1,
+          userId: 'user_sam',
+          action: 'plan.approved',
+          targetType: 'plan',
+          targetId: '1',
+          detail: { specId: 1 },
+          createdAt: daysAgo(3),
+        },
+        {
+          projectId: 1,
+          userId: 'user_sam',
+          action: 'plan.approved',
+          targetType: 'plan',
+          targetId: '2',
+          detail: { specId: 2 },
+          createdAt: daysAgo(3),
+        },
+        {
+          projectId: 2,
+          userId: 'user_alex',
+          action: 'plan.approved',
+          targetType: 'plan',
+          targetId: '3',
+          detail: { specId: 3 },
+          createdAt: daysAgo(3),
+        },
+        {
+          projectId: 4,
+          userId: 'user_alex',
+          action: 'plan.approved',
+          targetType: 'plan',
+          targetId: '5',
+          detail: { specId: 7 },
+          createdAt: daysAgo(3),
+        },
+        // member.added
+        {
+          projectId: 1,
+          userId: 'user_alex',
+          action: 'member.added',
+          targetType: 'user',
+          targetId: 'user_sam',
+          detail: { role: 'admin' },
+          createdAt: daysAgo(5),
+        },
+        {
+          projectId: 1,
+          userId: 'user_alex',
+          action: 'member.added',
+          targetType: 'user',
+          targetId: 'user_jordan',
+          detail: { role: 'member' },
+          createdAt: daysAgo(5),
+        },
+        // session.failed
+        {
+          projectId: 4,
+          userId: 'user_jordan',
+          action: 'session.failed',
+          targetType: 'agent_session',
+          targetId: '4',
+          detail: { errorMessage: 'Worker process OOM killed' },
+          createdAt: daysAgo(2),
+        },
+      ];
+
+      for (const entry of auditLogData) {
+        await tx.insert(auditLog).values(entry).onConflictDoNothing();
+      }
+
+      // -------------------------------------------------------------------------
+      // 25. Test Results
+      // -------------------------------------------------------------------------
+      await tx
+        .insert(testResults)
+        .values({
+          taskId: 101,
+          success: true,
+          logs: '6 passed, 0 failed\nAll component snapshot tests green.',
+          createdAt: new Date(daysAgo(3).getTime() + 2 * 3600 * 1000),
+        })
+        .onConflictDoNothing();
+
+      await tx
+        .insert(testResults)
+        .values({
+          taskId: 503,
+          success: false,
+          logs: '2 passed, 1 failed — retry timeout exceeded\nFAIL: RetryMechanism › should retry on OOM error\nExpected process to complete within 30s, but timed out.',
+          createdAt: new Date(daysAgo(2).getTime() + 2.5 * 3600 * 1000),
+        })
+        .onConflictDoNothing();
+
       logger.info(
-        { users: 3, projects: 2, specs: 6, plans: 4, tasks: 6, sessions: 1, webhooks: 2 },
+        {
+          users: 3,
+          projects: 5,
+          specs: 10,
+          specVersions: 11,
+          plans: 6,
+          planReviews: 6,
+          tasks: 20,
+          taskAttempts: 4,
+          fileChanges: 7,
+          sessions: 4,
+          agentEvents: 23,
+          agentLogs: 10,
+          notifications: 6,
+          notifPrefs: 6,
+          webhooks: 3,
+          webhookDeliveries: 4,
+          usageSnapshots: 15,
+          gitCommits: 10,
+          apiRequestLogs: 4,
+          auditLog: 16,
+          testResults: 2,
+        },
         'Seed data inserted'
       );
     });
