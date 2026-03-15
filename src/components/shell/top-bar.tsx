@@ -1,5 +1,6 @@
 'use client';
 
+import { Fragment } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Bell } from 'lucide-react';
@@ -88,9 +89,9 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
               </BreadcrumbLink>
             </BreadcrumbItem>
             {crumbs.map((crumb, i) => (
-              <>
-                <BreadcrumbSeparator key={`sep-${i}`} />
-                <BreadcrumbItem key={crumb.href}>
+              <Fragment key={crumb.href ?? i}>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
                   {i === crumbs.length - 1 || !crumb.href ? (
                     <BreadcrumbPage className="text-[--text-primary]">{crumb.label}</BreadcrumbPage>
                   ) : (
@@ -104,7 +105,7 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
                     </BreadcrumbLink>
                   )}
                 </BreadcrumbItem>
-              </>
+              </Fragment>
             ))}
           </BreadcrumbList>
         </Breadcrumb>
