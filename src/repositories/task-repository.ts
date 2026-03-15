@@ -43,12 +43,23 @@ export interface UpdateTaskData {
 }
 
 export class TaskRepository extends BaseRepository {
-  async getAll(): Promise<Task[]> {
-    const result = await this.executeQuery(() =>
-      db.select().from(tasks).orderBy(desc(tasks.createdAt))
-    );
+  async getAll(options: { page?: number; limit?: number } = {}) {
+    const { page = 1, limit = 50 } = options;
+    const safeLimit = Math.min(limit, 100);
+    const offset = (page - 1) * safeLimit;
 
-    return result as Task[];
+    const [rows, countResult] = await Promise.all([
+      this.executeQuery(() =>
+        db.select().from(tasks).orderBy(desc(tasks.createdAt)).limit(safeLimit).offset(offset)
+      ),
+      this.executeQuery(() => db.select({ count: sql<number>`count(*)` }).from(tasks)),
+    ]);
+
+    const total = Number(countResult[0]?.count ?? 0);
+    return {
+      data: rows as Task[],
+      meta: { page, limit: safeLimit, total, totalPages: Math.ceil(total / safeLimit) },
+    };
   }
 
   async getById(id: number): Promise<Task | null> {

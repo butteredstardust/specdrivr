@@ -3,6 +3,7 @@
 import { useRef, useEffect } from 'react';
 import AnsiToHtml from 'ansi-to-html';
 import { cn } from '@/lib/utils';
+import { sanitizeHtml } from '@/lib/sanitize';
 
 const converter = new AnsiToHtml({ escapeXML: true });
 
@@ -56,7 +57,7 @@ export function TerminalLog({
           <div
             key={i}
             className={getLineClass(line)}
-            dangerouslySetInnerHTML={{ __html: converter.toHtml(line) }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(converter.toHtml(line)) }}
           />
         ))}
       </div>
