@@ -47,7 +47,7 @@ export default function EditSpecPage() {
 
   const handleSave = async (
     title: string,
-    content: string,
+    content: string
   ): Promise<{ success: boolean; error?: string }> => {
     try {
       const res = await fetch(`/api/v1/specs/${id}`, {
@@ -73,7 +73,7 @@ export default function EditSpecPage() {
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <Loader2 className="animate-spin h-8 w-8 text-[--accent-violet]" />
+        <Loader2 className="text-accent-violet h-8 w-8 animate-spin" />
       </div>
     );
   }

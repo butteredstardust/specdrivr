@@ -58,10 +58,10 @@ function AuditRow({ entry }: { entry: AuditLogSelect }) {
   return (
     <>
       <tr
-        className="cursor-pointer border-b border-[--border-default] last:border-0 hover:bg-[--surface-hover]"
+        className="border-border-default hover:bg-surface-hover cursor-pointer border-b last:border-0"
         onClick={() => setExpanded((v) => !v)}
       >
-        <td className="px-4 py-2.5 font-mono text-xs text-[--text-muted]">
+        <td className="text-text-muted px-4 py-2.5 font-mono text-xs">
           <span className="flex items-center gap-1.5">
             <ChevronDown
               className={`size-3 shrink-0 transition-transform ${expanded ? 'rotate-0' : '-rotate-90'}`}
@@ -69,25 +69,19 @@ function AuditRow({ entry }: { entry: AuditLogSelect }) {
             {entry.userId ?? '—'}
           </span>
         </td>
-        <td className="px-4 py-2.5 font-mono text-xs text-[--text-primary]">{entry.action}</td>
-        <td className="px-4 py-2.5 font-mono text-xs text-[--text-muted]">
-          {entry.targetType ?? '—'}
-        </td>
-        <td className="px-4 py-2.5 font-mono text-xs text-[--text-muted]">
-          {entry.targetId ?? '—'}
-        </td>
-        <td className="px-4 py-2.5 font-mono text-xs text-[--text-muted]">
-          {entry.ipAddress ?? '—'}
-        </td>
-        <td className="px-4 py-2.5 font-mono text-xs text-[--text-muted]">
+        <td className="text-text-primary px-4 py-2.5 font-mono text-xs">{entry.action}</td>
+        <td className="text-text-muted px-4 py-2.5 font-mono text-xs">{entry.targetType ?? '—'}</td>
+        <td className="text-text-muted px-4 py-2.5 font-mono text-xs">{entry.targetId ?? '—'}</td>
+        <td className="text-text-muted px-4 py-2.5 font-mono text-xs">{entry.ipAddress ?? '—'}</td>
+        <td className="text-text-muted px-4 py-2.5 font-mono text-xs">
           {formatTs(entry.createdAt)}
         </td>
       </tr>
 
       {expanded && (
-        <tr className="border-b border-[--border-default]">
+        <tr className="border-border-default border-b">
           <td colSpan={6} className="px-4 pt-0 pb-3">
-            <pre className="max-h-64 overflow-auto rounded-md bg-[--bg-inset] p-3 font-mono text-xs text-[--text-primary]">
+            <pre className="bg-bg-inset text-text-primary max-h-64 overflow-auto rounded-md p-3 font-mono text-xs">
               {entry.detail ? JSON.stringify(entry.detail, null, 2) : '(no detail)'}
             </pre>
           </td>
@@ -265,7 +259,7 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
       </div>
 
       {isLoading && (
-        <div className="flex items-center gap-2 text-[--text-muted]">
+        <div className="text-text-muted flex items-center gap-2">
           <Loader2 className="size-3 animate-spin" />
           <span className="font-mono text-xs">Loading audit log…</span>
         </div>
@@ -273,12 +267,12 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
 
       {error && !isLoading && (
         <div className="flex items-center gap-2">
-          <span className="font-mono text-xs text-[--status-red]">Failed to load audit log.</span>
+          <span className="text-status-red font-mono text-xs">Failed to load audit log.</span>
           <Button
             variant="ghost"
             size="sm"
             onClick={restart}
-            className="h-auto px-0 font-mono text-xs text-[--text-muted] underline hover:bg-transparent hover:text-[--text-primary]"
+            className="text-text-muted hover:text-text-primary h-auto px-0 font-mono text-xs underline hover:bg-transparent"
           >
             Retry
           </Button>
@@ -288,8 +282,8 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
       {!isLoading && !error && entries.length === 0 && (
         <div className="flex flex-col items-center justify-center gap-3 py-16">
           <DaemonMascot size={32} expression="idle" />
-          <p className="font-mono text-sm text-[--text-muted]">No audit entries.</p>
-          <p className="font-mono text-xs text-[--text-muted]">
+          <p className="text-text-muted font-mono text-sm">No audit entries.</p>
+          <p className="text-text-muted font-mono text-xs">
             Administrative actions will be logged here.
           </p>
         </div>
@@ -297,16 +291,16 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
 
       {!isLoading && !error && entries.length > 0 && (
         <>
-          <div className="overflow-x-auto rounded-lg border border-[--border-default]">
+          <div className="border-border-default overflow-x-auto rounded-lg border">
             <table className="w-full text-left">
               <thead>
-                <tr className="border-b border-[--border-default] bg-[--bg-surface]">
-                  <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">Actor</th>
-                  <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">Action</th>
-                  <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">Resource</th>
-                  <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">Resource ID</th>
-                  <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">IP</th>
-                  <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">Timestamp</th>
+                <tr className="border-border-default bg-bg-surface border-b">
+                  <th className="text-text-muted px-4 py-2 font-mono text-xs">Actor</th>
+                  <th className="text-text-muted px-4 py-2 font-mono text-xs">Action</th>
+                  <th className="text-text-muted px-4 py-2 font-mono text-xs">Resource</th>
+                  <th className="text-text-muted px-4 py-2 font-mono text-xs">Resource ID</th>
+                  <th className="text-text-muted px-4 py-2 font-mono text-xs">IP</th>
+                  <th className="text-text-muted px-4 py-2 font-mono text-xs">Timestamp</th>
                 </tr>
               </thead>
               <tbody>
@@ -320,7 +314,7 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
           {/* Pagination */}
           {meta && meta.total > meta.pageSize && (
             <div className="flex items-center justify-between">
-              <span className="font-mono text-xs text-[--text-muted]">
+              <span className="text-text-muted font-mono text-xs">
                 Page {page} of {totalPages}
               </span>
               <div className="flex items-center gap-2">

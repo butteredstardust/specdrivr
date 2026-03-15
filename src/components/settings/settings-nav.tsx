@@ -65,7 +65,7 @@ export function SettingsNav({ userRole }: SettingsNavProps) {
         <div key={group.label}>
           <p
             className={cn(
-              'px-3 py-1 font-mono text-xs tracking-widest text-[--text-muted] uppercase',
+              'text-text-muted px-3 py-1 font-mono text-xs tracking-widest uppercase',
               groupIdx === 0 ? 'mt-0' : 'mt-4'
             )}
           >
@@ -82,8 +82,8 @@ export function SettingsNav({ userRole }: SettingsNavProps) {
                   className={cn(
                     'flex items-center rounded-sm px-3 py-1.5 text-sm transition-colors',
                     active
-                      ? 'border-l-2 border-[--accent-violet] bg-[--accent-violet]/10 pl-[10px] text-[--accent-violet]'
-                      : 'text-[--text-secondary] hover:bg-[--surface-hover] hover:text-[--text-primary]'
+                      ? 'border-accent-violet bg-accent-violet/10 text-accent-violet border-l-2 pl-[10px]'
+                      : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary'
                   )}
                 >
                   {item.label}
@@ -97,8 +97,8 @@ export function SettingsNav({ userRole }: SettingsNavProps) {
               className={cn(
                 'mt-4 flex items-center px-3 py-1.5 font-mono text-xs tracking-widest uppercase transition-colors',
                 isDangerActive
-                  ? 'border-l-2 border-[--accent-violet] bg-[--accent-violet]/10 pl-[10px] text-[--accent-violet]'
-                  : 'text-[--status-red]/80 hover:text-[--status-red]'
+                  ? 'border-accent-violet bg-accent-violet/10 text-accent-violet border-l-2 pl-[10px]'
+                  : 'text-status-red/80 hover:text-status-red'
               )}
             >
               DANGER ZONE

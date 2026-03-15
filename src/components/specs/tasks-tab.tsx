@@ -72,9 +72,7 @@ export function TasksTab({ specId, userRole }: TasksTabProps): React.ReactElemen
   }, []);
 
   if (isLoading) {
-    return (
-      <div className="py-8 text-center font-mono text-xs text-[--text-muted]">Loading tasks…</div>
-    );
+    return <div className="text-text-muted py-8 text-center font-mono text-xs">Loading tasks…</div>;
   }
 
   const list = tasks ?? [];
@@ -83,7 +81,7 @@ export function TasksTab({ specId, userRole }: TasksTabProps): React.ReactElemen
     return (
       <div className="flex flex-col items-center gap-4 py-16">
         <DaemonMascot size={48} expression="idle" />
-        <p className="font-mono text-sm text-[--text-secondary]">
+        <p className="text-text-secondary font-mono text-sm">
           No tasks yet. Approve the plan to begin execution.
         </p>
       </div>
@@ -98,18 +96,14 @@ export function TasksTab({ specId, userRole }: TasksTabProps): React.ReactElemen
   return (
     <div className="space-y-4">
       {/* Summary header */}
-      <div className="flex items-center gap-4 rounded-md border border-[--border-default] bg-[--bg-elevated] px-4 py-2">
-        <span className="font-mono text-xs text-[--text-muted]">
-          Total: <span className="text-[--text-primary]">{total}</span>
+      <div className="border-border-default bg-bg-elevated flex items-center gap-4 rounded-md border px-4 py-2">
+        <span className="text-text-muted font-mono text-xs">
+          Total: <span className="text-text-primary">{total}</span>
         </span>
         <span className="font-mono text-xs text-emerald-400">Done: {done}</span>
-        {failed > 0 && (
-          <span className="font-mono text-xs text-[--status-red]">Failed: {failed}</span>
-        )}
+        {failed > 0 && <span className="text-status-red font-mono text-xs">Failed: {failed}</span>}
         {inProgress > 0 && (
-          <span className="font-mono text-xs text-[--accent-violet]">
-            In Progress: {inProgress}
-          </span>
+          <span className="text-accent-violet font-mono text-xs">In Progress: {inProgress}</span>
         )}
       </div>
 

@@ -141,14 +141,14 @@ function GlobTagInput({ id, value, onChange, disabled, placeholder }: GlobTagInp
           {value.map((tag) => (
             <span
               key={tag}
-              className="flex items-center gap-1 rounded border border-[--border-default] bg-[--bg-surface] px-2 py-0.5 font-mono text-xs text-[--text-secondary]"
+              className="border-border-default bg-bg-surface text-text-secondary flex items-center gap-1 rounded border px-2 py-0.5 font-mono text-xs"
             >
               {tag}
               {!disabled && (
                 <button
                   type="button"
                   onClick={() => removeTag(tag)}
-                  className="ml-0.5 text-[--text-muted] hover:text-[--text-primary]"
+                  className="text-text-muted hover:text-text-primary ml-0.5"
                   aria-label={`Remove ${tag}`}
                 >
                   <X className="h-3 w-3" />
@@ -186,11 +186,11 @@ interface FormFieldProps {
 function FormField({ label, htmlFor, helper, children }: FormFieldProps) {
   return (
     <div className="flex flex-col gap-1.5">
-      <Label htmlFor={htmlFor} className="font-mono text-xs text-[--text-secondary] uppercase">
+      <Label htmlFor={htmlFor} className="text-text-secondary font-mono text-xs uppercase">
         {label}
       </Label>
       {children}
-      {helper && <p className="text-xs text-[--text-muted]">{helper}</p>}
+      {helper && <p className="text-text-muted text-xs">{helper}</p>}
     </div>
   );
 }
@@ -201,7 +201,7 @@ function FormField({ label, htmlFor, helper, children }: FormFieldProps) {
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">{children}</h2>
+    <h2 className="text-text-muted font-mono text-xs tracking-widest uppercase">{children}</h2>
   );
 }
 
@@ -335,7 +335,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
   // ---------------------------------------------------------------------------
 
   if (isLoading) {
-    return <p className="font-mono text-xs text-[--text-muted]">Loading agent configuration…</p>;
+    return <p className="text-text-muted font-mono text-xs">Loading agent configuration…</p>;
   }
 
   return (
@@ -397,7 +397,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
                     disabled={!editable}
                     className="flex-1"
                   />
-                  <span className="w-16 font-mono text-sm text-[--text-secondary]">
+                  <span className="text-text-secondary w-16 font-mono text-sm">
                     {form.maxConcurrentTasks} tasks
                   </span>
                 </div>
@@ -442,7 +442,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
                     disabled={!editable}
                     className="flex-1"
                   />
-                  <span className="w-16 font-mono text-sm text-[--text-secondary]">
+                  <span className="text-text-secondary w-16 font-mono text-sm">
                     {form.maxRetriesPerTask}
                   </span>
                 </div>
@@ -588,7 +588,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
           <div className="flex items-center justify-between">
             <Label
               htmlFor="prAutoCreate"
-              className="font-mono text-xs text-[--text-secondary] uppercase"
+              className="text-text-secondary font-mono text-xs uppercase"
             >
               AUTO-CREATE PULL REQUESTS
             </Label>
@@ -633,7 +633,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
           <div className="flex items-center justify-between">
             <Label
               htmlFor="requireApproval"
-              className="font-mono text-xs text-[--text-secondary] uppercase"
+              className="text-text-secondary font-mono text-xs uppercase"
             >
               REQUIRE PLAN APPROVAL
             </Label>
@@ -655,7 +655,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
           <div className="flex items-center justify-between">
             <Label
               htmlFor="autoGeneratePlan"
-              className="font-mono text-xs text-[--text-secondary] uppercase"
+              className="text-text-secondary font-mono text-xs uppercase"
             >
               AUTO-GENERATE PLAN ON SPEC SAVE
             </Label>
@@ -730,12 +730,12 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
         <section className="flex flex-col gap-4">
           <SectionHeading>AGENT TOKEN</SectionHeading>
 
-          <div className="rounded-md border border-[--border-default] bg-[--bg-surface] p-4">
-            <p className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
+          <div className="border-border-default bg-bg-surface rounded-md border p-4">
+            <p className="text-text-muted font-mono text-xs tracking-widest uppercase">
               AGENT TOKEN
             </p>
-            <p className="mt-2 font-mono text-sm text-[--text-primary]">sdk_••••••••••••</p>
-            <p className="mt-1 text-xs text-[--text-muted]">
+            <p className="text-text-primary mt-2 font-mono text-sm">sdk_••••••••••••</p>
+            <p className="text-text-muted mt-1 text-xs">
               This token is set via environment variable. Rotate it in your infrastructure, then
               update AGENT_TOKEN.
             </p>

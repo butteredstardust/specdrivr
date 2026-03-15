@@ -25,10 +25,10 @@ function getAgtStatus(agentLastSeen: string | null): { color: DotColor; label: s
 }
 
 const DOT_CLASS: Record<DotColor, string> = {
-  emerald: 'bg-[--status-emerald]',
-  amber: 'bg-[--phosphor-amber]',
-  red: 'bg-[--status-red]',
-  muted: 'bg-[--text-muted]',
+  emerald: 'bg-status-emerald',
+  amber: 'bg-phosphor-amber',
+  red: 'bg-status-red',
+  muted: 'bg-text-muted',
 };
 
 interface IndicatorProps {
@@ -42,7 +42,7 @@ function Indicator({ label, color, tooltip }: IndicatorProps) {
     <Tooltip>
       <TooltipTrigger asChild>
         <div className="flex flex-col items-center gap-0.5">
-          <span className="font-mono text-[9px] leading-none text-[--text-muted]">{label}</span>
+          <span className="text-text-muted font-mono text-[9px] leading-none">{label}</span>
           <span className={`h-1.5 w-1.5 rounded-full ${DOT_CLASS[color]}`} />
         </div>
       </TooltipTrigger>

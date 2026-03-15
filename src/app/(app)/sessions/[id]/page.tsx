@@ -63,17 +63,17 @@ function timeAgo(iso: string): string {
 function statusBadgeClass(status: Session['status']): string {
   switch (status) {
     case 'running':
-      return 'text-[--accent-violet] animate-[blink_1s_ease-in-out_infinite]';
+      return 'text-accent-violet animate-[blink_1s_ease-in-out_infinite]';
     case 'paused':
-      return 'text-[--phosphor-amber]';
+      return 'text-phosphor-amber';
     case 'completed':
       return 'text-emerald-400';
     case 'failed':
       return 'text-red-400';
     case 'cancelled':
-      return 'text-[--text-muted]';
+      return 'text-text-muted';
     default:
-      return 'text-[--text-muted]';
+      return 'text-text-muted';
   }
 }
 
@@ -85,7 +85,7 @@ function LoadingState() {
   return (
     <div className="flex flex-col items-center gap-3 py-16 text-center">
       <DaemonMascot size={48} expression="idle" />
-      <p className="font-mono text-xs text-[--text-muted]">Loading session…</p>
+      <p className="text-text-muted font-mono text-xs">Loading session…</p>
     </div>
   );
 }
@@ -94,7 +94,7 @@ function ErrorState() {
   return (
     <div className="flex flex-col items-center gap-3 py-16 text-center">
       <DaemonMascot size={48} expression="error" />
-      <p className="font-mono text-xs text-[--text-muted]">Session not found.</p>
+      <p className="text-text-muted font-mono text-xs">Session not found.</p>
       <Button size="sm" variant="outline" asChild>
         <Link href="/sessions">Back to Sessions</Link>
       </Button>
@@ -110,21 +110,16 @@ interface LostConnectionBannerProps {
 
 function LostConnectionBanner({ session, onCheck, onAbandon }: LostConnectionBannerProps) {
   return (
-    <div className="rounded-md bg-[--phosphor-amber]/10 border border-[--phosphor-amber]/30 p-3 flex items-center gap-3">
-      <AlertTriangle className="h-4 w-4 text-[--phosphor-amber] shrink-0" />
-      <span className="flex-1 text-sm text-[--phosphor-amber]">
+    <div className="bg-phosphor-amber/10 border-phosphor-amber/30 flex items-center gap-3 rounded-md border p-3">
+      <AlertTriangle className="text-phosphor-amber h-4 w-4 shrink-0" />
+      <span className="text-phosphor-amber flex-1 text-sm">
         Agent connection lost. Last heartbeat{' '}
         {session.lastHeartbeatAt ? timeAgo(session.lastHeartbeatAt) : 'unknown'}.
       </span>
       <Button size="sm" variant="outline" onClick={onCheck}>
         Check Status
       </Button>
-      <Button
-        size="sm"
-        variant="ghost"
-        className="text-[--phosphor-amber]"
-        onClick={onAbandon}
-      >
+      <Button size="sm" variant="ghost" className="text-phosphor-amber" onClick={onAbandon}>
         Abandon
       </Button>
     </div>
@@ -149,7 +144,7 @@ function CancelDialog({ onConfirm, trigger }: CancelDialogProps) {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Keep running</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} className="bg-[--status-red]">
+          <AlertDialogAction onClick={onConfirm} className="bg-status-red">
             Cancel session
           </AlertDialogAction>
         </AlertDialogFooter>
@@ -166,8 +161,7 @@ export default function SessionDetailPage() {
   const params = useParams();
   const router = useRouter();
 
-  const id =
-    typeof params['id'] === 'string' ? parseInt(params['id'], 10) : NaN;
+  const id = typeof params['id'] === 'string' ? parseInt(params['id'], 10) : NaN;
 
   // Redirect immediately if id is not a valid number
   useEffect(() => {
@@ -176,7 +170,11 @@ export default function SessionDetailPage() {
     }
   }, [id, router]);
 
-  const { data: session, isLoading, restart } = usePolling<Session>({
+  const {
+    data: session,
+    isLoading,
+    restart,
+  } = usePolling<Session>({
     url: !isNaN(id) ? `/api/v1/sessions/${id}` : null,
     interval: 10_000,
     stopWhen: (s) => ['completed', 'cancelled', 'failed'].includes(s.status),
@@ -184,11 +182,11 @@ export default function SessionDetailPage() {
 
   const [isActioning, setIsActioning] = useState(false);
 
-  const lostConnection = session?.status === 'running' && (
-    session.lastHeartbeatAt
-      ? (Date.now() - new Date(session.lastHeartbeatAt).getTime()) > 60_000
-      : (Date.now() - new Date(session.startedAt).getTime()) > 60_000
-  );
+  const lostConnection =
+    session?.status === 'running' &&
+    (session.lastHeartbeatAt
+      ? Date.now() - new Date(session.lastHeartbeatAt).getTime() > 60_000
+      : Date.now() - new Date(session.startedAt).getTime() > 60_000);
 
   // -------------------------------------------------------------------------
   // Action handlers
@@ -209,7 +207,10 @@ export default function SessionDetailPage() {
       restart();
     } catch (err) {
       toast.error('Pause not yet available');
-      clientLogger.error('Pause request failed', err instanceof Error ? err : new Error(String(err)));
+      clientLogger.error(
+        'Pause request failed',
+        err instanceof Error ? err : new Error(String(err))
+      );
     } finally {
       setIsActioning(false);
     }
@@ -230,7 +231,10 @@ export default function SessionDetailPage() {
       restart();
     } catch (err) {
       toast.error('Failed to resume session');
-      clientLogger.error('Resume request failed', err instanceof Error ? err : new Error(String(err)));
+      clientLogger.error(
+        'Resume request failed',
+        err instanceof Error ? err : new Error(String(err))
+      );
     } finally {
       setIsActioning(false);
     }
@@ -251,7 +255,10 @@ export default function SessionDetailPage() {
       restart();
     } catch (err) {
       toast.error('Failed to cancel session');
-      clientLogger.error('Cancel request failed', err instanceof Error ? err : new Error(String(err)));
+      clientLogger.error(
+        'Cancel request failed',
+        err instanceof Error ? err : new Error(String(err))
+      );
     } finally {
       setIsActioning(false);
     }
@@ -276,19 +283,19 @@ export default function SessionDetailPage() {
   return (
     <div className="flex flex-col gap-6">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 font-mono text-xs text-[--text-muted]">
-        <Link href="/sessions" className="hover:text-[--text-secondary] transition-colors">
+      <nav className="text-text-muted flex items-center gap-1.5 font-mono text-xs">
+        <Link href="/sessions" className="hover:text-text-secondary transition-colors">
           Sessions
         </Link>
         <span>/</span>
-        <span className="text-[--text-secondary]">SES-{paddedId}</span>
+        <span className="text-text-secondary">SES-{paddedId}</span>
       </nav>
 
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 flex-wrap">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
-          <div className="flex items-center gap-3 flex-wrap">
-            <span className="rounded-sm bg-[--phosphor-amber]/10 px-1.5 py-0.5 font-mono text-sm text-[--phosphor-amber]">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="bg-phosphor-amber/10 text-phosphor-amber rounded-sm px-1.5 py-0.5 font-mono text-sm">
               SES-{paddedId}
             </span>
             <span className={`font-mono text-xs ${statusBadgeClass(session.status)}`}>
@@ -297,14 +304,14 @@ export default function SessionDetailPage() {
             {session.specId && (
               <Link
                 href={`/specs/${session.specId}`}
-                className="flex items-center gap-1 font-mono text-xs text-[--text-muted] hover:text-[--text-secondary] transition-colors"
+                className="text-text-muted hover:text-text-secondary flex items-center gap-1 font-mono text-xs transition-colors"
               >
                 {session.specTitle ?? `Spec #${session.specId}`}
                 <ExternalLink className="h-3 w-3" />
               </Link>
             )}
           </div>
-          <div className="flex items-center gap-4 text-xs text-[--text-muted] font-mono flex-wrap">
+          <div className="text-text-muted flex flex-wrap items-center gap-4 font-mono text-xs">
             <span>Started: {new Date(session.startedAt).toLocaleString()}</span>
             <span>Duration: {formatDuration(session)}</span>
             <span>
@@ -314,16 +321,11 @@ export default function SessionDetailPage() {
         </div>
 
         {/* Action buttons */}
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex flex-wrap items-center gap-2">
           {session.status === 'running' && (
             <>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handlePause}
-                disabled={isActioning}
-              >
-                <Pause className="h-3.5 w-3.5 mr-1.5" />
+              <Button size="sm" variant="outline" onClick={handlePause} disabled={isActioning}>
+                <Pause className="mr-1.5 h-3.5 w-3.5" />
                 Pause
               </Button>
               <CancelDialog
@@ -332,10 +334,10 @@ export default function SessionDetailPage() {
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="text-[--status-red]"
+                    className="text-status-red"
                     disabled={isActioning}
                   >
-                    <X className="h-3.5 w-3.5 mr-1.5" />
+                    <X className="mr-1.5 h-3.5 w-3.5" />
                     Cancel
                   </Button>
                 }
@@ -345,12 +347,8 @@ export default function SessionDetailPage() {
 
           {session.status === 'paused' && (
             <>
-              <Button
-                size="sm"
-                onClick={handleResume}
-                disabled={isActioning}
-              >
-                <Play className="h-3.5 w-3.5 mr-1.5" />
+              <Button size="sm" onClick={handleResume} disabled={isActioning}>
+                <Play className="mr-1.5 h-3.5 w-3.5" />
                 Resume
               </Button>
               <CancelDialog
@@ -359,10 +357,10 @@ export default function SessionDetailPage() {
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="text-[--status-red]"
+                    className="text-status-red"
                     disabled={isActioning}
                   >
-                    <X className="h-3.5 w-3.5 mr-1.5" />
+                    <X className="mr-1.5 h-3.5 w-3.5" />
                     Cancel
                   </Button>
                 }
@@ -373,7 +371,7 @@ export default function SessionDetailPage() {
           {session.status === 'failed' && session.specId && (
             <Button size="sm" variant="outline" asChild>
               <Link href={`/specs/${session.specId}`}>
-                View Spec <ExternalLink className="h-3 w-3 ml-1.5" />
+                View Spec <ExternalLink className="ml-1.5 h-3 w-3" />
               </Link>
             </Button>
           )}
@@ -382,11 +380,7 @@ export default function SessionDetailPage() {
 
       {/* Lost connection banner */}
       {lostConnection && (
-        <LostConnectionBanner
-          session={session}
-          onCheck={restart}
-          onAbandon={handleCancel}
-        />
+        <LostConnectionBanner session={session} onCheck={restart} onAbandon={handleCancel} />
       )}
 
       {/* Event log */}

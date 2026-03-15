@@ -46,12 +46,12 @@ const STATUS_CHAR: Record<TaskStatus, string> = {
 };
 
 const STATUS_CLASS: Record<TaskStatus, string> = {
-  todo: 'text-[--text-muted]',
-  in_progress: 'text-[--accent-violet] animate-blink',
-  blocked: 'text-[--phosphor-amber]',
-  done: 'text-[--status-emerald]',
-  failed: 'text-[--status-red]',
-  skipped: 'text-[--text-muted] opacity-50',
+  todo: 'text-text-muted',
+  in_progress: 'text-accent-violet animate-blink',
+  blocked: 'text-phosphor-amber',
+  done: 'text-status-emerald',
+  failed: 'text-status-red',
+  skipped: 'text-text-muted opacity-50',
 };
 
 const ROLE_RANK: Record<UserRole, number> = { viewer: 0, member: 1, admin: 2, owner: 3 };
@@ -75,9 +75,9 @@ export function TaskRow({
 
   const rowBorderClass =
     task.status === 'in_progress'
-      ? 'border-l-2 border-[--accent-violet] bg-[--accent-violet]/5'
+      ? 'border-l-2 border-accent-violet bg-accent-violet/5'
       : task.status === 'blocked'
-        ? 'border-l-2 border-[--status-red]'
+        ? 'border-l-2 border-status-red'
         : 'border-l-2 border-transparent';
 
   return (
@@ -85,7 +85,7 @@ export function TaskRow({
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <div className={cn('rounded-sm', rowBorderClass, className)}>
           <CollapsibleTrigger asChild>
-            <div className="flex h-9 cursor-pointer items-center gap-2 px-3 select-none hover:bg-[--bg-elevated]">
+            <div className="hover:bg-bg-elevated flex h-9 cursor-pointer items-center gap-2 px-3 select-none">
               <span
                 className={cn(
                   'w-4 shrink-0 text-center font-mono text-sm',
@@ -94,15 +94,15 @@ export function TaskRow({
               >
                 {STATUS_CHAR[task.status]}
               </span>
-              <span className="shrink-0 rounded-sm bg-[--phosphor-amber]/10 px-1.5 py-0.5 font-mono text-xs text-[--phosphor-amber]">
+              <span className="bg-phosphor-amber/10 text-phosphor-amber shrink-0 rounded-sm px-1.5 py-0.5 font-mono text-xs">
                 T-{String(task.id).padStart(3, '0')}
               </span>
               {devMode && (
-                <span className="font-mono text-[10px] text-[--text-muted]">[id:{task.id}]</span>
+                <span className="text-text-muted font-mono text-[10px]">[id:{task.id}]</span>
               )}
-              <span className="flex-1 truncate text-sm text-[--text-primary]">{task.title}</span>
+              <span className="text-text-primary flex-1 truncate text-sm">{task.title}</span>
               {task.status === 'blocked' && task.errorMessage && (
-                <span className="max-w-48 truncate text-xs text-[--phosphor-amber]">
+                <span className="text-phosphor-amber max-w-48 truncate text-xs">
                   {task.errorMessage.slice(0, 60)}
                 </span>
               )}
@@ -178,10 +178,10 @@ export function TaskRow({
           </CollapsibleTrigger>
 
           <CollapsibleContent>
-            <div className="space-y-1 px-10 pb-3 text-sm text-[--text-secondary]">
+            <div className="text-text-secondary space-y-1 px-10 pb-3 text-sm">
               {task.description && <p>{task.description}</p>}
               {task.errorMessage && (
-                <p className="font-mono text-xs text-[--status-red]">{task.errorMessage}</p>
+                <p className="text-status-red font-mono text-xs">{task.errorMessage}</p>
               )}
             </div>
           </CollapsibleContent>

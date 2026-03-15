@@ -171,9 +171,7 @@ export function ApiTokensSection() {
   return (
     <section className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
-          API TOKENS
-        </h2>
+        <h2 className="text-text-muted font-mono text-xs tracking-widest uppercase">API TOKENS</h2>
         <Button
           variant="outline"
           size="sm"
@@ -186,7 +184,7 @@ export function ApiTokensSection() {
       </div>
 
       {isLoading && (
-        <div className="flex items-center gap-2 text-[--text-muted]">
+        <div className="text-text-muted flex items-center gap-2">
           <Loader2 className="size-3 animate-spin" />
           <span className="font-mono text-xs">Loading tokens…</span>
         </div>
@@ -194,12 +192,12 @@ export function ApiTokensSection() {
 
       {error && !isLoading && (
         <div className="flex items-center gap-2">
-          <span className="font-mono text-xs text-[--status-red]">Failed to load tokens.</span>
+          <span className="text-status-red font-mono text-xs">Failed to load tokens.</span>
           <Button
             variant="ghost"
             size="sm"
             onClick={restart}
-            className="h-auto px-0 font-mono text-xs text-[--text-muted] underline hover:bg-transparent hover:text-[--text-primary]"
+            className="text-text-muted hover:text-text-primary h-auto px-0 font-mono text-xs underline hover:bg-transparent"
           >
             Retry
           </Button>
@@ -209,13 +207,13 @@ export function ApiTokensSection() {
       {!isLoading && !error && (
         <>
           {tokens.length === 0 ? (
-            <p className="font-mono text-xs text-[--text-muted]">No API tokens yet.</p>
+            <p className="text-text-muted font-mono text-xs">No API tokens yet.</p>
           ) : (
-            <div className="flex flex-col gap-0 overflow-hidden rounded border border-[--surface-border]">
+            <div className="border-surface-border flex flex-col gap-0 overflow-hidden rounded border">
               {/* Header row */}
-              <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-4 border-b border-[--surface-border] px-3 py-2">
+              <div className="border-surface-border grid grid-cols-[1fr_auto_auto_auto_auto] gap-4 border-b px-3 py-2">
                 {['NAME', 'PREFIX', 'CREATED', 'LAST USED', 'EXPIRES'].map((col) => (
-                  <span key={col} className="font-mono text-xs text-[--text-muted]">
+                  <span key={col} className="text-text-muted font-mono text-xs">
                     {col}
                   </span>
                 ))}
@@ -224,29 +222,27 @@ export function ApiTokensSection() {
               {tokens.map((t) => (
                 <div
                   key={t.id}
-                  className="grid grid-cols-[1fr_auto_auto_auto_auto] items-center gap-4 border-b border-[--surface-border] px-3 py-2.5 last:border-b-0"
+                  className="border-surface-border grid grid-cols-[1fr_auto_auto_auto_auto] items-center gap-4 border-b px-3 py-2.5 last:border-b-0"
                 >
                   <div className="flex min-w-0 items-center gap-2">
-                    <Key className="size-3 shrink-0 text-[--text-muted]" />
-                    <span className="truncate font-mono text-xs text-[--text-primary]">
-                      {t.name}
-                    </span>
+                    <Key className="text-text-muted size-3 shrink-0" />
+                    <span className="text-text-primary truncate font-mono text-xs">{t.name}</span>
                   </div>
-                  <span className="font-mono text-xs text-[--text-muted]">{t.prefix}&hellip;</span>
-                  <span className="font-mono text-xs text-[--text-muted]">
+                  <span className="text-text-muted font-mono text-xs">{t.prefix}&hellip;</span>
+                  <span className="text-text-muted font-mono text-xs">
                     {formatDate(t.createdAt)}
                   </span>
-                  <span className="font-mono text-xs text-[--text-muted]">
+                  <span className="text-text-muted font-mono text-xs">
                     {formatDate(t.lastUsedAt)}
                   </span>
                   <div className="flex items-center gap-3">
-                    <span className="font-mono text-xs text-[--text-muted]">
+                    <span className="text-text-muted font-mono text-xs">
                       {formatDate(t.expiresAt)}
                     </span>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-auto px-1.5 py-0.5 font-mono text-xs text-[--status-red] hover:bg-[--status-red]/10 hover:text-[--status-red]"
+                      className="text-status-red hover:bg-status-red/10 hover:text-status-red h-auto px-1.5 py-0.5 font-mono text-xs"
                       onClick={() => setRevokeTargetId(t.id)}
                     >
                       Revoke
@@ -267,8 +263,8 @@ export function ApiTokensSection() {
           </DialogHeader>
           <form onSubmit={handleGenerate} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <label className="font-mono text-xs text-[--text-secondary]" htmlFor="token-name">
-                TOKEN NAME <span className="text-[--status-red]">*</span>
+              <label className="text-text-secondary font-mono text-xs" htmlFor="token-name">
+                TOKEN NAME <span className="text-status-red">*</span>
               </label>
               <Input
                 id="token-name"
@@ -280,7 +276,7 @@ export function ApiTokensSection() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="font-mono text-xs text-[--text-secondary]" htmlFor="token-expiry">
+              <label className="text-text-secondary font-mono text-xs" htmlFor="token-expiry">
                 EXPIRY
               </label>
               <Select
@@ -324,11 +320,11 @@ export function ApiTokensSection() {
             <DialogTitle className="font-mono">Your new API token</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-3">
-            <p className="font-mono text-xs text-[--text-muted]">
+            <p className="text-text-muted font-mono text-xs">
               This token is shown once only. Copy it now — you will not be able to see it again.
             </p>
-            <div className="flex items-center gap-2 rounded border border-[--surface-border] bg-[--bg-surface] px-3 py-2">
-              <code className="flex-1 font-mono text-xs break-all text-[--phosphor-amber]">
+            <div className="border-surface-border bg-bg-surface flex items-center gap-2 rounded border px-3 py-2">
+              <code className="text-phosphor-amber flex-1 font-mono text-xs break-all">
                 {revealToken}
               </code>
               <Button variant="ghost" size="sm" onClick={handleCopy} className="shrink-0 gap-1.5">
@@ -363,7 +359,7 @@ export function ApiTokensSection() {
             <AlertDialogAction
               onClick={handleRevoke}
               disabled={isRevoking}
-              className="bg-[--status-red] text-white hover:bg-[--status-red]/90"
+              className="bg-status-red hover:bg-status-red/90 text-white"
             >
               {isRevoking ? 'Revoking…' : 'Revoke'}
             </AlertDialogAction>

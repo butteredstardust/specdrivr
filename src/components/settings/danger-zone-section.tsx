@@ -64,12 +64,12 @@ export function DangerZoneSection({ project, userRole }: DangerZoneSectionProps)
 
   return (
     <TooltipProvider>
-      <div className="rounded border border-[--status-red]/40 p-4">
-        <h3 className="mb-3 font-mono text-xs tracking-widest text-[--status-red] uppercase">
+      <div className="border-status-red/40 rounded border p-4">
+        <h3 className="text-status-red mb-3 font-mono text-xs tracking-widest uppercase">
           Danger Zone
         </h3>
         <div className="flex items-center justify-between gap-4">
-          <p className="font-mono text-xs text-[--text-muted]">
+          <p className="text-text-muted font-mono text-xs">
             Permanently delete this project and all its data.
           </p>
           {deletable ? (

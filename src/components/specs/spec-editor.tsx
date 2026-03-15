@@ -30,7 +30,15 @@ interface SpecEditorProps {
 }
 
 export function SpecEditor(props: SpecEditorProps) {
-  const { initialContent, initialTitle, specId: _specId, specStatus, onSave, onPublish: _onPublish, className } = props;
+  const {
+    initialContent,
+    initialTitle,
+    specId: _specId,
+    specStatus,
+    onSave,
+    onPublish: _onPublish,
+    className,
+  } = props;
   const [title, setTitle] = useState(initialTitle ?? '');
   const [content, setContent] = useState(initialContent ?? '');
   const [isSaving, setIsSaving] = useState(false);
@@ -77,31 +85,21 @@ export function SpecEditor(props: SpecEditorProps) {
   return (
     <div className={`flex flex-col h-screen${className ? ` ${className}` : ''}`}>
       {/* Top bar */}
-      <div className="flex items-center gap-3 border-b border-[--border-subtle] px-4 py-2 shrink-0">
+      <div className="border-border-subtle flex shrink-0 items-center gap-3 border-b px-4 py-2">
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Untitled spec"
-          className="flex-1 bg-transparent font-mono text-sm text-[--text-primary] placeholder:text-[--text-muted] outline-none"
+          className="text-text-primary placeholder:text-text-muted flex-1 bg-transparent font-mono text-sm outline-none"
         />
-        {saveError && (
-          <p className="text-sm text-red-400">{saveError}</p>
-        )}
-        <Button
-          size="sm"
-          onClick={handleSave}
-          disabled={isSaving || !isDirty}
-        >
-          {isSaving ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            'Save'
-          )}
+        {saveError && <p className="text-sm text-red-400">{saveError}</p>}
+        <Button size="sm" onClick={handleSave} disabled={isSaving || !isDirty}>
+          {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
         </Button>
         <Link
           href="/specs"
-          className="font-mono text-xs text-[--text-muted] hover:text-[--text-secondary] transition-colors"
+          className="text-text-muted hover:text-text-secondary font-mono text-xs transition-colors"
         >
           Back
         </Link>
@@ -124,9 +122,9 @@ export function SpecEditor(props: SpecEditorProps) {
       )}
 
       {/* Split pane */}
-      <div className="grid grid-cols-2 flex-1 overflow-hidden">
+      <div className="grid flex-1 grid-cols-2 overflow-hidden">
         {/* Editor pane */}
-        <div className="h-full overflow-hidden border-r border-[--border-subtle]">
+        <div className="border-border-subtle h-full overflow-hidden border-r">
           <CodeMirror
             value={content}
             onChange={setContent}
@@ -139,7 +137,7 @@ export function SpecEditor(props: SpecEditorProps) {
         </div>
 
         {/* Preview pane */}
-        <div className="overflow-y-auto p-4 prose prose-invert prose-sm max-w-none">
+        <div className="prose prose-invert prose-sm max-w-none overflow-y-auto p-4">
           <ReactMarkdown>{content}</ReactMarkdown>
         </div>
       </div>

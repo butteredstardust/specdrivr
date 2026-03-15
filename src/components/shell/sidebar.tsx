@@ -38,22 +38,22 @@ export function Sidebar({ projects }: SidebarProps) {
     exact ? pathname === href : pathname === href || pathname.startsWith(href + '/');
 
   return (
-    <aside className="flex h-full w-60 flex-shrink-0 flex-col border-r border-[--border-default] bg-[--bg-surface]">
+    <aside className="border-border-default bg-bg-surface flex h-full w-60 flex-shrink-0 flex-col border-r">
       {/* Logo */}
-      <div className="flex items-center gap-2 border-b border-[--border-default] px-4 py-4">
+      <div className="border-border-default flex items-center gap-2 border-b px-4 py-4">
         <DaemonMascot size={24} expression="idle" />
-        <span className="font-mono text-sm font-bold tracking-widest text-[--text-primary]">
+        <span className="text-text-primary font-mono text-sm font-bold tracking-widest">
           SPECDRIVR
         </span>
         {devMode && (
-          <Badge className="ml-auto border-[--phosphor-amber]/30 bg-[--phosphor-amber]/20 font-mono text-[10px] text-[--phosphor-amber]">
+          <Badge className="border-phosphor-amber/30 bg-phosphor-amber/20 text-phosphor-amber ml-auto font-mono text-[10px]">
             DEV
           </Badge>
         )}
       </div>
 
       {/* Project Switcher */}
-      <div className="border-b border-[--border-default] px-3 py-3">
+      <div className="border-border-default border-b px-3 py-3">
         <Select
           value={activeProjectId ? String(activeProjectId) : ''}
           onValueChange={(v) => {
@@ -61,7 +61,7 @@ export function Sidebar({ projects }: SidebarProps) {
             router.push('/specs');
           }}
         >
-          <SelectTrigger className="h-8 border-[--border-default] bg-[--bg-elevated] text-xs">
+          <SelectTrigger className="border-border-default bg-bg-elevated h-8 text-xs">
             <SelectValue placeholder="Select project…" />
           </SelectTrigger>
           <SelectContent>
@@ -85,8 +85,8 @@ export function Sidebar({ projects }: SidebarProps) {
               className={cn(
                 'flex items-center gap-3 px-4 py-2 text-sm transition-colors',
                 active
-                  ? 'border-l-2 border-[--accent-violet] bg-[--accent-violet]/10 text-[--accent-violet]'
-                  : 'border-l-2 border-transparent text-[--text-secondary] hover:bg-[--bg-elevated] hover:text-[--text-primary]'
+                  ? 'border-accent-violet bg-accent-violet/10 text-accent-violet border-l-2'
+                  : 'text-text-secondary hover:bg-bg-elevated hover:text-text-primary border-l-2 border-transparent'
               )}
             >
               <Icon className="h-4 w-4 shrink-0" />
@@ -97,10 +97,10 @@ export function Sidebar({ projects }: SidebarProps) {
       </nav>
 
       {/* Bottom status */}
-      <div className="border-t border-[--border-default]">
+      <div className="border-border-default border-t">
         <div className="flex items-center gap-2 px-4 py-2">
           <DaemonMascot size={24} expression="idle" />
-          <span className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
+          <span className="text-text-muted font-mono text-xs tracking-widest uppercase">
             SYSTEM READY
           </span>
         </div>

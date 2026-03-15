@@ -79,14 +79,14 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
   };
 
   return (
-    <header className="flex h-14 items-center gap-4 border-b border-[--border-default] bg-[--bg-surface] px-6">
+    <header className="border-border-default bg-bg-surface flex h-14 items-center gap-4 border-b px-6">
       {/* Breadcrumbs */}
       <div className="flex-1">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href="/" className="text-[--text-muted] hover:text-[--text-primary]">
+                <Link href="/" className="text-text-muted hover:text-text-primary">
                   {PATH_LABELS['/'] ?? 'Home'}
                 </Link>
               </BreadcrumbLink>
@@ -96,13 +96,10 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
                   {i === crumbs.length - 1 || !crumb.href ? (
-                    <BreadcrumbPage className="text-[--text-primary]">{crumb.label}</BreadcrumbPage>
+                    <BreadcrumbPage className="text-text-primary">{crumb.label}</BreadcrumbPage>
                   ) : (
                     <BreadcrumbLink asChild>
-                      <Link
-                        href={crumb.href}
-                        className="text-[--text-muted] hover:text-[--text-primary]"
-                      >
+                      <Link href={crumb.href} className="text-text-muted hover:text-text-primary">
                         {crumb.label}
                       </Link>
                     </BreadcrumbLink>
@@ -120,16 +117,16 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="ghost" size="icon" className="relative h-8 w-8">
-              <Bell className="h-4 w-4 text-[--text-secondary]" />
+              <Bell className="text-text-secondary h-4 w-4" />
               {unreadCount > 0 && (
-                <Badge className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center bg-[--accent-violet] p-0 text-[10px]">
+                <Badge className="bg-accent-violet absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center p-0 text-[10px]">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </Badge>
               )}
             </Button>
           </PopoverTrigger>
           <PopoverContent
-            className="max-h-[480px] w-[380px] border-[--border-default] bg-[--bg-surface] p-0"
+            className="border-border-default bg-bg-surface max-h-[480px] w-[380px] p-0"
             align="end"
           >
             <NotificationPanel />
@@ -140,7 +137,7 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
         <Button
           variant="ghost"
           size="sm"
-          className="h-6 border border-[--border-muted] px-1.5 font-mono text-[10px] text-[--text-muted]"
+          className="border-border-muted text-text-muted h-6 border px-1.5 font-mono text-[10px]"
           onClick={() => setShortcutsOpen(true)}
         >
           ?
@@ -151,7 +148,7 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 rounded-full p-0">
               <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-[--accent-violet]/20 text-xs text-[--accent-violet]">
+                <AvatarFallback className="bg-accent-violet/20 text-accent-violet text-xs">
                   {initials}
                 </AvatarFallback>
               </Avatar>
@@ -159,8 +156,8 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <div className="px-3 py-2">
-              <p className="text-sm font-medium text-[--text-primary]">{user?.name}</p>
-              <p className="truncate text-xs text-[--text-muted]">{user?.email}</p>
+              <p className="text-text-primary text-sm font-medium">{user?.name}</p>
+              <p className="text-text-muted truncate text-xs">{user?.email}</p>
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Profile</DropdownMenuItem>
@@ -171,7 +168,7 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
               Keyboard Shortcuts
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleSignOut} className="text-[--status-red]">
+            <DropdownMenuItem onClick={handleSignOut} className="text-status-red">
               Sign out
             </DropdownMenuItem>
           </DropdownMenuContent>

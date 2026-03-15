@@ -62,6 +62,31 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
+
+  /* Custom Specdrivr Tokens */
+  --color-bg-base: var(--bg-base);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-elevated: var(--bg-elevated);
+
+  --color-border-default: var(--border-default);
+  --color-border-muted: var(--border-muted);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --color-accent-violet: var(--accent-violet);
+  --color-accent-violet-dim: var(--accent-violet-dim);
+
+  --color-phosphor-amber: var(--phosphor-amber);
+  --color-phosphor-amber-dim: var(--phosphor-amber-dim);
+
+  --color-status-emerald: var(--status-emerald);
+  --color-status-red: var(--status-red);
+  --color-status-orange: var(--status-orange);
+
+  --color-terminal-bg: var(--terminal-bg);
+  --color-terminal-green: var(--terminal-green);
 }
 
 html { color-scheme: dark; }

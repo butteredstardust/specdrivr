@@ -36,7 +36,9 @@ export function NotificationPanel() {
 
   // usePolling unwraps the { data: T } envelope, so data here is the inner payload.
   // The API may return { notifications: [...], meta: {...} } or the array directly.
-  const list: Notification[] = (data?.notifications ?? (data as unknown as Notification[]) ?? []) as Notification[];
+  const list: Notification[] = (data?.notifications ??
+    (data as unknown as Notification[]) ??
+    []) as Notification[];
   const hasUnread = list.some((n) => !n.isRead);
 
   const handleMarkAllRead = async () => {
@@ -56,8 +58,8 @@ export function NotificationPanel() {
   return (
     <div className="flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-[--border-default]">
-        <span className="font-mono text-xs font-semibold tracking-widest uppercase text-[--text-muted]">
+      <div className="border-border-default flex items-center justify-between border-b px-4 py-3">
+        <span className="text-text-muted font-mono text-xs font-semibold tracking-widest uppercase">
           NOTIFICATIONS
         </span>
         {hasUnread && (
@@ -72,26 +74,26 @@ export function NotificationPanel() {
         {list.length === 0 && !isLoading && (
           <div className="flex flex-col items-center gap-3 py-8">
             <DaemonMascot size={32} expression="idle" />
-            <span className="font-mono text-xs text-[--text-muted]">Nothing to report.</span>
+            <span className="text-text-muted font-mono text-xs">Nothing to report.</span>
           </div>
         )}
         {isLoading && list.length === 0 && (
-          <div className="py-6 text-center font-mono text-xs text-[--text-muted]">Loading...</div>
+          <div className="text-text-muted py-6 text-center font-mono text-xs">Loading...</div>
         )}
         {list.slice(0, 5).map((n) => (
           <div
             key={n.id}
             className={cn(
-              'flex h-12 items-center gap-3 px-4 border-b border-[--border-default] last:border-0',
+              'border-border-default flex h-12 items-center gap-3 border-b px-4 last:border-0',
               !n.isRead
-                ? 'bg-[--accent-violet]/5 border-l-2 border-[--accent-violet]'
+                ? 'bg-accent-violet/5 border-accent-violet border-l-2'
                 : 'border-l-2 border-transparent'
             )}
           >
-            <div className="flex-1 min-w-0">
-              <p className="truncate text-sm text-[--text-primary]">{n.message}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-text-primary truncate text-sm">{n.message}</p>
             </div>
-            <span className="shrink-0 font-mono text-xs text-[--text-muted]">
+            <span className="text-text-muted shrink-0 font-mono text-xs">
               {formatRelativeTime(n.createdAt)}
             </span>
           </div>
@@ -99,11 +101,8 @@ export function NotificationPanel() {
       </div>
 
       {/* Footer */}
-      <div className="border-t border-[--border-default] px-4 py-2">
-        <a
-          href="/notifications"
-          className="font-mono text-xs text-[--accent-violet] hover:underline"
-        >
+      <div className="border-border-default border-t px-4 py-2">
+        <a href="/notifications" className="text-accent-violet font-mono text-xs hover:underline">
           View all notifications &rarr;
         </a>
       </div>

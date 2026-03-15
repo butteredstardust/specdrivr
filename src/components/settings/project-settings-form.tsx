@@ -103,14 +103,14 @@ export function ProjectSettingsForm({
     <TooltipProvider>
       <section className="flex flex-col gap-4">
         {!dangerZoneOnly && (
-          <h2 className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
+          <h2 className="text-text-muted font-mono text-xs tracking-widest uppercase">
             PROJECT SETTINGS
           </h2>
         )}
         {!dangerZoneOnly && (
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <label className="font-mono text-xs text-[--text-secondary]" htmlFor="project-name">
+              <label className="text-text-secondary font-mono text-xs" htmlFor="project-name">
                 Project name
               </label>
               <Tooltip>
@@ -128,7 +128,7 @@ export function ProjectSettingsForm({
 
             <div className="flex flex-col gap-1.5">
               <label
-                className="font-mono text-xs text-[--text-secondary]"
+                className="text-text-secondary font-mono text-xs"
                 htmlFor="project-description"
               >
                 Description
@@ -147,10 +147,7 @@ export function ProjectSettingsForm({
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label
-                className="font-mono text-xs text-[--text-secondary]"
-                htmlFor="project-repo-url"
-              >
+              <label className="text-text-secondary font-mono text-xs" htmlFor="project-repo-url">
                 REPOSITORY URL
               </label>
               <div className="flex items-center gap-2">
@@ -196,13 +193,13 @@ export function ProjectSettingsForm({
                 </Tooltip>
 
                 {verifyStatus === 'connected' && (
-                  <span className="flex items-center gap-1 text-xs text-[--phosphor-amber]">
+                  <span className="text-phosphor-amber flex items-center gap-1 text-xs">
                     <CheckCircle className="h-3.5 w-3.5" />
                     Connected
                   </span>
                 )}
                 {verifyStatus === 'unreachable' && (
-                  <span className="flex items-center gap-1 text-xs text-[--text-muted]">
+                  <span className="text-text-muted flex items-center gap-1 text-xs">
                     <XCircle className="h-3.5 w-3.5" />
                     Unreachable
                   </span>
@@ -212,7 +209,7 @@ export function ProjectSettingsForm({
 
             <div className="flex flex-col gap-1.5">
               <label
-                className="font-mono text-xs text-[--text-secondary]"
+                className="text-text-secondary font-mono text-xs"
                 htmlFor="project-repo-branch"
               >
                 DEFAULT BRANCH

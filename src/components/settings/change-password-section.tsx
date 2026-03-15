@@ -22,11 +22,11 @@ function getStrength(password: string): 0 | 1 | 2 | 3 | 4 {
 }
 
 const STRENGTH_COLORS: Record<number, string> = {
-  0: 'bg-[--surface-hover]',
-  1: 'bg-[--status-red]',
-  2: 'bg-[--phosphor-amber]',
-  3: 'bg-[--phosphor-amber]',
-  4: 'bg-[--status-emerald]',
+  0: 'bg-surface-hover',
+  1: 'bg-status-red',
+  2: 'bg-phosphor-amber',
+  3: 'bg-phosphor-amber',
+  4: 'bg-status-emerald',
 };
 
 function StrengthIndicator({ password }: { password: string }) {
@@ -38,7 +38,7 @@ function StrengthIndicator({ password }: { password: string }) {
         <div
           key={seg}
           className={`h-1 flex-1 rounded-full transition-colors ${
-            password.length > 0 && seg <= level ? STRENGTH_COLORS[level] : 'bg-[--surface-hover]'
+            password.length > 0 && seg <= level ? STRENGTH_COLORS[level] : 'bg-surface-hover'
           }`}
         />
       ))}
@@ -109,12 +109,12 @@ export function ChangePasswordSection() {
 
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
+      <h2 className="text-text-muted font-mono text-xs tracking-widest uppercase">
         CHANGE PASSWORD
       </h2>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <label className="font-mono text-xs text-[--text-secondary]" htmlFor="current-password">
+          <label className="text-text-secondary font-mono text-xs" htmlFor="current-password">
             CURRENT PASSWORD
           </label>
           <Input
@@ -126,12 +126,12 @@ export function ChangePasswordSection() {
             required
           />
           {currentPasswordError && (
-            <p className="font-mono text-xs text-[--status-red]">{currentPasswordError}</p>
+            <p className="text-status-red font-mono text-xs">{currentPasswordError}</p>
           )}
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="font-mono text-xs text-[--text-secondary]" htmlFor="new-password">
+          <label className="text-text-secondary font-mono text-xs" htmlFor="new-password">
             NEW PASSWORD
           </label>
           <Input
@@ -146,7 +146,7 @@ export function ChangePasswordSection() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="font-mono text-xs text-[--text-secondary]" htmlFor="confirm-password">
+          <label className="text-text-secondary font-mono text-xs" htmlFor="confirm-password">
             CONFIRM NEW PASSWORD
           </label>
           <Input
@@ -157,7 +157,7 @@ export function ChangePasswordSection() {
             autoComplete="new-password"
             required
           />
-          {confirmError && <p className="font-mono text-xs text-[--status-red]">{confirmError}</p>}
+          {confirmError && <p className="text-status-red font-mono text-xs">{confirmError}</p>}
         </div>
 
         <div>

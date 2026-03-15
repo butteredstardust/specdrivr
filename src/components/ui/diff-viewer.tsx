@@ -46,12 +46,12 @@ interface DiffViewerProps {
 
 function renderDiffLines(patch: string): React.ReactNode[] {
   return patch.split('\n').map((line, i) => {
-    let className = 'text-[--text-secondary] px-2';
+    let className = 'text-text-secondary px-2';
     if (line.startsWith('+') && !line.startsWith('+++'))
       className = 'bg-green-950/40 text-green-400 px-2';
     else if (line.startsWith('-') && !line.startsWith('---'))
       className = 'bg-red-950/40 text-red-400 px-2';
-    else if (line.startsWith('@@')) className = 'text-[--text-muted] px-2';
+    else if (line.startsWith('@@')) className = 'text-text-muted px-2';
     return (
       <div key={i} className={`font-mono text-xs leading-5 whitespace-pre ${className}`}>
         {line || ' '}
@@ -69,9 +69,9 @@ const statusPrefix: Record<DiffFile['status'], string> = {
 
 const statusColor: Record<DiffFile['status'], string> = {
   added: 'text-green-400',
-  modified: 'text-[--phosphor-amber]',
-  deleted: 'text-[--status-red]',
-  renamed: 'text-[--phosphor-amber]',
+  modified: 'text-phosphor-amber',
+  deleted: 'text-status-red',
+  renamed: 'text-phosphor-amber',
 };
 
 export function DiffViewer({ files, className }: DiffViewerProps) {
@@ -85,7 +85,7 @@ export function DiffViewer({ files, className }: DiffViewerProps) {
     return (
       <div
         className={cn(
-          'flex flex-col items-center justify-center gap-3 p-8 text-[--text-muted]',
+          'text-text-muted flex flex-col items-center justify-center gap-3 p-8',
           className
         )}
       >
@@ -98,17 +98,17 @@ export function DiffViewer({ files, className }: DiffViewerProps) {
   return (
     <div className={cn('flex h-full flex-col', className)}>
       {/* Header */}
-      <div className="flex items-center gap-3 border-b border-[--border-default] px-4 py-2">
-        <span className="font-mono text-xs font-semibold tracking-widest text-[--text-muted] uppercase">
+      <div className="border-border-default flex items-center gap-3 border-b px-4 py-2">
+        <span className="text-text-muted font-mono text-xs font-semibold tracking-widest uppercase">
           FILE CHANGES
         </span>
         <span className="font-mono text-xs text-green-400">+{totalAdditions}</span>
-        <span className="font-mono text-xs text-[--status-red]">−{totalDeletions}</span>
+        <span className="text-status-red font-mono text-xs">−{totalDeletions}</span>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
         {/* File tree */}
-        <div className="w-56 shrink-0 overflow-y-auto border-r border-[--border-default]">
+        <div className="border-border-default w-56 shrink-0 overflow-y-auto border-r">
           {files.map((file) => (
             <button
               key={file.filename}
@@ -116,8 +116,8 @@ export function DiffViewer({ files, className }: DiffViewerProps) {
               className={cn(
                 'flex w-full items-center gap-1.5 truncate px-3 py-2 text-left font-mono text-xs',
                 selectedFile === file.filename
-                  ? 'bg-[--accent-violet]/10 text-[--accent-violet]'
-                  : 'text-[--text-secondary] hover:bg-[--bg-elevated]'
+                  ? 'bg-accent-violet/10 text-accent-violet'
+                  : 'text-text-secondary hover:bg-bg-elevated'
               )}
             >
               <span className={statusColor[file.status]}>{statusPrefix[file.status]}</span>
@@ -127,11 +127,11 @@ export function DiffViewer({ files, className }: DiffViewerProps) {
         </div>
 
         {/* Diff content */}
-        <div className="flex-1 overflow-auto bg-[--bg-base]">
+        <div className="bg-bg-base flex-1 overflow-auto">
           {selected ? (
             <div>{renderDiffLines(selected.patch)}</div>
           ) : (
-            <div className="p-4 text-sm text-[--text-muted]">Select a file to view changes.</div>
+            <div className="text-text-muted p-4 text-sm">Select a file to view changes.</div>
           )}
         </div>
       </div>

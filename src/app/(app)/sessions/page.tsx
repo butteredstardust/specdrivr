@@ -36,15 +36,15 @@ function statusColor(status: Session['status']): string {
     case 'running':
       return 'text-green-400';
     case 'paused':
-      return 'text-[--phosphor-amber]';
+      return 'text-phosphor-amber';
     case 'completed':
       return 'text-emerald-400';
     case 'failed':
       return 'text-red-400';
     case 'cancelled':
-      return 'text-[--text-muted]';
+      return 'text-text-muted';
     default:
-      return 'text-[--text-muted]';
+      return 'text-text-muted';
   }
 }
 
@@ -52,16 +52,16 @@ function StatusDot({ status }: { status: Session['status'] }) {
   switch (status) {
     case 'running':
       return (
-        <span className="mr-1.5 inline-block h-2 w-2 animate-pulse rounded-full bg-[--accent-violet]" />
+        <span className="bg-accent-violet mr-1.5 inline-block h-2 w-2 animate-pulse rounded-full" />
       );
     case 'completed':
       return <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-emerald-400" />;
     case 'failed':
       return <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-red-400" />;
     case 'paused':
-      return <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-[--phosphor-amber]" />;
+      return <span className="bg-phosphor-amber mr-1.5 inline-block h-2 w-2 rounded-full" />;
     case 'cancelled':
-      return <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-[--text-muted]" />;
+      return <span className="bg-text-muted mr-1.5 inline-block h-2 w-2 rounded-full" />;
     default:
       return null;
   }
@@ -190,7 +190,7 @@ export default function SessionsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">SESSIONS</h1>
+      <h1 className="text-text-muted font-mono text-xs tracking-widest uppercase">SESSIONS</h1>
 
       {/* Filter bar */}
       <div className="flex flex-wrap items-center gap-2">
@@ -249,49 +249,47 @@ export default function SessionsPage() {
             variant="outline"
             size="sm"
             onClick={clearFilters}
-            className="h-8 text-xs text-[--text-muted]"
+            className="text-text-muted h-8 text-xs"
           >
             Clear filters
           </Button>
         )}
       </div>
 
-      {isLoading && !sessions && <p className="font-mono text-xs text-[--text-muted]">Loading…</p>}
+      {isLoading && !sessions && <p className="text-text-muted font-mono text-xs">Loading…</p>}
 
       {isEmpty && (
         <div className="flex flex-col items-center gap-3 py-16 text-center">
           <DaemonMascot size={48} expression="idle" />
-          <p className="font-mono text-xs text-[--text-muted]">No sessions yet.</p>
+          <p className="text-text-muted font-mono text-xs">No sessions yet.</p>
         </div>
       )}
 
       {!activeProjectId && !isLoading && (
-        <p className="font-mono text-xs text-[--text-muted]">
-          Select a project to view its sessions.
-        </p>
+        <p className="text-text-muted font-mono text-xs">Select a project to view its sessions.</p>
       )}
 
       {sessions && sessions.length > 0 && (
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
-              <tr className="border-b border-[--border] text-left">
-                <th className="pr-4 pb-2 font-mono font-normal tracking-widest text-[--text-muted] uppercase">
+              <tr className="border-border border-b text-left">
+                <th className="text-text-muted pr-4 pb-2 font-mono font-normal tracking-widest uppercase">
                   ID
                 </th>
-                <th className="pr-4 pb-2 font-mono font-normal tracking-widest text-[--text-muted] uppercase">
+                <th className="text-text-muted pr-4 pb-2 font-mono font-normal tracking-widest uppercase">
                   Status
                 </th>
-                <th className="pr-4 pb-2 font-mono font-normal tracking-widest text-[--text-muted] uppercase">
+                <th className="text-text-muted pr-4 pb-2 font-mono font-normal tracking-widest uppercase">
                   Spec
                 </th>
-                <th className="pr-4 pb-2 font-mono font-normal tracking-widest text-[--text-muted] uppercase">
+                <th className="text-text-muted pr-4 pb-2 font-mono font-normal tracking-widest uppercase">
                   Started
                 </th>
-                <th className="pr-4 pb-2 font-mono font-normal tracking-widest text-[--text-muted] uppercase">
+                <th className="text-text-muted pr-4 pb-2 font-mono font-normal tracking-widest uppercase">
                   Duration
                 </th>
-                <th className="pb-2 font-mono font-normal tracking-widest text-[--text-muted] uppercase">
+                <th className="text-text-muted pb-2 font-mono font-normal tracking-widest uppercase">
                   Tasks
                 </th>
               </tr>
@@ -301,7 +299,7 @@ export default function SessionsPage() {
                 <Fragment key={`group-${label}`}>
                   <tr>
                     <td colSpan={6} className="px-0 py-0 pt-3 pb-1">
-                      <span className="font-mono text-xs font-semibold tracking-widest text-[--text-muted] uppercase">
+                      <span className="text-text-muted font-mono text-xs font-semibold tracking-widest uppercase">
                         {label}
                       </span>
                     </td>
@@ -309,15 +307,15 @@ export default function SessionsPage() {
                   {groupSessions.map((session) => (
                     <Fragment key={session.id}>
                       <tr
-                        className="cursor-pointer border-b border-[--border] transition-colors hover:bg-[--surface-hover]"
+                        className="border-border hover:bg-surface-hover cursor-pointer border-b transition-colors"
                         onClick={() => handleRowClick(session.id)}
                       >
-                        <td className="py-3 pr-4 font-mono text-[--text-primary]">
+                        <td className="text-text-primary py-3 pr-4 font-mono">
                           <Link
                             href={`/sessions/${session.id}`}
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <span className="rounded-sm bg-[--phosphor-amber]/10 px-1.5 py-0.5 font-mono text-xs text-[--phosphor-amber]">
+                            <span className="bg-phosphor-amber/10 text-phosphor-amber rounded-sm px-1.5 py-0.5 font-mono text-xs">
                               #{session.id}
                             </span>
                           </Link>
@@ -328,16 +326,16 @@ export default function SessionsPage() {
                           <StatusDot status={session.status} />
                           {session.status.toUpperCase()}
                         </td>
-                        <td className="py-3 pr-4 font-mono text-[--text-secondary]">
+                        <td className="text-text-secondary py-3 pr-4 font-mono">
                           {session.specTitle ?? (session.specId ? `Spec #${session.specId}` : '—')}
                         </td>
-                        <td className="py-3 pr-4 font-mono text-[--text-secondary]">
+                        <td className="text-text-secondary py-3 pr-4 font-mono">
                           {formatStartedAt(session.startedAt)}
                         </td>
-                        <td className="py-3 pr-4 font-mono text-[--text-muted]">
+                        <td className="text-text-muted py-3 pr-4 font-mono">
                           {formatDuration(session)}
                         </td>
-                        <td className="py-3 font-mono text-[--text-secondary]">
+                        <td className="text-text-secondary py-3 font-mono">
                           {session.tasksSucceeded}/{session.tasksExecuted}
                         </td>
                       </tr>
@@ -345,7 +343,7 @@ export default function SessionsPage() {
                         <td colSpan={6} className="p-0">
                           <Collapsible open={expandedId === session.id}>
                             <CollapsibleContent>
-                              <div className="border-b border-[--border] px-4 py-4">
+                              <div className="border-border border-b px-4 py-4">
                                 <EventLog sessionId={session.id} />
                               </div>
                             </CollapsibleContent>
