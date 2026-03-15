@@ -74,10 +74,11 @@ export function usePolling<T>({
     }
 
     let isMounted = true;
+    const controller = new AbortController();
 
     const fetchData = async () => {
       try {
-        const response = await fetch(url, { credentials: 'include' });
+        const response = await fetch(url, { credentials: 'include', signal: controller.signal });
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -107,6 +108,7 @@ export function usePolling<T>({
           stop();
         }
       } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') return;
         if (!isMounted) return;
 
         errorCountRef.current += 1;
@@ -140,6 +142,7 @@ export function usePolling<T>({
     return () => {
       isMounted = false;
       clearInterval(timeoutId);
+      controller.abort();
     };
   }, [url, interval, enabled, isStopped, onData, onError, stopWhen, stop]);
 

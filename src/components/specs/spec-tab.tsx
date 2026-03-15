@@ -41,11 +41,9 @@ function statusBadgeClass(status: SpecStatus): string {
   }
 }
 
-function wordCount(text: string): number {
-  return text
-    .trim()
-    .split(/\s+/)
-    .filter((w) => w.length > 0).length;
+function wordCount(text: string | undefined): number {
+  if (!text) return 0;
+  return text.trim().split(/\s+/).filter((w) => w.length > 0).length;
 }
 
 export function SpecTab({ spec, userRole }: SpecTabProps): React.ReactElement {

@@ -139,8 +139,7 @@ export default function SessionsPage() {
 
   // Build poll URL from active filters
   const buildUrl = () => {
-    if (!activeProjectId) return null;
-    const params = new URLSearchParams({ projectId: String(activeProjectId) });
+    const params = new URLSearchParams();
     if (debouncedSearch) params.set('search', debouncedSearch);
     if (statusFilter !== 'all') params.set('status', statusFilter);
     if (specFilter !== 'all') params.set('specId', specFilter);
