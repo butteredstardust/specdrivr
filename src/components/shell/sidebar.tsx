@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, FolderKanban, FileText, Terminal, Settings } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, FileText, Terminal, Bell, Settings } from 'lucide-react';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { useShell } from '@/components/shell/shell-context';
 import { Badge } from '@/components/ui/badge';
@@ -24,6 +24,7 @@ const NAV_ITEMS = [
   { href: '/projects', label: 'Projects', icon: FolderKanban, exact: false },
   { href: '/specs', label: 'Specs', icon: FileText, exact: false },
   { href: '/sessions', label: 'Sessions', icon: Terminal, exact: false },
+  { href: '/notifications', label: 'Notifications', icon: Bell, exact: false },
   { href: '/settings', label: 'Settings', icon: Settings, exact: false },
 ];
 

@@ -6,6 +6,7 @@ import { clientLogger } from '@/lib/logger-client';
 import { usePolling } from '@/hooks/use-polling';
 import { TaskRow } from '@/components/ui/task-row';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { useTaskDrawer } from '@/components/shell/task-drawer-context';
 import type { UserRole } from '@/db/schema';
 
 type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'done' | 'failed' | 'skipped';
@@ -27,6 +28,8 @@ interface TasksTabProps {
 const TERMINAL_STATUSES: TaskStatus[] = ['done', 'failed', 'skipped'];
 
 export function TasksTab({ specId, userRole }: TasksTabProps): React.ReactElement {
+  const { openDrawer } = useTaskDrawer();
+
   const { data: tasks, isLoading } = usePolling<Task[]>({
     url: `/api/v1/tasks?specId=${specId}`,
     interval: 5000,
@@ -119,6 +122,7 @@ export function TasksTab({ specId, userRole }: TasksTabProps): React.ReactElemen
             userRole={userRole}
             onUnblock={handleUnblock}
             onOverride={handleOverride}
+            onOpenDrawer={openDrawer}
           />
         ))}
       </div>

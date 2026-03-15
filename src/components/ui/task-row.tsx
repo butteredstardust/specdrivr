@@ -12,7 +12,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal } from 'lucide-react';
+import { ChevronRight, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -31,6 +31,7 @@ interface TaskRowProps {
   userRole: UserRole;
   onUnblock?: (taskId: number) => void;
   onOverride?: (taskId: number, newStatus: TaskStatus) => void;
+  onOpenDrawer?: (taskId: number) => void;
   className?: string;
 }
 
@@ -58,7 +59,7 @@ function hasRole(userRole: UserRole, required: UserRole): boolean {
   return ROLE_RANK[userRole] >= ROLE_RANK[required];
 }
 
-export function TaskRow({ task, userRole, onUnblock, onOverride, className }: TaskRowProps) {
+export function TaskRow({ task, userRole, onUnblock, onOverride, onOpenDrawer, className }: TaskRowProps) {
   const [isOpen, setIsOpen] = useState(false);
   const canUnblock = hasRole(userRole, 'member');
   const canOverride = hasRole(userRole, 'admin');
@@ -92,6 +93,17 @@ export function TaskRow({ task, userRole, onUnblock, onOverride, className }: Ta
                 <span className="max-w-48 truncate text-xs text-[--phosphor-amber]">
                   {task.errorMessage.slice(0, 60)}
                 </span>
+              )}
+              {onOpenDrawer && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 shrink-0"
+                  onClick={(e) => { e.stopPropagation(); onOpenDrawer(task.id); }}
+                  aria-label="Open task details"
+                >
+                  <ChevronRight className="h-3 w-3" />
+                </Button>
               )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
