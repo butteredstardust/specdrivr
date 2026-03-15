@@ -195,9 +195,7 @@ export const invites = pgTable('invites', {
   email: text('email').notNull(),
   role: userRoleEnum('role').notNull().default('viewer'),
   token: text('token').notNull().unique(),
-  invitedBy: text('invited_by')
-    .notNull()
-    .references(() => users.id),
+  invitedBy: text('invited_by').references(() => users.id, { onDelete: 'set null' }),
   resendCount: integer('resend_count').notNull().default(0),
   lastResentAt: timestamp('last_resent_at', { withTimezone: true }),
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
@@ -686,8 +684,8 @@ export const gitCommits = pgTable('git_commits', {
 
 export const apiRequestLogs = pgTable('api_request_logs', {
   id: serial('id').primaryKey(),
-  tokenId: integer('token_id').references(() => agentTokens.id),
-  projectId: integer('project_id').references(() => projects.id),
+  tokenId: integer('token_id').references(() => agentTokens.id, { onDelete: 'set null' }),
+  projectId: integer('project_id').references(() => projects.id, { onDelete: 'cascade' }),
   endpoint: text('endpoint').notNull(),
   method: text('method').notNull(),
   statusCode: integer('status_code').notNull(),
@@ -704,7 +702,7 @@ export const auditLog = pgTable(
   {
     id: serial('id').primaryKey(),
     projectId: integer('project_id').references(() => projects.id, { onDelete: 'cascade' }),
-    userId: text('user_id').references(() => users.id),
+    userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
     action: text('action').notNull(),
     targetType: text('target_type'),
     targetId: text('target_id'),

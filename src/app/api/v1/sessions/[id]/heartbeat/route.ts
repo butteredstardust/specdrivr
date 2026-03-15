@@ -4,6 +4,7 @@ import { agentSessionRepository } from '@/repositories/agent-session-repository'
 import { handleApiError } from '@/lib/error-handler';
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  // No body — no Zod needed
   const authResult = await verifyAgentToken(request.headers.get('Authorization'));
   if (!authResult.success) {
     return authResult.response;

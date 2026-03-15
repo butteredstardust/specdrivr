@@ -29,9 +29,12 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const snapshots = await usageRepository.getByProjectId(projectId, 30);
+    const page = parseInt(_request.nextUrl.searchParams.get('page') ?? '1', 10);
+    const limit = parseInt(_request.nextUrl.searchParams.get('limit') ?? '50', 10);
 
-    const summary = snapshots.reduce(
+    const result = await usageRepository.getByProjectId(projectId, { days: 30, page, limit });
+
+    const summary = result.data.reduce(
       (acc, s) => ({
         totalSessions: acc.totalSessions + s.sessionsRun,
         totalTasks: acc.totalTasks + s.tasksExecuted,
@@ -41,7 +44,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       { totalSessions: 0, totalTasks: 0, totalTokens: 0, totalCostUsd: 0 }
     );
 
-    return NextResponse.json({ data: { snapshots, summary } });
+    return NextResponse.json({ data: { snapshots: result.data, summary, meta: result.meta } });
   } catch (error) {
     return handleApiError(error);
   }

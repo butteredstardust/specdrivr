@@ -4,6 +4,7 @@ import { notificationRepository } from '@/repositories/notification-repository';
 import { handleApiError } from '@/lib/error-handler';
 
 export async function POST(req: Request, context: { params: Promise<{ id: string }> }) {
+  // No body — no Zod needed
   try {
     const session = await auth();
     if (!session?.user) {
