@@ -90,6 +90,7 @@ export function ProjectSettingsForm({
       if (res.ok) {
         setVerifyStatus('connected');
       } else {
+        clientLogger.warn('Repository verify returned non-OK', { status: res.status });
         setVerifyStatus('unreachable');
       }
     } catch (err) {
@@ -235,7 +236,7 @@ export function ProjectSettingsForm({
                 <TooltipTrigger asChild>
                   <span tabIndex={!editable ? 0 : undefined}>
                     <Button type="submit" disabled={!editable || isSaving} size="sm">
-                      {isSaving ? 'Saving…' : 'Save'}
+                      {isSaving ? 'Saving Changes…' : 'Save Changes'}
                     </Button>
                   </span>
                 </TooltipTrigger>
