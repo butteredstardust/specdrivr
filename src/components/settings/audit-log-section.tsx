@@ -1,0 +1,319 @@
+'use client';
+
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { clientLogger } from '@/lib/logger-client';
+import { usePolling } from '@/hooks/use-polling';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { Loader2, ChevronLeft, ChevronRight, ChevronDown, Download } from 'lucide-react';
+import type { AuditLogSelect } from '@/db/schema';
+
+interface AuditMeta {
+  page: number;
+  total: number;
+  pageSize: number;
+}
+
+interface AuditPayload {
+  data: AuditLogSelect[];
+  meta: AuditMeta;
+}
+
+interface AuditLogSectionProps {
+  projectId: number;
+}
+
+const KNOWN_ACTIONS = [
+  'project.updated',
+  'member.invited',
+  'member.removed',
+  'spec.created',
+  'plan.approved',
+  'session.started',
+];
+
+function formatTs(date: string | Date): string {
+  return new Date(date).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+}
+
+function AuditRow({ entry }: { entry: AuditLogSelect }) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <>
+      <tr
+        className="cursor-pointer border-b border-[--border-default] last:border-0 hover:bg-[--surface-hover]"
+        onClick={() => setExpanded((v) => !v)}
+      >
+        <td className="px-4 py-2.5 font-mono text-xs text-[--text-muted]">
+          <span className="flex items-center gap-1.5">
+            <ChevronDown
+              className={`size-3 shrink-0 transition-transform ${expanded ? 'rotate-0' : '-rotate-90'}`}
+            />
+            {entry.userId ?? '—'}
+          </span>
+        </td>
+        <td className="px-4 py-2.5 font-mono text-xs text-[--text-primary]">{entry.action}</td>
+        <td className="px-4 py-2.5 font-mono text-xs text-[--text-muted]">
+          {entry.targetType ?? '—'}
+        </td>
+        <td className="px-4 py-2.5 font-mono text-xs text-[--text-muted]">
+          {entry.targetId ?? '—'}
+        </td>
+        <td className="px-4 py-2.5 font-mono text-xs text-[--text-muted]">
+          {entry.ipAddress ?? '—'}
+        </td>
+        <td className="px-4 py-2.5 font-mono text-xs text-[--text-muted]">
+          {formatTs(entry.createdAt)}
+        </td>
+      </tr>
+
+      {expanded && (
+        <tr className="border-b border-[--border-default]">
+          <td colSpan={6} className="px-4 pt-0 pb-3">
+            <pre className="max-h-64 overflow-auto rounded-md bg-[--bg-inset] p-3 font-mono text-xs text-[--text-primary]">
+              {entry.detail ? JSON.stringify(entry.detail, null, 2) : '(no detail)'}
+            </pre>
+          </td>
+        </tr>
+      )}
+    </>
+  );
+}
+
+export function AuditLogSection({ projectId }: AuditLogSectionProps) {
+  const [page, setPage] = useState(1);
+  const [entries, setEntries] = useState<AuditLogSelect[]>([]);
+  const [meta, setMeta] = useState<AuditMeta | null>(null);
+
+  const [searchInput, setSearchInput] = useState('');
+  const [search, setSearch] = useState('');
+  const [actor, setActor] = useState('');
+  const [action, setAction] = useState('');
+
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Debounce the search field
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setSearch(searchInput);
+      setPage(1);
+    }, 300);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [searchInput]);
+
+  const buildUrl = () => {
+    const params = new URLSearchParams({ page: String(page) });
+    if (search) params.set('search', search);
+    if (actor) params.set('actor', actor);
+    if (action && action !== '__all__') params.set('action', action);
+    return `/api/v1/projects/${projectId}/audit?${params.toString()}`;
+  };
+
+  const url = buildUrl();
+
+  const stopWhen = useCallback((data: AuditPayload) => {
+    setEntries(data.data);
+    setMeta(data.meta);
+    return true;
+  }, []);
+
+  const onError = useCallback((err: Error) => {
+    clientLogger.error('Failed to load audit log', err);
+  }, []);
+
+  const { isLoading, error, restart } = usePolling<AuditPayload>({
+    url,
+    stopWhen,
+    onError,
+  });
+
+  const totalPages = meta ? Math.max(1, Math.ceil(meta.total / meta.pageSize)) : 1;
+
+  const goToPage = (next: number) => {
+    setPage(next);
+    restart();
+  };
+
+  const handleActorBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    if (e.target.value !== actor) {
+      setActor(e.target.value);
+      setPage(1);
+      restart();
+    }
+  };
+
+  const handleActionChange = (value: string) => {
+    setAction(value);
+    setPage(1);
+    restart();
+  };
+
+  const handleExport = () => {
+    const header = 'Actor,Action,Resource,Resource ID,IP,Timestamp\n';
+    const rows = entries
+      .map(
+        (e) =>
+          `${e.userId ?? ''},${e.action},${e.targetType ?? ''},${e.targetId ?? ''},${e.ipAddress ?? ''},${formatTs(e.createdAt)}`
+      )
+      .join('\n');
+    const blob = new Blob([header + rows], { type: 'text/csv' });
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = `audit-${projectId}-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(blobUrl);
+  };
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* Filter bar */}
+      <div className="flex flex-wrap items-center gap-2">
+        <Input
+          placeholder="Search actions…"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          className="h-8 w-48 font-mono text-xs"
+        />
+        <Input
+          placeholder="Actor user ID"
+          defaultValue={actor}
+          onBlur={handleActorBlur}
+          className="h-8 w-48 font-mono text-xs"
+        />
+        <Select value={action || '__all__'} onValueChange={handleActionChange}>
+          <SelectTrigger className="h-8 w-44 font-mono text-xs">
+            <SelectValue placeholder="All actions" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__all__" className="font-mono text-xs">
+              All actions
+            </SelectItem>
+            {KNOWN_ACTIONS.map((a) => (
+              <SelectItem key={a} value={a} className="font-mono text-xs">
+                {a}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <div className="ml-auto">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExport}
+            disabled={entries.length === 0}
+            className="gap-2 font-mono text-xs"
+          >
+            <Download className="size-3" />
+            Export CSV
+          </Button>
+        </div>
+      </div>
+
+      {isLoading && (
+        <div className="flex items-center gap-2 text-[--text-muted]">
+          <Loader2 className="size-3 animate-spin" />
+          <span className="font-mono text-xs">Loading audit log…</span>
+        </div>
+      )}
+
+      {error && !isLoading && (
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-xs text-[--status-red]">Failed to load audit log.</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={restart}
+            className="h-auto px-0 font-mono text-xs text-[--text-muted] underline hover:bg-transparent hover:text-[--text-primary]"
+          >
+            Retry
+          </Button>
+        </div>
+      )}
+
+      {!isLoading && !error && entries.length === 0 && (
+        <div className="flex flex-col items-center justify-center gap-3 py-16">
+          <DaemonMascot size={32} expression="idle" />
+          <p className="font-mono text-sm text-[--text-muted]">No audit entries.</p>
+          <p className="font-mono text-xs text-[--text-muted]">
+            Administrative actions will be logged here.
+          </p>
+        </div>
+      )}
+
+      {!isLoading && !error && entries.length > 0 && (
+        <>
+          <div className="overflow-x-auto rounded-lg border border-[--border-default]">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-[--border-default] bg-[--bg-surface]">
+                  <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">Actor</th>
+                  <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">Action</th>
+                  <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">Resource</th>
+                  <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">Resource ID</th>
+                  <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">IP</th>
+                  <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">Timestamp</th>
+                </tr>
+              </thead>
+              <tbody>
+                {entries.map((entry) => (
+                  <AuditRow key={entry.id} entry={entry} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          {meta && meta.total > meta.pageSize && (
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-xs text-[--text-muted]">
+                Page {page} of {totalPages}
+              </span>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => goToPage(page - 1)}
+                  disabled={page <= 1}
+                  className="gap-1 font-mono text-xs"
+                >
+                  <ChevronLeft className="size-3" />
+                  Prev
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => goToPage(page + 1)}
+                  disabled={page >= totalPages}
+                  className="gap-1 font-mono text-xs"
+                >
+                  Next
+                  <ChevronRight className="size-3" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
