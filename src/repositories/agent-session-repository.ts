@@ -5,6 +5,7 @@ import {
   auditLog,
   type AgentSessionSelect as AgentSession,
   type AgentEventInsert,
+  type AgentEventSelect,
   projects,
   specifications,
 } from '@/db/schema';
@@ -187,6 +188,18 @@ export class AgentSessionRepository extends BaseRepository {
       // Never throw from notification helper
       logger.error({ err }, 'Failed to send session Slack notification');
     }
+  }
+
+  async getEvents(sessionId: number, limit: number): Promise<AgentEventSelect[]> {
+    const rows = await this.executeQuery(() =>
+      db
+        .select()
+        .from(agentEvents)
+        .where(eq(agentEvents.sessionId, sessionId))
+        .orderBy(desc(agentEvents.createdAt))
+        .limit(limit)
+    );
+    return rows.reverse(); // chronological order for log display
   }
 
   async addEvent(data: Omit<AgentEventInsert, 'id' | 'createdAt'>): Promise<void> {
