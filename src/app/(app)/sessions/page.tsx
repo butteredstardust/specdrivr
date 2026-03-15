@@ -16,6 +16,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 interface Session {
   id: number;
@@ -31,39 +39,56 @@ interface Session {
 
 const TERMINAL_STATUSES = ['completed', 'failed', 'cancelled'] as const;
 
-function statusColor(status: Session['status']): string {
-  switch (status) {
-    case 'running':
-      return 'text-green-400';
-    case 'paused':
-      return 'text-phosphor-amber';
-    case 'completed':
-      return 'text-emerald-400';
-    case 'failed':
-      return 'text-red-400';
-    case 'cancelled':
-      return 'text-text-muted';
-    default:
-      return 'text-text-muted';
-  }
+function SessionIdBadge({ id }: { id: number }) {
+  return (
+    <code className="bg-phosphor-amber/10 text-phosphor-amber inline-flex items-center rounded px-1.5 py-0.5 font-mono text-xs">
+      SESS-{String(id).padStart(3, '0')}
+    </code>
+  );
 }
 
-function StatusDot({ status }: { status: Session['status'] }) {
+function StatusBadge({ status }: { status: Session['status'] }) {
+  const base =
+    'font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded inline-flex items-center gap-1.5';
+  const dot = 'h-1.5 w-1.5 rounded-full shrink-0';
   switch (status) {
     case 'running':
       return (
-        <span className="bg-accent-violet mr-1.5 inline-block h-2 w-2 animate-pulse rounded-full" />
+        <span className={`${base} bg-accent-violet/10 text-accent-violet`}>
+          <span className={`${dot} bg-accent-violet animate-pulse`} />
+          Running
+        </span>
+      );
+    case 'paused':
+      return (
+        <span className={`${base} bg-phosphor-amber/10 text-phosphor-amber`}>
+          <span className={`${dot} bg-phosphor-amber`} />
+          Paused
+        </span>
       );
     case 'completed':
-      return <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-emerald-400" />;
+      return (
+        <span className={`${base} bg-status-emerald/10 text-status-emerald`}>
+          <span className={`${dot} bg-status-emerald`} />
+          Done
+        </span>
+      );
     case 'failed':
-      return <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-red-400" />;
-    case 'paused':
-      return <span className="bg-phosphor-amber mr-1.5 inline-block h-2 w-2 rounded-full" />;
+      return (
+        <span className={`${base} bg-status-red/10 text-status-red`}>
+          <span className={`${dot} bg-status-red`} />
+          Failed
+        </span>
+      );
     case 'cancelled':
-      return <span className="bg-text-muted mr-1.5 inline-block h-2 w-2 rounded-full" />;
+      return (
+        <span className={`${base} bg-secondary text-muted-foreground`}>
+          <span className={`${dot} bg-muted-foreground`} />
+          Cancelled
+        </span>
+      );
     default:
-      return null;
+      return <span className={`${base} bg-secondary text-muted-foreground`}>{status}</span>;
   }
 }
 
@@ -115,7 +140,6 @@ export default function SessionsPage() {
   const { activeProjectId } = useShell();
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
-  // Filter state
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -123,21 +147,18 @@ export default function SessionsPage() {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
 
-  // Debounce search — state management only, not data fetching
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 300);
     return () => clearTimeout(t);
   }, [search]);
 
-  // Single fetch for spec dropdown options
-  const { data: specsData } = usePolling<Array<{ id: number; title: string }>>({
+  const { data: specsData } = usePolling<Array<{ id: number; name: string }>>({
     url: activeProjectId ? `/api/v1/specs?projectId=${activeProjectId}` : null,
     interval: 60_000,
     stopWhen: () => true,
   });
   const specs = specsData ?? [];
 
-  // Build poll URL from active filters
   const buildUrl = () => {
     const params = new URLSearchParams();
     if (debouncedSearch) params.set('search', debouncedSearch);
@@ -147,20 +168,15 @@ export default function SessionsPage() {
     if (toDate) params.set('to', toDate);
     return `/api/v1/sessions?${params}`;
   };
-  const url = buildUrl();
 
   const { data: sessions, isLoading } = usePolling<Session[]>({
-    url,
+    url: buildUrl(),
     interval: 5000,
     stopWhen: (data) =>
       Array.isArray(data) &&
       data.length > 0 &&
       data.every((s) => (TERMINAL_STATUSES as readonly string[]).includes(s.status)),
   });
-
-  const handleRowClick = (id: number) => {
-    setExpandedId((prev) => (prev === id ? null : id));
-  };
 
   const isEmpty = !isLoading && (!sessions || sessions.length === 0);
 
@@ -180,7 +196,6 @@ export default function SessionsPage() {
     setToDate('');
   };
 
-  // Group sessions by date label
   const groups = new Map<string, Session[]>();
   for (const session of sessions ?? []) {
     const label = getGroupLabel(session.startedAt);
@@ -189,175 +204,182 @@ export default function SessionsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="text-text-muted font-mono text-xs tracking-widest uppercase">SESSIONS</h1>
+    <div className="-mx-6 -mt-6 flex min-h-full flex-col">
+      {/* Header */}
+      <div className="border-border flex items-center justify-between border-b px-6 py-4">
+        <div>
+          <div className="text-muted-foreground mb-1 font-mono text-[10px] tracking-[0.2em] uppercase">
+            Sessions
+          </div>
+          <h1 className="text-foreground text-xl font-semibold">Sessions</h1>
+        </div>
+      </div>
 
-      {/* Filter bar */}
-      <div className="flex flex-wrap items-center gap-2">
+      {/* Filter bar — primary row */}
+      <div className="border-border flex items-center gap-3 border-b px-6 py-3">
         <Input
           type="text"
           placeholder="Search sessions…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="h-8 w-48 text-xs"
+          className="h-8 w-52 text-xs"
         />
-
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="h-8 w-36 text-xs">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All statuses</SelectItem>
-            <SelectItem value="running">Running</SelectItem>
-            <SelectItem value="paused">Paused</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-            <SelectItem value="failed">Failed</SelectItem>
-            <SelectItem value="cancelled">Cancelled</SelectItem>
-          </SelectContent>
-        </Select>
-
-        <Select value={specFilter} onValueChange={setSpecFilter}>
-          <SelectTrigger className="h-8 w-40 text-xs">
-            <SelectValue placeholder="Spec" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All specs</SelectItem>
-            {specs.map((spec) => (
-              <SelectItem key={spec.id} value={String(spec.id)}>
-                {spec.title}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Input
-          type="date"
-          value={fromDate}
-          onChange={(e) => setFromDate(e.target.value)}
-          className="h-8 text-xs"
-        />
-
-        <Input
-          type="date"
-          value={toDate}
-          onChange={(e) => setToDate(e.target.value)}
-          className="h-8 text-xs"
-        />
-
-        {isAnyFilterActive && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={clearFilters}
-            className="text-text-muted h-8 text-xs"
-          >
-            Clear filters
-          </Button>
-        )}
+        <div className="flex items-center gap-1">
+          {(['all', 'running', 'completed', 'paused', 'failed', 'cancelled'] as const).map((s) => (
+            <button
+              key={s}
+              onClick={() => setStatusFilter(s)}
+              className={[
+                'h-7 rounded px-2.5 font-mono text-[10px] tracking-wider uppercase transition-colors',
+                statusFilter === s
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-secondary text-muted-foreground hover:text-foreground',
+              ].join(' ')}
+            >
+              {s === 'all' ? 'All' : s}
+            </button>
+          ))}
+        </div>
+        <div className="ml-auto flex items-center gap-2">
+          <Select value={specFilter} onValueChange={setSpecFilter}>
+            <SelectTrigger className="h-8 w-40 text-xs">
+              <SelectValue placeholder="All specs" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All specs</SelectItem>
+              {specs.map((spec) => (
+                <SelectItem key={spec.id} value={String(spec.id)}>
+                  {spec.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Input
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+            className="h-8 w-36 text-xs"
+          />
+          <Input
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+            className="h-8 w-36 text-xs"
+          />
+          {isAnyFilterActive && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearFilters}
+              className="text-muted-foreground h-8 text-xs"
+            >
+              Clear
+            </Button>
+          )}
+        </div>
       </div>
 
-      {isLoading && !sessions && <p className="text-text-muted font-mono text-xs">Loading…</p>}
-
-      {isEmpty && (
-        <div className="flex flex-col items-center gap-3 py-16 text-center">
-          <DaemonMascot size={48} expression="idle" />
-          <p className="text-text-muted font-mono text-xs">No sessions yet.</p>
-        </div>
-      )}
-
-      {!activeProjectId && !isLoading && (
-        <p className="text-text-muted font-mono text-xs">Select a project to view its sessions.</p>
-      )}
-
-      {sessions && sessions.length > 0 && (
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="border-border border-b text-left">
-                <th className="text-text-muted pr-4 pb-2 font-mono font-normal tracking-widest uppercase">
+      {/* Content */}
+      <div className="border-border border-b px-6 py-2.5">
+        {!activeProjectId && !isLoading ? (
+          <div className="flex flex-col items-center gap-4 py-16">
+            <DaemonMascot size={48} expression="idle" />
+            <p className="text-muted-foreground font-mono text-sm">
+              Select a project to view its sessions.
+            </p>
+          </div>
+        ) : isLoading && !sessions ? (
+          <div className="text-muted-foreground py-8 text-center font-mono text-xs">Loading…</div>
+        ) : isEmpty ? (
+          <div className="flex flex-col items-center gap-4 py-16">
+            <DaemonMascot size={48} expression="idle" />
+            <p className="text-muted-foreground font-mono text-sm">No sessions yet.</p>
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow className="border-border hover:bg-transparent">
+                <TableHead className="text-muted-foreground h-auto w-36 px-6 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
                   ID
-                </th>
-                <th className="text-text-muted pr-4 pb-2 font-mono font-normal tracking-widest uppercase">
+                </TableHead>
+                <TableHead className="text-muted-foreground h-auto w-36 px-3 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
                   Status
-                </th>
-                <th className="text-text-muted pr-4 pb-2 font-mono font-normal tracking-widest uppercase">
+                </TableHead>
+                <TableHead className="text-muted-foreground h-auto px-3 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
                   Spec
-                </th>
-                <th className="text-text-muted pr-4 pb-2 font-mono font-normal tracking-widest uppercase">
+                </TableHead>
+                <TableHead className="text-muted-foreground h-auto w-40 px-3 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
                   Started
-                </th>
-                <th className="text-text-muted pr-4 pb-2 font-mono font-normal tracking-widest uppercase">
+                </TableHead>
+                <TableHead className="text-muted-foreground h-auto w-24 px-3 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
                   Duration
-                </th>
-                <th className="text-text-muted pb-2 font-mono font-normal tracking-widest uppercase">
+                </TableHead>
+                <TableHead className="text-muted-foreground h-auto w-20 px-3 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
                   Tasks
-                </th>
-              </tr>
-            </thead>
-            <tbody>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {Array.from(groups.entries()).map(([label, groupSessions]) => (
                 <Fragment key={`group-${label}`}>
-                  <tr>
-                    <td colSpan={6} className="px-0 py-0 pt-3 pb-1">
-                      <span className="text-text-muted font-mono text-xs font-semibold tracking-widest uppercase">
+                  <TableRow className="border-0 hover:bg-transparent">
+                    <TableCell colSpan={6} className="px-6 pt-4 pb-1">
+                      <span className="text-muted-foreground font-mono text-[10px] font-semibold tracking-[0.2em] uppercase">
                         {label}
                       </span>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                   {groupSessions.map((session) => (
                     <Fragment key={session.id}>
-                      <tr
-                        className="border-border hover:bg-surface-hover cursor-pointer border-b transition-colors"
-                        onClick={() => handleRowClick(session.id)}
+                      <TableRow
+                        className="border-border/50 hover:bg-secondary/30 cursor-pointer"
+                        onClick={() =>
+                          setExpandedId((prev) => (prev === session.id ? null : session.id))
+                        }
                       >
-                        <td className="text-text-primary py-3 pr-4 font-mono">
-                          <Link
-                            href={`/sessions/${session.id}`}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <span className="bg-phosphor-amber/10 text-phosphor-amber rounded-sm px-1.5 py-0.5 font-mono text-xs">
-                              #{session.id}
-                            </span>
+                        <TableCell className="px-6 py-3" onClick={(e) => e.stopPropagation()}>
+                          <Link href={`/sessions/${session.id}`}>
+                            <SessionIdBadge id={session.id} />
                           </Link>
-                        </td>
-                        <td
-                          className={`py-3 pr-4 font-mono font-semibold ${statusColor(session.status)}`}
-                        >
-                          <StatusDot status={session.status} />
-                          {session.status.toUpperCase()}
-                        </td>
-                        <td className="text-text-secondary py-3 pr-4 font-mono">
+                        </TableCell>
+                        <TableCell className="px-3 py-3">
+                          <StatusBadge status={session.status} />
+                        </TableCell>
+                        <TableCell className="text-muted-foreground px-3 py-3 font-mono text-xs">
                           {session.specTitle ?? (session.specId ? `Spec #${session.specId}` : '—')}
-                        </td>
-                        <td className="text-text-secondary py-3 pr-4 font-mono">
+                        </TableCell>
+                        <TableCell className="text-muted-foreground px-3 py-3 font-mono text-xs">
                           {formatStartedAt(session.startedAt)}
-                        </td>
-                        <td className="text-text-muted py-3 pr-4 font-mono">
+                        </TableCell>
+                        <TableCell className="text-muted-foreground px-3 py-3 font-mono text-xs">
                           {formatDuration(session)}
-                        </td>
-                        <td className="text-text-secondary py-3 font-mono">
+                        </TableCell>
+                        <TableCell className="text-muted-foreground px-3 py-3 font-mono text-xs">
                           {session.tasksSucceeded}/{session.tasksExecuted}
-                        </td>
-                      </tr>
-                      <tr key={`${session.id}-log`}>
-                        <td colSpan={6} className="p-0">
+                        </TableCell>
+                      </TableRow>
+                      <TableRow
+                        key={`${session.id}-log`}
+                        className="border-0 p-0 hover:bg-transparent"
+                      >
+                        <TableCell colSpan={6} className="p-0">
                           <Collapsible open={expandedId === session.id}>
                             <CollapsibleContent>
-                              <div className="border-border border-b px-4 py-4">
+                              <div className="border-border border-b px-6 py-4">
                                 <EventLog sessionId={session.id} />
                               </div>
                             </CollapsibleContent>
                           </Collapsible>
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     </Fragment>
                   ))}
                 </Fragment>
               ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+            </TableBody>
+          </Table>
+        )}
+      </div>
     </div>
   );
 }

@@ -16,7 +16,7 @@ export default async function TeamPage() {
   if (!project) {
     return (
       <div className="flex max-w-2xl flex-col gap-8">
-        <h1 className="text-text-muted font-mono text-xs tracking-widest uppercase">TEAM</h1>
+        <h1 className="text-foreground text-lg font-semibold">TEAM</h1>
         <p className="text-text-muted font-mono text-xs">No project found.</p>
       </div>
     );
@@ -28,7 +28,7 @@ export default async function TeamPage() {
 
   return (
     <div className="flex max-w-2xl flex-col gap-8">
-      <h1 className="text-text-muted font-mono text-xs tracking-widest uppercase">TEAM</h1>
+      <h1 className="text-foreground text-lg font-semibold">TEAM</h1>
       <MembersSection projectId={project.id} userRole={userRole} initialMembers={initialMembers} />
     </div>
   );

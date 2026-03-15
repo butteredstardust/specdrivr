@@ -207,6 +207,10 @@ export function TaskDrawer() {
         <Drawer.Portal>
           <Drawer.Overlay className="fixed inset-0 z-40 bg-black/60" />
           <Drawer.Content className="border-border-default bg-bg-surface fixed top-0 right-0 bottom-0 z-50 flex w-[640px] flex-col border-l outline-none">
+            <Drawer.Title className="sr-only">{task?.title ?? 'Task'}</Drawer.Title>
+            <Drawer.Description className="sr-only">
+              {task ? `${task.externalId} — ${task.status}` : 'Loading task'}
+            </Drawer.Description>
             {task && (
               <>
                 {/* Header */}

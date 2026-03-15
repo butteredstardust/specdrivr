@@ -32,6 +32,21 @@ interface Plan {
   content: string;
   status: PlanStatus;
   reviewerFeedback?: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+function timeAgo(dateStr: string | null | undefined): string {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return '';
+  const diff = Date.now() - date.getTime();
+  const mins = Math.floor(diff / 60_000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
 }
 
 const ROLE_RANK: Record<UserRole, number> = { viewer: 0, member: 1, admin: 2, owner: 3 };
@@ -246,21 +261,27 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
     return <p className="text-text-muted py-8 text-center font-mono text-xs">No plan found.</p>;
   }
 
-  // --- State 4: executing | completed ---
-  if (plan.status === 'executing' || plan.status === 'completed') {
+  // --- State 4: approved | executing | completed ---
+  if (plan.status === 'approved' || plan.status === 'executing' || plan.status === 'completed') {
+    const isExecuting = plan.status === 'executing';
+    const bannerBorder = isExecuting
+      ? 'border-accent-violet/30 bg-accent-violet/5'
+      : 'border-status-emerald/30 bg-status-emerald/5';
+    const bannerText = isExecuting ? 'text-accent-violet' : 'text-status-emerald';
+    const bannerLabel = isExecuting
+      ? 'EXECUTING'
+      : plan.status === 'approved'
+        ? 'APPROVED'
+        : 'COMPLETED';
+
     return (
       <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <span className="text-text-muted font-mono text-xs tracking-widest uppercase">Plan</span>
-          <span
-            className={`font-mono text-xs ${
-              plan.status === 'executing'
-                ? 'text-accent-violet animate-[blink_1s_ease-in-out_infinite]'
-                : 'text-emerald-400'
-            }`}
-          >
-            {plan.status.replace(/_/g, ' ')}
+        <div className={`flex items-center gap-2.5 rounded border px-3 py-2.5 ${bannerBorder}`}>
+          <DaemonMascot size={16} expression={isExecuting ? 'working' : 'idle'} />
+          <span className={`font-mono text-xs font-semibold tracking-widest ${bannerText}`}>
+            {bannerLabel}
           </span>
+          <span className="text-muted-foreground font-mono text-xs">{timeAgo(plan.updatedAt)}</span>
         </div>
         <div className="prose prose-invert max-w-none">
           <ReactMarkdown>{plan.content}</ReactMarkdown>

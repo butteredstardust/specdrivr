@@ -12,6 +12,8 @@ interface ShellContextValue {
   user: { id: string; name: string; email: string; role?: string; onboardingStep?: number };
   shortcutsOpen: boolean;
   setShortcutsOpen: (v: boolean) => void;
+  pageLabel: string | null;
+  setPageLabel: (label: string | null) => void;
 }
 
 interface ShellProviderProps {
@@ -34,6 +36,7 @@ export function ShellProvider({ user, children }: ShellProviderProps) {
     if (storedDevMode === 'true') setDevModeState(true);
   }, []);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [pageLabel, setPageLabel] = useState<string | null>(null);
   const firstKeyRef = useRef<string | null>(null);
   const firstKeyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -147,6 +150,8 @@ export function ShellProvider({ user, children }: ShellProviderProps) {
         user,
         shortcutsOpen,
         setShortcutsOpen,
+        pageLabel,
+        setPageLabel,
       }}
     >
       {children}

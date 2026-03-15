@@ -8,20 +8,18 @@ import type { UserRole } from '@/db/schema';
 interface NavItem {
   href: string;
   label: string;
-  /** If set, hides the item when the user's role is in this list */
   hideForRoles?: string[];
 }
 
 interface NavGroup {
   label: string;
   items: NavItem[];
-  /** Injected slot rendered immediately after this group */
   afterSlot?: 'danger-zone';
 }
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    label: 'ACCOUNT',
+    label: 'Account',
     items: [
       { href: '/settings/profile', label: 'Profile' },
       { href: '/settings/security', label: 'Security' },
@@ -29,7 +27,7 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    label: 'PROJECT',
+    label: 'Project',
     items: [
       { href: '/settings/general', label: 'General' },
       { href: '/settings/team', label: 'Team' },
@@ -41,7 +39,7 @@ const NAV_GROUPS: NavGroup[] = [
     afterSlot: 'danger-zone',
   },
   {
-    label: 'DEVELOPER',
+    label: 'Developer',
     items: [
       { href: '/settings/webhooks', label: 'Webhook Log' },
       { href: '/settings/security', label: 'API Tokens' },
@@ -60,48 +58,45 @@ export function SettingsNav({ userRole }: SettingsNavProps) {
     pathname === '/settings/danger' || pathname.startsWith('/settings/danger/');
 
   return (
-    <nav className="flex w-[180px] shrink-0 flex-col gap-0">
-      {NAV_GROUPS.map((group, groupIdx) => (
+    <nav className="flex flex-col gap-5">
+      {NAV_GROUPS.map((group) => (
         <div key={group.label}>
-          <p
-            className={cn(
-              'text-text-muted px-3 py-1 font-mono text-xs tracking-widest uppercase',
-              groupIdx === 0 ? 'mt-0' : 'mt-4'
-            )}
-          >
+          <p className="text-muted-foreground mb-1 px-2 font-mono text-[10px] tracking-[0.15em] uppercase">
             {group.label}
           </p>
-          {group.items
-            .filter((item) => !item.hideForRoles?.includes(userRole))
-            .map((item) => {
-              const active = pathname === item.href || pathname.startsWith(item.href + '/');
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    'flex items-center rounded-sm px-3 py-1.5 text-sm transition-colors',
-                    active
-                      ? 'border-accent-violet bg-accent-violet/10 text-accent-violet border-l-2 pl-[10px]'
-                      : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary'
-                  )}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
+          <div className="flex flex-col gap-0.5">
+            {group.items
+              .filter((item) => !item.hideForRoles?.includes(userRole))
+              .map((item) => {
+                const active = pathname === item.href || pathname.startsWith(item.href + '/');
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      'rounded px-2 py-1.5 text-sm transition-colors',
+                      active
+                        ? 'bg-accent-violet/10 text-accent-violet font-medium'
+                        : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+          </div>
 
           {group.afterSlot === 'danger-zone' && (
             <Link
               href="/settings/danger"
               className={cn(
-                'mt-4 flex items-center px-3 py-1.5 font-mono text-xs tracking-widest uppercase transition-colors',
+                'mt-3 block rounded px-2 py-1.5 font-mono text-xs tracking-wider uppercase transition-colors',
                 isDangerActive
-                  ? 'border-accent-violet bg-accent-violet/10 text-accent-violet border-l-2 pl-[10px]'
-                  : 'text-status-red/80 hover:text-status-red'
+                  ? 'bg-status-red/10 text-status-red font-medium'
+                  : 'text-status-red/70 hover:text-status-red'
               )}
             >
-              DANGER ZONE
+              Danger Zone
             </Link>
           )}
         </div>

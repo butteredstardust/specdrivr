@@ -6,7 +6,6 @@ import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   Table,
@@ -17,6 +16,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Plus, MoreHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import type { UserRole, SpecStatus } from '@/db/schema';
 
@@ -28,39 +28,47 @@ interface Spec {
   updatedAt: string;
 }
 
-const ALL_STATUSES: SpecStatus[] = [
-  'drafting',
-  'pending_plan',
-  'pending_approval',
-  'executing',
-  'completed',
-  'stalled',
-  'archived',
+const STATUS_TABS: Array<{ value: string; label: string; status?: SpecStatus }> = [
+  { value: 'all', label: 'All' },
+  { value: 'drafting', label: 'Drafting', status: 'drafting' },
+  { value: 'pending_plan', label: 'Pending', status: 'pending_plan' },
+  { value: 'pending_approval', label: 'Review', status: 'pending_approval' },
+  { value: 'executing', label: 'Executing', status: 'executing' },
+  { value: 'completed', label: 'Complete', status: 'completed' },
+  { value: 'stalled', label: 'Stalled', status: 'stalled' },
+  { value: 'archived', label: 'Archived', status: 'archived' },
 ];
 
-function statusBadgeClass(status: SpecStatus): string {
+function StatusBadge({ status }: { status: SpecStatus }) {
+  const base = 'font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded';
   switch (status) {
     case 'drafting':
-      return 'text-text-muted';
+      return <span className={`${base} bg-secondary text-muted-foreground`}>Draft</span>;
     case 'pending_plan':
-      return 'text-phosphor-amber animate-[blink_1s_ease-in-out_infinite]';
+      return <span className={`${base} text-phosphor-amber bg-phosphor-amber/10`}>Pending</span>;
     case 'pending_approval':
-      return 'text-phosphor-amber';
+      return <span className={`${base} text-phosphor-amber bg-phosphor-amber/10`}>Review</span>;
     case 'executing':
-      return 'text-accent-violet animate-[blink_1s_ease-in-out_infinite]';
+      return <span className={`${base} text-primary bg-primary/10`}>Running</span>;
     case 'completed':
-      return 'text-emerald-400';
+      return <span className={`${base} text-status-emerald bg-status-emerald/10`}>Done</span>;
     case 'stalled':
-      return 'text-orange-400';
+      return <span className={`${base} text-status-red bg-status-red/10`}>Stalled</span>;
     case 'archived':
-      return 'text-text-muted opacity-50';
+      return (
+        <span className={`${base} bg-secondary text-muted-foreground opacity-60`}>Archived</span>
+      );
     default:
-      return 'text-text-muted';
+      return <span className={`${base} bg-secondary text-muted-foreground`}>{status}</span>;
   }
 }
 
-function statusLabel(status: SpecStatus): string {
-  return status.replace(/_/g, ' ');
+function SpecIdBadge({ id }: { id: number }) {
+  return (
+    <code className="bg-phosphor-amber/10 text-phosphor-amber inline-flex cursor-pointer items-center gap-1 rounded px-1.5 py-0.5 font-mono text-xs">
+      SPEC-{String(id).padStart(3, '0')}
+    </code>
+  );
 }
 
 export default function SpecsPage(): React.ReactElement {
@@ -73,7 +81,6 @@ export default function SpecsPage(): React.ReactElement {
     ? parseInt(searchParams.get('projectId')!, 10)
     : null;
 
-  // Sync URL ?projectId into shell context so the sidebar picker also updates
   useEffect(() => {
     if (urlProjectId !== null && activeProjectId !== urlProjectId) {
       setActiveProjectId(urlProjectId);
@@ -83,7 +90,6 @@ export default function SpecsPage(): React.ReactElement {
   const effectiveProjectId = activeProjectId ?? urlProjectId;
 
   const [activeTab, setActiveTab] = useState<string>('all');
-  const [search, setSearch] = useState('');
 
   const specsUrl =
     effectiveProjectId !== null ? `/api/v1/specs?projectId=${effectiveProjectId}` : null;
@@ -95,11 +101,9 @@ export default function SpecsPage(): React.ReactElement {
 
   const canCreate = userRole === 'member' || userRole === 'admin' || userRole === 'owner';
 
-  const filteredSpecs = (specs ?? []).filter((spec) => {
-    const matchesTab = activeTab === 'all' || spec.status === activeTab;
-    const matchesSearch = spec.name.toLowerCase().includes(search.toLowerCase());
-    return matchesTab && matchesSearch;
-  });
+  const allSpecs = specs ?? [];
+  const countByStatus = (status: SpecStatus) => allSpecs.filter((s) => s.status === status).length;
+  const filteredSpecs = allSpecs.filter((spec) => activeTab === 'all' || spec.status === activeTab);
 
   const newSpecButton = (
     <Button
@@ -107,15 +111,24 @@ export default function SpecsPage(): React.ReactElement {
       disabled={!canCreate}
       onClick={canCreate ? () => router.push('/specs/new') : undefined}
       aria-disabled={!canCreate}
+      className="gap-1.5"
     >
+      <Plus className="h-3.5 w-3.5" />
       New Spec
     </Button>
   );
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-text-muted font-mono text-xs tracking-widest uppercase">SPECS</h1>
+    // Escape the layout's p-6 so sections are full-bleed with border separators
+    <div className="-mx-6 -mt-6 flex min-h-full flex-col">
+      {/* Header */}
+      <div className="border-border flex items-center justify-between border-b px-6 py-4">
+        <div>
+          <div className="text-muted-foreground mb-1 font-mono text-[10px] tracking-[0.2em] uppercase">
+            Specifications
+          </div>
+          <h1 className="text-foreground text-xl font-semibold">Specs</h1>
+        </div>
         <TooltipProvider>
           {canCreate ? (
             newSpecButton
@@ -132,85 +145,105 @@ export default function SpecsPage(): React.ReactElement {
         </TooltipProvider>
       </div>
 
-      <div className="flex items-center gap-3">
-        <Input
-          placeholder="Search specs..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="max-w-xs"
-        />
-      </div>
+      {/* Filter tabs */}
+      <div className="border-border border-b px-6 py-2.5">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
+            {STATUS_TABS.map(({ value, label, status }) => {
+              const count = status ? countByStatus(status) : allSpecs.length;
+              if (status && count === 0) return null;
+              return (
+                <TabsTrigger
+                  key={value}
+                  value={value}
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:bg-secondary data-[state=inactive]:text-muted-foreground hover:text-foreground h-auto rounded px-2.5 py-1 font-mono text-[10px] tracking-wider uppercase data-[state=active]:shadow-none"
+                >
+                  {label}
+                  {count > 0 && <span className="ml-1 opacity-60">{count}</span>}
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="h-auto flex-wrap gap-1">
-          <TabsTrigger value="all">All</TabsTrigger>
-          {ALL_STATUSES.map((status) => (
-            <TabsTrigger key={status} value={status}>
-              {statusLabel(status)}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        <TabsContent value={activeTab}>
-          {effectiveProjectId === null ? (
-            <div className="flex flex-col items-center gap-4 py-16">
-              <DaemonMascot size={48} expression="idle" />
-              <p className="text-text-secondary font-mono text-sm">
-                Select a project to view specs.
-              </p>
-            </div>
-          ) : isLoading ? (
-            <div className="text-text-muted py-8 text-center font-mono text-xs">Loading…</div>
-          ) : filteredSpecs.length === 0 ? (
-            <div className="flex flex-col items-center gap-4 py-16">
-              <DaemonMascot size={48} expression="idle" />
-              <p className="text-text-secondary font-mono text-sm">No specs yet.</p>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Updated</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredSpecs.map((spec) => (
-                  <TableRow
-                    key={spec.id}
-                    className="cursor-pointer"
-                    onClick={() => router.push(`/specs/${spec.id}`)}
-                  >
-                    <TableCell className="font-mono text-sm">{spec.name}</TableCell>
-                    <TableCell>
-                      <span className={`font-mono text-xs ${statusBadgeClass(spec.status)}`}>
-                        {statusLabel(spec.status)}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-text-secondary text-sm">
-                      {new Date(spec.createdAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-text-secondary text-sm">
-                      {new Date(spec.updatedAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell onClick={(e) => e.stopPropagation()}>
-                      <Link
-                        href={`/specs/${spec.id}`}
-                        className="text-accent-violet text-xs hover:underline"
-                      >
-                        View
-                      </Link>
-                    </TableCell>
+          {/* Single shared content panel keyed by activeTab */}
+          <TabsContent value={activeTab} className="mt-0">
+            {effectiveProjectId === null ? (
+              <div className="flex flex-col items-center gap-4 py-16">
+                <DaemonMascot size={48} expression="idle" />
+                <p className="text-muted-foreground font-mono text-sm">
+                  Select a project to view specs.
+                </p>
+              </div>
+            ) : isLoading ? (
+              <div className="text-muted-foreground py-8 text-center font-mono text-xs">
+                Loading…
+              </div>
+            ) : filteredSpecs.length === 0 ? (
+              <div className="flex flex-col items-center gap-4 py-16">
+                <DaemonMascot size={48} expression="idle" />
+                <p className="text-muted-foreground font-mono text-sm">No specs yet.</p>
+              </div>
+            ) : (
+              <Table className="caption-bottom text-sm">
+                <TableHeader>
+                  <TableRow className="border-border hover:bg-transparent">
+                    <TableHead className="text-muted-foreground h-auto w-36 px-6 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
+                      ID
+                    </TableHead>
+                    <TableHead className="text-muted-foreground h-auto px-3 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
+                      Name
+                    </TableHead>
+                    <TableHead className="text-muted-foreground h-auto w-36 px-3 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
+                      Status
+                    </TableHead>
+                    <TableHead className="text-muted-foreground h-auto w-16 px-3 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
+                      v
+                    </TableHead>
+                    <TableHead className="h-auto w-10" />
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </TabsContent>
-      </Tabs>
+                </TableHeader>
+                <TableBody>
+                  {filteredSpecs.map((spec) => (
+                    <TableRow
+                      key={spec.id}
+                      className="border-border/50 hover:bg-secondary/30 cursor-pointer"
+                      onClick={() => router.push(`/specs/${spec.id}`)}
+                    >
+                      <TableCell className="px-6 py-3">
+                        <SpecIdBadge id={spec.id} />
+                      </TableCell>
+                      <TableCell className="text-foreground px-3 py-3 text-sm">
+                        {spec.name}
+                      </TableCell>
+                      <TableCell className="px-3 py-3">
+                        <StatusBadge status={spec.status} />
+                      </TableCell>
+                      <TableCell className="text-muted-foreground px-3 py-3 font-mono text-[10px]">
+                        —
+                      </TableCell>
+                      <TableCell
+                        className="px-3 py-3 text-right"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-muted-foreground h-6 w-6"
+                          asChild
+                        >
+                          <Link href={`/specs/${spec.id}`} onClick={(e) => e.stopPropagation()}>
+                            <MoreHorizontal className="h-3.5 w-3.5" />
+                          </Link>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }

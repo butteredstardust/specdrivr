@@ -48,7 +48,7 @@ const PATH_LABELS: Record<string, string> = {
 export function TopBar({ breadcrumbs }: TopBarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, setShortcutsOpen } = useShell();
+  const { user, setShortcutsOpen, pageLabel } = useShell();
 
   const { data: notifData } = usePolling<NotificationData>({
     url: '/api/v1/notifications?unreadOnly=true&limit=1',
@@ -58,10 +58,12 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
   const unreadCount = notifData?.meta?.total ?? 0;
 
   const segments = pathname.split('/').filter(Boolean);
-  const autoCrumbs = segments.map((seg, i) => ({
-    label: PATH_LABELS['/' + segments.slice(0, i + 1).join('/')] ?? seg,
-    href: '/' + segments.slice(0, i + 1).join('/'),
-  }));
+  const autoCrumbs = segments.map((seg, i) => {
+    const path = '/' + segments.slice(0, i + 1).join('/');
+    const isLast = i === segments.length - 1;
+    const label = PATH_LABELS[path] ?? (isLast && pageLabel ? pageLabel : seg);
+    return { label, href: path };
+  });
   const crumbs = breadcrumbs ?? autoCrumbs;
 
   const initials = user?.name
@@ -79,7 +81,7 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
   };
 
   return (
-    <header className="flex h-14 items-center gap-4 border-b border-[--border-default] bg-[color:var(--bg-surface)] px-6">
+    <header className="border-border-default bg-bg-surface flex h-14 items-center gap-4 border-b px-6">
       {/* Breadcrumbs */}
       <div className="flex-1">
         <Breadcrumb>
@@ -116,7 +118,12 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
         {/* Notification bell */}
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative h-8 w-8">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative h-8 w-8"
+              suppressHydrationWarning
+            >
               <Bell className="text-text-secondary h-4 w-4" />
               {unreadCount > 0 && (
                 <Badge className="bg-accent-violet absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center p-0 text-[10px]">
@@ -126,7 +133,7 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
             </Button>
           </PopoverTrigger>
           <PopoverContent
-            className="max-h-[480px] w-[380px] border-[--border-default] bg-[color:var(--bg-surface)] p-0"
+            className="border-border-default bg-bg-surface max-h-[480px] w-[380px] p-0"
             align="end"
           >
             <NotificationPanel />
@@ -146,7 +153,7 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
         {/* User dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 rounded-full p-0">
+            <Button variant="ghost" className="h-8 w-8 rounded-full p-0" suppressHydrationWarning>
               <Avatar className="h-8 w-8">
                 <AvatarFallback className="bg-accent-violet/20 text-accent-violet text-xs">
                   {initials}
