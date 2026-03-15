@@ -25,8 +25,8 @@ const STRENGTH_COLORS: Record<number, string> = {
   0: 'bg-[--surface-hover]',
   1: 'bg-[--status-red]',
   2: 'bg-[--phosphor-amber]',
-  3: 'bg-yellow-400',
-  4: 'bg-emerald-500',
+  3: 'bg-[--phosphor-amber]',
+  4: 'bg-[--status-emerald]',
 };
 
 function StrengthIndicator({ password }: { password: string }) {
@@ -88,6 +88,7 @@ export function ChangePasswordSection() {
         const code = data?.error?.code ?? '';
         if (code === 'INVALID_PASSWORD') {
           setCurrentPasswordError('Current password is incorrect.');
+          setIsSaving(false);
           return;
         }
         throw new Error(data?.error?.message ?? `HTTP ${res.status}`);
