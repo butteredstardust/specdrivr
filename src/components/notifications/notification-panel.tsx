@@ -1,6 +1,7 @@
 'use client';
 
 import { toast } from 'sonner';
+import Link from 'next/link';
 import { clientLogger } from '@/lib/logger-client';
 import { usePolling } from '@/hooks/use-polling';
 import { Button } from '@/components/ui/button';
@@ -102,9 +103,12 @@ export function NotificationPanel() {
 
       {/* Footer */}
       <div className="border-border-default border-t px-4 py-2">
-        <a href="/notifications" className="text-accent-violet font-mono text-xs hover:underline">
+        <Link
+          href="/notifications"
+          className="text-accent-violet font-mono text-xs hover:underline"
+        >
           View all notifications &rarr;
-        </a>
+        </Link>
       </div>
     </div>
   );

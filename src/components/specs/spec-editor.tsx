@@ -8,6 +8,7 @@ import ReactMarkdown from 'react-markdown';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export type SpecStatus =
@@ -86,12 +87,12 @@ export function SpecEditor(props: SpecEditorProps) {
     <div className={`flex flex-col h-screen${className ? ` ${className}` : ''}`}>
       {/* Top bar */}
       <div className="border-border-subtle flex shrink-0 items-center gap-3 border-b px-4 py-2">
-        <input
+        <Input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Untitled spec"
-          className="text-text-primary placeholder:text-text-muted flex-1 bg-transparent font-mono text-sm outline-none"
+          className="text-text-primary placeholder:text-text-muted flex-1 border-none bg-transparent font-mono text-sm shadow-none outline-none focus-visible:ring-0"
         />
         {saveError && <p className="text-sm text-red-400">{saveError}</p>}
         <Button size="sm" onClick={handleSave} disabled={isSaving || !isDirty}>

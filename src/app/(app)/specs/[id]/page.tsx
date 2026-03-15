@@ -17,6 +17,7 @@ import { PlanTab } from '@/components/specs/plan-tab';
 import { TasksTab } from '@/components/specs/tasks-tab';
 import { ChangesTab } from '@/components/specs/changes-tab';
 import { ActivityTab } from '@/components/specs/activity-tab';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import type { SpecStatus } from '@/components/specs/spec-editor';
 import type { UserRole } from '@/db/schema';
 
@@ -204,39 +205,52 @@ export default function SpecDetailPage(): React.ReactElement {
         </div>
       )}
 
-      {/* Tab bar */}
-      <div className="border-border-default flex items-center gap-0 border-b">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => router.push(`/specs/${specId}?tab=${tab.id}`)}
-            className={`px-4 py-2 font-mono text-xs tracking-widest transition-colors ${
-              activeTab === tab.id
-                ? 'border-accent-violet text-text-primary border-b-2'
-                : 'text-text-muted hover:text-text-secondary'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      {/* Tabs */}
+      <Tabs
+        value={activeTab}
+        onValueChange={(v) => router.push(`/specs/${specId}?tab=${v}`)}
+        className="w-full"
+      >
+        <TabsList className="border-border-default h-auto w-full justify-start gap-4 rounded-none border-b bg-transparent p-0">
+          {TABS.map((tab) => (
+            <TabsTrigger
+              key={tab.id}
+              value={tab.id}
+              className="data-[state=active]:border-accent-violet data-[state=active]:text-text-primary text-text-muted hover:text-text-secondary rounded-none border-b-2 border-transparent bg-transparent px-4 py-2 font-mono text-xs tracking-widest shadow-none transition-colors"
+            >
+              {tab.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
-      {/* Tab content */}
-      {isLoading ? (
-        <div className="space-y-3">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-4/5" />
-          <Skeleton className="h-4 w-3/5" />
+        <div className="mt-6">
+          {isLoading ? (
+            <div className="space-y-3">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-4/5" />
+              <Skeleton className="h-4 w-3/5" />
+            </div>
+          ) : spec ? (
+            <>
+              <TabsContent value="spec" className="mt-0">
+                <SpecTab spec={spec} userRole={userRole} />
+              </TabsContent>
+              <TabsContent value="plan" className="mt-0">
+                <PlanTab spec={spec} userRole={userRole} />
+              </TabsContent>
+              <TabsContent value="tasks" className="mt-0">
+                <TasksTab specId={spec.id} userRole={userRole} />
+              </TabsContent>
+              <TabsContent value="changes" className="mt-0">
+                <ChangesTab specId={spec.id} />
+              </TabsContent>
+              <TabsContent value="activity" className="mt-0">
+                <ActivityTab specId={spec.id} specStatus={spec.status} />
+              </TabsContent>
+            </>
+          ) : null}
         </div>
-      ) : spec ? (
-        <>
-          {activeTab === 'spec' && <SpecTab spec={spec} userRole={userRole} />}
-          {activeTab === 'plan' && <PlanTab spec={spec} userRole={userRole} />}
-          {activeTab === 'tasks' && <TasksTab specId={spec.id} userRole={userRole} />}
-          {activeTab === 'changes' && <ChangesTab specId={spec.id} />}
-          {activeTab === 'activity' && <ActivityTab specId={spec.id} specStatus={spec.status} />}
-        </>
-      ) : null}
+      </Tabs>
     </div>
   );
 }
