@@ -6,7 +6,7 @@ import { DaemonMascot } from '@/components/ui/daemon-mascot';
 
 export default function NotFound() {
   return (
-    <div className="bg-bg-base flex min-h-screen flex-col items-center justify-center px-6 text-center">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[color:var(--bg-base)] px-6 text-center">
       <div className="mb-8">
         <DaemonMascot size={64} expression="idle" />
       </div>
@@ -17,7 +17,11 @@ export default function NotFound() {
         The requested path does not exist in the current specification. The system has encountered a
         non-recoverable routing error.
       </p>
-      <Button asChild variant="outline" className="border-border-default hover:bg-bg-elevated">
+      <Button
+        asChild
+        variant="outline"
+        className="border-[--border-default] hover:bg-[color:var(--bg-elevated)]"
+      >
         <Link href="/">Return to Mission Control</Link>
       </Button>
     </div>
