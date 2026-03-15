@@ -221,7 +221,7 @@ export function ActiveSessionsSection() {
             );
           })}
 
-          {otherSessions.length > 1 && (
+          {otherSessions.length > 0 && (
             <div className="mt-2">
               <Button
                 variant="ghost"
