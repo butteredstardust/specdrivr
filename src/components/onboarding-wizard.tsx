@@ -84,10 +84,9 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
         body: JSON.stringify({ onboardingStep: 3 }),
       });
       if (!onboardingRes.ok) {
-        clientLogger.error(
-          'OnboardingWizard: PATCH /api/v1/users/me onboardingStep failed',
-          onboardingRes.status
-        );
+        clientLogger.error('Failed to update onboarding step', { status: onboardingRes.status });
+        setProjectError('Setup failed. Please try again.');
+        return;
       }
 
       router.refresh();
@@ -107,7 +106,7 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
         onEscapeKeyDown={(e) => e.preventDefault()}
         className="sm:max-w-md"
       >
-        <Progress value={(step / 3) * 100} className="mb-2" />
+        <Progress value={((step - 1) / 3) * 100} className="mb-2" />
 
         {step === 1 && (
           <>
@@ -139,6 +138,9 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
                 placeholder="Display name"
                 disabled={isSubmitting}
               />
+              {!displayName.trim() && !nameError && (
+                <p className="text-muted-foreground mt-1 text-sm">Name cannot be empty.</p>
+              )}
               {nameError && <p className="mt-1 text-sm text-red-400">{nameError}</p>}
             </div>
             <div className="mt-2 flex justify-end">
