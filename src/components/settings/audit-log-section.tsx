@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { clientLogger } from '@/lib/logger-client';
 import { usePolling } from '@/hooks/use-polling';
 import { Button } from '@/components/ui/button';
@@ -99,6 +99,7 @@ function AuditRow({ entry }: { entry: AuditLogSelect }) {
 
 export function AuditLogSection({ projectId }: AuditLogSectionProps) {
   const [page, setPage] = useState(1);
+  const [reqKey, setReqKey] = useState(0);
   const [entries, setEntries] = useState<AuditEntryRow[]>([]);
   const [meta, setMeta] = useState<AuditMeta | null>(null);
 
@@ -111,18 +112,6 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Debounce the search field
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      setSearch(searchInput);
-      setPage(1);
-    }, 300);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [searchInput]);
-
   const buildUrl = () => {
     const params = new URLSearchParams({ page: String(page) });
     if (search) params.set('search', search);
@@ -130,6 +119,7 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
     if (action && action !== '__all__') params.set('action', action);
     if (fromDate) params.set('from', fromDate);
     if (toDate) params.set('to', toDate);
+    params.set('_t', String(reqKey));
     return `/api/v1/projects/${projectId}/audit?${params.toString()}`;
   };
 
@@ -153,8 +143,20 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
 
   const totalPages = meta ? Math.max(1, Math.ceil(meta.total / meta.pageSize)) : 1;
 
+  const handleSearchInput = (value: string) => {
+    setSearchInput(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setSearch(value);
+      setPage(1);
+      setReqKey((k) => k + 1);
+      restart();
+    }, 300);
+  };
+
   const goToPage = (next: number) => {
     setPage(next);
+    setReqKey((k) => k + 1);
     restart();
   };
 
@@ -208,7 +210,7 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
         <Input
           placeholder="Search actions…"
           value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
+          onChange={(e) => handleSearchInput(e.target.value)}
           className="h-8 w-48 font-mono text-xs"
         />
         <Input

@@ -72,7 +72,7 @@ export function UsageSection({ projectId }: UsageSectionProps) {
     const rows = snapshots
       .map((s) => {
         const tokens = s.promptTokens + s.completionTokens;
-        return `${formatDate(s.date)},${s.sessionsRun},${s.tasksExecuted},${tokens},${s.estimatedCostUsd.toFixed(4)}`;
+        return `${formatDate(s.date)},${s.sessionsRun},${s.tasksExecuted},${tokens},${Number(s.estimatedCostUsd).toFixed(4)}`;
       })
       .join('\n');
     const blob = new Blob([header + rows], { type: 'text/csv' });
@@ -128,7 +128,7 @@ export function UsageSection({ projectId }: UsageSectionProps) {
         <SummaryCard label="Total Sessions" value={String(summary.totalSessions)} />
         <SummaryCard label="Tasks Completed" value={String(summary.totalTasks)} />
         <SummaryCard label="Tokens Used" value={formatTokens(summary.totalTokens)} />
-        <SummaryCard label="Est. Cost" value={`$${summary.totalCostUsd.toFixed(2)}`} />
+        <SummaryCard label="Est. Cost" value={`$${Number(summary.totalCostUsd).toFixed(2)}`} />
       </div>
 
       {/* Export button */}
@@ -175,7 +175,7 @@ export function UsageSection({ projectId }: UsageSectionProps) {
                   {formatTokens(s.promptTokens + s.completionTokens)}
                 </td>
                 <td className="px-4 py-2.5 font-mono text-xs text-[--text-primary]">
-                  ${s.estimatedCostUsd.toFixed(4)}
+                  ${Number(s.estimatedCostUsd).toFixed(4)}
                 </td>
               </tr>
             ))}

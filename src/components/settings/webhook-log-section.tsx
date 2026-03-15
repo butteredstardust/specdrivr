@@ -27,7 +27,7 @@ interface WebhookLogSectionProps {
   projectId: number;
 }
 
-type DeliveryStatus = 'delivered' | 'failed' | 'pending' | string;
+type DeliveryStatus = 'delivered' | 'failed' | 'pending' | 'exhausted';
 
 function StatusBadge({ status }: { status: DeliveryStatus }) {
   const classes: Record<string, string> = {
@@ -75,7 +75,7 @@ function DeliveryRow({ entry }: { entry: DeliveryRow }) {
           {entry.endpointUrl ?? '—'}
         </td>
         <td className="px-4 py-2.5">
-          <StatusBadge status={entry.status} />
+          <StatusBadge status={entry.status as DeliveryStatus} />
         </td>
         <td className="px-4 py-2.5 font-mono text-xs text-[--text-primary]">
           {entry.responseStatus ?? '—'}
@@ -84,26 +84,24 @@ function DeliveryRow({ entry }: { entry: DeliveryRow }) {
           {formatTs(entry.createdAt)}
         </td>
         <td className="px-4 py-2.5" onClick={(e) => e.stopPropagation()}>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled
-                    className="h-auto gap-1 px-2 font-mono text-xs text-[--text-muted]"
-                  >
-                    <RotateCcw className="size-3" />
-                    Retry
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="font-mono text-xs">
-                Retry not yet available
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  disabled
+                  className="h-auto gap-1 px-2 font-mono text-xs text-[--text-muted]"
+                >
+                  <RotateCcw className="size-3" />
+                  Retry
+                </Button>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="font-mono text-xs">
+              Retry not yet available
+            </TooltipContent>
+          </Tooltip>
         </td>
       </tr>
 
@@ -122,10 +120,11 @@ function DeliveryRow({ entry }: { entry: DeliveryRow }) {
 
 export function WebhookLogSection({ projectId }: WebhookLogSectionProps) {
   const [page, setPage] = useState(1);
+  const [reqKey, setReqKey] = useState(0);
   const [deliveries, setDeliveries] = useState<DeliveryRow[]>([]);
   const [meta, setMeta] = useState<DeliveryMeta | null>(null);
 
-  const url = `/api/v1/projects/${projectId}/webhook-deliveries?page=${page}`;
+  const url = `/api/v1/projects/${projectId}/webhook-deliveries?page=${page}&_t=${reqKey}`;
 
   const stopWhen = useCallback((data: WebhookDeliveriesPayload) => {
     setDeliveries(data.items);
@@ -147,6 +146,7 @@ export function WebhookLogSection({ projectId }: WebhookLogSectionProps) {
 
   const goToPage = (next: number) => {
     setPage(next);
+    setReqKey((k) => k + 1);
     restart();
   };
 
@@ -188,25 +188,27 @@ export function WebhookLogSection({ projectId }: WebhookLogSectionProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="overflow-x-auto rounded-lg border border-[--border-default]">
-        <table className="w-full text-left">
-          <thead>
-            <tr className="border-b border-[--border-default] bg-[--bg-surface]">
-              <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">Event</th>
-              <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">Endpoint</th>
-              <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">Status</th>
-              <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">HTTP Code</th>
-              <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">Timestamp</th>
-              <th className="px-4 py-2 font-mono text-xs text-[--text-muted]"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {deliveries.map((entry) => (
-              <DeliveryRow key={entry.id} entry={entry} />
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <TooltipProvider>
+        <div className="overflow-x-auto rounded-lg border border-[--border-default]">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b border-[--border-default] bg-[--bg-surface]">
+                <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">Event</th>
+                <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">Endpoint</th>
+                <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">Status</th>
+                <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">HTTP Code</th>
+                <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">Timestamp</th>
+                <th className="px-4 py-2 font-mono text-xs text-[--text-muted]"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {deliveries.map((entry) => (
+                <DeliveryRow key={entry.id} entry={entry} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </TooltipProvider>
 
       {/* Pagination */}
       {meta && meta.total > meta.pageSize && (
