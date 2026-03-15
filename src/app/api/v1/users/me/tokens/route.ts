@@ -1,10 +1,8 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { db } from '@/db';
-import { agentTokens } from '@/db/schema';
+import { tokenRepository } from '@/repositories/token-repository';
 import { handleApiError } from '@/lib/error-handler';
 import { z } from 'zod';
-import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
 
@@ -23,18 +21,7 @@ export async function GET() {
   }
 
   try {
-    const tokens = await db
-      .select({
-        id: agentTokens.id,
-        name: agentTokens.name,
-        prefix: agentTokens.prefix,
-        lastUsedAt: agentTokens.lastUsedAt,
-        expiresAt: agentTokens.expiresAt,
-        createdAt: agentTokens.createdAt,
-      })
-      .from(agentTokens)
-      .where(eq(agentTokens.userId, session.user.id));
-
+    const tokens = await tokenRepository.getByUserId(session.user.id);
     return NextResponse.json({ data: tokens });
   } catch (error) {
     return handleApiError(error);
@@ -58,16 +45,13 @@ export async function POST(request: Request) {
     const prefix = token.slice(0, 10);
     const tokenHash = await bcrypt.hash(token, 12);
 
-    const [inserted] = await db
-      .insert(agentTokens)
-      .values({
-        userId: session.user.id,
-        projectId,
-        name,
-        tokenHash,
-        prefix,
-      })
-      .returning();
+    const inserted = await tokenRepository.create({
+      userId: session.user.id,
+      projectId,
+      name,
+      tokenHash,
+      prefix,
+    });
 
     return NextResponse.json({
       data: {

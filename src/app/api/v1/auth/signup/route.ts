@@ -3,9 +3,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { authInstance } from '@/lib/auth';
 import { handleApiError } from '@/lib/error-handler';
-import { db } from '@/db';
-import { users } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { userRepository } from '@/repositories/user-repository';
 import { logger } from '@/lib/logger';
 
 const SignupSchema = z.object({
@@ -36,7 +34,6 @@ export async function POST(req: Request) {
 
     try {
       // 1. Call BetterAuth signUpEmail
-      // This handles password hashing and autoSignIn
       const result = await authInstance.api.signUpEmail({
         body: {
           email,
@@ -50,7 +47,7 @@ export async function POST(req: Request) {
       }
 
       // 2. Post-signup logic: update onboardingStep
-      await db.update(users).set({ onboardingStep: 1 }).where(eq(users.id, result.user.id));
+      await userRepository.updateOnboardingStep(result.user.id, 1);
 
       return NextResponse.json(
         {

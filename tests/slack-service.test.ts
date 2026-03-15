@@ -36,7 +36,9 @@ describe('Slack Service', () => {
       (db.select as any).mockReturnValue({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([{ botToken: 'xoxb-123', channelId: 'C123' }]),
+            limit: vi
+              .fn()
+              .mockResolvedValue([{ slackBotToken: 'xoxb-123', slackChannelId: 'C123' }]),
           }),
         }),
       });
@@ -71,7 +73,9 @@ describe('Slack Service', () => {
       (db.select as any).mockReturnValue({
         from: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue([{ botToken: 'xoxb-123', channelId: 'C123' }]),
+            limit: vi
+              .fn()
+              .mockResolvedValue([{ slackBotToken: 'xoxb-123', slackChannelId: 'C123' }]),
           }),
         }),
       });

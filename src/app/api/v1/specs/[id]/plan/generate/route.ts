@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { planRepository, specificationRepository } from '@/repositories';
+import type { PlanInsert } from '@/db/schema';
 import { auth } from '@/lib/auth';
 import { handleApiError } from '@/lib/error-handler';
 import { NotFoundError } from '@/lib/errors';
@@ -46,7 +47,7 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
           engine: 'mock-gpt-4',
         },
       },
-    } as unknown as import('@/db/schema').PlanInsert);
+    } as PlanInsert);
 
     return NextResponse.json({ data: newPlan }, { status: 201 });
   } catch (error) {

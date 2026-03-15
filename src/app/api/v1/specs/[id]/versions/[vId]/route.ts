@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/db';
-import { specVersions } from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { specificationRepository } from '@/repositories/specification-repository';
 import { auth } from '@/lib/auth';
 import { logger } from '@/lib/logger';
 import { handleApiError } from '@/lib/error-handler';
@@ -18,18 +16,13 @@ export async function GET(req: Request, context: { params: Promise<{ id: string;
 
     const { id, vId } = await context.params;
 
-    const existing = await db
-      .select()
-      .from(specVersions)
-      .where(and(eq(specVersions.specId, Number(id)), eq(specVersions.id, Number(vId))));
-    if (existing.length === 0) {
+    const spec = await specificationRepository.getVersionById(Number(id), Number(vId));
+    if (!spec) {
       return NextResponse.json(
         { error: { code: 'NOT_FOUND', message: 'Specification version not found' } },
         { status: 404 }
       );
     }
-
-    const spec = existing[0];
 
     return NextResponse.json({
       data: {

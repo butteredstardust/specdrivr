@@ -1,17 +1,12 @@
 import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/db';
-import {
-  webhookDeliveries,
-  agentLogs,
-  notifications,
-  projectMembers,
-  tasks,
-  auditLog,
-} from '@/db/schema';
-import { eq } from 'drizzle-orm';
 import { verifyGitHubSignature, getGitHubConfig } from '@/lib/github';
 import { logger } from '@/lib/logger';
+import { webhookRepository } from '@/repositories/webhook-repository';
+import { auditRepository } from '@/repositories/audit-repository';
+import { notificationRepository } from '@/repositories/notification-repository';
+import { memberRepository } from '@/repositories/member-repository';
+import { taskRepository } from '@/repositories/task-repository';
 
 export async function POST(
   request: NextRequest,
@@ -59,12 +54,11 @@ export async function POST(
     const payload = JSON.parse(rawBody);
 
     // 4. Log delivery to database
-    await db.insert(webhookDeliveries).values({
+    await webhookRepository.logDelivery({
       projectId: projectId,
       eventType: event,
       payload: payload,
       status: 'delivered',
-      deliveredAt: new Date(),
     });
 
     // 5. Handle events
@@ -108,12 +102,7 @@ async function handlePush(
     for (const commit of commits) {
       const msgMatch = commit.message.match(/\bT-(\d+)\b/i);
       if (msgMatch) {
-        // Find task by external ID
-        const [task] = await db
-          .select({ id: tasks.id })
-          .from(tasks)
-          .where(eq(tasks.externalId, `T-${msgMatch[1]}`))
-          .limit(1);
+        const task = await taskRepository.getByExternalId(`T-${msgMatch[1]}`);
         if (task) {
           taskId = task.id;
           break;
@@ -122,43 +111,30 @@ async function handlePush(
     }
   }
 
-  // 2. Log to agent_logs (if taskId found) or audit_log
-  if (taskId) {
-    await db.insert(agentLogs).values({
-      projectId,
-      taskId,
-      level: 'info',
-      message: `GitHub Push: ${branch} by ${pusher} (${commitCount} commits)`,
-      context: { pusher, branch, commitCount },
-    });
-  } else {
-    await db.insert(auditLog).values({
-      projectId,
-      action: 'github_push',
-      targetType: 'project',
-      targetId: String(projectId),
-      detail: { pusher, branch, commitCount },
-    });
-  }
+  // 2. Log to audit_log
+  await auditRepository.create({
+    projectId,
+    action: 'github_push',
+    targetType: taskId ? 'task' : 'project',
+    targetId: taskId ? String(taskId) : String(projectId),
+    detail: { pusher, branch, commitCount },
+  });
 
   // 3. Notify project members
-  const members = await db
-    .select()
-    .from(projectMembers)
-    .where(eq(projectMembers.projectId, projectId));
+  const memberUserIds = await memberRepository.getMemberUserIds(projectId);
   const title = `New push to ${branch}`;
   const body = `Pushed by ${pusher} (${commitCount} commits)`;
 
-  for (const member of members) {
-    await db.insert(notifications).values({
-      userId: member.userId,
-      projectId: projectId,
+  await notificationRepository.createMany(
+    memberUserIds.map((userId) => ({
+      userId,
+      projectId,
       type: 'github_push',
       title,
       body,
       linkUrl: `/projects/${projectId}/activity`,
-    });
-  }
+    }))
+  );
 }
 
 async function handlePullRequest(
@@ -186,26 +162,23 @@ async function handlePullRequest(
     const specRef = specMatch[1];
 
     // Notify project members
-    const members = await db
-      .select()
-      .from(projectMembers)
-      .where(eq(projectMembers.projectId, projectId));
+    const memberUserIds = await memberRepository.getMemberUserIds(projectId);
     const title = `PR #${pr.number} references spec ${specRef}`;
     const body = `PR: "${prTitle}"`;
 
-    for (const member of members) {
-      await db.insert(notifications).values({
-        userId: member.userId,
-        projectId: projectId,
+    await notificationRepository.createMany(
+      memberUserIds.map((userId) => ({
+        userId,
+        projectId,
         type: 'github_pr',
         title,
         body,
         linkUrl: pr.html_url || `/projects/${projectId}`,
-      });
-    }
+      }))
+    );
 
     // Log to audit log
-    await db.insert(auditLog).values({
+    await auditRepository.create({
       projectId,
       action: 'github_pr_spec_ref',
       targetType: 'pull_request',

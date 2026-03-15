@@ -1,112 +1,106 @@
 'use client';
 
-import React from 'react';
+import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { PxlKitIcon } from '@pxlkit/core';
-import { Home, List, History, Settings } from '@pxlkit/ui';
-import { PixelBadge, PixelPulse, PixelButton } from '@pxlkit/ui-kit';
+import { LayoutDashboard, FolderKanban, FileText, Terminal, Bell, Settings } from 'lucide-react';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
-import { ProjectSwitcher } from '@/components/shell/project-switcher';
-import { useShell } from '@/components/providers/shell-provider';
-import { twMerge } from 'tailwind-merge';
+import { useShell } from '@/components/shell/shell-context';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
-const navItems = [
-  { label: 'Mission Control', href: '/', icon: Home },
-  { label: 'Specifications', href: '/specs', icon: List },
-  { label: 'Sessions', href: '/sessions', icon: History },
-  { label: 'Settings', href: '/settings', icon: Settings },
+interface SidebarProps {
+  projects: Array<{ id: number; name: string; slug: string }>;
+}
+
+const NAV_ITEMS = [
+  { href: '/', label: 'Mission Control', icon: LayoutDashboard, exact: true },
+  { href: '/projects', label: 'Projects', icon: FolderKanban, exact: false },
+  { href: '/specs', label: 'Specs', icon: FileText, exact: false },
+  { href: '/sessions', label: 'Sessions', icon: Terminal, exact: false },
+  { href: '/notifications', label: 'Notifications', icon: Bell, exact: false },
+  { href: '/settings', label: 'Settings', icon: Settings, exact: false },
 ];
 
-export function Sidebar() {
+export function Sidebar({ projects }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { devMode } = useShell();
+  const { activeProjectId, setActiveProjectId, devMode } = useShell();
 
-  // Polling states for DAEMON footer would go here.
-  // Stubbing according to TASK-018
-  const blockedCount = 0;
-  const sessionRunning = false;
-  const sessionPaused = false;
-  let daemonStatusNode = null;
-  let daemonExpression: 'idle' | 'working' | 'error' | 'success' = 'idle';
-
-  if (blockedCount > 0) {
-    daemonStatusNode = (
-      <PixelButton
-        variant="ghost"
-        onClick={() => router.push('/')}
-        className="h-auto p-0 transition-opacity hover:opacity-80"
-      >
-        <PixelBadge tone="gold">⚠ {blockedCount} BLOCKED</PixelBadge>
-      </PixelButton>
-    );
-    daemonExpression = 'error';
-  } else if (sessionRunning) {
-    daemonStatusNode = (
-      <PixelPulse>
-        <PixelBadge tone="purple">● RUNNING</PixelBadge>
-      </PixelPulse>
-    );
-    daemonExpression = 'working';
-  } else if (sessionPaused) {
-    daemonStatusNode = <PixelBadge tone="gold">⏸ PAUSED</PixelBadge>;
-    daemonExpression = 'idle';
-  } else {
-    daemonStatusNode = <span className="font-mono text-xs text-[--text-muted]">SYSTEM READY</span>;
-    daemonExpression = 'idle';
-  }
+  const isActive = (href: string, exact: boolean) =>
+    exact ? pathname === href : pathname === href || pathname.startsWith(href + '/');
 
   return (
-    <aside className="flex h-full w-[240px] flex-shrink-0 flex-col border-r border-[--border-default] bg-[--bg-surface]">
-      {/* Logo Area */}
-      <div className="flex h-14 items-center gap-3 border-b border-[--border-default] px-4">
-        <DaemonMascot size="sm" state="idle" />
-        <span className="font-mono text-xs tracking-widest text-[--text-primary] uppercase">
+    <aside className="flex h-full w-60 flex-shrink-0 flex-col border-r border-[--border-default] bg-[--bg-surface]">
+      {/* Logo */}
+      <div className="flex items-center gap-2 border-b border-[--border-default] px-4 py-4">
+        <DaemonMascot size={24} expression="idle" />
+        <span className="font-mono text-sm font-bold tracking-widest text-[--text-primary]">
           SPECDRIVR
         </span>
+        {devMode && (
+          <Badge className="ml-auto border-[--phosphor-amber]/30 bg-[--phosphor-amber]/20 font-mono text-[10px] text-[--phosphor-amber]">
+            DEV
+          </Badge>
+        )}
       </div>
 
       {/* Project Switcher */}
-      <div className="border-b border-[--border-default] p-4">
-        <ProjectSwitcher />
+      <div className="border-b border-[--border-default] px-3 py-3">
+        <Select
+          value={activeProjectId ? String(activeProjectId) : ''}
+          onValueChange={(v) => {
+            setActiveProjectId(parseInt(v, 10));
+            router.push('/specs');
+          }}
+        >
+          <SelectTrigger className="h-8 border-[--border-default] bg-[--bg-elevated] text-xs">
+            <SelectValue placeholder="Select project…" />
+          </SelectTrigger>
+          <SelectContent>
+            {projects.map((p) => (
+              <SelectItem key={p.id} value={String(p.id)} className="text-xs">
+                {p.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex flex-1 flex-col gap-1 overflow-y-auto py-4">
-        {navItems.map((item) => {
-          // Exact match for root, prefix match for others
-          const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
-
+      {/* Nav */}
+      <nav className="flex-1 py-2">
+        {NAV_ITEMS.map(({ href, label, icon: Icon, exact }) => {
+          const active = isActive(href, exact);
           return (
-            <PixelButton
-              key={item.href}
-              variant="ghost"
-              onClick={() => router.push(item.href)}
-              className={twMerge(
-                'flex w-full items-center justify-start gap-3 rounded-none px-4 py-2 text-left text-sm font-medium transition-colors',
-                isActive
-                  ? 'border-l-2 border-[--accent-violet] bg-[--accent-violet]/5 text-[--accent-violet]'
+            <Link
+              key={href}
+              href={href}
+              className={cn(
+                'flex items-center gap-3 px-4 py-2 text-sm transition-colors',
+                active
+                  ? 'border-l-2 border-[--accent-violet] bg-[--accent-violet]/10 text-[--accent-violet]'
                   : 'border-l-2 border-transparent text-[--text-secondary] hover:bg-[--bg-elevated] hover:text-[--text-primary]'
               )}
             >
-              <PxlKitIcon icon={item.icon} size={16} color="currentColor" />
-              {item.label}
-            </PixelButton>
+              <Icon className="h-4 w-4 shrink-0" />
+              {label}
+            </Link>
           );
         })}
       </nav>
 
-      {/* Bottom Section */}
-      <div className="relative mt-auto flex flex-col gap-2 border-t border-[--border-default] p-4">
-        <div className="flex h-6 items-center gap-2">
-          <DaemonMascot size="sm" state={daemonExpression} className="h-4 w-4" />
-          {daemonStatusNode}
-        </div>
-
-        <div className="flex items-center justify-between text-[--text-muted]">
-          <span className="font-mono text-[10px]">v0.1.0</span>
-          {devMode && <PixelBadge tone="gold">[DEV]</PixelBadge>}
-        </div>
+      {/* Bottom status */}
+      <div className="flex items-center gap-2 border-t border-[--border-default] px-4 py-3">
+        <DaemonMascot size={24} expression="idle" />
+        <span className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
+          SYSTEM READY
+        </span>
       </div>
     </aside>
   );

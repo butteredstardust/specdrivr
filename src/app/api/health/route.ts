@@ -1,3 +1,4 @@
+// Infrastructure probe — direct db import is intentional (no repository needed)
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
 import { sql } from 'drizzle-orm';

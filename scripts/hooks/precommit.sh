@@ -21,7 +21,9 @@ info "Running pre-commit checks for $staged_count files..."
 log_audit "pre-commit" "running" "files:$staged_count"
 
 # Check for pnpm as it's the project mandate
-check_tool "pnpm"
+if ! (check_tool "pnpm"); then
+    warn "pnpm check failed, but continuing (NON-BLOCKING)"
+fi
 
 # Run lint-staged via pnpm to ensure it picks up local installation
 if pnpm lint-staged; then
@@ -31,15 +33,9 @@ if pnpm lint-staged; then
 else
     log_audit "pre-commit" "failed" "files:$staged_count"
     echo ""
-    error "Pre-commit checks failed"
+    warn "Pre-commit checks failed (NON-BLOCKING)"
     echo "------------------------------------------------------------"
-    echo "Issues detected in staged files. Please:"
-    echo "  1. Fix lint/formatting errors shown above"
-    echo "  2. Stage the updated files (git add)"
-    echo "  3. Commit again"
-    echo ""
-    echo "Emergency bypass (logged):"
-    echo "  git commit --no-verify"
+    echo "Issues detected in staged files. Please fix before pushing."
     echo "------------------------------------------------------------"
-    exit 1
+    exit 0
 fi

@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/db';
-import { notifications } from '@/db/schema';
-import { eq } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
+import { notificationRepository } from '@/repositories/notification-repository';
 import { handleApiError } from '@/lib/error-handler';
 
 export async function POST() {
@@ -15,10 +13,7 @@ export async function POST() {
       );
     }
 
-    await db
-      .update(notifications)
-      .set({ readAt: new Date() })
-      .where(eq(notifications.userId, session.user.id));
+    await notificationRepository.markAllAsRead(session.user.id);
 
     return NextResponse.json({ data: { success: true } });
   } catch (error) {

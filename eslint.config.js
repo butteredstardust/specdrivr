@@ -27,6 +27,10 @@ const eslintConfig = [
       ...pluginNext.configs['core-web-vitals'].rules,
 
       // ─── Specdrivr Architectural Guards ─────────────────────────────────────
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { varsIgnorePattern: '^_', argsIgnorePattern: '^_' },
+      ],
       '@typescript-eslint/no-explicit-any': 'warn',
       'no-debugger': 'error',
       'no-console': ['warn', { allow: ['info', 'error', 'warn'] }], // Prefer Pino logger
@@ -42,19 +46,27 @@ const eslintConfig = [
       ],
 
       // Boundary Preservation: No DB imports in components/pages
-      'no-restricted-imports': [
+      'no-restricted-imports': 'off',
+      '@typescript-eslint/no-restricted-imports': [
         'warn',
         {
           paths: [
             {
               name: '@/db',
               message: 'Direct DB access in components is prohibited. Use Repositories instead.',
+              allowTypeImports: true,
+            },
+            {
+              name: '@/db/schema',
+              message: 'Direct DB access in components is prohibited. Use Repositories instead.',
+              allowTypeImports: true,
             },
           ],
           patterns: [
             {
               group: ['@/db/*'],
               message: 'Direct DB access in components is prohibited. Use Repositories instead.',
+              allowTypeImports: true,
             },
           ],
         },
@@ -78,6 +90,44 @@ const eslintConfig = [
       ],
     },
   },
+  // Architectural rule exceptions
+  {
+    files: [
+      'src/repositories/**/*',
+      'src/db/**/*',
+      'src/lib/auth.ts',
+      'src/app/api/health/route.ts',
+    ],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': 'off',
+    },
+  },
+  {
+    files: [
+      'drizzle.config.ts',
+      'playwright.config.ts',
+      'src/lib/env-core.ts',
+      'src/proxy.ts',
+      'src/lib/auth-client.ts',
+      'src/lib/logger-client.ts',
+      'src/app/error.tsx',
+      'src/app/global-error.tsx',
+      'src/app/(auth)/login/page.tsx',
+    ],
+    rules: {
+      'no-restricted-properties': 'off',
+    },
+  },
+  {
+    files: [
+      'src/components/ui/input.tsx',
+      'src/components/ui/button.tsx',
+      'src/components/ui/select.tsx',
+    ],
+    rules: {
+      'no-restricted-syntax': 'off',
+    },
+  },
   // Exclusions for tests and scripts where architectural rules are too strict
   {
     files: ['tests/**/*', 'scripts/**/*', 'next.config.js', 'eslint.config.js'],
@@ -85,6 +135,7 @@ const eslintConfig = [
       'no-console': 'off',
       'no-restricted-properties': 'off',
       'no-restricted-imports': 'off',
+      '@typescript-eslint/no-restricted-imports': 'off',
     },
   },
 ];

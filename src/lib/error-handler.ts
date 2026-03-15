@@ -1,4 +1,5 @@
 import { logger } from '@/lib/logger';
+import { env } from '@/lib/env';
 import { NextResponse } from 'next/server';
 import { AppError, DatabaseError, NotFoundError, ValidationError, BusinessError } from './errors';
 
@@ -44,7 +45,7 @@ export function formatErrorResponse(error: unknown): ErrorResponse {
 
     return {
       error: {
-        message: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
+        message: env.NODE_ENV === 'development' ? error.message : 'Internal server error',
         code: 'INTERNAL_ERROR',
         statusCode: 500,
       },

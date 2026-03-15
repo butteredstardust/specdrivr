@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/db';
-import { notifications } from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
+import { notificationRepository } from '@/repositories/notification-repository';
 import { handleApiError } from '@/lib/error-handler';
 
 export async function POST(req: Request, context: { params: Promise<{ id: string }> }) {
@@ -17,22 +15,13 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
 
     const { id } = await context.params;
 
-    const existing = await db
-      .select()
-      .from(notifications)
-      .where(and(eq(notifications.id, Number(id)), eq(notifications.userId, session.user.id)));
-
-    if (existing.length === 0) {
+    const found = await notificationRepository.markAsRead(Number(id), session.user.id);
+    if (!found) {
       return NextResponse.json(
         { error: { code: 'NOT_FOUND', message: 'Notification not found' } },
         { status: 404 }
       );
     }
-
-    await db
-      .update(notifications)
-      .set({ readAt: new Date() })
-      .where(eq(notifications.id, Number(id)));
 
     return NextResponse.json({ data: { success: true } });
   } catch (error) {

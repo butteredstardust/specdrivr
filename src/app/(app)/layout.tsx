@@ -1,38 +1,42 @@
-import { PixelToast } from '@pxlkit/core';
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
-import { ShellProvider } from '@/components/providers/shell-provider';
+import { projectRepository } from '@/repositories/project-repository';
+import { ShellProvider } from '@/components/shell/shell-context';
 import { Sidebar } from '@/components/shell/sidebar';
 import { TopBar } from '@/components/shell/top-bar';
-import { KeyboardShortcutsWrapper } from '@/components/shell/keyboard-shortcuts-wrapper';
+import { OnboardingWizard } from '@/components/onboarding-wizard';
+import { TaskDrawerProvider } from '@/components/shell/task-drawer-context';
+import { TaskDrawer } from '@/components/tasks/task-drawer';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
+  if (!session?.user?.id) redirect('/login');
 
-  if (!session?.user) {
-    // Basic redirect fallback if unauthenticated
-    redirect('/login');
-  }
+  const projects = await projectRepository.getByUserId(session.user.id);
+
+  const shellUser = {
+    id: session.user.id,
+    name: session.user.name,
+    email: session.user.email,
+    role: session.user.role ?? undefined,
+    onboardingStep: session.user.onboardingStep ?? undefined,
+  };
+
+  const showOnboarding = session.user.onboardingStep === 0;
 
   return (
-    <ShellProvider
-      user={{
-        id: session.user.id,
-        name: session.user.name,
-        email: session.user.email,
-        avatarUrl: session.user.image || undefined,
-      }}
-    >
-      <div className="flex h-screen overflow-hidden bg-[--bg-base]">
-        <Sidebar />
-        <div className="flex min-w-0 flex-1 flex-col">
-          <TopBar title="SPECDRIVR" />
-          <main className="flex-1 overflow-auto">{children}</main>
+    <ShellProvider user={shellUser}>
+      <TaskDrawerProvider>
+        <div className="flex h-screen overflow-hidden">
+          <Sidebar projects={projects} />
+          <div className="flex flex-1 flex-col overflow-hidden">
+            <TopBar />
+            <main className="flex-1 overflow-y-auto p-6">{children}</main>
+          </div>
         </div>
-      </div>
-
-      <KeyboardShortcutsWrapper />
-      <PixelToast visible={false} title="" />
+        {showOnboarding && <OnboardingWizard user={shellUser} />}
+        <TaskDrawer />
+      </TaskDrawerProvider>
     </ShellProvider>
   );
 }

@@ -1,9 +1,7 @@
 import 'server-only';
 import { Octokit } from '@octokit/rest';
 import crypto from 'crypto';
-import { db } from '@/db';
-import { agentConfig } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { projectRepository } from '@/repositories/project-repository';
 import { logger } from './logger';
 
 /**
@@ -17,30 +15,21 @@ export async function getGitHubConfig(projectId: number): Promise<{
   webhookSecret: string | null;
 } | null> {
   try {
-    const [config] = await db
-      .select({
-        token: agentConfig.githubToken,
-        repo: agentConfig.githubRepo,
-        branch: agentConfig.githubBranch,
-        webhookSecret: agentConfig.githubWebhookSecret,
-      })
-      .from(agentConfig)
-      .where(eq(agentConfig.projectId, projectId))
-      .limit(1);
+    const config = await projectRepository.getAgentConfig(projectId);
 
-    if (!config || !config.token || !config.repo || !config.branch) {
+    if (!config || !config.githubToken || !config.githubRepo || !config.githubBranch) {
       logger.info(
-        { projectId, tokenConfigured: !!config?.token },
+        { projectId, tokenConfigured: !!config?.githubToken },
         'GitHub config not found or incomplete'
       );
       return null;
     }
 
     return {
-      token: config.token,
-      repo: config.repo,
-      branch: config.branch,
-      webhookSecret: config.webhookSecret,
+      token: config.githubToken,
+      repo: config.githubRepo,
+      branch: config.githubBranch,
+      webhookSecret: config.githubWebhookSecret,
     };
   } catch (error) {
     logger.error({ error, projectId }, 'Failed to retrieve GitHub config');
@@ -53,28 +42,20 @@ export async function getGitHubConfig(projectId: number): Promise<{
  */
 export async function setGitHubConfig(
   projectId: number,
-  config: { token: string; repo: string; branch: string; webhookSecret?: string }
+  config: { token: string; repo: string; branch: string; webhookSecret?: string },
+  actorId: string
 ): Promise<void> {
   try {
-    await db
-      .insert(agentConfig)
-      .values({
-        projectId,
+    await projectRepository.updateAgentConfig(
+      projectId,
+      {
         githubToken: config.token,
         githubRepo: config.repo,
         githubBranch: config.branch,
         githubWebhookSecret: config.webhookSecret || null,
-      })
-      .onConflictDoUpdate({
-        target: agentConfig.projectId,
-        set: {
-          githubToken: config.token,
-          githubRepo: config.repo,
-          githubBranch: config.branch,
-          githubWebhookSecret: config.webhookSecret || null,
-          updatedAt: new Date(),
-        },
-      });
+      },
+      actorId
+    );
 
     logger.info({ projectId, tokenConfigured: true }, 'GitHub config updated');
   } catch (error) {
@@ -86,18 +67,18 @@ export async function setGitHubConfig(
 /**
  * Remove GitHub config for a project (disconnect).
  */
-export async function removeGitHubConfig(projectId: number): Promise<void> {
+export async function removeGitHubConfig(projectId: number, actorId: string): Promise<void> {
   try {
-    await db
-      .update(agentConfig)
-      .set({
+    await projectRepository.updateAgentConfig(
+      projectId,
+      {
         githubToken: null,
         githubRepo: null,
         githubBranch: 'main',
         githubWebhookSecret: null,
-        updatedAt: new Date(),
-      })
-      .where(eq(agentConfig.projectId, projectId));
+      },
+      actorId
+    );
 
     logger.info({ projectId }, 'GitHub config removed');
   } catch (error) {
