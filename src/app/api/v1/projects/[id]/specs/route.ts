@@ -16,7 +16,7 @@ const CreateSpecificationSchema = z.object({
   markdownContent: z.string().min(1, 'Initial content is required'),
 });
 
-export async function GET(_request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -44,11 +44,15 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const specs = await specificationRepository.getByProjectId(projectId);
+    const pageParam = parseInt(request.nextUrl.searchParams.get('page') ?? '1', 10);
+    const limitParam = parseInt(request.nextUrl.searchParams.get('limit') ?? '50', 10);
 
-    return NextResponse.json({
-      data: specs,
+    const result = await specificationRepository.listByProjectId(projectId, {
+      page: isNaN(pageParam) || pageParam < 1 ? 1 : pageParam,
+      limit: isNaN(limitParam) || limitParam < 1 ? 50 : limitParam,
     });
+
+    return NextResponse.json({ data: result.data, meta: result.meta });
   } catch (error) {
     return handleApiError(error);
   }
@@ -91,8 +95,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const parsed = CreateSpecificationSchema.parse({ projectId, ...body });
 
     // Check for name conflict
-    const existing = await specificationRepository.getByProjectId(projectId);
-    if (existing.some((s) => s.name === parsed.name)) {
+    const nameExists = await specificationRepository.existsByName(projectId, parsed.name);
+    if (nameExists) {
       return NextResponse.json(
         {
           error: {
