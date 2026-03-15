@@ -1,6 +1,6 @@
 import { db } from '@/db';
 import { auditLog, type AuditLogSelect as AuditLogEntry, type AuditLogInsert } from '@/db/schema';
-import { eq, desc, sql, ilike, or, and } from 'drizzle-orm';
+import { eq, desc, sql, ilike, or, and, gte, lte } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { DatabaseError } from '@/lib/errors';
 
@@ -35,6 +35,8 @@ export class AuditRepository extends BaseRepository {
       search?: string;
       actor?: string;
       action?: string;
+      from?: string;
+      to?: string;
     },
     limit = 50,
     offset = 0
@@ -56,6 +58,14 @@ export class AuditRepository extends BaseRepository {
 
     if (filters.action) {
       conditions.push(eq(auditLog.action, filters.action));
+    }
+
+    if (filters.from) {
+      conditions.push(gte(auditLog.createdAt, new Date(filters.from)));
+    }
+
+    if (filters.to) {
+      conditions.push(lte(auditLog.createdAt, new Date(filters.to)));
     }
 
     return await this.executeQuery(() =>
@@ -85,6 +95,8 @@ export class AuditRepository extends BaseRepository {
       search?: string;
       actor?: string;
       action?: string;
+      from?: string;
+      to?: string;
     }
   ): Promise<number> {
     const conditions = [eq(auditLog.projectId, projectId)];
@@ -104,6 +116,14 @@ export class AuditRepository extends BaseRepository {
 
     if (filters.action) {
       conditions.push(eq(auditLog.action, filters.action));
+    }
+
+    if (filters.from) {
+      conditions.push(gte(auditLog.createdAt, new Date(filters.from)));
+    }
+
+    if (filters.to) {
+      conditions.push(lte(auditLog.createdAt, new Date(filters.to)));
     }
 
     const result = await this.executeQuery(() =>

@@ -41,8 +41,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     ]);
 
     return NextResponse.json({
-      data: deliveries,
-      meta: { page, total, pageSize: PAGE_SIZE },
+      data: { items: deliveries, meta: { page, total, pageSize: PAGE_SIZE } },
     });
   } catch (error) {
     return handleApiError(error);

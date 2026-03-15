@@ -126,7 +126,7 @@ export function UsageSection({ projectId }: UsageSectionProps) {
       {/* Summary cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <SummaryCard label="Total Sessions" value={String(summary.totalSessions)} />
-        <SummaryCard label="Tasks Run" value={String(summary.totalTasks)} />
+        <SummaryCard label="Tasks Completed" value={String(summary.totalTasks)} />
         <SummaryCard label="Tokens Used" value={formatTokens(summary.totalTokens)} />
         <SummaryCard label="Est. Cost" value={`$${summary.totalCostUsd.toFixed(2)}`} />
       </div>

@@ -22,8 +22,10 @@ interface AuditMeta {
   pageSize: number;
 }
 
+type AuditEntryRow = AuditLogSelect;
+
 interface AuditPayload {
-  data: AuditLogSelect[];
+  items: AuditEntryRow[];
   meta: AuditMeta;
 }
 
@@ -97,13 +99,15 @@ function AuditRow({ entry }: { entry: AuditLogSelect }) {
 
 export function AuditLogSection({ projectId }: AuditLogSectionProps) {
   const [page, setPage] = useState(1);
-  const [entries, setEntries] = useState<AuditLogSelect[]>([]);
+  const [entries, setEntries] = useState<AuditEntryRow[]>([]);
   const [meta, setMeta] = useState<AuditMeta | null>(null);
 
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [actor, setActor] = useState('');
   const [action, setAction] = useState('');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -124,13 +128,15 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
     if (search) params.set('search', search);
     if (actor) params.set('actor', actor);
     if (action && action !== '__all__') params.set('action', action);
+    if (fromDate) params.set('from', fromDate);
+    if (toDate) params.set('to', toDate);
     return `/api/v1/projects/${projectId}/audit?${params.toString()}`;
   };
 
   const url = buildUrl();
 
   const stopWhen = useCallback((data: AuditPayload) => {
-    setEntries(data.data);
+    setEntries(data.items);
     setMeta(data.meta);
     return true;
   }, []);
@@ -162,6 +168,18 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
 
   const handleActionChange = (value: string) => {
     setAction(value);
+    setPage(1);
+    restart();
+  };
+
+  const handleFromChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFromDate(e.target.value);
+    setPage(1);
+    restart();
+  };
+
+  const handleToChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setToDate(e.target.value);
     setPage(1);
     restart();
   };
@@ -214,6 +232,21 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
             ))}
           </SelectContent>
         </Select>
+
+        <Input
+          type="date"
+          value={fromDate}
+          onChange={handleFromChange}
+          className="h-8 w-36 font-mono text-xs"
+          aria-label="From date"
+        />
+        <Input
+          type="date"
+          value={toDate}
+          onChange={handleToChange}
+          className="h-8 w-36 font-mono text-xs"
+          aria-label="To date"
+        />
 
         <div className="ml-auto">
           <Button

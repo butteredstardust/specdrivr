@@ -5,7 +5,7 @@ import {
   type WebhookSelect as Webhook,
   type WebhookDeliverySelect as WebhookDelivery,
 } from '@/db/schema';
-import { eq, and, sql, ne, desc } from 'drizzle-orm';
+import { eq, and, sql, ne, desc, getTableColumns } from 'drizzle-orm';
 
 export type { WebhookDeliverySelect as WebhookDelivery } from '@/db/schema';
 import { BaseRepository } from './base-repository';
@@ -156,11 +156,15 @@ export class WebhookRepository extends BaseRepository {
     projectId: number,
     limit = 25,
     offset = 0
-  ): Promise<WebhookDelivery[]> {
+  ): Promise<(WebhookDelivery & { endpointUrl: string | null })[]> {
     return await this.executeQuery(() =>
       db
-        .select()
+        .select({
+          ...getTableColumns(webhookDeliveries),
+          endpointUrl: webhooks.url,
+        })
         .from(webhookDeliveries)
+        .leftJoin(webhooks, eq(webhooks.id, webhookDeliveries.webhookId))
         .where(eq(webhookDeliveries.projectId, projectId))
         .orderBy(desc(webhookDeliveries.createdAt))
         .limit(limit)
