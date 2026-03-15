@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Pause, Play, X, RefreshCw } from 'lucide-react';
+import { Pause, Play, X, RefreshCw, CheckCircle } from 'lucide-react';
 import type { UserRole } from '@/db/schema';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { Button } from '@/components/ui/button';
@@ -104,6 +104,14 @@ export function SessionPanel({
   });
 
   useEffect(() => {
+    if (!session?.startedAt) {
+      setElapsed(0);
+      return;
+    }
+    setElapsed(Math.floor((Date.now() - new Date(session.startedAt).getTime()) / 1000));
+  }, [session?.startedAt]);
+
+  useEffect(() => {
     if (panelState !== 'running') return;
     const interval = setInterval(() => setElapsed((e) => e + 1), 1000);
     return () => clearInterval(interval);
@@ -186,8 +194,8 @@ export function SessionPanel({
         <div className="flex flex-col gap-3">
           {/* Header */}
           <div className="flex items-center gap-2">
-            <span className="font-mono text-xs font-semibold text-[--phosphor-amber]">
-              ⏸ PAUSED
+            <span className="flex items-center gap-1 font-mono text-xs font-semibold text-[--phosphor-amber]">
+              <Pause className="h-3 w-3" /> PAUSED
             </span>
             <span className="ml-auto font-mono text-xs text-[--text-muted]">
               {mm}:{ss}
@@ -228,8 +236,8 @@ export function SessionPanel({
     return (
       <div className="flex flex-col items-center gap-3 py-4 text-center">
         <DaemonMascot size={48} expression="success" />
-        <p className="font-mono text-xs font-semibold tracking-widest text-green-400 uppercase">
-          ✓ Execution Complete
+        <p className="flex items-center gap-1 font-mono text-xs font-semibold tracking-widest text-green-400 uppercase">
+          <CheckCircle className="h-3 w-3" /> EXECUTION COMPLETE
         </p>
         {session && (
           <div className="flex gap-4 font-mono text-xs text-[--text-secondary]">
