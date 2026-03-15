@@ -3,9 +3,6 @@ import { specificationRepository } from '@/repositories/specification-repository
 import { handleApiError, formatErrorResponse } from '@/lib/error-handler';
 import { auth } from '@/lib/auth';
 import { requireMember } from '@/lib/rbac';
-import { db } from '@/db';
-import { specVersions } from '@/db/schema';
-import { eq, desc } from 'drizzle-orm';
 import { z } from 'zod';
 
 interface RouteParams {
@@ -47,11 +44,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const versions = await db
-      .select()
-      .from(specVersions)
-      .where(eq(specVersions.specId, specId))
-      .orderBy(desc(specVersions.versionNumber));
+    const versions = await specificationRepository.getVersionsBySpecId(specId);
 
     return NextResponse.json({ data: versions });
   } catch (error) {

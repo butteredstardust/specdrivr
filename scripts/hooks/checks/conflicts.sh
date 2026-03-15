@@ -21,16 +21,20 @@ fi
 
 FAILED=0
 # Search for standard conflict markers: <<<<<<<, =======, >>>>>>>
-# Note: ======= is less unique, but in combination they are sure markers.
-CONFLICT_PATTERN='(<<<<<<<|=======|>>>>>>>)'
+# We check if a file contains the START marker, as it's the most unique.
+# If it has <<<<<<<, it's almost certainly a conflict.
+START_MARKER='^<{7} '
+DIVIDE_MARKER='^={7}$'
+END_MARKER='^>{7} '
 
 for file in $pushed_files; do
     if [[ "$file" == *"conflicts.sh"* ]]; then continue; fi # Skip self
     if [ ! -f "$file" ]; then continue; fi # Skip deleted
     
-    violations=$(grep -nE "$CONFLICT_PATTERN" "$file" || true)
-    if [ -n "$violations" ]; then
+    # Check for all three markers to confirm it's a conflict
+    if grep -qE "$START_MARKER" "$file" && grep -qE "$DIVIDE_MARKER" "$file" && grep -qE "$END_MARKER" "$file"; then
         error "Unresolved conflict marker detected in $file:"
+        violations=$(grep -nE "($START_MARKER|$DIVIDE_MARKER|$END_MARKER)" "$file" || true)
         echo -e "$violations" | while read -r line; do
             echo "    Line $line"
         done

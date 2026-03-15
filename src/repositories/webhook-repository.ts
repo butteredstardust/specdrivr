@@ -5,7 +5,7 @@ import {
   type WebhookSelect as Webhook,
   type WebhookDeliverySelect as WebhookDelivery,
 } from '@/db/schema';
-import { eq, and, sql, ne } from 'drizzle-orm';
+import { eq, and, sql, ne, desc } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, DatabaseError } from '@/lib/errors';
 
@@ -114,6 +114,17 @@ export class WebhookRepository extends BaseRepository {
     }
 
     return delivery;
+  }
+
+  async getDeliveriesByWebhookId(webhookId: number, limit = 50): Promise<WebhookDelivery[]> {
+    return await this.executeQuery(() =>
+      db
+        .select()
+        .from(webhookDeliveries)
+        .where(eq(webhookDeliveries.webhookId, webhookId))
+        .orderBy(desc(webhookDeliveries.createdAt))
+        .limit(limit)
+    );
   }
 
   async getActiveWebhooksForEvent(projectId: number, event: string): Promise<Webhook[]> {

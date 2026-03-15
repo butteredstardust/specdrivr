@@ -3,9 +3,6 @@ import { auth } from '@/lib/auth';
 import { webhookRepository } from '@/repositories/webhook-repository';
 import { handleApiError } from '@/lib/error-handler';
 import { requireMember } from '@/lib/rbac';
-import { db } from '@/db';
-import { webhookDeliveries } from '@/db/schema';
-import { eq, desc } from 'drizzle-orm';
 
 interface RouteParams {
   params: Promise<{ id: string; webhookId: string }>;
@@ -42,11 +39,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const deliveries = await db
-      .select()
-      .from(webhookDeliveries)
-      .where(eq(webhookDeliveries.webhookId, wId))
-      .orderBy(desc(webhookDeliveries.createdAt));
+    const deliveries = await webhookRepository.getDeliveriesByWebhookId(wId);
 
     return NextResponse.json({ data: deliveries });
   } catch (error) {

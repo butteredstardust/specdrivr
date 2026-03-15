@@ -1,12 +1,10 @@
 import 'server-only';
 import { NextResponse } from 'next/server';
-import { db } from '@/db';
-import { invites, projectMembers, projects, users } from '@/db/schema';
-import { eq, and, gt } from 'drizzle-orm';
-import { z } from 'zod';
+import { inviteRepository } from '@/repositories/invite-repository';
 import { handleApiError } from '@/lib/error-handler';
 import { authInstance } from '@/lib/auth';
 import { logger } from '@/lib/logger';
+import { z } from 'zod';
 
 const AcceptInviteSchema = z.object({
   token: z.string().min(1),
@@ -26,18 +24,7 @@ export async function GET(req: Request) {
       );
     }
 
-    const [invite] = await db
-      .select({
-        id: invites.id,
-        email: invites.email,
-        projectId: invites.projectId,
-        projectName: projects.name,
-      })
-      .from(invites)
-      .innerJoin(projects, eq(invites.projectId, projects.id))
-      .where(and(eq(invites.token, token), gt(invites.expiresAt, new Date())))
-      .limit(1);
-
+    const invite = await inviteRepository.getByTokenWithProject(token);
     if (!invite) {
       return NextResponse.json(
         { error: { code: 'INVALID_TOKEN', message: 'Token invalid or expired' } },
@@ -45,11 +32,7 @@ export async function GET(req: Request) {
       );
     }
 
-    const [existingUser] = await db
-      .select({ id: users.id })
-      .from(users)
-      .where(eq(users.email, invite.email))
-      .limit(1);
+    const existingUser = await inviteRepository.checkUserExists(invite.email);
 
     return NextResponse.json({
       data: {
@@ -87,12 +70,7 @@ export async function POST(req: Request) {
 
     const { token, password, name } = parsed.data;
 
-    const [invite] = await db
-      .select()
-      .from(invites)
-      .where(and(eq(invites.token, token), gt(invites.expiresAt, new Date())))
-      .limit(1);
-
+    const invite = await inviteRepository.getByToken(token);
     if (!invite) {
       return NextResponse.json(
         { error: { code: 'INVALID_TOKEN', message: 'Invalid or expired invite' } },
@@ -100,42 +78,14 @@ export async function POST(req: Request) {
       );
     }
 
-    const [existingUser] = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, invite.email))
-      .limit(1);
+    const existingUser = await inviteRepository.checkUserExists(invite.email);
 
     let userId: string;
 
     if (existingUser) {
       userId = existingUser.id;
 
-      // Attempt to sign in via better-auth - this typically needs credentials but we'll
-      // rely on the user manually logging in via the UI redirect or just set them as member.
-      // The prompt says: "sign them in via BetterAuth, add as project member if not already"
-      // Note: Backend can't magically sign them in without password, but we'll add them to the project.
-      try {
-        await db.transaction(async (tx) => {
-          await tx
-            .insert(projectMembers)
-            .values({
-              projectId: invite.projectId,
-              userId: userId,
-              role: invite.role,
-            })
-            .onConflictDoNothing();
-
-          // Invalidate invite (set used_at)
-          await tx
-            .update(invites)
-            .set({ expiresAt: new Date(0) }) // Using expiresAt as proxy for used since schema might not have usedAt
-            .where(eq(invites.id, invite.id));
-        });
-      } catch (error) {
-        logger.error({ error, inviteId: invite.id }, 'Transaction failed in accept-invite');
-        throw error;
-      }
+      await inviteRepository.accept(invite.id, userId, invite.projectId, invite.role);
     } else {
       if (!password || !name) {
         return NextResponse.json(
@@ -147,7 +97,7 @@ export async function POST(req: Request) {
       let newUser;
       try {
         newUser = await authInstance.api.signUpEmail({
-          body: { email: invite.email, password: password!, name: name! },
+          body: { email: invite.email, password, name },
         });
       } catch (error: unknown) {
         logger.error({ error, email: invite.email }, 'signUpEmail failed');
@@ -163,23 +113,7 @@ export async function POST(req: Request) {
 
       userId = newUser.user.id;
 
-      try {
-        await db.transaction(async (tx) => {
-          await tx.insert(projectMembers).values({
-            projectId: invite.projectId,
-            userId: userId,
-            role: invite.role,
-          });
-
-          await tx
-            .update(invites)
-            .set({ expiresAt: new Date(0) })
-            .where(eq(invites.id, invite.id));
-        });
-      } catch (error) {
-        logger.error({ error, userId }, 'Transaction failed');
-        throw error;
-      }
+      await inviteRepository.accept(invite.id, userId, invite.projectId, invite.role);
     }
 
     return NextResponse.json({ data: { success: true } }, { status: 200 });

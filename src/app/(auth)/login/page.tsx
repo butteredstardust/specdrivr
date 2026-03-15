@@ -1,209 +1,146 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
-import Link from 'next/link';
+import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import Link from 'next/link';
 import { authClient } from '@/lib/auth-client';
-import { PixelInput, PixelPasswordInput, PixelButton, PixelAlert } from '@pxlkit/ui-kit';
+import { clientLogger } from '@/lib/logger-client';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
-const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
-
-function LoginContent() {
+export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [isLoading, setIsLoading] = useState(false);
+  const next = searchParams.get('next') ?? '/';
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [expression, setExpression] = useState<'idle' | 'working' | 'error'>('idle');
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  });
-
-  const emailValue = watch('email');
-  const passwordValue = watch('password');
-
-  const onLogin = async (data: LoginFormValues) => {
-    setIsLoading(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
     setError(null);
+    setExpression('working');
 
-    const callbackURL = searchParams.get('next') || '/';
+    const { data, error: signInError } = await authClient.signIn.email({
+      email,
+      password,
+      callbackURL: next,
+    });
 
-    try {
-      const { error: signInError } = await authClient.signIn.email({
-        email: data.email,
-        password: data.password,
-        callbackURL,
-      });
+    if (signInError) {
+      clientLogger.error('Login failed', signInError);
+      setError('Invalid email or password.');
+      setExpression('error');
+      setLoading(false);
+      return;
+    }
 
-      if (signInError) {
-        setError('Invalid email or password.');
-      } else {
-        router.push(callbackURL);
-      }
-    } catch {
-      setError('Something went wrong. Please try again.');
-    } finally {
-      setIsLoading(false);
+    if (data) {
+      router.push(next);
     }
   };
 
-  const signInAs = async (demoEmail: string) => {
-    setIsLoading(true);
-    setError(null);
-    const callbackURL = searchParams.get('next') || '/';
-
-    try {
-      const { error: signInError } = await authClient.signIn.email({
-        email: demoEmail,
-        password: 'Password123!',
-        callbackURL,
-      });
-
-      if (signInError) {
-        setError('Invalid email or password.');
-      } else {
-        router.push(callbackURL);
-      }
-    } catch {
-      setError('Something went wrong. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const isDev = process.env.NODE_ENV === 'development';
 
   return (
-    <div className="w-full max-w-[400px]">
-      <div className="flex flex-col items-center border-[--border-default] bg-[--bg-surface] p-8">
-        <DaemonMascot
-          size="lg"
-          state={isLoading ? 'working' : error ? 'error' : 'idle'}
-          className="mb-4"
-        />
-        <h1 className="mb-1 font-mono text-2xl font-bold text-[--text-primary]">SPECDRIVR</h1>
-        <p className="mb-8 text-sm text-[--text-muted]">Build what you spec.</p>
-
-        <form className="flex w-full flex-col gap-4" onSubmit={handleSubmit(onLogin)}>
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="email" className="text-xs font-medium text-[--text-secondary]">
-              EMAIL
-            </label>
-            <PixelInput
+    <Card className="w-full max-w-sm border-[--border-default] bg-[--bg-surface]">
+      <CardHeader className="items-center gap-2 pb-2">
+        <DaemonMascot size={48} expression={expression} />
+        <div className="text-center">
+          <p className="font-mono text-sm font-bold tracking-widest text-[--text-primary]">
+            SPECDRIVR
+          </p>
+          <p className="text-xs text-[--text-muted]">Build what you spec.</p>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="email">Email</Label>
+            <Input
               id="email"
               type="email"
-              tone="purple"
               autoFocus
-              {...register('email')}
-              onChange={(e) => setValue('email', e.target.value)}
-              value={emailValue}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              className="border-[--border-default] bg-[--bg-base]"
             />
           </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="password" className="text-xs font-medium text-[--text-secondary]">
-              PASSWORD
-            </label>
-            <PixelPasswordInput
+          <div className="space-y-1.5">
+            <Label htmlFor="password">Password</Label>
+            <Input
               id="password"
-              tone="purple"
-              {...register('password')}
-              onChange={(e) => setValue('password', e.target.value)}
-              value={passwordValue}
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="border-[--border-default] bg-[--bg-base]"
             />
           </div>
 
-          <div className="mt-2">
-            <PixelButton type="submit" tone="purple" className="w-full" loading={isLoading}>
-              Sign In
-            </PixelButton>
-          </div>
-
-          {(error || Object.keys(errors).length > 0) && (
-            <div className="mt-2 w-full">
-              <PixelAlert
-                tone="red"
-                title="Error"
-                message={error || Object.values(errors)[0]?.message || 'Invalid input.'}
-              />
-            </div>
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
           )}
 
-          <div className="mt-2 text-right">
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-[--accent-violet] hover:bg-[--accent-violet-dim]"
+          >
+            {loading ? 'Signing in…' : 'Sign In'}
+          </Button>
+          <div className="text-right">
             <Link
               href="/forgot-password"
-              className="text-sm text-[--accent-violet] hover:underline"
+              className="text-xs text-[--text-muted] hover:text-[--text-secondary]"
             >
               Forgot password?
             </Link>
           </div>
         </form>
-      </div>
 
-      {process.env.NODE_ENV === 'development' && (
-        <div className="mt-4 rounded-lg border border-dashed border-[--border-muted] p-4">
-          <p className="mb-3 font-mono text-xs tracking-wider text-[--text-muted] uppercase">
-            DEMO ACCESS
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <PixelButton
-              tone="neutral"
-              size="sm"
-              onClick={() => signInAs('alex@specdrivr.dev')}
-              loading={isLoading}
-            >
-              Admin
-            </PixelButton>
-            <PixelButton
-              tone="neutral"
-              size="sm"
-              onClick={() => signInAs('sam@specdrivr.dev')}
-              loading={isLoading}
-            >
-              Member
-            </PixelButton>
-            <PixelButton
-              tone="neutral"
-              size="sm"
-              onClick={() => signInAs('jordan@specdrivr.dev')}
-              loading={isLoading}
-            >
-              Viewer
-            </PixelButton>
+        {isDev && (
+          <div className="mt-4 space-y-2 border-t border-dashed border-[--border-muted] pt-4">
+            <p className="font-mono text-xs text-[--text-muted]">DEV QUICK LOGIN</p>
+            {[
+              { label: 'Owner', email: 'owner@example.com' },
+              { label: 'Admin', email: 'admin@example.com' },
+              { label: 'Member', email: 'member@example.com' },
+            ].map(({ label, email: quickEmail }) => (
+              <Button
+                key={label}
+                type="button"
+                variant="outline"
+                size="sm"
+                className="w-full text-xs"
+                onClick={async () => {
+                  setEmail(quickEmail);
+                  setPassword('Password123!');
+                  const { data } = await authClient.signIn.email({
+                    email: quickEmail,
+                    password: 'Password123!',
+                    callbackURL: next,
+                  });
+                  if (data) router.push(next);
+                }}
+              >
+                {label}
+              </Button>
+            ))}
           </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="w-full max-w-[400px] text-center text-[--text-muted]">
-          <DaemonMascot size="lg" state="working" className="mx-auto mb-4" />
-          Loading...
-        </div>
-      }
-    >
-      <LoginContent />
-    </Suspense>
+        )}
+      </CardContent>
+    </Card>
   );
 }

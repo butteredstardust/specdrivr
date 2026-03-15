@@ -1,52 +1,156 @@
 'use client';
 
-import React from 'react';
-import { NeedsAttentionBanner } from '@/components/dashboard/needs-attention-banner';
-import { SessionPanel } from '@/components/dashboard/session-panel';
-import { EventLog } from '@/components/dashboard/event-log';
+import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
+import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
-import { useShell } from '@/components/providers/shell-provider';
+import { clientLogger } from '@/lib/logger-client';
+import { NeedsAttentionBanner } from '@/components/mission-control/needs-attention-banner';
+import { SessionPanel } from '@/components/mission-control/session-panel';
+import { EventLog } from '@/components/mission-control/event-log';
+import { Skeleton } from '@/components/ui/skeleton';
+import type { UserRole } from '@/db/schema';
+
+interface AgentSession {
+  id: number;
+  status: 'running' | 'paused' | 'completed' | 'failed' | 'cancelled';
+  startedAt: string;
+  tasksExecuted: number;
+  tasksSucceeded: number;
+  tasksFailed: number;
+  errorMessage?: string | null;
+  specId?: number | null;
+}
+
+interface BlockedTask {
+  id: number;
+  title: string;
+  specId: number;
+}
 
 export default function MissionControlPage() {
-  const { activeProjectId } = useShell();
+  const { activeProjectId, user } = useShell();
+  const userRole = (user.role ?? 'viewer') as UserRole;
 
-  // We need the active session ID to pass to EventLog and NeedsAttentionBanner
-  // The session panel already polls, but we poll here to coordinate state
-  const { data: sessionData } = usePolling<{ data: { id: string } }>({
-    url: `/api/v1/sessions?projectId=${activeProjectId}&status=running&limit=1`,
-    interval: 3000,
-    enabled: !!activeProjectId,
-    stopWhen: () => false,
+  const [dismissed, setDismissed] = useState(false);
+
+  const sessionsUrl =
+    activeProjectId !== null
+      ? `/api/v1/sessions?projectId=${activeProjectId}&status=running&limit=1`
+      : null;
+
+  const tasksUrl =
+    activeProjectId !== null
+      ? `/api/v1/tasks?status=blocked&projectId=${activeProjectId}&limit=50`
+      : null;
+
+  const { data: sessionsData } = usePolling<AgentSession[]>({
+    url: sessionsUrl,
+    interval: 10_000,
   });
 
-  const activeSessionId = sessionData?.data?.id;
-
-  // Poll for blocked tasks if we have an active project
-  const { data: blockedData } = usePolling<{ data: { id: string; externalId: string }[] }>({
-    url: activeProjectId ? `/api/v1/tasks?projectId=${activeProjectId}&status=blocked` : '',
-    interval: 5000,
-    enabled: !!activeProjectId,
+  const { data: tasksData } = usePolling<BlockedTask[]>({
+    url: tasksUrl,
+    interval: 30_000,
   });
 
-  const blockedTasks = blockedData?.data || [];
+  const activeSession = sessionsData?.[0] ?? null;
+  const blockedTasks = tasksData ?? [];
+
+  // Reset dismissed state whenever the polled task data reference changes
+  useEffect(() => {
+    setDismissed(false);
+  }, [tasksData]);
+
+  async function handleSessionPatch(sessionId: number, status: string) {
+    try {
+      const response = await fetch(`/api/v1/sessions/${sessionId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ status }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+    } catch (err) {
+      clientLogger.error('Failed to update session status', { sessionId, status, err });
+      toast.error('Failed to update session');
+    }
+  }
+
+  const handlePause = async () => {
+    if (!activeSession) return;
+    await handleSessionPatch(activeSession.id, 'paused');
+  };
+
+  const handleResume = async () => {
+    if (!activeSession) return;
+    await handleSessionPatch(activeSession.id, 'running');
+  };
+
+  const handleCancel = async () => {
+    if (!activeSession) return;
+    await handleSessionPatch(activeSession.id, 'cancelled');
+  };
+
+  const handleRetry = async () => {
+    if (!activeSession) return;
+    try {
+      const response = await fetch(`/api/v1/sessions/${activeSession.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ status: 'cancelled' }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      toast.info('Session cancelled. Start a new session from the spec page.');
+    } catch (err) {
+      clientLogger.error('Failed to cancel session for retry', {
+        sessionId: activeSession.id,
+        err,
+      });
+      toast.error('Failed to update session');
+    }
+  };
+
+  const handleDismiss = () => {
+    setDismissed(true);
+  };
 
   return (
-    <div className="flex h-[calc(100vh-56px)] w-full flex-col overflow-hidden">
-      {/* Needs Attention Banner */}
-      <NeedsAttentionBanner blockedTasks={blockedTasks} />
+    <div className="flex flex-col gap-6">
+      <h1 className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
+        MISSION CONTROL
+      </h1>
 
-      {/* Columns Container */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left Column: Session Panel */}
-        <div className="w-[60%] overflow-y-auto border-r border-[--border-default]">
-          <SessionPanel />
+      {activeProjectId === null ? (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <Skeleton className="h-40 w-full" />
+          <Skeleton className="h-40 w-full" />
         </div>
+      ) : (
+        <>
+          {blockedTasks.length > 0 && !dismissed && (
+            <NeedsAttentionBanner blockedTasks={blockedTasks} onDismiss={handleDismiss} />
+          )}
 
-        {/* Right Column: Event Log */}
-        <div className="w-[40%] overflow-y-auto bg-[--bg-surface]">
-          <EventLog activeSessionId={activeSessionId} />
-        </div>
-      </div>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <SessionPanel
+              session={activeSession}
+              userRole={userRole}
+              onPause={handlePause}
+              onResume={handleResume}
+              onCancel={handleCancel}
+              onRetry={handleRetry}
+              onDismiss={handleDismiss}
+            />
+            <EventLog sessionId={activeSession?.id ?? null} />
+          </div>
+        </>
+      )}
     </div>
   );
 }

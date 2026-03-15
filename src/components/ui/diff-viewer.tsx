@@ -1,211 +1,143 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import DOMPurify from 'isomorphic-dompurify';
-import { createHighlighter, type Highlighter } from 'shiki';
-import { twMerge } from 'tailwind-merge';
-import { PixelEmptyState } from '@pxlkit/ui-kit';
+import { useState } from 'react';
+import { cn } from '@/lib/utils';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
-import { clientLogger } from '@/lib/logger-client';
+import type { Highlighter } from 'shiki';
 
-// Module-scoped highlighter promise to initialise only once
+// Module-scope singleton
 let highlighterPromise: Promise<Highlighter> | null = null;
 
-function getHighlighter() {
+function getHighlighter(): Promise<Highlighter> {
   if (!highlighterPromise) {
-    highlighterPromise = createHighlighter({
-      themes: ['github-dark'],
-      langs: ['typescript', 'javascript', 'python', 'bash', 'json', 'css', 'html'],
-    });
+    highlighterPromise = import('shiki').then(({ createHighlighter }) =>
+      createHighlighter({
+        themes: ['github-dark'],
+        langs: [
+          'diff',
+          'typescript',
+          'javascript',
+          'python',
+          'go',
+          'rust',
+          'css',
+          'html',
+          'json',
+          'bash',
+        ],
+      })
+    );
   }
   return highlighterPromise;
 }
 
-export type DiffViewerProps = {
-  diff: string;
-  language?: string;
+interface DiffFile {
+  filename: string;
+  patch: string;
+  additions: number;
+  deletions: number;
+  status: 'added' | 'modified' | 'deleted' | 'renamed';
+}
+
+interface DiffViewerProps {
+  files: DiffFile[];
   className?: string;
-};
+}
 
-type ParsedLine = {
-  content: string;
-  type: 'add' | 'remove' | 'context' | 'header';
-  highlightedHtml?: string;
-};
-
-export function DiffViewer({ diff, language = 'typescript', className }: DiffViewerProps) {
-  const [lines, setLines] = useState<ParsedLine[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!diff) {
-      setLines([]);
-      setLoading(false);
-      return;
-    }
-
-    let isMounted = true;
-    setLoading(true);
-
-    async function processDiff() {
-      try {
-        const highlighter = await getHighlighter();
-        if (!isMounted) return;
-
-        const rawLines = diff.split('\n');
-        const processedLines: ParsedLine[] = [];
-
-        for (const line of rawLines) {
-          if (line.startsWith('@@')) {
-            processedLines.push({
-              content: line,
-              type: 'header',
-            });
-          } else if (line.startsWith('+') && !line.startsWith('+++')) {
-            const code = line.substring(1);
-            const html = highlighter.codeToHtml(code, {
-              lang: language,
-              theme: 'github-dark',
-            });
-            processedLines.push({
-              content: line,
-              type: 'add',
-              highlightedHtml: stripPreTag(html),
-            });
-          } else if (line.startsWith('-') && !line.startsWith('---')) {
-            const code = line.substring(1);
-            const html = highlighter.codeToHtml(code, {
-              lang: language,
-              theme: 'github-dark',
-            });
-            processedLines.push({
-              content: line,
-              type: 'remove',
-              highlightedHtml: stripPreTag(html),
-            });
-          } else if (!line.startsWith('---') && !line.startsWith('+++')) {
-            const code = line.startsWith(' ') ? line.substring(1) : line;
-            const html = highlighter.codeToHtml(code, {
-              lang: language,
-              theme: 'github-dark',
-            });
-            processedLines.push({
-              content: line,
-              type: 'context',
-              highlightedHtml: stripPreTag(html),
-            });
-          }
-        }
-
-        setLines(processedLines);
-      } catch (error: unknown) {
-        clientLogger.error('Failed to parse or highlight diff:', error);
-        // Fallback to raw text without highlighting
-        setLines(
-          diff.split('\n').map((line) => {
-            if (line.startsWith('@@')) return { content: line, type: 'header' };
-            if (line.startsWith('+') && !line.startsWith('+++'))
-              return { content: line, type: 'add' };
-            if (line.startsWith('-') && !line.startsWith('---'))
-              return { content: line, type: 'remove' };
-            return { content: line, type: 'context' };
-          })
-        );
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    }
-
-    processDiff();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [diff, language]);
-
-  // Shiki output comes wrapped in <pre><code>, we strip it to compose our own lines safely
-  const stripPreTag = (html: string) => {
-    return html.replace(/<pre[^>]*><code[^>]*>/i, '').replace(/<\/code><\/pre>/i, '');
-  };
-
-  if (!diff) {
+function renderDiffLines(patch: string): React.ReactNode[] {
+  return patch.split('\n').map((line, i) => {
+    let className = 'text-[--text-secondary] px-2';
+    if (line.startsWith('+') && !line.startsWith('+++'))
+      className = 'bg-green-950/40 text-green-400 px-2';
+    else if (line.startsWith('-') && !line.startsWith('---'))
+      className = 'bg-red-950/40 text-red-400 px-2';
+    else if (line.startsWith('@@')) className = 'text-[--text-muted] px-2';
     return (
-      <div
-        className={twMerge(
-          'rounded-md border border-[--border-default] bg-[--bg-surface] p-8',
-          className
-        )}
-      >
-        <PixelEmptyState
-          title="No file changes yet."
-          description="No changes to display."
-          icon={<DaemonMascot size="lg" state="idle" />}
-        />
+      <div key={i} className={`font-mono text-xs leading-5 whitespace-pre ${className}`}>
+        {line || ' '}
       </div>
     );
-  }
+  });
+}
 
-  if (loading) {
+const statusPrefix: Record<DiffFile['status'], string> = {
+  added: '+',
+  modified: '~',
+  deleted: '-',
+  renamed: '~',
+};
+
+const statusColor: Record<DiffFile['status'], string> = {
+  added: 'text-green-400',
+  modified: 'text-[--phosphor-amber]',
+  deleted: 'text-[--status-red]',
+  renamed: 'text-[--phosphor-amber]',
+};
+
+export function DiffViewer({ files, className }: DiffViewerProps) {
+  const [selectedFile, setSelectedFile] = useState<string | null>(files[0]?.filename ?? null);
+
+  const selected = files.find((f) => f.filename === selectedFile);
+  const totalAdditions = files.reduce((s, f) => s + f.additions, 0);
+  const totalDeletions = files.reduce((s, f) => s + f.deletions, 0);
+
+  if (files.length === 0) {
     return (
       <div
-        className={twMerge(
-          'rounded-md border border-[--border-default] bg-[--bg-surface] p-4 font-mono text-[13px] text-[--text-muted]',
+        className={cn(
+          'flex flex-col items-center justify-center gap-3 p-8 text-[--text-muted]',
           className
         )}
       >
-        Loading diff...
+        <DaemonMascot size={32} expression="idle" />
+        <span className="text-sm">No file changes.</span>
       </div>
     );
   }
 
   return (
-    <div
-      className={twMerge(
-        'terminal-surface overflow-x-auto rounded-md border border-[--border-default] bg-[--bg-surface] font-mono text-[13px]',
-        className
-      )}
-    >
-      <div className="relative z-10 min-w-max py-2">
-        {lines.map((line, i) => {
-          let lineClass =
-            'px-4 py-0.5 whitespace-pre flex hover:bg-[--bg-elevated] transition-colors ';
-          let prefix = ' ';
+    <div className={cn('flex h-full flex-col', className)}>
+      {/* Header */}
+      <div className="flex items-center gap-3 border-b border-[--border-default] px-4 py-2">
+        <span className="font-mono text-xs font-semibold tracking-widest text-[--text-muted] uppercase">
+          FILE CHANGES
+        </span>
+        <span className="font-mono text-xs text-green-400">+{totalAdditions}</span>
+        <span className="font-mono text-xs text-[--status-red]">−{totalDeletions}</span>
+      </div>
 
-          if (line.type === 'add') {
-            lineClass += 'bg-green-950/40 text-[--status-emerald]';
-            prefix = '+';
-          } else if (line.type === 'remove') {
-            lineClass += 'bg-red-950/40 text-[--status-red]';
-            prefix = '-';
-          } else if (line.type === 'header') {
-            lineClass +=
-              'text-[--text-muted] italic bg-[--bg-base] mt-2 mb-1 border-y border-[--border-muted]';
-            prefix = '';
-          } else {
-            lineClass += 'text-[--text-primary]';
-          }
-
-          return (
-            <div key={i} className={lineClass}>
-              <span className="mr-4 inline-block w-12 shrink-0 border-r border-[--border-muted] pr-4 text-right text-[--text-muted] opacity-50 select-none">
-                {line.type !== 'header' ? i + 1 : ''}
-              </span>
-              <span className="w-4 shrink-0 text-[--text-muted] select-none">{prefix}</span>
-              {line.highlightedHtml ? (
-                <span
-                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(line.highlightedHtml) }}
-                />
-              ) : (
-                <span>
-                  {line.content.substring(
-                    line.type !== 'header' && line.content.length > 0 ? 1 : 0
-                  )}
-                </span>
+      <div className="flex flex-1 overflow-hidden">
+        {/* File tree */}
+        <div className="w-56 shrink-0 overflow-y-auto border-r border-[--border-default]">
+          {files.map((file) => (
+            <button
+              key={file.filename}
+              onClick={() => setSelectedFile(file.filename)}
+              className={cn(
+                'flex w-full items-center gap-1.5 truncate px-3 py-2 text-left font-mono text-xs',
+                selectedFile === file.filename
+                  ? 'bg-[--accent-violet]/10 text-[--accent-violet]'
+                  : 'text-[--text-secondary] hover:bg-[--bg-elevated]'
               )}
-            </div>
-          );
-        })}
+            >
+              <span className={statusColor[file.status]}>{statusPrefix[file.status]}</span>
+              <span className="truncate">{file.filename}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Diff content */}
+        <div className="flex-1 overflow-auto bg-[--bg-base]">
+          {selected ? (
+            <div>{renderDiffLines(selected.patch)}</div>
+          ) : (
+            <div className="p-4 text-sm text-[--text-muted]">Select a file to view changes.</div>
+          )}
+        </div>
       </div>
     </div>
   );
 }
+
+// Export getHighlighter for potential future use (SSR preloading, etc.)
+export { getHighlighter };

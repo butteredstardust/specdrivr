@@ -8,6 +8,13 @@
       "when": 1773340837123,
       "tag": "0000_jazzy_ink",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1773527140425,
+      "tag": "0001_hot_yellow_claw",
+      "breakpoints": true
     }
   ]
 }

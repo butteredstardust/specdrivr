@@ -30,9 +30,7 @@ export class ProjectRepository extends BaseRepository {
       db.select().from(projects).limit(limit).offset(offset)
     );
 
-    return result.sort(
-      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
-    ) as unknown as Project[];
+    return result.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
   async getById(id: number): Promise<Project | null> {
@@ -40,7 +38,7 @@ export class ProjectRepository extends BaseRepository {
       db.select().from(projects).where(eq(projects.id, id)).limit(1)
     );
 
-    return (result[0] as unknown as Project) || null;
+    return result[0] || null;
   }
 
   async getByUserId(userId: string, limit = 50, offset = 0): Promise<Project[]> {
@@ -48,7 +46,7 @@ export class ProjectRepository extends BaseRepository {
       db.select().from(projects).where(eq(projects.createdBy, userId)).limit(limit).offset(offset)
     );
 
-    return result as unknown as Project[];
+    return result;
   }
 
   async getActive(): Promise<Project[]> {
@@ -56,7 +54,7 @@ export class ProjectRepository extends BaseRepository {
       db.select().from(projects).where(eq(projects.status, 'active'))
     );
 
-    return result as unknown as Project[];
+    return result;
   }
 
   async create(data: CreateProjectData): Promise<Project> {
@@ -106,7 +104,7 @@ export class ProjectRepository extends BaseRepository {
           });
         }
 
-        return newProject as unknown as Project;
+        return newProject;
       });
     });
 
@@ -152,15 +150,15 @@ export class ProjectRepository extends BaseRepository {
       throw new ValidationError('No fields to update');
     }
 
-    const [updatedProject] = (await this.executeQuery(() =>
+    const [updatedProject] = await this.executeQuery(() =>
       db.update(projects).set(updateData).where(eq(projects.id, id)).returning()
-    )) as unknown as unknown[];
+    );
 
     if (!updatedProject) {
       throw new DatabaseError('Failed to update project');
     }
 
-    return updatedProject as unknown as Project;
+    return updatedProject;
   }
 
   async delete(id: number): Promise<void> {

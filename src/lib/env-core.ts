@@ -2,20 +2,19 @@ import { z } from 'zod';
 import { config } from 'dotenv';
 import fs from 'fs';
 import path from 'path';
-import { logger } from './logger-cli';
 
 export const envSchema = z.object({
   DATABASE_URL: z
     .string()
     .min(1, 'DATABASE_URL is required')
     .url('DATABASE_URL must be a valid URL'),
-  NEXTAUTH_SECRET: z
-    .string()
-    .min(32, 'NEXTAUTH_SECRET must be at least 32 characters for security'),
   BETTER_AUTH_SECRET: z
     .string()
     .min(32, 'BETTER_AUTH_SECRET must be at least 32 characters for security'),
-  NEXTAUTH_URL: z.string().url('NEXTAUTH_URL must be a valid URL').default('http://localhost:3000'),
+  BETTER_AUTH_URL: z
+    .string()
+    .url('BETTER_AUTH_URL must be a valid URL')
+    .default('http://localhost:3000'),
   NEXT_PUBLIC_APP_URL: z.string().url().default('http://localhost:3000'),
   REDIS_URL: z
     .string()
@@ -37,46 +36,57 @@ export function parseEnv(): Env {
   const dotEnvPath = path.resolve(process.cwd(), '.env');
   const dotEnvLocalPath = path.resolve(process.cwd(), '.env.local');
 
+  // Snapshot keys already present before we load any file (shell / CI injected values).
+  // .env.local may override .env, but neither file should clobber vars that already
+  // exist in the environment — otherwise CI's DATABASE_URL gets replaced by the
+  // committed .env.local that carries local dev credentials (pg error 28P01).
+  const preExistingKeys = new Set(Object.keys(process.env));
+
   if (fs.existsSync(dotEnvPath)) {
     const envConfig = config({ path: dotEnvPath }).parsed || {};
     for (const k in envConfig) {
-      process.env[k] = process.env[k] || envConfig[k];
+      if (!preExistingKeys.has(k)) process.env[k] = envConfig[k];
     }
   }
   if (fs.existsSync(dotEnvLocalPath)) {
     const envConfig = config({ path: dotEnvLocalPath }).parsed || {};
     for (const k in envConfig) {
-      process.env[k] = envConfig[k]; // .local overrides .env
+      // .local overrides .env (both bypass preExistingKeys), but never overrides
+      // a var that was already in the shell / CI environment.
+      if (!preExistingKeys.has(k)) process.env[k] = envConfig[k];
     }
   }
 
   const envToParse = {
     DATABASE_URL: process.env.DATABASE_URL,
-    NEXTAUTH_SECRET:
-      process.env.NEXTAUTH_SECRET || (process.env.VITEST ? 'a'.repeat(32) : undefined),
     BETTER_AUTH_SECRET:
       process.env.BETTER_AUTH_SECRET || (process.env.VITEST ? 'a'.repeat(32) : undefined),
-    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL,
+    BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || process.env.BETTER_AUTH_URL,
     REDIS_URL: process.env.REDIS_URL,
     NODE_ENV: process.env.NODE_ENV,
     GITHUB_TOKEN: process.env.GITHUB_TOKEN,
     GITHUB_WEBHOOK_SECRET: process.env.GITHUB_WEBHOOK_SECRET,
-    CRON_SECRET: process.env.CRON_SECRET || (process.env.VITEST ? 'a'.repeat(32) : undefined),
+    CRON_SECRET:
+      process.env.CRON_SECRET ||
+      (process.env.NODE_ENV === 'production' && process.env.CI ? undefined : 'a'.repeat(32)),
     RESEND_API_KEY:
-      process.env.RESEND_API_KEY || (process.env.VITEST ? 're_dummy_key_for_testing' : undefined),
+      process.env.RESEND_API_KEY ||
+      (process.env.NODE_ENV === 'production' && process.env.CI
+        ? undefined
+        : 're_dummy_key_for_testing'),
     RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
   };
 
   if (process.env.VITEST && !process.env.DATABASE_URL) {
-    logger.warn('DATABASE_URL is missing during Vitest execution.');
+    console.warn('DATABASE_URL is missing during Vitest execution.');
   }
 
   try {
     return envSchema.parse(envToParse);
   } catch (error) {
     if (process.env.VITEST) {
-      logger.error({ error }, 'Environment validation failed during Vitest');
+      console.error('Environment validation failed during Vitest:', error);
     }
     throw error;
   }

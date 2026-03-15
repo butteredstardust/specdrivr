@@ -64,8 +64,8 @@ yarn-error.log*
 # ==============================
 # Secrets & Environments
 # ==============================
-.env
-.env*.local
+#.env
+#.env*.local
 .env.development
 .env.test
 .env.production
@@ -92,25 +92,23 @@ Thumbs.db
 .vercel/
 
 # Gemini AI files
-.gemini/
+#.gemini/
 
 # Claude system files
-.claude/
-!.claude/agents/
-.mcp.json
+#.mcp.json
 
 # Agent & CI files
-.agents/
-.ci/
-.playwright-mcp/
-.Jules/
+#.agents/
+#.ci/
+#.playwright-mcp/
+#.Jules/
 
 # Build & Tooling Cache
 .turbo/
 .pnpm-store/
 
 # Local configuration
-*.local
+#*.local
 
 # Cleanup scripts
 knip-baseline.json
@@ -126,4 +124,3 @@ fix-*.sh
 *_output.txt     # Build/generate output logs
 *_results.txt    # Test/lint result dumps
 migrate-*.ts     # One-time migration scripts (unless in drizzle/)
-next-env.d.ts
