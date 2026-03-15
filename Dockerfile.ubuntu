@@ -1,31 +1,24 @@
-FROM ubuntu:22.04
+FROM node:25-bookworm-slim
 
-# Install dependencies needed for bootstrap
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    curl \
-    git \
-    build-essential \
-    ca-certificates \
-    sudo \
-    lsb-release \
-    postgresql \
-    postgresql-contrib \
-    redis-server \
-    && rm -rf /var/lib/apt/lists/*
+ENV NODE_ENV=production
+ENV PNPM_HOME=/root/.local/share/pnpm
+ENV PATH="$PNPM_HOME:$PATH"
 
-# Set up a non-root user (more realistic testing)
-RUN useradd -m -s /bin/bash specdrivr && \
-    echo "specdrivr ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+RUN npm install -g pnpm
 
-# Switch to the specdrivr user
-USER specdrivr
-WORKDIR /home/specdrivr
+WORKDIR /app
 
-# Copy project files
-COPY --chown=specdrivr:specdrivr . .
+# Install deps (cached layer)
+COPY pnpm-lock.yaml package.json ./
+RUN pnpm install --frozen-lockfile
 
-# Make bootstrap executable
-RUN chmod +x bootstrap.sh
+# Copy source and build
+COPY . .
+RUN pnpm build
 
-# Run the bootstrap script
-CMD ["./bootstrap.sh"]
+# Entrypoint
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+EXPOSE 3000
+ENTRYPOINT ["docker-entrypoint.sh"]

@@ -6,7 +6,7 @@ import {
   auditLog,
   type SpecificationSelect as Specification,
 } from '@/db/schema';
-import { eq, and, ne, desc } from 'drizzle-orm';
+import { eq, and, ne, desc, sql } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, DatabaseError } from '@/lib/errors';
 import { dispatchWebhookEvent } from '@/lib/webhooks';
@@ -30,6 +30,47 @@ export class SpecificationRepository extends BaseRepository {
     return await this.executeQuery(() =>
       db.select().from(specifications).where(eq(specifications.projectId, projectId))
     );
+  }
+
+  async listByProjectId(projectId: number, options: { page?: number; limit?: number } = {}) {
+    const { page = 1, limit = 50 } = options;
+    const safeLimit = Math.min(limit, 100);
+    const offset = (page - 1) * safeLimit;
+
+    const [rows, countResult] = await Promise.all([
+      this.executeQuery(() =>
+        db
+          .select()
+          .from(specifications)
+          .where(eq(specifications.projectId, projectId))
+          .orderBy(desc(specifications.createdAt))
+          .limit(safeLimit)
+          .offset(offset)
+      ),
+      this.executeQuery(() =>
+        db
+          .select({ count: sql<number>`count(*)` })
+          .from(specifications)
+          .where(eq(specifications.projectId, projectId))
+      ),
+    ]);
+
+    const total = Number(countResult[0]?.count ?? 0);
+    return {
+      data: rows,
+      meta: { page, limit: safeLimit, total, totalPages: Math.ceil(total / safeLimit) },
+    };
+  }
+
+  async existsByName(projectId: number, name: string): Promise<boolean> {
+    const result = await this.executeQuery(() =>
+      db
+        .select({ id: specifications.id })
+        .from(specifications)
+        .where(and(eq(specifications.projectId, projectId), eq(specifications.name, name)))
+        .limit(1)
+    );
+    return result.length > 0;
   }
 
   async create(data: {

@@ -1,22 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { clientLogger } from '@/lib/logger-client';
 import type { UserRole } from '@/db/schema';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { DangerZoneSection } from '@/components/settings/danger-zone-section';
 
 interface ProjectSettingsFormProps {
   project: {
@@ -24,29 +16,32 @@ interface ProjectSettingsFormProps {
     name: string;
     description: string | null;
     repositoryUrl?: string | null;
+    repositoryBranch?: string | null;
   };
   userRole: UserRole;
+  /** When true, renders only the Danger Zone section and hides the project fields form. */
+  dangerZoneOnly?: boolean;
 }
+
+type VerifyStatus = 'idle' | 'checking' | 'connected' | 'unreachable';
 
 function canEdit(role: UserRole): boolean {
   return role === 'admin' || role === 'owner';
 }
 
-function canDelete(role: UserRole): boolean {
-  return role === 'owner';
-}
-
-export function ProjectSettingsForm({ project, userRole }: ProjectSettingsFormProps) {
-  const router = useRouter();
+export function ProjectSettingsForm({
+  project,
+  userRole,
+  dangerZoneOnly = false,
+}: ProjectSettingsFormProps) {
   const [name, setName] = useState(project.name);
   const [description, setDescription] = useState(project.description ?? '');
-  const [githubRepo, setGithubRepo] = useState(project.repositoryUrl ?? '');
+  const [repositoryUrl, setRepositoryUrl] = useState(project.repositoryUrl ?? '');
+  const [repositoryBranch, setRepositoryBranch] = useState(project.repositoryBranch ?? 'main');
   const [isSaving, setIsSaving] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [verifyStatus, setVerifyStatus] = useState<VerifyStatus>('idle');
 
   const editable = canEdit(userRole);
-  const deletable = canDelete(userRole);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -58,7 +53,12 @@ export function ProjectSettingsForm({ project, userRole }: ProjectSettingsFormPr
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, description, githubRepo }),
+        body: JSON.stringify({
+          name,
+          description,
+          repositoryUrl: repositoryUrl || null,
+          repositoryBranch: repositoryBranch || null,
+        }),
       });
 
       if (!res.ok) {
@@ -76,165 +76,178 @@ export function ProjectSettingsForm({ project, userRole }: ProjectSettingsFormPr
     }
   };
 
-  const handleDelete = async () => {
-    if (!deletable) return;
-    setIsDeleting(true);
-
+  const handleVerifyConnection = async () => {
+    const url = repositoryUrl.trim();
+    if (!url) {
+      toast.error('Enter a repository URL first.');
+      return;
+    }
+    setVerifyStatus('checking');
     try {
-      const res = await fetch(`/api/v1/projects/${project.id}`, {
-        method: 'DELETE',
+      const res = await fetch(`/api/v1/verify-repo?url=${encodeURIComponent(url)}`, {
         credentials: 'include',
       });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data?.error ?? `HTTP ${res.status}`);
+      if (res.ok) {
+        setVerifyStatus('connected');
+      } else {
+        clientLogger.warn('Repository verify returned non-OK', { status: res.status });
+        setVerifyStatus('unreachable');
       }
-
-      toast.success('Project deleted');
-      router.push('/projects');
     } catch (err) {
-      const error = err instanceof Error ? err : new Error(String(err));
-      clientLogger.error('Failed to delete project', error);
-      toast.error('Failed to delete project');
-    } finally {
-      setIsDeleting(false);
-      setDeleteOpen(false);
+      clientLogger.error('Repo verify error', err instanceof Error ? err : new Error(String(err)));
+      setVerifyStatus('unreachable');
     }
   };
 
   return (
     <TooltipProvider>
       <section className="flex flex-col gap-4">
-        <h2 className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
-          PROJECT SETTINGS
-        </h2>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label className="font-mono text-xs text-[--text-secondary]" htmlFor="project-name">
-              Project name
-            </label>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Input
-                  id="project-name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  disabled={!editable}
-                />
-              </TooltipTrigger>
-              {!editable && <TooltipContent>Requires admin or owner role to edit</TooltipContent>}
-            </Tooltip>
-          </div>
+        {!dangerZoneOnly && (
+          <h2 className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
+            PROJECT SETTINGS
+          </h2>
+        )}
+        {!dangerZoneOnly && (
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="font-mono text-xs text-[--text-secondary]" htmlFor="project-name">
+                Project name
+              </label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Input
+                    id="project-name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    disabled={!editable}
+                  />
+                </TooltipTrigger>
+                {!editable && <TooltipContent>Requires admin or owner role to edit</TooltipContent>}
+              </Tooltip>
+            </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label
-              className="font-mono text-xs text-[--text-secondary]"
-              htmlFor="project-description"
-            >
-              Description
-            </label>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Input
-                  id="project-description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  disabled={!editable}
-                />
-              </TooltipTrigger>
-              {!editable && <TooltipContent>Requires admin or owner role to edit</TooltipContent>}
-            </Tooltip>
-          </div>
+            <div className="flex flex-col gap-1.5">
+              <label
+                className="font-mono text-xs text-[--text-secondary]"
+                htmlFor="project-description"
+              >
+                Description
+              </label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Input
+                    id="project-description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    disabled={!editable}
+                  />
+                </TooltipTrigger>
+                {!editable && <TooltipContent>Requires admin or owner role to edit</TooltipContent>}
+              </Tooltip>
+            </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="font-mono text-xs text-[--text-secondary]" htmlFor="project-github">
-              GitHub repo (owner/repo)
-            </label>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Input
-                  id="project-github"
-                  value={githubRepo}
-                  onChange={(e) => setGithubRepo(e.target.value)}
-                  placeholder="owner/repo-name"
-                  disabled={!editable}
-                />
-              </TooltipTrigger>
-              {!editable && <TooltipContent>Requires admin or owner role to edit</TooltipContent>}
-            </Tooltip>
-          </div>
+            <div className="flex flex-col gap-1.5">
+              <label
+                className="font-mono text-xs text-[--text-secondary]"
+                htmlFor="project-repo-url"
+              >
+                REPOSITORY URL
+              </label>
+              <div className="flex items-center gap-2">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Input
+                      id="project-repo-url"
+                      value={repositoryUrl}
+                      onChange={(e) => {
+                        setRepositoryUrl(e.target.value);
+                        setVerifyStatus('idle');
+                      }}
+                      placeholder="https://github.com/owner/repo"
+                      disabled={!editable}
+                      className="flex-1"
+                    />
+                  </TooltipTrigger>
+                  {!editable && (
+                    <TooltipContent>Requires admin or owner role to edit</TooltipContent>
+                  )}
+                </Tooltip>
 
-          <div>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span tabIndex={!editable ? 0 : undefined}>
-                  <Button type="submit" disabled={!editable || isSaving} size="sm">
-                    {isSaving ? 'Saving…' : 'Save'}
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              {!editable && <TooltipContent>Requires admin or owner role</TooltipContent>}
-            </Tooltip>
-          </div>
-        </form>
-
-        {/* Danger Zone */}
-        <div className="mt-4 rounded border border-red-900/40 p-4">
-          <h3 className="mb-3 font-mono text-xs tracking-widest text-red-400 uppercase">
-            Danger Zone
-          </h3>
-          <div className="flex items-center justify-between gap-4">
-            <p className="font-mono text-xs text-[--text-muted]">
-              Permanently delete this project and all its data.
-            </p>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span tabIndex={!deletable ? 0 : undefined}>
-                  <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-                    <DialogTrigger asChild>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span tabIndex={!editable ? 0 : undefined}>
                       <Button
-                        variant="destructive"
+                        type="button"
+                        variant="outline"
                         size="sm"
-                        disabled={!deletable}
-                        onClick={() => setDeleteOpen(true)}
+                        onClick={handleVerifyConnection}
+                        disabled={!editable || verifyStatus === 'checking'}
+                        className="shrink-0"
                       >
-                        Delete Project
+                        {verifyStatus === 'checking' ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          'Verify Connection'
+                        )}
                       </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle className="font-mono">Delete project?</DialogTitle>
-                        <DialogDescription className="font-mono text-xs">
-                          This action cannot be undone. All specs, sessions, and data for{' '}
-                          <strong>{project.name}</strong> will be permanently deleted.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <DialogFooter>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setDeleteOpen(false)}
-                          disabled={isDeleting}
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={handleDelete}
-                          disabled={isDeleting}
-                        >
-                          {isDeleting ? 'Deleting…' : 'Delete'}
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                </span>
-              </TooltipTrigger>
-              {!deletable && <TooltipContent>Only project owners can delete</TooltipContent>}
-            </Tooltip>
-          </div>
+                    </span>
+                  </TooltipTrigger>
+                  {!editable && <TooltipContent>Requires admin or owner role</TooltipContent>}
+                </Tooltip>
+
+                {verifyStatus === 'connected' && (
+                  <span className="flex items-center gap-1 text-xs text-[--phosphor-amber]">
+                    <CheckCircle className="h-3.5 w-3.5" />
+                    Connected
+                  </span>
+                )}
+                {verifyStatus === 'unreachable' && (
+                  <span className="flex items-center gap-1 text-xs text-[--text-muted]">
+                    <XCircle className="h-3.5 w-3.5" />
+                    Unreachable
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label
+                className="font-mono text-xs text-[--text-secondary]"
+                htmlFor="project-repo-branch"
+              >
+                DEFAULT BRANCH
+              </label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Input
+                    id="project-repo-branch"
+                    value={repositoryBranch}
+                    onChange={(e) => setRepositoryBranch(e.target.value)}
+                    placeholder="main"
+                    disabled={!editable}
+                  />
+                </TooltipTrigger>
+                {!editable && <TooltipContent>Requires admin or owner role to edit</TooltipContent>}
+              </Tooltip>
+            </div>
+
+            <div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span tabIndex={!editable ? 0 : undefined}>
+                    <Button type="submit" disabled={!editable || isSaving} size="sm">
+                      {isSaving ? 'Saving Changes…' : 'Save Changes'}
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                {!editable && <TooltipContent>Requires admin or owner role</TooltipContent>}
+              </Tooltip>
+            </div>
+          </form>
+        )}
+
+        <div className="mt-4">
+          <DangerZoneSection project={{ id: project.id, name: project.name }} userRole={userRole} />
         </div>
       </section>
     </TooltipProvider>

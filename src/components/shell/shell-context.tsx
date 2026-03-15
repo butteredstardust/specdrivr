@@ -8,6 +8,7 @@ interface ShellContextValue {
   setActiveProjectId: (id: number | null) => void;
   devMode: boolean;
   setDevMode: (v: boolean) => void;
+  toggleDevMode: () => void;
   user: { id: string; name: string; email: string; role?: string; onboardingStep?: number };
   shortcutsOpen: boolean;
   setShortcutsOpen: (v: boolean) => void;
@@ -46,6 +47,14 @@ export function ShellProvider({ user, children }: ShellProviderProps) {
     localStorage.setItem('specdrivr:devMode', String(v));
   }, []);
 
+  const toggleDevMode = useCallback(() => {
+    setDevModeState((prev) => {
+      const next = !prev;
+      localStorage.setItem('specdrivr:devMode', String(next));
+      return next;
+    });
+  }, []);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Skip if focused on input/textarea
@@ -63,13 +72,30 @@ export function ShellProvider({ user, children }: ShellProviderProps) {
       // Ctrl+`
       if (e.ctrlKey && e.key === '`') {
         e.preventDefault();
-        setDevMode(!devMode);
+        setDevModeState((prev) => {
+          const next = !prev;
+          localStorage.setItem('specdrivr:devMode', String(next));
+          return next;
+        });
         return;
       }
 
       // ?
       if (e.key === '?') {
         setShortcutsOpen(true);
+        return;
+      }
+
+      // N — new specification (only when no modifier key)
+      if (e.key === 'n' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        router.push('/specs/new');
+        return;
+      }
+
+      // Cmd+K — command palette (placeholder: open shortcuts modal for now)
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setShortcutsOpen(true); // placeholder until command palette is built
         return;
       }
 
@@ -107,7 +133,7 @@ export function ShellProvider({ user, children }: ShellProviderProps) {
         firstKeyTimerRef.current = null;
       }
     };
-  }, [devMode, router, setDevMode]);
+  }, [router]);
 
   return (
     <ShellContext.Provider
@@ -116,6 +142,7 @@ export function ShellProvider({ user, children }: ShellProviderProps) {
         setActiveProjectId,
         devMode,
         setDevMode,
+        toggleDevMode,
         user,
         shortcutsOpen,
         setShortcutsOpen,
@@ -130,4 +157,9 @@ export function useShell(): ShellContextValue {
   const ctx = useContext(ShellContext);
   if (!ctx) throw new Error('useShell must be used within ShellProvider');
   return ctx;
+}
+
+export function useDevMode() {
+  const { devMode, toggleDevMode } = useShell();
+  return { devMode, toggleDevMode };
 }

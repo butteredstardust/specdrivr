@@ -23,33 +23,31 @@ describe('Seed Script Smoke Test', () => {
     const [userCount] = await testDb.select({ value: count() }).from(schema.users);
     expect(userCount.value).toBe(3);
 
-    // 2 projects
+    // 5 projects
     const [projectCount] = await testDb.select({ value: count() }).from(schema.projects);
-    expect(projectCount.value).toBe(2);
+    expect(projectCount.value).toBe(5);
 
-    // 6 specs
+    // 10 specs
     const [specCount] = await testDb.select({ value: count() }).from(schema.specifications);
-    expect(specCount.value).toBe(6);
+    expect(specCount.value).toBe(10);
 
-    // 4 plans
+    // 6 plans
     const [planCount] = await testDb.select({ value: count() }).from(schema.plans);
-    expect(planCount.value).toBe(4);
+    expect(planCount.value).toBe(6);
 
-    // spec_001 plan status is pending_approval
+    // spec 1 (Component Library Refactor) is completed; plan 1 is completed
     const [spec1] = await testDb
       .select()
       .from(schema.specifications)
       .where(eq(schema.specifications.id, 1));
-    const [plan1] = await testDb
-      .select()
-      .from(schema.plans)
-      .where(eq(schema.plans.specId, spec1.id));
-    expect(plan1.status).toBe('pending_approval');
+    expect(spec1.status).toBe('completed');
+    const [plan1] = await testDb.select().from(schema.plans).where(eq(schema.plans.id, 1));
+    expect(plan1.status).toBe('completed');
 
-    // task_105 status is blocked with non-empty blockedReason
-    const [task105] = await testDb.select().from(schema.tasks).where(eq(schema.tasks.id, 105));
-    expect(task105.status).toBe('blocked');
-    expect(task105.blockedReason).toBeTruthy();
+    // T-504 (Add monitoring hooks) is blocked with a non-empty blockedReason
+    const [task504] = await testDb.select().from(schema.tasks).where(eq(schema.tasks.id, 504));
+    expect(task504.status).toBe('blocked');
+    expect(task504.blockedReason).toBeTruthy();
 
     // Exactly one session with status running
     const [runningSessions] = await testDb

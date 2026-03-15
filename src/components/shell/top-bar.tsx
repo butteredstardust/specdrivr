@@ -129,7 +129,7 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
             </Button>
           </PopoverTrigger>
           <PopoverContent
-            className="w-[380px] max-h-[480px] p-0 bg-[--bg-surface] border-[--border-default]"
+            className="max-h-[480px] w-[380px] border-[--border-default] bg-[--bg-surface] p-0"
             align="end"
           >
             <NotificationPanel />
@@ -166,6 +166,9 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
             <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href="/settings">Settings</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setShortcutsOpen(true)}>
+              Keyboard Shortcuts
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSignOut} className="text-[--status-red]">

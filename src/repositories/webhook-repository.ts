@@ -5,7 +5,9 @@ import {
   type WebhookSelect as Webhook,
   type WebhookDeliverySelect as WebhookDelivery,
 } from '@/db/schema';
-import { eq, and, sql, ne, desc } from 'drizzle-orm';
+import { eq, and, sql, ne, desc, getTableColumns } from 'drizzle-orm';
+
+export type { WebhookDeliverySelect as WebhookDelivery } from '@/db/schema';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, DatabaseError } from '@/lib/errors';
 
@@ -148,6 +150,36 @@ export class WebhookRepository extends BaseRepository {
     await this.executeQuery(() =>
       db.update(webhooks).set({ status: 'error' }).where(eq(webhooks.id, id))
     );
+  }
+
+  async getDeliveriesByProjectId(
+    projectId: number,
+    limit = 25,
+    offset = 0
+  ): Promise<(WebhookDelivery & { endpointUrl: string | null })[]> {
+    return await this.executeQuery(() =>
+      db
+        .select({
+          ...getTableColumns(webhookDeliveries),
+          endpointUrl: webhooks.url,
+        })
+        .from(webhookDeliveries)
+        .leftJoin(webhooks, eq(webhooks.id, webhookDeliveries.webhookId))
+        .where(eq(webhookDeliveries.projectId, projectId))
+        .orderBy(desc(webhookDeliveries.createdAt))
+        .limit(limit)
+        .offset(offset)
+    );
+  }
+
+  async countDeliveriesByProjectId(projectId: number): Promise<number> {
+    const result = await this.executeQuery(() =>
+      db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(webhookDeliveries)
+        .where(eq(webhookDeliveries.projectId, projectId))
+    );
+    return result[0]?.count ?? 0;
   }
 }
 

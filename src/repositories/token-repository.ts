@@ -4,7 +4,7 @@ import {
   type AgentTokenSelect as AgentToken,
   type AgentTokenInsert,
 } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { DatabaseError } from '@/lib/errors';
 
@@ -55,6 +55,17 @@ export class TokenRepository extends BaseRepository {
     await this.executeQuery(() =>
       db.update(agentTokens).set({ revokedAt: new Date() }).where(eq(agentTokens.id, id))
     );
+  }
+
+  async findByIdAndUserId(id: number, userId: string): Promise<{ id: number } | null> {
+    const result = await this.executeQuery(() =>
+      db
+        .select({ id: agentTokens.id })
+        .from(agentTokens)
+        .where(and(eq(agentTokens.id, id), eq(agentTokens.userId, userId)))
+        .limit(1)
+    );
+    return result[0] ?? null;
   }
 }
 
