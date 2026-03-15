@@ -1,0 +1,160 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import CodeMirror from '@uiw/react-codemirror';
+import { markdown } from '@codemirror/lang-markdown';
+import ReactMarkdown from 'react-markdown';
+import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+
+type SpecStatus =
+  | 'drafting'
+  | 'pending_plan'
+  | 'pending_approval'
+  | 'executing'
+  | 'completed'
+  | 'stalled'
+  | 'archived';
+
+interface SpecEditorProps {
+  initialContent?: string;
+  initialTitle?: string;
+  specId?: number;
+  specStatus?: SpecStatus;
+  onSave: (title: string, content: string) => Promise<{ success: boolean; error?: string }>;
+  onPublish?: () => void;
+  className?: string;
+}
+
+export function SpecEditor({
+  initialContent,
+  initialTitle,
+  specStatus,
+  onSave,
+  className,
+}: SpecEditorProps) {
+  const [title, setTitle] = useState(initialTitle ?? '');
+  const [content, setContent] = useState(initialContent ?? '');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  const isDirty = title !== (initialTitle ?? '') || content !== (initialContent ?? '');
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    setSaveError(null);
+    const result = await onSave(title, content);
+    setIsSaving(false);
+    if (result.success) {
+      toast.success('Saved');
+    } else {
+      setSaveError(result.error ?? 'Failed to save');
+    }
+  };
+
+  // Ctrl+Enter / Cmd+Enter shortcut
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        handleSave();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [title, content]);
+
+  // Unsaved changes guard
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (isDirty) e.preventDefault();
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [isDirty]);
+
+  const isReadOnly = specStatus === 'pending_plan';
+
+  return (
+    <div className={`flex flex-col h-screen${className ? ` ${className}` : ''}`}>
+      {/* Top bar */}
+      <div className="flex items-center gap-3 border-b border-[--border-subtle] px-4 py-2 shrink-0">
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Untitled spec"
+          className="flex-1 bg-transparent font-mono text-sm text-[--text-primary] placeholder:text-[--text-muted] outline-none"
+        />
+        {saveError && (
+          <p className="text-sm text-red-400">{saveError}</p>
+        )}
+        <Button
+          size="sm"
+          onClick={handleSave}
+          disabled={isSaving || !isDirty}
+        >
+          {isSaving ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            'Save'
+          )}
+        </Button>
+        <Link
+          href="/specs"
+          className="font-mono text-xs text-[--text-muted] hover:text-[--text-secondary] transition-colors"
+        >
+          Back
+        </Link>
+      </div>
+
+      {/* Warning banners */}
+      {specStatus === 'executing' && (
+        <Alert className="rounded-none border-x-0 border-t-0 border-amber-500/40 bg-amber-500/10 text-amber-300">
+          <AlertDescription>
+            This spec has an active execution session — edits may cause conflicts.
+          </AlertDescription>
+        </Alert>
+      )}
+      {specStatus === 'pending_approval' && (
+        <Alert className="rounded-none border-x-0 border-t-0 border-amber-500/40 bg-amber-500/10 text-amber-300">
+          <AlertDescription>
+            Plan changes have been requested — address feedback before editing.
+          </AlertDescription>
+        </Alert>
+      )}
+      {specStatus === 'pending_plan' && (
+        <Alert className="rounded-none border-x-0 border-t-0 border-amber-500/40 bg-amber-500/10 text-amber-300">
+          <AlertDescription>
+            This spec is pending plan generation — editing is disabled until the plan is ready.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Split pane */}
+      <div className="grid grid-cols-2 flex-1 overflow-hidden">
+        {/* Editor pane */}
+        <div className="h-full overflow-hidden border-r border-[--border-subtle]">
+          <CodeMirror
+            value={content}
+            onChange={setContent}
+            extensions={[markdown()]}
+            theme="dark"
+            height="100%"
+            className="h-full"
+            editable={!isReadOnly}
+          />
+        </div>
+
+        {/* Preview pane */}
+        <div className="overflow-y-auto p-4 prose prose-invert prose-sm max-w-none">
+          <ReactMarkdown>{content}</ReactMarkdown>
+        </div>
+      </div>
+    </div>
+  );
+}
