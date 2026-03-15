@@ -20,8 +20,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     onboardingStep: session.user.onboardingStep ?? undefined,
   };
 
-  // TODO: OnboardingWizard will be implemented in Task 18
-  // For now, conditionally render once it exists
   const showOnboarding = session.user.onboardingStep === 0;
 
   return (
