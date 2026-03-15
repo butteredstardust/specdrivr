@@ -78,7 +78,9 @@ export function SpecTab({ spec, userRole }: SpecTabProps): React.ReactElement {
     <div className="flex flex-col gap-6 lg:flex-row">
       {/* Main content */}
       <div className="min-w-0 flex-1">
-        <ReactMarkdown className="prose prose-invert max-w-none">{spec.content}</ReactMarkdown>
+        <div className="prose prose-invert max-w-none">
+          <ReactMarkdown>{spec.content}</ReactMarkdown>
+        </div>
       </div>
 
       {/* Metadata sidebar */}
