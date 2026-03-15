@@ -9,7 +9,7 @@ import {
   projects,
   specifications,
 } from '@/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, inArray } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, DatabaseError } from '@/lib/errors';
 import { dispatchWebhookEvent, type WebhookEventType } from '@/lib/webhooks';
@@ -48,6 +48,18 @@ export class AgentSessionRepository extends BaseRepository {
         .limit(limit)
         .offset(offset)
         .orderBy(desc(agentSessions.startedAt))
+    );
+  }
+
+  async getByProjectIds(projectIds: number[], limit = 50, offset = 0): Promise<AgentSession[]> {
+    return await this.executeQuery(() =>
+      db
+        .select()
+        .from(agentSessions)
+        .where(inArray(agentSessions.projectId, projectIds))
+        .orderBy(desc(agentSessions.startedAt))
+        .limit(limit)
+        .offset(offset)
     );
   }
 

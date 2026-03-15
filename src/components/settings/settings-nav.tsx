@@ -44,7 +44,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'DEVELOPER',
     items: [
       { href: '/settings/webhooks', label: 'Webhook Log' },
-      { href: '/settings/tokens', label: 'API Tokens' },
+      { href: '/settings/security', label: 'API Tokens' },
     ],
   },
 ];
