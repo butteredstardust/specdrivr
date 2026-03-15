@@ -27,6 +27,10 @@ const eslintConfig = [
       ...pluginNext.configs['core-web-vitals'].rules,
 
       // ─── Specdrivr Architectural Guards ─────────────────────────────────────
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { varsIgnorePattern: '^_', argsIgnorePattern: '^_' },
+      ],
       '@typescript-eslint/no-explicit-any': 'warn',
       'no-debugger': 'error',
       'no-console': ['warn', { allow: ['info', 'error', 'warn'] }], // Prefer Pino logger

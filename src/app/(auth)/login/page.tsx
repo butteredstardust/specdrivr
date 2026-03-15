@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { toast } from 'sonner';
 import { authClient } from '@/lib/auth-client';
 import { clientLogger } from '@/lib/logger-client';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
@@ -52,11 +51,13 @@ export default function LoginPage() {
   const isDev = process.env.NODE_ENV === 'development';
 
   return (
-    <Card className="w-full max-w-sm bg-[--bg-surface] border-[--border-default]">
+    <Card className="w-full max-w-sm border-[--border-default] bg-[--bg-surface]">
       <CardHeader className="items-center gap-2 pb-2">
         <DaemonMascot size={48} expression={expression} />
         <div className="text-center">
-          <p className="font-mono font-bold text-sm tracking-widest text-[--text-primary]">SPECDRIVR</p>
+          <p className="font-mono text-sm font-bold tracking-widest text-[--text-primary]">
+            SPECDRIVR
+          </p>
           <p className="text-xs text-[--text-muted]">Build what you spec.</p>
         </div>
       </CardHeader>
@@ -71,7 +72,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="bg-[--bg-base] border-[--border-default]"
+              className="border-[--border-default] bg-[--bg-base]"
             />
           </div>
           <div className="space-y-1.5">
@@ -82,7 +83,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="bg-[--bg-base] border-[--border-default]"
+              className="border-[--border-default] bg-[--bg-base]"
             />
           </div>
 
@@ -92,19 +93,26 @@ export default function LoginPage() {
             </Alert>
           )}
 
-          <Button type="submit" disabled={loading} className="w-full bg-[--accent-violet] hover:bg-[--accent-violet-dim]">
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-[--accent-violet] hover:bg-[--accent-violet-dim]"
+          >
             {loading ? 'Signing in…' : 'Sign In'}
           </Button>
           <div className="text-right">
-            <Link href="/forgot-password" className="text-xs text-[--text-muted] hover:text-[--text-secondary]">
+            <Link
+              href="/forgot-password"
+              className="text-xs text-[--text-muted] hover:text-[--text-secondary]"
+            >
               Forgot password?
             </Link>
           </div>
         </form>
 
         {isDev && (
-          <div className="mt-4 pt-4 border-t border-dashed border-[--border-muted] space-y-2">
-            <p className="text-xs text-[--text-muted] font-mono">DEV QUICK LOGIN</p>
+          <div className="mt-4 space-y-2 border-t border-dashed border-[--border-muted] pt-4">
+            <p className="font-mono text-xs text-[--text-muted]">DEV QUICK LOGIN</p>
             {[
               { label: 'Owner', email: 'owner@example.com' },
               { label: 'Admin', email: 'admin@example.com' },
@@ -119,7 +127,11 @@ export default function LoginPage() {
                 onClick={async () => {
                   setEmail(quickEmail);
                   setPassword('Password123!');
-                  const { data } = await authClient.signIn.email({ email: quickEmail, password: 'Password123!', callbackURL: next });
+                  const { data } = await authClient.signIn.email({
+                    email: quickEmail,
+                    password: 'Password123!',
+                    callbackURL: next,
+                  });
                   if (data) router.push(next);
                 }}
               >
