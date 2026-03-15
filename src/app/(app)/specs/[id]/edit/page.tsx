@@ -1,19 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, notFound } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { SpecEditor } from '@/components/specs/spec-editor';
+import type { SpecStatus } from '@/components/specs/spec-editor';
 import { clientLogger } from '@/lib/logger-client';
-
-type SpecStatus =
-  | 'drafting'
-  | 'pending_plan'
-  | 'pending_approval'
-  | 'executing'
-  | 'completed'
-  | 'stalled'
-  | 'archived';
 
 interface Spec {
   id: number;
@@ -27,7 +19,6 @@ export default function EditSpecPage() {
   const router = useRouter();
   const [spec, setSpec] = useState<Spec | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     const fetchSpec = async () => {
@@ -40,8 +31,7 @@ export default function EditSpecPage() {
           return;
         }
         if (res.status === 404) {
-          setNotFound(true);
-          setIsLoading(false);
+          notFound();
           return;
         }
         const data = (await res.json()) as { data: Spec };
@@ -49,8 +39,7 @@ export default function EditSpecPage() {
         setIsLoading(false);
       } catch (e) {
         clientLogger.error('Failed to fetch spec', { error: e });
-        setNotFound(true);
-        setIsLoading(false);
+        notFound();
       }
     };
     fetchSpec();
@@ -90,12 +79,8 @@ export default function EditSpecPage() {
     );
   }
 
-  if (notFound || !spec) {
-    return (
-      <div className="flex h-screen items-center justify-center text-[--text-secondary]">
-        Spec not found.
-      </div>
-    );
+  if (!spec) {
+    return null;
   }
 
   return (
