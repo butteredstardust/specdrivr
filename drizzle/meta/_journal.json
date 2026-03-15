@@ -15,6 +15,13 @@
       "when": 1773527140425,
       "tag": "0001_hot_yellow_claw",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1773591183415,
+      "tag": "0002_salty_meltdown",
+      "breakpoints": true
     }
   ]
 }

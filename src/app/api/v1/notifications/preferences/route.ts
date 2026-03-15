@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
+import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { notificationRepository } from '@/repositories/notification-repository';
 import { handleApiError } from '@/lib/error-handler';
 
-const ALL_EVENT_TYPES = [
+const EventTypeEnum = z.enum([
   'plan_generated',
   'plan_approved',
   'plan_rejected',
@@ -13,7 +14,17 @@ const ALL_EVENT_TYPES = [
   'session_failed',
   'member_invited',
   'role_changed',
-] as const;
+]);
+
+const PreferencesSchema = z.object({
+  preferences: z.array(
+    z.object({
+      eventType: EventTypeEnum,
+      emailEnabled: z.boolean(),
+      inAppEnabled: z.boolean(),
+    })
+  ),
+});
 
 export async function GET() {
   try {
@@ -32,12 +43,6 @@ export async function GET() {
   }
 }
 
-interface PrefInput {
-  eventType: string;
-  emailEnabled: boolean;
-  inAppEnabled: boolean;
-}
-
 export async function PATCH(req: Request) {
   try {
     const session = await auth();
@@ -49,28 +54,15 @@ export async function PATCH(req: Request) {
     }
 
     const body = await req.json().catch(() => null);
-
-    if (!body || !Array.isArray(body.preferences)) {
+    const parsed = PreferencesSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: { code: 'BAD_REQUEST', message: 'preferences array is required' } },
+        { error: { code: 'BAD_REQUEST', message: parsed.error.message } },
         { status: 400 }
       );
     }
 
-    const validEventTypes = new Set<string>(ALL_EVENT_TYPES);
-    const validated: PrefInput[] = [];
-
-    for (const pref of body.preferences as PrefInput[]) {
-      if (!validEventTypes.has(pref.eventType)) {
-        return NextResponse.json(
-          { error: { code: 'BAD_REQUEST', message: `Unknown event type: ${pref.eventType}` } },
-          { status: 400 }
-        );
-      }
-      validated.push(pref);
-    }
-
-    await notificationRepository.upsertPreferences(session.user.id, validated);
+    await notificationRepository.upsertPreferences(session.user.id, parsed.data.preferences);
     return NextResponse.json({ data: { success: true } });
   } catch (error) {
     return handleApiError(error);

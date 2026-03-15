@@ -1,8 +1,13 @@
 import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { env } from '@/lib/env';
 import { aggregateUsageForDate } from '@/lib/jobs/aggregate-usage';
 import { logger } from '@/lib/logger';
+
+const AggregateUsageSchema = z.object({
+  date: z.string().optional(),
+});
 
 export async function POST(request: NextRequest) {
   const authHeader = request.headers.get('Authorization');
@@ -18,7 +23,14 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json().catch(() => ({}));
-    const dateArg = body.date;
+    const parsed = AggregateUsageSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: { code: 'VALIDATION_ERROR', message: parsed.error.message } },
+        { status: 400 }
+      );
+    }
+    const dateArg = parsed.data.date;
 
     const targetDate = dateArg
       ? new Date(dateArg)

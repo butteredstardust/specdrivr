@@ -4,6 +4,7 @@ import { agentSessionRepository } from '@/repositories';
 import { handleApiError } from '@/lib/error-handler';
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  // No body — no Zod needed
   const session = await auth();
   if (!session) {
     return NextResponse.json(
