@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
 import { EventLog } from '@/components/mission-control/event-log';
@@ -11,6 +11,7 @@ interface Session {
   id: number;
   status: 'running' | 'paused' | 'completed' | 'failed' | 'cancelled';
   startedAt: string;
+  endedAt?: string | null;
   tasksExecuted: number;
   tasksSucceeded: number;
   tasksFailed: number;
@@ -35,6 +36,20 @@ function statusColor(status: Session['status']): string {
     default:
       return 'text-[--text-muted]';
   }
+}
+
+function formatDuration(session: Session): string {
+  const end = session.endedAt
+    ? new Date(session.endedAt)
+    : session.status === 'running'
+      ? new Date()
+      : null;
+  if (!end) return '—';
+  const ms = end.getTime() - new Date(session.startedAt).getTime();
+  const secs = Math.floor(ms / 1000);
+  const mm = String(Math.floor(secs / 60)).padStart(2, '0');
+  const ss = String(secs % 60).padStart(2, '0');
+  return `${mm}:${ss}`;
 }
 
 function formatStartedAt(iso: string): string {
@@ -118,9 +133,8 @@ export default function SessionsPage() {
             </thead>
             <tbody>
               {sessions.map((session) => (
-                <>
+                <Fragment key={session.id}>
                   <tr
-                    key={session.id}
                     className="cursor-pointer border-b border-[--border] transition-colors hover:bg-[--surface-hover]"
                     onClick={() => handleRowClick(session.id)}
                   >
@@ -136,7 +150,9 @@ export default function SessionsPage() {
                     <td className="py-3 pr-4 font-mono text-[--text-secondary]">
                       {formatStartedAt(session.startedAt)}
                     </td>
-                    <td className="py-3 pr-4 font-mono text-[--text-muted]">—</td>
+                    <td className="py-3 pr-4 font-mono text-[--text-muted]">
+                      {formatDuration(session)}
+                    </td>
                     <td className="py-3 font-mono text-[--text-secondary]">
                       {session.tasksSucceeded}/{session.tasksExecuted}
                     </td>
@@ -152,7 +168,7 @@ export default function SessionsPage() {
                       </Collapsible>
                     </td>
                   </tr>
-                </>
+                </Fragment>
               ))}
             </tbody>
           </table>
