@@ -19,7 +19,7 @@ export default async function GeneralPage() {
 
   return (
     <div className="flex max-w-2xl flex-col gap-8">
-      <h1 className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">GENERAL</h1>
+      <h1 className="text-text-muted font-mono text-xs tracking-widest uppercase">GENERAL</h1>
 
       {project ? (
         <>
@@ -36,7 +36,7 @@ export default async function GeneralPage() {
           <OnboardingRestartSection />
         </>
       ) : (
-        <p className="text-sm text-[--text-muted]">No project found.</p>
+        <p className="text-text-muted text-sm">No project found.</p>
       )}
     </div>
   );

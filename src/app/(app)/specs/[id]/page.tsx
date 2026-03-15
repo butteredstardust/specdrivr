@@ -42,21 +42,21 @@ const TABS: { id: TabName; label: string }[] = [
 function statusBadgeClass(status: SpecStatus): string {
   switch (status) {
     case 'drafting':
-      return 'text-[--text-muted]';
+      return 'text-text-muted';
     case 'pending_plan':
-      return 'text-[--phosphor-amber] animate-[blink_1s_ease-in-out_infinite]';
+      return 'text-phosphor-amber animate-[blink_1s_ease-in-out_infinite]';
     case 'pending_approval':
-      return 'text-[--phosphor-amber]';
+      return 'text-phosphor-amber';
     case 'executing':
-      return 'text-[--accent-violet] animate-[blink_1s_ease-in-out_infinite]';
+      return 'text-accent-violet animate-[blink_1s_ease-in-out_infinite]';
     case 'completed':
       return 'text-emerald-400';
     case 'stalled':
       return 'text-orange-400';
     case 'archived':
-      return 'text-[--text-muted] opacity-50';
+      return 'text-text-muted opacity-50';
     default:
-      return 'text-[--text-muted]';
+      return 'text-text-muted';
   }
 }
 
@@ -161,15 +161,15 @@ export default function SpecDetailPage(): React.ReactElement {
   return (
     <div className="flex flex-col gap-6">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 font-mono text-xs text-[--text-muted]">
-        <Link href="/specs" className="transition-colors hover:text-[--text-secondary]">
+      <nav className="text-text-muted flex items-center gap-1.5 font-mono text-xs">
+        <Link href="/specs" className="hover:text-text-secondary transition-colors">
           Specs
         </Link>
         <span>/</span>
         {isLoading ? (
           <Skeleton className="h-3 w-32" />
         ) : (
-          <span className="text-[--text-secondary]">{spec?.title ?? '…'}</span>
+          <span className="text-text-secondary">{spec?.title ?? '…'}</span>
         )}
       </nav>
 
@@ -182,9 +182,7 @@ export default function SpecDetailPage(): React.ReactElement {
       ) : (
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-xl font-semibold text-[--text-primary]">
-              {spec?.title ?? 'Untitled'}
-            </h1>
+            <h1 className="text-text-primary text-xl font-semibold">{spec?.title ?? 'Untitled'}</h1>
             {spec && (
               <span className={`font-mono text-xs ${statusBadgeClass(spec.status)}`}>
                 {spec.status.replace(/_/g, ' ')}
@@ -207,15 +205,15 @@ export default function SpecDetailPage(): React.ReactElement {
       )}
 
       {/* Tab bar */}
-      <div className="flex items-center gap-0 border-b border-[--border-default]">
+      <div className="border-border-default flex items-center gap-0 border-b">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => router.push(`/specs/${specId}?tab=${tab.id}`)}
             className={`px-4 py-2 font-mono text-xs tracking-widest transition-colors ${
               activeTab === tab.id
-                ? 'border-b-2 border-[--accent-violet] text-[--text-primary]'
-                : 'text-[--text-muted] hover:text-[--text-secondary]'
+                ? 'border-accent-violet text-text-primary border-b-2'
+                : 'text-text-muted hover:text-text-secondary'
             }`}
           >
             {tab.label}

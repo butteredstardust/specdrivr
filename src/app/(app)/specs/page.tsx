@@ -41,21 +41,21 @@ const ALL_STATUSES: SpecStatus[] = [
 function statusBadgeClass(status: SpecStatus): string {
   switch (status) {
     case 'drafting':
-      return 'text-[--text-muted]';
+      return 'text-text-muted';
     case 'pending_plan':
-      return 'text-[--phosphor-amber] animate-[blink_1s_ease-in-out_infinite]';
+      return 'text-phosphor-amber animate-[blink_1s_ease-in-out_infinite]';
     case 'pending_approval':
-      return 'text-[--phosphor-amber]';
+      return 'text-phosphor-amber';
     case 'executing':
-      return 'text-[--accent-violet] animate-[blink_1s_ease-in-out_infinite]';
+      return 'text-accent-violet animate-[blink_1s_ease-in-out_infinite]';
     case 'completed':
       return 'text-emerald-400';
     case 'stalled':
       return 'text-orange-400';
     case 'archived':
-      return 'text-[--text-muted] opacity-50';
+      return 'text-text-muted opacity-50';
     default:
-      return 'text-[--text-muted]';
+      return 'text-text-muted';
   }
 }
 
@@ -115,7 +115,7 @@ export default function SpecsPage(): React.ReactElement {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h1 className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">SPECS</h1>
+        <h1 className="text-text-muted font-mono text-xs tracking-widest uppercase">SPECS</h1>
         <TooltipProvider>
           {canCreate ? (
             newSpecButton
@@ -155,16 +155,16 @@ export default function SpecsPage(): React.ReactElement {
           {effectiveProjectId === null ? (
             <div className="flex flex-col items-center gap-4 py-16">
               <DaemonMascot size={48} expression="idle" />
-              <p className="font-mono text-sm text-[--text-secondary]">
+              <p className="text-text-secondary font-mono text-sm">
                 Select a project to view specs.
               </p>
             </div>
           ) : isLoading ? (
-            <div className="py-8 text-center font-mono text-xs text-[--text-muted]">Loading…</div>
+            <div className="text-text-muted py-8 text-center font-mono text-xs">Loading…</div>
           ) : filteredSpecs.length === 0 ? (
             <div className="flex flex-col items-center gap-4 py-16">
               <DaemonMascot size={48} expression="idle" />
-              <p className="font-mono text-sm text-[--text-secondary]">No specs yet.</p>
+              <p className="text-text-secondary font-mono text-sm">No specs yet.</p>
             </div>
           ) : (
             <Table>
@@ -190,16 +190,16 @@ export default function SpecsPage(): React.ReactElement {
                         {statusLabel(spec.status)}
                       </span>
                     </TableCell>
-                    <TableCell className="text-sm text-[--text-secondary]">
+                    <TableCell className="text-text-secondary text-sm">
                       {new Date(spec.createdAt).toLocaleDateString()}
                     </TableCell>
-                    <TableCell className="text-sm text-[--text-secondary]">
+                    <TableCell className="text-text-secondary text-sm">
                       {new Date(spec.updatedAt).toLocaleDateString()}
                     </TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()}>
                       <Link
                         href={`/specs/${spec.id}`}
-                        className="text-xs text-[--accent-violet] hover:underline"
+                        className="text-accent-violet text-xs hover:underline"
                       >
                         View
                       </Link>

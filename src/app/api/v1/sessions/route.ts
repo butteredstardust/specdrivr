@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { requireMember } from '@/lib/rbac';
 import { db } from '@/db';
 import { projectMembers } from '@/db/schema';
-import { eq, inArray } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 
 const SessionQuerySchema = z.object({
   projectId: z.coerce.number().int().positive().optional(),
@@ -62,7 +62,10 @@ export async function GET(request: NextRequest) {
       .then((rows) => rows.map((r) => r.projectId));
 
     if (memberProjectIds.length === 0) {
-      return NextResponse.json({ data: [], meta: { limit: query.limit, offset: query.offset, count: 0 } });
+      return NextResponse.json({
+        data: [],
+        meta: { limit: query.limit, offset: query.offset, count: 0 },
+      });
     }
 
     const allSessions = await agentSessionRepository.getByProjectIds(

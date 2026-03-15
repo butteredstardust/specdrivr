@@ -128,7 +128,7 @@ function PasswordInput({ id, value, onChange, disabled, placeholder }: PasswordI
       <button
         type="button"
         onClick={() => setShow((prev) => !prev)}
-        className="absolute top-1/2 right-2 -translate-y-1/2 text-[--text-muted] hover:text-[--text-primary] disabled:pointer-events-none"
+        className="text-text-muted hover:text-text-primary absolute top-1/2 right-2 -translate-y-1/2 disabled:pointer-events-none"
         aria-label={show ? 'Hide value' : 'Show value'}
         disabled={disabled}
         tabIndex={-1}
@@ -152,7 +152,7 @@ interface FormFieldProps {
 function FormField({ label, htmlFor, children }: FormFieldProps) {
   return (
     <div className="flex flex-col gap-1.5">
-      <Label htmlFor={htmlFor} className="font-mono text-xs text-[--text-secondary] uppercase">
+      <Label htmlFor={htmlFor} className="text-text-secondary font-mono text-xs uppercase">
         {label}
       </Label>
       {children}
@@ -168,9 +168,7 @@ function ConnectedBadge({ connected }: { connected: boolean }) {
   return (
     <span
       className={`inline-flex items-center rounded-full px-2 py-0.5 font-mono text-[10px] tracking-wider uppercase ${
-        connected
-          ? 'bg-[--status-green]/10 text-[--status-green]'
-          : 'bg-[--bg-surface] text-[--text-muted]'
+        connected ? 'bg-status-green/10 text-status-green' : 'bg-bg-surface text-text-muted'
       }`}
     >
       {connected ? 'Connected' : 'Not connected'}
@@ -307,13 +305,13 @@ function GitHubCard({ projectId, editable, initialData, onSaved }: GitHubCardPro
 
   return (
     <>
-      <Card className="border-[--border-default] bg-[--bg-surface]">
+      <Card className="border-border-default bg-bg-surface">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <Github className="h-5 w-5 text-[--text-secondary]" />
-            <CardTitle className="text-sm font-semibold text-[--text-primary]">GitHub</CardTitle>
+            <Github className="text-text-secondary h-5 w-5" />
+            <CardTitle className="text-text-primary text-sm font-semibold">GitHub</CardTitle>
           </div>
-          <CardDescription className="text-xs text-[--text-muted]">
+          <CardDescription className="text-text-muted text-xs">
             Connect your repository for automated commits.
           </CardDescription>
           <ConnectedBadge connected={connected} />
@@ -432,14 +430,14 @@ function GitHubCard({ projectId, editable, initialData, onSaved }: GitHubCardPro
           </FormField>
 
           {connected && (
-            <div className="flex items-center gap-2 rounded-md border border-[--border-default] bg-[--bg-inset] px-3 py-2">
-              <p className="min-w-0 flex-1 truncate font-mono text-xs text-[--text-muted]">
+            <div className="border-border-default bg-bg-inset flex items-center gap-2 rounded-md border px-3 py-2">
+              <p className="text-text-muted min-w-0 flex-1 truncate font-mono text-xs">
                 {webhookUrl}
               </p>
               <button
                 type="button"
                 onClick={copyWebhookUrl}
-                className="shrink-0 text-[--text-muted] hover:text-[--text-primary]"
+                className="text-text-muted hover:text-text-primary shrink-0"
                 aria-label="Copy webhook URL"
               >
                 <Copy className="h-3.5 w-3.5" />
@@ -464,7 +462,7 @@ function GitHubCard({ projectId, editable, initialData, onSaved }: GitHubCardPro
                     variant="outline"
                     onClick={() => setDisconnectOpen(true)}
                     disabled={isSaving}
-                    className="text-[--status-red] hover:text-[--status-red]"
+                    className="text-status-red hover:text-status-red"
                   >
                     Disconnect
                   </Button>
@@ -503,7 +501,7 @@ function GitHubCard({ projectId, editable, initialData, onSaved }: GitHubCardPro
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDisconnect}
-              className="bg-[--status-red] hover:bg-[--status-red]/90"
+              className="bg-status-red hover:bg-status-red/90"
             >
               Disconnect
             </AlertDialogAction>
@@ -603,13 +601,13 @@ function SlackCard({ projectId, editable, initialData, onSaved }: SlackCardProps
 
   return (
     <>
-      <Card className="border-[--border-default] bg-[--bg-surface]">
+      <Card className="border-border-default bg-bg-surface">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <Hash className="h-5 w-5 text-[--text-secondary]" />
-            <CardTitle className="text-sm font-semibold text-[--text-primary]">Slack</CardTitle>
+            <Hash className="text-text-secondary h-5 w-5" />
+            <CardTitle className="text-text-primary text-sm font-semibold">Slack</CardTitle>
           </div>
-          <CardDescription className="text-xs text-[--text-muted]">
+          <CardDescription className="text-text-muted text-xs">
             Send notifications to Slack.
           </CardDescription>
           <ConnectedBadge connected={connected} />
@@ -688,7 +686,7 @@ function SlackCard({ projectId, editable, initialData, onSaved }: SlackCardProps
                     variant="outline"
                     onClick={() => setDisconnectOpen(true)}
                     disabled={isSaving}
-                    className="text-[--status-red] hover:text-[--status-red]"
+                    className="text-status-red hover:text-status-red"
                   >
                     Disconnect
                   </Button>
@@ -727,7 +725,7 @@ function SlackCard({ projectId, editable, initialData, onSaved }: SlackCardProps
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDisconnect}
-              className="bg-[--status-red] hover:bg-[--status-red]/90"
+              className="bg-status-red hover:bg-status-red/90"
             >
               Disconnect
             </AlertDialogAction>
@@ -813,7 +811,7 @@ function WebhookDialog({ open, onClose, onSave, initial, isSaving }: WebhookDial
           </FormField>
 
           <div className="flex flex-col gap-2">
-            <Label className="font-mono text-xs text-[--text-secondary] uppercase">EVENTS</Label>
+            <Label className="text-text-secondary font-mono text-xs uppercase">EVENTS</Label>
             <div className="flex flex-col gap-2">
               {WEBHOOK_EVENTS.map((ev) => (
                 <div key={ev.value} className="flex items-center gap-2">
@@ -824,7 +822,7 @@ function WebhookDialog({ open, onClose, onSave, initial, isSaving }: WebhookDial
                   />
                   <Label
                     htmlFor={`event-${ev.value}`}
-                    className="cursor-pointer font-mono text-xs text-[--text-secondary]"
+                    className="text-text-secondary cursor-pointer font-mono text-xs"
                   >
                     {ev.label}
                   </Label>
@@ -971,13 +969,13 @@ function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
 
   return (
     <>
-      <Card className="border-[--border-default] bg-[--bg-surface]">
+      <Card className="border-border-default bg-bg-surface">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <Globe className="h-5 w-5 text-[--text-secondary]" />
-            <CardTitle className="text-sm font-semibold text-[--text-primary]">Webhooks</CardTitle>
+            <Globe className="text-text-secondary h-5 w-5" />
+            <CardTitle className="text-text-primary text-sm font-semibold">Webhooks</CardTitle>
           </div>
-          <CardDescription className="text-xs text-[--text-muted]">
+          <CardDescription className="text-text-muted text-xs">
             Send events to external endpoints.
           </CardDescription>
         </CardHeader>
@@ -999,22 +997,22 @@ function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
 
           {/* Webhook list */}
           {isLoading ? (
-            <p className="font-mono text-xs text-[--text-muted]">Loading webhooks…</p>
+            <p className="text-text-muted font-mono text-xs">Loading webhooks…</p>
           ) : webhooks.length === 0 ? (
-            <p className="text-xs text-[--text-muted]">No webhooks configured.</p>
+            <p className="text-text-muted text-xs">No webhooks configured.</p>
           ) : (
-            <div className="flex flex-col divide-y divide-[--border-default]">
+            <div className="divide-border-default flex flex-col divide-y">
               {webhooks.map((wh) => (
                 <div key={wh.id} className="flex items-center gap-2 py-2">
-                  <p className="min-w-0 flex-1 truncate font-mono text-xs text-[--text-secondary]">
+                  <p className="text-text-secondary min-w-0 flex-1 truncate font-mono text-xs">
                     {wh.url}
                   </p>
                   <Badge
                     variant="outline"
                     className={
                       wh.status === 'active'
-                        ? 'border-[--status-green]/30 bg-[--status-green]/10 font-mono text-[10px] text-[--status-green]'
-                        : 'border-[--status-red]/30 bg-[--status-red]/10 font-mono text-[10px] text-[--status-red]'
+                        ? 'border-status-green/30 bg-status-green/10 text-status-green font-mono text-[10px]'
+                        : 'border-status-red/30 bg-status-red/10 text-status-red font-mono text-[10px]'
                     }
                   >
                     {wh.status}
@@ -1025,7 +1023,7 @@ function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 shrink-0 text-[--text-muted] hover:text-[--text-primary]"
+                          className="text-text-muted hover:text-text-primary h-7 w-7 shrink-0"
                           aria-label="Webhook actions"
                         >
                           <MoreHorizontal className="h-4 w-4" />
@@ -1038,7 +1036,7 @@ function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => setDeleteTarget(wh)}
-                          className="gap-2 text-[--status-red] focus:text-[--status-red]"
+                          className="text-status-red focus:text-status-red gap-2"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                           Delete
@@ -1053,7 +1051,7 @@ function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-7 w-7 shrink-0 text-[--text-muted]"
+                              className="text-text-muted h-7 w-7 shrink-0"
                               aria-label="Webhook actions"
                               disabled
                             >
@@ -1096,7 +1094,7 @@ function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
             <AlertDialogAction
               onClick={handleDelete}
               disabled={isSaving}
-              className="bg-[--status-red] hover:bg-[--status-red]/90"
+              className="bg-status-red hover:bg-status-red/90"
             >
               {isSaving ? 'Deleting…' : 'Delete'}
             </AlertDialogAction>
@@ -1141,7 +1139,7 @@ export function IntegrationsSection({ projectId, userRole }: IntegrationsSection
   }, [restartConfig]);
 
   if (isLoading) {
-    return <p className="font-mono text-xs text-[--text-muted]">Loading integrations…</p>;
+    return <p className="text-text-muted font-mono text-xs">Loading integrations…</p>;
   }
 
   return (

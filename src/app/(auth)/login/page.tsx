@@ -53,14 +53,12 @@ export default function LoginPage() {
     process.env.NEXT_PUBLIC_APP_URL?.includes('localhost');
 
   return (
-    <Card className="w-full max-w-sm border-[--border-default] bg-[--bg-surface]">
+    <Card className="border-border-default bg-bg-surface w-full max-w-sm">
       <CardHeader className="items-center gap-2 pb-2">
         <DaemonMascot size={48} expression={expression} />
         <div className="text-center">
-          <p className="font-mono text-sm font-bold tracking-widest text-[--text-primary]">
-            SPECDRIVR
-          </p>
-          <p className="text-xs text-[--text-muted]">Build what you spec.</p>
+          <p className="text-text-primary font-mono text-sm font-bold tracking-widest">SPECDRIVR</p>
+          <p className="text-text-muted text-xs">Build what you spec.</p>
         </div>
       </CardHeader>
       <CardContent>
@@ -74,7 +72,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="border-[--border-default] bg-[--bg-base]"
+              className="border-border-default bg-bg-base"
             />
           </div>
           <div className="space-y-1.5">
@@ -85,7 +83,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="border-[--border-default] bg-[--bg-base]"
+              className="border-border-default bg-bg-base"
             />
           </div>
 
@@ -98,14 +96,14 @@ export default function LoginPage() {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full bg-[--accent-violet] hover:bg-[--accent-violet-dim]"
+            className="bg-accent-violet hover:bg-accent-violet-dim w-full"
           >
             {loading ? 'Signing in…' : 'Sign In'}
           </Button>
           <div className="text-right">
             <Link
               href="/forgot-password"
-              className="text-xs text-[--text-muted] hover:text-[--text-secondary]"
+              className="text-text-muted hover:text-text-secondary text-xs"
             >
               Forgot password?
             </Link>
@@ -113,8 +111,8 @@ export default function LoginPage() {
         </form>
 
         {isDev && (
-          <div className="mt-4 space-y-2 border-t border-dashed border-[--border-muted] pt-4">
-            <p className="font-mono text-xs text-[--text-muted]">DEV QUICK LOGIN</p>
+          <div className="border-border-muted mt-4 space-y-2 border-t border-dashed pt-4">
+            <p className="text-text-muted font-mono text-xs">DEV QUICK LOGIN</p>
             {[
               { label: 'Owner', email: 'alex@specdrivr.dev' },
               { label: 'Admin', email: 'sam@specdrivr.dev' },

@@ -40,9 +40,9 @@ function formatDate(date: string | Date): string {
 
 function SummaryCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col gap-1 rounded-lg border border-[--border-default] bg-[--bg-surface] p-4">
-      <span className="font-mono text-xs text-[--text-muted]">{label}</span>
-      <span className="font-mono text-lg text-[--text-primary]">{value}</span>
+    <div className="border-border-default bg-bg-surface flex flex-col gap-1 rounded-lg border p-4">
+      <span className="text-text-muted font-mono text-xs">{label}</span>
+      <span className="text-text-primary font-mono text-lg">{value}</span>
     </div>
   );
 }
@@ -86,7 +86,7 @@ export function UsageSection({ projectId }: UsageSectionProps) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-2 text-[--text-muted]">
+      <div className="text-text-muted flex items-center gap-2">
         <Loader2 className="size-3 animate-spin" />
         <span className="font-mono text-xs">Loading usage data…</span>
       </div>
@@ -96,12 +96,12 @@ export function UsageSection({ projectId }: UsageSectionProps) {
   if (error && !isLoading) {
     return (
       <div className="flex items-center gap-2">
-        <span className="font-mono text-xs text-[--status-red]">Failed to load usage data.</span>
+        <span className="text-status-red font-mono text-xs">Failed to load usage data.</span>
         <Button
           variant="ghost"
           size="sm"
           onClick={restart}
-          className="h-auto px-0 font-mono text-xs text-[--text-muted] underline hover:bg-transparent hover:text-[--text-primary]"
+          className="text-text-muted hover:text-text-primary h-auto px-0 font-mono text-xs underline hover:bg-transparent"
         >
           Retry
         </Button>
@@ -113,8 +113,8 @@ export function UsageSection({ projectId }: UsageSectionProps) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-16">
         <DaemonMascot size={48} expression="idle" />
-        <p className="font-mono text-sm text-[--text-muted]">No usage data yet.</p>
-        <p className="font-mono text-xs text-[--text-muted]">
+        <p className="text-text-muted font-mono text-sm">No usage data yet.</p>
+        <p className="text-text-muted font-mono text-xs">
           Usage will appear here once execution begins.
         </p>
       </div>
@@ -145,36 +145,34 @@ export function UsageSection({ projectId }: UsageSectionProps) {
       </div>
 
       {/* Daily breakdown table */}
-      <div className="overflow-x-auto rounded-lg border border-[--border-default]">
+      <div className="border-border-default overflow-x-auto rounded-lg border">
         <table className="w-full text-left">
           <thead>
-            <tr className="border-b border-[--border-default] bg-[--bg-surface]">
-              <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">Date</th>
-              <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">Sessions</th>
-              <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">Tasks</th>
-              <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">Tokens</th>
-              <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">Cost</th>
+            <tr className="border-border-default bg-bg-surface border-b">
+              <th className="text-text-muted px-4 py-2 font-mono text-xs">Date</th>
+              <th className="text-text-muted px-4 py-2 font-mono text-xs">Sessions</th>
+              <th className="text-text-muted px-4 py-2 font-mono text-xs">Tasks</th>
+              <th className="text-text-muted px-4 py-2 font-mono text-xs">Tokens</th>
+              <th className="text-text-muted px-4 py-2 font-mono text-xs">Cost</th>
             </tr>
           </thead>
           <tbody>
             {snapshots.map((s) => (
               <tr
                 key={s.id}
-                className="border-b border-[--border-default] last:border-0 hover:bg-[--surface-hover]"
+                className="border-border-default hover:bg-surface-hover border-b last:border-0"
               >
-                <td className="px-4 py-2.5 font-mono text-xs text-[--text-primary]">
+                <td className="text-text-primary px-4 py-2.5 font-mono text-xs">
                   {formatDate(s.date)}
                 </td>
-                <td className="px-4 py-2.5 font-mono text-xs text-[--text-primary]">
-                  {s.sessionsRun}
-                </td>
-                <td className="px-4 py-2.5 font-mono text-xs text-[--text-primary]">
+                <td className="text-text-primary px-4 py-2.5 font-mono text-xs">{s.sessionsRun}</td>
+                <td className="text-text-primary px-4 py-2.5 font-mono text-xs">
                   {s.tasksExecuted}
                 </td>
-                <td className="px-4 py-2.5 font-mono text-xs text-[--text-primary]">
+                <td className="text-text-primary px-4 py-2.5 font-mono text-xs">
                   {formatTokens(s.promptTokens + s.completionTokens)}
                 </td>
-                <td className="px-4 py-2.5 font-mono text-xs text-[--text-primary]">
+                <td className="text-text-primary px-4 py-2.5 font-mono text-xs">
                   ${Number(s.estimatedCostUsd).toFixed(4)}
                 </td>
               </tr>

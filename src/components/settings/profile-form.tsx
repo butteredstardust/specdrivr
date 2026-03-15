@@ -48,10 +48,10 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">PROFILE</h2>
+      <h2 className="text-text-muted font-mono text-xs tracking-widest uppercase">PROFILE</h2>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <label className="font-mono text-xs text-[--text-secondary]" htmlFor="profile-name">
+          <label className="text-text-secondary font-mono text-xs" htmlFor="profile-name">
             Name
           </label>
           <Input
@@ -62,7 +62,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="font-mono text-xs text-[--text-secondary]" htmlFor="profile-email">
+          <label className="text-text-secondary font-mono text-xs" htmlFor="profile-email">
             Email
           </label>
           <Input

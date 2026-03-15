@@ -122,7 +122,7 @@ export default function MissionControlPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
+      <h1 className="text-text-muted font-mono text-xs tracking-widest uppercase">
         MISSION CONTROL
       </h1>
 

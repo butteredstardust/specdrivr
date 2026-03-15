@@ -23,11 +23,11 @@ export function NeedsAttentionBanner({ blockedTasks, onDismiss }: NeedsAttention
   }
 
   return (
-    <div className="flex items-center gap-3 rounded-md border border-[--phosphor-amber]/20 bg-[--phosphor-amber]/10 px-3 py-2">
+    <div className="border-phosphor-amber/20 bg-phosphor-amber/10 flex items-center gap-3 rounded-md border px-3 py-2">
       {/* Left: icon + label */}
       <div className="flex shrink-0 items-center gap-1.5">
-        <TriangleAlert className="h-4 w-4 text-[--phosphor-amber]" aria-hidden="true" />
-        <span className="font-mono text-xs tracking-widest text-[--phosphor-amber] uppercase">
+        <TriangleAlert className="text-phosphor-amber h-4 w-4" aria-hidden="true" />
+        <span className="text-phosphor-amber font-mono text-xs tracking-widest uppercase">
           NEEDS ATTENTION
         </span>
       </div>
@@ -40,7 +40,7 @@ export function NeedsAttentionBanner({ blockedTasks, onDismiss }: NeedsAttention
             variant="ghost"
             size="sm"
             onClick={() => openDrawer(task.id)}
-            className="h-auto shrink-0 rounded border border-[--phosphor-amber]/30 bg-[--phosphor-amber]/10 px-2 py-0.5 font-mono text-xs text-[--phosphor-amber] transition-colors hover:bg-[--phosphor-amber]/20"
+            className="border-phosphor-amber/30 bg-phosphor-amber/10 text-phosphor-amber hover:bg-phosphor-amber/20 h-auto shrink-0 rounded border px-2 py-0.5 font-mono text-xs transition-colors"
           >
             {task.title}
           </Button>
@@ -53,7 +53,7 @@ export function NeedsAttentionBanner({ blockedTasks, onDismiss }: NeedsAttention
         size="icon"
         onClick={onDismiss}
         aria-label="Dismiss"
-        className="h-6 w-6 shrink-0 text-[--phosphor-amber]/70 hover:text-[--phosphor-amber]"
+        className="text-phosphor-amber/70 hover:text-phosphor-amber h-6 w-6 shrink-0"
       >
         <X className="h-4 w-4" aria-hidden="true" />
       </Button>

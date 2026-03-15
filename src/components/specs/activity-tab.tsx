@@ -18,10 +18,10 @@ interface ActivityTabProps {
 }
 
 function eventTypeBadgeClass(eventType: string): string {
-  if (eventType.startsWith('PLAN_')) return 'text-[--phosphor-amber]';
-  if (eventType.startsWith('TASK_')) return 'text-[--accent-violet]';
-  if (eventType.startsWith('SESSION_')) return 'text-[--text-secondary]';
-  return 'text-[--text-muted]';
+  if (eventType.startsWith('PLAN_')) return 'text-phosphor-amber';
+  if (eventType.startsWith('TASK_')) return 'text-accent-violet';
+  if (eventType.startsWith('SESSION_')) return 'text-text-secondary';
+  return 'text-text-muted';
 }
 
 function formatTimestamp(ts: string): string {
@@ -84,9 +84,7 @@ export function ActivityTab({ specId, specStatus }: ActivityTabProps): React.Rea
 
   if (loading) {
     return (
-      <div className="py-8 text-center font-mono text-xs text-[--text-muted]">
-        Loading activity…
-      </div>
+      <div className="text-text-muted py-8 text-center font-mono text-xs">Loading activity…</div>
     );
   }
 
@@ -96,9 +94,7 @@ export function ActivityTab({ specId, specStatus }: ActivityTabProps): React.Rea
   );
 
   if (sorted.length === 0) {
-    return (
-      <p className="py-8 text-center font-mono text-xs text-[--text-muted]">No activity yet.</p>
-    );
+    return <p className="text-text-muted py-8 text-center font-mono text-xs">No activity yet.</p>;
   }
 
   return (
@@ -106,17 +102,17 @@ export function ActivityTab({ specId, specStatus }: ActivityTabProps): React.Rea
       {sorted.map((event) => (
         <div
           key={event.id}
-          className="flex items-start gap-3 rounded-sm px-3 py-2 hover:bg-[--bg-elevated]"
+          className="hover:bg-bg-elevated flex items-start gap-3 rounded-sm px-3 py-2"
         >
-          <span className="shrink-0 font-mono text-xs text-[--text-muted] tabular-nums">
+          <span className="text-text-muted shrink-0 font-mono text-xs tabular-nums">
             {formatTimestamp(event.timestamp)}
           </span>
           <span
-            className={`shrink-0 rounded-sm bg-[--bg-elevated] px-1.5 py-0.5 font-mono text-xs ${eventTypeBadgeClass(event.type)}`}
+            className={`bg-bg-elevated shrink-0 rounded-sm px-1.5 py-0.5 font-mono text-xs ${eventTypeBadgeClass(event.type)}`}
           >
             {event.type}
           </span>
-          <span className="text-sm text-[--text-secondary]">{event.message}</span>
+          <span className="text-text-secondary text-sm">{event.message}</span>
         </div>
       ))}
     </div>

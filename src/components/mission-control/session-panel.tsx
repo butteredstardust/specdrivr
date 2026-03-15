@@ -131,13 +131,11 @@ export function SessionPanel({
     return (
       <div className="flex flex-col items-center gap-3 py-6 text-center">
         <DaemonMascot size={48} expression="idle" />
-        <p className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
-          SYSTEM READY
-        </p>
-        <p className="text-sm text-[--text-secondary]">No active session.</p>
+        <p className="text-text-muted font-mono text-xs tracking-widest uppercase">SYSTEM READY</p>
+        <p className="text-text-secondary text-sm">No active session.</p>
         <Link
           href="/specs"
-          className="text-sm text-[--phosphor-amber] underline-offset-2 hover:underline"
+          className="text-phosphor-amber text-sm underline-offset-2 hover:underline"
         >
           Start a new spec →
         </Link>
@@ -153,17 +151,17 @@ export function SessionPanel({
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 animate-pulse rounded-full bg-green-400" aria-hidden="true" />
             <span className="font-mono text-xs font-semibold text-green-400">● LIVE</span>
-            <span className="ml-auto font-mono text-xs text-[--text-muted]">
+            <span className="text-text-muted ml-auto font-mono text-xs">
               {mm}:{ss}
             </span>
           </div>
 
           {/* Task counts */}
           {session && (
-            <div className="flex gap-4 font-mono text-xs text-[--text-secondary]">
+            <div className="text-text-secondary flex gap-4 font-mono text-xs">
               <span>Executed: {session.tasksExecuted}</span>
               <span className="text-green-400">OK: {session.tasksSucceeded}</span>
-              <span className="text-[--status-red]">Failed: {session.tasksFailed}</span>
+              <span className="text-status-red">Failed: {session.tasksFailed}</span>
             </div>
           )}
 
@@ -194,20 +192,20 @@ export function SessionPanel({
         <div className="flex flex-col gap-3">
           {/* Header */}
           <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1 font-mono text-xs font-semibold text-[--phosphor-amber]">
+            <span className="text-phosphor-amber flex items-center gap-1 font-mono text-xs font-semibold">
               <Pause className="h-3 w-3" /> PAUSED
             </span>
-            <span className="ml-auto font-mono text-xs text-[--text-muted]">
+            <span className="text-text-muted ml-auto font-mono text-xs">
               {mm}:{ss}
             </span>
           </div>
 
           {/* Task counts */}
           {session && (
-            <div className="flex gap-4 font-mono text-xs text-[--text-secondary]">
+            <div className="text-text-secondary flex gap-4 font-mono text-xs">
               <span>Executed: {session.tasksExecuted}</span>
               <span className="text-green-400">OK: {session.tasksSucceeded}</span>
-              <span className="text-[--status-red]">Failed: {session.tasksFailed}</span>
+              <span className="text-status-red">Failed: {session.tasksFailed}</span>
             </div>
           )}
 
@@ -240,16 +238,16 @@ export function SessionPanel({
           <CheckCircle className="h-3 w-3" /> EXECUTION COMPLETE
         </p>
         {session && (
-          <div className="flex gap-4 font-mono text-xs text-[--text-secondary]">
+          <div className="text-text-secondary flex gap-4 font-mono text-xs">
             <span>Executed: {session.tasksExecuted}</span>
             <span className="text-green-400">OK: {session.tasksSucceeded}</span>
-            <span className="text-[--status-red]">Failed: {session.tasksFailed}</span>
+            <span className="text-status-red">Failed: {session.tasksFailed}</span>
           </div>
         )}
         {session?.specId && (
           <Link
             href={`/specs/${session.specId}?tab=changes`}
-            className="text-sm text-[--phosphor-amber] underline-offset-2 hover:underline"
+            className="text-phosphor-amber text-sm underline-offset-2 hover:underline"
           >
             View Changes →
           </Link>
@@ -295,10 +293,10 @@ export function SessionPanel({
   return (
     <div className="flex flex-col items-center gap-3 py-6 text-center">
       <DaemonMascot size={48} expression="idle" />
-      <p className="text-sm text-[--text-muted]">Session cancelled.</p>
+      <p className="text-text-muted text-sm">Session cancelled.</p>
       <Link
         href="/specs"
-        className="text-sm text-[--phosphor-amber] underline-offset-2 hover:underline"
+        className="text-phosphor-amber text-sm underline-offset-2 hover:underline"
       >
         Return to specs
       </Link>

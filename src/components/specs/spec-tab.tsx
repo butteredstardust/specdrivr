@@ -23,27 +23,30 @@ interface SpecTabProps {
 function statusBadgeClass(status: SpecStatus): string {
   switch (status) {
     case 'drafting':
-      return 'text-[--text-muted]';
+      return 'text-text-muted';
     case 'pending_plan':
-      return 'text-[--phosphor-amber] animate-[blink_1s_ease-in-out_infinite]';
+      return 'text-phosphor-amber animate-[blink_1s_ease-in-out_infinite]';
     case 'pending_approval':
-      return 'text-[--phosphor-amber]';
+      return 'text-phosphor-amber';
     case 'executing':
-      return 'text-[--accent-violet] animate-[blink_1s_ease-in-out_infinite]';
+      return 'text-accent-violet animate-[blink_1s_ease-in-out_infinite]';
     case 'completed':
       return 'text-emerald-400';
     case 'stalled':
       return 'text-orange-400';
     case 'archived':
-      return 'text-[--text-muted] opacity-50';
+      return 'text-text-muted opacity-50';
     default:
-      return 'text-[--text-muted]';
+      return 'text-text-muted';
   }
 }
 
 function wordCount(text: string | undefined): number {
   if (!text) return 0;
-  return text.trim().split(/\s+/).filter((w) => w.length > 0).length;
+  return text
+    .trim()
+    .split(/\s+/)
+    .filter((w) => w.length > 0).length;
 }
 
 export function SpecTab({ spec, userRole }: SpecTabProps): React.ReactElement {
@@ -83,9 +86,9 @@ export function SpecTab({ spec, userRole }: SpecTabProps): React.ReactElement {
 
       {/* Metadata sidebar */}
       <aside className="w-full shrink-0 space-y-4 lg:w-56">
-        <div className="space-y-3 rounded-md border border-[--border-default] bg-[--bg-elevated] p-4">
+        <div className="border-border-default bg-bg-elevated space-y-3 rounded-md border p-4">
           <div>
-            <p className="mb-1 font-mono text-xs tracking-widest text-[--text-muted] uppercase">
+            <p className="text-text-muted mb-1 font-mono text-xs tracking-widest uppercase">
               Status
             </p>
             <span className={`font-mono text-xs ${statusBadgeClass(spec.status)}`}>
@@ -94,28 +97,28 @@ export function SpecTab({ spec, userRole }: SpecTabProps): React.ReactElement {
           </div>
 
           <div>
-            <p className="mb-1 font-mono text-xs tracking-widest text-[--text-muted] uppercase">
+            <p className="text-text-muted mb-1 font-mono text-xs tracking-widest uppercase">
               Word Count
             </p>
-            <span className="font-mono text-xs text-[--text-secondary]">
+            <span className="text-text-secondary font-mono text-xs">
               {wordCount(spec.content).toLocaleString()}
             </span>
           </div>
 
           <div>
-            <p className="mb-1 font-mono text-xs tracking-widest text-[--text-muted] uppercase">
+            <p className="text-text-muted mb-1 font-mono text-xs tracking-widest uppercase">
               Created
             </p>
-            <span className="font-mono text-xs text-[--text-secondary]">
+            <span className="text-text-secondary font-mono text-xs">
               {new Date(spec.createdAt).toLocaleDateString()}
             </span>
           </div>
 
           <div>
-            <p className="mb-1 font-mono text-xs tracking-widest text-[--text-muted] uppercase">
+            <p className="text-text-muted mb-1 font-mono text-xs tracking-widest uppercase">
               Updated
             </p>
-            <span className="font-mono text-xs text-[--text-secondary]">
+            <span className="text-text-secondary font-mono text-xs">
               {new Date(spec.updatedAt).toLocaleDateString()}
             </span>
           </div>

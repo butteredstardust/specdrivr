@@ -18,12 +18,12 @@ export default async function AgentPage() {
 
   return (
     <div className="flex max-w-2xl flex-col gap-8">
-      <h1 className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">AGENT</h1>
+      <h1 className="text-text-muted font-mono text-xs tracking-widest uppercase">AGENT</h1>
 
       {project ? (
         <AgentConfigForm projectId={project.id} userRole={userRole} />
       ) : (
-        <p className="text-sm text-[--text-muted]">No project found.</p>
+        <p className="text-text-muted text-sm">No project found.</p>
       )}
     </div>
   );

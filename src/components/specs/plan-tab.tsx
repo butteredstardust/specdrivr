@@ -53,7 +53,7 @@ function ElapsedTimer({ startedAt }: { startedAt: Date }): React.ReactElement {
   const mins = Math.floor(elapsed / 60);
   const secs = elapsed % 60;
   return (
-    <span className="font-mono text-xs text-[--text-muted]">
+    <span className="text-text-muted font-mono text-xs">
       {mins > 0 ? `${mins}m ` : ''}
       {secs}s
     </span>
@@ -211,19 +211,19 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
         {isTimedOut ? (
           <>
             <DaemonMascot size={48} expression="error" />
-            <p className="font-mono text-sm text-[--status-red]">
+            <p className="text-status-red font-mono text-sm">
               Plan generation timed out. Please try again.
             </p>
           </>
         ) : (
           <>
             <DaemonMascot size={48} expression="working" />
-            <p className="font-mono text-sm tracking-widest text-[--text-secondary] uppercase">
+            <p className="text-text-secondary font-mono text-sm tracking-widest uppercase">
               GENERATING PLAN…
             </p>
             <ElapsedTimer startedAt={startedAt} />
             {isSlowWarning && (
-              <p className="max-w-xs text-center font-mono text-xs text-[--phosphor-amber]">
+              <p className="text-phosphor-amber max-w-xs text-center font-mono text-xs">
                 Taking longer than expected…
               </p>
             )}
@@ -235,17 +235,15 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
 
   // Loading plan from API
   if (planLoading) {
-    return (
-      <div className="py-8 text-center font-mono text-xs text-[--text-muted]">Loading plan…</div>
-    );
+    return <div className="text-text-muted py-8 text-center font-mono text-xs">Loading plan…</div>;
   }
 
   if (planError) {
-    return <p className="py-8 text-center font-mono text-xs text-[--status-red]">{planError}</p>;
+    return <p className="text-status-red py-8 text-center font-mono text-xs">{planError}</p>;
   }
 
   if (!plan) {
-    return <p className="py-8 text-center font-mono text-xs text-[--text-muted]">No plan found.</p>;
+    return <p className="text-text-muted py-8 text-center font-mono text-xs">No plan found.</p>;
   }
 
   // --- State 4: executing | completed ---
@@ -253,13 +251,11 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <span className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
-            Plan
-          </span>
+          <span className="text-text-muted font-mono text-xs tracking-widest uppercase">Plan</span>
           <span
             className={`font-mono text-xs ${
               plan.status === 'executing'
-                ? 'animate-[blink_1s_ease-in-out_infinite] text-[--accent-violet]'
+                ? 'text-accent-violet animate-[blink_1s_ease-in-out_infinite]'
                 : 'text-emerald-400'
             }`}
           >
@@ -278,7 +274,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
     return (
       <div className="flex flex-col items-center gap-4 py-12">
         <DaemonMascot size={48} expression="blocked" />
-        <p className="font-mono text-sm text-[--text-muted]">
+        <p className="text-text-muted font-mono text-sm">
           Plan {plan.status}. Re-generate to continue.
         </p>
         <TooltipProvider>
@@ -308,9 +304,9 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
     return (
       <div className="space-y-4">
         {plan.reviewerFeedback && (
-          <blockquote className="border-l-2 border-[--phosphor-amber] bg-[--phosphor-amber]/5 py-2 pl-4">
-            <p className="font-mono text-xs text-[--phosphor-amber]">Reviewer feedback:</p>
-            <p className="mt-1 text-sm text-[--text-secondary]">{plan.reviewerFeedback}</p>
+          <blockquote className="border-phosphor-amber bg-phosphor-amber/5 border-l-2 py-2 pl-4">
+            <p className="text-phosphor-amber font-mono text-xs">Reviewer feedback:</p>
+            <p className="text-text-secondary mt-1 text-sm">{plan.reviewerFeedback}</p>
           </blockquote>
         )}
         <div className="prose prose-invert max-w-none">
@@ -402,7 +398,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
             <Button
               size="sm"
               variant="outline"
-              className="text-[--status-red] hover:text-[--status-red]"
+              className="text-status-red hover:text-status-red"
               onClick={() => {
                 setRejectOpen((v) => !v);
                 setChangesOpen(false);
@@ -418,7 +414,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="text-[--status-red]"
+                    className="text-status-red"
                     disabled
                     aria-disabled
                   >
@@ -433,8 +429,8 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
 
         {/* Request Changes panel */}
         {changesOpen && (
-          <div className="space-y-2 rounded-md border border-[--border-default] bg-[--bg-elevated] p-4">
-            <p className="font-mono text-xs text-[--text-muted]">Describe the required changes:</p>
+          <div className="border-border-default bg-bg-elevated space-y-2 rounded-md border p-4">
+            <p className="text-text-muted font-mono text-xs">Describe the required changes:</p>
             <Textarea
               value={feedbackText}
               onChange={(e) => setFeedbackText(e.target.value)}
@@ -465,8 +461,8 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
 
         {/* Reject panel */}
         {rejectOpen && (
-          <div className="space-y-2 rounded-md border border-[--border-default] bg-[--bg-elevated] p-4">
-            <p className="font-mono text-xs text-[--text-muted]">Reason for rejection:</p>
+          <div className="border-border-default bg-bg-elevated space-y-2 rounded-md border p-4">
+            <p className="text-text-muted font-mono text-xs">Reason for rejection:</p>
             <Textarea
               value={rejectText}
               onChange={(e) => setRejectText(e.target.value)}
@@ -476,7 +472,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
             <div className="flex gap-2">
               <Button
                 size="sm"
-                className="bg-[--status-red] text-white hover:bg-[--status-red]/80"
+                className="bg-status-red hover:bg-status-red/80 text-white"
                 onClick={handleReject}
                 disabled={isActioning || !rejectText.trim()}
               >

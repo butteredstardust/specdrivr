@@ -45,7 +45,9 @@ export default function NotificationsPage() {
   });
 
   // usePolling unwraps the { data: T } envelope automatically.
-  const list: Notification[] = (data?.notifications ?? (data as unknown as Notification[]) ?? []) as Notification[];
+  const list: Notification[] = (data?.notifications ??
+    (data as unknown as Notification[]) ??
+    []) as Notification[];
   const meta = data?.meta ?? { page: 1, total: 0 };
   const totalPages = Math.max(1, Math.ceil(meta.total / 50));
   const unreadCount = meta?.unread ?? list.filter((n) => !n.isRead).length;
@@ -68,7 +70,7 @@ export default function NotificationsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h1 className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
+        <h1 className="text-text-muted font-mono text-xs tracking-widest uppercase">
           NOTIFICATIONS
         </h1>
         {unreadCount > 0 && (
@@ -92,12 +94,12 @@ export default function NotificationsPage() {
 
         <TabsContent value={tab} className="mt-4">
           {isLoading && list.length === 0 && (
-            <p className="font-mono text-xs text-[--text-muted]">Loading...</p>
+            <p className="text-text-muted font-mono text-xs">Loading...</p>
           )}
           {!isLoading && list.length === 0 && (
             <div className="flex flex-col items-center gap-4 py-16">
               <DaemonMascot size={48} expression="idle" />
-              <p className="font-mono text-sm text-[--text-secondary]">All caught up.</p>
+              <p className="text-text-secondary font-mono text-sm">All caught up.</p>
             </div>
           )}
           {list.length > 0 && (
@@ -108,17 +110,17 @@ export default function NotificationsPage() {
                   className={cn(
                     'flex h-14 items-center gap-4 rounded-sm px-4',
                     !n.isRead
-                      ? 'bg-[--accent-violet]/5 border-l-2 border-[--accent-violet]'
-                      : 'border-l-2 border-transparent hover:bg-[--bg-elevated]'
+                      ? 'bg-accent-violet/5 border-accent-violet border-l-2'
+                      : 'hover:bg-bg-elevated border-l-2 border-transparent'
                   )}
                 >
-                  <div className="flex-1 min-w-0">
-                    <p className="truncate text-sm text-[--text-primary]">{n.message}</p>
-                    <p className="font-mono text-xs text-[--text-muted]">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-text-primary truncate text-sm">{n.message}</p>
+                    <p className="text-text-muted font-mono text-xs">
                       {formatRelativeTime(n.createdAt)}
                     </p>
                   </div>
-                  <span className="shrink-0 rounded bg-[--bg-elevated] px-2 py-0.5 font-mono text-xs text-[--text-muted]">
+                  <span className="bg-bg-elevated text-text-muted shrink-0 rounded px-2 py-0.5 font-mono text-xs">
                     {n.type}
                   </span>
                 </div>
@@ -130,26 +132,26 @@ export default function NotificationsPage() {
 
       {/* Pagination */}
       <div className="flex items-center gap-3">
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={page <= 1}
-            onClick={() => setPage((p) => p - 1)}
-          >
-            Prev
-          </Button>
-          <span className="font-mono text-xs text-[--text-muted]">
-            Page {page} of {totalPages}
-          </span>
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={page >= totalPages}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Next
-          </Button>
-        </div>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={page <= 1}
+          onClick={() => setPage((p) => p - 1)}
+        >
+          Prev
+        </Button>
+        <span className="text-text-muted font-mono text-xs">
+          Page {page} of {totalPages}
+        </span>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={page >= totalPages}
+          onClick={() => setPage((p) => p + 1)}
+        >
+          Next
+        </Button>
+      </div>
     </div>
   );
 }
