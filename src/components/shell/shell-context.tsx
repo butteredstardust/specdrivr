@@ -100,7 +100,13 @@ export function ShellProvider({ user, children }: ShellProviderProps) {
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      if (firstKeyTimerRef.current) {
+        clearTimeout(firstKeyTimerRef.current);
+        firstKeyTimerRef.current = null;
+      }
+    };
   }, [devMode, router, setDevMode]);
 
   return (
