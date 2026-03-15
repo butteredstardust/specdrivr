@@ -98,7 +98,10 @@ export function SessionPanel({
 
   const canControl = userRole === 'admin' || userRole === 'owner';
 
-  const [elapsed, setElapsed] = useState(0);
+  const [elapsed, setElapsed] = useState(() => {
+    if (!session?.startedAt) return 0;
+    return Math.floor((Date.now() - new Date(session.startedAt).getTime()) / 1000);
+  });
 
   useEffect(() => {
     if (panelState !== 'running') return;
@@ -121,7 +124,7 @@ export function SessionPanel({
       <div className="flex flex-col items-center gap-3 py-6 text-center">
         <DaemonMascot size={48} expression="idle" />
         <p className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
-          System Ready
+          SYSTEM READY
         </p>
         <p className="text-sm text-[--text-secondary]">No active session.</p>
         <Link
@@ -249,24 +252,34 @@ export function SessionPanel({
 
   if (panelState === 'failed') {
     return (
-      <div className="flex flex-col items-center gap-3 py-4 text-center">
-        <DaemonMascot size={48} expression="error" />
-        {session?.errorMessage && (
-          <Alert variant="destructive" className="text-left">
-            <AlertDescription>{session.errorMessage}</AlertDescription>
-          </Alert>
-        )}
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={onRetry}>
-            <RefreshCw className="h-3 w-3" />
-            Retry
-          </Button>
-          <Button variant="ghost" size="sm" onClick={onDismiss}>
-            <X className="h-3 w-3" />
-            Dismiss
-          </Button>
+      <TooltipProvider>
+        <div className="flex flex-col items-center gap-3 py-4 text-center">
+          <DaemonMascot size={48} expression="error" />
+          {session?.errorMessage && (
+            <Alert variant="destructive" className="text-left">
+              <AlertDescription>{session.errorMessage}</AlertDescription>
+            </Alert>
+          )}
+          <div className="flex gap-2">
+            <ControlButton
+              canControl={canControl}
+              onClick={onRetry}
+              icon={<RefreshCw className="h-3 w-3" />}
+              label="Retry"
+              variant="outline"
+              disabledTooltip="Requires admin role"
+            />
+            <ControlButton
+              canControl={canControl}
+              onClick={onDismiss}
+              icon={<X className="h-3 w-3" />}
+              label="Dismiss"
+              variant="ghost"
+              disabledTooltip="Requires admin role"
+            />
+          </div>
         </div>
-      </div>
+      </TooltipProvider>
     );
   }
 
