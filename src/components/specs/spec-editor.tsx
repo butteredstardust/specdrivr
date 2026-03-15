@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import CodeMirror from '@uiw/react-codemirror';
 import { markdown } from '@codemirror/lang-markdown';
@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
-type SpecStatus =
+export type SpecStatus =
   | 'drafting'
   | 'pending_plan'
   | 'pending_approval'
@@ -29,13 +29,8 @@ interface SpecEditorProps {
   className?: string;
 }
 
-export function SpecEditor({
-  initialContent,
-  initialTitle,
-  specStatus,
-  onSave,
-  className,
-}: SpecEditorProps) {
+export function SpecEditor(props: SpecEditorProps) {
+  const { initialContent, initialTitle, specId, specStatus, onSave, onPublish, className } = props;
   const [title, setTitle] = useState(initialTitle ?? '');
   const [content, setContent] = useState(initialContent ?? '');
   const [isSaving, setIsSaving] = useState(false);
@@ -43,7 +38,8 @@ export function SpecEditor({
 
   const isDirty = title !== (initialTitle ?? '') || content !== (initialContent ?? '');
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
+    if (isSaving) return;
     setIsSaving(true);
     setSaveError(null);
     const result = await onSave(title, content);
@@ -53,7 +49,7 @@ export function SpecEditor({
     } else {
       setSaveError(result.error ?? 'Failed to save');
     }
-  };
+  }, [isSaving, onSave, title, content]);
 
   // Ctrl+Enter / Cmd+Enter shortcut
   useEffect(() => {
@@ -65,8 +61,7 @@ export function SpecEditor({
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [title, content]);
+  }, [handleSave]);
 
   // Unsaved changes guard
   useEffect(() => {
@@ -124,13 +119,6 @@ export function SpecEditor({
         <Alert className="rounded-none border-x-0 border-t-0 border-amber-500/40 bg-amber-500/10 text-amber-300">
           <AlertDescription>
             Plan changes have been requested — address feedback before editing.
-          </AlertDescription>
-        </Alert>
-      )}
-      {specStatus === 'pending_plan' && (
-        <Alert className="rounded-none border-x-0 border-t-0 border-amber-500/40 bg-amber-500/10 text-amber-300">
-          <AlertDescription>
-            This spec is pending plan generation — editing is disabled until the plan is ready.
           </AlertDescription>
         </Alert>
       )}
