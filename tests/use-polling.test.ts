@@ -1,4 +1,4 @@
-import { renderHook, waitFor, act } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { expect, test, describe, vi, beforeEach, afterEach } from 'vitest';
 import { usePolling } from '@/hooks/use-polling';
 
@@ -45,7 +45,8 @@ describe('usePolling', () => {
     for (let i = 0; i < 5; i++) {
       await act(() => vi.advanceTimersByTimeAsync(200));
     }
-    await waitFor(() => expect(onError).toHaveBeenCalledTimes(1));
+    // waitFor uses setTimeout internally which is mocked — assert directly after flushing
+    expect(onError).toHaveBeenCalledTimes(1);
     expect(result.current.error).not.toBeNull();
   });
 
@@ -73,7 +74,8 @@ describe('usePolling', () => {
       })
     );
     await act(() => vi.advanceTimersByTimeAsync(500));
-    await waitFor(() => expect(result.current.data?.done).toBe(true));
+    // waitFor uses setTimeout internally which is mocked — assert directly after flushing
+    expect(result.current.data?.done).toBe(true);
     const countAfterStop = callCount;
     await act(() => vi.advanceTimersByTimeAsync(500));
     expect(callCount).toBe(countAfterStop);
