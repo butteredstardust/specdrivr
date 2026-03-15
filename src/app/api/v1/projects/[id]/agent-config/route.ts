@@ -15,7 +15,7 @@ const updateAgentConfigSchema = z.object({
   maxConcurrentTasks: z.number().int().min(1).max(10).optional(),
   taskTimeoutSeconds: z.number().int().min(30).max(3600).optional(),
   maxRetriesPerTask: z.number().int().min(0).max(5).optional(),
-  retryDelaySeconds: z.number().int().optional(),
+  retryDelaySeconds: z.number().int().min(15).max(300).optional(),
   requireApproval: z.boolean().optional(),
   autoGeneratePlan: z.boolean().optional(),
   branchPrefix: z.string().optional(),

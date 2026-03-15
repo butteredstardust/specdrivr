@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { X } from 'lucide-react';
 import { clientLogger } from '@/lib/logger-client';
-import type { UserRole } from '@/db/schema';
+import type { UserRole, AgentConfigSelect } from '@/db/schema';
 import { usePolling } from '@/hooks/use-polling';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -221,7 +221,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
   const [pendingApprovalOff, setPendingApprovalOff] = useState(false);
 
   // One-shot fetch via usePolling — stop immediately after first successful load
-  const onData = useCallback((data: AgentConfigData | null) => {
+  const onData = useCallback((data: AgentConfigSelect | null) => {
     if (!data) return;
     setForm({
       modelId: data.modelId ?? DEFAULTS.modelId,
@@ -250,7 +250,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
     toast.error('Failed to load agent configuration');
   }, []);
 
-  const { isLoading } = usePolling<AgentConfigData | null>({
+  const { isLoading } = usePolling<AgentConfigSelect | null>({
     url: `/api/v1/projects/${projectId}/agent-config`,
     stopWhen: () => true,
     onData,
