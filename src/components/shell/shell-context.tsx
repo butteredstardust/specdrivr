@@ -23,15 +23,16 @@ const ShellContext = createContext<ShellContextValue | null>(null);
 
 export function ShellProvider({ user, children }: ShellProviderProps) {
   const router = useRouter();
-  const [activeProjectId, setActiveProjectIdState] = useState<number | null>(() => {
-    if (typeof window === 'undefined') return null;
-    const stored = localStorage.getItem('specdrivr:activeProjectId');
-    return stored ? parseInt(stored, 10) : null;
-  });
-  const [devMode, setDevModeState] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-    return localStorage.getItem('specdrivr:devMode') === 'true';
-  });
+  const [activeProjectId, setActiveProjectIdState] = useState<number | null>(null);
+  const [devMode, setDevModeState] = useState<boolean>(false);
+
+  // Hydrate from localStorage after mount to avoid SSR/client mismatch
+  useEffect(() => {
+    const storedProject = localStorage.getItem('specdrivr:activeProjectId');
+    if (storedProject) setActiveProjectIdState(parseInt(storedProject, 10));
+    const storedDevMode = localStorage.getItem('specdrivr:devMode');
+    if (storedDevMode === 'true') setDevModeState(true);
+  }, []);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const firstKeyRef = useRef<string | null>(null);
   const firstKeyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

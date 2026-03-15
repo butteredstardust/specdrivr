@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
@@ -22,7 +22,7 @@ import type { UserRole, SpecStatus } from '@/db/schema';
 
 interface Spec {
   id: number;
-  title: string;
+  name: string;
   status: SpecStatus;
   createdAt: string;
   updatedAt: string;
@@ -65,13 +65,28 @@ function statusLabel(status: SpecStatus): string {
 
 export default function SpecsPage(): React.ReactElement {
   const router = useRouter();
-  const { activeProjectId, user } = useShell();
+  const searchParams = useSearchParams();
+  const { activeProjectId, setActiveProjectId, user } = useShell();
   const userRole = (user.role ?? 'viewer') as UserRole;
+
+  const urlProjectId = searchParams.get('projectId')
+    ? parseInt(searchParams.get('projectId')!, 10)
+    : null;
+
+  // Sync URL ?projectId into shell context so the sidebar picker also updates
+  useEffect(() => {
+    if (urlProjectId !== null && activeProjectId !== urlProjectId) {
+      setActiveProjectId(urlProjectId);
+    }
+  }, [urlProjectId, activeProjectId, setActiveProjectId]);
+
+  const effectiveProjectId = activeProjectId ?? urlProjectId;
 
   const [activeTab, setActiveTab] = useState<string>('all');
   const [search, setSearch] = useState('');
 
-  const specsUrl = activeProjectId !== null ? `/api/v1/specs?projectId=${activeProjectId}` : null;
+  const specsUrl =
+    effectiveProjectId !== null ? `/api/v1/specs?projectId=${effectiveProjectId}` : null;
 
   const { data: specs, isLoading } = usePolling<Spec[]>({
     url: specsUrl,
@@ -82,7 +97,7 @@ export default function SpecsPage(): React.ReactElement {
 
   const filteredSpecs = (specs ?? []).filter((spec) => {
     const matchesTab = activeTab === 'all' || spec.status === activeTab;
-    const matchesSearch = spec.title.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = spec.name.toLowerCase().includes(search.toLowerCase());
     return matchesTab && matchesSearch;
   });
 
@@ -137,7 +152,7 @@ export default function SpecsPage(): React.ReactElement {
         </TabsList>
 
         <TabsContent value={activeTab}>
-          {activeProjectId === null ? (
+          {effectiveProjectId === null ? (
             <div className="flex flex-col items-center gap-4 py-16">
               <DaemonMascot size={48} expression="idle" />
               <p className="font-mono text-sm text-[--text-secondary]">
@@ -169,7 +184,7 @@ export default function SpecsPage(): React.ReactElement {
                     className="cursor-pointer"
                     onClick={() => router.push(`/specs/${spec.id}`)}
                   >
-                    <TableCell className="font-mono text-sm">{spec.title}</TableCell>
+                    <TableCell className="font-mono text-sm">{spec.name}</TableCell>
                     <TableCell>
                       <span className={`font-mono text-xs ${statusBadgeClass(spec.status)}`}>
                         {statusLabel(spec.status)}
