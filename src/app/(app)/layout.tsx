@@ -4,6 +4,7 @@ import { projectRepository } from '@/repositories/project-repository';
 import { ShellProvider } from '@/components/shell/shell-context';
 import { Sidebar } from '@/components/shell/sidebar';
 import { TopBar } from '@/components/shell/top-bar';
+import { OnboardingWizard } from '@/components/onboarding-wizard';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -32,7 +33,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <main className="flex-1 overflow-y-auto p-6">{children}</main>
         </div>
       </div>
-      {showOnboarding && null /* <OnboardingWizard user={shellUser} /> - Task 18 */}
+      {showOnboarding && <OnboardingWizard user={shellUser} />}
     </ShellProvider>
   );
 }
