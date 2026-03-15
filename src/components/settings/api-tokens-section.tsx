@@ -209,9 +209,9 @@ export function ApiTokensSection() {
           {tokens.length === 0 ? (
             <p className="text-text-muted font-mono text-xs">No API tokens yet.</p>
           ) : (
-            <div className="border-surface-border flex flex-col gap-0 overflow-hidden rounded border">
+            <div className="border-border-default flex flex-col gap-0 overflow-hidden rounded border">
               {/* Header row */}
-              <div className="border-surface-border grid grid-cols-[1fr_auto_auto_auto_auto] gap-4 border-b px-3 py-2">
+              <div className="border-border-default grid grid-cols-[1fr_auto_auto_auto_auto] gap-4 border-b px-3 py-2">
                 {['NAME', 'PREFIX', 'CREATED', 'LAST USED', 'EXPIRES'].map((col) => (
                   <span key={col} className="text-text-muted font-mono text-xs">
                     {col}
@@ -222,7 +222,7 @@ export function ApiTokensSection() {
               {tokens.map((t) => (
                 <div
                   key={t.id}
-                  className="border-surface-border grid grid-cols-[1fr_auto_auto_auto_auto] items-center gap-4 border-b px-3 py-2.5 last:border-b-0"
+                  className="border-border-default grid grid-cols-[1fr_auto_auto_auto_auto] items-center gap-4 border-b px-3 py-2.5 last:border-b-0"
                 >
                   <div className="flex min-w-0 items-center gap-2">
                     <Key className="text-text-muted size-3 shrink-0" />
@@ -323,7 +323,7 @@ export function ApiTokensSection() {
             <p className="text-text-muted font-mono text-xs">
               This token is shown once only. Copy it now — you will not be able to see it again.
             </p>
-            <div className="border-surface-border bg-bg-surface flex items-center gap-2 rounded border px-3 py-2">
+            <div className="border-border-default bg-bg-surface flex items-center gap-2 rounded border px-3 py-2">
               <code className="text-phosphor-amber flex-1 font-mono text-xs break-all">
                 {revealToken}
               </code>

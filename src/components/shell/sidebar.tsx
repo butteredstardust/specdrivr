@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import {
-  LayoutDashboard,
+  Monitor,
   FolderKanban,
   FileText,
   Terminal,
@@ -12,14 +12,14 @@ import {
   Settings,
   PanelLeftClose,
   PanelLeftOpen,
+  ChevronDown,
 } from 'lucide-react';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
-import { SystemsBar } from '@/components/layout/systems-bar';
+import { useSystemHealth } from '@/components/layout/systems-bar';
 import { useShell } from '@/components/shell/shell-context';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils';
 import {
   Select,
   SelectContent,
@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 
 const COLLAPSED_KEY = 'sidebar-collapsed';
 
@@ -35,13 +36,114 @@ interface SidebarProps {
 }
 
 const NAV_ITEMS = [
-  { href: '/', label: 'Mission Control', icon: LayoutDashboard, exact: true },
+  { href: '/', label: 'Mission Control', icon: Monitor, exact: true },
   { href: '/projects', label: 'Projects', icon: FolderKanban, exact: false },
   { href: '/specs', label: 'Specs', icon: FileText, exact: false },
   { href: '/sessions', label: 'Sessions', icon: Terminal, exact: false },
   { href: '/notifications', label: 'Notifications', icon: Bell, exact: false },
   { href: '/settings', label: 'Settings', icon: Settings, exact: false },
 ];
+
+type HealthState = 'ok' | 'warn' | 'error' | 'unknown';
+
+type DaemonExpr = 'idle' | 'working' | 'success' | 'blocked' | 'error';
+
+function healthToExpr(state: HealthState): DaemonExpr {
+  switch (state) {
+    case 'ok': return 'success';
+    case 'warn': return 'blocked';
+    case 'error': return 'error';
+    default: return 'idle';
+  }
+}
+
+function healthDot(state: HealthState) {
+  switch (state) {
+    case 'ok': return 'bg-status-emerald';
+    case 'warn': return 'bg-phosphor-amber';
+    case 'error': return 'bg-status-red';
+    default: return 'bg-text-muted';
+  }
+}
+
+function SystemIcon({ label, state, tooltip }: { label: string; state: HealthState; tooltip: string }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className="flex cursor-default flex-col items-center gap-0.5">
+          <div className="relative">
+            <DaemonMascot size={24} expression={healthToExpr(state)} />
+            <span className={cn('absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full border border-bg-surface', healthDot(state))} />
+          </div>
+          <span className="text-text-muted mt-0.5 font-mono text-[8px] tracking-wider">{label}</span>
+        </div>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="text-xs">{tooltip}</TooltipContent>
+    </Tooltip>
+  );
+}
+
+function SidebarBottom({ collapsed }: { collapsed: boolean }) {
+  const health = useSystemHealth();
+
+  const overallExpr: DaemonExpr =
+    health.overall === 'ok' ? 'idle'
+    : health.overall === 'degraded' ? 'error'
+    : 'idle';
+
+  const statusText =
+    health.overall === 'ok' ? 'SYSTEM OK'
+    : health.overall === 'degraded' ? 'DEGRADED'
+    : 'CONNECTING';
+
+  const statusClass =
+    health.overall === 'ok' ? 'text-text-muted'
+    : health.overall === 'degraded' ? 'text-status-red'
+    : 'text-text-muted';
+
+  const gitTooltip = health.git === 'ok' ? 'GitHub: connected' : health.git === 'warn' ? 'GitHub: not configured' : 'GitHub: unknown';
+  const apiTooltip = health.api === 'ok' ? 'API: healthy' : health.api === 'error' ? 'API: degraded' : 'API: unknown';
+  const agtTooltip = health.agt === 'ok' ? 'Agent: active' : health.agt === 'warn' ? 'Agent: idle' : health.agt === 'error' ? 'Agent: offline' : 'Agent: unknown';
+  const pgTooltip = health.pg === 'ok' ? 'Database: connected' : health.pg === 'error' ? 'Database: unreachable' : 'Database: unknown';
+
+  if (collapsed) {
+    return (
+      <div className="border-border-default flex flex-col items-center gap-2 border-t py-3">
+        <DaemonMascot size={20} expression={overallExpr} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="border-border-default border-t">
+      {/* Systems icons */}
+      <div className="px-3 pt-3 pb-1">
+        <span className="text-text-muted mb-2 block px-1 font-mono text-[8px] uppercase tracking-[0.2em]">
+          Systems
+        </span>
+        <div className="flex items-end justify-around">
+          <SystemIcon label="GIT" state={health.git} tooltip={gitTooltip} />
+          <SystemIcon label="API" state={health.api} tooltip={apiTooltip} />
+          <SystemIcon label="AGT" state={health.agt} tooltip={agtTooltip} />
+          <SystemIcon label="PG" state={health.pg} tooltip={pgTooltip} />
+        </div>
+      </div>
+
+      {/* Daemon status footer */}
+      <div className="px-3 pt-1 pb-3">
+        <div className="flex items-center gap-1.5">
+          <DaemonMascot size={20} expression={overallExpr} />
+          <span className={cn('font-mono text-[10px] tracking-wider uppercase', statusClass)}>
+            DAEMON · {statusText}
+          </span>
+        </div>
+        <div className="mt-1 px-0.5">
+          <span className="text-text-muted/50 font-mono text-[9px]">v0.1.0</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function Sidebar({ projects }: SidebarProps) {
   const pathname = usePathname();
@@ -65,51 +167,52 @@ export function Sidebar({ projects }: SidebarProps) {
   const isActive = (href: string, exact: boolean) =>
     exact ? pathname === href : pathname === href || pathname.startsWith(href + '/');
 
-  // Don't render collapsed state until mounted to avoid hydration mismatch
   const isCollapsed = mounted && collapsed;
+
+  const activeProject = projects.find((p) => p.id === activeProjectId) ?? projects[0] ?? null;
+  const projectPath = activeProject ? `~/${activeProject.slug}` : '~/select-project';
 
   return (
     <TooltipProvider delayDuration={300}>
       <aside
         className={cn(
           'border-border-default bg-bg-surface flex h-full flex-shrink-0 flex-col border-r transition-all duration-200',
-          isCollapsed ? 'w-14' : 'w-60'
+          isCollapsed ? 'w-14' : 'w-56'
         )}
       >
-        {/* Logo + collapse toggle */}
-        <div className="border-border-default flex items-center gap-2 border-b px-3 py-4">
-          {!isCollapsed && <DaemonMascot size={24} expression="idle" />}
-          {!isCollapsed && (
-            <span className="text-text-primary flex-1 font-mono text-sm font-bold tracking-widest">
-              SPECDRIVR
-            </span>
-          )}
-          {!isCollapsed && devMode && (
-            <Badge className="border-phosphor-amber/30 bg-phosphor-amber/20 text-phosphor-amber font-mono text-[10px]">
-              DEV
-            </Badge>
-          )}
-          {isCollapsed && (
+        {/* Logo */}
+        <div className="flex items-center gap-2.5 px-4 py-4">
+          {isCollapsed ? (
             <div className="flex w-full justify-center">
               <DaemonMascot size={24} expression="idle" />
             </div>
-          )}
-          {!isCollapsed && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-text-muted hover:text-text-primary h-6 w-6 shrink-0"
-              onClick={toggleCollapsed}
-              aria-label="Collapse sidebar"
-            >
-              <PanelLeftClose className="h-4 w-4" />
-            </Button>
+          ) : (
+            <>
+              <DaemonMascot size={24} expression="idle" />
+              <span className="text-text-primary flex-1 font-mono text-sm font-semibold tracking-wide">
+                Specdrivr
+              </span>
+              {devMode && (
+                <Badge className="border-phosphor-amber/30 bg-phosphor-amber/20 text-phosphor-amber font-mono text-[10px]">
+                  DEV
+                </Badge>
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-text-muted hover:text-text-primary h-6 w-6 shrink-0"
+                onClick={toggleCollapsed}
+                aria-label="Collapse sidebar"
+              >
+                <PanelLeftClose className="h-4 w-4" />
+              </Button>
+            </>
           )}
         </div>
 
         {/* Expand button when collapsed */}
         {isCollapsed && (
-          <div className="border-border-default flex justify-center border-b py-2">
+          <div className="flex justify-center py-1.5">
             <Button
               variant="ghost"
               size="icon"
@@ -122,9 +225,9 @@ export function Sidebar({ projects }: SidebarProps) {
           </div>
         )}
 
-        {/* Project Switcher */}
+        {/* Project switcher */}
         {!isCollapsed && (
-          <div className="border-border-default border-b px-3 py-3">
+          <div className="px-3 pb-3">
             <Select
               value={activeProjectId ? String(activeProjectId) : ''}
               onValueChange={(v) => {
@@ -132,13 +235,14 @@ export function Sidebar({ projects }: SidebarProps) {
                 router.push('/specs');
               }}
             >
-              <SelectTrigger className="border-border-default bg-bg-elevated h-8 text-xs">
-                <SelectValue placeholder="Select project…" />
+              <SelectTrigger className="border-border-default bg-bg-elevated h-auto w-full border px-2.5 py-1.5 text-xs [&>svg:last-child]:hidden">
+                <span className="text-text-muted font-mono truncate flex-1">{projectPath}</span>
+                <ChevronDown className="text-text-muted ml-1 h-3 w-3 shrink-0" />
               </SelectTrigger>
               <SelectContent>
                 {projects.map((p) => (
-                  <SelectItem key={p.id} value={String(p.id)} className="text-xs">
-                    {p.name}
+                  <SelectItem key={p.id} value={String(p.id)} className="font-mono text-xs">
+                    ~/{p.slug}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -147,7 +251,7 @@ export function Sidebar({ projects }: SidebarProps) {
         )}
 
         {/* Nav */}
-        <nav className="flex-1 py-2">
+        <nav className="flex-1 space-y-0.5 px-3">
           {NAV_ITEMS.map(({ href, label, icon: Icon, exact }) => {
             const active = isActive(href, exact);
             const linkEl = (
@@ -155,17 +259,11 @@ export function Sidebar({ projects }: SidebarProps) {
                 key={href}
                 href={href}
                 className={cn(
-                  'flex items-center transition-colors',
-                  isCollapsed
-                    ? 'mx-1 justify-center rounded-md p-2'
-                    : 'gap-3 border-l-2 px-4 py-2 text-sm',
+                  'flex items-center gap-2.5 rounded px-2.5 py-2 text-sm transition-colors',
+                  isCollapsed && 'justify-center px-2',
                   active
-                    ? isCollapsed
-                      ? 'bg-accent-violet/10 text-accent-violet'
-                      : 'border-accent-violet bg-accent-violet/10 text-accent-violet'
-                    : isCollapsed
-                      ? 'text-text-secondary hover:bg-bg-elevated hover:text-text-primary'
-                      : 'text-text-secondary hover:bg-bg-elevated hover:text-text-primary border-transparent'
+                    ? 'bg-bg-elevated text-text-primary'
+                    : 'text-text-secondary hover:bg-bg-elevated/60 hover:text-text-primary'
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" />
@@ -185,23 +283,8 @@ export function Sidebar({ projects }: SidebarProps) {
           })}
         </nav>
 
-        {/* Bottom status */}
-        <div className="border-border-default border-t">
-          {!isCollapsed && (
-            <div className="flex items-center gap-2 px-4 py-2">
-              <DaemonMascot size={24} expression="idle" />
-              <span className="text-text-muted font-mono text-xs tracking-widest uppercase">
-                SYSTEM READY
-              </span>
-            </div>
-          )}
-          {isCollapsed && (
-            <div className="flex justify-center py-2">
-              <DaemonMascot size={20} expression="idle" />
-            </div>
-          )}
-          <SystemsBar collapsed={isCollapsed} />
-        </div>
+        {/* Systems + footer */}
+        <SidebarBottom collapsed={isCollapsed} />
       </aside>
     </TooltipProvider>
   );
