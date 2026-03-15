@@ -28,6 +28,12 @@ const updateAgentConfigSchema = z.object({
   maxDiffSizeKb: z.number().int().min(1).optional(),
   prAutoCreate: z.boolean().optional(),
   prTargetBranch: z.string().optional(),
+  githubToken: z.string().nullable().optional(),
+  githubRepo: z.string().nullable().optional(),
+  githubBranch: z.string().nullable().optional(),
+  githubWebhookSecret: z.string().nullable().optional(),
+  slackBotToken: z.string().nullable().optional(),
+  slackChannelId: z.string().nullable().optional(),
 });
 
 export async function GET(_request: NextRequest, { params }: RouteParams) {
