@@ -192,7 +192,7 @@ export function ActiveSessionsSection() {
             return (
               <div
                 key={s.id}
-                className="border-surface-border flex items-center gap-3 rounded border px-3 py-2.5"
+                className="border-border-default flex items-center gap-3 rounded border px-3 py-2.5"
               >
                 <SessionIcon ua={s.userAgent} />
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5">
