@@ -200,6 +200,14 @@ export const taskQuerySchema = z.object({
       message: 'Plan ID must be a positive number',
     }),
 
+  specId: z
+    .string()
+    .optional()
+    .transform((val) => (val ? parseInt(val, 10) : undefined))
+    .refine((val) => val === undefined || (!isNaN(val) && val > 0), {
+      message: 'Spec ID must be a positive number',
+    }),
+
   status: taskStatusSchema.optional(),
 
   page: z

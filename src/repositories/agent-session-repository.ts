@@ -9,7 +9,7 @@ import {
   projects,
   specifications,
 } from '@/db/schema';
-import { eq, desc, inArray } from 'drizzle-orm';
+import { eq, desc, inArray, asc } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, DatabaseError } from '@/lib/errors';
 import { dispatchWebhookEvent, type WebhookEventType } from '@/lib/webhooks';
@@ -212,6 +212,21 @@ export class AgentSessionRepository extends BaseRepository {
         .limit(limit)
     );
     return rows.reverse(); // chronological order for log display
+  }
+
+  async getEventsBySpecId(
+    specId: number,
+    limit = 200
+  ): Promise<(typeof agentEvents.$inferSelect)[]> {
+    const rows = await this.executeQuery(() =>
+      db
+        .select()
+        .from(agentEvents)
+        .where(eq(agentEvents.specId, specId))
+        .orderBy(asc(agentEvents.createdAt))
+        .limit(limit)
+    );
+    return rows;
   }
 
   async addEvent(data: Omit<AgentEventInsert, 'id' | 'createdAt'>): Promise<void> {
