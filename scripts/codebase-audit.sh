@@ -146,13 +146,30 @@ done
 # API Route Security: Session checks and Zod validation
 API_ROUTES=$(find src/app/api -name "route.ts" 2>/dev/null)
 for route in $API_ROUTES; do
-    # Skip known public or auth routes
-    if [[ "$route" =~ "api/auth" || "$route" =~ "api/health" || "$route" =~ "api/webhooks" || "$route" =~ "api/v1/health" ]]; then
+    # PUBLIC ROUTES — intentionally unauthenticated:
+    # api/auth/*    — BetterAuth's own endpoints (managed by the library)
+    # api/v1/auth/* — user-facing auth flows (signup, password reset, invite acceptance)
+    # api/v1/health — load balancer health check, no auth needed or appropriate
+    # api/health    — legacy health endpoint, same reason
+    # api/webhooks  — inbound webhook receiver, authenticated by HMAC signature not session
+    if [[ "$route" =~ "api/auth" || "$route" =~ "api/v1/auth" || \
+          "$route" =~ "api/health" || "$route" =~ "api/v1/health" || \
+          "$route" =~ "api/webhooks" ]]; then
         info "PUBLIC API ROUTE: Intentionally public or auth-handled: $route"
         continue
     fi
-    
-    if ! grep -q "auth(" "$route"; then
+
+    # A route is considered authenticated if it contains ANY of:
+    # 1. auth(          — BetterAuth session cookie check
+    # 2. Authorization  — API key or CRON_SECRET bearer token header check
+    # 3. CRON_SECRET    — admin/cron endpoint protection
+    # 4. verifyApiToken / apiToken — any token verification helper
+    # ALTERNATIVE AUTH — uses API key or CRON_SECRET, not session cookies:
+    # api/v1/agent/tasks/next          — project-scoped SDK token (Authorization: Bearer sdk_...)
+    # api/v1/sessions/[id]/complete    — agent-to-server, SDK token auth
+    # api/v1/sessions/[id]/heartbeat   — agent-to-server, SDK token auth
+    # api/v1/admin/aggregate-usage     — CRON_SECRET bearer token, not user session
+    if ! grep -qE "auth\(|Authorization|CRON_SECRET|verifyApiToken|apiToken" "$route"; then
         warn "API SECURITY: Potential missing session check in $route"
     fi
     if ! grep -q "z\." "$route" && grep -qE "POST|PUT|PATCH" "$route"; then
@@ -231,10 +248,15 @@ if [[ -n "$HEX_CODES" ]]; then
 fi
 
 # Prohibited shadcn tokens
+# Exclude src/components/ui/ — shadcn-generated files use shadcn semantic tokens
+# (bg-background, text-foreground etc.) by design. These are not our custom components
+# and should not be checked for Specdrivr token conventions.
 PROHIBITED_TOKENS=("bg-background" "text-foreground" "bg-destructive")
 for token in "${PROHIBITED_TOKENS[@]}"; do
-    if grep -r "$token" src/components src/app > /dev/null 2>&1; then
-        warn "DESIGN TOKEN VIOLATION: Prohibited shadcn token '$token' found. Use project-specific CSS variables."
+    if grep -r "$token" src/components src/app \
+        --exclude-dir="src/components/ui" \
+        --exclude-dir="ui" > /dev/null 2>&1; then
+        warn "DESIGN TOKEN VIOLATION: Prohibited shadcn token '$token' found outside src/components/ui/. Use project-specific CSS variables."
     fi
 done
 
