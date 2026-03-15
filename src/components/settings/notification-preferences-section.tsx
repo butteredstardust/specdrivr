@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import { clientLogger } from '@/lib/logger-client';
 import { usePolling } from '@/hooks/use-polling';
@@ -98,30 +98,25 @@ export function NotificationPreferencesSection() {
   const [isSaving, setIsSaving] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  // Fetch once via usePolling (stopWhen: () => true stops after first load)
-  const { data: apiData, error: pollingError } = usePolling<ApiPref[]>({
+  // Fetch once via usePolling (stopWhen: () => true stops after first successful load)
+  const { isLoading } = usePolling<ApiPref[]>({
     url: '/api/v1/notifications/preferences',
+    interval: 60_000,
     stopWhen: () => true,
-  });
-
-  // Populate state when data arrives
-  useEffect(() => {
-    if (apiData) {
-      const mapped = apiArrayToMap(apiData);
+    onData: (data) => {
+      const mapped = apiArrayToMap(data);
       setPrefs(mapped);
       initialPrefsRef.current = mapped;
       setIsDirty(false);
       setLoadError(null);
-    }
-  }, [apiData]);
-
-  // Surface polling errors as inline message
-  useEffect(() => {
-    if (pollingError) {
-      clientLogger.error('Failed to load notification preferences', pollingError);
+    },
+    onError: (err) => {
+      clientLogger.error('Failed to load notification preferences', err);
       setLoadError('Failed to load preferences.');
-    }
-  }, [pollingError]);
+    },
+  });
+
+  void isLoading;
 
   // Toggle a single switch
   const handleToggle = useCallback(
@@ -181,7 +176,7 @@ export function NotificationPreferencesSection() {
       {loadError && <p className="text-sm text-[--status-red]">{loadError}</p>}
 
       {/* Table header */}
-      <div className="grid grid-cols-[1fr_4rem_4rem] items-center gap-2 border-b border-[--border-subtle] pb-2">
+      <div className="grid grid-cols-[1fr_4rem_4rem] items-center gap-2 border-b border-[--border-muted] pb-2">
         <span className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
           Event
         </span>
@@ -194,7 +189,7 @@ export function NotificationPreferencesSection() {
       </div>
 
       {/* Rows */}
-      <div className="flex flex-col gap-0 divide-y divide-[--border-subtle]">
+      <div className="flex flex-col gap-0 divide-y divide-[--border-muted]">
         {ALL_EVENT_TYPES.map((et) => (
           <div key={et} className="grid grid-cols-[1fr_4rem_4rem] items-center gap-2 py-3">
             <span className="text-sm text-[--text-primary]">{EVENT_LABELS[et]}</span>

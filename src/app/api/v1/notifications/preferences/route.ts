@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { db } from '@/db';
-import { notificationPreferences } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { notificationRepository } from '@/repositories/notification-repository';
 import { handleApiError } from '@/lib/error-handler';
 
 const ALL_EVENT_TYPES = [
@@ -27,23 +25,7 @@ export async function GET() {
       );
     }
 
-    const userId = session.user.id;
-    const rows = await db
-      .select()
-      .from(notificationPreferences)
-      .where(eq(notificationPreferences.userId, userId));
-
-    const rowMap = new Map(rows.map((r) => [r.eventType, r]));
-
-    const result = ALL_EVENT_TYPES.map((eventType) => {
-      const row = rowMap.get(eventType);
-      return {
-        eventType,
-        emailEnabled: row?.emailEnabled ?? false,
-        inAppEnabled: row?.inAppEnabled ?? true,
-      };
-    });
-
+    const result = await notificationRepository.getPreferences(session.user.id);
     return NextResponse.json({ data: result });
   } catch (error) {
     return handleApiError(error);
@@ -66,7 +48,6 @@ export async function PATCH(req: Request) {
       );
     }
 
-    const userId = session.user.id;
     const body = await req.json().catch(() => null);
 
     if (!body || !Array.isArray(body.preferences)) {
@@ -77,6 +58,7 @@ export async function PATCH(req: Request) {
     }
 
     const validEventTypes = new Set<string>(ALL_EVENT_TYPES);
+    const validated: PrefInput[] = [];
 
     for (const pref of body.preferences as PrefInput[]) {
       if (!validEventTypes.has(pref.eventType)) {
@@ -85,26 +67,10 @@ export async function PATCH(req: Request) {
           { status: 400 }
         );
       }
-
-      await db
-        .insert(notificationPreferences)
-        .values({
-          userId,
-          eventType: pref.eventType,
-          emailEnabled: pref.emailEnabled,
-          inAppEnabled: pref.inAppEnabled,
-          updatedAt: new Date(),
-        })
-        .onConflictDoUpdate({
-          target: [notificationPreferences.userId, notificationPreferences.eventType],
-          set: {
-            emailEnabled: pref.emailEnabled,
-            inAppEnabled: pref.inAppEnabled,
-            updatedAt: new Date(),
-          },
-        });
+      validated.push(pref);
     }
 
+    await notificationRepository.upsertPreferences(session.user.id, validated);
     return NextResponse.json({ data: { success: true } });
   } catch (error) {
     return handleApiError(error);
