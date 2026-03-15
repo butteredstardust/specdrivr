@@ -24,8 +24,6 @@ The product specification has been split into purpose-specific files for better 
 ```
 documentation/
 ├── README.md                      # This file
-├── SPECIFICATION.md               # Redirect (original was split)
-├── SPECIFICATION.md.bak           # Original backup
 ├── SPECIFICATION_INDEX.md         # Master index
 ├── PRODUCT.md                     # Product specification
 ├── ARCHITECTURE.md                # Architecture specification
@@ -40,7 +38,7 @@ documentation/
 
 ## Splitting Rationale
 
-The original [SPECIFICATION.md](./SPECIFICATION.md) contained all 27 sections in a single 137KB file (2021 lines). This monolithic structure made it:
+The original product specification was split from a monolithic 137KB file (2021 lines) into the current modular structure. This change was made to:
 
 - Difficult to navigate and find specific information
 - Hard to maintain (changes to one area required reviewing the entire file)
