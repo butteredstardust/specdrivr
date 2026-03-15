@@ -22,6 +22,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const { id } = await params;
     const sessionId = parseInt(id, 10);
 
+    if (Number.isNaN(sessionId)) {
+      return NextResponse.json(
+        { error: { code: 'BAD_REQUEST', message: 'Invalid session id' } },
+        { status: 400 }
+      );
+    }
+
     const agentSession = await agentSessionRepository.getById(sessionId);
     if (!agentSession) throw new NotFoundError(`Session ${sessionId} not found`);
 
@@ -34,7 +41,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     const limitParam = request.nextUrl.searchParams.get('limit');
-    const limit = limitParam ? Math.min(parseInt(limitParam, 10), 100) : 30;
+    const parsed = parseInt(limitParam ?? '', 10);
+    const limit = Number.isNaN(parsed) ? 30 : Math.min(parsed, 100);
 
     const events = await agentSessionRepository.getEvents(sessionId, limit);
     return NextResponse.json({ data: events });
