@@ -19,6 +19,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     onboardingStep: session.user.onboardingStep ?? undefined,
   };
 
+  // TODO: OnboardingWizard will be implemented in Task 18
+  // For now, conditionally render once it exists
+  const showOnboarding = session.user.onboardingStep === 0;
+
   return (
     <ShellProvider user={shellUser}>
       <div className="flex h-screen overflow-hidden">
@@ -28,6 +32,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <main className="flex-1 overflow-y-auto p-6">{children}</main>
         </div>
       </div>
+      {showOnboarding && null /* <OnboardingWizard user={shellUser} /> - Task 18 */}
     </ShellProvider>
   );
 }
