@@ -20,6 +20,8 @@ interface UpdateProjectData {
   name?: string;
   description?: string | null;
   status?: 'active' | 'archived';
+  repositoryUrl?: string | null;
+  repositoryBranch?: string | null;
 }
 
 export { type ProjectSelect as Project } from '@/db/schema';
@@ -140,6 +142,14 @@ export class ProjectRepository extends BaseRepository {
       ) {
         throw new ValidationError('Project description cannot exceed 1000 characters');
       }
+    }
+
+    if (data.repositoryUrl !== undefined) {
+      updateData.repositoryUrl = data.repositoryUrl;
+    }
+
+    if (data.repositoryBranch !== undefined) {
+      updateData.repositoryBranch = data.repositoryBranch;
     }
 
     if (data.status !== undefined) {
