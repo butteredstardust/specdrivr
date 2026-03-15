@@ -36,16 +36,24 @@ export function parseEnv(): Env {
   const dotEnvPath = path.resolve(process.cwd(), '.env');
   const dotEnvLocalPath = path.resolve(process.cwd(), '.env.local');
 
+  // Snapshot keys already present before we load any file (shell / CI injected values).
+  // .env.local may override .env, but neither file should clobber vars that already
+  // exist in the environment — otherwise CI's DATABASE_URL gets replaced by the
+  // committed .env.local that carries local dev credentials (pg error 28P01).
+  const preExistingKeys = new Set(Object.keys(process.env));
+
   if (fs.existsSync(dotEnvPath)) {
     const envConfig = config({ path: dotEnvPath }).parsed || {};
     for (const k in envConfig) {
-      process.env[k] = process.env[k] || envConfig[k];
+      if (!preExistingKeys.has(k)) process.env[k] = envConfig[k];
     }
   }
   if (fs.existsSync(dotEnvLocalPath)) {
     const envConfig = config({ path: dotEnvLocalPath }).parsed || {};
     for (const k in envConfig) {
-      process.env[k] = envConfig[k]; // .local overrides .env
+      // .local overrides .env (both bypass preExistingKeys), but never overrides
+      // a var that was already in the shell / CI environment.
+      if (!preExistingKeys.has(k)) process.env[k] = envConfig[k];
     }
   }
 
