@@ -14,6 +14,8 @@ interface NavItem {
 interface NavGroup {
   label: string;
   items: NavItem[];
+  /** Injected slot rendered immediately after this group */
+  afterSlot?: 'danger-zone';
 }
 
 const NAV_GROUPS: NavGroup[] = [
@@ -35,10 +37,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: '/settings/usage', label: 'Usage' },
       { href: '/settings/audit', label: 'Audit Log', hideForRoles: ['member', 'viewer'] },
     ],
-  },
-  {
-    label: 'DANGER ZONE',
-    items: [{ href: '/settings/danger', label: 'Danger Zone' }],
+    afterSlot: 'danger-zone',
   },
   {
     label: 'DEVELOPER',
@@ -55,6 +54,9 @@ interface SettingsNavProps {
 
 export function SettingsNav({ userRole }: SettingsNavProps) {
   const pathname = usePathname();
+
+  const isDangerActive =
+    pathname === '/settings/danger' || pathname.startsWith('/settings/danger/');
 
   return (
     <nav className="flex w-[180px] shrink-0 flex-col gap-0">
@@ -87,6 +89,20 @@ export function SettingsNav({ userRole }: SettingsNavProps) {
                 </Link>
               );
             })}
+
+          {group.afterSlot === 'danger-zone' && (
+            <Link
+              href="/settings/danger"
+              className={cn(
+                'mt-4 flex items-center px-3 py-1.5 font-mono text-xs tracking-widest uppercase transition-colors',
+                isDangerActive
+                  ? 'border-l-2 border-[--accent-violet] bg-[--accent-violet]/10 pl-[10px] text-[--accent-violet]'
+                  : 'text-[--status-red]/80 hover:text-[--status-red]'
+              )}
+            >
+              DANGER ZONE
+            </Link>
+          )}
         </div>
       ))}
     </nav>

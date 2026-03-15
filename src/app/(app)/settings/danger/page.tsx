@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { projectRepository } from '@/repositories/project-repository';
 import { getProjectRole } from '@/lib/rbac';
-import { ProjectSettingsForm } from '@/components/settings/project-settings-form';
+import { DangerZoneSection } from '@/components/settings/danger-zone-section';
 
 export default async function DangerPage() {
   const session = await auth();
@@ -29,16 +29,7 @@ export default async function DangerPage() {
       <h1 className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
         DANGER ZONE
       </h1>
-      <ProjectSettingsForm
-        project={{
-          id: project.id,
-          name: project.name,
-          description: project.description ?? null,
-          repositoryUrl: project.repositoryUrl ?? null,
-        }}
-        userRole={userRole}
-        dangerZoneOnly
-      />
+      <DangerZoneSection project={{ id: project.id, name: project.name }} userRole={userRole} />
     </div>
   );
 }
