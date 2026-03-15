@@ -266,7 +266,9 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
             {plan.status.replace(/_/g, ' ')}
           </span>
         </div>
-        <ReactMarkdown className="prose prose-invert max-w-none">{plan.content}</ReactMarkdown>
+        <div className="prose prose-invert max-w-none">
+          <ReactMarkdown>{plan.content}</ReactMarkdown>
+        </div>
       </div>
     );
   }
@@ -311,7 +313,9 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
             <p className="mt-1 text-sm text-[--text-secondary]">{plan.reviewerFeedback}</p>
           </blockquote>
         )}
-        <ReactMarkdown className="prose prose-invert max-w-none">{plan.content}</ReactMarkdown>
+        <div className="prose prose-invert max-w-none">
+          <ReactMarkdown>{plan.content}</ReactMarkdown>
+        </div>
         <TooltipProvider>
           {canMember ? (
             <Button size="sm" onClick={handleRegenerate} disabled={isActioning}>
@@ -338,7 +342,9 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
   return (
     <TooltipProvider>
       <div className="space-y-6">
-        <ReactMarkdown className="prose prose-invert max-w-none">{plan.content}</ReactMarkdown>
+        <div className="prose prose-invert max-w-none">
+          <ReactMarkdown>{plan.content}</ReactMarkdown>
+        </div>
 
         {/* Action buttons — always rendered */}
         <div className="flex flex-wrap gap-2">
