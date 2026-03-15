@@ -57,10 +57,10 @@ export default function MissionControlPage() {
   const activeSession = sessionsData?.[0] ?? null;
   const blockedTasks = tasksData ?? [];
 
-  // Reset dismissed state whenever blocked tasks change
+  // Reset dismissed state whenever the polled task data reference changes
   useEffect(() => {
     setDismissed(false);
-  }, [blockedTasks]);
+  }, [tasksData]);
 
   async function handleSessionPatch(sessionId: number, status: string) {
     try {
