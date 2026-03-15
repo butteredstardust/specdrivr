@@ -14,7 +14,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 
 interface DangerZoneSectionProps {
@@ -73,52 +72,53 @@ export function DangerZoneSection({ project, userRole }: DangerZoneSectionProps)
           <p className="font-mono text-xs text-[--text-muted]">
             Permanently delete this project and all its data.
           </p>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span tabIndex={!deletable ? 0 : undefined}>
-                <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-                  <DialogTrigger asChild>
+          {deletable ? (
+            <>
+              <Button variant="destructive" size="sm" onClick={() => setDeleteOpen(true)}>
+                Delete Project
+              </Button>
+              <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle className="font-mono">Delete project?</DialogTitle>
+                    <DialogDescription className="font-mono text-xs">
+                      This action cannot be undone. All specs, sessions, and data for{' '}
+                      <strong>{project.name}</strong> will be permanently deleted.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setDeleteOpen(false)}
+                      disabled={isDeleting}
+                    >
+                      Cancel
+                    </Button>
                     <Button
                       variant="destructive"
                       size="sm"
-                      disabled={!deletable}
-                      onClick={() => setDeleteOpen(true)}
+                      onClick={handleDelete}
+                      disabled={isDeleting}
                     >
-                      Delete Project
+                      {isDeleting ? 'Deleting…' : 'Delete'}
                     </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle className="font-mono">Delete project?</DialogTitle>
-                      <DialogDescription className="font-mono text-xs">
-                        This action cannot be undone. All specs, sessions, and data for{' '}
-                        <strong>{project.name}</strong> will be permanently deleted.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setDeleteOpen(false)}
-                        disabled={isDeleting}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={handleDelete}
-                        disabled={isDeleting}
-                      >
-                        {isDeleting ? 'Deleting…' : 'Delete'}
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </span>
-            </TooltipTrigger>
-            {!deletable && <TooltipContent>Only project owners can delete</TooltipContent>}
-          </Tooltip>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </>
+          ) : (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span tabIndex={0}>
+                  <Button variant="destructive" size="sm" disabled>
+                    Delete Project
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>Only project owners can delete</TooltipContent>
+            </Tooltip>
+          )}
         </div>
       </div>
     </TooltipProvider>

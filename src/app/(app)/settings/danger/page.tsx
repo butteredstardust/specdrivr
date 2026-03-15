@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { projectRepository } from '@/repositories/project-repository';
 import { getProjectRole } from '@/lib/rbac';
+import type { UserRole } from '@/db/schema';
 import { DangerZoneSection } from '@/components/settings/danger-zone-section';
 
 export default async function DangerPage() {
@@ -22,7 +23,8 @@ export default async function DangerPage() {
     );
   }
 
-  const userRole = (await getProjectRole(session.user.id, project.id)) ?? 'viewer';
+  const userRole: UserRole = ((await getProjectRole(session.user.id, project.id)) ??
+    'viewer') as UserRole;
 
   return (
     <div className="flex max-w-2xl flex-col gap-8">
