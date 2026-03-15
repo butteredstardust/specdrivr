@@ -26,6 +26,7 @@ export { notificationRepository, NotificationRepository } from './notification-r
 export { auditRepository, AuditRepository } from './audit-repository';
 export { tokenRepository, TokenRepository } from './token-repository';
 export { inviteRepository, InviteRepository } from './invite-repository';
+export { sessionRepository, SessionRepository } from './session-repository';
 export { BaseRepository } from './base-repository';
 
 /**
