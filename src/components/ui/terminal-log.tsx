@@ -46,7 +46,10 @@ export function TerminalLog({
     <div
       ref={containerRef}
       onScroll={handleScroll}
-      className={cn('terminal-surface bg-terminal-bg overflow-y-auto rounded-md p-3', className)}
+      className={cn(
+        'terminal-surface overflow-y-auto rounded-md bg-[color:var(--terminal-bg)] p-3',
+        className
+      )}
       style={{ maxHeight }}
     >
       <div className="space-y-0.5 font-mono text-xs leading-relaxed">

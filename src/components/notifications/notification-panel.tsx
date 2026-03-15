@@ -59,7 +59,7 @@ export function NotificationPanel() {
   return (
     <div className="flex flex-col">
       {/* Header */}
-      <div className="border-border-default flex items-center justify-between border-b px-4 py-3">
+      <div className="flex items-center justify-between border-b border-[--border-default] px-4 py-3">
         <span className="text-text-muted font-mono text-xs font-semibold tracking-widest uppercase">
           NOTIFICATIONS
         </span>
@@ -85,9 +85,9 @@ export function NotificationPanel() {
           <div
             key={n.id}
             className={cn(
-              'border-border-default flex h-12 items-center gap-3 border-b px-4 last:border-0',
+              'flex h-12 items-center gap-3 border-b border-[--border-default] px-4 last:border-0',
               !n.isRead
-                ? 'bg-accent-violet/5 border-accent-violet border-l-2'
+                ? 'bg-accent-violet/5 border-l-2 border-[--accent-violet]'
                 : 'border-l-2 border-transparent'
             )}
           >
@@ -102,7 +102,7 @@ export function NotificationPanel() {
       </div>
 
       {/* Footer */}
-      <div className="border-border-default border-t px-4 py-2">
+      <div className="border-t border-[--border-default] px-4 py-2">
         <Link
           href="/notifications"
           className="text-accent-violet font-mono text-xs hover:underline"

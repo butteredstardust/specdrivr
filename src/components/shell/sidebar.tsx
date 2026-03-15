@@ -38,7 +38,7 @@ export function Sidebar({ projects }: SidebarProps) {
     exact ? pathname === href : pathname === href || pathname.startsWith(href + '/');
 
   return (
-    <aside className="border-border-default bg-bg-surface flex h-full w-60 flex-shrink-0 flex-col border-r">
+    <aside className="flex h-full w-60 flex-shrink-0 flex-col border-r border-[--border-default] bg-[color:var(--bg-surface)]">
       {/* Logo */}
       <div className="border-border-default flex items-center gap-2 border-b px-4 py-4">
         <DaemonMascot size={24} expression="idle" />
@@ -61,7 +61,7 @@ export function Sidebar({ projects }: SidebarProps) {
             router.push('/specs');
           }}
         >
-          <SelectTrigger className="border-border-default bg-bg-elevated h-8 text-xs">
+          <SelectTrigger className="h-8 border-[--border-default] bg-[color:var(--bg-elevated)] text-xs">
             <SelectValue placeholder="Select project…" />
           </SelectTrigger>
           <SelectContent>
@@ -85,8 +85,8 @@ export function Sidebar({ projects }: SidebarProps) {
               className={cn(
                 'flex items-center gap-3 px-4 py-2 text-sm transition-colors',
                 active
-                  ? 'border-accent-violet bg-accent-violet/10 text-accent-violet border-l-2'
-                  : 'text-text-secondary hover:bg-bg-elevated hover:text-text-primary border-l-2 border-transparent'
+                  ? 'border-l-2 border-[--accent-violet] bg-[color:var(--accent-violet)]/10 text-[--accent-violet]'
+                  : 'border-l-2 border-transparent text-[--text-secondary] hover:bg-[color:var(--bg-elevated)] hover:text-[--text-primary]'
               )}
             >
               <Icon className="h-4 w-4 shrink-0" />

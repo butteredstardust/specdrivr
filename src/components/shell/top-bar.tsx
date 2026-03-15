@@ -79,7 +79,7 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
   };
 
   return (
-    <header className="border-border-default bg-bg-surface flex h-14 items-center gap-4 border-b px-6">
+    <header className="flex h-14 items-center gap-4 border-b border-[--border-default] bg-[color:var(--bg-surface)] px-6">
       {/* Breadcrumbs */}
       <div className="flex-1">
         <Breadcrumb>
@@ -126,7 +126,7 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
             </Button>
           </PopoverTrigger>
           <PopoverContent
-            className="border-border-default bg-bg-surface max-h-[480px] w-[380px] p-0"
+            className="max-h-[480px] w-[380px] border-[--border-default] bg-[color:var(--bg-surface)] p-0"
             align="end"
           >
             <NotificationPanel />
