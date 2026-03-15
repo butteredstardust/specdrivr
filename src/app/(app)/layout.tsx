@@ -7,6 +7,7 @@ import { TopBar } from '@/components/shell/top-bar';
 import { OnboardingWizard } from '@/components/onboarding-wizard';
 import { TaskDrawerProvider } from '@/components/shell/task-drawer-context';
 import { TaskDrawer } from '@/components/tasks/task-drawer';
+import { KeyboardShortcutsModal } from '@/components/ui/keyboard-shortcuts-modal';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -36,6 +37,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
         {showOnboarding && <OnboardingWizard user={shellUser} />}
         <TaskDrawer />
+        <KeyboardShortcutsModal />
       </TaskDrawerProvider>
     </ShellProvider>
   );

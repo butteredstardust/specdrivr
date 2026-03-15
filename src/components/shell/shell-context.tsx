@@ -131,3 +131,8 @@ export function useShell(): ShellContextValue {
   if (!ctx) throw new Error('useShell must be used within ShellProvider');
   return ctx;
 }
+
+export function useDevMode() {
+  const { devMode, setDevMode } = useShell();
+  return { devMode, toggleDevMode: () => setDevMode(!devMode) };
+}

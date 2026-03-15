@@ -403,6 +403,16 @@ function DrawerFooter({
           <span>Cost: ${task.totalCostUsd != null ? task.totalCostUsd.toFixed(4) : '---'}</span>
         </div>
       )}
+      {devMode && (
+        <details className="mt-1">
+          <summary className="cursor-pointer font-mono text-[10px] text-[--text-muted] select-none">
+            JSON inspector
+          </summary>
+          <pre className="mt-1 overflow-auto rounded bg-[--terminal-bg] p-3 font-mono text-[10px] text-[--terminal-green]">
+            {JSON.stringify(task, null, 2)}
+          </pre>
+        </details>
+      )}
     </div>
   );
 }
