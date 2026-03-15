@@ -29,6 +29,7 @@ interface TaskRowProps {
     orderIndex: number;
   };
   userRole: UserRole;
+  devMode?: boolean;
   onUnblock?: (taskId: number) => void;
   onOverride?: (taskId: number, newStatus: TaskStatus) => void;
   onOpenDrawer?: (taskId: number) => void;
@@ -59,7 +60,15 @@ function hasRole(userRole: UserRole, required: UserRole): boolean {
   return ROLE_RANK[userRole] >= ROLE_RANK[required];
 }
 
-export function TaskRow({ task, userRole, onUnblock, onOverride, onOpenDrawer, className }: TaskRowProps) {
+export function TaskRow({
+  task,
+  userRole,
+  devMode,
+  onUnblock,
+  onOverride,
+  onOpenDrawer,
+  className,
+}: TaskRowProps) {
   const [isOpen, setIsOpen] = useState(false);
   const canUnblock = hasRole(userRole, 'member');
   const canOverride = hasRole(userRole, 'admin');
@@ -88,6 +97,9 @@ export function TaskRow({ task, userRole, onUnblock, onOverride, onOpenDrawer, c
               <span className="shrink-0 rounded-sm bg-[--phosphor-amber]/10 px-1.5 py-0.5 font-mono text-xs text-[--phosphor-amber]">
                 T-{String(task.id).padStart(3, '0')}
               </span>
+              {devMode && (
+                <span className="font-mono text-[10px] text-[--text-muted]">[id:{task.id}]</span>
+              )}
               <span className="flex-1 truncate text-sm text-[--text-primary]">{task.title}</span>
               {task.status === 'blocked' && task.errorMessage && (
                 <span className="max-w-48 truncate text-xs text-[--phosphor-amber]">
@@ -99,7 +111,10 @@ export function TaskRow({ task, userRole, onUnblock, onOverride, onOpenDrawer, c
                   variant="ghost"
                   size="icon"
                   className="h-6 w-6 shrink-0"
-                  onClick={(e) => { e.stopPropagation(); onOpenDrawer(task.id); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenDrawer(task.id);
+                  }}
                   aria-label="Open task details"
                 >
                   <ChevronRight className="h-3 w-3" />

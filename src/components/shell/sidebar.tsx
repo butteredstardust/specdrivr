@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { LayoutDashboard, FolderKanban, FileText, Terminal, Bell, Settings } from 'lucide-react';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { SystemsBar } from '@/components/layout/systems-bar';
 import { useShell } from '@/components/shell/shell-context';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -96,11 +97,14 @@ export function Sidebar({ projects }: SidebarProps) {
       </nav>
 
       {/* Bottom status */}
-      <div className="flex items-center gap-2 border-t border-[--border-default] px-4 py-3">
-        <DaemonMascot size={24} expression="idle" />
-        <span className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
-          SYSTEM READY
-        </span>
+      <div className="border-t border-[--border-default]">
+        <div className="flex items-center gap-2 px-4 py-2">
+          <DaemonMascot size={24} expression="idle" />
+          <span className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
+            SYSTEM READY
+          </span>
+        </div>
+        <SystemsBar />
       </div>
     </aside>
   );
