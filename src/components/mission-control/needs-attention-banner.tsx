@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { TriangleAlert, X } from 'lucide-react';
+import { useTaskDrawer } from '@/components/shell/task-drawer-context';
 
 interface BlockedTask {
   id: number;
@@ -15,6 +15,8 @@ interface NeedsAttentionBannerProps {
 }
 
 export function NeedsAttentionBanner({ blockedTasks, onDismiss }: NeedsAttentionBannerProps) {
+  const { openDrawer } = useTaskDrawer();
+
   if (blockedTasks.length === 0) {
     return null;
   }
@@ -32,13 +34,14 @@ export function NeedsAttentionBanner({ blockedTasks, onDismiss }: NeedsAttention
       {/* Center: scrollable task pills */}
       <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto py-0.5">
         {blockedTasks.map((task) => (
-          <Link
+          <button
             key={task.id}
-            href={`/specs/${task.specId}?tab=tasks`}
+            type="button"
+            onClick={() => openDrawer(task.id)}
             className="shrink-0 rounded border border-[--phosphor-amber]/30 bg-[--phosphor-amber]/10 px-2 py-0.5 font-mono text-xs text-[--phosphor-amber] transition-colors hover:bg-[--phosphor-amber]/20"
           >
             {task.title}
-          </Link>
+          </button>
         ))}
       </div>
 

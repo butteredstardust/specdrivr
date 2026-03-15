@@ -17,6 +17,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { NotificationPanel } from '@/components/notifications/notification-panel';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -40,6 +42,7 @@ const PATH_LABELS: Record<string, string> = {
   '/specs': 'Specifications',
   '/sessions': 'Sessions',
   '/settings': 'Settings',
+  '/notifications': 'Notifications',
 };
 
 export function TopBar({ breadcrumbs }: TopBarProps) {
@@ -114,14 +117,24 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
       {/* Right side */}
       <div className="flex items-center gap-2">
         {/* Notification bell */}
-        <Button variant="ghost" size="icon" className="relative h-8 w-8">
-          <Bell className="h-4 w-4 text-[--text-secondary]" />
-          {unreadCount > 0 && (
-            <Badge className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center bg-[--accent-violet] p-0 text-[10px]">
-              {unreadCount > 9 ? '9+' : unreadCount}
-            </Badge>
-          )}
-        </Button>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="icon" className="relative h-8 w-8">
+              <Bell className="h-4 w-4 text-[--text-secondary]" />
+              {unreadCount > 0 && (
+                <Badge className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center bg-[--accent-violet] p-0 text-[10px]">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </Badge>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent
+            className="w-[380px] max-h-[480px] p-0 bg-[--bg-surface] border-[--border-default]"
+            align="end"
+          >
+            <NotificationPanel />
+          </PopoverContent>
+        </Popover>
 
         {/* Shortcuts chip */}
         <Button

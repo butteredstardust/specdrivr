@@ -5,6 +5,8 @@ import { ShellProvider } from '@/components/shell/shell-context';
 import { Sidebar } from '@/components/shell/sidebar';
 import { TopBar } from '@/components/shell/top-bar';
 import { OnboardingWizard } from '@/components/onboarding-wizard';
+import { TaskDrawerProvider } from '@/components/shell/task-drawer-context';
+import { TaskDrawer } from '@/components/tasks/task-drawer';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -24,14 +26,17 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <ShellProvider user={shellUser}>
-      <div className="flex h-screen overflow-hidden">
-        <Sidebar projects={projects} />
-        <div className="flex flex-1 flex-col overflow-hidden">
-          <TopBar />
-          <main className="flex-1 overflow-y-auto p-6">{children}</main>
+      <TaskDrawerProvider>
+        <div className="flex h-screen overflow-hidden">
+          <Sidebar projects={projects} />
+          <div className="flex flex-1 flex-col overflow-hidden">
+            <TopBar />
+            <main className="flex-1 overflow-y-auto p-6">{children}</main>
+          </div>
         </div>
-      </div>
-      {showOnboarding && <OnboardingWizard user={shellUser} />}
+        {showOnboarding && <OnboardingWizard user={shellUser} />}
+        <TaskDrawer />
+      </TaskDrawerProvider>
     </ShellProvider>
   );
 }

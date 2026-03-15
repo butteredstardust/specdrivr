@@ -1,11 +1,19 @@
 'use client';
 
-import { useState, Fragment } from 'react';
+import { useState, useEffect, Fragment } from 'react';
+import Link from 'next/link';
 import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
 import { EventLog } from '@/components/mission-control/event-log';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface Session {
   id: number;
@@ -38,6 +46,25 @@ function statusColor(status: Session['status']): string {
   }
 }
 
+function StatusDot({ status }: { status: Session['status'] }) {
+  switch (status) {
+    case 'running':
+      return (
+        <span className="inline-block h-2 w-2 rounded-full bg-[--accent-violet] animate-pulse mr-1.5" />
+      );
+    case 'completed':
+      return <span className="inline-block h-2 w-2 rounded-full bg-emerald-400 mr-1.5" />;
+    case 'failed':
+      return <span className="inline-block h-2 w-2 rounded-full bg-red-400 mr-1.5" />;
+    case 'paused':
+      return <span className="inline-block h-2 w-2 rounded-full bg-[--phosphor-amber] mr-1.5" />;
+    case 'cancelled':
+      return <span className="inline-block h-2 w-2 rounded-full bg-[--text-muted] mr-1.5" />;
+    default:
+      return null;
+  }
+}
+
 function formatDuration(session: Session): string {
   const end = session.endedAt
     ? new Date(session.endedAt)
@@ -66,11 +93,60 @@ function formatStartedAt(iso: string): string {
   }
 }
 
+function getGroupLabel(isoString: string): string {
+  const date = new Date(isoString);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - today.getDay());
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  if (d.getTime() === today.getTime()) return 'TODAY';
+  if (d.getTime() === yesterday.getTime()) return 'YESTERDAY';
+  if (d >= weekStart) return 'THIS WEEK';
+  return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+
 export default function SessionsPage() {
   const { activeProjectId } = useShell();
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
-  const url = activeProjectId !== null ? `/api/v1/sessions?projectId=${activeProjectId}` : null;
+  // Filter state
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [specFilter, setSpecFilter] = useState('all');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+
+  // Debounce search — state management only, not data fetching
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  // Single fetch for spec dropdown options
+  const { data: specsData } = usePolling<Array<{ id: number; title: string }>>({
+    url: activeProjectId ? `/api/v1/specs?projectId=${activeProjectId}` : null,
+    interval: 60_000,
+    stopWhen: () => true,
+  });
+  const specs = specsData ?? [];
+
+  // Build poll URL from active filters
+  const buildUrl = () => {
+    if (!activeProjectId) return null;
+    const params = new URLSearchParams({ projectId: String(activeProjectId) });
+    if (debouncedSearch) params.set('search', debouncedSearch);
+    if (statusFilter !== 'all') params.set('status', statusFilter);
+    if (specFilter !== 'all') params.set('specId', specFilter);
+    if (fromDate) params.set('from', fromDate);
+    if (toDate) params.set('to', toDate);
+    return `/api/v1/sessions?${params}`;
+  };
+  const url = buildUrl();
 
   const { data: sessions, isLoading } = usePolling<Session[]>({
     url,
@@ -87,9 +163,95 @@ export default function SessionsPage() {
 
   const isEmpty = !isLoading && (!sessions || sessions.length === 0);
 
+  const isAnyFilterActive =
+    search !== '' ||
+    statusFilter !== 'all' ||
+    specFilter !== 'all' ||
+    fromDate !== '' ||
+    toDate !== '';
+
+  const clearFilters = () => {
+    setSearch('');
+    setDebouncedSearch('');
+    setStatusFilter('all');
+    setSpecFilter('all');
+    setFromDate('');
+    setToDate('');
+  };
+
+  // Group sessions by date label
+  const groups = new Map<string, Session[]>();
+  for (const session of sessions ?? []) {
+    const label = getGroupLabel(session.startedAt);
+    if (!groups.has(label)) groups.set(label, []);
+    groups.get(label)!.push(session);
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <h1 className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">SESSIONS</h1>
+
+      {/* Filter bar */}
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          type="text"
+          placeholder="Search sessions…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="h-8 rounded border border-[--border-default] bg-[--bg-elevated] px-3 text-xs text-[--text-primary] placeholder:text-[--text-muted] focus:outline-none focus:ring-1 focus:ring-[--accent-violet] w-48"
+        />
+
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="h-8 w-36 text-xs">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All statuses</SelectItem>
+            <SelectItem value="running">Running</SelectItem>
+            <SelectItem value="paused">Paused</SelectItem>
+            <SelectItem value="completed">Completed</SelectItem>
+            <SelectItem value="failed">Failed</SelectItem>
+            <SelectItem value="cancelled">Cancelled</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={specFilter} onValueChange={setSpecFilter}>
+          <SelectTrigger className="h-8 w-40 text-xs">
+            <SelectValue placeholder="Spec" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All specs</SelectItem>
+            {specs.map((spec) => (
+              <SelectItem key={spec.id} value={String(spec.id)}>
+                {spec.title}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <input
+          type="date"
+          value={fromDate}
+          onChange={(e) => setFromDate(e.target.value)}
+          className="h-8 rounded border border-[--border-default] bg-[--bg-elevated] px-3 text-xs text-[--text-primary] focus:outline-none focus:ring-1 focus:ring-[--accent-violet]"
+        />
+
+        <input
+          type="date"
+          value={toDate}
+          onChange={(e) => setToDate(e.target.value)}
+          className="h-8 rounded border border-[--border-default] bg-[--bg-elevated] px-3 text-xs text-[--text-primary] focus:outline-none focus:ring-1 focus:ring-[--accent-violet]"
+        />
+
+        {isAnyFilterActive && (
+          <button
+            onClick={clearFilters}
+            className="h-8 rounded border border-[--border-default] bg-[--bg-elevated] px-3 text-xs text-[--text-muted] hover:text-[--text-primary] transition-colors"
+          >
+            Clear filters
+          </button>
+        )}
+      </div>
 
       {isLoading && !sessions && <p className="font-mono text-xs text-[--text-muted]">Loading…</p>}
 
@@ -132,42 +294,63 @@ export default function SessionsPage() {
               </tr>
             </thead>
             <tbody>
-              {sessions.map((session) => (
-                <Fragment key={session.id}>
-                  <tr
-                    className="cursor-pointer border-b border-[--border] transition-colors hover:bg-[--surface-hover]"
-                    onClick={() => handleRowClick(session.id)}
-                  >
-                    <td className="py-3 pr-4 font-mono text-[--text-primary]">#{session.id}</td>
-                    <td
-                      className={`py-3 pr-4 font-mono font-semibold ${statusColor(session.status)}`}
-                    >
-                      {session.status.toUpperCase()}
-                    </td>
-                    <td className="py-3 pr-4 font-mono text-[--text-secondary]">
-                      {session.specTitle ?? (session.specId ? `Spec #${session.specId}` : '—')}
-                    </td>
-                    <td className="py-3 pr-4 font-mono text-[--text-secondary]">
-                      {formatStartedAt(session.startedAt)}
-                    </td>
-                    <td className="py-3 pr-4 font-mono text-[--text-muted]">
-                      {formatDuration(session)}
-                    </td>
-                    <td className="py-3 font-mono text-[--text-secondary]">
-                      {session.tasksSucceeded}/{session.tasksExecuted}
+              {Array.from(groups.entries()).map(([label, groupSessions]) => (
+                <Fragment key={`group-${label}`}>
+                  <tr>
+                    <td colSpan={6} className="px-0 py-0 pb-1 pt-3">
+                      <span className="font-mono text-xs font-semibold uppercase tracking-widest text-[--text-muted]">
+                        {label}
+                      </span>
                     </td>
                   </tr>
-                  <tr key={`${session.id}-log`}>
-                    <td colSpan={6} className="p-0">
-                      <Collapsible open={expandedId === session.id}>
-                        <CollapsibleContent>
-                          <div className="border-b border-[--border] px-4 py-4">
-                            <EventLog sessionId={session.id} />
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    </td>
-                  </tr>
+                  {groupSessions.map((session) => (
+                    <Fragment key={session.id}>
+                      <tr
+                        className="cursor-pointer border-b border-[--border] transition-colors hover:bg-[--surface-hover]"
+                        onClick={() => handleRowClick(session.id)}
+                      >
+                        <td className="py-3 pr-4 font-mono text-[--text-primary]">
+                          <Link
+                            href={`/sessions/${session.id}`}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <span className="rounded-sm bg-[--phosphor-amber]/10 px-1.5 py-0.5 font-mono text-xs text-[--phosphor-amber]">
+                              #{session.id}
+                            </span>
+                          </Link>
+                        </td>
+                        <td
+                          className={`py-3 pr-4 font-mono font-semibold ${statusColor(session.status)}`}
+                        >
+                          <StatusDot status={session.status} />
+                          {session.status.toUpperCase()}
+                        </td>
+                        <td className="py-3 pr-4 font-mono text-[--text-secondary]">
+                          {session.specTitle ?? (session.specId ? `Spec #${session.specId}` : '—')}
+                        </td>
+                        <td className="py-3 pr-4 font-mono text-[--text-secondary]">
+                          {formatStartedAt(session.startedAt)}
+                        </td>
+                        <td className="py-3 pr-4 font-mono text-[--text-muted]">
+                          {formatDuration(session)}
+                        </td>
+                        <td className="py-3 font-mono text-[--text-secondary]">
+                          {session.tasksSucceeded}/{session.tasksExecuted}
+                        </td>
+                      </tr>
+                      <tr key={`${session.id}-log`}>
+                        <td colSpan={6} className="p-0">
+                          <Collapsible open={expandedId === session.id}>
+                            <CollapsibleContent>
+                              <div className="border-b border-[--border] px-4 py-4">
+                                <EventLog sessionId={session.id} />
+                              </div>
+                            </CollapsibleContent>
+                          </Collapsible>
+                        </td>
+                      </tr>
+                    </Fragment>
+                  ))}
                 </Fragment>
               ))}
             </tbody>
