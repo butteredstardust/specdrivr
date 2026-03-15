@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { Button } from '@/components/ui/button';
 import type { Highlighter } from 'shiki';
 
 // Module-scope singleton
@@ -110,19 +111,20 @@ export function DiffViewer({ files, className }: DiffViewerProps) {
         {/* File tree */}
         <div className="border-border-default w-56 shrink-0 overflow-y-auto border-r">
           {files.map((file) => (
-            <button
+            <Button
               key={file.filename}
+              variant="ghost"
               onClick={() => setSelectedFile(file.filename)}
               className={cn(
-                'flex w-full items-center gap-1.5 truncate px-3 py-2 text-left font-mono text-xs',
+                'flex h-auto w-full items-center justify-start gap-1.5 truncate rounded-none px-3 py-2 text-left font-mono text-xs',
                 selectedFile === file.filename
-                  ? 'bg-accent-violet/10 text-accent-violet'
+                  ? 'bg-accent-violet/10 text-accent-violet hover:bg-accent-violet/15'
                   : 'text-text-secondary hover:bg-bg-elevated'
               )}
             >
               <span className={statusColor[file.status]}>{statusPrefix[file.status]}</span>
               <span className="truncate">{file.filename}</span>
-            </button>
+            </Button>
           ))}
         </div>
 

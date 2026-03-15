@@ -125,16 +125,18 @@ function PasswordInput({ id, value, onChange, disabled, placeholder }: PasswordI
         placeholder={placeholder}
         className="pr-9 font-mono text-sm"
       />
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        size="icon"
         onClick={() => setShow((prev) => !prev)}
-        className="text-text-muted hover:text-text-primary absolute top-1/2 right-2 -translate-y-1/2 disabled:pointer-events-none"
+        className="text-text-muted hover:text-text-primary absolute top-1/2 right-1.5 h-6 w-6 -translate-y-1/2 p-0 disabled:pointer-events-none"
         aria-label={show ? 'Hide value' : 'Show value'}
         disabled={disabled}
         tabIndex={-1}
       >
         {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -434,14 +436,16 @@ function GitHubCard({ projectId, editable, initialData, onSaved }: GitHubCardPro
               <p className="text-text-muted min-w-0 flex-1 truncate font-mono text-xs">
                 {webhookUrl}
               </p>
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 onClick={copyWebhookUrl}
-                className="text-text-muted hover:text-text-primary shrink-0"
+                className="text-text-muted hover:text-text-primary h-7 w-7 shrink-0 p-0"
                 aria-label="Copy webhook URL"
               >
                 <Copy className="h-3.5 w-3.5" />
-              </button>
+              </Button>
             </div>
           )}
 

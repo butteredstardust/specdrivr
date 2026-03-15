@@ -3,6 +3,7 @@ import { render, screen, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { expect, test, describe, vi, beforeEach, afterEach } from 'vitest';
 import { ShellProvider, useShell } from '@/components/shell/shell-context';
+import { Button } from '@/components/ui/button';
 
 // Mock next/navigation — not available in jsdom
 vi.mock('next/navigation', () => ({
@@ -18,7 +19,7 @@ function TestConsumer() {
     <div>
       <span data-testid="project-id">{activeProjectId ?? 'null'}</span>
       <span data-testid="dev-mode">{devMode ? 'true' : 'false'}</span>
-      <button onClick={() => setActiveProjectId(42)}>set project</button>
+      <Button onClick={() => setActiveProjectId(42)}>set project</Button>
     </div>
   );
 }

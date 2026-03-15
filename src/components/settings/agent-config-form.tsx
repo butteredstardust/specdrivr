@@ -145,14 +145,16 @@ function GlobTagInput({ id, value, onChange, disabled, placeholder }: GlobTagInp
             >
               {tag}
               {!disabled && (
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon"
                   onClick={() => removeTag(tag)}
-                  className="text-text-muted hover:text-text-primary ml-0.5"
+                  className="text-text-muted hover:text-text-primary ml-0.5 h-4 w-4 shrink-0 p-0"
                   aria-label={`Remove ${tag}`}
                 >
                   <X className="h-3 w-3" />
-                </button>
+                </Button>
               )}
             </span>
           ))}
