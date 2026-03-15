@@ -40,7 +40,7 @@ export function EventLog({ sessionId, className }: EventLogProps) {
   return (
     <div className={className}>
       <p className="mb-2 font-mono text-xs tracking-widest text-[--text-muted] uppercase">
-        Event Log
+        EVENT LOG
       </p>
       <TerminalLog lines={lines} />
     </div>

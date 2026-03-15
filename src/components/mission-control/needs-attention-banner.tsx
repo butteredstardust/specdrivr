@@ -25,7 +25,7 @@ export function NeedsAttentionBanner({ blockedTasks, onDismiss }: NeedsAttention
       <div className="flex shrink-0 items-center gap-1.5">
         <TriangleAlert className="h-4 w-4 text-[--phosphor-amber]" aria-hidden="true" />
         <span className="font-mono text-xs tracking-widest text-[--phosphor-amber] uppercase">
-          Needs Attention
+          NEEDS ATTENTION
         </span>
       </div>
 
