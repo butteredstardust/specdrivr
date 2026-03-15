@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { projectRepository } from '@/repositories/project-repository';
 import { memberRepository } from '@/repositories/member-repository';
 import { getProjectRole } from '@/lib/rbac';
+import type { UserRole } from '@/db/schema';
 import { MembersSection } from '@/components/settings/members-section';
 
 export default async function TeamPage() {
@@ -21,7 +22,8 @@ export default async function TeamPage() {
     );
   }
 
-  const userRole = (await getProjectRole(session.user.id, project.id)) ?? 'viewer';
+  const userRole: UserRole = ((await getProjectRole(session.user.id, project.id)) ??
+    'viewer') as UserRole;
   const initialMembers = await memberRepository.getByProjectId(project.id);
 
   return (

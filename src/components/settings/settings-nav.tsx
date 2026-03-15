@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import type { UserRole } from '@/db/schema';
 
 interface NavItem {
   href: string;
@@ -49,7 +50,7 @@ const NAV_GROUPS: NavGroup[] = [
 ];
 
 interface SettingsNavProps {
-  userRole: string;
+  userRole: UserRole;
 }
 
 export function SettingsNav({ userRole }: SettingsNavProps) {
