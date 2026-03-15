@@ -320,69 +320,115 @@ function GitHubCard({ projectId, editable, initialData, onSaved }: GitHubCardPro
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <FormField label="GITHUB TOKEN" htmlFor="githubToken">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div>
-                  <PasswordInput
-                    id="githubToken"
-                    value={form.githubToken}
-                    onChange={(v) => set('githubToken', v)}
-                    disabled={!editable}
-                    placeholder="ghp_••••••••••••"
-                  />
-                </div>
-              </TooltipTrigger>
-              {!editable && <TooltipContent>Requires Admin or Owner role</TooltipContent>}
-            </Tooltip>
+            {editable ? (
+              <PasswordInput
+                id="githubToken"
+                value={form.githubToken}
+                onChange={(v) => set('githubToken', v)}
+                disabled={false}
+                placeholder="ghp_••••••••••••"
+              />
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    <PasswordInput
+                      id="githubToken"
+                      value={form.githubToken}
+                      onChange={(v) => set('githubToken', v)}
+                      disabled
+                      placeholder="ghp_••••••••••••"
+                    />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>Requires Admin or Owner role</TooltipContent>
+              </Tooltip>
+            )}
           </FormField>
 
           <FormField label="REPOSITORY" htmlFor="githubRepo">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Input
-                  id="githubRepo"
-                  value={form.githubRepo}
-                  onChange={(e) => set('githubRepo', e.target.value)}
-                  disabled={!editable}
-                  placeholder="owner/repo-name"
-                  className="font-mono text-sm"
-                />
-              </TooltipTrigger>
-              {!editable && <TooltipContent>Requires Admin or Owner role</TooltipContent>}
-            </Tooltip>
+            {editable ? (
+              <Input
+                id="githubRepo"
+                value={form.githubRepo}
+                onChange={(e) => set('githubRepo', e.target.value)}
+                disabled={false}
+                placeholder="owner/repo-name"
+                className="font-mono text-sm"
+              />
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    <Input
+                      id="githubRepo"
+                      value={form.githubRepo}
+                      onChange={(e) => set('githubRepo', e.target.value)}
+                      disabled
+                      placeholder="owner/repo-name"
+                      className="font-mono text-sm"
+                    />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>Requires Admin or Owner role</TooltipContent>
+              </Tooltip>
+            )}
           </FormField>
 
           <FormField label="BRANCH" htmlFor="githubBranch">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Input
-                  id="githubBranch"
-                  value={form.githubBranch}
-                  onChange={(e) => set('githubBranch', e.target.value)}
-                  disabled={!editable}
-                  placeholder="main"
-                  className="font-mono text-sm"
-                />
-              </TooltipTrigger>
-              {!editable && <TooltipContent>Requires Admin or Owner role</TooltipContent>}
-            </Tooltip>
+            {editable ? (
+              <Input
+                id="githubBranch"
+                value={form.githubBranch}
+                onChange={(e) => set('githubBranch', e.target.value)}
+                disabled={false}
+                placeholder="main"
+                className="font-mono text-sm"
+              />
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    <Input
+                      id="githubBranch"
+                      value={form.githubBranch}
+                      onChange={(e) => set('githubBranch', e.target.value)}
+                      disabled
+                      placeholder="main"
+                      className="font-mono text-sm"
+                    />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>Requires Admin or Owner role</TooltipContent>
+              </Tooltip>
+            )}
           </FormField>
 
           <FormField label="WEBHOOK SECRET" htmlFor="githubWebhookSecret">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div>
-                  <PasswordInput
-                    id="githubWebhookSecret"
-                    value={form.githubWebhookSecret}
-                    onChange={(v) => set('githubWebhookSecret', v)}
-                    disabled={!editable}
-                    placeholder="whsec_••••••••••••"
-                  />
-                </div>
-              </TooltipTrigger>
-              {!editable && <TooltipContent>Requires Admin or Owner role</TooltipContent>}
-            </Tooltip>
+            {editable ? (
+              <PasswordInput
+                id="githubWebhookSecret"
+                value={form.githubWebhookSecret}
+                onChange={(v) => set('githubWebhookSecret', v)}
+                disabled={false}
+                placeholder="whsec_••••••••••••"
+              />
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    <PasswordInput
+                      id="githubWebhookSecret"
+                      value={form.githubWebhookSecret}
+                      onChange={(v) => set('githubWebhookSecret', v)}
+                      disabled
+                      placeholder="whsec_••••••••••••"
+                    />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>Requires Admin or Owner role</TooltipContent>
+              </Tooltip>
+            )}
           </FormField>
 
           {connected && (
@@ -570,36 +616,59 @@ function SlackCard({ projectId, editable, initialData, onSaved }: SlackCardProps
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <FormField label="BOT TOKEN" htmlFor="slackBotToken">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div>
-                  <PasswordInput
-                    id="slackBotToken"
-                    value={form.slackBotToken}
-                    onChange={(v) => set('slackBotToken', v)}
-                    disabled={!editable}
-                    placeholder="xoxb-••••••••••••"
-                  />
-                </div>
-              </TooltipTrigger>
-              {!editable && <TooltipContent>Requires Admin or Owner role</TooltipContent>}
-            </Tooltip>
+            {editable ? (
+              <PasswordInput
+                id="slackBotToken"
+                value={form.slackBotToken}
+                onChange={(v) => set('slackBotToken', v)}
+                disabled={false}
+                placeholder="xoxb-••••••••••••"
+              />
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    <PasswordInput
+                      id="slackBotToken"
+                      value={form.slackBotToken}
+                      onChange={(v) => set('slackBotToken', v)}
+                      disabled
+                      placeholder="xoxb-••••••••••••"
+                    />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>Requires Admin or Owner role</TooltipContent>
+              </Tooltip>
+            )}
           </FormField>
 
           <FormField label="CHANNEL ID" htmlFor="slackChannelId">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Input
-                  id="slackChannelId"
-                  value={form.slackChannelId}
-                  onChange={(e) => set('slackChannelId', e.target.value)}
-                  disabled={!editable}
-                  placeholder="C0123456789"
-                  className="font-mono text-sm"
-                />
-              </TooltipTrigger>
-              {!editable && <TooltipContent>Requires Admin or Owner role</TooltipContent>}
-            </Tooltip>
+            {editable ? (
+              <Input
+                id="slackChannelId"
+                value={form.slackChannelId}
+                onChange={(e) => set('slackChannelId', e.target.value)}
+                disabled={false}
+                placeholder="C0123456789"
+                className="font-mono text-sm"
+              />
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    <Input
+                      id="slackChannelId"
+                      value={form.slackChannelId}
+                      onChange={(e) => set('slackChannelId', e.target.value)}
+                      disabled
+                      placeholder="C0123456789"
+                      className="font-mono text-sm"
+                    />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>Requires Admin or Owner role</TooltipContent>
+              </Tooltip>
+            )}
           </FormField>
 
           <div className="flex gap-2 pt-1">
@@ -950,36 +1019,52 @@ function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
                   >
                     {wh.status}
                   </Badge>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 shrink-0 text-[--text-muted] hover:text-[--text-primary]"
-                        aria-label="Webhook actions"
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={() => openEdit(wh)}
-                        disabled={!editable}
-                        className="gap-2"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => setDeleteTarget(wh)}
-                        disabled={!editable}
-                        className="gap-2 text-[--status-red] focus:text-[--status-red]"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  {editable ? (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 shrink-0 text-[--text-muted] hover:text-[--text-primary]"
+                          aria-label="Webhook actions"
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => openEdit(wh)} className="gap-2">
+                          <Pencil className="h-3.5 w-3.5" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => setDeleteTarget(wh)}
+                          className="gap-2 text-[--status-red] focus:text-[--status-red]"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  ) : (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 shrink-0 text-[--text-muted]"
+                              aria-label="Webhook actions"
+                              disabled
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>Requires Admin or Owner role</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
                 </div>
               ))}
             </div>
@@ -1041,17 +1126,19 @@ export function IntegrationsSection({ projectId, userRole }: IntegrationsSection
     toast.error('Failed to load integration settings');
   }, []);
 
-  const { isLoading } = usePolling<AgentConfigSelect | null>({
+  const { isLoading, restart: restartConfig } = usePolling<AgentConfigSelect | null>({
     url: `/api/v1/projects/${projectId}/agent-config`,
+    interval: 60_000,
     stopWhen: () => true,
     onData,
     onError,
   });
 
-  // Increment version to force child card re-mounts after a save so state is refreshed
+  // Re-fetch fresh config then force child card re-mounts so state is refreshed
   const handleSaved = useCallback(() => {
+    restartConfig();
     setConfigVersion((v) => v + 1);
-  }, []);
+  }, [restartConfig]);
 
   if (isLoading) {
     return <p className="font-mono text-xs text-[--text-muted]">Loading integrations…</p>;
