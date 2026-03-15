@@ -114,12 +114,20 @@ export function usePolling<T>({
 
         clientLogger.error(`Polling error for ${url}:`, currentError);
 
+        // Clear initial loading state on first-fetch failure so callers are not stuck
+        if (isFirstFetchRef.current) {
+          setIsLoading(false);
+          isFirstFetchRef.current = false;
+        }
+
+        setError(currentError);
+
+        if (onError) {
+          onError(currentError);
+        }
+
         if (errorCountRef.current >= 5) {
-          setError(currentError);
           stop();
-          if (onError) {
-            onError(currentError);
-          }
         }
       }
     };

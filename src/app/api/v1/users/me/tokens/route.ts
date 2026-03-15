@@ -9,6 +9,7 @@ import { randomBytes } from 'crypto';
 const createTokenSchema = z.object({
   name: z.string().min(1),
   projectId: z.number().optional(),
+  expiresAt: z.string().datetime().nullable().optional(),
 });
 
 export async function GET() {
@@ -39,7 +40,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { name, projectId } = createTokenSchema.parse(body);
+    const { name, projectId, expiresAt } = createTokenSchema.parse(body);
 
     const token = `sdk_${randomBytes(24).toString('hex')}`;
     const prefix = token.slice(0, 10);
@@ -51,6 +52,7 @@ export async function POST(request: Request) {
       name,
       tokenHash,
       prefix,
+      expiresAt: expiresAt ? new Date(expiresAt) : null,
     });
 
     return NextResponse.json({

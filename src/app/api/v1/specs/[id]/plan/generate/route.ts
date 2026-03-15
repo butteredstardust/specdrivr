@@ -10,6 +10,7 @@ interface RouteParams {
 }
 
 export async function POST(_request: NextRequest, { params }: RouteParams) {
+  // No body — no Zod needed
   try {
     const session = await auth();
     if (!session?.user?.id) {

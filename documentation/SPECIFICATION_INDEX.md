@@ -101,4 +101,4 @@ This specification has been split into the following purpose-specific files:
 - Version: 1.0
 - Status: Confidential
 - Last Updated: 2026-03-08
-- Original: SPECIFICATION.md (split for maintainability)
+- History: Split for maintainability

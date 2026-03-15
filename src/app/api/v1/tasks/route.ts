@@ -37,20 +37,25 @@ export async function GET(request: NextRequest) {
     }
 
     const { status, planId } = validationResult.data;
-    let tasks: Task[] = [];
 
     if (planId) {
-      tasks = await taskRepository.getByPlanId(planId);
+      let tasks: Task[] = await taskRepository.getByPlanId(planId);
       if (status) {
         tasks = tasks.filter((task) => task.status === status);
       }
+      return NextResponse.json({ data: tasks });
     } else if (status) {
-      tasks = await taskRepository.getByStatus(status as TaskStatus);
+      const tasks: Task[] = await taskRepository.getByStatus(status as TaskStatus);
+      return NextResponse.json({ data: tasks });
     } else {
-      tasks = await taskRepository.getAll();
+      const pageParam = parseInt(request.nextUrl.searchParams.get('page') ?? '1', 10);
+      const limitParam = parseInt(request.nextUrl.searchParams.get('limit') ?? '50', 10);
+      const result = await taskRepository.getAll({
+        page: isNaN(pageParam) || pageParam < 1 ? 1 : pageParam,
+        limit: isNaN(limitParam) || limitParam < 1 ? 50 : limitParam,
+      });
+      return NextResponse.json({ data: result.data, meta: result.meta });
     }
-
-    return NextResponse.json({ data: tasks });
   } catch (error) {
     return handleApiError(error);
   }

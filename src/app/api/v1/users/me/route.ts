@@ -1,7 +1,16 @@
 import { NextResponse } from 'next/server';
+import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { userRepository } from '@/repositories';
 import { handleApiError } from '@/lib/error-handler';
+
+const UpdateMeSchema = z.object({
+  name: z.string().min(1).max(255).optional(),
+  onboardingStep: z.number().int().optional(),
+  timezone: z.string().optional(),
+  locale: z.string().optional(),
+  theme: z.string().optional(),
+});
 
 export async function GET() {
   const session = await auth();
@@ -32,8 +41,15 @@ export async function PATCH(request: Request) {
 
   try {
     const body = await request.json();
+    const parsed = UpdateMeSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: { code: 'VALIDATION_ERROR', message: parsed.error.message } },
+        { status: 400 }
+      );
+    }
     const userId = session.user.id;
-    const updated = await userRepository.update(userId, body);
+    const updated = await userRepository.update(userId, parsed.data);
     return NextResponse.json({ data: updated });
   } catch (error) {
     return handleApiError(error);

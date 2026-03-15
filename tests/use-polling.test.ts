@@ -45,8 +45,8 @@ describe('usePolling', () => {
     for (let i = 0; i < 5; i++) {
       await act(() => vi.advanceTimersByTimeAsync(200));
     }
-    // waitFor uses setTimeout internally which is mocked — assert directly after flushing
-    expect(onError).toHaveBeenCalledTimes(1);
+    // onError fires on every error; polling stops after 5 consecutive
+    expect(onError).toHaveBeenCalledTimes(5);
     expect(result.current.error).not.toBeNull();
   });
 

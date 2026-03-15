@@ -48,7 +48,9 @@ export default function LoginPage() {
     }
   };
 
-  const isDev = process.env.NODE_ENV === 'development';
+  const isDev =
+    process.env.NODE_ENV === 'development' ||
+    process.env.NEXT_PUBLIC_APP_URL?.includes('localhost');
 
   return (
     <Card className="w-full max-w-sm border-[--border-default] bg-[--bg-surface]">
@@ -114,9 +116,9 @@ export default function LoginPage() {
           <div className="mt-4 space-y-2 border-t border-dashed border-[--border-muted] pt-4">
             <p className="font-mono text-xs text-[--text-muted]">DEV QUICK LOGIN</p>
             {[
-              { label: 'Owner', email: 'owner@example.com' },
-              { label: 'Admin', email: 'admin@example.com' },
-              { label: 'Member', email: 'member@example.com' },
+              { label: 'Owner', email: 'alex@specdrivr.dev' },
+              { label: 'Admin', email: 'sam@specdrivr.dev' },
+              { label: 'Member', email: 'jordan@specdrivr.dev' },
             ].map(({ label, email: quickEmail }) => (
               <Button
                 key={label}

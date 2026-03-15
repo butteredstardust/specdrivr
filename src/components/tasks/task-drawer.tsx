@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Drawer } from 'vaul';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -347,6 +348,7 @@ function DrawerFooter({
   onMarkDone,
 }: DrawerFooterProps) {
   const showRerun = ['failed', 'blocked', 'done'].includes(task.status);
+  const [jsonOpen, setJsonOpen] = useState(false);
 
   return (
     <div className="shrink-0 space-y-3 border-t border-[--border-default] px-5 py-3">
@@ -402,6 +404,18 @@ function DrawerFooter({
           <span>Completion: {task.completionTokensUsed?.toLocaleString() ?? '---'}</span>
           <span>Cost: ${task.totalCostUsd != null ? task.totalCostUsd.toFixed(4) : '---'}</span>
         </div>
+      )}
+      {devMode && (
+        <Collapsible open={jsonOpen} onOpenChange={setJsonOpen}>
+          <CollapsibleTrigger className="cursor-pointer font-mono text-[10px] text-[--text-muted] select-none">
+            JSON inspector
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <pre className="mt-1 overflow-auto rounded bg-[--terminal-bg] p-3 font-mono text-[10px] text-[--terminal-green]">
+              {JSON.stringify(task, null, 2)}
+            </pre>
+          </CollapsibleContent>
+        </Collapsible>
       )}
     </div>
   );
