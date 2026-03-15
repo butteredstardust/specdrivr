@@ -26,6 +26,8 @@ interface ProjectSettingsFormProps {
     repositoryUrl?: string | null;
   };
   userRole: UserRole;
+  /** When true, renders only the Danger Zone section and hides the project fields form. */
+  dangerZoneOnly?: boolean;
 }
 
 function canEdit(role: UserRole): boolean {
@@ -36,7 +38,11 @@ function canDelete(role: UserRole): boolean {
   return role === 'owner';
 }
 
-export function ProjectSettingsForm({ project, userRole }: ProjectSettingsFormProps) {
+export function ProjectSettingsForm({
+  project,
+  userRole,
+  dangerZoneOnly = false,
+}: ProjectSettingsFormProps) {
   const router = useRouter();
   const [name, setName] = useState(project.name);
   const [description, setDescription] = useState(project.description ?? '');
@@ -106,78 +112,82 @@ export function ProjectSettingsForm({ project, userRole }: ProjectSettingsFormPr
   return (
     <TooltipProvider>
       <section className="flex flex-col gap-4">
-        <h2 className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
-          PROJECT SETTINGS
-        </h2>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label className="font-mono text-xs text-[--text-secondary]" htmlFor="project-name">
-              Project name
-            </label>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Input
-                  id="project-name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  disabled={!editable}
-                />
-              </TooltipTrigger>
-              {!editable && <TooltipContent>Requires admin or owner role to edit</TooltipContent>}
-            </Tooltip>
-          </div>
+        {!dangerZoneOnly && (
+          <h2 className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
+            PROJECT SETTINGS
+          </h2>
+        )}
+        {!dangerZoneOnly && (
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="font-mono text-xs text-[--text-secondary]" htmlFor="project-name">
+                Project name
+              </label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Input
+                    id="project-name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    disabled={!editable}
+                  />
+                </TooltipTrigger>
+                {!editable && <TooltipContent>Requires admin or owner role to edit</TooltipContent>}
+              </Tooltip>
+            </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label
-              className="font-mono text-xs text-[--text-secondary]"
-              htmlFor="project-description"
-            >
-              Description
-            </label>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Input
-                  id="project-description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  disabled={!editable}
-                />
-              </TooltipTrigger>
-              {!editable && <TooltipContent>Requires admin or owner role to edit</TooltipContent>}
-            </Tooltip>
-          </div>
+            <div className="flex flex-col gap-1.5">
+              <label
+                className="font-mono text-xs text-[--text-secondary]"
+                htmlFor="project-description"
+              >
+                Description
+              </label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Input
+                    id="project-description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    disabled={!editable}
+                  />
+                </TooltipTrigger>
+                {!editable && <TooltipContent>Requires admin or owner role to edit</TooltipContent>}
+              </Tooltip>
+            </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="font-mono text-xs text-[--text-secondary]" htmlFor="project-github">
-              GitHub repo (owner/repo)
-            </label>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Input
-                  id="project-github"
-                  value={githubRepo}
-                  onChange={(e) => setGithubRepo(e.target.value)}
-                  placeholder="owner/repo-name"
-                  disabled={!editable}
-                />
-              </TooltipTrigger>
-              {!editable && <TooltipContent>Requires admin or owner role to edit</TooltipContent>}
-            </Tooltip>
-          </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="font-mono text-xs text-[--text-secondary]" htmlFor="project-github">
+                GitHub repo (owner/repo)
+              </label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Input
+                    id="project-github"
+                    value={githubRepo}
+                    onChange={(e) => setGithubRepo(e.target.value)}
+                    placeholder="owner/repo-name"
+                    disabled={!editable}
+                  />
+                </TooltipTrigger>
+                {!editable && <TooltipContent>Requires admin or owner role to edit</TooltipContent>}
+              </Tooltip>
+            </div>
 
-          <div>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span tabIndex={!editable ? 0 : undefined}>
-                  <Button type="submit" disabled={!editable || isSaving} size="sm">
-                    {isSaving ? 'Saving…' : 'Save'}
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              {!editable && <TooltipContent>Requires admin or owner role</TooltipContent>}
-            </Tooltip>
-          </div>
-        </form>
+            <div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span tabIndex={!editable ? 0 : undefined}>
+                    <Button type="submit" disabled={!editable || isSaving} size="sm">
+                      {isSaving ? 'Saving…' : 'Save'}
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                {!editable && <TooltipContent>Requires admin or owner role</TooltipContent>}
+              </Tooltip>
+            </div>
+          </form>
+        )}
 
         {/* Danger Zone */}
         <div className="mt-4 rounded border border-red-900/40 p-4">
