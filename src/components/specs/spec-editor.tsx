@@ -30,7 +30,7 @@ interface SpecEditorProps {
 }
 
 export function SpecEditor(props: SpecEditorProps) {
-  const { initialContent, initialTitle, specId, specStatus, onSave, onPublish, className } = props;
+  const { initialContent, initialTitle, specId: _specId, specStatus, onSave, onPublish: _onPublish, className } = props;
   const [title, setTitle] = useState(initialTitle ?? '');
   const [content, setContent] = useState(initialContent ?? '');
   const [isSaving, setIsSaving] = useState(false);
