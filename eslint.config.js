@@ -92,12 +92,7 @@ const eslintConfig = [
   },
   // Architectural rule exceptions
   {
-    files: [
-      'src/repositories/**/*',
-      'src/db/**/*',
-      'src/lib/auth.ts',
-      'src/app/api/health/route.ts',
-    ],
+    files: ['src/repositories/**/*', 'src/db/**/*', 'src/lib/auth.ts', 'src/app/api/**/*'],
     rules: {
       '@typescript-eslint/no-restricted-imports': 'off',
     },
