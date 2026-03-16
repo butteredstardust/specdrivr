@@ -20,13 +20,7 @@ import { useShell } from '@/components/shell/shell-context';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 
 const COLLAPSED_KEY = 'sidebar-collapsed';
@@ -50,35 +44,60 @@ type DaemonExpr = 'idle' | 'working' | 'success' | 'blocked' | 'error';
 
 function healthToExpr(state: HealthState): DaemonExpr {
   switch (state) {
-    case 'ok': return 'success';
-    case 'warn': return 'blocked';
-    case 'error': return 'error';
-    default: return 'idle';
+    case 'ok':
+      return 'success';
+    case 'warn':
+      return 'blocked';
+    case 'error':
+      return 'error';
+    default:
+      return 'idle';
   }
 }
 
 function healthDot(state: HealthState) {
   switch (state) {
-    case 'ok': return 'bg-status-emerald';
-    case 'warn': return 'bg-phosphor-amber';
-    case 'error': return 'bg-status-red';
-    default: return 'bg-text-muted';
+    case 'ok':
+      return 'bg-status-emerald';
+    case 'warn':
+      return 'bg-phosphor-amber';
+    case 'error':
+      return 'bg-status-red';
+    default:
+      return 'bg-text-muted';
   }
 }
 
-function SystemIcon({ label, state, tooltip }: { label: string; state: HealthState; tooltip: string }) {
+function SystemIcon({
+  label,
+  state,
+  tooltip,
+}: {
+  label: string;
+  state: HealthState;
+  tooltip: string;
+}) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <div className="flex cursor-default flex-col items-center gap-0.5">
           <div className="relative">
             <DaemonMascot size={32} expression={healthToExpr(state)} />
-            <span className={cn('absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full border border-bg-surface', healthDot(state))} />
+            <span
+              className={cn(
+                'border-bg-surface absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full border',
+                healthDot(state)
+              )}
+            />
           </div>
-          <span className="text-text-muted mt-0.5 font-mono text-[8px] tracking-wider">{label}</span>
+          <span className="text-text-muted mt-0.5 font-mono text-[8px] tracking-wider">
+            {label}
+          </span>
         </div>
       </TooltipTrigger>
-      <TooltipContent side="top" className="text-xs">{tooltip}</TooltipContent>
+      <TooltipContent side="top" className="text-xs">
+        {tooltip}
+      </TooltipContent>
     </Tooltip>
   );
 }
@@ -87,24 +106,48 @@ function SidebarBottom({ collapsed }: { collapsed: boolean }) {
   const health = useSystemHealth();
 
   const overallExpr: DaemonExpr =
-    health.overall === 'ok' ? 'idle'
-    : health.overall === 'degraded' ? 'error'
-    : 'idle';
+    health.overall === 'ok' ? 'idle' : health.overall === 'degraded' ? 'error' : 'idle';
 
   const statusText =
-    health.overall === 'ok' ? 'SYSTEM OK'
-    : health.overall === 'degraded' ? 'DEGRADED'
-    : 'CONNECTING';
+    health.overall === 'ok'
+      ? 'SYSTEM OK'
+      : health.overall === 'degraded'
+        ? 'DEGRADED'
+        : 'CONNECTING';
 
   const statusClass =
-    health.overall === 'ok' ? 'text-text-muted'
-    : health.overall === 'degraded' ? 'text-status-red'
-    : 'text-text-muted';
+    health.overall === 'ok'
+      ? 'text-text-muted'
+      : health.overall === 'degraded'
+        ? 'text-status-red'
+        : 'text-text-muted';
 
-  const gitTooltip = health.git === 'ok' ? 'GitHub: connected' : health.git === 'warn' ? 'GitHub: not configured' : 'GitHub: unknown';
-  const apiTooltip = health.api === 'ok' ? 'API: healthy' : health.api === 'error' ? 'API: degraded' : 'API: unknown';
-  const agtTooltip = health.agt === 'ok' ? 'Agent: active' : health.agt === 'warn' ? 'Agent: idle' : health.agt === 'error' ? 'Agent: offline' : 'Agent: unknown';
-  const pgTooltip = health.pg === 'ok' ? 'Database: connected' : health.pg === 'error' ? 'Database: unreachable' : 'Database: unknown';
+  const gitTooltip =
+    health.git === 'ok'
+      ? 'GitHub: connected'
+      : health.git === 'warn'
+        ? 'GitHub: not configured'
+        : 'GitHub: unknown';
+  const apiTooltip =
+    health.api === 'ok'
+      ? 'API: healthy'
+      : health.api === 'error'
+        ? 'API: degraded'
+        : 'API: unknown';
+  const agtTooltip =
+    health.agt === 'ok'
+      ? 'Agent: active'
+      : health.agt === 'warn'
+        ? 'Agent: idle'
+        : health.agt === 'error'
+          ? 'Agent: offline'
+          : 'Agent: unknown';
+  const pgTooltip =
+    health.pg === 'ok'
+      ? 'Database: connected'
+      : health.pg === 'error'
+        ? 'Database: unreachable'
+        : 'Database: unknown';
 
   if (collapsed) {
     return (
@@ -118,7 +161,7 @@ function SidebarBottom({ collapsed }: { collapsed: boolean }) {
     <div className="border-border-default border-t">
       {/* Systems icons */}
       <div className="px-3 pt-3 pb-1">
-        <span className="text-text-muted mb-2 block px-1 font-mono text-[8px] uppercase tracking-[0.2em]">
+        <span className="text-text-muted mb-2 block px-1 font-mono text-[8px] tracking-[0.2em] uppercase">
           Systems
         </span>
         <div className="flex items-end justify-around">
@@ -236,7 +279,7 @@ export function Sidebar({ projects }: SidebarProps) {
               }}
             >
               <SelectTrigger className="border-border-default bg-bg-elevated h-auto w-full border px-2.5 py-1.5 text-xs [&>svg:last-child]:hidden">
-                <span className="text-text-muted font-mono truncate flex-1">{projectPath}</span>
+                <span className="text-text-muted flex-1 truncate font-mono">{projectPath}</span>
                 <ChevronDown className="text-text-muted ml-1 h-3 w-3 shrink-0" />
               </SelectTrigger>
               <SelectContent>
