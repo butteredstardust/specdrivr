@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { clientLogger } from '@/lib/logger-client';
 import { usePolling } from '@/hooks/use-polling';
+import { cn } from '@/lib/utils';
 import type { SpecStatus } from '@/components/specs/spec-editor';
 
 interface ActivityEvent {
@@ -24,15 +25,16 @@ function eventTypeBadgeClass(eventType: string): string {
   return 'text-text-muted';
 }
 
-function formatTimestamp(ts: string): string {
-  const d = new Date(ts);
-  return d.toLocaleString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
+function timeAgo(ts: string): string {
+  const date = new Date(ts);
+  if (isNaN(date.getTime())) return '';
+  const diff = Date.now() - date.getTime();
+  const mins = Math.floor(diff / 60_000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
 }
 
 export function ActivityTab({ specId, specStatus }: ActivityTabProps): React.ReactElement {
@@ -98,23 +100,33 @@ export function ActivityTab({ specId, specStatus }: ActivityTabProps): React.Rea
   }
 
   return (
-    <div className="space-y-1">
-      {sorted.map((event) => (
-        <div
-          key={event.id}
-          className="hover:bg-bg-elevated flex items-start gap-3 rounded-sm px-3 py-2"
-        >
-          <span className="text-text-muted shrink-0 font-mono text-xs tabular-nums">
-            {formatTimestamp(event.timestamp)}
-          </span>
-          <span
-            className={`bg-bg-elevated shrink-0 rounded-sm px-1.5 py-0.5 font-mono text-xs ${eventTypeBadgeClass(event.type)}`}
+    <div>
+      <p className="text-text-muted mb-3 font-mono text-[10px] tracking-[0.2em] uppercase">
+        Activity Log
+      </p>
+      <div className="space-y-1">
+        {sorted.map((event, idx) => (
+          <div
+            key={event.id}
+            className={cn(
+              'flex items-start gap-3 rounded-sm px-3 py-2',
+              idx === 0
+                ? 'bg-phosphor-amber/5 border-phosphor-amber/20 border'
+                : 'hover:bg-bg-elevated'
+            )}
           >
-            {event.type}
-          </span>
-          <span className="text-text-secondary text-sm">{event.message}</span>
-        </div>
-      ))}
+            <span className="text-text-muted shrink-0 font-mono text-xs tabular-nums">
+              {timeAgo(event.timestamp)}
+            </span>
+            <span
+              className={`bg-bg-elevated shrink-0 rounded-sm px-1.5 py-0.5 font-mono text-xs ${eventTypeBadgeClass(event.type)}`}
+            >
+              [{event.type}]
+            </span>
+            <span className="text-text-secondary text-sm">{event.message}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

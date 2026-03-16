@@ -33,6 +33,23 @@ interface Spec {
 
 type TabName = 'spec' | 'plan' | 'tasks' | 'changes' | 'activity';
 
+function specStatusToExpression(
+  status: SpecStatus | undefined
+): 'idle' | 'working' | 'success' | 'error' {
+  switch (status) {
+    case 'pending_plan':
+    case 'pending_approval':
+    case 'executing':
+      return 'working';
+    case 'completed':
+      return 'success';
+    case 'stalled':
+      return 'error';
+    default:
+      return 'idle';
+  }
+}
+
 const TABS: { id: TabName; label: string }[] = [
   { id: 'spec', label: 'SPEC' },
   { id: 'plan', label: 'PLAN' },
@@ -181,7 +198,7 @@ export default function SpecDetailPage(): React.ReactElement {
         ) : (
           <div className="flex items-center justify-between gap-4">
             <div className="flex min-w-0 items-center gap-3">
-              <DaemonMascot size={20} expression="idle" />
+              <DaemonMascot size={20} expression={specStatusToExpression(spec?.status)} />
               <code className="bg-phosphor-amber/10 text-phosphor-amber shrink-0 rounded px-1.5 py-0.5 font-mono text-xs">
                 SPEC-{String(specId).padStart(3, '0')}
               </code>
@@ -191,6 +208,15 @@ export default function SpecDetailPage(): React.ReactElement {
               {spec && <StatusBadge status={spec.status} />}
             </div>
             <div className="flex shrink-0 items-center gap-2">
+              {spec?.status === 'pending_approval' && (
+                <Button
+                  size="sm"
+                  className="border-phosphor-amber text-phosphor-amber hover:bg-phosphor-amber/10 border"
+                  onClick={() => router.push(`/specs/${specId}?tab=plan`)}
+                >
+                  Review Plan →
+                </Button>
+              )}
               <TooltipProvider>
                 {canEdit ? (
                   editButton

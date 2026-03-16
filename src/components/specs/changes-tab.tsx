@@ -70,9 +70,12 @@ export function ChangesTab({ specId }: ChangesTabProps): React.ReactElement {
 
   if (!files || files.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-4 py-16">
+      <div className="flex flex-col items-center gap-3 py-16">
         <DaemonMascot size={48} expression="idle" />
-        <p className="text-text-secondary font-mono text-sm">No changes recorded yet.</p>
+        <p className="text-text-secondary font-mono text-sm">No file changes yet.</p>
+        <p className="text-text-muted font-mono text-xs italic">
+          &quot;Changes will appear here as DAEMON completes tasks.&quot;
+        </p>
       </div>
     );
   }
