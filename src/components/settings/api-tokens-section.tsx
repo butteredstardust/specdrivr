@@ -1,6 +1,9 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { toast } from 'sonner';
 import { clientLogger } from '@/lib/logger-client';
 import { usePolling } from '@/hooks/use-polling';
@@ -43,6 +46,13 @@ interface TokenRow {
 
 type ExpiryOption = '30d' | '90d' | '1y' | 'never';
 
+const generateTokenSchema = z.object({
+  tokenName: z.string().min(1, 'Token name is required'),
+  expiryOption: z.enum(['30d', '90d', '1y', 'never']),
+});
+
+type GenerateTokenValues = z.infer<typeof generateTokenSchema>;
+
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return '—';
   const d = new Date(dateStr);
@@ -65,11 +75,17 @@ export function ApiTokensSection() {
   const [revealToken, setRevealToken] = useState('');
   const [revokeTargetId, setRevokeTargetId] = useState<number | null>(null);
   const [isRevoking, setIsRevoking] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
 
-  // Generate form state
-  const [tokenName, setTokenName] = useState('');
-  const [expiryOption, setExpiryOption] = useState<ExpiryOption>('90d');
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    formState: { isSubmitting, errors },
+  } = useForm<GenerateTokenValues>({
+    resolver: zodResolver(generateTokenSchema),
+    defaultValues: { tokenName: '', expiryOption: '90d' },
+  });
 
   const stopWhen = useCallback((data: TokenRow[]) => {
     setTokens(data);
@@ -81,19 +97,14 @@ export function ApiTokensSection() {
     stopWhen,
   });
 
-  const handleGenerate = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!tokenName.trim()) return;
-
-    setIsGenerating(true);
-
+  const handleGenerate = async (values: GenerateTokenValues) => {
     try {
-      const expiresAt = computeExpiresAt(expiryOption);
+      const expiresAt = computeExpiresAt(values.expiryOption);
       const res = await fetch('/api/v1/users/me/tokens', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: tokenName.trim(), expiresAt }),
+        body: JSON.stringify({ name: values.tokenName.trim(), expiresAt }),
       });
 
       const data = await res.json().catch(() => ({}));
@@ -105,30 +116,19 @@ export function ApiTokensSection() {
       const { id, name, token } = data.data as { id: number; name: string; token: string };
       const prefix = token.slice(0, 10);
 
-      // Optimistically add to list
       setTokens((prev) => [
-        {
-          id,
-          name,
-          prefix,
-          lastUsedAt: null,
-          expiresAt: expiresAt,
-          createdAt: new Date().toISOString(),
-        },
+        { id, name, prefix, lastUsedAt: null, expiresAt, createdAt: new Date().toISOString() },
         ...prev,
       ]);
 
       setGenerateOpen(false);
-      setTokenName('');
-      setExpiryOption('90d');
+      reset();
       setRevealToken(token);
       setRevealOpen(true);
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
       clientLogger.error('Failed to generate token', error);
       toast.error('Failed to generate token.');
-    } finally {
-      setIsGenerating(false);
     }
   };
 
@@ -259,43 +259,49 @@ export function ApiTokensSection() {
       )}
 
       {/* Generate token dialog */}
-      <Dialog open={generateOpen} onOpenChange={setGenerateOpen}>
+      <Dialog
+        open={generateOpen}
+        onOpenChange={(open) => {
+          setGenerateOpen(open);
+          if (!open) reset();
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="font-mono">Generate API Token</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleGenerate} className="flex flex-col gap-4">
+          <form onSubmit={handleSubmit(handleGenerate)} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-text-secondary font-mono text-xs" htmlFor="token-name">
                 TOKEN NAME <span className="text-status-red">*</span>
               </label>
-              <Input
-                id="token-name"
-                value={tokenName}
-                onChange={(e) => setTokenName(e.target.value)}
-                placeholder="e.g. CI Deploy"
-                required
-              />
+              <Input id="token-name" placeholder="e.g. CI Deploy" {...register('tokenName')} />
+              {errors.tokenName && (
+                <p className="text-status-red font-mono text-xs">{errors.tokenName.message}</p>
+              )}
             </div>
 
             <div className="flex flex-col gap-1.5">
               <label className="text-text-secondary font-mono text-xs" htmlFor="token-expiry">
                 EXPIRY
               </label>
-              <Select
-                value={expiryOption}
-                onValueChange={(v) => setExpiryOption(v as ExpiryOption)}
-              >
-                <SelectTrigger id="token-expiry">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="30d">30 days</SelectItem>
-                  <SelectItem value="90d">90 days</SelectItem>
-                  <SelectItem value="1y">1 year</SelectItem>
-                  <SelectItem value="never">Never</SelectItem>
-                </SelectContent>
-              </Select>
+              <Controller
+                name="expiryOption"
+                control={control}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="token-expiry">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="30d">30 days</SelectItem>
+                      <SelectItem value="90d">90 days</SelectItem>
+                      <SelectItem value="1y">1 year</SelectItem>
+                      <SelectItem value="never">Never</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
 
             <DialogFooter>
@@ -303,13 +309,16 @@ export function ApiTokensSection() {
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => setGenerateOpen(false)}
-                disabled={isGenerating}
+                onClick={() => {
+                  setGenerateOpen(false);
+                  reset();
+                }}
+                disabled={isSubmitting}
               >
                 Cancel
               </Button>
-              <Button type="submit" size="sm" disabled={isGenerating || !tokenName.trim()}>
-                {isGenerating ? 'Generating…' : 'Generate'}
+              <Button type="submit" size="sm" disabled={isSubmitting}>
+                {isSubmitting ? 'Generating…' : 'Generate'}
               </Button>
             </DialogFooter>
           </form>
