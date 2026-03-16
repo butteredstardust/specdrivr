@@ -1,3 +1,17 @@
 {
-  "hooks": {}
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pnpm lint --fix",
+            "ignoreError": true,
+            "statusMessage": "Auto-formatting with ESLint + Prettier..."
+          }
+        ]
+      }
+    ]
+  }
 }
