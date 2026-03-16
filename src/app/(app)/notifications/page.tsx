@@ -1,155 +1,231 @@
 'use client';
 
 import { useState } from 'react';
-import { toast } from 'sonner';
-import { clientLogger } from '@/lib/logger-client';
+import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { PageHeader } from '@/components/ui/page-header';
+import { Button } from '@/components/ui/button';
+import { Bell, CheckCircle2, AlertCircle, Info, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+function formatRelativeTime(iso: string): string {
+  const date = new Date(iso);
+  const diff = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return date.toLocaleDateString();
+}
 
 interface Notification {
   id: number;
+  type: 'info' | 'success' | 'warning' | 'error' | 'mention';
+  title: string;
   message: string;
-  type: string;
   isRead: boolean;
   createdAt: string;
+  readAt: string | null;
 }
 
-interface NotificationsPageResponse {
-  notifications?: Notification[];
-  meta?: { page: number; total: number; unread?: number };
+interface NotificationsResponse {
+  notifications: Notification[];
+  unreadCount: number;
+  total: number;
+  pages: number;
 }
 
-function formatRelativeTime(iso: string): string {
-  const secs = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-  if (secs < 60) return `${secs}s ago`;
-  if (secs < 3600) return `${Math.floor(secs / 60)}m ago`;
-  if (secs < 86400) return `${Math.floor(secs / 3600)}h ago`;
-  return `${Math.floor(secs / 86400)}d ago`;
-}
+const STATUS_TABS = [
+  { value: 'all', label: 'All' },
+  { value: 'unread', label: 'Unread' },
+  { value: 'mentions', label: 'Mentions' },
+] as const;
+
+type TabValue = (typeof STATUS_TABS)[number]['value'];
 
 export default function NotificationsPage() {
+  const { activeProjectId } = useShell();
   const [page, setPage] = useState(1);
-  const [tab, setTab] = useState<'all' | 'unread'>('all');
+  const [tab, setTab] = useState<TabValue>('all');
 
-  const url =
-    tab === 'unread'
-      ? `/api/v1/notifications?unread=true&page=${page}`
-      : `/api/v1/notifications?page=${page}`;
+  const buildFetchUrl = () => {
+    const params = new URLSearchParams();
+    if (activeProjectId) params.set('projectId', String(activeProjectId));
+    params.set('page', String(page));
+    params.set('limit', '50');
+    if (tab === 'unread') params.set('unreadOnly', 'true');
+    if (tab === 'mentions') params.set('type', 'mention');
+    return `/api/v1/notifications?${params.toString()}`;
+  };
 
-  const { data, isLoading, restart } = usePolling<NotificationsPageResponse>({
-    url,
-    interval: 30_000,
+  const notificationsUrl = buildFetchUrl();
+
+  const { data, isLoading, restart } = usePolling<NotificationsResponse>({
+    url: notificationsUrl,
+    interval: 5000,
   });
 
-  // usePolling unwraps the { data: T } envelope automatically.
-  const list: Notification[] = (data?.notifications ?? (data as unknown as Notification[]) ?? []) as Notification[];
-  const meta = data?.meta ?? { page: 1, total: 0 };
-  const totalPages = Math.max(1, Math.ceil(meta.total / 50));
-  const unreadCount = meta?.unread ?? list.filter((n) => !n.isRead).length;
+  const notifications = data?.notifications ?? [];
+  const unreadCount = data?.unreadCount ?? 0;
+  const totalPages = data?.pages ?? 1;
 
   const handleMarkAllRead = async () => {
+    if (!activeProjectId) return;
     try {
-      const res = await fetch('/api/v1/notifications/read-all', {
+      const res = await fetch(`/api/v1/notifications/read-all?projectId=${activeProjectId}`, {
         method: 'POST',
-        credentials: 'include',
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      restart();
-      toast.success('All notifications marked as read.');
-    } catch (err) {
-      clientLogger.error('NotificationsPage: mark all read failed', err);
-      toast.error('Failed to mark notifications as read.');
+      if (res.ok) restart();
+    } catch (error) {
+      console.error('Failed to mark all as read:', error);
+    }
+  };
+
+  const handleMarkRead = async (id: number) => {
+    try {
+      const res = await fetch(`/api/v1/notifications/${id}/read`, { method: 'POST' });
+      if (res.ok) restart();
+    } catch (error) {
+      console.error('Failed to mark read:', error);
+    }
+  };
+
+  const getTypeIcon = (type: Notification['type']) => {
+    switch (type) {
+      case 'success':
+        return <CheckCircle2 className="text-status-emerald h-4 w-4" />;
+      case 'error':
+        return <AlertCircle className="text-status-red h-4 w-4" />;
+      case 'warning':
+        return <AlertCircle className="text-phosphor-amber h-4 w-4" />;
+      case 'mention':
+        return <Bell className="text-accent-violet h-4 w-4" />;
+      default:
+        return <Info className="text-primary h-4 w-4" />;
     }
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h1 className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
-          NOTIFICATIONS
-        </h1>
-        {unreadCount > 0 && (
-          <Button size="sm" variant="outline" onClick={handleMarkAllRead}>
-            Mark all read
-          </Button>
+    <div className="-mx-6 -mt-6 flex min-h-full flex-col">
+      <PageHeader
+        category="System"
+        title="Notifications"
+        action={
+          unreadCount > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleMarkAllRead}
+              className="text-muted-foreground hover:text-foreground h-8 font-mono text-[10px] tracking-wider uppercase transition-all"
+            >
+              Mark all read
+            </Button>
+          )
+        }
+      />
+
+      {/* Tabs & Pagination Controls */}
+      <div className="border-border-default flex items-center justify-between border-b px-6 py-2.5">
+        <div className="flex items-center gap-1">
+          {STATUS_TABS.map((t) => (
+            <Button
+              key={t.value}
+              variant={tab === t.value ? 'default' : 'secondary'}
+              size="sm"
+              onClick={() => {
+                setTab(t.value);
+                setPage(1);
+              }}
+              className={cn(
+                'h-7 px-2.5 font-mono text-[10px] tracking-wider uppercase transition-all',
+                tab !== t.value && 'bg-secondary/50 text-muted-foreground hover:text-foreground'
+              )}
+            >
+              {t.label} {t.value === 'unread' && unreadCount > 0 && `(${unreadCount})`}
+            </Button>
+          ))}
+        </div>
+
+        {totalPages > 1 && (
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground font-mono text-[10px] uppercase">
+              Page {page} of {totalPages}
+            </span>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="icon"
+                disabled={page <= 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                className="h-6 w-6 transition-all disabled:opacity-30"
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                disabled={page >= totalPages}
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                className="h-6 w-6 transition-all disabled:opacity-30"
+              >
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </div>
         )}
       </div>
 
-      <Tabs
-        value={tab}
-        onValueChange={(v) => {
-          setTab(v as typeof tab);
-          setPage(1);
-        }}
-      >
-        <TabsList>
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="unread">Unread</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value={tab} className="mt-4">
-          {isLoading && list.length === 0 && (
-            <p className="font-mono text-xs text-[--text-muted]">Loading...</p>
-          )}
-          {!isLoading && list.length === 0 && (
-            <div className="flex flex-col items-center gap-4 py-16">
-              <DaemonMascot size={48} expression="idle" />
-              <p className="font-mono text-sm text-[--text-secondary]">All caught up.</p>
-            </div>
-          )}
-          {list.length > 0 && (
-            <div className="space-y-1">
-              {list.map((n) => (
-                <div
-                  key={n.id}
-                  className={cn(
-                    'flex h-14 items-center gap-4 rounded-sm px-4',
-                    !n.isRead
-                      ? 'bg-[--accent-violet]/5 border-l-2 border-[--accent-violet]'
-                      : 'border-l-2 border-transparent hover:bg-[--bg-elevated]'
-                  )}
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="truncate text-sm text-[--text-primary]">{n.message}</p>
-                    <p className="font-mono text-xs text-[--text-muted]">
-                      {formatRelativeTime(n.createdAt)}
-                    </p>
-                  </div>
-                  <span className="shrink-0 rounded bg-[--bg-elevated] px-2 py-0.5 font-mono text-xs text-[--text-muted]">
-                    {n.type}
-                  </span>
+      {/* Content */}
+      <div className="flex-1">
+        {activeProjectId === null ? (
+          <div className="flex flex-col items-center gap-4 py-16">
+            <DaemonMascot size={48} expression="idle" />
+            <p className="text-muted-foreground font-mono text-sm">
+              Select a project to view notifications.
+            </p>
+          </div>
+        ) : isLoading && !data ? (
+          <div className="text-muted-foreground py-16 text-center font-mono text-xs">Loading…</div>
+        ) : notifications.length === 0 ? (
+          <div className="flex flex-col items-center gap-4 py-16">
+            <Bell className="text-muted-foreground/20 h-12 w-12" />
+            <p className="text-muted-foreground font-mono text-sm">
+              No {tab === 'unread' ? 'unread ' : ''}notifications.
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col">
+            {notifications.map((n) => (
+              <div
+                key={n.id}
+                className={cn(
+                  'border-border-default/50 flex cursor-pointer items-center gap-4 border-b py-3 pr-6 transition-colors',
+                  !n.readAt
+                    ? 'border-l-accent-violet bg-accent-violet/5 border-l-2 pl-[22px]'
+                    : 'hover:bg-bg-elevated/50 border-l-2 border-l-transparent pl-[22px]'
+                )}
+                onClick={() => !n.readAt && handleMarkRead(n.id)}
+              >
+                <div className="shrink-0">{getTypeIcon(n.type)}</div>
+                <div className="min-w-0 flex-1">
+                  <p
+                    className={cn(
+                      'text-sm leading-snug',
+                      !n.readAt ? 'text-foreground font-medium' : 'text-muted-foreground'
+                    )}
+                  >
+                    {n.title}
+                  </p>
+                  <p className="text-muted-foreground mt-0.5 line-clamp-1 text-xs">{n.message}</p>
+                  <p className="text-muted-foreground/60 mt-0.5 font-mono text-[10px] uppercase">
+                    {formatRelativeTime(n.createdAt)}
+                  </p>
                 </div>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
-
-      {/* Pagination */}
-      <div className="flex items-center gap-3">
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={page <= 1}
-            onClick={() => setPage((p) => p - 1)}
-          >
-            Prev
-          </Button>
-          <span className="font-mono text-xs text-[--text-muted]">
-            Page {page} of {totalPages}
-          </span>
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={page >= totalPages}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Next
-          </Button>
-        </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

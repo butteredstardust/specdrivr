@@ -35,11 +35,9 @@ export function OnboardingRestartSection() {
   };
 
   return (
-    <section className="flex flex-col gap-3 rounded-md border border-[--border-default] p-4">
-      <h2 className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
-        ONBOARDING
-      </h2>
-      <p className="text-sm text-[--text-secondary]">
+    <section className="border-border-default flex flex-col gap-3 rounded-md border p-4">
+      <h2 className="text-text-muted font-mono text-xs tracking-widest uppercase">ONBOARDING</h2>
+      <p className="text-text-secondary text-sm">
         You can restart the onboarding tour to revisit the setup steps.
       </p>
       <Button

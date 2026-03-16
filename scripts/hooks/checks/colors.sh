@@ -28,7 +28,11 @@ HEX_PATTERN='#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})\b'
 
 for file in $style_files; do
     if [ ! -f "$file" ]; then continue; fi
-    
+
+    # globals.css is the legitimate home of design token definitions (CSS custom properties).
+    # Hex values there are intentional — they ARE the design tokens. Skip it.
+    if [[ "$file" == *"globals.css" ]]; then continue; fi
+
     # Search for hex colors
     # We ignore comments if possible, but static grep is limited.
     # Note: We look for hex colors that are values (e.g., color: #fff or bg-[#fff])

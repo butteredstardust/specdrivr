@@ -171,28 +171,26 @@ export function NotificationPreferencesSection() {
 
   return (
     <section className="flex flex-col gap-6">
-      <p className="text-sm text-[--text-secondary]">Choose when DAEMON notifies you.</p>
+      <p className="text-text-secondary text-sm">Choose when DAEMON notifies you.</p>
 
-      {loadError && <p className="text-sm text-[--status-red]">{loadError}</p>}
+      {loadError && <p className="text-status-red text-sm">{loadError}</p>}
 
       {/* Table header */}
-      <div className="grid grid-cols-[1fr_4rem_4rem] items-center gap-2 border-b border-[--border-muted] pb-2">
-        <span className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
-          Event
-        </span>
-        <span className="text-center font-mono text-xs tracking-widest text-[--text-muted] uppercase">
+      <div className="border-border-muted grid grid-cols-[1fr_4rem_4rem] items-center gap-2 border-b pb-2">
+        <span className="text-text-muted font-mono text-xs tracking-widest uppercase">Event</span>
+        <span className="text-text-muted text-center font-mono text-xs tracking-widest uppercase">
           Email
         </span>
-        <span className="text-center font-mono text-xs tracking-widest text-[--text-muted] uppercase">
+        <span className="text-text-muted text-center font-mono text-xs tracking-widest uppercase">
           In-App
         </span>
       </div>
 
       {/* Rows */}
-      <div className="flex flex-col gap-0 divide-y divide-[--border-muted]">
+      <div className="divide-border-muted flex flex-col gap-0 divide-y">
         {ALL_EVENT_TYPES.map((et) => (
           <div key={et} className="grid grid-cols-[1fr_4rem_4rem] items-center gap-2 py-3">
-            <span className="text-sm text-[--text-primary]">{EVENT_LABELS[et]}</span>
+            <span className="text-text-primary text-sm">{EVENT_LABELS[et]}</span>
 
             <div className="flex justify-center">
               <Switch
@@ -218,7 +216,7 @@ export function NotificationPreferencesSection() {
         <Button size="sm" disabled={!isDirty || isSaving} onClick={handleSave}>
           {isSaving ? 'Saving…' : 'Save Preferences'}
         </Button>
-        {isDirty && <span className="text-xs text-[--phosphor-amber]">• Unsaved changes</span>}
+        {isDirty && <span className="text-phosphor-amber text-xs">• Unsaved changes</span>}
       </div>
     </section>
   );

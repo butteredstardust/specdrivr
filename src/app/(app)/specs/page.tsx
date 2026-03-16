@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { PageHeader } from '@/components/ui/page-header';
+import { PixelBadge } from '@/components/ui/pixel-badge';
 import {
   Table,
   TableBody,
@@ -17,61 +18,84 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Plus, MoreHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import type { UserRole, SpecStatus } from '@/db/schema';
 
 interface Spec {
   id: number;
-  title: string;
+  name: string;
   status: SpecStatus;
   createdAt: string;
   updatedAt: string;
+  taskCount?: number | null;
+  currentVersionNumber?: number | null;
 }
 
-const ALL_STATUSES: SpecStatus[] = [
-  'drafting',
-  'pending_plan',
-  'pending_approval',
-  'executing',
-  'completed',
-  'stalled',
-  'archived',
+const STATUS_TABS: Array<{ value: string; label: string; status?: SpecStatus }> = [
+  { value: 'all', label: 'All' },
+  { value: 'drafting', label: 'Drafting', status: 'drafting' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'executing', label: 'Executing', status: 'executing' },
+  { value: 'completed', label: 'Complete', status: 'completed' },
+  { value: 'stalled', label: 'Stalled', status: 'stalled' },
+  { value: 'archived', label: 'Archived', status: 'archived' },
 ];
 
-function statusBadgeClass(status: SpecStatus): string {
+function StatusBadge({ status }: { status: SpecStatus }) {
   switch (status) {
     case 'drafting':
-      return 'text-[--text-muted]';
+      return <PixelBadge>Draft</PixelBadge>;
     case 'pending_plan':
-      return 'text-[--phosphor-amber] animate-[blink_1s_ease-in-out_infinite]';
+      return <PixelBadge variant="amber">Pending</PixelBadge>;
     case 'pending_approval':
-      return 'text-[--phosphor-amber]';
+      return <PixelBadge variant="amber">Review</PixelBadge>;
     case 'executing':
-      return 'text-[--accent-violet] animate-[blink_1s_ease-in-out_infinite]';
+      return (
+        <PixelBadge variant="violet" dot>
+          Running
+        </PixelBadge>
+      );
     case 'completed':
-      return 'text-emerald-400';
+      return <PixelBadge variant="emerald">Done</PixelBadge>;
     case 'stalled':
-      return 'text-orange-400';
+      return <PixelBadge variant="red">Stalled</PixelBadge>;
     case 'archived':
-      return 'text-[--text-muted] opacity-50';
+      return <PixelBadge variant="muted">Archived</PixelBadge>;
     default:
-      return 'text-[--text-muted]';
+      return <PixelBadge>{status}</PixelBadge>;
   }
-}
-
-function statusLabel(status: SpecStatus): string {
-  return status.replace(/_/g, ' ');
 }
 
 export default function SpecsPage(): React.ReactElement {
   const router = useRouter();
-  const { activeProjectId, user } = useShell();
+  const searchParams = useSearchParams();
+  const { activeProjectId, setActiveProjectId, user } = useShell();
   const userRole = (user.role ?? 'viewer') as UserRole;
 
-  const [activeTab, setActiveTab] = useState<string>('all');
-  const [search, setSearch] = useState('');
+  const urlProjectId = searchParams.get('projectId')
+    ? parseInt(searchParams.get('projectId')!, 10)
+    : null;
 
-  const specsUrl = activeProjectId !== null ? `/api/v1/specs?projectId=${activeProjectId}` : null;
+  useEffect(() => {
+    if (urlProjectId !== null && activeProjectId !== urlProjectId) {
+      setActiveProjectId(urlProjectId);
+    }
+  }, [urlProjectId, activeProjectId, setActiveProjectId]);
+
+  // When activeProjectId changes from sidebar, update the URL
+  useEffect(() => {
+    if (activeProjectId !== null && activeProjectId !== urlProjectId) {
+      router.push(`/specs?projectId=${activeProjectId}`);
+    }
+  }, [activeProjectId, urlProjectId, router]);
+
+  const effectiveProjectId = activeProjectId ?? urlProjectId;
+
+  const [activeTab, setActiveTab] = useState<string>('all');
+
+  const specsUrl =
+    effectiveProjectId !== null ? `/api/v1/specs?projectId=${effectiveProjectId}` : null;
 
   const { data: specs, isLoading } = usePolling<Spec[]>({
     url: specsUrl,
@@ -80,10 +104,19 @@ export default function SpecsPage(): React.ReactElement {
 
   const canCreate = userRole === 'member' || userRole === 'admin' || userRole === 'owner';
 
-  const filteredSpecs = (specs ?? []).filter((spec) => {
-    const matchesTab = activeTab === 'all' || spec.status === activeTab;
-    const matchesSearch = spec.title.toLowerCase().includes(search.toLowerCase());
-    return matchesTab && matchesSearch;
+  const allSpecs = specs ?? [];
+  const countByStatus = (value: string, status?: SpecStatus) => {
+    if (value === 'pending') {
+      return allSpecs.filter((s) => s.status === 'pending_plan' || s.status === 'pending_approval')
+        .length;
+    }
+    return status ? allSpecs.filter((s) => s.status === status).length : allSpecs.length;
+  };
+  const filteredSpecs = allSpecs.filter((spec) => {
+    if (activeTab === 'all') return true;
+    if (activeTab === 'pending')
+      return spec.status === 'pending_plan' || spec.status === 'pending_approval';
+    return spec.status === activeTab;
   });
 
   const newSpecButton = (
@@ -92,110 +125,143 @@ export default function SpecsPage(): React.ReactElement {
       disabled={!canCreate}
       onClick={canCreate ? () => router.push('/specs/new') : undefined}
       aria-disabled={!canCreate}
+      className="gap-1.5"
     >
+      <Plus className="h-3.5 w-3.5" />
       New Spec
     </Button>
   );
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h1 className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">SPECS</h1>
-        <TooltipProvider>
-          {canCreate ? (
-            newSpecButton
-          ) : (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span tabIndex={0}>{newSpecButton}</span>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Only members, admins, and owners can create specs.</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-        </TooltipProvider>
-      </div>
+    // Escape the layout's p-6 so sections are full-bleed with border separators
+    <div className="-mx-6 -mt-6 flex min-h-full flex-col">
+      <PageHeader
+        category="Specifications"
+        title="Specs"
+        action={
+          <TooltipProvider>
+            {canCreate ? (
+              newSpecButton
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span tabIndex={0}>{newSpecButton}</span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Only members, admins, and owners can create specs.</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </TooltipProvider>
+        }
+      />
 
-      <div className="flex items-center gap-3">
-        <Input
-          placeholder="Search specs..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="max-w-xs"
-        />
-      </div>
+      {/* Filter tabs */}
+      <div className="border-border-default border-b px-6 py-2.5">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
+            {STATUS_TABS.map(({ value, label, status }) => {
+              const count = countByStatus(value, status);
+              return (
+                <TabsTrigger
+                  key={value}
+                  value={value}
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:bg-secondary data-[state=inactive]:text-muted-foreground hover:text-foreground h-auto rounded px-2.5 py-1 font-mono text-[10px] tracking-wider uppercase transition-all data-[state=active]:shadow-none"
+                >
+                  {label}
+                  {count > 0 && <span className="ml-1 opacity-60">{count}</span>}
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="h-auto flex-wrap gap-1">
-          <TabsTrigger value="all">All</TabsTrigger>
-          {ALL_STATUSES.map((status) => (
-            <TabsTrigger key={status} value={status}>
-              {statusLabel(status)}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        <TabsContent value={activeTab}>
-          {activeProjectId === null ? (
-            <div className="flex flex-col items-center gap-4 py-16">
-              <DaemonMascot size={48} expression="idle" />
-              <p className="font-mono text-sm text-[--text-secondary]">
-                Select a project to view specs.
-              </p>
-            </div>
-          ) : isLoading ? (
-            <div className="py-8 text-center font-mono text-xs text-[--text-muted]">Loading…</div>
-          ) : filteredSpecs.length === 0 ? (
-            <div className="flex flex-col items-center gap-4 py-16">
-              <DaemonMascot size={48} expression="idle" />
-              <p className="font-mono text-sm text-[--text-secondary]">No specs yet.</p>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Updated</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredSpecs.map((spec) => (
-                  <TableRow
-                    key={spec.id}
-                    className="cursor-pointer"
-                    onClick={() => router.push(`/specs/${spec.id}`)}
-                  >
-                    <TableCell className="font-mono text-sm">{spec.title}</TableCell>
-                    <TableCell>
-                      <span className={`font-mono text-xs ${statusBadgeClass(spec.status)}`}>
-                        {statusLabel(spec.status)}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-sm text-[--text-secondary]">
-                      {new Date(spec.createdAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-sm text-[--text-secondary]">
-                      {new Date(spec.updatedAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell onClick={(e) => e.stopPropagation()}>
-                      <Link
-                        href={`/specs/${spec.id}`}
-                        className="text-xs text-[--accent-violet] hover:underline"
-                      >
-                        View
-                      </Link>
-                    </TableCell>
+          {/* Single shared content panel keyed by activeTab */}
+          <TabsContent value={activeTab} className="mt-0">
+            {effectiveProjectId === null ? (
+              <div className="flex flex-col items-center gap-4 py-16">
+                <DaemonMascot size={48} expression="idle" />
+                <p className="text-muted-foreground font-mono text-sm">
+                  Select a project to view specs.
+                </p>
+              </div>
+            ) : isLoading ? (
+              <div className="text-muted-foreground py-8 text-center font-mono text-xs">
+                Loading…
+              </div>
+            ) : filteredSpecs.length === 0 ? (
+              <div className="flex flex-col items-center gap-4 py-16">
+                <DaemonMascot size={48} expression="idle" />
+                <p className="text-muted-foreground font-mono text-sm">No specs yet.</p>
+              </div>
+            ) : (
+              <Table className="caption-bottom text-sm">
+                <TableHeader>
+                  <TableRow className="border-border-default hover:bg-transparent">
+                    <TableHead className="text-muted-foreground h-auto w-36 px-6 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
+                      ID
+                    </TableHead>
+                    <TableHead className="text-muted-foreground h-auto px-3 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
+                      Name
+                    </TableHead>
+                    <TableHead className="text-muted-foreground h-auto w-36 px-3 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
+                      Status
+                    </TableHead>
+                    <TableHead className="text-muted-foreground h-auto w-16 px-3 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
+                      v
+                    </TableHead>
+                    <TableHead className="text-muted-foreground h-auto w-24 px-3 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
+                      Tasks
+                    </TableHead>
+                    <TableHead className="h-auto w-10" />
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </TabsContent>
-      </Tabs>
+                </TableHeader>
+                <TableBody>
+                  {filteredSpecs.map((spec) => (
+                    <TableRow
+                      key={spec.id}
+                      className="border-border-default/50 hover:bg-bg-elevated/50 cursor-pointer"
+                      onClick={() => router.push(`/specs/${spec.id}`)}
+                    >
+                      <TableCell className="px-6 py-3">
+                        <PixelBadge variant="amber">
+                          SPEC-{String(spec.id).padStart(3, '0')}
+                        </PixelBadge>
+                      </TableCell>
+                      <TableCell className="text-foreground px-3 py-3 text-sm">
+                        {spec.name}
+                      </TableCell>
+                      <TableCell className="px-3 py-3">
+                        <StatusBadge status={spec.status} />
+                      </TableCell>
+                      <TableCell className="text-muted-foreground px-3 py-3 font-mono text-[10px]">
+                        {spec.currentVersionNumber ? `v${spec.currentVersionNumber}` : '—'}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground px-3 py-3 font-mono text-[10px]">
+                        {spec.taskCount != null ? `${spec.taskCount}` : '—'}
+                      </TableCell>
+                      <TableCell
+                        className="px-3 py-3 text-right"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-muted-foreground h-6 w-6"
+                          asChild
+                        >
+                          <Link href={`/specs/${spec.id}`} onClick={(e) => e.stopPropagation()}>
+                            <MoreHorizontal className="h-3.5 w-3.5" />
+                          </Link>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }

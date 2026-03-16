@@ -37,7 +37,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <Card className="w-full max-w-sm border-[--border-default] bg-[--bg-surface]">
+    <Card className="border-border-default bg-bg-surface w-full max-w-sm">
       <CardHeader className="items-center gap-2 pb-2">
         <DaemonMascot size={48} expression={state === 'sent' ? 'success' : 'idle'} />
         <p className="font-mono text-sm font-bold tracking-widest">SPECDRIVR</p>
@@ -45,11 +45,11 @@ export default function ForgotPasswordPage() {
       <CardContent>
         {state === 'sent' ? (
           <div className="space-y-3 text-center">
-            <p className="text-sm text-[--text-primary]">Check your email.</p>
-            <p className="text-xs text-[--text-muted]">
+            <p className="text-text-primary text-sm">Check your email.</p>
+            <p className="text-text-muted text-xs">
               If that address is registered, a reset link is on its way.
             </p>
-            <Link href="/login" className="text-xs text-[--accent-violet] hover:underline">
+            <Link href="/login" className="text-accent-violet text-xs hover:underline">
               Back to login
             </Link>
           </div>
@@ -64,21 +64,18 @@ export default function ForgotPasswordPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="border-[--border-default] bg-[--bg-base]"
+                className="border-border-default bg-bg-base"
               />
             </div>
             <Button
               type="submit"
               disabled={state === 'loading'}
-              className="w-full bg-[--accent-violet] hover:bg-[--accent-violet-dim]"
+              className="bg-accent-violet hover:bg-accent-violet-dim w-full"
             >
               {state === 'loading' ? 'Sending…' : 'Send Reset Link'}
             </Button>
             <div className="text-center">
-              <Link
-                href="/login"
-                className="text-xs text-[--text-muted] hover:text-[--text-secondary]"
-              >
+              <Link href="/login" className="text-text-muted hover:text-text-secondary text-xs">
                 Back to login
               </Link>
             </div>

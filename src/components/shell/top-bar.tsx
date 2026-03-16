@@ -3,7 +3,7 @@
 import { Fragment } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Bell } from 'lucide-react';
+import { Bell, User, Shield, LogOut, Keyboard, Command } from 'lucide-react';
 import { authClient } from '@/lib/auth-client';
 import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
@@ -48,20 +48,22 @@ const PATH_LABELS: Record<string, string> = {
 export function TopBar({ breadcrumbs }: TopBarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, setShortcutsOpen } = useShell();
+  const { user, setShortcutsOpen, pageLabel } = useShell();
 
   const { data: notifData } = usePolling<NotificationData>({
-    url: '/api/v1/notifications?unreadOnly=true&limit=1',
+    url: '/api/v1/notifications?unread=true&limit=1',
     interval: 30_000,
   });
 
   const unreadCount = notifData?.meta?.total ?? 0;
 
   const segments = pathname.split('/').filter(Boolean);
-  const autoCrumbs = segments.map((seg, i) => ({
-    label: PATH_LABELS['/' + segments.slice(0, i + 1).join('/')] ?? seg,
-    href: '/' + segments.slice(0, i + 1).join('/'),
-  }));
+  const autoCrumbs = segments.map((seg, i) => {
+    const path = '/' + segments.slice(0, i + 1).join('/');
+    const isLast = i === segments.length - 1;
+    const label = PATH_LABELS[path] ?? (isLast && pageLabel ? pageLabel : seg);
+    return { label, href: path };
+  });
   const crumbs = breadcrumbs ?? autoCrumbs;
 
   const initials = user?.name
@@ -79,14 +81,14 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
   };
 
   return (
-    <header className="flex h-14 items-center gap-4 border-b border-[--border-default] bg-[--bg-surface] px-6">
+    <header className="border-border-default bg-bg-surface flex h-14 items-center gap-4 border-b px-6">
       {/* Breadcrumbs */}
       <div className="flex-1">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href="/" className="text-[--text-muted] hover:text-[--text-primary]">
+                <Link href="/" className="text-text-muted hover:text-text-primary">
                   {PATH_LABELS['/'] ?? 'Home'}
                 </Link>
               </BreadcrumbLink>
@@ -96,13 +98,10 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
                   {i === crumbs.length - 1 || !crumb.href ? (
-                    <BreadcrumbPage className="text-[--text-primary]">{crumb.label}</BreadcrumbPage>
+                    <BreadcrumbPage className="text-text-primary">{crumb.label}</BreadcrumbPage>
                   ) : (
                     <BreadcrumbLink asChild>
-                      <Link
-                        href={crumb.href}
-                        className="text-[--text-muted] hover:text-[--text-primary]"
-                      >
+                      <Link href={crumb.href} className="text-text-muted hover:text-text-primary">
                         {crumb.label}
                       </Link>
                     </BreadcrumbLink>
@@ -119,17 +118,22 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
         {/* Notification bell */}
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative h-8 w-8">
-              <Bell className="h-4 w-4 text-[--text-secondary]" />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative h-8 w-8"
+              suppressHydrationWarning
+            >
+              <Bell className="text-text-secondary h-4 w-4" />
               {unreadCount > 0 && (
-                <Badge className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center bg-[--accent-violet] p-0 text-[10px]">
+                <Badge className="bg-accent-violet absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center p-0 text-[10px]">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </Badge>
               )}
             </Button>
           </PopoverTrigger>
           <PopoverContent
-            className="max-h-[480px] w-[380px] border-[--border-default] bg-[--bg-surface] p-0"
+            className="border-border-default bg-bg-surface max-h-[480px] w-[380px] p-0"
             align="end"
           >
             <NotificationPanel />
@@ -139,40 +143,68 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
         {/* Shortcuts chip */}
         <Button
           variant="ghost"
-          size="sm"
-          className="h-6 border border-[--border-muted] px-1.5 font-mono text-[10px] text-[--text-muted]"
+          size="icon"
+          className="text-text-muted h-8 w-8"
           onClick={() => setShortcutsOpen(true)}
+          title="Keyboard shortcuts"
         >
-          ?
+          <Command className="h-4 w-4" />
         </Button>
 
         {/* User dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 rounded-full p-0">
+            <Button variant="ghost" className="h-8 w-8 rounded-full p-0" suppressHydrationWarning>
               <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-[--accent-violet]/20 text-xs text-[--accent-violet]">
+                <AvatarFallback className="bg-accent-violet/20 text-accent-violet text-xs">
                   {initials}
                 </AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <div className="px-3 py-2">
-              <p className="text-sm font-medium text-[--text-primary]">{user?.name}</p>
-              <p className="truncate text-xs text-[--text-muted]">{user?.email}</p>
+          <DropdownMenuContent align="end" className="w-56">
+            <div className="px-3 py-2.5">
+              <p className="text-text-primary text-sm font-semibold">{user?.name}</p>
+              <p className="text-text-muted truncate text-xs">{user?.email}</p>
+              {user?.role && (
+                <span className="text-text-muted mt-1 inline-block font-mono text-[10px] tracking-widest uppercase">
+                  {user.role}
+                </span>
+              )}
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href="/settings">Settings</Link>
+              <Link href="/settings/profile" className="flex items-center gap-2">
+                <User className="h-3.5 w-3.5" />
+                Profile Settings
+              </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setShortcutsOpen(true)}>
+            <DropdownMenuItem asChild>
+              <Link href="/settings/security" className="flex items-center gap-2">
+                <Shield className="h-3.5 w-3.5" />
+                Security
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/settings/notifications" className="flex items-center gap-2">
+                <Bell className="h-3.5 w-3.5" />
+                Notifications
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => setShortcutsOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <Keyboard className="h-3.5 w-3.5" />
               Keyboard Shortcuts
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleSignOut} className="text-[--status-red]">
-              Sign out
+            <DropdownMenuItem
+              onClick={handleSignOut}
+              className="text-status-red flex items-center gap-2"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              Sign Out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

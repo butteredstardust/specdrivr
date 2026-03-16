@@ -2,10 +2,11 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useShell } from '@/components/shell/shell-context';
+import { Command } from 'lucide-react';
 
 function Kbd({ children }: { children: React.ReactNode }) {
   return (
-    <kbd className="inline-flex items-center rounded border border-[--border-default] bg-[--bg-elevated] px-1.5 py-0.5 font-mono text-xs text-[--text-secondary]">
+    <kbd className="border-border-default bg-bg-elevated text-text-secondary inline-flex items-center rounded border px-1.5 py-0.5 font-mono text-xs">
       {children}
     </kbd>
   );
@@ -19,7 +20,7 @@ interface ShortcutRowProps {
 function ShortcutRow({ keys, action }: ShortcutRowProps) {
   return (
     <div className="flex items-center justify-between py-1.5">
-      <span className="text-xs text-[--text-secondary]">{action}</span>
+      <span className="text-text-secondary text-xs">{action}</span>
       <div className="flex items-center gap-1">{keys}</div>
     </div>
   );
@@ -27,7 +28,7 @@ function ShortcutRow({ keys, action }: ShortcutRowProps) {
 
 function SectionHeader({ children }: { children: React.ReactNode }) {
   return (
-    <p className="mt-4 mb-1 font-mono text-xs tracking-widest text-[--text-muted] uppercase first:mt-0">
+    <p className="text-text-muted mt-4 mb-1 font-mono text-xs tracking-widest uppercase first:mt-0">
       {children}
     </p>
   );
@@ -38,14 +39,15 @@ export function KeyboardShortcutsModal() {
 
   return (
     <Dialog open={shortcutsOpen} onOpenChange={setShortcutsOpen}>
-      <DialogContent className="max-w-lg border-[--border-default] bg-[--bg-surface]">
+      <DialogContent className="border-border-default bg-bg-surface max-w-lg">
         <DialogHeader>
-          <DialogTitle className="font-mono text-sm tracking-widest text-[--text-muted] uppercase">
+          <DialogTitle className="text-text-muted flex items-center gap-2 font-mono text-sm tracking-widest uppercase">
+            <Command className="h-4 w-4" />
             KEYBOARD SHORTCUTS
           </DialogTitle>
         </DialogHeader>
 
-        <div className="divide-y divide-[--border-muted]">
+        <div className="divide-border-muted divide-y">
           <div className="pb-3">
             <SectionHeader>NAVIGATION</SectionHeader>
             <ShortcutRow

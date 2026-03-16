@@ -31,9 +31,9 @@ describe('Seed Script Smoke Test', () => {
     const [specCount] = await testDb.select({ value: count() }).from(schema.specifications);
     expect(specCount.value).toBe(10);
 
-    // 6 plans
+    // 7 plans
     const [planCount] = await testDb.select({ value: count() }).from(schema.plans);
-    expect(planCount.value).toBe(6);
+    expect(planCount.value).toBe(7);
 
     // spec 1 (Component Library Refactor) is completed; plan 1 is completed
     const [spec1] = await testDb
@@ -49,12 +49,12 @@ describe('Seed Script Smoke Test', () => {
     expect(task504.status).toBe('blocked');
     expect(task504.blockedReason).toBeTruthy();
 
-    // Exactly one session with status running
+    // 2 sessions with status running
     const [runningSessions] = await testDb
       .select({ value: count() })
       .from(schema.agentSessions)
       .where(eq(schema.agentSessions.status, 'running'));
-    expect(runningSessions.value).toBe(1);
+    expect(runningSessions.value).toBe(2);
   });
 
   it('is idempotent (running twice produces same counts)', async () => {

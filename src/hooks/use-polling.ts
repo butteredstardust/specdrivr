@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useLayoutEffect } from 'react';
 import { clientLogger } from '@/lib/logger-client';
 
 type UsePollingOptions<T> = {
@@ -52,6 +52,16 @@ export function usePolling<T>({
   const errorCountRef = useRef(0);
   const isFirstFetchRef = useRef(true);
 
+  // Use refs for callbacks so they never cause the effect to restart
+  const stopWhenRef = useRef(stopWhen);
+  const onDataRef = useRef(onData);
+  const onErrorRef = useRef(onError);
+  useLayoutEffect(() => {
+    stopWhenRef.current = stopWhen;
+    onDataRef.current = onData;
+    onErrorRef.current = onError;
+  });
+
   const stop = useCallback(() => {
     setIsStopped(true);
   }, []);
@@ -74,10 +84,11 @@ export function usePolling<T>({
     }
 
     let isMounted = true;
+    const controller = new AbortController();
 
     const fetchData = async () => {
       try {
-        const response = await fetch(url, { credentials: 'include' });
+        const response = await fetch(url, { credentials: 'include', signal: controller.signal });
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -99,14 +110,15 @@ export function usePolling<T>({
           isFirstFetchRef.current = false;
         }
 
-        if (onData) {
-          onData(payload);
+        if (onDataRef.current) {
+          onDataRef.current(payload);
         }
 
-        if (stopWhen && stopWhen(payload)) {
+        if (stopWhenRef.current && stopWhenRef.current(payload)) {
           stop();
         }
       } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') return;
         if (!isMounted) return;
 
         errorCountRef.current += 1;
@@ -122,8 +134,8 @@ export function usePolling<T>({
 
         setError(currentError);
 
-        if (onError) {
-          onError(currentError);
+        if (onErrorRef.current) {
+          onErrorRef.current(currentError);
         }
 
         if (errorCountRef.current >= 5) {
@@ -140,8 +152,9 @@ export function usePolling<T>({
     return () => {
       isMounted = false;
       clearInterval(timeoutId);
+      controller.abort();
     };
-  }, [url, interval, enabled, isStopped, onData, onError, stopWhen, stop]);
+  }, [url, interval, enabled, isStopped, stop]);
 
   return {
     data,

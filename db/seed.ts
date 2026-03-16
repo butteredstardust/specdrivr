@@ -114,6 +114,40 @@ async function main() {
   logger.info('Starting database seed...');
 
   try {
+    // Truncate all relevant tables to ensure a clean start
+    const tablesToReset = [
+      'test_results',
+      'audit_log',
+      'api_request_logs',
+      'git_commits',
+      'usage_snapshots',
+      'webhook_deliveries',
+      'webhooks',
+      'notification_preferences',
+      'notifications',
+      'agent_logs',
+      'agent_events',
+      'agent_sessions',
+      'file_changes',
+      'task_attempts',
+      'tasks',
+      'plan_reviews',
+      'plans',
+      'spec_versions',
+      'specifications',
+      'project_members',
+      'agent_config',
+      'invites',
+      'projects',
+      'accounts',
+      'users',
+    ];
+
+    logger.info('Truncating existing data...');
+    for (const table of tablesToReset) {
+      await db.execute(sql.raw(`TRUNCATE TABLE "${table}" CASCADE;`));
+    }
+
     await db.transaction(async (tx) => {
       // -------------------------------------------------------------------------
       // 1. Users + Accounts
@@ -253,32 +287,27 @@ async function main() {
 
       await tx.insert(agentConfig).values({ projectId: 5 }).onConflictDoNothing();
 
-      // -------------------------------------------------------------------------
-      // 4. Project Members
-      // -------------------------------------------------------------------------
-      const projectMembersData = [
-        // P1: Blaze UI
-        { projectId: 1, userId: 'user_alex', role: 'owner' as const, joinedAt: daysAgo(5) },
-        { projectId: 1, userId: 'user_sam', role: 'admin' as const, joinedAt: daysAgo(5) },
-        { projectId: 1, userId: 'user_jordan', role: 'member' as const, joinedAt: daysAgo(5) },
-        // P2: Auth Service
-        { projectId: 2, userId: 'user_sam', role: 'owner' as const, joinedAt: daysAgo(5) },
-        { projectId: 2, userId: 'user_alex', role: 'admin' as const, joinedAt: daysAgo(5) },
-        { projectId: 2, userId: 'user_jordan', role: 'member' as const, joinedAt: daysAgo(5) },
-        // P3: Payments v2
-        { projectId: 3, userId: 'user_alex', role: 'owner' as const, joinedAt: daysAgo(4) },
-        { projectId: 3, userId: 'user_sam', role: 'admin' as const, joinedAt: daysAgo(4) },
-        // P4: Data Pipeline
-        { projectId: 4, userId: 'user_jordan', role: 'owner' as const, joinedAt: daysAgo(4) },
-        { projectId: 4, userId: 'user_alex', role: 'member' as const, joinedAt: daysAgo(4) },
-        // P5: API Gateway
-        { projectId: 5, userId: 'user_alex', role: 'owner' as const, joinedAt: daysAgo(1) },
-        { projectId: 5, userId: 'user_jordan', role: 'admin' as const, joinedAt: daysAgo(1) },
-        { projectId: 5, userId: 'user_sam', role: 'member' as const, joinedAt: daysAgo(1) },
-      ];
+      // Ensure all demo users are members of ALL projects
+      const allProjectIds = demoProjects.map((p) => p.id);
+      const allUserIds = demoUsers.map((u) => u.id);
 
-      for (const m of projectMembersData) {
-        await tx.insert(projectMembers).values(m).onConflictDoNothing();
+      for (const projectId of allProjectIds) {
+        for (const userId of allUserIds) {
+          const isOwner =
+            (projectId === 1 && userId === 'user_alex') ||
+            (projectId === 2 && userId === 'user_sam') ||
+            (projectId === 4 && userId === 'user_jordan');
+
+          await tx
+            .insert(projectMembers)
+            .values({
+              projectId,
+              userId,
+              role: isOwner ? 'owner' : userId === 'user_jordan' ? 'member' : 'admin',
+              joinedAt: daysAgo(5),
+            })
+            .onConflictDoNothing();
+        }
       }
 
       // -------------------------------------------------------------------------
@@ -473,7 +502,7 @@ async function main() {
           specId: 3,
           versionNumber: 1,
           markdownContent:
-            '# OAuth2 Integration\n\nConfigure the OAuth2 provider, implement the callback handler, store tokens securely, add refresh token rotation, and write integration tests.',
+            '# OAuth2 Integration (In Progress)\n\n## Architecture Overview\nImplement OAuth 2.0 with Authorization Code Flow for secure third-party authentication. Support Google, GitHub, and Microsoft as initial providers. Implement proper token management with secure storage in HTTP-only cookies and Redis caching layer for session state. Establish clear security boundaries and error handling protocols.\n\n## Provider Configuration\nConfigure each OAuth provider: client_id, client_secret, redirect_uri management. Implement dynamic provider discovery for future extensibility. Set up secure credential rotation strategies. Define scopes for user data access: email, profile, openid. Handle provider-specific quirks and response formats.\n\n## Token Management\nImplement access token caching with TTL-based expiration. Design refresh token rotation strategy with security considerations. Store tokens in Redis with encrypted values. Implement automatic token refresh before expiration with retry logic for edge cases. Handle token revocation on logout.\n\n## Integration Points\nBuild OAuth callback handler route for post-authentication token exchange. Implement user creation/lookup logic based on provider claims. Establish user profile synchronization strategy. Set up session initialization after successful authentication. Define rollback procedures for failed authentications.\n\n## Security & Testing\nImplement PKCE (Proof Key for Code Exchange) for mobile clients. Add CSRF protection on callback routes. Write comprehensive integration tests for each provider. Perform security audit of token storage mechanisms. Load test authentication flows under peak conditions.',
           createdBy: 'user_sam',
           createdAt: daysAgo(5),
         },
@@ -606,7 +635,7 @@ async function main() {
           specVersionId: 4, // v1 of OAuth2
           status: 'executing' as const,
           markdownContent:
-            '## Plan: OAuth2 Integration\n\n1. Configure OAuth2 provider\n2. Implement callback handler\n3. Store OAuth tokens securely\n4. Add refresh token rotation\n5. Write integration tests',
+            '# Plan: OAuth2 Integration for Auth Service\n\n## Breakdown of Work\n\n### Phase 1: Provider Setup (Estimated: 8 hours)\n- Configure Google OAuth application in Google Cloud Console\n- Set up GitHub OAuth application in developer settings\n- Configure Microsoft Azure AD application registration\n- Create secure credential storage for client secrets\n- Implement environment variable management for multi-environment support\n- Write provider configuration abstraction layer\n\n### Phase 2: Core OAuth Flow (Estimated: 16 hours)\n- Implement Authorization Code Flow with PKCE support\n- Build OAuth callback handler route with secure state validation\n- Implement token exchange logic from authorization code\n- Create access/refresh token storage strategy in Redis\n- Build user session initialization after token acquisition\n- Implement logout and token revocation flows\n\n### Phase 3: User Integration (Estimated: 12 hours)\n- Implement user creation from provider claims (sub, email, name)\n- Build user lookup by provider ID and email\n- Create user profile synchronization from provider data\n- Implement link/unlink accounts functionality\n- Handle edge case: existing user email from different provider\n- Build test user data fixtures for each provider\n\n### Phase 4: Security Hardening (Estimated: 10 hours)\n- Implement CSRF token validation on callback routes\n- Set up HTTP-only cookie configuration for token storage\n- Implement rate limiting on auth endpoints\n- Add security headers (CSP, X-Frame-Options, etc.)\n- Perform OWASP Top 10 security review\n- Document security architecture and threat model\n\n### Phase 5: Testing & Documentation (Estimated: 10 hours)\n- Write integration tests for each OAuth provider\n- Create end-to-end test flows for success and failure paths\n- Document provider-specific setup instructions\n- Create troubleshooting guide for common OAuth issues\n- Write API documentation for auth endpoints\n- Perform load testing on authentication endpoints\n\n## Risk Mitigation\n- Provider API changes: Implement adapter pattern for provider-specific logic\n- Token expiration: Implement automatic refresh with user notification\n- Third-party outages: Design fallback authentication mechanisms\n- Security vulnerabilities: Subscribe to OAuth/OIDC security bulletins',
           approvedAt: daysAgo(3),
           approvedBy: 'user_alex',
           taskCount: 5,
@@ -616,6 +645,18 @@ async function main() {
         },
         {
           id: 4,
+          specId: 4,
+          specVersionId: 5, // v1 of Session Management
+          status: 'pending_approval' as const,
+          markdownContent:
+            '# Plan: Session Management Implementation\n\n## Breakdown of Work\n\n### Phase 1: Session Schema & Storage (Estimated: 6 hours)\n- Design session table schema with TTL and device tracking\n- Implement Redis cache layer for active sessions\n- Create session lifecycle state machine\n- Build session lookup and validation logic\n- Implement session cleanup for expired records\n- Set up session activity audit logging\n\n### Phase 2: Session Lifecycle (Estimated: 8 hours)\n- Implement session creation on login with device fingerprinting\n- Build session refresh logic with sliding expiry window\n- Implement session invalidation on logout\n- Create forced logout (admin-triggered) capability\n- Build session lock/unlock for 2FA flows\n- Implement multi-device session management\n\n### Phase 3: Device & Security Tracking (Estimated: 7 hours)\n- Implement device identification and tracking\n- Build suspicious activity detection (IP change, user agent mismatch)\n- Create session suspension workflow\n- Implement concurrent session limits per user\n- Build session conflict resolution\n- Add geolocation-based session validation\n\n### Phase 4: Admin & Monitoring Tools (Estimated: 5 hours)\n- Build admin session dashboard (active sessions per user)\n- Implement bulk session termination\n- Create session audit trail view\n- Build session anomaly alerts\n- Implement rate limiting on session creation\n- Add monitoring/alerting for high-risk activities\n\n### Phase 5: Testing & Documentation (Estimated: 6 hours)\n- Write integration tests for session lifecycle\n- Create load tests for concurrent session handling\n- Test session expiry and cleanup edge cases\n- Build end-to-end test flows for multi-device scenarios\n- Write API documentation for session endpoints\n- Document security considerations and threat model\n\n## Risk Mitigation\n- Session fixation attacks: Use cryptographically secure random tokens with rotation\n- Concurrent session abuse: Implement device fingerprinting and geo-location validation\n- Session storage failure: Redis cluster with failover and database fallback\n- Expired session cleanup: Implement async cleanup jobs with monitoring',
+          taskCount: 0,
+          totalEstimatedMinutes: 200,
+          createdBy: 'user_sam',
+          createdAt: daysAgo(2),
+        },
+        {
+          id: 5,
           specId: 5,
           specVersionId: 6, // v1 of Stripe Checkout
           status: 'pending_approval' as const,
@@ -627,7 +668,7 @@ async function main() {
           createdAt: daysAgo(1),
         },
         {
-          id: 5,
+          id: 6,
           specId: 7,
           specVersionId: 8, // v1 of Batch Processor
           status: 'executing' as const,
@@ -641,7 +682,7 @@ async function main() {
           createdAt: daysAgo(4),
         },
         {
-          id: 6,
+          id: 7,
           specId: 1,
           specVersionId: 1, // v1 of Component Library (old plan, replaced)
           status: 'abandoned' as const,
@@ -691,17 +732,17 @@ async function main() {
           notes: 'Updated plan looks good. Approved.',
           createdAt: daysAgo(3),
         },
-        // Plan 5: approved by Alex (day -3)
+        // Plan 6: approved by Alex (day -3)
         {
-          planId: 5,
+          planId: 6,
           userId: 'user_alex',
           action: 'approved',
           notes: 'Solid plan. Watch the OOM risk on the worker.',
           createdAt: daysAgo(3),
         },
-        // Plan 6: abandoned by Sam (day -4)
+        // Plan 7: abandoned by Sam (day -4)
         {
-          planId: 6,
+          planId: 7,
           userId: 'user_sam',
           action: 'abandoned',
           notes: 'Abandoning — spec was revised to v2. Use the new plan.',
@@ -724,6 +765,8 @@ async function main() {
           specId: 1,
           externalId: 'T-101',
           title: 'Audit existing components',
+          description:
+            'Review all existing UI components across the codebase. Document their current state, usage patterns, and potential for consolidation.',
           status: 'done' as const,
           executionOrder: 1,
           startedAt: daysAgo(3),
@@ -735,6 +778,8 @@ async function main() {
           specId: 1,
           externalId: 'T-102',
           title: 'Extract design tokens',
+          description:
+            'Extract color, spacing, typography, and sizing tokens from the design system. Create a comprehensive token list in JSON format for use across components.',
           status: 'done' as const,
           executionOrder: 2,
           dependsOn: ['T-101'],
@@ -747,6 +792,8 @@ async function main() {
           specId: 1,
           externalId: 'T-103',
           title: 'Build Button variants',
+          description:
+            'Create Button component with variants for primary, secondary, danger, and ghost. Include support for sizes (sm, md, lg) and loading states.',
           status: 'done' as const,
           executionOrder: 3,
           dependsOn: ['T-102'],
@@ -797,6 +844,8 @@ async function main() {
           specId: 2,
           externalId: 'T-201',
           title: 'Create CSS variable system',
+          description:
+            'Set up CSS custom properties for colors, spacing, typography, shadows, and transitions. Update globals.css with theme variables that support light and dark modes.',
           status: 'done' as const,
           executionOrder: 1,
           startedAt: daysAgo(3),
@@ -846,10 +895,13 @@ async function main() {
           specId: 3,
           externalId: 'T-301',
           title: 'Configure OAuth2 provider',
+          description:
+            'Set up OAuth 2.0 provider configuration for Google and GitHub. Create OAuth applications in provider consoles and store client credentials securely in environment variables.',
           status: 'done' as const,
           executionOrder: 1,
           startedAt: daysAgo(3),
           completedAt: new Date(daysAgo(3).getTime() + 3 * 3600 * 1000),
+          currentAttemptId: 1,
         },
         {
           id: 302,
@@ -881,9 +933,10 @@ async function main() {
           specId: 3,
           externalId: 'T-304',
           title: 'Add refresh token rotation',
-          status: 'todo' as const,
+          status: 'blocked' as const,
           executionOrder: 4,
           dependsOn: ['T-303'],
+          blockedReason: 'Waiting for T-303 (token storage) to complete first',
         },
         {
           id: 305,
@@ -976,6 +1029,37 @@ async function main() {
           exitCode: 0,
           workingDirectory: '/workspace/blaze-ui',
         },
+        // T-301: 1 succeeded attempt (id=5)
+        {
+          id: 5,
+          taskId: 301,
+          seq: 1,
+          status: 'succeeded' as const,
+          startedAt: new Date(daysAgo(3).getTime() + 0 * 3600 * 1000),
+          endedAt: new Date(daysAgo(3).getTime() + 3 * 3600 * 1000),
+          exitCode: 0,
+          workingDirectory: '/workspace/auth-service',
+          logLines: [
+            '[2026-03-12T18:45:00Z] Starting OAuth provider configuration task',
+            '[2026-03-12T18:45:15Z] Checking Google Cloud project setup...',
+            '[2026-03-12T18:45:32Z] ✓ Google OAuth application created',
+            '[2026-03-12T18:46:01Z] Client ID: 123456789-abcdefghijk.apps.googleusercontent.com',
+            '[2026-03-12T18:46:15Z] Client Secret: gocspx-xxxxxxxxxxxxxxxxxxxxx',
+            '[2026-03-12T18:46:45Z] Checking GitHub OAuth app setup...',
+            '[2026-03-12T18:47:02Z] ✓ GitHub OAuth application created',
+            '[2026-03-12T18:47:18Z] Client ID: Iv1.xxxxxxxxxxxxxxxx',
+            '[2026-03-12T18:47:35Z] Client Secret: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+            '[2026-03-12T18:48:01Z] Writing credentials to .env file...',
+            '[2026-03-12T18:48:15Z] ✓ Environment variables configured',
+            '[2026-03-12T18:48:32Z] Validating OAuth provider connections...',
+            '[2026-03-12T18:49:01Z] ✓ Google provider validated',
+            '[2026-03-12T18:49:15Z] ✓ GitHub provider validated',
+            '[2026-03-12T18:49:45Z] Task completed successfully in 3 hours',
+          ],
+          agentVersion: 'specdrivr-agent/1.3.0',
+          promptTokensUsed: 2845,
+          completionTokensUsed: 1203,
+        },
         // T-303: 1 running attempt (id=2)
         {
           id: 2,
@@ -1056,6 +1140,25 @@ async function main() {
           linesAdded: 34,
           linesRemoved: 12,
         },
+        // T-301: OAuth provider configuration
+        {
+          taskId: 301,
+          attemptId: 5,
+          filePath: 'src/lib/oauth-config.ts',
+          changeType: 'created',
+          language: 'typescript',
+          linesAdded: 89,
+          linesRemoved: 0,
+        },
+        {
+          taskId: 301,
+          attemptId: 5,
+          filePath: '.env.example',
+          changeType: 'modified',
+          language: 'text',
+          linesAdded: 5,
+          linesRemoved: 0,
+        },
         // T-302: OAuth callback
         {
           taskId: 302,
@@ -1064,6 +1167,88 @@ async function main() {
           language: 'typescript',
           linesAdded: 76,
           linesRemoved: 0,
+          diff: `diff --git a/src/app/api/auth/callback/route.ts b/src/app/api/auth/callback/route.ts
+new file mode 100644
+index 0000000..1234567
+--- /dev/null
++++ b/src/app/api/auth/callback/route.ts
+@@ -0,0 +1,76 @@
++'use server';
++
++import { NextRequest, NextResponse } from 'next/server';
++import crypto from 'crypto';
++
++// OAuth callback handler for authorization code exchange
++export async function GET(request: NextRequest) {
++  const searchParams = request.nextUrl.searchParams;
++  const code = searchParams.get('code');
++  const state = searchParams.get('state');
++  const error = searchParams.get('error');
++  const errorDescription = searchParams.get('error_description');
++
++  // Handle OAuth errors
++  if (error) {
++    console.error(\`OAuth error: \${error} - \${errorDescription}\`);
++    return NextResponse.redirect(new URL(\`/auth/error?error=\${error}\`, request.url));
++  }
++
++  // Validate state parameter to prevent CSRF
++  const sessionState = request.cookies.get('oauth_state')?.value;
++  if (!state || state !== sessionState) {
++    console.error('State mismatch - potential CSRF attack');
++    return NextResponse.redirect(new URL('/auth/error?error=invalid_state', request.url));
++  }
++
++  if (!code) {
++    return NextResponse.redirect(new URL('/auth/error?error=missing_code', request.url));
++  }
++
++  try {
++    // Exchange authorization code for access token
++    const provider = request.cookies.get('oauth_provider')?.value || 'google';
++    const tokenResponse = await exchangeCodeForToken(code, provider);
++
++    if (!tokenResponse.access_token) {
++      throw new Error('No access token in response');
++    }
++
++    // Fetch user profile from OAuth provider
++    const userProfile = await fetchUserProfile(tokenResponse.access_token, provider);
++
++    // Create or update user in database
++    const user = await createOrUpdateUser(userProfile, provider);
++
++    // Create session
++    const session = await createSession(user.id);
++
++    // Clear OAuth temp cookies
++    const response = NextResponse.redirect(new URL('/dashboard', request.url));
++    response.cookies.delete('oauth_state');
++    response.cookies.delete('oauth_provider');
++    response.cookies.set('session', session.token, {
++      httpOnly: true,
++      secure: true,
++      sameSite: 'lax',
++      maxAge: 86400 * 7,
++    });
++
++    return response;
++  } catch (error) {
++    console.error('OAuth callback error:', error);
++    return NextResponse.redirect(new URL('/auth/error?error=callback_failed', request.url));
++  }
++}
++
++async function exchangeCodeForToken(code: string, provider: string) {
++  // Implementation for token exchange
++  // Varies by OAuth provider
++  return {};
++}
++
++async function fetchUserProfile(token: string, provider: string) {
++  // Implementation for fetching user profile
++  return {};
++}`,
         },
         // T-501: job queue
         {
@@ -1073,6 +1258,96 @@ async function main() {
           language: 'typescript',
           linesAdded: 143,
           linesRemoved: 0,
+          diff: `diff --git a/src/lib/queue.ts b/src/lib/queue.ts
+new file mode 100644
+index 0000000..2345678
+--- /dev/null
++++ b/src/lib/queue.ts
+@@ -0,0 +1,143 @@
++import Bull from 'bull';
++import { redis } from './redis';
++
++// Job queue for async task processing
++export const jobQueue = new Bull('jobs', {
++  redis: {
++    host: process.env.REDIS_HOST,
++    port: parseInt(process.env.REDIS_PORT || '6379'),
++  },
++});
++
++export interface JobData {
++  type: string;
++  payload: Record<string, unknown>;
++  retryCount?: number;
++  maxRetries?: number;
++}
++
++// Process jobs with error handling and retry logic
++jobQueue.process(async (job) => {
++  const { type, payload, retryCount = 0, maxRetries = 3 } = job.data as JobData;
++
++  try {
++    switch (type) {
++      case 'send_email':
++        return await sendEmailJob(payload);
++      case 'generate_report':
++        return await generateReportJob(payload);
++      case 'sync_external_data':
++        return await syncExternalDataJob(payload);
++      default:
++        throw new Error(\`Unknown job type: \${type}\`);
++    }
++  } catch (error) {
++    if (retryCount < maxRetries) {
++      throw error; // Bull will retry
++    }
++    // Max retries exceeded
++    console.error(\`Job \${job.id} failed after \${retryCount} retries\`, error);
++    throw error;
++  }
++});
++
++// Job completion and failure handlers
++jobQueue.on('completed', (job) => {
++  console.log(\`Job \${job.id} completed\`, job.data);
++});
++
++jobQueue.on('failed', (job, error) => {
++  console.error(\`Job \${job.id} failed\`, error);
++});
++
++// Queue job for processing
++export async function enqueueJob(type: string, payload: Record<string, unknown>) {
++  return await jobQueue.add({ type, payload }, {
++    attempts: 3,
++    backoff: {
++      type: 'exponential',
++      delay: 2000,
++    },
++    removeOnComplete: true,
++  });
++}
++
++// Implementation for email sending job
++async function sendEmailJob(payload: Record<string, unknown>) {
++  const { to, subject, body } = payload;
++  // Send email implementation
++  return { sent: true };
++}
++
++// Implementation for report generation job
++async function generateReportJob(payload: Record<string, unknown>) {
++  const { reportId, format } = payload;
++  // Generate report implementation
++  return { reportId, format };
++}
++
++// Implementation for external data sync job
++async function syncExternalDataJob(payload: Record<string, unknown>) {
++  const { source, destination } = payload;
++  // Sync data implementation
++  return { synced: true };
++}`,
         },
         {
           taskId: 501,
@@ -1152,6 +1427,22 @@ async function main() {
           endedAt: daysAgo(2),
           gitBaseBranch: 'main',
           agentVersion: 'specdrivr-agent/1.2.0',
+        },
+        {
+          id: 5,
+          projectId: 2,
+          specId: 3,
+          planId: 3,
+          status: 'running' as const,
+          currentTaskId: 303,
+          tasksExecuted: 2,
+          tasksSucceeded: 2,
+          tasksFailed: 0,
+          startedBy: 'user_sam',
+          startedAt: hoursAgo(2),
+          lastHeartbeatAt: hoursAgo(0),
+          gitBaseBranch: 'feat/oauth2-integration',
+          agentVersion: 'specdrivr-agent/1.3.0',
         },
       ];
 
@@ -1349,6 +1640,51 @@ async function main() {
           metadata: { errorMessage: 'Worker process OOM killed' },
           createdAt: new Date(daysAgo(2).getTime() + 3 * 3600 * 1000 + 120000),
         },
+
+        // Session 5 — OAuth2 Integration (running)
+        {
+          sessionId: 5,
+          specId: 3,
+          eventType: 'SESSION_STARTED',
+          message: 'Agent session started for OAuth2 Integration',
+          createdAt: hoursAgo(2),
+        },
+        {
+          sessionId: 5,
+          specId: 3,
+          taskId: 301,
+          eventType: 'TASK_DONE',
+          message: 'T-301 Configure OAuth2 provider — completed in 3 hours',
+          metadata: { duration: '3h', providers: ['google', 'github'] },
+          createdAt: hoursAgo(1),
+        },
+        {
+          sessionId: 5,
+          specId: 3,
+          taskId: 302,
+          eventType: 'TASK_DONE',
+          message: 'T-302 Implement callback handler — completed in 2.5 hours',
+          metadata: { duration: '2.5h', routes: 2 },
+          createdAt: new Date(hoursAgo(1).getTime() - 30 * 60000),
+        },
+        {
+          sessionId: 5,
+          specId: 3,
+          taskId: 303,
+          eventType: 'TASK_STARTED',
+          message: 'Started T-303 Store OAuth tokens securely',
+          metadata: { approach: 'Redis + HTTP-only cookies' },
+          createdAt: hoursAgo(0.5),
+        },
+        {
+          sessionId: 5,
+          specId: 3,
+          taskId: 303,
+          eventType: 'TASK_PROGRESS',
+          message: 'Created Redis schema for token storage and implemented encryption',
+          metadata: { files: ['src/lib/oauth/token-storage.ts'], status: 'in-progress' },
+          createdAt: hoursAgo(0.1),
+        },
       ];
 
       for (const e of agentEventsData) {
@@ -1457,6 +1793,45 @@ async function main() {
           context: { taskId: 503, exitCode: 137, memoryMB: 638, limitMB: 512 },
           timestamp: new Date(daysAgo(2).getTime() + 2.5 * 3600 * 1000),
         },
+        // Session 5 logs (running)
+        {
+          taskId: 301,
+          sessionId: 5,
+          projectId: 2,
+          level: 'info' as const,
+          message:
+            'OAuth2 provider configuration: Google (client_id: ***), GitHub (client_id: ***)',
+          context: { taskId: 301, providers: ['google', 'github'] },
+          timestamp: hoursAgo(1.8),
+        },
+        {
+          taskId: 302,
+          sessionId: 5,
+          projectId: 2,
+          level: 'info' as const,
+          message: 'Callback handler deployed at /api/auth/callback with CSRF protection',
+          context: { taskId: 302, route: '/api/auth/callback', csrf: true },
+          timestamp: hoursAgo(1.2),
+        },
+        {
+          taskId: 303,
+          sessionId: 5,
+          projectId: 2,
+          level: 'info' as const,
+          message: 'Redis schema created for OAuth token storage with TTL-based expiry',
+          context: { taskId: 303, schema: 'oauth:tokens', ttl: 604800 },
+          timestamp: hoursAgo(0.3),
+        },
+        {
+          taskId: 303,
+          sessionId: 5,
+          projectId: 2,
+          level: 'debug' as const,
+          message: 'Implementing AES-256-GCM encryption for sensitive token data',
+          isInternal: true,
+          context: { taskId: 303, cipher: 'AES-256-GCM' },
+          timestamp: hoursAgo(0.1),
+        },
       ];
 
       for (const l of agentLogsData) {
@@ -1464,82 +1839,54 @@ async function main() {
       }
 
       // -------------------------------------------------------------------------
-      // 17. Notifications (2+ per user)
+      // 17. Notifications (Comprehensive coverage for all users)
       // -------------------------------------------------------------------------
-      const notificationsData = [
-        // Alex
+      const notificationTemplates = [
         {
-          userId: 'user_alex',
           type: 'plan_approved',
           title: 'Plan approved',
-          body: 'Sam approved the plan for "Component Library Refactor".',
-          linkUrl: '/projects/blaze-ui/specs/1/plans/1',
-          actorUserId: 'user_sam',
-          projectId: 1,
-          resourceType: 'plan',
-          resourceId: '1',
-          createdAt: daysAgo(3),
+          body: 'The implementation plan for {resource} has been approved.',
         },
         {
-          userId: 'user_alex',
           type: 'session_complete',
           title: 'Session completed',
-          body: 'Agent session for "Component Library Refactor" completed — 6/6 tasks succeeded.',
-          linkUrl: '/projects/blaze-ui/specs/1/sessions/1',
-          projectId: 1,
-          resourceType: 'agent_session',
-          resourceId: '1',
-          createdAt: daysAgo(2),
-        },
-        // Sam
-        {
-          userId: 'user_sam',
-          type: 'plan_generated',
-          title: 'Plan ready for review',
-          body: 'A plan has been generated for "Stripe Checkout Flow" — awaiting approval.',
-          linkUrl: '/projects/payments-v2/specs/5/plans/4',
-          projectId: 3,
-          resourceType: 'plan',
-          resourceId: '4',
-          createdAt: daysAgo(1),
+          body: 'Agent session for {resource} finished successfully.',
         },
         {
-          userId: 'user_sam',
           type: 'task_blocked',
           title: 'Task blocked',
-          body: 'T-504 "Add monitoring hooks" is blocked on Data Pipeline.',
-          linkUrl: '/projects/data-pipeline/specs/7/tasks/504',
-          projectId: 4,
-          resourceType: 'task',
-          resourceId: '504',
-          createdAt: daysAgo(2),
+          body: 'A task in {resource} needs your attention.',
         },
-        // Jordan
         {
-          userId: 'user_jordan',
           type: 'session_failed',
           title: 'Session failed',
-          body: 'Agent session for "Batch Processor" failed — worker OOM killed.',
-          linkUrl: '/projects/data-pipeline/specs/7/sessions/4',
-          projectId: 4,
-          resourceType: 'agent_session',
-          resourceId: '4',
-          createdAt: daysAgo(2),
-        },
-        {
-          userId: 'user_jordan',
-          type: 'member_invited',
-          title: 'Added to project',
-          body: 'Alex Rivera added you to "Blaze UI Redesign" as a member.',
-          linkUrl: '/projects/blaze-ui',
-          actorUserId: 'user_alex',
-          projectId: 1,
-          createdAt: daysAgo(5),
+          body: 'Agent session for {resource} failed.',
         },
       ];
 
-      for (const n of notificationsData) {
-        await tx.insert(notifications).values(n).onConflictDoNothing();
+      for (const user of demoUsers) {
+        for (const project of demoProjects) {
+          // Add 2-3 notifications per user per project
+          for (let i = 0; i < 2; i++) {
+            const template =
+              notificationTemplates[
+                (user.id.length + project.id + i) % notificationTemplates.length
+              ];
+            await tx
+              .insert(notifications)
+              .values({
+                userId: user.id,
+                type: template.type,
+                title: template.title,
+                body: template.body.replace('{resource}', project.name),
+                linkUrl: `/projects/${project.id}`,
+                projectId: project.id,
+                createdAt: daysAgo(i + 1),
+                readAt: i === 0 ? null : daysAgo(0), // One unread, one read
+              })
+              .onConflictDoNothing();
+          }
+        }
       }
 
       // -------------------------------------------------------------------------
@@ -2159,7 +2506,7 @@ async function main() {
           sessions: 4,
           agentEvents: 23,
           agentLogs: 10,
-          notifications: 6,
+          notifications: 60,
           notifPrefs: 6,
           webhooks: 3,
           webhookDeliveries: 4,

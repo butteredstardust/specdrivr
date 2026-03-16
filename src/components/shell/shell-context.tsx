@@ -12,34 +12,40 @@ interface ShellContextValue {
   user: { id: string; name: string; email: string; role?: string; onboardingStep?: number };
   shortcutsOpen: boolean;
   setShortcutsOpen: (v: boolean) => void;
+  pageLabel: string | null;
+  setPageLabel: (label: string | null) => void;
 }
 
 interface ShellProviderProps {
   user: ShellContextValue['user'];
+  initialId?: number | null;
   children: React.ReactNode;
 }
 
 const ShellContext = createContext<ShellContextValue | null>(null);
 
-export function ShellProvider({ user, children }: ShellProviderProps) {
+export function ShellProvider({ user, initialId, children }: ShellProviderProps) {
   const router = useRouter();
-  const [activeProjectId, setActiveProjectIdState] = useState<number | null>(() => {
-    if (typeof window === 'undefined') return null;
-    const stored = localStorage.getItem('specdrivr:activeProjectId');
-    return stored ? parseInt(stored, 10) : null;
-  });
-  const [devMode, setDevModeState] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-    return localStorage.getItem('specdrivr:devMode') === 'true';
-  });
+  const [activeProjectId, setActiveProjectIdState] = useState<number | null>(initialId ?? null);
+  const [devMode, setDevModeState] = useState<boolean>(false);
+
+  // Hydrate from localStorage after mount to avoid SSR/client mismatch
+  useEffect(() => {
+    const storedDevMode = localStorage.getItem('specdrivr:devMode');
+    if (storedDevMode === 'true') setDevModeState(true);
+  }, []);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [pageLabel, setPageLabel] = useState<string | null>(null);
   const firstKeyRef = useRef<string | null>(null);
   const firstKeyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const setActiveProjectId = useCallback((id: number | null) => {
     setActiveProjectIdState(id);
-    if (id === null) localStorage.removeItem('specdrivr:activeProjectId');
-    else localStorage.setItem('specdrivr:activeProjectId', String(id));
+    if (id === null) {
+      document.cookie = 'active-project-id=; path=/; max-age=0; SameSite=Lax';
+    } else {
+      document.cookie = `active-project-id=${id}; path=/; max-age=31536000; SameSite=Lax`;
+    }
   }, []);
 
   const setDevMode = useCallback((v: boolean) => {
@@ -146,6 +152,8 @@ export function ShellProvider({ user, children }: ShellProviderProps) {
         user,
         shortcutsOpen,
         setShortcutsOpen,
+        pageLabel,
+        setPageLabel,
       }}
     >
       {children}

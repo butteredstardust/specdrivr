@@ -4,11 +4,17 @@ import { auth } from '@/lib/auth';
 import { handleApiError, formatErrorResponse } from '@/lib/error-handler';
 import { z } from 'zod';
 import { requireMember } from '@/lib/rbac';
+import { db } from '@/db';
+import { projectMembers, agentSessions, specifications, tasks } from '@/db/schema';
+import { eq, and, count, inArray, sql, desc } from 'drizzle-orm';
 
 const SessionQuerySchema = z.object({
   projectId: z.coerce.number().int().positive().optional(),
   specId: z.coerce.number().int().positive().optional(),
   status: z.enum(['running', 'paused', 'completed', 'failed', 'cancelled']).optional(),
+  search: z.string().optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
   limit: z.coerce.number().int().positive().default(50),
   offset: z.coerce.number().int().nonnegative().default(0),
 });
@@ -32,6 +38,14 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const query = SessionQuerySchema.parse(Object.fromEntries(searchParams.entries()));
 
+    const totalTasksSubq = db
+      .select({ planId: tasks.planId, total: count().as('total') })
+      .from(tasks)
+      .groupBy(tasks.planId)
+      .as('task_counts');
+
+    const whereConditions = [];
+
     if (query.projectId) {
       const { allowed } = await requireMember(session.user.id, query.projectId);
       if (!allowed) {
@@ -40,22 +54,72 @@ export async function GET(request: NextRequest) {
           { status: 403 }
         );
       }
-      const sessions = await agentSessionRepository.getByProjectId(
-        query.projectId,
-        query.limit,
-        query.offset
-      );
-      return NextResponse.json({
-        data: sessions,
-        meta: { limit: query.limit, offset: query.offset, count: sessions.length },
-      });
+      whereConditions.push(eq(agentSessions.projectId, query.projectId));
+    } else {
+      // Scope to all projects the user is a member of
+      const memberProjectIds = await db
+        .select({ projectId: projectMembers.projectId })
+        .from(projectMembers)
+        .where(eq(projectMembers.userId, session.user.id))
+        .then((rows) => rows.map((r) => r.projectId));
+
+      if (memberProjectIds.length === 0) {
+        return NextResponse.json({
+          data: [],
+          meta: { limit: query.limit, offset: query.offset, count: 0 },
+        });
+      }
+      whereConditions.push(inArray(agentSessions.projectId, memberProjectIds));
     }
 
-    // In a production app, we'd strictly filter here to user's projects.
-    const allSessions = await agentSessionRepository.getAll(query.limit, query.offset);
+    if (query.status) {
+      whereConditions.push(eq(agentSessions.status, query.status));
+    }
+
+    if (query.specId) {
+      whereConditions.push(eq(agentSessions.specId, query.specId));
+    }
+
+    if (query.search) {
+      whereConditions.push(sql`${specifications.name} ILIKE ${'%' + query.search + '%'}`);
+    }
+
+    if (query.from) {
+      whereConditions.push(sql`${agentSessions.startedAt} >= ${new Date(query.from).toISOString()}`);
+    }
+
+    if (query.to) {
+      whereConditions.push(sql`${agentSessions.startedAt} <= ${new Date(query.to).toISOString()}`);
+    }
+
+    const rows = await db
+      .select({
+        session: agentSessions,
+        specName: specifications.name,
+        currentTaskExternalId: tasks.externalId,
+        currentTaskTitle: tasks.title,
+        totalTasks: totalTasksSubq.total,
+      })
+      .from(agentSessions)
+      .leftJoin(specifications, eq(agentSessions.specId, specifications.id))
+      .leftJoin(tasks, eq(agentSessions.currentTaskId, tasks.id))
+      .leftJoin(totalTasksSubq, eq(agentSessions.planId, totalTasksSubq.planId))
+      .where(and(...whereConditions))
+      .limit(query.limit)
+      .offset(query.offset)
+      .orderBy(desc(agentSessions.startedAt));
+
+    const enrichedSessions = rows.map((r) => ({
+      ...r.session,
+      specTitle: r.specName ?? null, // UI Expects specTitle
+      currentTaskExternalId: r.currentTaskExternalId ?? null,
+      currentTaskTitle: r.currentTaskTitle ?? null,
+      totalTasks: r.totalTasks != null ? Number(r.totalTasks) : null,
+    }));
+
     return NextResponse.json({
-      data: allSessions,
-      meta: { limit: query.limit, offset: query.offset, count: allSessions.length },
+      data: enrichedSessions,
+      meta: { limit: query.limit, offset: query.offset, count: enrichedSessions.length },
     });
   } catch (error) {
     if (error instanceof z.ZodError) {

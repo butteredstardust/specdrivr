@@ -9,7 +9,7 @@ import {
   type TaskStatus,
 } from '@/db/schema';
 import * as schema from '@/db/schema';
-import { eq, desc, sql, and, asc } from 'drizzle-orm';
+import { eq, desc, sql, and, asc, getTableColumns } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, ValidationError, DatabaseError } from '@/lib/errors';
 import { dispatchWebhookEvent, type WebhookEventType } from '@/lib/webhooks';
@@ -75,6 +75,13 @@ export class TaskRepository extends BaseRepository {
       db.select().from(tasks).where(eq(tasks.planId, planId)).orderBy(desc(tasks.createdAt))
     );
 
+    return result as Task[];
+  }
+
+  async getBySpecId(specId: number): Promise<Task[]> {
+    const result = await this.executeQuery(() =>
+      db.select().from(tasks).where(eq(tasks.specId, specId)).orderBy(asc(tasks.executionOrder))
+    );
     return result as Task[];
   }
 
@@ -605,6 +612,19 @@ export class TaskRepository extends BaseRepository {
         .from(schema.fileChanges)
         .where(eq(schema.fileChanges.taskId, taskId))
         .orderBy(desc(schema.fileChanges.createdAt))
+    );
+  }
+
+  async getFileChangesBySpecId(
+    specId: number
+  ): Promise<(typeof schema.fileChanges.$inferSelect)[]> {
+    return this.executeQuery(() =>
+      db
+        .select(getTableColumns(schema.fileChanges))
+        .from(schema.fileChanges)
+        .innerJoin(tasks, eq(schema.fileChanges.taskId, tasks.id))
+        .where(eq(tasks.specId, specId))
+        .orderBy(asc(schema.fileChanges.createdAt))
     );
   }
 

@@ -1,6 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  cacheComponents: true,
+  reactCompiler: true,
+  experimental: {
+    turbopackFileSystemCacheForBuild: true,
+  },
   async headers() {
     return [
       {

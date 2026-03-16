@@ -206,15 +206,19 @@ export function TaskDrawer() {
       <Drawer.Root open={!!activeTaskId} onOpenChange={handleOpenChange} direction="right">
         <Drawer.Portal>
           <Drawer.Overlay className="fixed inset-0 z-40 bg-black/60" />
-          <Drawer.Content className="fixed top-0 right-0 bottom-0 z-50 flex w-[640px] flex-col border-l border-[--border-default] bg-[--bg-surface] outline-none">
+          <Drawer.Content className="border-border-default bg-bg-surface fixed top-0 right-0 bottom-0 z-50 flex w-[640px] flex-col border-l outline-none">
+            <Drawer.Title className="sr-only">{task?.title ?? 'Task'}</Drawer.Title>
+            <Drawer.Description className="sr-only">
+              {task ? `${task.externalId} — ${task.status}` : 'Loading task'}
+            </Drawer.Description>
             {task && (
               <>
                 {/* Header */}
-                <div className="flex shrink-0 items-center gap-3 border-b border-[--border-default] px-5 py-4">
-                  <span className="rounded-sm bg-[--phosphor-amber]/10 px-1.5 py-0.5 font-mono text-xs text-[--phosphor-amber]">
+                <div className="border-border-default flex shrink-0 items-center gap-3 border-b px-5 py-4">
+                  <span className="bg-phosphor-amber/10 text-phosphor-amber rounded-sm px-1.5 py-0.5 font-mono text-xs">
                     {task.externalId}
                   </span>
-                  <span className="flex-1 truncate text-base font-medium text-[--text-primary]">
+                  <span className="text-text-primary flex-1 truncate text-base font-medium">
                     {task.title}
                   </span>
                   <DaemonMascot size={24} expression={statusToExpression(task.status)} />
@@ -259,12 +263,12 @@ export function TaskDrawer() {
 
                 {/* Tabs */}
                 <Tabs defaultValue="overview" className="flex min-h-0 flex-1 flex-col">
-                  <TabsList className="mx-5 mt-3 mb-0 h-auto shrink-0 justify-start gap-0 rounded-none border-b border-[--border-default] bg-transparent p-0">
+                  <TabsList className="border-border-default mx-5 mt-3 mb-0 h-auto shrink-0 justify-start gap-0 rounded-none border-b bg-transparent p-0">
                     {DRAWER_TABS.map((tab) => (
                       <TabsTrigger
                         key={tab}
                         value={tab}
-                        className="rounded-none bg-transparent px-4 py-2 font-mono text-xs tracking-widest uppercase shadow-none data-[state=active]:border-b-2 data-[state=active]:border-[--accent-violet] data-[state=active]:text-[--text-primary] data-[state=inactive]:text-[--text-muted]"
+                        className="data-[state=active]:border-accent-violet data-[state=active]:text-text-primary data-[state=inactive]:text-text-muted rounded-none bg-transparent px-4 py-2 font-mono text-xs tracking-widest uppercase shadow-none data-[state=active]:border-b-2"
                       >
                         {tab}
                       </TabsTrigger>
@@ -300,7 +304,7 @@ export function TaskDrawer() {
             )}
             {!task && isLoading && (
               <div className="flex flex-1 items-center justify-center">
-                <span className="font-mono text-xs text-[--text-muted]">Loading...</span>
+                <span className="text-text-muted font-mono text-xs">Loading...</span>
               </div>
             )}
           </Drawer.Content>
@@ -351,7 +355,7 @@ function DrawerFooter({
   const [jsonOpen, setJsonOpen] = useState(false);
 
   return (
-    <div className="shrink-0 space-y-3 border-t border-[--border-default] px-5 py-3">
+    <div className="border-border-default shrink-0 space-y-3 border-t px-5 py-3">
       <div className="flex items-center gap-2">
         {showRerun && (
           <Button variant="outline" size="sm" onClick={onRetry}>
@@ -399,7 +403,7 @@ function DrawerFooter({
       </div>
 
       {devMode && (
-        <div className="flex items-center gap-4 font-mono text-[10px] text-[--text-muted]">
+        <div className="text-text-muted flex items-center gap-4 font-mono text-[10px]">
           <span>Prompt: {task.promptTokensUsed?.toLocaleString() ?? '---'}</span>
           <span>Completion: {task.completionTokensUsed?.toLocaleString() ?? '---'}</span>
           <span>Cost: ${task.totalCostUsd != null ? task.totalCostUsd.toFixed(4) : '---'}</span>
@@ -407,11 +411,11 @@ function DrawerFooter({
       )}
       {devMode && (
         <Collapsible open={jsonOpen} onOpenChange={setJsonOpen}>
-          <CollapsibleTrigger className="cursor-pointer font-mono text-[10px] text-[--text-muted] select-none">
+          <CollapsibleTrigger className="text-text-muted cursor-pointer font-mono text-[10px] select-none">
             JSON inspector
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <pre className="mt-1 overflow-auto rounded bg-[--terminal-bg] p-3 font-mono text-[10px] text-[--terminal-green]">
+            <pre className="bg-terminal-bg text-terminal-green mt-1 overflow-auto rounded p-3 font-mono text-[10px]">
               {JSON.stringify(task, null, 2)}
             </pre>
           </CollapsibleContent>

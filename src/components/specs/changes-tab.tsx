@@ -60,19 +60,22 @@ export function ChangesTab({ specId }: ChangesTabProps): React.ReactElement {
 
   if (isLoading) {
     return (
-      <div className="py-8 text-center font-mono text-xs text-[--text-muted]">Loading changes…</div>
+      <div className="text-text-muted py-8 text-center font-mono text-xs">Loading changes…</div>
     );
   }
 
   if (fetchError) {
-    return <p className="py-8 text-center font-mono text-xs text-[--text-muted]">{fetchError}</p>;
+    return <p className="text-text-muted py-8 text-center font-mono text-xs">{fetchError}</p>;
   }
 
   if (!files || files.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-4 py-16">
+      <div className="flex flex-col items-center gap-3 py-16">
         <DaemonMascot size={48} expression="idle" />
-        <p className="font-mono text-sm text-[--text-secondary]">No changes recorded yet.</p>
+        <p className="text-text-secondary font-mono text-sm">No file changes yet.</p>
+        <p className="text-text-muted font-mono text-xs italic">
+          &quot;Changes will appear here as DAEMON completes tasks.&quot;
+        </p>
       </div>
     );
   }
@@ -82,12 +85,12 @@ export function ChangesTab({ specId }: ChangesTabProps): React.ReactElement {
 
   return (
     <div className="space-y-3">
-      <p className="font-mono text-xs text-[--text-muted]">
+      <p className="text-text-muted font-mono text-xs">
         {files.length} {files.length === 1 ? 'file' : 'files'} changed,{' '}
         <span className="text-emerald-400">+{totalAdditions} insertions</span>,{' '}
-        <span className="text-[--status-red]">-{totalDeletions} deletions</span>
+        <span className="text-status-red">-{totalDeletions} deletions</span>
       </p>
-      <div className="min-h-96 overflow-hidden rounded-md border border-[--border-default]">
+      <div className="border-border-default min-h-96 overflow-hidden rounded-md border">
         <DiffViewer files={files} />
       </div>
     </div>

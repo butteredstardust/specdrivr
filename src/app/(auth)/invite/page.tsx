@@ -75,7 +75,7 @@ export default function InvitePage() {
 
   if (tokenState === 'loading') {
     return (
-      <Card className="w-full max-w-sm border-[--border-default] bg-[--bg-surface]">
+      <Card className="border-border-default bg-bg-surface w-full max-w-sm">
         <CardContent className="flex justify-center pt-6">
           <DaemonMascot size={48} expression="working" />
         </CardContent>
@@ -85,24 +85,24 @@ export default function InvitePage() {
 
   if (tokenState === 'invalid') {
     return (
-      <Card className="w-full max-w-sm border-[--border-default] bg-[--bg-surface]">
+      <Card className="border-border-default bg-bg-surface w-full max-w-sm">
         <CardContent className="space-y-3 pt-6 text-center">
           <DaemonMascot size={48} expression="error" />
-          <p className="text-sm text-[--text-primary]">This invite link has expired.</p>
-          <p className="text-xs text-[--text-muted]">Ask your admin to send a new invitation.</p>
+          <p className="text-text-primary text-sm">This invite link has expired.</p>
+          <p className="text-text-muted text-xs">Ask your admin to send a new invitation.</p>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="w-full max-w-sm border-[--border-default] bg-[--bg-surface]">
+    <Card className="border-border-default bg-bg-surface w-full max-w-sm">
       <CardHeader className="items-center gap-2 pb-2">
         <DaemonMascot size={48} expression="idle" />
         <div className="text-center">
           <p className="font-mono text-sm font-bold tracking-widest">SPECDRIVR</p>
           {invite && (
-            <p className="text-xs text-[--text-muted]">
+            <p className="text-text-muted text-xs">
               {invite.inviterName} invited you to <strong>{invite.projectName}</strong>
             </p>
           )}
@@ -117,7 +117,7 @@ export default function InvitePage() {
               type="email"
               value={invite?.email ?? ''}
               readOnly
-              className="border-[--border-default] bg-[--bg-base] opacity-60"
+              className="border-border-default bg-bg-base opacity-60"
             />
           </div>
           <div className="space-y-1.5">
@@ -127,7 +127,7 @@ export default function InvitePage() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="border-[--border-default] bg-[--bg-base]"
+              className="border-border-default bg-bg-base"
             />
           </div>
           <div className="space-y-1.5">
@@ -137,13 +137,13 @@ export default function InvitePage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="border-[--border-default] bg-[--bg-base]"
+              className="border-border-default bg-bg-base"
             />
           </div>
           <Button
             type="submit"
             disabled={loading}
-            className="w-full bg-[--accent-violet] hover:bg-[--accent-violet-dim]"
+            className="bg-accent-violet hover:bg-accent-violet-dim w-full"
           >
             {loading ? 'Joining…' : 'Accept Invitation'}
           </Button>

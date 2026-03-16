@@ -10,7 +10,7 @@ export default async function SecurityPage() {
 
   return (
     <div className="flex max-w-2xl flex-col gap-8">
-      <h1 className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">SECURITY</h1>
+      <h2 className="text-muted-foreground font-mono text-[10px] tracking-[0.2em] uppercase">Security</h2>
       <ChangePasswordSection />
       <ActiveSessionsSection />
       <ApiTokensSection />
