@@ -95,7 +95,7 @@ Spec-driven autonomous code execution for engineering teams
 // { email, password }
 // Handled by BetterAuth catch-all at /api/auth/[...auth]
 // Uses BetterAuth credentials provider
-// Returns: session token set as httpOnly cookie, session cached in Upstash Redis
+// Returns: session token set as httpOnly cookie, session cached in Redis via ioredis
 ```
 
 ### Success

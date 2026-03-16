@@ -132,7 +132,7 @@ import { env } from '@/lib/env-script'; // No server-only, safe for scripts
 - **Testing**: Vitest 4 (unit), Playwright 1.42 (E2E)
 - **State/Interactivity**: @dnd-kit (drag-and-drop), Base UI
 - **Rich Text**: @uiw/react-md-editor
-- **Security**: bcryptjs, @upstash/ratelimit, @upstash/redis, RBAC utilities, lock-manager
+- **Security**: bcryptjs, ioredis, RBAC utilities, lock-manager
 - **Utilities**: clsx, tailwind-merge, lucide icons, next-themes (dark mode), DOMPurify (sanitization)
 
 See `package.json` for full dependency list.
@@ -397,7 +397,7 @@ const result = await db.execute('SELECT * FROM projects WHERE id = ?', [id]);
 
 ### Rate Limiting (`src/lib/rate-limiter.ts`)
 
-Uses `@upstash/ratelimit` with Redis to protect API routes from abuse. This implements token bucket algorithm across distributed systems.
+Uses ioredis with Redis to protect API routes from abuse. This implements token bucket algorithm across distributed systems.
 
 ```typescript
 import { ratelimit } from '@/lib/rate-limiter';
@@ -474,7 +474,7 @@ export async function badAction() {
 
 ### Redis Utilities (`src/lib/redis.ts`)
 
-Abstracted access to Redis through `@upstash/redis` (HTTP). **ioredis (TCP) is strictly forbidden.** Used for rate limiting, auth sessions, and distributed locking. Safe for Serverless/Edge.
+Abstracted access to Redis through ioredis (TCP). Production-grade Redis client used for rate limiting, auth sessions, and distributed locking. Configured with connection pooling and error recovery.
 
 ## Git Workflow
 

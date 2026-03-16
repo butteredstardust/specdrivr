@@ -17,7 +17,7 @@ _Spec-driven autonomous code execution for engineering teams_
 | Database           | PostgreSQL 16                                     | ACID transactions; JSONB for log lines and metadata                     |
 | ORM                | Drizzle ORM + drizzle-kit                         | Type-safe queries; schema-first migrations; no code generation          |
 | Auth               | [Better Auth](https://www.better-auth.com/)       | Credentials + Email/Password; session in httpOnly cookie; CSRF built-in |
-| Cache / Queues     | Redis (Upstash)                                   | Rate limiting; agent task queue; @upstash/redis (HTTP) ONLY; NO ioredis |
+| Cache / Queues     | Redis (ioredis)                                   | Rate limiting; agent task queue; production-grade TCP client |
 | File storage       | S3-compatible (AWS or self-hosted MinIO)          | Spec attachments; diff snapshots for long sessions                      |
 | Email              | Resend                                            | Transactional email for invites, notifications, password reset          |
 | UI components      | shadcn/ui (Radix + Tailwind)                      | Accessible, unstyled primitives; customisable without overrides         |
@@ -38,7 +38,7 @@ _Spec-driven autonomous code execution for engineering teams_
 
 - Next.js application deployed on Vercel or a Node.js container (Docker image provided)
 - PostgreSQL on managed provider (Supabase, Neon, RDS, or self-hosted)
-- Redis on Upstash (serverless-compatible) or self-hosted Redis 7+
+- Redis 7+ (self-hosted, Docker, or managed provider)
 - DAEMON agent runtime: a separate long-running Node.js process that polls the task queue from Redis and executes against the repository via git + language-specific tooling
 - The DAEMON agent authenticates to the Specdrivr API using an API token (AGENT_TOKEN environment variable). It never connects directly to the database.
 - S3 bucket or MinIO instance for spec attachments and large diff storage
@@ -73,11 +73,11 @@ This section documents known pitfalls and required mitigations for the specific 
 | Drizzle singleton in serverless: creating a new PgPool on every Lambda invocation exhausts connection limits within minutes.                                                                                             | lib/db.ts must use the global pattern: const globalDb = global as any; if (!globalDb.db) { globalDb.db = drizzle(pool); } export const db = globalDb.db;. Use pg-pool with max: 5 to limit connections per instance.                                                    |
 | Type drift between schema and runtime: Drizzle types inferred from schema are the source of truth. If you add a column to the DB without updating schema.ts, TypeScript will not catch queries that miss the new column. | Never write raw SQL migrations by hand. Always use drizzle-kit generate → drizzle-kit migrate. schema.ts is the single source of truth. CI must run drizzle-kit check to verify schema is not out of sync.                                                              |
 
-## **23.3 Redis / Upstash**
+## **23.3 Redis / ioredis**
 
 | **Pitfall**                                                                                                                              | **Mitigation**                                                                                                                                                |
 | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Using ioredis (TCP) in serverless: Vercel Lambda functions do not maintain persistent TCP connections. ioredis will fail on cold starts. | Use @upstash/redis which uses HTTP fetch under the hood. Safe for serverless and edge. **ioredis is strictly forbidden in this project.**                       |
+| Connection pooling and reconnection: ioredis must be initialized as a singleton with connection pooling to avoid exhausting connection limits. | Use global singleton pattern in lib/redis.ts. Implement proper error handling and reconnection strategies. Connection pool should be shared across all routes. |
 | Redis keys: rate limiting and queue management.                                                                                          | Prefix all keys: ratelimit:{ip}:{endpoint}, queue:task:{taskId}. Never store a bare key.                                                                      |
 | Rate limit bypass via header spoofing: using X-Forwarded-For as the rate limit key allows clients to spoof IP addresses.                 | Extract real IP from Vercel's trusted x-vercel-forwarded-for header in production. In development, fall back to req.ip. Never trust X-Forwarded-For directly. |
 
@@ -252,7 +252,7 @@ Frontend state is managed explicitly to distinguish between persistent global st
 
 - Specdrivr uses Next.js Edge for middleware/proxy routing.
 - Native Node.js modules, globals (`process.cwd`), and raw TCP connections (`ioredis`) are unsupported at the Edge.
-- Rate limiting and session verification at the edge use `@upstash/ratelimit` (HTTP-based Redis), avoiding `ioredis` connection crashes.
+- Rate limiting and session verification use ioredis with proper connection pooling and error recovery.
 
 **Race Condition Handling (PostgreSQL State Machine):**
 

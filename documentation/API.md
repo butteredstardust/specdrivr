@@ -183,7 +183,7 @@ Collection endpoints support cursor-based or offset-based pagination. Successful
 
 ### **Rate Limiting & Quotas**
 
-Rate limiting is enforced at the `src/proxy.ts` (Next.js Edge) layer using Upstash Redis sliding window algorithms.
+Rate limiting is enforced at the `src/lib/rate-limiter.ts` layer using ioredis with token bucket algorithms.
 
 **Limits by Tier:**
 
