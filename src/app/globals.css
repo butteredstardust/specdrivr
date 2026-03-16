@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
 @layer base {
+  *, *::before, *::after {
+    border-color: var(--border-default);
+  }
+
   :root {
     --background: 0 0% 4%;
     --foreground: 240 5% 96%;
