@@ -1,10 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { toast } from 'sonner';
 import { clientLogger } from '@/lib/logger-client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+
+const profileSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  email: z.string().email('Invalid email address'),
+});
+
+type ProfileFormValues = z.infer<typeof profileSchema>;
 
 interface ProfileFormProps {
   user: {
@@ -15,20 +24,31 @@ interface ProfileFormProps {
 }
 
 export function ProfileForm({ user }: ProfileFormProps) {
-  const [name, setName] = useState(user.name);
-  const [email, setEmail] = useState(user.email);
-  const [isSaving, setIsSaving] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { isSubmitting, errors },
+  } = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: { name: user.name, email: user.email },
+  });
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsSaving(true);
+  const name = watch('name');
+  const initials = name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join('');
 
+  const onSubmit = async (values: ProfileFormValues) => {
     try {
       const res = await fetch('/api/v1/users/me', {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email }),
+        body: JSON.stringify(values),
       });
 
       if (!res.ok) {
@@ -41,17 +61,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
       const error = err instanceof Error ? err : new Error(String(err));
       clientLogger.error('Failed to update profile', error);
       toast.error('Failed to update profile');
-    } finally {
-      setIsSaving(false);
     }
   };
-
-  const initials = name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0].toUpperCase())
-    .join('');
 
   return (
     <section className="flex flex-col gap-6">
@@ -65,36 +76,31 @@ export function ProfileForm({ user }: ProfileFormProps) {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <label className="text-text-secondary font-mono text-xs" htmlFor="profile-name">
             Display Name
           </label>
-          <Input
-            id="profile-name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            autoComplete="name"
-          />
+          <Input id="profile-name" autoComplete="name" {...register('name')} />
+          {errors.name && (
+            <p className="text-status-red font-mono text-xs">{errors.name.message}</p>
+          )}
         </div>
         <div className="flex flex-col gap-1.5">
           <label className="text-text-secondary font-mono text-xs" htmlFor="profile-email">
             Email
           </label>
-          <Input
-            id="profile-email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
-          />
+          <Input id="profile-email" type="email" autoComplete="email" {...register('email')} />
+          {errors.email && (
+            <p className="text-status-red font-mono text-xs">{errors.email.message}</p>
+          )}
           <p className="text-text-muted text-xs">
             To change your email, contact your administrator.
           </p>
         </div>
         <div>
-          <Button type="submit" disabled={isSaving} size="sm">
-            {isSaving ? 'Saving…' : 'Save Profile'}
+          <Button type="submit" disabled={isSubmitting} size="sm">
+            {isSubmitting ? 'Saving…' : 'Save Profile'}
           </Button>
         </div>
       </form>
