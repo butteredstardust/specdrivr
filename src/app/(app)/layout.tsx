@@ -45,7 +45,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <ShellProvider user={shellUser} initialId={validatedProjectId}>
       <TaskDrawerProvider>
-        <div className="flex h-screen overflow-hidden">
+        <div className="flex h-screen overflow-hidden relative">
           <Sidebar projects={projects} />
           <div className="flex flex-1 flex-col overflow-hidden">
             <TopBar />
