@@ -1,3 +1,4 @@
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { projectRepository } from '@/repositories/project-repository';
@@ -14,6 +15,22 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!session?.user?.id) redirect('/login');
 
   const projects = await projectRepository.getByUserId(session.user.id);
+  const cookieStore = await cookies();
+  const activeProjectId = cookieStore.get('active-project-id')?.value;
+
+  // Validate the active project ID
+  let validatedProjectId: number | null = null;
+  if (activeProjectId) {
+    const id = parseInt(activeProjectId, 10);
+    if (projects.some((p) => p.id === id)) {
+      validatedProjectId = id;
+    }
+  }
+
+  // Fallback to first project if none valid
+  if (validatedProjectId === null && projects.length > 0) {
+    validatedProjectId = projects[0].id;
+  }
 
   const shellUser = {
     id: session.user.id,
@@ -26,7 +43,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const showOnboarding = session.user.onboardingStep === 0;
 
   return (
-    <ShellProvider user={shellUser}>
+    <ShellProvider user={shellUser} initialId={validatedProjectId}>
       <TaskDrawerProvider>
         <div className="flex h-screen overflow-hidden">
           <Sidebar projects={projects} />

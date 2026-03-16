@@ -244,18 +244,15 @@ export default function SessionsPage() {
         />
         <div className="flex items-center gap-1">
           {(['all', 'running', 'completed', 'paused', 'failed', 'cancelled'] as const).map((s) => (
-            <button
+            <Button
               key={s}
+              size="sm"
+              variant={statusFilter === s ? 'default' : 'outline'}
               onClick={() => setStatusFilter(s)}
-              className={[
-                'h-7 rounded px-2.5 font-mono text-[10px] tracking-wider uppercase transition-colors',
-                statusFilter === s
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary text-muted-foreground hover:text-foreground',
-              ].join(' ')}
+              className="h-7 px-2.5 font-mono text-[10px] tracking-wider uppercase"
             >
               {s === 'all' ? 'All' : s}
-            </button>
+            </Button>
           ))}
         </div>
         <div className="ml-auto flex items-center gap-2">

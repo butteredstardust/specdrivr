@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { clientLogger } from '@/lib/logger-client';
+import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
 import { Button } from '@/components/ui/button';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
@@ -41,13 +42,23 @@ type TabValue = (typeof STATUS_TABS)[number]['value'];
 export default function NotificationsPage() {
   const [page, setPage] = useState(1);
   const [tab, setTab] = useState<TabValue>('all');
+  const { activeProjectId } = useShell();
 
-  const url =
-    tab === 'unread'
-      ? `/api/v1/notifications?unread=true&page=${page}`
-      : tab === 'mentions'
-        ? `/api/v1/notifications?type=mention&page=${page}`
-        : `/api/v1/notifications?page=${page}`;
+  const baseUrl = '/api/v1/notifications';
+  const params = new URLSearchParams();
+
+  if (activeProjectId) {
+    params.append('projectId', String(activeProjectId));
+  }
+
+  if (tab === 'unread') {
+    params.append('unread', 'true');
+  } else if (tab === 'mentions') {
+    params.append('type', 'mention');
+  }
+  params.append('page', page.toString());
+
+  const url = `${baseUrl}?${params.toString()}`;
 
   const { data, isLoading, restart } = usePolling<NotificationsPageResponse>({
     url,
@@ -96,16 +107,18 @@ export default function NotificationsPage() {
       {/* Filter tabs */}
       <div className="border-border-default flex items-center gap-1 border-b px-6 py-3">
         {STATUS_TABS.map(({ value, label }) => (
-          <button
+          <Button
             key={value}
+            variant={tab === value ? 'default' : 'secondary'}
+            size="sm"
             onClick={() => {
               setTab(value);
               setPage(1);
             }}
             className={cn(
-              'h-7 rounded px-2.5 font-mono text-[10px] tracking-wider uppercase transition-colors',
+              'h-7 px-2.5 font-mono text-[10px] tracking-wider uppercase',
               tab === value
-                ? 'bg-primary text-primary-foreground'
+                ? 'bg-primary text-primary-foreground text-white'
                 : 'bg-secondary text-muted-foreground hover:text-foreground'
             )}
           >
@@ -113,7 +126,7 @@ export default function NotificationsPage() {
             {value === 'unread' && unreadCount > 0 && (
               <span className="ml-1 opacity-70">{unreadCount}</span>
             )}
-          </button>
+          </Button>
         ))}
       </div>
 

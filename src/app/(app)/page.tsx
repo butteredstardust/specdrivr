@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
@@ -62,10 +62,12 @@ export default function MissionControlPage() {
   const activeSession = sessionsData?.[0] ?? null;
   const blockedTasks = tasksData ?? [];
 
-  // Reset dismissed state whenever the polled task data reference changes
-  useEffect(() => {
+  const [prevTasks, setPrevTasks] = useState(tasksData);
+
+  if (tasksData !== prevTasks) {
+    setPrevTasks(tasksData);
     setDismissed(false);
-  }, [tasksData]);
+  }
 
   async function handleSessionPatch(sessionId: number, status: string) {
     try {
