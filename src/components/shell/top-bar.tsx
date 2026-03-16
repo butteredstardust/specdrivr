@@ -3,7 +3,7 @@
 import { Fragment } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Bell } from 'lucide-react';
+import { Bell, User, Shield, LogOut, Keyboard } from 'lucide-react';
 import { authClient } from '@/lib/auth-client';
 import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
@@ -161,22 +161,49 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <div className="px-3 py-2">
-              <p className="text-text-primary text-sm font-medium">{user?.name}</p>
+          <DropdownMenuContent align="end" className="w-56">
+            <div className="px-3 py-2.5">
+              <p className="text-text-primary text-sm font-semibold">{user?.name}</p>
               <p className="text-text-muted truncate text-xs">{user?.email}</p>
+              {user?.role && (
+                <span className="text-text-muted mt-1 inline-block font-mono text-[10px] tracking-widest uppercase">
+                  {user.role}
+                </span>
+              )}
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href="/settings">Settings</Link>
+              <Link href="/settings/profile" className="flex items-center gap-2">
+                <User className="h-3.5 w-3.5" />
+                Profile Settings
+              </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setShortcutsOpen(true)}>
+            <DropdownMenuItem asChild>
+              <Link href="/settings/security" className="flex items-center gap-2">
+                <Shield className="h-3.5 w-3.5" />
+                Security
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/settings/notifications" className="flex items-center gap-2">
+                <Bell className="h-3.5 w-3.5" />
+                Notifications
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => setShortcutsOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <Keyboard className="h-3.5 w-3.5" />
               Keyboard Shortcuts
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleSignOut} className="text-status-red">
-              Sign out
+            <DropdownMenuItem
+              onClick={handleSignOut}
+              className="text-status-red flex items-center gap-2"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              Sign Out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
