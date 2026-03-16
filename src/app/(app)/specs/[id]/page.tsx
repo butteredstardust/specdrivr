@@ -12,7 +12,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Pencil } from 'lucide-react';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { SpecTab } from '@/components/specs/spec-tab';
 import { PlanTab } from '@/components/specs/plan-tab';
 import { TasksTab } from '@/components/specs/tasks-tab';
@@ -183,26 +182,31 @@ export default function SpecDetailPage(): React.ReactElement {
   return (
     <div className="-mx-6 -mt-6 flex min-h-full flex-col">
       {/* Header */}
-      <div className="border-border-default border-b px-6 py-4">
+      <div className="border-border-default flex items-center justify-between border-b px-6 py-4">
         {isLoading ? (
-          <div className="flex items-center gap-3">
-            <Skeleton className="h-5 w-20" />
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-3.5 w-16" />
             <Skeleton className="h-7 w-56" />
-            <Skeleton className="h-5 w-16" />
           </div>
         ) : (
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex min-w-0 flex-col gap-1">
+            <div className="text-muted-foreground mb-1 font-mono text-[10px] tracking-[0.2em] uppercase">
+              Project Spec
+            </div>
             <div className="flex min-w-0 items-center gap-3">
-              <DaemonMascot size={20} expression={specStatusToExpression(displayedSpec?.status)} />
-              <code className="bg-phosphor-amber/10 text-phosphor-amber shrink-0 rounded px-1.5 py-0.5 font-mono text-xs">
-                SPEC-{String(specId).padStart(3, '0')}
-              </code>
               <h1 className="text-foreground truncate text-xl font-semibold">
                 {displayedSpec?.name ?? '…'}
               </h1>
+              <code className="bg-phosphor-amber/10 text-phosphor-amber shrink-0 rounded px-1.5 py-0.5 font-mono text-xs">
+                SPEC-{String(specId).padStart(3, '0')}
+              </code>
               {displayedSpec && <StatusBadge status={displayedSpec.status} />}
             </div>
-            <div className="flex shrink-0 items-center gap-2">
+          </div>
+        )}
+        <div className="flex shrink-0 items-center gap-2">
+          {!isLoading && (
+            <>
               {displayedSpec?.status === 'pending_approval' && (
                 <Button
                   size="sm"
@@ -224,9 +228,9 @@ export default function SpecDetailPage(): React.ReactElement {
                   </Tooltip>
                 )}
               </TooltipProvider>
-            </div>
-          </div>
-        )}
+            </>
+          )}
+        </div>
       </div>
 
       {/* Tabs */}

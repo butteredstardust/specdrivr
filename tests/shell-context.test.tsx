@@ -37,7 +37,7 @@ describe('ShellContext', () => {
     expect(screen.getByTestId('project-id').textContent).toBe('null');
   });
 
-  test('persists activeProjectId to localStorage', async () => {
+  test('persists activeProjectId to cookies', async () => {
     const user = userEvent.setup();
     render(
       <ShellProvider user={mockUser}>
@@ -45,7 +45,7 @@ describe('ShellContext', () => {
       </ShellProvider>
     );
     await user.click(screen.getByText('set project'));
-    expect(localStorage.getItem('specdrivr:activeProjectId')).toBe('42');
+    expect(document.cookie).toContain('active-project-id=42');
   });
 
   test('throws if useShell called outside provider', () => {

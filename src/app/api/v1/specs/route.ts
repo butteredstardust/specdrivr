@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { connection } from 'next/server';
 import { handleApiError, formatErrorResponse } from '@/lib/error-handler';
 import { auth } from '@/lib/auth';
 import { requireMember } from '@/lib/rbac';
@@ -14,6 +15,7 @@ const SpecsQuerySchema = z.object({
 });
 
 export async function GET(request: NextRequest) {
+  await connection();
   try {
     const session = await auth();
     if (!session?.user?.id) {
