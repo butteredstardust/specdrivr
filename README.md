@@ -1,312 +1,274 @@
 # Specdrivr
 
-**Spec-driven orchestration for teams that actually ship.**
+**Spec-driven development platform for AI-augmented teams.**
 
-The AI orchestration platform for engineering teams who build complex systems *and mean it*. Not startups. Not side projects. Teams that need to scale fast, maintain sanity, and let AI do the heavy lifting—without turning their codebase into a dumpster fire.
+The application that orchestrates spec-driven development workflows. Write what you want to build. Specdrivr translates that into tasks. Your AI agent executes them. Your team reviews. Ship.
+
+Built for engineering teams who believe AI should handle the mechanical parts while humans handle the strategy.
 
 ---
 
 ## Why This Exists
 
-Most AI-ready templates are one of two things:
+Most AI tools treat development as "here's a prompt, here's your output." That works for scripts. It doesn't work for systems.
 
-1. **Too simple.** They're cute for a weekend. Then you add auth, you add databases, you add team collaboration, and suddenly you're building infrastructure while Claude is staring at you waiting for guidance.
+The problem: **AI agents don't understand your codebase, your architecture, or your constraints.** So they:
+- Build things in the wrong place (data access scattered everywhere).
+- Miss security requirements (forget to auth-check).
+- Create consistency nightmares (each agent thinks differently about the same problem).
 
-2. **Too bloated.** Enterprise templates with 47 layers of abstraction, 12 "best practices" you'll never use, and a folder structure that makes Claude's context window weep.
+Specdrivr solves this by being the **single source of truth** for how your system gets built. You define a spec. The system breaks it into tasks. The AI agent executes against a strict, predictable architecture. Your team reviews the results.
 
-Specdrivr exists because **AI needs boring to be predictable.** When Claude or Gemini builds your system, it needs to know:
-- Where data lives (always in repositories).
-- Where mutations happen (always in actions).
-- Where state lives (always on the server).
-- What the rules are (RBAC, auth-first, no exceptions).
-
-No surprises. No sprawl. Just a **strictly governed architecture** that lets you think about the hard problem—your actual business logic—while the framework handles the rest.
-
-We found that **the best AI workflows start with the tightest constraints.** Paradoxically, that's what makes you fast.
+**The best AI workflows start with the tightest constraints.** Paradoxically, that's what makes you fast.
 
 ---
 
-## What It Does (Actually)
+## What It Does
 
-Specdrivr is a production-grade Next.js scaffold built specifically for **spec-driven autonomous execution**. You write a spec. Claude reads it. Claude understands your architecture *immediately* and builds it correctly—first time.
+Specdrivr is a platform that manages the spec-to-execution pipeline for AI-augmented development. It:
 
-It's not magic. It's just... boring. In the best way.
+1. **Manages specifications** — Write what you're building in plain language.
+2. **Breaks specs into tasks** — System decomposes specs into actionable work items.
+3. **Orchestrates execution** — AI agents execute tasks against your codebase following strict rules.
+4. **Tracks sessions** — Monitor what the agent does, roll back if needed.
+5. **Enforces architecture** — Pre-commit hooks ensure every change respects your system design.
 
-### The Stack (No Surprises)
+It's not a template. It's the orchestration layer that makes spec-driven development *actually work with AI*.
 
-| Layer | The Thing | Why |
+### The Stack
+
+| Layer | Technology | Why |
 |---|---|---|
-| **Framework** | Next.js 16 + App Router | Type-safe, built for async, plays nice with Server Actions |
-| **Language** | TypeScript 5.9 | Type safety isn't negotiable when AI is writing code |
-| **Database** | PostgreSQL + Drizzle ORM | Migrations as code. Fast queries. No magic |
-| **Auth** | better-auth | Session management that actually works. Redis-backed. |
-| **UI** | shadcn/ui + Tailwind 4 | Consistent, accessible, predictable |
-| **Safety** | Zod + Pino logging | Validation at boundaries. Logging everywhere. No surprises. |
+| **Framework** | Next.js 16 + App Router | Type-safe server-first architecture, built for AI-generated code |
+| **Language** | TypeScript 5.9 | Type safety catches AI mistakes at compile time |
+| **Database** | PostgreSQL + Drizzle ORM | Migrations as code. Predictable. No surprises. |
+| **Auth** | better-auth | Session-based auth. Human-grade security. |
+| **API** | REST + Server Actions | AI agents understand this pattern immediately |
+| **UI** | shadcn/ui + Tailwind 4 | Design system for consistency |
+| **Validation** | Zod | Every boundary validated. Every input checked. |
+| **Logging** | Pino | Full audit trail of what the agent did |
 
 ---
 
-## The Architecture (It's Strict On Purpose)
+## The Architecture (Constraints That Enable AI)
 
-Specdrivr enforces three rules. Break them and the pre-commit hooks will fight you.
+Specdrivr's platform is built on strict architectural rules. The app enforces these same rules for projects built *inside* it. This isn't bureaucracy—it's what makes AI agents predictable.
 
-### Rule 1: Repositories
+### Repository Pattern
 
-**All database access goes through `src/repositories/`.**
+**All data access flows through repositories.**
 
-No importing `db` in components. No loose queries scattered across action files. Data access is one place. It's boring. It's also why Claude can build features without accidentally creating a thousand data races.
+Why? When an AI agent builds a feature, it needs to know there's exactly one place to read/write data. No scattered queries. No data races. No surprises.
 
-```typescript
-// src/repositories/task-repository.ts
-export const taskRepository = {
-  create: async (data: NewTask) => {
-    return await executeQuery(async () => {
-      const [task] = await db.insert(tasks).values(data).returning();
-      return task;
-    });
-  },
+### Server Actions
 
-  findByProjectId: async (projectId: string) => {
-    return await executeQuery(async () => {
-      return await db.query.tasks.findMany({
-        where: eq(tasks.projectId, projectId),
-      });
-    });
-  },
-};
-```
+**All mutations are isolated in Server Actions. Auth happens first.**
 
-### Rule 2: Server Actions
+The agent knows: every action calls `await auth()` first. No exceptions. This is how you prevent security regressions when AI is writing code.
 
-**All mutations are Server Actions. Auth comes first.**
+### Server Components by Default
 
-```typescript
-'use server';
+**Components are servers unless they need JavaScript.**
 
-import { taskRepository } from '@/repositories/task-repository';
+`"use client"` is for interactivity. Everything else is server-rendered. The agent understands this constraint and builds accordingly.
 
-export async function createTaskAction(input: CreateTaskInput) {
-  const session = await auth(); // FIRST LINE. Always.
-  if (!session) return { success: false, error: 'Unauthorized' };
+### Pre-Commit Hooks
 
-  const validated = createTaskSchema.parse(input);
-  const task = await taskRepository.create(validated);
+**15 checks run before any commit lands.** No `--no-verify` without an RCA.
 
-  return { success: true, data: task };
-}
-```
-
-No async logic in components. No useEffect data fetching. Actions handle it. Components consume it. Clean.
-
-### Rule 3: Server Components by Default
-
-**Components are servers unless they need interactivity.**
-
-`"use client"` is for buttons, forms, animations. Everything else is a server component. This is fast. This is clean. This is non-negotiable.
+These aren't gatekeeping. They're guardrails. Linting, type checking, test validation—all automated. The agent learns to work within these constraints. Your team stops reviewing for style mistakes and starts reviewing for logic.
 
 ---
 
-## Getting Started
+## How It Works
 
-You need three things: Node 25.6+, pnpm, and PostgreSQL 16+. That's it. No Redis setup tutorials. No Docker mysteries. If you don't have Postgres, spin it in Docker (we ship a `docker-compose.yml`).
+### 1. Write a Spec
 
-### Setup (4 Commands)
+Define what you're building in plain language:
+
+> "Add OAuth2 integration for Google and GitHub. Support account linking. Store refresh tokens securely."
+
+### 2. System Creates Tasks
+
+Specdrivr breaks your spec into tasks:
+- Task 1: Set up OAuth application configs
+- Task 2: Implement OAuth callback handler
+- Task 3: Build user creation from OAuth claims
+- Task 4: Add account linking UI
+- Task 5: Write integration tests
+
+### 3. AI Agent Executes
+
+An AI agent claims tasks one by one:
+- Agent reads your architecture docs (AGENTS.md, CLAUDE.md)
+- Agent understands your constraints (repositories, server actions, etc.)
+- Agent executes against your codebase
+- Agent's changes pass pre-commit hooks before landing
+
+### 4. You Review & Merge
+
+Every session creates a full audit trail:
+- What changed
+- Why it changed
+- What was tested
+- What still needs review
+
+You approve and merge. The spec is complete.
+
+---
+
+## Development Commands
 
 ```bash
-# 1. Get the code
-git clone <your-repo>
-cd specdrivr
-nvm use  # Locks Node version
+pnpm dev              # Start the platform
+pnpm lint             # Check code quality
+pnpm test             # Run all tests
+pnpm tsc --noEmit     # Type check
 
-# 2. Install dependencies
-pnpm install --frozen-lockfile
-
-# 3. Configure database
-cp .env.example .env
-# Edit .env with your DATABASE_URL
-
-# 4. Migrate
-pnpm db:generate
-pnpm db:migrate
-
-# 5. Run
-pnpm dev
-```
-
-Done. Your app is at `http://localhost:3000`.
-
----
-
-## Commands That Actually Matter
-
-```bash
-pnpm dev              # Dev server (port 3000)
-pnpm lint             # ESLint + prettier (fixes automatically)
-pnpm test             # Vitest unit tests + Playwright E2E
-pnpm tsc --noEmit     # Type check (catches stupidity fast)
-
-# Database
-pnpm db:generate      # Sync schema to migrations
+# Database (for projects built in Specdrivr)
+pnpm db:generate      # Generate migrations from schema
 pnpm db:migrate       # Apply pending migrations
 ```
 
-**No `db:push`**. Ever. We generate migrations. We review them. We apply them. This is how teams don't lose production data.
+For projects *being built inside Specdrivr*: **No `db:push`.** Ever. Migrations are code. They're reviewed. They're applied. This is how production stays safe.
 
 ---
 
-## Workflow (Pre-Commit Hooks Are Your Friend)
+## The Workflow (How Execution Happens)
 
-We run 15 checks before you commit. Yes, 15. No, you can't skip them unless you're fixing a regression.
+1. **Spec Creation** — You or your team writes a specification
+2. **Task Breakdown** — System decomposes it into actionable tasks
+3. **Session Start** — AI agent claims the specification
+4. **Execution** — Agent executes tasks one by one against the codebase
+5. **Hooks Run** — Pre-commit hooks validate every change (linting, types, tests)
+6. **Review** — Human team reviews the work (logic, not style)
+7. **Merge** — Changes land on your branch
 
-**Your flow:**
-1. Create a branch
-2. Make changes
-3. Commit (hooks run)
-4. Push (more hooks run)
-5. Open PR
-6. We generate `BRANCH_CHANGES.md` and `BRANCH_CODE_REVIEW.md` automatically
-
-If a hook fails, you'll see why. Fix it. Commit again. Repeat until green.
-
-**Never `--no-verify`.** If you feel the urge, write an RCA in `BRANCH_CHANGES.md` first. The repo will ask for it before you push.
+**Pre-commit hooks are the guardrail.** They run 15 checks before any commit. No exceptions. If you want to skip them, write an RCA first. This is how AI-assisted development stays safe.
 
 ---
 
-## For AI (Claude, Gemini)
+## For AI Agents (How to Use Specdrivr)
 
-Specdrivr is built specifically for autonomous execution. Every file is an anchor for agent understanding:
+When an AI agent executes a spec in Specdrivr, it has three documents that define how to build:
 
-- **AGENTS.md**: Complete architectural mandate (read first)
-- **CLAUDE.md**: Claude-specific workflows and gotchas
-- **GEMINI.md**: Gemini-specific patterns
+- **AGENTS.md** — The architectural mandate. Read this first. It defines every rule.
+- **CLAUDE.md** — Claude-specific workflows, gotchas, and constraints.
+- **GEMINI.md** — Gemini-specific patterns and integrations.
 
-These files do one thing: make boring predictable. So agents read the rules, understand the constraints, and build features instead of asking questions.
-
----
-
-## The Honest Part
-
-### What's Hard About This
-
-- **You have to commit to boring.** The architecture is strict. If you fight it, it fights back.
-- **You have to use Drizzle and PostgreSQL.** We picked these because they work great with type safety and AI. If you need MongoDB or Prisma magic, go elsewhere.
-- **Pre-commit hooks are not optional.** They're in `.husky/` and they run before every commit. Learn to love them or use `git push --no-verify` and deal with the email.
-
-### What's Great About This
-
-- **No surprise regressions.** The hooks catch things before they land.
-- **AI builds features in hours, not days.** Claude reads AGENTS.md and just *knows* where everything goes.
-- **New team members understand the codebase instantly.** The structure is so predictable, there's nothing to learn except your business logic.
-- **Type safety everywhere.** TypeScript + Zod catches 80% of bugs at compile time.
+These files answer every "where do I put this?" question. The agent reads them once, understands the architecture, and executes with confidence. No asking. No guessing. No regressions.
 
 ---
 
-## Examples (Because You're Impatient)
+## What's Real About This
 
-### Creating a Feature End-to-End
+### The Constraints
 
-**1. Add to database schema** (`src/db/schema.ts`)
-```typescript
-export const features = createTable('features', {
-  id: varchar('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  projectId: varchar('project_id').notNull(),
-  name: varchar('name').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-});
-```
+- **Architecture is strict.** Repositories, Server Actions, Server Components—no exceptions. This is why AI agents can execute reliably.
+- **PostgreSQL + Drizzle, always.** We chose these because they work with type safety and AI. Other choices are fine, but not here.
+- **Pre-commit hooks are mandatory.** Not optional. Not skippable. They run before every commit. They catch mistakes the agent makes so humans don't have to.
 
-**2. Generate migration**
-```bash
-pnpm db:generate
-```
+### The Reality
 
-**3. Create repository** (`src/repositories/feature-repository.ts`)
-```typescript
-export const featureRepository = {
-  create: async (data: NewFeature) => {
-    return await executeQuery(async () => {
-      const [feature] = await db.insert(features).values(data).returning();
-      return feature;
-    });
-  },
-};
-```
-
-**4. Create action** (`src/actions/create-feature.ts`)
-```typescript
-'use server';
-
-export async function createFeatureAction(input: CreateFeatureInput) {
-  const session = await auth();
-  if (!session?.user) return { success: false, error: 'Unauthorized' };
-
-  const feature = await featureRepository.create({
-    projectId: session.user.projectId,
-    name: input.name,
-  });
-
-  return { success: true, data: feature };
-}
-```
-
-**5. Build the UI** (`src/app/dashboard/features/create-form.tsx`)
-```typescript
-'use client';
-
-export function CreateFeatureForm() {
-  const [name, setName] = useState('');
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const result = await createFeatureAction({ name });
-
-    if (result.success) {
-      // Success
-    }
-  }
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <input value={name} onChange={(e) => setName(e.target.value)} />
-      <button type="submit">Create</button>
-    </form>
-  );
-}
-```
-
-**That's it.** Schema → Migration → Repository → Action → UI. Every feature follows this pattern. No exceptions. That's why Claude can ship them.
+- **AI builds features reliably.** When the agent understands the constraints, it doesn't fight them. It builds fast.
+- **Pre-commit hooks save time.** Yes, they slow down commits. But they catch 80% of bugs before review. Your team reviews logic, not formatting.
+- **Specs are your product documentation.** Every spec becomes a permanent record of *why* something was built the way it was.
+- **Human judgment still matters.** The agent executes. You decide if the execution solves the problem. This isn't replacement. It's augmentation.
 
 ---
 
-## Tooling We Use
+## Example: Real Spec Execution
 
-- **Next.js 16** for the framework
-- **Drizzle** for database
-- **better-auth** for sessions
-- **Zod** for validation
-- **Pino** for logging
-- **shadcn/ui** for components
-- **Tailwind CSS** for styling
-- **Vitest** for unit tests
-- **Playwright** for E2E tests
-- **Husky** for git hooks
+### The Spec
 
-All of these are because they work well *together*. Not because we like them personally (though we do).
+```
+# Dark Mode Support
+
+Add dark mode to the application with:
+- CSS custom properties for all colors
+- System theme detection (light/dark)
+- Manual toggle in user settings
+- Persisted user preference
+
+Should work across all pages and respect the user's OS setting by default.
+```
+
+### What Happens
+
+**Session Created**
+```
+Spec: "Dark Mode Support"
+Tasks Created:
+  - T-101: Create CSS variable system for colors
+  - T-102: Implement ThemeProvider component
+  - T-103: Add dark mode toggle to settings
+  - T-104: Persist theme preference to database
+  - T-105: Add system theme detection
+  - T-106: Write integration tests
+```
+
+**Agent Executes**
+- Agent reads `AGENTS.md` and `CLAUDE.md`
+- Agent understands: "Use Server Components. No scattered CSS. Database access through repositories."
+- Agent executes each task
+- Pre-commit hooks validate each commit
+- Within 2 hours: All tasks complete. All tests pass. All hooks green.
+
+**Review & Merge**
+- Team reviews the logic (not the formatting)
+- Approves the implementation
+- Merges to main
+- Dark mode works. Spec complete.
+
+**The Audit Trail**
+- Every task has a timestamp
+- Every commit references its task
+- Every change is traceable back to the original spec
+- Why? Because someone will ask "why is dark mode implemented this way?" six months from now. You have the answer.
+
+---
+
+## The Tech Stack (Why These Choices)
+
+| Component | Choice | Reason |
+|---|---|---|
+| **Platform** | Next.js 16 | Server-first. AI-friendly. Built for type safety. |
+| **Database** | PostgreSQL + Drizzle | Migrations as code. Predictable. Type-safe ORM. |
+| **Auth** | better-auth | Session-based. Human-friendly. Production-grade. |
+| **Validation** | Zod | Every boundary is checked. AI mistakes are caught early. |
+| **Logging** | Pino | Structured logging. Full audit trail of execution. |
+| **Components** | shadcn/ui | Consistent design system. Accessible. Predictable. |
+| **Testing** | Vitest + Playwright | Fast unit tests. Real E2E validation. |
+| **Git Hooks** | Husky | Enforces quality before commits land. |
+
+We chose each tool because it works *with AI*, not despite it. Type safety, predictability, and clarity—these are what make AI agents reliable.
+
+---
+
+## What's Next
+
+- **Mission Control** — Monitor active sessions and agent execution in real-time
+- **Spec History** — Track every version of every spec and understand evolution
+- **Team Collaboration** — Built-in code review and approval workflows
+- **Custom Rulesets** — Define your own architectural constraints per-project
+- **Agent Marketplace** — Swap between Claude, Gemini, or custom agents
 
 ---
 
 ## Get Help
 
-- **Architecture questions?** Read `AGENTS.md`. It's the source of truth.
-- **AI integration?** Check `CLAUDE.md` or `GEMINI.md`.
-- **Database problems?** See `documentation/DATABASE.md`.
-- **Bug or feature request?** Open an issue with what you're trying to do.
+- **How does Specdrivr work?** Start here: This README
+- **Building with AI?** Read `AGENTS.md`. It defines the entire architecture.
+- **Claude-specific?** Check `CLAUDE.md` for workflows and gotchas.
+- **Gemini-specific?** See `GEMINI.md` for Gemini patterns.
+- **Bug or feature request?** Open an issue. Tell us what you're trying to do.
 
 ---
 
 ## License
 
-MIT. Build what you want. Ship it. Don't sweat it.
+MIT. Build with it. Ship it. Let the AI do the boring parts.
 
 ---
 
-**Built by teams who actually use this. For teams who actually ship.**
+**Specdrivr: The orchestration layer for spec-driven development with AI.**
