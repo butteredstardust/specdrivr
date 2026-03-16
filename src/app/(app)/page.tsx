@@ -121,36 +121,43 @@ export default function MissionControlPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="text-text-muted font-mono text-xs tracking-widest uppercase">
-        MISSION CONTROL
-      </h1>
-
-      {activeProjectId === null ? (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <Skeleton className="h-40 w-full" />
-          <Skeleton className="h-40 w-full" />
+    <div className="-mx-6 -mt-6 flex min-h-full flex-col">
+      {/* Header */}
+      <div className="border-border border-b px-6 py-4">
+        <div className="text-muted-foreground mb-1 font-mono text-[10px] tracking-[0.2em] uppercase">
+          Mission Control
         </div>
-      ) : (
-        <>
-          {blockedTasks.length > 0 && !dismissed && (
-            <NeedsAttentionBanner blockedTasks={blockedTasks} onDismiss={handleDismiss} />
-          )}
+        <h1 className="text-foreground text-xl font-semibold">Dashboard</h1>
+      </div>
 
+      {/* Content */}
+      <div className="flex flex-col gap-6 px-6 py-6">
+        {activeProjectId === null ? (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <SessionPanel
-              session={activeSession}
-              userRole={userRole}
-              onPause={handlePause}
-              onResume={handleResume}
-              onCancel={handleCancel}
-              onRetry={handleRetry}
-              onDismiss={handleDismiss}
-            />
-            <EventLog sessionId={activeSession?.id ?? null} />
+            <Skeleton className="h-40 w-full" />
+            <Skeleton className="h-40 w-full" />
           </div>
-        </>
-      )}
+        ) : (
+          <>
+            {blockedTasks.length > 0 && !dismissed && (
+              <NeedsAttentionBanner blockedTasks={blockedTasks} onDismiss={handleDismiss} />
+            )}
+
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <SessionPanel
+                session={activeSession}
+                userRole={userRole}
+                onPause={handlePause}
+                onResume={handleResume}
+                onCancel={handleCancel}
+                onRetry={handleRetry}
+                onDismiss={handleDismiss}
+              />
+              <EventLog sessionId={activeSession?.id ?? null} />
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

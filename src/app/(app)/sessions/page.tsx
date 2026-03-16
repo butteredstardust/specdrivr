@@ -211,7 +211,7 @@ export default function SessionsPage() {
           <div className="text-muted-foreground mb-1 font-mono text-[10px] tracking-[0.2em] uppercase">
             Sessions
           </div>
-          <h1 className="text-foreground text-xl font-semibold">Sessions</h1>
+          <h1 className="text-foreground text-xl font-semibold">Execution History</h1>
         </div>
       </div>
 

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { clientLogger } from '@/lib/logger-client';
 import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -79,7 +80,9 @@ export function CreateProjectDialog({
       disabled={!canCreate}
       onClick={canCreate ? () => setOpen(true) : undefined}
       aria-disabled={!canCreate}
+      className="gap-1.5"
     >
+      <Plus className="h-3.5 w-3.5" />
       {label}
     </Button>
   );

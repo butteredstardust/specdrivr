@@ -33,6 +33,7 @@ function formatRelativeTime(iso: string): string {
 const STATUS_TABS = [
   { value: 'all', label: 'All' },
   { value: 'unread', label: 'Unread' },
+  { value: 'mentions', label: 'Mentions' },
 ] as const;
 
 type TabValue = (typeof STATUS_TABS)[number]['value'];
@@ -44,7 +45,9 @@ export default function NotificationsPage() {
   const url =
     tab === 'unread'
       ? `/api/v1/notifications?unread=true&page=${page}`
-      : `/api/v1/notifications?page=${page}`;
+      : tab === 'mentions'
+        ? `/api/v1/notifications?type=mention&page=${page}`
+        : `/api/v1/notifications?page=${page}`;
 
   const { data, isLoading, restart } = usePolling<NotificationsPageResponse>({
     url,
@@ -131,19 +134,19 @@ export default function NotificationsPage() {
           <div
             key={n.id}
             className={cn(
-              'border-border/50 flex items-start gap-4 border-b px-6 py-4 transition-colors',
+              'border-border/50 flex items-center gap-3 border-b px-6 py-3 transition-colors',
               !n.readAt ? 'bg-accent-violet/5' : 'hover:bg-secondary/30'
             )}
           >
             {/* Icon */}
-            <div className="mt-0.5 shrink-0">
+            <div className="shrink-0">
               <div
                 className={cn(
-                  'flex h-8 w-8 items-center justify-center rounded-full',
+                  'flex h-7 w-7 items-center justify-center rounded-full',
                   !n.readAt ? 'bg-accent-violet/15' : 'bg-secondary'
                 )}
               >
-                <DaemonMascot size={18} expression={!n.readAt ? 'working' : 'idle'} />
+                <DaemonMascot size={16} expression={!n.readAt ? 'working' : 'idle'} />
               </div>
             </div>
 
@@ -152,21 +155,18 @@ export default function NotificationsPage() {
               <p
                 className={cn(
                   'text-sm leading-snug',
-                  !n.readAt ? 'text-foreground font-medium' : 'text-foreground/80'
+                  !n.readAt ? 'text-foreground font-medium' : 'text-muted-foreground'
                 )}
               >
                 {n.title}
               </p>
-              {n.body && (
-                <p className="text-muted-foreground mt-0.5 text-xs leading-snug">{n.body}</p>
-              )}
-              <p className="text-muted-foreground mt-1 font-mono text-[10px]">
+              <p className="text-muted-foreground mt-0.5 font-mono text-[10px]">
                 {formatRelativeTime(n.createdAt)}
               </p>
             </div>
 
             {/* Unread dot */}
-            {!n.readAt && <div className="bg-accent-violet mt-1.5 h-2 w-2 shrink-0 rounded-full" />}
+            {!n.readAt && <div className="bg-accent-violet h-2 w-2 shrink-0 rounded-full" />}
           </div>
         ))}
       </div>

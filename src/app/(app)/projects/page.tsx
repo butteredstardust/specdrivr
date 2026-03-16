@@ -39,7 +39,7 @@ export default async function ProjectsPage() {
           <div className="text-muted-foreground mb-1 font-mono text-[10px] tracking-[0.2em] uppercase">
             Projects
           </div>
-          <h1 className="text-foreground text-xl font-semibold">Projects</h1>
+          <h1 className="text-foreground text-xl font-semibold">All Projects</h1>
         </div>
         <CreateProjectDialog userRole={userRole} />
       </div>

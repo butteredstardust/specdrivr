@@ -170,7 +170,7 @@ function ConnectedBadge({ connected }: { connected: boolean }) {
   return (
     <span
       className={`inline-flex items-center rounded-full px-2 py-0.5 font-mono text-[10px] tracking-wider uppercase ${
-        connected ? 'bg-status-green/10 text-status-green' : 'bg-bg-surface text-text-muted'
+        connected ? 'bg-status-emerald/10 text-status-emerald' : 'bg-bg-surface text-text-muted'
       }`}
     >
       {connected ? 'Connected' : 'Not connected'}
@@ -432,7 +432,7 @@ function GitHubCard({ projectId, editable, initialData, onSaved }: GitHubCardPro
           </FormField>
 
           {connected && (
-            <div className="border-border-default bg-bg-inset flex items-center gap-2 rounded-md border px-3 py-2">
+            <div className="border-border-default bg-bg-base flex items-center gap-2 rounded-md border px-3 py-2">
               <p className="text-text-muted min-w-0 flex-1 truncate font-mono text-xs">
                 {webhookUrl}
               </p>
@@ -1015,7 +1015,7 @@ function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
                     variant="outline"
                     className={
                       wh.status === 'active'
-                        ? 'border-status-green/30 bg-status-green/10 text-status-green font-mono text-[10px]'
+                        ? 'border-status-emerald/30 bg-status-emerald/10 text-status-emerald font-mono text-[10px]'
                         : 'border-status-red/30 bg-status-red/10 text-status-red font-mono text-[10px]'
                     }
                   >

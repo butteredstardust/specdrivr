@@ -12,7 +12,7 @@ export default async function UsagePage() {
 
   return (
     <div className="flex max-w-4xl flex-col gap-8">
-      <h1 className="text-foreground text-lg font-semibold">USAGE — LAST 30 DAYS</h1>
+      <h2 className="text-text-muted font-mono text-xs tracking-widest uppercase">USAGE — LAST 30 DAYS</h2>
 
       {project ? (
         <UsageSection projectId={project.id} />
