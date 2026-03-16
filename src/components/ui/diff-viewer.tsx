@@ -110,9 +110,9 @@ export function DiffViewer({ files, className }: DiffViewerProps) {
       <div className="flex flex-1 overflow-hidden">
         {/* File tree */}
         <div className="border-border-default w-56 shrink-0 overflow-y-auto border-r">
-          {files.map((file) => (
+          {files.map((file, i) => (
             <Button
-              key={file.filename}
+              key={`${file.filename}-${i}`}
               variant="ghost"
               onClick={() => setSelectedFile(file.filename)}
               className={cn(

@@ -29,7 +29,7 @@ type PlanStatus =
 
 interface Plan {
   id: number;
-  content: string;
+  markdownContent: string;
   status: PlanStatus;
   reviewerFeedback?: string | null;
   createdAt: string | null;
@@ -286,7 +286,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
         </div>
         <div className="border-border-default bg-bg-elevated rounded-md border p-4">
           <div className="prose prose-invert max-w-none">
-            <ReactMarkdown>{plan.content}</ReactMarkdown>
+            <ReactMarkdown>{plan.markdownContent}</ReactMarkdown>
           </div>
         </div>
       </div>
@@ -335,7 +335,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
         )}
         <div className="border-border-default bg-bg-elevated rounded-md border p-4">
           <div className="prose prose-invert max-w-none">
-            <ReactMarkdown>{plan.content}</ReactMarkdown>
+            <ReactMarkdown>{plan.markdownContent}</ReactMarkdown>
           </div>
         </div>
         <TooltipProvider>
@@ -468,7 +468,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
           </p>
           <div className="border-border-default bg-bg-elevated rounded-md border p-4">
             <div className="prose prose-invert max-w-none">
-              <ReactMarkdown>{plan.content}</ReactMarkdown>
+              <ReactMarkdown>{plan.markdownContent}</ReactMarkdown>
             </div>
           </div>
         </div>
