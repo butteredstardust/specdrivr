@@ -1,34 +1,38 @@
 'use client';
 
 import { useState } from 'react';
-import { toast } from 'sonner';
-import { clientLogger } from '@/lib/logger-client';
 import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
-import { Button } from '@/components/ui/button';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { PageHeader } from '@/components/ui/page-header';
+import { Button } from '@/components/ui/button';
+import { Bell, CheckCircle2, AlertCircle, Info, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+function formatRelativeTime(iso: string): string {
+  const date = new Date(iso);
+  const diff = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return date.toLocaleDateString();
+}
 
 interface Notification {
   id: number;
+  type: 'info' | 'success' | 'warning' | 'error' | 'mention';
   title: string;
-  body: string;
-  type: string;
-  readAt: string | null;
+  message: string;
+  isRead: boolean;
   createdAt: string;
+  readAt: string | null;
 }
 
-interface NotificationsPageResponse {
-  notifications?: Notification[];
-  meta?: { page: number; total: number; unread?: number };
-}
-
-function formatRelativeTime(iso: string): string {
-  const secs = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-  if (secs < 60) return `${secs}s ago`;
-  if (secs < 3600) return `${Math.floor(secs / 60)}m ago`;
-  if (secs < 86400) return `${Math.floor(secs / 3600)}h ago`;
-  return `${Math.floor(secs / 86400)}d ago`;
+interface NotificationsResponse {
+  notifications: Notification[];
+  unreadCount: number;
+  total: number;
+  pages: number;
 }
 
 const STATUS_TABS = [
@@ -40,166 +44,188 @@ const STATUS_TABS = [
 type TabValue = (typeof STATUS_TABS)[number]['value'];
 
 export default function NotificationsPage() {
+  const { activeProjectId } = useShell();
   const [page, setPage] = useState(1);
   const [tab, setTab] = useState<TabValue>('all');
-  const { activeProjectId } = useShell();
 
-  const baseUrl = '/api/v1/notifications';
-  const params = new URLSearchParams();
+  const buildFetchUrl = () => {
+    const params = new URLSearchParams();
+    if (activeProjectId) params.set('projectId', String(activeProjectId));
+    params.set('page', String(page));
+    params.set('limit', '50');
+    if (tab === 'unread') params.set('unreadOnly', 'true');
+    if (tab === 'mentions') params.set('type', 'mention');
+    return `/api/v1/notifications?${params.toString()}`;
+  };
 
-  if (activeProjectId) {
-    params.append('projectId', String(activeProjectId));
-  }
-
-  if (tab === 'unread') {
-    params.append('unread', 'true');
-  } else if (tab === 'mentions') {
-    params.append('type', 'mention');
-  }
-  params.append('page', page.toString());
-
-  const url = `${baseUrl}?${params.toString()}`;
-
-  const { data, isLoading, restart } = usePolling<NotificationsPageResponse>({
-    url,
-    interval: 30_000,
+  const { data, isLoading, restart } = usePolling<NotificationsResponse>({
+    url: buildFetchUrl(),
+    interval: 5000,
   });
 
-  const list: Notification[] = (data?.notifications ??
-    (data as unknown as Notification[]) ??
-    []) as Notification[];
-  const meta = data?.meta ?? { page: 1, total: 0 };
-  const totalPages = Math.max(1, Math.ceil(meta.total / 50));
-  const unreadCount = meta?.unread ?? list.filter((n) => !n.readAt).length;
+  const notifications = data?.notifications ?? [];
+  const unreadCount = data?.unreadCount ?? 0;
+  const totalPages = data?.pages ?? 1;
 
   const handleMarkAllRead = async () => {
+    if (!activeProjectId) return;
     try {
-      const res = await fetch('/api/v1/notifications/read-all', {
+      const res = await fetch(`/api/v1/notifications/mark-all-read?projectId=${activeProjectId}`, {
         method: 'POST',
-        credentials: 'include',
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      restart();
-      toast.success('All notifications marked as read.');
-    } catch (err) {
-      clientLogger.error('NotificationsPage: mark all read failed', err);
-      toast.error('Failed to mark notifications as read.');
+      if (res.ok) restart();
+    } catch (error) {
+      console.error('Failed to mark all as read:', error);
+    }
+  };
+
+  const handleMarkRead = async (id: number) => {
+    try {
+      const res = await fetch(`/api/v1/notifications/${id}/read`, { method: 'POST' });
+      if (res.ok) restart();
+    } catch (error) {
+      console.error('Failed to mark read:', error);
+    }
+  };
+
+  const getTypeIcon = (type: Notification['type']) => {
+    switch (type) {
+      case 'success':
+        return <CheckCircle2 className="text-status-emerald h-4 w-4" />;
+      case 'error':
+        return <AlertCircle className="text-status-red h-4 w-4" />;
+      case 'warning':
+        return <AlertCircle className="text-phosphor-amber h-4 w-4" />;
+      case 'mention':
+        return <Bell className="text-accent-violet h-4 w-4" />;
+      default:
+        return <Info className="text-primary h-4 w-4" />;
     }
   };
 
   return (
     <div className="-mx-6 -mt-6 flex min-h-full flex-col">
-      {/* Header */}
-      <div className="border-border-default flex items-center justify-between border-b px-6 py-4">
-        <div>
-          <div className="text-muted-foreground mb-1 font-mono text-[10px] tracking-[0.2em] uppercase">
-            Notifications
-          </div>
-          <h1 className="text-foreground text-xl font-semibold">All Notifications</h1>
+      <PageHeader
+        category="System"
+        title="Notifications"
+        action={
+          unreadCount > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleMarkAllRead}
+              className="text-muted-foreground hover:text-foreground h-8 font-mono text-[10px] tracking-wider uppercase transition-all"
+            >
+              Mark all read
+            </Button>
+          )
+        }
+      />
+
+      {/* Tabs & Pagination Controls */}
+      <div className="border-border-default flex items-center justify-between border-b px-6 py-2.5">
+        <div className="flex items-center gap-1">
+          {STATUS_TABS.map((t) => (
+            <Button
+              key={t.value}
+              variant={tab === t.value ? 'default' : 'secondary'}
+              size="sm"
+              onClick={() => {
+                setTab(t.value);
+                setPage(1);
+              }}
+              className={cn(
+                'h-7 px-2.5 font-mono text-[10px] tracking-wider uppercase transition-all',
+                tab !== t.value && 'bg-secondary/50 text-muted-foreground hover:text-foreground'
+              )}
+            >
+              {t.label} {t.value === 'unread' && unreadCount > 0 && `(${unreadCount})`}
+            </Button>
+          ))}
         </div>
-        {unreadCount > 0 && (
-          <Button size="sm" variant="outline" onClick={handleMarkAllRead}>
-            Mark all read
-          </Button>
+
+        {totalPages > 1 && (
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground font-mono text-[10px] uppercase">
+              Page {page} of {totalPages}
+            </span>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="icon"
+                disabled={page <= 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                className="h-6 w-6 disabled:opacity-30 transition-all"
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                disabled={page >= totalPages}
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                className="h-6 w-6 disabled:opacity-30 transition-all"
+              >
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </div>
         )}
       </div>
 
-      {/* Filter tabs */}
-      <div className="border-border-default flex items-center gap-1 border-b px-6 py-3">
-        {STATUS_TABS.map(({ value, label }) => (
-          <Button
-            key={value}
-            variant={tab === value ? 'default' : 'secondary'}
-            size="sm"
-            onClick={() => {
-              setTab(value);
-              setPage(1);
-            }}
-            className={cn(
-              'h-7 px-2.5 font-mono text-[10px] tracking-wider uppercase',
-              tab === value
-                ? 'bg-primary text-primary-foreground text-white'
-                : 'bg-secondary text-muted-foreground hover:text-foreground'
-            )}
-          >
-            {label}
-            {value === 'unread' && unreadCount > 0 && (
-              <span className="ml-1 opacity-70">{unreadCount}</span>
-            )}
-          </Button>
-        ))}
-      </div>
-
-      {/* List */}
-      <div className="flex flex-col">
-        {isLoading && list.length === 0 && (
-          <div className="text-muted-foreground py-8 text-center font-mono text-xs">Loading…</div>
-        )}
-
-        {!isLoading && list.length === 0 && (
+      {/* Content */}
+      <div className="flex-1">
+        {activeProjectId === null ? (
           <div className="flex flex-col items-center gap-4 py-16">
             <DaemonMascot size={48} expression="idle" />
-            <p className="text-muted-foreground font-mono text-sm">All caught up.</p>
+            <p className="text-muted-foreground font-mono text-sm">
+              Select a project to view notifications.
+            </p>
+          </div>
+        ) : isLoading && !data ? (
+          <div className="text-muted-foreground py-16 text-center font-mono text-xs">Loading…</div>
+        ) : notifications.length === 0 ? (
+          <div className="flex flex-col items-center gap-4 py-16">
+            <Bell className="text-muted-foreground/20 h-12 w-12" />
+            <p className="text-muted-foreground font-mono text-sm">
+              No {tab === 'unread' ? 'unread ' : ''}notifications.
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col">
+            {notifications.map((n) => (
+              <div
+                key={n.id}
+                className={cn(
+                  'border-border-default/50 flex items-center gap-4 border-b py-3 pr-6 transition-colors cursor-pointer',
+                  !n.readAt
+                    ? 'border-l-accent-violet bg-accent-violet/5 border-l-2 pl-[22px]'
+                    : 'hover:bg-bg-elevated/50 border-l-2 border-l-transparent pl-[22px]'
+                )}
+                onClick={() => !n.readAt && handleMarkRead(n.id)}
+              >
+                <div className="shrink-0">
+                  {getTypeIcon(n.type)}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className={cn(
+                    'text-sm leading-snug',
+                    !n.readAt ? 'text-foreground font-medium' : 'text-muted-foreground'
+                  )}>
+                    {n.title}
+                  </p>
+                  <p className="text-muted-foreground mt-0.5 text-xs line-clamp-1">
+                    {n.message}
+                  </p>
+                  <p className="text-muted-foreground/60 mt-0.5 font-mono text-[10px] uppercase">
+                    {formatRelativeTime(n.createdAt)}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         )}
-
-        {list.map((n) => (
-          <div
-            key={n.id}
-            className={cn(
-              'border-border-default/50 flex items-center gap-4 border-b py-3 pr-6 transition-colors',
-              !n.readAt
-                ? 'border-l-accent-violet bg-accent-violet/5 border-l-2 pl-[22px]'
-                : 'hover:bg-bg-elevated/50 border-l-2 border-l-transparent pl-[22px]'
-            )}
-          >
-            {/* Icon */}
-            <div className="shrink-0">
-              <DaemonMascot size={28} expression={!n.readAt ? 'working' : 'idle'} />
-            </div>
-
-            {/* Content */}
-            <div className="min-w-0 flex-1">
-              <p
-                className={cn(
-                  'text-sm leading-snug',
-                  !n.readAt ? 'text-foreground font-medium' : 'text-muted-foreground'
-                )}
-              >
-                {n.title}
-              </p>
-              <p className="text-muted-foreground mt-0.5 font-mono text-[10px]">
-                {formatRelativeTime(n.createdAt)}
-              </p>
-            </div>
-          </div>
-        ))}
       </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center gap-3 px-6 py-4">
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={page <= 1}
-            onClick={() => setPage((p) => p - 1)}
-          >
-            Prev
-          </Button>
-          <span className="text-muted-foreground font-mono text-xs">
-            Page {page} of {totalPages}
-          </span>
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={page >= totalPages}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Next
-          </Button>
-        </div>
-      )}
     </div>
   );
 }

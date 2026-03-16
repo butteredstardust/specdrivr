@@ -7,6 +7,8 @@ import { usePolling } from '@/hooks/use-polling';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { PageHeader } from '@/components/ui/page-header';
+import { PixelBadge } from '@/components/ui/pixel-badge';
 import {
   Table,
   TableBody,
@@ -41,35 +43,24 @@ const STATUS_TABS: Array<{ value: string; label: string; status?: SpecStatus }> 
 ];
 
 function StatusBadge({ status }: { status: SpecStatus }) {
-  const base = 'font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded';
   switch (status) {
     case 'drafting':
-      return <span className={`${base} bg-secondary text-muted-foreground`}>Draft</span>;
+      return <PixelBadge>Draft</PixelBadge>;
     case 'pending_plan':
-      return <span className={`${base} text-phosphor-amber bg-phosphor-amber/10`}>Pending</span>;
+      return <PixelBadge variant="amber">Pending</PixelBadge>;
     case 'pending_approval':
-      return <span className={`${base} text-phosphor-amber bg-phosphor-amber/10`}>Review</span>;
+      return <PixelBadge variant="amber">Review</PixelBadge>;
     case 'executing':
-      return <span className={`${base} text-primary bg-primary/10`}>Running</span>;
+      return <PixelBadge variant="violet" dot>Running</PixelBadge>;
     case 'completed':
-      return <span className={`${base} text-status-emerald bg-status-emerald/10`}>Done</span>;
+      return <PixelBadge variant="emerald">Done</PixelBadge>;
     case 'stalled':
-      return <span className={`${base} text-status-red bg-status-red/10`}>Stalled</span>;
+      return <PixelBadge variant="red">Stalled</PixelBadge>;
     case 'archived':
-      return (
-        <span className={`${base} bg-secondary text-muted-foreground opacity-60`}>Archived</span>
-      );
+      return <PixelBadge variant="muted">Archived</PixelBadge>;
     default:
-      return <span className={`${base} bg-secondary text-muted-foreground`}>{status}</span>;
+      return <PixelBadge>{status}</PixelBadge>;
   }
-}
-
-function SpecIdBadge({ id }: { id: number }) {
-  return (
-    <code className="bg-phosphor-amber/10 text-phosphor-amber inline-flex cursor-pointer items-center gap-1 rounded px-1.5 py-0.5 font-mono text-xs">
-      SPEC-{String(id).padStart(3, '0')}
-    </code>
-  );
 }
 
 export default function SpecsPage(): React.ReactElement {
@@ -133,29 +124,26 @@ export default function SpecsPage(): React.ReactElement {
   return (
     // Escape the layout's p-6 so sections are full-bleed with border separators
     <div className="-mx-6 -mt-6 flex min-h-full flex-col">
-      {/* Header */}
-      <div className="border-border-default flex items-center justify-between border-b px-6 py-4">
-        <div>
-          <div className="text-muted-foreground mb-1 font-mono text-[10px] tracking-[0.2em] uppercase">
-            Specifications
-          </div>
-          <h1 className="text-foreground text-xl font-semibold">Specs</h1>
-        </div>
-        <TooltipProvider>
-          {canCreate ? (
-            newSpecButton
-          ) : (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span tabIndex={0}>{newSpecButton}</span>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Only members, admins, and owners can create specs.</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-        </TooltipProvider>
-      </div>
+      <PageHeader
+        category="Specifications"
+        title="Specs"
+        action={
+          <TooltipProvider>
+            {canCreate ? (
+              newSpecButton
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span tabIndex={0}>{newSpecButton}</span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Only members, admins, and owners can create specs.</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </TooltipProvider>
+        }
+      />
 
       {/* Filter tabs */}
       <div className="border-border-default border-b px-6 py-2.5">
@@ -167,7 +155,7 @@ export default function SpecsPage(): React.ReactElement {
                 <TabsTrigger
                   key={value}
                   value={value}
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:bg-secondary data-[state=inactive]:text-muted-foreground hover:text-foreground h-auto rounded px-2.5 py-1 font-mono text-[10px] tracking-wider uppercase data-[state=active]:shadow-none"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:bg-secondary data-[state=inactive]:text-muted-foreground hover:text-foreground h-auto rounded px-2.5 py-1 font-mono text-[10px] tracking-wider uppercase data-[state=active]:shadow-none transition-all"
                 >
                   {label}
                   {count > 0 && <span className="ml-1 opacity-60">{count}</span>}
@@ -224,7 +212,9 @@ export default function SpecsPage(): React.ReactElement {
                       onClick={() => router.push(`/specs/${spec.id}`)}
                     >
                       <TableCell className="px-6 py-3">
-                        <SpecIdBadge id={spec.id} />
+                        <PixelBadge variant="amber">
+                          SPEC-{String(spec.id).padStart(3, '0')}
+                        </PixelBadge>
                       </TableCell>
                       <TableCell className="text-foreground px-3 py-3 text-sm">
                         {spec.name}
