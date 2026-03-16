@@ -1,0 +1,62 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: specdrivr_db
+    restart: always
+    environment:
+      POSTGRES_USER: specdrivr
+      POSTGRES_PASSWORD: specdrivr_password
+      POSTGRES_DB: specdrivr
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U specdrivr']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: specdrivr_redis
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: ..
+      dockerfile: infra/docker/Dockerfile.ubuntu
+    container_name: specdrivr_app
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      APP_URL: http://localhost:3000
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      DATABASE_URL: postgresql://specdrivr:specdrivr_password@postgres:5432/specdrivr
+      REDIS_URL: redis://redis:6379
+      BETTER_AUTH_URL: http://localhost:3000
+      BETTER_AUTH_SECRET: dev-secret-must-be-at-least-32-chars-long
+      AUTH_SECRET: dev-secret-must-be-at-least-32-chars-long
+      CRON_SECRET: dev-cron-secret-32-chars-minimum-xx
+      AGENT_TOKEN: dev-agent-token-12345
+
+volumes:
+  postgres_data:
+  redis_data:
