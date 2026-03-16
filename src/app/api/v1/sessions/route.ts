@@ -5,8 +5,8 @@ import { handleApiError, formatErrorResponse } from '@/lib/error-handler';
 import { z } from 'zod';
 import { requireMember } from '@/lib/rbac';
 import { db } from '@/db';
-import { projectMembers } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { projectMembers, agentSessions, specifications, tasks } from '@/db/schema';
+import { eq, and, count } from 'drizzle-orm';
 
 const SessionQuerySchema = z.object({
   projectId: z.coerce.number().int().positive().optional(),
@@ -43,14 +43,45 @@ export async function GET(request: NextRequest) {
           { status: 403 }
         );
       }
-      const sessions = await agentSessionRepository.getByProjectId(
-        query.projectId,
-        query.limit,
-        query.offset
-      );
+
+      const totalTasksSubq = db
+        .select({ planId: tasks.planId, total: count().as('total') })
+        .from(tasks)
+        .groupBy(tasks.planId)
+        .as('task_counts');
+
+      const whereConditions = [eq(agentSessions.projectId, query.projectId)];
+      if (query.status) {
+        whereConditions.push(eq(agentSessions.status, query.status));
+      }
+
+      const rows = await db
+        .select({
+          session: agentSessions,
+          specName: specifications.name,
+          currentTaskExternalId: tasks.externalId,
+          currentTaskTitle: tasks.title,
+          totalTasks: totalTasksSubq.total,
+        })
+        .from(agentSessions)
+        .leftJoin(specifications, eq(agentSessions.specId, specifications.id))
+        .leftJoin(tasks, eq(agentSessions.currentTaskId, tasks.id))
+        .leftJoin(totalTasksSubq, eq(agentSessions.planId, totalTasksSubq.planId))
+        .where(and(...whereConditions))
+        .limit(query.limit)
+        .offset(query.offset);
+
+      const enrichedSessions = rows.map((r) => ({
+        ...r.session,
+        specName: r.specName ?? null,
+        currentTaskExternalId: r.currentTaskExternalId ?? null,
+        currentTaskTitle: r.currentTaskTitle ?? null,
+        totalTasks: r.totalTasks != null ? Number(r.totalTasks) : null,
+      }));
+
       return NextResponse.json({
-        data: sessions,
-        meta: { limit: query.limit, offset: query.offset, count: sessions.length },
+        data: enrichedSessions,
+        meta: { limit: query.limit, offset: query.offset, count: enrichedSessions.length },
       });
     }
 
