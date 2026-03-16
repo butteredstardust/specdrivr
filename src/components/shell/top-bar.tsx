@@ -3,7 +3,7 @@
 import { Fragment } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Bell, User, Shield, LogOut, Keyboard } from 'lucide-react';
+import { Bell, User, Shield, LogOut, Keyboard, Command } from 'lucide-react';
 import { authClient } from '@/lib/auth-client';
 import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
@@ -143,11 +143,12 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
         {/* Shortcuts chip */}
         <Button
           variant="ghost"
-          size="sm"
-          className="border-border-muted text-text-muted h-6 border px-1.5 font-mono text-[10px]"
+          size="icon"
+          className="text-text-muted h-8 w-8"
           onClick={() => setShortcutsOpen(true)}
+          title="Keyboard shortcuts"
         >
-          ?
+          <Command className="h-4 w-4" />
         </Button>
 
         {/* User dropdown */}
