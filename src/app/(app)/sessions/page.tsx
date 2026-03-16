@@ -33,6 +33,7 @@ interface Session {
   tasksExecuted: number;
   tasksSucceeded: number;
   tasksFailed: number;
+  totalTasks?: number | null;
   specId?: number | null;
   specTitle?: string;
 }
@@ -42,9 +43,22 @@ const TERMINAL_STATUSES = ['completed', 'failed', 'cancelled'] as const;
 function SessionIdBadge({ id }: { id: number }) {
   return (
     <code className="bg-phosphor-amber/10 text-phosphor-amber inline-flex items-center rounded px-1.5 py-0.5 font-mono text-xs">
-      SESS-{String(id).padStart(3, '0')}
+      SES-{String(id).padStart(3, '0')}
     </code>
   );
+}
+
+function timeAgo(dateStr: string | null | undefined): string {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return '';
+  const diff = Date.now() - date.getTime();
+  const mins = Math.floor(diff / 60_000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
 }
 
 function StatusBadge({ status }: { status: Session['status'] }) {
@@ -106,20 +120,6 @@ function formatDuration(session: Session): string {
   return `${mm}:${ss}`;
 }
 
-function formatStartedAt(iso: string): string {
-  try {
-    return new Date(iso).toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
-  } catch {
-    return iso;
-  }
-}
-
 function getGroupLabel(isoString: string): string {
   const date = new Date(isoString);
   const today = new Date();
@@ -139,6 +139,24 @@ function getGroupLabel(isoString: string): string {
 export default function SessionsPage() {
   const { activeProjectId } = useShell();
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [cancellingIds, setCancellingIds] = useState<Set<number>>(new Set());
+
+  const handleCancel = async (e: React.MouseEvent, sessionId: number) => {
+    e.stopPropagation();
+    setCancellingIds((prev) => new Set(prev).add(sessionId));
+    try {
+      await fetch(`/api/v1/sessions/${sessionId}/cancel`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch {
+      setCancellingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(sessionId);
+        return next;
+      });
+    }
+  };
 
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -317,13 +335,14 @@ export default function SessionsPage() {
                 <TableHead className="text-muted-foreground h-auto w-20 px-3 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
                   Tasks
                 </TableHead>
+                <TableHead className="h-auto w-24 px-3 py-2.5" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {Array.from(groups.entries()).map(([label, groupSessions]) => (
                 <Fragment key={`group-${label}`}>
                   <TableRow className="border-0 hover:bg-transparent">
-                    <TableCell colSpan={6} className="px-6 pt-4 pb-1">
+                    <TableCell colSpan={7} className="px-6 pt-4 pb-1">
                       <span className="text-muted-foreground font-mono text-[10px] font-semibold tracking-[0.2em] uppercase">
                         {label}
                       </span>
@@ -349,20 +368,36 @@ export default function SessionsPage() {
                           {session.specTitle ?? (session.specId ? `Spec #${session.specId}` : '—')}
                         </TableCell>
                         <TableCell className="text-muted-foreground px-3 py-3 font-mono text-xs">
-                          {formatStartedAt(session.startedAt)}
+                          {timeAgo(session.startedAt)}
                         </TableCell>
                         <TableCell className="text-muted-foreground px-3 py-3 font-mono text-xs">
                           {formatDuration(session)}
                         </TableCell>
-                        <TableCell className="text-muted-foreground px-3 py-3 font-mono text-xs">
-                          {session.tasksSucceeded}/{session.tasksExecuted}
+                        <TableCell className="px-3 py-3">
+                          <span className="bg-secondary text-muted-foreground rounded px-1.5 py-0.5 font-mono text-[10px]">
+                            {session.tasksSucceeded}/{session.totalTasks ?? session.tasksExecuted}{' '}
+                            tasks
+                          </span>
+                        </TableCell>
+                        <TableCell className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
+                          {session.status === 'running' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-6 px-2 font-mono text-[10px]"
+                              disabled={cancellingIds.has(session.id)}
+                              onClick={(e) => handleCancel(e, session.id)}
+                            >
+                              {cancellingIds.has(session.id) ? 'Cancelling…' : 'Cancel'}
+                            </Button>
+                          )}
                         </TableCell>
                       </TableRow>
                       <TableRow
                         key={`${session.id}-log`}
                         className="border-0 p-0 hover:bg-transparent"
                       >
-                        <TableCell colSpan={6} className="p-0">
+                        <TableCell colSpan={7} className="p-0">
                           <Collapsible open={expandedId === session.id}>
                             <CollapsibleContent>
                               <div className="border-border-default border-b px-6 py-4">

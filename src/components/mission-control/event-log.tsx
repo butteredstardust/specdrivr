@@ -39,7 +39,7 @@ export function EventLog({ sessionId, className }: EventLogProps) {
     interval: 5000,
   });
 
-  const events = data ?? [];
+  const events = Array.from(new Map((data ?? []).map((e) => [e.id, e])).values());
 
   return (
     <div className={className}>
