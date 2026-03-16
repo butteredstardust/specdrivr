@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { usePolling } from '@/hooks/use-polling';
+import { CheckCircle2, AlertCircle, Clock, SkipForward } from 'lucide-react';
 
 interface TaskItem {
   id: number;
@@ -17,37 +18,60 @@ interface TaskItem {
 
 const TERMINAL_TASK_STATUSES = ['done', 'blocked', 'failed', 'skipped'];
 
-function statusBorderColor(status: string): string {
+function statusColor(status: string): { bg: string; text: string; dot: string } {
   switch (status) {
     case 'in_progress':
-      return 'var(--color-phosphor-amber, #f59e0b)';
+      return {
+        bg: 'bg-phosphor-amber/10',
+        text: 'text-phosphor-amber',
+        dot: 'bg-phosphor-amber',
+      };
     case 'done':
-      return 'var(--color-status-emerald, #10b981)';
+      return {
+        bg: 'bg-status-emerald/10',
+        text: 'text-status-emerald',
+        dot: 'bg-status-emerald',
+      };
     case 'blocked':
+      return {
+        bg: 'bg-status-red/10',
+        text: 'text-status-red',
+        dot: 'bg-status-red',
+      };
     case 'failed':
-      return 'var(--color-status-red, #ef4444)';
+      return {
+        bg: 'bg-status-red/10',
+        text: 'text-status-red',
+        dot: 'bg-status-red',
+      };
     case 'skipped':
-      return 'var(--color-text-muted, #6b7280)';
+      return {
+        bg: 'bg-secondary',
+        text: 'text-muted-foreground',
+        dot: 'bg-muted-foreground',
+      };
     default:
-      return 'var(--color-border-default, #374151)';
+      return {
+        bg: 'bg-secondary',
+        text: 'text-muted-foreground',
+        dot: 'bg-muted-foreground',
+      };
   }
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const base = 'font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0';
+function StatusIcon({ status }: { status: string }) {
   switch (status) {
-    case 'in_progress':
-      return <span className={`${base} bg-phosphor-amber/10 text-phosphor-amber`}>running</span>;
     case 'done':
-      return <span className={`${base} bg-status-emerald/10 text-status-emerald`}>done</span>;
+      return <CheckCircle2 className="h-4 w-4" />;
     case 'blocked':
-      return <span className={`${base} bg-status-red/10 text-status-red`}>blocked</span>;
     case 'failed':
-      return <span className={`${base} bg-status-red/10 text-status-red`}>failed</span>;
+      return <AlertCircle className="h-4 w-4" />;
     case 'skipped':
-      return <span className={`${base} bg-secondary text-muted-foreground`}>skipped</span>;
+      return <SkipForward className="h-4 w-4" />;
+    case 'in_progress':
+      return <Clock className="h-4 w-4 animate-spin" />;
     default:
-      return <span className={`${base} bg-secondary text-muted-foreground`}>{status}</span>;
+      return <div className="h-4 w-4 rounded-full border border-current" />;
   }
 }
 
@@ -67,7 +91,7 @@ function LiveDuration({ startedAt }: { startedAt: string }) {
     return () => clearInterval(id);
   }, [startedAt]);
 
-  return <span className="text-text-muted w-12 text-right font-mono text-[10px]">{elapsed}</span>;
+  return <span className="text-muted-foreground font-mono text-[10px]">{elapsed}</span>;
 }
 
 function taskDuration(task: TaskItem): React.ReactNode {
@@ -79,12 +103,12 @@ function taskDuration(task: TaskItem): React.ReactNode {
     const mm = String(Math.floor(secs / 60)).padStart(2, '0');
     const ss = String(secs % 60).padStart(2, '0');
     return (
-      <span className="text-text-muted w-12 text-right font-mono text-[10px]">
+      <span className="text-muted-foreground font-mono text-[10px]">
         {mm}:{ss}
       </span>
     );
   }
-  return <span className="text-text-muted w-12 text-right font-mono text-[10px]">—</span>;
+  return <span className="text-muted-foreground font-mono text-[10px]">—</span>;
 }
 
 interface TaskTimelineProps {
@@ -105,7 +129,7 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
 
   return (
     <div>
-      <p className="text-text-muted mb-3 font-mono text-[9px] tracking-widest uppercase">
+      <p className="text-muted-foreground mb-6 font-mono text-[10px] tracking-[0.2em] uppercase">
         Task Execution Timeline
       </p>
       {isLoading && tasks.length === 0 ? (
@@ -113,23 +137,65 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
       ) : tasks.length === 0 ? (
         <p className="text-text-muted font-mono text-xs">No tasks found.</p>
       ) : (
-        <div className="flex flex-col gap-1">
-          {tasks.map((task) => (
-            <div
-              key={task.id}
-              className="flex items-center gap-3 border-l-2 py-2 pl-3"
-              style={{ borderColor: statusBorderColor(task.status) }}
-            >
-              <span className="text-text-muted w-12 shrink-0 font-mono text-[10px]">
-                {task.externalId}
-              </span>
-              <span className="text-text-primary flex-1 truncate font-mono text-xs">
-                {task.title}
-              </span>
-              {taskDuration(task)}
-              <StatusBadge status={task.status} />
-            </div>
-          ))}
+        <div className="relative space-y-3">
+          {tasks.map((task, idx) => {
+            const colors = statusColor(task.status);
+            const isLast = idx === tasks.length - 1;
+
+            return (
+              <div key={task.id} className="relative flex gap-4">
+                {/* Left column: dots and line */}
+                <div className="relative flex flex-col items-center pt-1">
+                  {/* Vertical line (extends down from dot) */}
+                  {!isLast && (
+                    <div className="bg-border-default/30 absolute top-6 left-1/2 h-12 w-0.5 -translate-x-1/2" />
+                  )}
+
+                  {/* Dot */}
+                  <div
+                    className={`relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all ${colors.dot} border-bg-default ${
+                      task.status === 'in_progress'
+                        ? 'ring-phosphor-amber shadow-lg ring-2 ring-offset-2'
+                        : ''
+                    }`}
+                  >
+                    {task.status === 'in_progress' && (
+                      <div className="bg-phosphor-amber/30 absolute inset-0 animate-pulse rounded-full" />
+                    )}
+                  </div>
+                </div>
+
+                {/* Right column: content card */}
+                <div className="flex-1 pt-0.5">
+                  <div
+                    className={`rounded-lg border transition-all ${colors.bg} border-border-default/50 px-3 py-2.5`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="mb-1 flex items-center gap-2">
+                          <span className="text-muted-foreground shrink-0 font-mono text-[10px] font-semibold tracking-wider uppercase">
+                            {task.externalId}
+                          </span>
+                          <div className={`flex items-center gap-1 ${colors.text}`}>
+                            <StatusIcon status={task.status} />
+                          </div>
+                        </div>
+                        <p className="text-foreground truncate font-mono text-xs">{task.title}</p>
+                      </div>
+                      <div className="flex shrink-0 flex-col items-end gap-1">
+                        {taskDuration(task)}
+                        <span
+                          className={`rounded px-1.5 py-0.5 font-mono text-[9px] tracking-wider uppercase ${colors.bg} ${colors.text}`}
+                        >
+                          {task.status.replace(/_/g, ' ')}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
