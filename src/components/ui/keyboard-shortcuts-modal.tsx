@@ -2,6 +2,7 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useShell } from '@/components/shell/shell-context';
+import { Command } from 'lucide-react';
 
 function Kbd({ children }: { children: React.ReactNode }) {
   return (
@@ -40,7 +41,8 @@ export function KeyboardShortcutsModal() {
     <Dialog open={shortcutsOpen} onOpenChange={setShortcutsOpen}>
       <DialogContent className="border-border-default bg-bg-surface max-w-lg">
         <DialogHeader>
-          <DialogTitle className="text-text-muted font-mono text-sm tracking-widest uppercase">
+          <DialogTitle className="text-text-muted flex items-center gap-2 font-mono text-sm tracking-widest uppercase">
+            <Command className="h-4 w-4" />
             KEYBOARD SHORTCUTS
           </DialogTitle>
         </DialogHeader>
