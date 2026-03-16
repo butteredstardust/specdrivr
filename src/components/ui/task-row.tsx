@@ -28,6 +28,8 @@ interface TaskRowProps {
     errorMessage?: string | null;
     orderIndex: number;
   };
+  externalId?: string;
+  dependsOn?: string[];
   userRole: UserRole;
   devMode?: boolean;
   onUnblock?: (taskId: number) => void;
@@ -62,6 +64,8 @@ function hasRole(userRole: UserRole, required: UserRole): boolean {
 
 export function TaskRow({
   task,
+  externalId,
+  dependsOn,
   userRole,
   devMode,
   onUnblock,
@@ -95,12 +99,24 @@ export function TaskRow({
                 {STATUS_CHAR[task.status]}
               </span>
               <span className="bg-phosphor-amber/10 text-phosphor-amber shrink-0 rounded-sm px-1.5 py-0.5 font-mono text-xs">
-                T-{String(task.id).padStart(3, '0')}
+                {externalId ?? `T-${String(task.id).padStart(3, '0')}`}
               </span>
               {devMode && (
                 <span className="text-text-muted font-mono text-[10px]">[id:{task.id}]</span>
               )}
               <span className="text-text-primary flex-1 truncate text-sm">{task.title}</span>
+              {dependsOn && dependsOn.length > 0 && (
+                <div className="flex shrink-0 gap-1">
+                  {dependsOn.slice(0, 3).map((dep) => (
+                    <span
+                      key={dep}
+                      className="text-text-muted bg-bg-elevated rounded px-1 font-mono text-[9px]"
+                    >
+                      +{dep}
+                    </span>
+                  ))}
+                </div>
+              )}
               {task.status === 'blocked' && task.errorMessage && (
                 <span className="text-phosphor-amber max-w-48 truncate text-xs">
                   {task.errorMessage.slice(0, 60)}

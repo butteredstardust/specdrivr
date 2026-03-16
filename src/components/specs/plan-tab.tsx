@@ -34,6 +34,7 @@ interface Plan {
   reviewerFeedback?: string | null;
   createdAt: string | null;
   updatedAt: string | null;
+  taskCount?: number | null;
 }
 
 function timeAgo(dateStr: string | null | undefined): string {
@@ -283,8 +284,10 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
           </span>
           <span className="text-muted-foreground font-mono text-xs">{timeAgo(plan.updatedAt)}</span>
         </div>
-        <div className="prose prose-invert max-w-none">
-          <ReactMarkdown>{plan.content}</ReactMarkdown>
+        <div className="border-border-default bg-bg-elevated rounded-md border p-4">
+          <div className="prose prose-invert max-w-none">
+            <ReactMarkdown>{plan.content}</ReactMarkdown>
+          </div>
         </div>
       </div>
     );
@@ -330,8 +333,10 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
             <p className="text-text-secondary mt-1 text-sm">{plan.reviewerFeedback}</p>
           </blockquote>
         )}
-        <div className="prose prose-invert max-w-none">
-          <ReactMarkdown>{plan.content}</ReactMarkdown>
+        <div className="border-border-default bg-bg-elevated rounded-md border p-4">
+          <div className="prose prose-invert max-w-none">
+            <ReactMarkdown>{plan.content}</ReactMarkdown>
+          </div>
         </div>
         <TooltipProvider>
           {canMember ? (
@@ -358,94 +363,114 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
   // --- State 2: pending_approval ---
   return (
     <TooltipProvider>
-      <div className="space-y-6">
-        <div className="prose prose-invert max-w-none">
-          <ReactMarkdown>{plan.content}</ReactMarkdown>
+      <div className="space-y-4">
+        {/* Status banner ABOVE content */}
+        <div className="border-phosphor-amber/20 bg-phosphor-amber/5 flex items-center gap-3 rounded-md border px-3 py-2.5">
+          <DaemonMascot size={16} expression="working" />
+          <div className="flex flex-1 flex-col gap-0.5">
+            <span className="text-phosphor-amber font-mono text-xs font-semibold tracking-widest uppercase">
+              Plan Ready for Review
+            </span>
+            <span className="text-text-muted font-mono text-[10px]">
+              {timeAgo(plan.createdAt)}
+              {plan.taskCount != null ? ` · ${plan.taskCount} tasks` : ''}
+            </span>
+          </div>
+          <div className="flex gap-2">
+            {canAdmin ? (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setChangesOpen((v) => !v);
+                  setRejectOpen(false);
+                }}
+                disabled={isActioning}
+              >
+                Request Changes
+              </Button>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span tabIndex={0}>
+                    <Button size="sm" variant="outline" disabled aria-disabled>
+                      Request Changes
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>Requires Admin role or higher</TooltipContent>
+              </Tooltip>
+            )}
+            {canAdmin ? (
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-status-red hover:text-status-red"
+                onClick={() => {
+                  setRejectOpen((v) => !v);
+                  setChangesOpen(false);
+                }}
+                disabled={isActioning}
+              >
+                Reject Plan
+              </Button>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span tabIndex={0}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-status-red"
+                      disabled
+                      aria-disabled
+                    >
+                      Reject Plan
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>Requires Admin role or higher</TooltipContent>
+              </Tooltip>
+            )}
+            {canAdmin ? (
+              <Button
+                size="sm"
+                className="bg-accent-violet hover:bg-accent-violet/80 text-white"
+                onClick={handleApprove}
+                disabled={isActioning}
+              >
+                Approve & Execute
+              </Button>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span tabIndex={0}>
+                    <Button
+                      size="sm"
+                      className="bg-accent-violet text-white"
+                      disabled
+                      aria-disabled
+                    >
+                      Approve & Execute
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>Requires Admin role or higher</TooltipContent>
+              </Tooltip>
+            )}
+          </div>
         </div>
 
-        {/* Action buttons — always rendered */}
-        <div className="flex flex-wrap gap-2">
-          {/* Approve */}
-          {canAdmin ? (
-            <Button
-              size="sm"
-              className="bg-emerald-700 text-white hover:bg-emerald-600"
-              onClick={handleApprove}
-              disabled={isActioning}
-            >
-              Approve Plan
-            </Button>
-          ) : (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span tabIndex={0}>
-                  <Button size="sm" className="bg-emerald-700 text-white" disabled aria-disabled>
-                    Approve Plan
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>Requires Admin role or higher</TooltipContent>
-            </Tooltip>
-          )}
-
-          {/* Request Changes */}
-          {canAdmin ? (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                setChangesOpen((v) => !v);
-                setRejectOpen(false);
-              }}
-              disabled={isActioning}
-            >
-              Request Changes
-            </Button>
-          ) : (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span tabIndex={0}>
-                  <Button size="sm" variant="outline" disabled aria-disabled>
-                    Request Changes
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>Requires Admin role or higher</TooltipContent>
-            </Tooltip>
-          )}
-
-          {/* Reject */}
-          {canAdmin ? (
-            <Button
-              size="sm"
-              variant="outline"
-              className="text-status-red hover:text-status-red"
-              onClick={() => {
-                setRejectOpen((v) => !v);
-                setChangesOpen(false);
-              }}
-              disabled={isActioning}
-            >
-              Reject Plan
-            </Button>
-          ) : (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span tabIndex={0}>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-status-red"
-                    disabled
-                    aria-disabled
-                  >
-                    Reject Plan
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>Requires Admin role or higher</TooltipContent>
-            </Tooltip>
-          )}
+        {/* Plan document */}
+        <div>
+          <p className="text-text-muted mb-2 font-mono text-[10px] tracking-[0.2em] uppercase">
+            Plan Document
+          </p>
+          <div className="border-border-default bg-bg-elevated rounded-md border p-4">
+            <div className="prose prose-invert max-w-none">
+              <ReactMarkdown>{plan.content}</ReactMarkdown>
+            </div>
+          </div>
         </div>
 
         {/* Request Changes panel */}

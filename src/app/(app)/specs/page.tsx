@@ -26,13 +26,14 @@ interface Spec {
   status: SpecStatus;
   createdAt: string;
   updatedAt: string;
+  taskCount?: number | null;
+  currentVersionNumber?: number | null;
 }
 
 const STATUS_TABS: Array<{ value: string; label: string; status?: SpecStatus }> = [
   { value: 'all', label: 'All' },
   { value: 'drafting', label: 'Drafting', status: 'drafting' },
-  { value: 'pending_plan', label: 'Pending', status: 'pending_plan' },
-  { value: 'pending_approval', label: 'Review', status: 'pending_approval' },
+  { value: 'pending', label: 'Pending' },
   { value: 'executing', label: 'Executing', status: 'executing' },
   { value: 'completed', label: 'Complete', status: 'completed' },
   { value: 'stalled', label: 'Stalled', status: 'stalled' },
@@ -102,8 +103,19 @@ export default function SpecsPage(): React.ReactElement {
   const canCreate = userRole === 'member' || userRole === 'admin' || userRole === 'owner';
 
   const allSpecs = specs ?? [];
-  const countByStatus = (status: SpecStatus) => allSpecs.filter((s) => s.status === status).length;
-  const filteredSpecs = allSpecs.filter((spec) => activeTab === 'all' || spec.status === activeTab);
+  const countByStatus = (value: string, status?: SpecStatus) => {
+    if (value === 'pending') {
+      return allSpecs.filter((s) => s.status === 'pending_plan' || s.status === 'pending_approval')
+        .length;
+    }
+    return status ? allSpecs.filter((s) => s.status === status).length : allSpecs.length;
+  };
+  const filteredSpecs = allSpecs.filter((spec) => {
+    if (activeTab === 'all') return true;
+    if (activeTab === 'pending')
+      return spec.status === 'pending_plan' || spec.status === 'pending_approval';
+    return spec.status === activeTab;
+  });
 
   const newSpecButton = (
     <Button
@@ -150,8 +162,7 @@ export default function SpecsPage(): React.ReactElement {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
             {STATUS_TABS.map(({ value, label, status }) => {
-              const count = status ? countByStatus(status) : allSpecs.length;
-              if (status && count === 0) return null;
+              const count = countByStatus(value, status);
               return (
                 <TabsTrigger
                   key={value}
@@ -199,6 +210,9 @@ export default function SpecsPage(): React.ReactElement {
                     <TableHead className="text-muted-foreground h-auto w-16 px-3 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
                       v
                     </TableHead>
+                    <TableHead className="text-muted-foreground h-auto w-24 px-3 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
+                      Tasks
+                    </TableHead>
                     <TableHead className="h-auto w-10" />
                   </TableRow>
                 </TableHeader>
@@ -219,7 +233,10 @@ export default function SpecsPage(): React.ReactElement {
                         <StatusBadge status={spec.status} />
                       </TableCell>
                       <TableCell className="text-muted-foreground px-3 py-3 font-mono text-[10px]">
-                        —
+                        {spec.currentVersionNumber ? `v${spec.currentVersionNumber}` : '—'}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground px-3 py-3 font-mono text-[10px]">
+                        {spec.taskCount != null ? `${spec.taskCount}` : '—'}
                       </TableCell>
                       <TableCell
                         className="px-3 py-3 text-right"

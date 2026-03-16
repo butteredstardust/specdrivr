@@ -18,6 +18,8 @@ interface Task {
   description?: string | null;
   errorMessage?: string | null;
   orderIndex: number;
+  externalId: string;
+  dependsOn?: string[] | null;
 }
 
 interface TasksTabProps {
@@ -107,12 +109,22 @@ export function TasksTab({ specId, userRole }: TasksTabProps): React.ReactElemen
         )}
       </div>
 
+      {list.every((t) => t.status === 'todo') && (
+        <div className="border-border-default bg-bg-elevated rounded border px-3 py-2">
+          <p className="text-text-muted font-mono text-[10px] tracking-wider uppercase">
+            Tasks will begin executing after plan approval.
+          </p>
+        </div>
+      )}
+
       {/* Task list */}
       <div className="space-y-1">
         {list.map((task) => (
           <TaskRow
             key={task.id}
             task={task}
+            externalId={task.externalId}
+            dependsOn={task.dependsOn ?? undefined}
             userRole={userRole}
             onUnblock={handleUnblock}
             onOverride={handleOverride}
