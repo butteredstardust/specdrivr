@@ -19,7 +19,7 @@ export default async function SettingsLayout({ children }: { children: React.Rea
   return (
     <div className="-mx-6 -mt-6 flex min-h-full flex-col">
       {/* Header */}
-      <div className="border-border border-b px-6 py-4">
+      <div className="border-border-default border-b px-6 py-4">
         <div className="text-muted-foreground mb-1 font-mono text-[10px] tracking-[0.2em] uppercase">
           Settings
         </div>
@@ -28,7 +28,7 @@ export default async function SettingsLayout({ children }: { children: React.Rea
 
       {/* Two-column body */}
       <div className="flex flex-1">
-        <div className="border-border w-52 shrink-0 border-r px-4 py-6">
+        <div className="border-border-default w-52 shrink-0 border-r px-4 py-6">
           <SettingsNav userRole={userRole} />
         </div>
         <div className="min-w-0 flex-1 px-8 py-6">{children}</div>

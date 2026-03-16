@@ -182,6 +182,9 @@ export function ApiTokensSection() {
           Generate Token
         </Button>
       </div>
+      <p className="text-text-muted text-sm">
+        Use tokens to authenticate the DAEMON agent or external integrations.
+      </p>
 
       {isLoading && (
         <div className="text-text-muted flex items-center gap-2">

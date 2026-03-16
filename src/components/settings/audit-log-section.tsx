@@ -281,7 +281,7 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
 
       {!isLoading && !error && entries.length === 0 && (
         <div className="flex flex-col items-center justify-center gap-3 py-16">
-          <DaemonMascot size={32} expression="idle" />
+          <DaemonMascot size={48} expression="idle" />
           <p className="text-text-muted font-mono text-sm">No audit entries.</p>
           <p className="text-text-muted font-mono text-xs">
             Administrative actions will be logged here.

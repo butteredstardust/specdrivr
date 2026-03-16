@@ -123,11 +123,13 @@ export default function MissionControlPage() {
   return (
     <div className="-mx-6 -mt-6 flex min-h-full flex-col">
       {/* Header */}
-      <div className="border-border border-b px-6 py-4">
-        <div className="text-muted-foreground mb-1 font-mono text-[10px] tracking-[0.2em] uppercase">
-          Mission Control
+      <div className="border-border-default flex items-center justify-between border-b px-6 py-4">
+        <div>
+          <div className="text-muted-foreground mb-1 font-mono text-[10px] tracking-[0.2em] uppercase">
+            Mission Control
+          </div>
+          <h1 className="text-foreground text-xl font-semibold">Dashboard</h1>
         </div>
-        <h1 className="text-foreground text-xl font-semibold">Dashboard</h1>
       </div>
 
       {/* Content */}

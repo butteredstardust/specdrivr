@@ -51,7 +51,7 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
   const { user, setShortcutsOpen, pageLabel } = useShell();
 
   const { data: notifData } = usePolling<NotificationData>({
-    url: '/api/v1/notifications?unreadOnly=true&limit=1',
+    url: '/api/v1/notifications?unread=true&limit=1',
     interval: 30_000,
   });
 

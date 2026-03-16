@@ -171,7 +171,7 @@ export default function SpecDetailPage(): React.ReactElement {
   return (
     <div className="-mx-6 -mt-6 flex min-h-full flex-col">
       {/* Header */}
-      <div className="border-border border-b px-6 py-4">
+      <div className="border-border-default border-b px-6 py-4">
         {isLoading ? (
           <div className="flex items-center gap-3">
             <Skeleton className="h-5 w-20" />
@@ -215,7 +215,7 @@ export default function SpecDetailPage(): React.ReactElement {
           onValueChange={(v) => router.push(`/specs/${specId}?tab=${v}`)}
           className="w-full"
         >
-          <TabsList className="border-border h-auto w-full justify-start gap-4 rounded-none border-b bg-transparent p-0">
+          <TabsList className="border-border-default h-auto w-full justify-start gap-4 rounded-none border-b bg-transparent p-0">
             {TABS.map((tab) => (
               <TabsTrigger
                 key={tab.id}
