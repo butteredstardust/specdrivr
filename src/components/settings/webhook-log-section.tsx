@@ -31,13 +31,13 @@ type DeliveryStatus = 'delivered' | 'failed' | 'pending' | 'exhausted';
 
 function StatusBadge({ status }: { status: DeliveryStatus }) {
   const classes: Record<string, string> = {
-    delivered: 'bg-[--status-emerald]/10 text-[--status-emerald]',
-    failed: 'bg-[--status-red]/10 text-[--status-red]',
-    pending: 'bg-[--phosphor-amber]/10 text-[--phosphor-amber]',
-    exhausted: 'bg-[--status-red]/10 text-[--status-red]',
+    delivered: 'bg-status-emerald/10 text-status-emerald',
+    failed: 'bg-status-red/10 text-status-red',
+    pending: 'bg-phosphor-amber/10 text-phosphor-amber',
+    exhausted: 'bg-status-red/10 text-status-red',
   };
 
-  const cls = classes[status] ?? 'bg-[--bg-surface] text-[--text-muted]';
+  const cls = classes[status] ?? 'bg-bg-surface text-text-muted';
 
   return <span className={cn('rounded px-1.5 py-0.5 font-mono text-xs', cls)}>{status}</span>;
 }
@@ -58,29 +58,29 @@ function DeliveryRow({ entry }: { entry: DeliveryRow }) {
   return (
     <>
       <tr
-        className="cursor-pointer border-b border-[--border-default] last:border-0 hover:bg-[--surface-hover]"
+        className="border-border-default hover:bg-bg-elevated/50 cursor-pointer border-b last:border-0"
         onClick={() => setExpanded((v) => !v)}
       >
-        <td className="px-4 py-2.5 font-mono text-xs text-[--text-primary]">
+        <td className="text-text-primary px-4 py-2.5 font-mono text-xs">
           <span className="flex items-center gap-1.5">
             {expanded ? (
-              <ChevronDown className="size-3 shrink-0 text-[--text-muted]" />
+              <ChevronDown className="text-text-muted size-3 shrink-0" />
             ) : (
-              <ChevronRight className="size-3 shrink-0 text-[--text-muted]" />
+              <ChevronRight className="text-text-muted size-3 shrink-0" />
             )}
             {entry.eventType}
           </span>
         </td>
-        <td className="max-w-[160px] truncate px-4 py-2.5 font-mono text-xs text-[--text-muted]">
+        <td className="text-text-muted max-w-[160px] truncate px-4 py-2.5 font-mono text-xs">
           {entry.endpointUrl ?? '—'}
         </td>
         <td className="px-4 py-2.5">
           <StatusBadge status={entry.status as DeliveryStatus} />
         </td>
-        <td className="px-4 py-2.5 font-mono text-xs text-[--text-primary]">
+        <td className="text-text-primary px-4 py-2.5 font-mono text-xs">
           {entry.responseStatus ?? '—'}
         </td>
-        <td className="px-4 py-2.5 font-mono text-xs text-[--text-muted]">
+        <td className="text-text-muted px-4 py-2.5 font-mono text-xs">
           {formatTs(entry.createdAt)}
         </td>
         <td className="px-4 py-2.5" onClick={(e) => e.stopPropagation()}>
@@ -91,7 +91,7 @@ function DeliveryRow({ entry }: { entry: DeliveryRow }) {
                   variant="ghost"
                   size="sm"
                   disabled
-                  className="h-auto gap-1 px-2 font-mono text-xs text-[--text-muted]"
+                  className="text-text-muted h-auto gap-1 px-2 font-mono text-xs"
                 >
                   <RotateCcw className="size-3" />
                   Retry
@@ -106,9 +106,9 @@ function DeliveryRow({ entry }: { entry: DeliveryRow }) {
       </tr>
 
       {expanded && (
-        <tr className="border-b border-[--border-default]">
+        <tr className="border-border-default border-b">
           <td colSpan={6} className="px-4 pt-0 pb-3">
-            <pre className="max-h-48 overflow-auto rounded-md bg-[--bg-inset] p-3 font-mono text-xs text-[--text-primary]">
+            <pre className="bg-bg-base text-text-primary max-h-48 overflow-auto rounded-md p-3 font-mono text-xs">
               {entry.responseBody || '(no response body)'}
             </pre>
           </td>
@@ -152,7 +152,7 @@ export function WebhookLogSection({ projectId }: WebhookLogSectionProps) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-2 text-[--text-muted]">
+      <div className="text-text-muted flex items-center gap-2">
         <Loader2 className="size-3 animate-spin" />
         <span className="font-mono text-xs">Loading webhook deliveries…</span>
       </div>
@@ -162,14 +162,14 @@ export function WebhookLogSection({ projectId }: WebhookLogSectionProps) {
   if (error && !isLoading) {
     return (
       <div className="flex items-center gap-2">
-        <span className="font-mono text-xs text-[--status-red]">
+        <span className="text-status-red font-mono text-xs">
           Failed to load webhook deliveries.
         </span>
         <Button
           variant="ghost"
           size="sm"
           onClick={restart}
-          className="h-auto px-0 font-mono text-xs text-[--text-muted] underline hover:bg-transparent hover:text-[--text-primary]"
+          className="text-text-muted hover:text-text-primary h-auto px-0 font-mono text-xs underline hover:bg-transparent"
         >
           Retry
         </Button>
@@ -181,7 +181,7 @@ export function WebhookLogSection({ projectId }: WebhookLogSectionProps) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-16">
         <DaemonMascot size={48} expression="idle" />
-        <p className="font-mono text-sm text-[--text-muted]">No webhook deliveries yet.</p>
+        <p className="text-text-muted font-mono text-sm">No webhook deliveries yet.</p>
       </div>
     );
   }
@@ -189,16 +189,16 @@ export function WebhookLogSection({ projectId }: WebhookLogSectionProps) {
   return (
     <div className="flex flex-col gap-4">
       <TooltipProvider>
-        <div className="overflow-x-auto rounded-lg border border-[--border-default]">
+        <div className="border-border-default overflow-x-auto rounded-lg border">
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b border-[--border-default] bg-[--bg-surface]">
-                <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">Event</th>
-                <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">Endpoint</th>
-                <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">Status</th>
-                <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">HTTP Code</th>
-                <th className="px-4 py-2 font-mono text-xs text-[--text-muted]">Timestamp</th>
-                <th className="px-4 py-2 font-mono text-xs text-[--text-muted]"></th>
+              <tr className="border-border-default bg-bg-surface border-b">
+                <th className="text-text-muted px-4 py-2 font-mono text-xs">Event</th>
+                <th className="text-text-muted px-4 py-2 font-mono text-xs">Endpoint</th>
+                <th className="text-text-muted px-4 py-2 font-mono text-xs">Status</th>
+                <th className="text-text-muted px-4 py-2 font-mono text-xs">HTTP Code</th>
+                <th className="text-text-muted px-4 py-2 font-mono text-xs">Timestamp</th>
+                <th className="text-text-muted px-4 py-2 font-mono text-xs"></th>
               </tr>
             </thead>
             <tbody>
@@ -213,7 +213,7 @@ export function WebhookLogSection({ projectId }: WebhookLogSectionProps) {
       {/* Pagination */}
       {meta && meta.total > meta.pageSize && (
         <div className="flex items-center justify-between">
-          <span className="font-mono text-xs text-[--text-muted]">
+          <span className="text-text-muted font-mono text-xs">
             Page {page} of {totalPages}
           </span>
           <div className="flex items-center gap-2">

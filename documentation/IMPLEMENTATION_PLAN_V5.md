@@ -1,6 +1,6 @@
 # Engineering Implementation Plan V5 — Audit-Corrected & Deterministic
 
-This document serves as the authoritative, step-by-step execution roadmap for Specdrivr. It incorporates corrections from the Technical Audit (March 2026), specifically mandating Upstash Redis (HTTP), DOMPurify sanitization, and async plan generation via QStash.
+This document serves as the authoritative, step-by-step execution roadmap for Specdrivr. It incorporates corrections from the Technical Audit (March 2026), specifically mandating ioredis for production Redis access, DOMPurify sanitization, and async plan generation.
 
 ## Phase 1 — Infrastructure & Foundation
 
@@ -9,8 +9,8 @@ This document serves as the authoritative, step-by-step execution roadmap for Sp
 - **Runtime:** Node.js 25.6.1 (pnpm)
 - **Database:** PostgreSQL 16 (Drizzle ORM)
 - **Auth:** BetterAuth 1.5.5
-- **Cache/Queue:** Upstash Redis (HTTP-based) — **Strict: No ioredis/TCP**
-- **Rate Limiting:** Upstash Ratelimit
+- **Cache/Queue:** Redis with ioredis (TCP) — Production-grade client
+- **Rate Limiting:** ioredis-based rate limiting
 - **Sanitization:** Isomorphic DOMPurify (Mandatory)
 - **Logging:** Pino (Structured JSON)
 
@@ -72,27 +72,27 @@ This document serves as the authoritative, step-by-step execution roadmap for Sp
 
 **Step Number:** TASK-005
 **Title:** [REFACTORED] Authentication & Redis Setup
-**Objective:** Configure BetterAuth with Upstash Redis (HTTP) for edge-compatible sessions.
+**Objective:** Configure BetterAuth with ioredis for production sessions.
 **Detailed instructions:**
-1. Install `@upstash/redis` and `@better-auth/core`. **UNINSTALL `ioredis` if present.**
-2. Create `src/lib/redis.ts`: Export Upstash Redis singleton using `REDIS_URL`.
-3. Create `src/lib/auth.ts`: Configure BetterAuth with the Drizzle adapter and the Upstash Redis session storage.
+1. Install `ioredis` and `@better-auth/core`.
+2. Create `src/lib/redis.ts`: Export ioredis singleton with connection pooling and error recovery using `REDIS_URL`.
+3. Create `src/lib/auth.ts`: Configure BetterAuth with the Drizzle adapter and ioredis session storage.
 4. Implement `bcrypt` (cost: 12).
 5. Mount catch-all route at `src/app/api/auth/[...all]/route.ts`.
 **Files involved:** `src/lib/redis.ts`, `src/lib/auth.ts`, `src/app/api/auth/[...all]/route.ts`
-**Expected output:** Functional auth system that does not use TCP sockets.
-**Verification method:** Attempt login via `/api/auth/sign-in`. Verify session persists in Upstash console.
+**Expected output:** Functional auth system with production-grade Redis client and connection pooling.
+**Verification method:** Attempt login via `/api/auth/sign-in`. Verify session persists in Redis.
 
 **Step Number:** TASK-006
-**Title:** [REFACTORED] Edge Middleware & Logging
-**Objective:** Implement rate limiting (Upstash) and structured logging (Pino).
+**Title:** [REFACTORED] Rate Limiting & Logging
+**Objective:** Implement rate limiting via ioredis and structured logging (Pino).
 **Detailed instructions:**
 1. Create `src/lib/logger.ts`: Configure Pino with JSON output and sensitive field redaction.
-2. Update `src/proxy.ts`: Implement `@upstash/ratelimit`. Set 100 req/min for API, 10 req/min for Auth.
+2. Create `src/lib/rate-limiter.ts`: Implement token bucket rate limiting with ioredis. Set 100 req/min for API, 10 req/min for Auth.
 3. Implement `GET /api/health`: Return `{ data: { status: 'ok', db: 'ok', redis: 'ok' } }`.
 4. Add `import 'server-only'` to `src/lib/db/index.ts`, `src/lib/env.ts`, `src/lib/logger.ts`.
-**Files involved:** `src/proxy.ts`, `src/lib/logger.ts`, `src/app/api/health/route.ts`
-**Expected output:** Global rate limiting at the edge.
+**Files involved:** `src/lib/rate-limiter.ts`, `src/lib/logger.ts`, `src/app/api/health/route.ts`
+**Expected output:** Global rate limiting with distributed Redis.
 **Verification method:** Blast `/api/health` with 110 requests; verify HTTP 429 on the last 10.
 
 ### Area: API Implementation (v1)

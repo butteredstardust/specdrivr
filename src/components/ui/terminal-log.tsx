@@ -15,9 +15,9 @@ interface TerminalLogProps {
 }
 
 function getLineClass(line: string): string {
-  if (line.includes('ERROR')) return 'text-[--status-red]';
-  if (line.includes('WARN')) return 'text-[--phosphor-amber]';
-  return 'text-[--text-secondary]';
+  if (line.includes('ERROR')) return 'text-status-red';
+  if (line.includes('WARN')) return 'text-phosphor-amber';
+  return 'text-text-secondary';
 }
 
 export function TerminalLog({
@@ -47,7 +47,7 @@ export function TerminalLog({
       ref={containerRef}
       onScroll={handleScroll}
       className={cn(
-        'terminal-surface overflow-y-auto rounded-md bg-[--terminal-bg] p-3',
+        'terminal-surface overflow-y-auto rounded-md bg-[color:var(--terminal-bg)] p-3',
         className
       )}
       style={{ maxHeight }}

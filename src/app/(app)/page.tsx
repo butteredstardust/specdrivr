@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
@@ -20,10 +20,15 @@ interface AgentSession {
   tasksFailed: number;
   errorMessage?: string | null;
   specId?: number | null;
+  specName?: string | null;
+  currentTaskExternalId?: string | null;
+  currentTaskTitle?: string | null;
+  totalTasks?: number | null;
 }
 
 interface BlockedTask {
   id: number;
+  externalId: string;
   title: string;
   specId: number;
 }
@@ -57,10 +62,12 @@ export default function MissionControlPage() {
   const activeSession = sessionsData?.[0] ?? null;
   const blockedTasks = tasksData ?? [];
 
-  // Reset dismissed state whenever the polled task data reference changes
-  useEffect(() => {
+  const [prevTasks, setPrevTasks] = useState(tasksData);
+
+  if (tasksData !== prevTasks) {
+    setPrevTasks(tasksData);
     setDismissed(false);
-  }, [tasksData]);
+  }
 
   async function handleSessionPatch(sessionId: number, status: string) {
     try {
@@ -121,36 +128,49 @@ export default function MissionControlPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
-        MISSION CONTROL
-      </h1>
-
-      {activeProjectId === null ? (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <Skeleton className="h-40 w-full" />
-          <Skeleton className="h-40 w-full" />
-        </div>
-      ) : (
-        <>
-          {blockedTasks.length > 0 && !dismissed && (
-            <NeedsAttentionBanner blockedTasks={blockedTasks} onDismiss={handleDismiss} />
-          )}
-
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <SessionPanel
-              session={activeSession}
-              userRole={userRole}
-              onPause={handlePause}
-              onResume={handleResume}
-              onCancel={handleCancel}
-              onRetry={handleRetry}
-              onDismiss={handleDismiss}
-            />
-            <EventLog sessionId={activeSession?.id ?? null} />
+    <div className="-mx-6 -mt-6 flex min-h-full flex-col">
+      {/* Header */}
+      <div className="border-border-default flex items-center justify-between border-b px-6 py-4">
+        <div>
+          <div className="text-muted-foreground mb-1 font-mono text-[10px] tracking-[0.2em] uppercase">
+            Mission Control
           </div>
-        </>
-      )}
+          <h1 className="text-foreground text-xl font-semibold">Dashboard</h1>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="flex flex-col gap-6 px-6 py-6">
+        {activeProjectId === null ? (
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <Skeleton className="h-40 w-full" />
+            <Skeleton className="h-40 w-full" />
+          </div>
+        ) : (
+          <>
+            {blockedTasks.length > 0 && !dismissed && (
+              <NeedsAttentionBanner blockedTasks={blockedTasks} onDismiss={handleDismiss} />
+            )}
+
+            <div className="divide-border-default grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] lg:divide-x">
+              <div className="pb-6 lg:pr-6 lg:pb-0">
+                <SessionPanel
+                  session={activeSession}
+                  userRole={userRole}
+                  onPause={handlePause}
+                  onResume={handleResume}
+                  onCancel={handleCancel}
+                  onRetry={handleRetry}
+                  onDismiss={handleDismiss}
+                />
+              </div>
+              <div className="lg:pl-6">
+                <EventLog sessionId={activeSession?.id ?? null} />
+              </div>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

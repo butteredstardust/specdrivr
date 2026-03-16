@@ -15,10 +15,8 @@ export default async function DangerPage() {
   if (!project) {
     return (
       <div className="flex max-w-2xl flex-col gap-8">
-        <h1 className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
-          DANGER ZONE
-        </h1>
-        <p className="font-mono text-xs text-[--text-muted]">No project found.</p>
+        <h2 className="text-muted-foreground font-mono text-[10px] tracking-[0.2em] uppercase">Danger Zone</h2>
+        <p className="text-muted-foreground font-mono text-xs">No project found.</p>
       </div>
     );
   }
@@ -28,9 +26,7 @@ export default async function DangerPage() {
 
   return (
     <div className="flex max-w-2xl flex-col gap-8">
-      <h1 className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
-        DANGER ZONE
-      </h1>
+      <h2 className="text-muted-foreground font-mono text-[10px] tracking-[0.2em] uppercase">Danger Zone</h2>
       <DangerZoneSection project={{ id: project.id, name: project.name }} userRole={userRole} />
     </div>
   );

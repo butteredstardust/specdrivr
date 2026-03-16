@@ -11,7 +11,7 @@ _Spec-driven autonomous code execution for engineering teams_
 ## **7.1 Auth System**
 
 - Authentication provider: [Better Auth](https://www.better-auth.com/) with Email & Password plugin.
-- Session storage: Redis-backed via BetterAuth Upstash Redis adapter. This ensures session persistence across serverless/edge functions without DB-thundering-herd issues.
+- Session storage: Redis-backed via BetterAuth with ioredis. This ensures session persistence with production-grade connection pooling and error recovery.
 - Database sync: User data and account links are stored in PostgreSQL via Drizzle adapter.
 - Cookies: Uses `better-auth.session_token` (and `__Secure-` prefix in production).
 - Passwords: bcrypt, cost factor 12. Never stored in plain text. Never logged.

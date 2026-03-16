@@ -17,8 +17,9 @@ export async function GET(request: NextRequest) {
 
     const searchParams = request.nextUrl.searchParams;
     const query = {
-      status: searchParams.get('status'),
-      planId: searchParams.get('planId'),
+      status: searchParams.get('status') ?? undefined,
+      planId: searchParams.get('planId') ?? undefined,
+      specId: searchParams.get('specId') ?? undefined,
     };
 
     const validationResult = taskQuerySchema.safeParse(query);
@@ -36,9 +37,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { status, planId } = validationResult.data;
+    const { status, planId, specId } = validationResult.data;
 
-    if (planId) {
+    if (specId) {
+      let tasks: Task[] = await taskRepository.getBySpecId(specId);
+      if (status) {
+        tasks = tasks.filter((task) => task.status === status);
+      }
+      return NextResponse.json({ data: tasks });
+    } else if (planId) {
       let tasks: Task[] = await taskRepository.getByPlanId(planId);
       if (status) {
         tasks = tasks.filter((task) => task.status === status);

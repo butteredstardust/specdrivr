@@ -1,6 +1,9 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { toast } from 'sonner';
 import { clientLogger } from '@/lib/logger-client';
 import { usePolling } from '@/hooks/use-polling';
@@ -43,6 +46,13 @@ interface TokenRow {
 
 type ExpiryOption = '30d' | '90d' | '1y' | 'never';
 
+const generateTokenSchema = z.object({
+  tokenName: z.string().min(1, 'Token name is required'),
+  expiryOption: z.enum(['30d', '90d', '1y', 'never']),
+});
+
+type GenerateTokenValues = z.infer<typeof generateTokenSchema>;
+
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return '—';
   const d = new Date(dateStr);
@@ -65,11 +75,17 @@ export function ApiTokensSection() {
   const [revealToken, setRevealToken] = useState('');
   const [revokeTargetId, setRevokeTargetId] = useState<number | null>(null);
   const [isRevoking, setIsRevoking] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
 
-  // Generate form state
-  const [tokenName, setTokenName] = useState('');
-  const [expiryOption, setExpiryOption] = useState<ExpiryOption>('90d');
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    formState: { isSubmitting, errors },
+  } = useForm<GenerateTokenValues>({
+    resolver: zodResolver(generateTokenSchema),
+    defaultValues: { tokenName: '', expiryOption: '90d' },
+  });
 
   const stopWhen = useCallback((data: TokenRow[]) => {
     setTokens(data);
@@ -81,19 +97,14 @@ export function ApiTokensSection() {
     stopWhen,
   });
 
-  const handleGenerate = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!tokenName.trim()) return;
-
-    setIsGenerating(true);
-
+  const handleGenerate = async (values: GenerateTokenValues) => {
     try {
-      const expiresAt = computeExpiresAt(expiryOption);
+      const expiresAt = computeExpiresAt(values.expiryOption);
       const res = await fetch('/api/v1/users/me/tokens', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: tokenName.trim(), expiresAt }),
+        body: JSON.stringify({ name: values.tokenName.trim(), expiresAt }),
       });
 
       const data = await res.json().catch(() => ({}));
@@ -105,30 +116,19 @@ export function ApiTokensSection() {
       const { id, name, token } = data.data as { id: number; name: string; token: string };
       const prefix = token.slice(0, 10);
 
-      // Optimistically add to list
       setTokens((prev) => [
-        {
-          id,
-          name,
-          prefix,
-          lastUsedAt: null,
-          expiresAt: expiresAt,
-          createdAt: new Date().toISOString(),
-        },
+        { id, name, prefix, lastUsedAt: null, expiresAt, createdAt: new Date().toISOString() },
         ...prev,
       ]);
 
       setGenerateOpen(false);
-      setTokenName('');
-      setExpiryOption('90d');
+      reset();
       setRevealToken(token);
       setRevealOpen(true);
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
       clientLogger.error('Failed to generate token', error);
       toast.error('Failed to generate token.');
-    } finally {
-      setIsGenerating(false);
     }
   };
 
@@ -171,9 +171,7 @@ export function ApiTokensSection() {
   return (
     <section className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-mono text-xs tracking-widest text-[--text-muted] uppercase">
-          API TOKENS
-        </h2>
+        <h2 className="text-text-muted font-mono text-xs tracking-widest uppercase">API TOKENS</h2>
         <Button
           variant="outline"
           size="sm"
@@ -184,9 +182,12 @@ export function ApiTokensSection() {
           Generate Token
         </Button>
       </div>
+      <p className="text-text-muted text-sm">
+        Use tokens to authenticate the DAEMON agent or external integrations.
+      </p>
 
       {isLoading && (
-        <div className="flex items-center gap-2 text-[--text-muted]">
+        <div className="text-text-muted flex items-center gap-2">
           <Loader2 className="size-3 animate-spin" />
           <span className="font-mono text-xs">Loading tokens…</span>
         </div>
@@ -194,12 +195,12 @@ export function ApiTokensSection() {
 
       {error && !isLoading && (
         <div className="flex items-center gap-2">
-          <span className="font-mono text-xs text-[--status-red]">Failed to load tokens.</span>
+          <span className="text-status-red font-mono text-xs">Failed to load tokens.</span>
           <Button
             variant="ghost"
             size="sm"
             onClick={restart}
-            className="h-auto px-0 font-mono text-xs text-[--text-muted] underline hover:bg-transparent hover:text-[--text-primary]"
+            className="text-text-muted hover:text-text-primary h-auto px-0 font-mono text-xs underline hover:bg-transparent"
           >
             Retry
           </Button>
@@ -209,13 +210,13 @@ export function ApiTokensSection() {
       {!isLoading && !error && (
         <>
           {tokens.length === 0 ? (
-            <p className="font-mono text-xs text-[--text-muted]">No API tokens yet.</p>
+            <p className="text-text-muted font-mono text-xs">No API tokens yet.</p>
           ) : (
-            <div className="flex flex-col gap-0 overflow-hidden rounded border border-[--surface-border]">
+            <div className="border-border-default flex flex-col gap-0 overflow-hidden rounded border">
               {/* Header row */}
-              <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-4 border-b border-[--surface-border] px-3 py-2">
+              <div className="border-border-default grid grid-cols-[1fr_auto_auto_auto_auto] gap-4 border-b px-3 py-2">
                 {['NAME', 'PREFIX', 'CREATED', 'LAST USED', 'EXPIRES'].map((col) => (
-                  <span key={col} className="font-mono text-xs text-[--text-muted]">
+                  <span key={col} className="text-text-muted font-mono text-xs">
                     {col}
                   </span>
                 ))}
@@ -224,29 +225,27 @@ export function ApiTokensSection() {
               {tokens.map((t) => (
                 <div
                   key={t.id}
-                  className="grid grid-cols-[1fr_auto_auto_auto_auto] items-center gap-4 border-b border-[--surface-border] px-3 py-2.5 last:border-b-0"
+                  className="border-border-default grid grid-cols-[1fr_auto_auto_auto_auto] items-center gap-4 border-b px-3 py-2.5 last:border-b-0"
                 >
                   <div className="flex min-w-0 items-center gap-2">
-                    <Key className="size-3 shrink-0 text-[--text-muted]" />
-                    <span className="truncate font-mono text-xs text-[--text-primary]">
-                      {t.name}
-                    </span>
+                    <Key className="text-text-muted size-3 shrink-0" />
+                    <span className="text-text-primary truncate font-mono text-xs">{t.name}</span>
                   </div>
-                  <span className="font-mono text-xs text-[--text-muted]">{t.prefix}&hellip;</span>
-                  <span className="font-mono text-xs text-[--text-muted]">
+                  <span className="text-text-muted font-mono text-xs">{t.prefix}&hellip;</span>
+                  <span className="text-text-muted font-mono text-xs">
                     {formatDate(t.createdAt)}
                   </span>
-                  <span className="font-mono text-xs text-[--text-muted]">
+                  <span className="text-text-muted font-mono text-xs">
                     {formatDate(t.lastUsedAt)}
                   </span>
                   <div className="flex items-center gap-3">
-                    <span className="font-mono text-xs text-[--text-muted]">
+                    <span className="text-text-muted font-mono text-xs">
                       {formatDate(t.expiresAt)}
                     </span>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-auto px-1.5 py-0.5 font-mono text-xs text-[--status-red] hover:bg-[--status-red]/10 hover:text-[--status-red]"
+                      className="text-status-red hover:bg-status-red/10 hover:text-status-red h-auto px-1.5 py-0.5 font-mono text-xs"
                       onClick={() => setRevokeTargetId(t.id)}
                     >
                       Revoke
@@ -260,43 +259,49 @@ export function ApiTokensSection() {
       )}
 
       {/* Generate token dialog */}
-      <Dialog open={generateOpen} onOpenChange={setGenerateOpen}>
+      <Dialog
+        open={generateOpen}
+        onOpenChange={(open) => {
+          setGenerateOpen(open);
+          if (!open) reset();
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="font-mono">Generate API Token</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleGenerate} className="flex flex-col gap-4">
+          <form onSubmit={handleSubmit(handleGenerate)} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <label className="font-mono text-xs text-[--text-secondary]" htmlFor="token-name">
-                TOKEN NAME <span className="text-[--status-red]">*</span>
+              <label className="text-text-secondary font-mono text-xs" htmlFor="token-name">
+                TOKEN NAME <span className="text-status-red">*</span>
               </label>
-              <Input
-                id="token-name"
-                value={tokenName}
-                onChange={(e) => setTokenName(e.target.value)}
-                placeholder="e.g. CI Deploy"
-                required
-              />
+              <Input id="token-name" placeholder="e.g. CI Deploy" {...register('tokenName')} />
+              {errors.tokenName && (
+                <p className="text-status-red font-mono text-xs">{errors.tokenName.message}</p>
+              )}
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="font-mono text-xs text-[--text-secondary]" htmlFor="token-expiry">
+              <label className="text-text-secondary font-mono text-xs" htmlFor="token-expiry">
                 EXPIRY
               </label>
-              <Select
-                value={expiryOption}
-                onValueChange={(v) => setExpiryOption(v as ExpiryOption)}
-              >
-                <SelectTrigger id="token-expiry">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="30d">30 days</SelectItem>
-                  <SelectItem value="90d">90 days</SelectItem>
-                  <SelectItem value="1y">1 year</SelectItem>
-                  <SelectItem value="never">Never</SelectItem>
-                </SelectContent>
-              </Select>
+              <Controller
+                name="expiryOption"
+                control={control}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="token-expiry">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="30d">30 days</SelectItem>
+                      <SelectItem value="90d">90 days</SelectItem>
+                      <SelectItem value="1y">1 year</SelectItem>
+                      <SelectItem value="never">Never</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
 
             <DialogFooter>
@@ -304,13 +309,16 @@ export function ApiTokensSection() {
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => setGenerateOpen(false)}
-                disabled={isGenerating}
+                onClick={() => {
+                  setGenerateOpen(false);
+                  reset();
+                }}
+                disabled={isSubmitting}
               >
                 Cancel
               </Button>
-              <Button type="submit" size="sm" disabled={isGenerating || !tokenName.trim()}>
-                {isGenerating ? 'Generating…' : 'Generate'}
+              <Button type="submit" size="sm" disabled={isSubmitting}>
+                {isSubmitting ? 'Generating…' : 'Generate'}
               </Button>
             </DialogFooter>
           </form>
@@ -324,11 +332,11 @@ export function ApiTokensSection() {
             <DialogTitle className="font-mono">Your new API token</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-3">
-            <p className="font-mono text-xs text-[--text-muted]">
+            <p className="text-text-muted font-mono text-xs">
               This token is shown once only. Copy it now — you will not be able to see it again.
             </p>
-            <div className="flex items-center gap-2 rounded border border-[--surface-border] bg-[--bg-surface] px-3 py-2">
-              <code className="flex-1 font-mono text-xs break-all text-[--phosphor-amber]">
+            <div className="border-border-default bg-bg-surface flex items-center gap-2 rounded border px-3 py-2">
+              <code className="text-phosphor-amber flex-1 font-mono text-xs break-all">
                 {revealToken}
               </code>
               <Button variant="ghost" size="sm" onClick={handleCopy} className="shrink-0 gap-1.5">
@@ -363,7 +371,7 @@ export function ApiTokensSection() {
             <AlertDialogAction
               onClick={handleRevoke}
               disabled={isRevoking}
-              className="bg-[--status-red] text-white hover:bg-[--status-red]/90"
+              className="bg-status-red hover:bg-status-red/90 text-white"
             >
               {isRevoking ? 'Revoking…' : 'Revoke'}
             </AlertDialogAction>

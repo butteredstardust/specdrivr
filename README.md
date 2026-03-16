@@ -1,166 +1,312 @@
 # Specdrivr
 
-**The AI-native orchestration platform for high-performance engineering.**
+**Spec-driven orchestration for teams that actually ship.**
 
-Specdrivr is a modern, structured foundation designed to bridge the gap between AI-agentic development and production-grade software architecture.
-
----
-
-## Why This Project Exists
-
-Most modern templates are either too simple for production or too bloated for AI agents to navigate effectively. Specdrivr exists to provide a **strictly governed, high-density architecture** that empowers both human developers and AI agents (like Claude and Gemini) to build complex systems with absolute consistency.
-
-We believe that for AI to build reliable software, the architecture must be predictable, type-safe, and modular.
+The AI orchestration platform for engineering teams who build complex systems *and mean it*. Not startups. Not side projects. Teams that need to scale fast, maintain sanity, and let AI do the heavy lifting—without turning their codebase into a dumpster fire.
 
 ---
 
-## What This Project Does
+## Why This Exists
 
-Specdrivr provides an orchestration layer with a "Linear" aesthetic, built on a robust Repository-Action-Component pattern. It handles the "boring" parts of infrastructure—auth, database access, security, and UI tiering—so you can focus on building the engine.
+Most AI-ready templates are one of two things:
 
-### Key Features
-- **Deterministic Architecture**: Strict Repository Pattern for data access and Server Actions for mutations.
-- **AI-Native Optimization**: Dedicated `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` for seamless agentic workflows.
-- **Premium UI Foundation**: Built on `shadcn/ui` for a matte, obsidian-tinted interactive experience.
-- **Security by Default**: Auto-verified `auth()` in actions, RBAC governance, and runtime environment validation.
-- **Integrity Protection**: Pre-commit/Pre-push quality gates with SHA256 hook integrity checks.
+1. **Too simple.** They're cute for a weekend. Then you add auth, you add databases, you add team collaboration, and suddenly you're building infrastructure while Claude is staring at you waiting for guidance.
 
----
+2. **Too bloated.** Enterprise templates with 47 layers of abstraction, 12 "best practices" you'll never use, and a folder structure that makes Claude's context window weep.
 
-## Architecture Overview
+Specdrivr exists because **AI needs boring to be predictable.** When Claude or Gemini builds your system, it needs to know:
+- Where data lives (always in repositories).
+- Where mutations happen (always in actions).
+- Where state lives (always on the server).
+- What the rules are (RBAC, auth-first, no exceptions).
 
-Specdrivr follows a strictly separated architecture to maintain clean boundaries between data, logic, and presentation.
+No surprises. No sprawl. Just a **strictly governed architecture** that lets you think about the hard problem—your actual business logic—while the framework handles the rest.
 
-### 1. Data Layer (Repositories)
-The single source of truth for database access. Located in `src/repositories/`, these modules use Drizzle ORM and are wrapped in an `executeQuery` utility to ensure consistent error handling and logging.
-
-### 2. Logic Layer (Server Actions)
-UI-driven mutations located in `src/actions/`. Every action performs a mandatory `await auth()` check as its first line of execution and returns structured `{ success, error }` objects.
-
-### 3. Presentation Layer (RSC/RCC)
-A "Server Component by Default" philosophy. Client components (`"use client"`) are strictly reserved for interactivity and state, preserving clean boundaries and performance.
+We found that **the best AI workflows start with the tightest constraints.** Paradoxically, that's what makes you fast.
 
 ---
 
-## Tech Stack
+## What It Does (Actually)
 
-| Layer | Technology |
-|---|---|
-| **Framework** | Next.js 16.1.6 (App Router) |
-| **Core** | React 19.2.4 & TypeScript 5.9.3 |
-| **Database** | PostgreSQL & Drizzle ORM 0.45.1 |
-| **Auth** | better-auth 1.5.4 |
-| **Styling** | Tailwind CSS 4.2.1 |
-| **Safety** | Zod 3.22 & Pino 10.3 |
+Specdrivr is a production-grade Next.js scaffold built specifically for **spec-driven autonomous execution**. You write a spec. Claude reads it. Claude understands your architecture *immediately* and builds it correctly—first time.
 
----
+It's not magic. It's just... boring. In the best way.
 
-## Project Structure
+### The Stack (No Surprises)
 
-```text
-documentation/     # Canonical docs (Design System, UI, Development)
-src/app/           # Route segments, layouts, and global tokens
-src/repositories/  # Database access layer (Repositories)
-src/actions/       # Server Actions for UI mutations
-src/lib/           # Utilities, engine logic, RBAC, and environment
-src/components/ui/ # Local shadcn/ui implementation
-tests/             # Vitest (Unit) and Playwright (E2E) suites
-.husky/            # Quality gates (pre-commit/pre-push)
-```
+| Layer | The Thing | Why |
+|---|---|---|
+| **Framework** | Next.js 16 + App Router | Type-safe, built for async, plays nice with Server Actions |
+| **Language** | TypeScript 5.9 | Type safety isn't negotiable when AI is writing code |
+| **Database** | PostgreSQL + Drizzle ORM | Migrations as code. Fast queries. No magic |
+| **Auth** | better-auth | Session management that actually works. Redis-backed. |
+| **UI** | shadcn/ui + Tailwind 4 | Consistent, accessible, predictable |
+| **Safety** | Zod + Pino logging | Validation at boundaries. Logging everywhere. No surprises. |
 
 ---
 
-## Quick Start
+## The Architecture (It's Strict On Purpose)
 
-### 1. Prerequisites
-- Node.js v25.6.1 (managed via `.nvmrc`)
-- pnpm v8+
-- PostgreSQL v16+
+Specdrivr enforces three rules. Break them and the pre-commit hooks will fight you.
 
-### 2. Installation
-```bash
-nvm use
-pnpm install --frozen-lockfile
-```
+### Rule 1: Repositories
 
-### 3. Configuration
-Copy the example environment file and configure your `DATABASE_URL`.
-```bash
-cp .env.example .env
-```
+**All database access goes through `src/repositories/`.**
 
-### 4. Database Setup
-Register your schema and apply migrations. No `db:push`.
-```bash
-pnpm db:generate
-pnpm db:migrate
-```
+No importing `db` in components. No loose queries scattered across action files. Data access is one place. It's boring. It's also why Claude can build features without accidentally creating a thousand data races.
 
-### 5. Running Locally
-```bash
-pnpm dev
-# App available at http://localhost:3000
-```
-
----
-
-## Development Workflow
-
-We enforce a professional engineering workflow through Husky hooks.
-
-### Pull Request Flow
-1. Create a feature branch.
-2. Implement changes following `AGENTS.md` mandates.
-3. Commit (Conventional Commits required).
-4. Push (Triggers `pnpm test` and `pnpm lint`).
-5. Generate `BRANCH_CHANGES.md` and `BRANCH_CODE_REVIEW.md` in `documentation/branches/`.
-
-### Commands Reference
-- **Linting**: `pnpm lint`
-- **Testing**: `pnpm test`
-- **Typecheck**: `pnpm tsc --noEmit`
-- **Generate Migration**: `pnpm db:generate`
-
-### Git Hooks Integrity
-Never bypass hooks without a **Root Cause Analysis (RCA)**. If a bypass is necessary, document it in `BRANCH_CHANGES.md` and use `git push --no-verify`.
-
----
-
-## Example Usage
-
-### Creating a Repository Method
 ```typescript
-// src/repositories/item-repository.ts
-export const itemRepository = {
-  create: async (data: NewItem) => {
+// src/repositories/task-repository.ts
+export const taskRepository = {
+  create: async (data: NewTask) => {
     return await executeQuery(async () => {
-      const [item] = await db.insert(items).values(data).returning();
-      return item;
+      const [task] = await db.insert(tasks).values(data).returning();
+      return task;
+    });
+  },
+
+  findByProjectId: async (projectId: string) => {
+    return await executeQuery(async () => {
+      return await db.query.tasks.findMany({
+        where: eq(tasks.projectId, projectId),
+      });
     });
   },
 };
 ```
 
-### Calling a Server Action
+### Rule 2: Server Actions
+
+**All mutations are Server Actions. Auth comes first.**
+
 ```typescript
-// src/actions/create-item.ts
 'use server';
 
-export async function createItemAction(formData: FormData) {
-  const session = await auth(); // Auth first
+import { taskRepository } from '@/repositories/task-repository';
+
+export async function createTaskAction(input: CreateTaskInput) {
+  const session = await auth(); // FIRST LINE. Always.
   if (!session) return { success: false, error: 'Unauthorized' };
 
-  // ... validation and repository call
-  return { success: true, data: result };
+  const validated = createTaskSchema.parse(input);
+  const task = await taskRepository.create(validated);
+
+  return { success: true, data: task };
 }
 ```
 
+No async logic in components. No useEffect data fetching. Actions handle it. Components consume it. Clean.
+
+### Rule 3: Server Components by Default
+
+**Components are servers unless they need interactivity.**
+
+`"use client"` is for buttons, forms, animations. Everything else is a server component. This is fast. This is clean. This is non-negotiable.
+
 ---
 
-## Contributing
-Please see [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines. We prioritize architectural integrity over speed.
+## Getting Started
+
+You need three things: Node 25.6+, pnpm, and PostgreSQL 16+. That's it. No Redis setup tutorials. No Docker mysteries. If you don't have Postgres, spin it in Docker (we ship a `docker-compose.yml`).
+
+### Setup (4 Commands)
+
+```bash
+# 1. Get the code
+git clone <your-repo>
+cd specdrivr
+nvm use  # Locks Node version
+
+# 2. Install dependencies
+pnpm install --frozen-lockfile
+
+# 3. Configure database
+cp .env.example .env
+# Edit .env with your DATABASE_URL
+
+# 4. Migrate
+pnpm db:generate
+pnpm db:migrate
+
+# 5. Run
+pnpm dev
+```
+
+Done. Your app is at `http://localhost:3000`.
+
+---
+
+## Commands That Actually Matter
+
+```bash
+pnpm dev              # Dev server (port 3000)
+pnpm lint             # ESLint + prettier (fixes automatically)
+pnpm test             # Vitest unit tests + Playwright E2E
+pnpm tsc --noEmit     # Type check (catches stupidity fast)
+
+# Database
+pnpm db:generate      # Sync schema to migrations
+pnpm db:migrate       # Apply pending migrations
+```
+
+**No `db:push`**. Ever. We generate migrations. We review them. We apply them. This is how teams don't lose production data.
+
+---
+
+## Workflow (Pre-Commit Hooks Are Your Friend)
+
+We run 15 checks before you commit. Yes, 15. No, you can't skip them unless you're fixing a regression.
+
+**Your flow:**
+1. Create a branch
+2. Make changes
+3. Commit (hooks run)
+4. Push (more hooks run)
+5. Open PR
+6. We generate `BRANCH_CHANGES.md` and `BRANCH_CODE_REVIEW.md` automatically
+
+If a hook fails, you'll see why. Fix it. Commit again. Repeat until green.
+
+**Never `--no-verify`.** If you feel the urge, write an RCA in `BRANCH_CHANGES.md` first. The repo will ask for it before you push.
+
+---
+
+## For AI (Claude, Gemini)
+
+Specdrivr is built specifically for autonomous execution. Every file is an anchor for agent understanding:
+
+- **AGENTS.md**: Complete architectural mandate (read first)
+- **CLAUDE.md**: Claude-specific workflows and gotchas
+- **GEMINI.md**: Gemini-specific patterns
+
+These files do one thing: make boring predictable. So agents read the rules, understand the constraints, and build features instead of asking questions.
+
+---
+
+## The Honest Part
+
+### What's Hard About This
+
+- **You have to commit to boring.** The architecture is strict. If you fight it, it fights back.
+- **You have to use Drizzle and PostgreSQL.** We picked these because they work great with type safety and AI. If you need MongoDB or Prisma magic, go elsewhere.
+- **Pre-commit hooks are not optional.** They're in `.husky/` and they run before every commit. Learn to love them or use `git push --no-verify` and deal with the email.
+
+### What's Great About This
+
+- **No surprise regressions.** The hooks catch things before they land.
+- **AI builds features in hours, not days.** Claude reads AGENTS.md and just *knows* where everything goes.
+- **New team members understand the codebase instantly.** The structure is so predictable, there's nothing to learn except your business logic.
+- **Type safety everywhere.** TypeScript + Zod catches 80% of bugs at compile time.
+
+---
+
+## Examples (Because You're Impatient)
+
+### Creating a Feature End-to-End
+
+**1. Add to database schema** (`src/db/schema.ts`)
+```typescript
+export const features = createTable('features', {
+  id: varchar('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  projectId: varchar('project_id').notNull(),
+  name: varchar('name').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+```
+
+**2. Generate migration**
+```bash
+pnpm db:generate
+```
+
+**3. Create repository** (`src/repositories/feature-repository.ts`)
+```typescript
+export const featureRepository = {
+  create: async (data: NewFeature) => {
+    return await executeQuery(async () => {
+      const [feature] = await db.insert(features).values(data).returning();
+      return feature;
+    });
+  },
+};
+```
+
+**4. Create action** (`src/actions/create-feature.ts`)
+```typescript
+'use server';
+
+export async function createFeatureAction(input: CreateFeatureInput) {
+  const session = await auth();
+  if (!session?.user) return { success: false, error: 'Unauthorized' };
+
+  const feature = await featureRepository.create({
+    projectId: session.user.projectId,
+    name: input.name,
+  });
+
+  return { success: true, data: feature };
+}
+```
+
+**5. Build the UI** (`src/app/dashboard/features/create-form.tsx`)
+```typescript
+'use client';
+
+export function CreateFeatureForm() {
+  const [name, setName] = useState('');
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const result = await createFeatureAction({ name });
+
+    if (result.success) {
+      // Success
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input value={name} onChange={(e) => setName(e.target.value)} />
+      <button type="submit">Create</button>
+    </form>
+  );
+}
+```
+
+**That's it.** Schema → Migration → Repository → Action → UI. Every feature follows this pattern. No exceptions. That's why Claude can ship them.
+
+---
+
+## Tooling We Use
+
+- **Next.js 16** for the framework
+- **Drizzle** for database
+- **better-auth** for sessions
+- **Zod** for validation
+- **Pino** for logging
+- **shadcn/ui** for components
+- **Tailwind CSS** for styling
+- **Vitest** for unit tests
+- **Playwright** for E2E tests
+- **Husky** for git hooks
+
+All of these are because they work well *together*. Not because we like them personally (though we do).
+
+---
+
+## Get Help
+
+- **Architecture questions?** Read `AGENTS.md`. It's the source of truth.
+- **AI integration?** Check `CLAUDE.md` or `GEMINI.md`.
+- **Database problems?** See `documentation/DATABASE.md`.
+- **Bug or feature request?** Open an issue with what you're trying to do.
 
 ---
 
 ## License
-MIT © Stefan Neagu
+
+MIT. Build what you want. Ship it. Don't sweat it.
+
+---
+
+**Built by teams who actually use this. For teams who actually ship.**

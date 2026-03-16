@@ -1,10 +1,22 @@
+import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
-import { auth } from '@/lib/auth';
+import { authInstance } from '@/lib/auth';
+import { headers } from 'next/headers';
 
-export default async function AuthLayout({ children }: { children: React.ReactNode }) {
-  const session = await auth();
+async function AuthCheck({ children }: { children: React.ReactNode }) {
+  const session = await authInstance.api.getSession({
+    headers: await headers(),
+  });
   if (session) redirect('/');
+  return <>{children}</>;
+}
+
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[--bg-base]">{children}</div>
+    <div className="bg-bg-base flex min-h-screen items-center justify-center">
+      <Suspense fallback={null}>
+        <AuthCheck>{children}</AuthCheck>
+      </Suspense>
+    </div>
   );
 }

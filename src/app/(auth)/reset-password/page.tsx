@@ -22,10 +22,10 @@ function getStrength(password: string): number {
 }
 
 const STRENGTH_COLORS = [
-  'bg-[--status-red]',
-  'bg-[--status-orange]',
-  'bg-[--phosphor-amber]',
-  'bg-[--status-emerald]',
+  'bg-status-red',
+  'bg-status-orange',
+  'bg-phosphor-amber',
+  'bg-status-emerald',
 ];
 
 export default function ResetPasswordPage() {
@@ -40,11 +40,11 @@ export default function ResetPasswordPage() {
 
   if (!token) {
     return (
-      <Card className="w-full max-w-sm border-[--border-default] bg-[--bg-surface]">
+      <Card className="border-border-default bg-bg-surface w-full max-w-sm">
         <CardContent className="space-y-3 pt-6 text-center">
           <DaemonMascot size={48} expression="error" />
-          <p className="text-sm text-[--text-primary]">This link has expired.</p>
-          <Link href="/forgot-password" className="text-xs text-[--accent-violet] hover:underline">
+          <p className="text-text-primary text-sm">This link has expired.</p>
+          <Link href="/forgot-password" className="text-accent-violet text-xs hover:underline">
             Request a new link
           </Link>
         </CardContent>
@@ -74,7 +74,7 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <Card className="w-full max-w-sm border-[--border-default] bg-[--bg-surface]">
+    <Card className="border-border-default bg-bg-surface w-full max-w-sm">
       <CardHeader className="items-center gap-2 pb-2">
         <DaemonMascot size={48} expression="idle" />
         <p className="font-mono text-sm font-bold tracking-widest">SPECDRIVR</p>
@@ -88,14 +88,14 @@ export default function ResetPasswordPage() {
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="border-[--border-default] bg-[--bg-base]"
+              className="border-border-default bg-bg-base"
             />
             {newPassword && (
               <div className="mt-1 flex gap-1">
                 {[0, 1, 2, 3].map((i) => (
                   <div
                     key={i}
-                    className={`h-1 flex-1 rounded-full ${i < strength ? STRENGTH_COLORS[strength - 1] : 'bg-[--border-muted]'}`}
+                    className={`h-1 flex-1 rounded-full ${i < strength ? STRENGTH_COLORS[strength - 1] : 'bg-border-muted'}`}
                   />
                 ))}
               </div>
@@ -108,14 +108,14 @@ export default function ResetPasswordPage() {
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="border-[--border-default] bg-[--bg-base]"
+              className="border-border-default bg-bg-base"
             />
           </div>
-          {error && <p className="text-xs text-[--status-red]">{error}</p>}
+          {error && <p className="text-status-red text-xs">{error}</p>}
           <Button
             type="submit"
             disabled={loading}
-            className="w-full bg-[--accent-violet] hover:bg-[--accent-violet-dim]"
+            className="bg-accent-violet hover:bg-accent-violet-dim w-full"
           >
             {loading ? 'Updating…' : 'Reset Password'}
           </Button>
