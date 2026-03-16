@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { usePolling } from '@/hooks/use-polling';
 import {
   Monitor,
   FolderKanban,
@@ -195,6 +196,12 @@ export function Sidebar({ projects }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
 
+  const { data: notifData } = usePolling<{ meta: { total: number } }>({
+    url: '/api/v1/notifications?unread=true&limit=1',
+    interval: 30_000,
+  });
+  const unreadCount = notifData?.meta?.total ?? 0;
+
   useEffect(() => {
     const stored = localStorage.getItem(COLLAPSED_KEY);
     if (stored === 'true') setCollapsed(true);
@@ -297,13 +304,17 @@ export function Sidebar({ projects }: SidebarProps) {
         <nav className="flex-1 space-y-0.5 px-3">
           {NAV_ITEMS.map(({ href, label, icon: Icon, exact }) => {
             const active = isActive(href, exact);
+            const isNotifications = label === 'Notifications';
+            const showBadge = isNotifications && unreadCount > 0;
+            const badgeText = unreadCount > 9 ? '9+' : String(unreadCount);
+
             const linkEl = (
               <Link
                 key={href}
                 href={href}
                 className={cn(
                   'flex items-center gap-2.5 rounded px-2.5 py-2 text-sm transition-colors',
-                  isCollapsed && 'justify-center px-2',
+                  isCollapsed && 'relative justify-center px-2',
                   active
                     ? 'bg-bg-elevated text-text-primary'
                     : 'text-text-secondary hover:bg-bg-elevated/60 hover:text-text-primary'
@@ -311,6 +322,16 @@ export function Sidebar({ projects }: SidebarProps) {
               >
                 <Icon className="h-4 w-4 shrink-0" />
                 {!isCollapsed && label}
+                {!isCollapsed && showBadge && (
+                  <span className="bg-accent-violet ml-auto flex h-4 w-4 items-center justify-center rounded-full font-mono text-[9px] text-white">
+                    {badgeText}
+                  </span>
+                )}
+                {isCollapsed && showBadge && (
+                  <span className="bg-accent-violet absolute -top-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full font-mono text-[8px] text-white">
+                    {badgeText}
+                  </span>
+                )}
               </Link>
             );
 

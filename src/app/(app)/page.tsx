@@ -20,10 +20,15 @@ interface AgentSession {
   tasksFailed: number;
   errorMessage?: string | null;
   specId?: number | null;
+  specName?: string | null;
+  currentTaskExternalId?: string | null;
+  currentTaskTitle?: string | null;
+  totalTasks?: number | null;
 }
 
 interface BlockedTask {
   id: number;
+  externalId: string;
   title: string;
   specId: number;
 }
@@ -145,17 +150,21 @@ export default function MissionControlPage() {
               <NeedsAttentionBanner blockedTasks={blockedTasks} onDismiss={handleDismiss} />
             )}
 
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              <SessionPanel
-                session={activeSession}
-                userRole={userRole}
-                onPause={handlePause}
-                onResume={handleResume}
-                onCancel={handleCancel}
-                onRetry={handleRetry}
-                onDismiss={handleDismiss}
-              />
-              <EventLog sessionId={activeSession?.id ?? null} />
+            <div className="divide-border-default grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] lg:divide-x">
+              <div className="pb-6 lg:pr-6 lg:pb-0">
+                <SessionPanel
+                  session={activeSession}
+                  userRole={userRole}
+                  onPause={handlePause}
+                  onResume={handleResume}
+                  onCancel={handleCancel}
+                  onRetry={handleRetry}
+                  onDismiss={handleDismiss}
+                />
+              </div>
+              <div className="lg:pl-6">
+                <EventLog sessionId={activeSession?.id ?? null} />
+              </div>
             </div>
           </>
         )}
