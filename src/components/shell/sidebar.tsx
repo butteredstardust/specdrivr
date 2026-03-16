@@ -184,11 +184,11 @@ export function Sidebar({ projects }: SidebarProps) {
         <div className="flex items-center gap-2.5 px-4 py-4">
           {isCollapsed ? (
             <div className="flex w-full justify-center">
-              <DaemonMascot size={24} expression="idle" />
+              <DaemonMascot size={32} expression="idle" />
             </div>
           ) : (
             <>
-              <DaemonMascot size={24} expression="idle" />
+              <DaemonMascot size={32} expression="idle" />
               <span className="text-text-primary flex-1 font-mono text-sm font-semibold tracking-wide">
                 Specdrivr
               </span>
