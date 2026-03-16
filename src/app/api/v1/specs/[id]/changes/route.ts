@@ -56,7 +56,13 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 
     const fileChanges = await taskRepository.getFileChangesBySpecId(specId);
 
-    const files = fileChanges.map((fc) => ({
+    // Deduplicate by filePath — results are ordered asc createdAt, so last write wins (most recent)
+    const fileMap = new Map<string, (typeof fileChanges)[0]>();
+    for (const fc of fileChanges) {
+      fileMap.set(fc.filePath, fc);
+    }
+
+    const files = Array.from(fileMap.values()).map((fc) => ({
       filename: fc.filePath,
       patch: fc.diff ?? '',
       additions: fc.linesAdded ?? 0,
