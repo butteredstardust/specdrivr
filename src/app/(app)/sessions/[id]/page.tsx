@@ -3,7 +3,6 @@
 import { use } from 'react';
 import Link from 'next/link';
 import { usePolling } from '@/hooks/use-polling';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { Button } from '@/components/ui/button';
 import { EventLog } from '@/components/mission-control/event-log';
 import { TaskTimeline } from '@/components/sessions/task-timeline';
@@ -138,17 +137,26 @@ export default function SessionDetailPage({ params }: PageProps) {
   return (
     <div className="-mx-6 -mt-6 flex min-h-full flex-col">
       {/* Header */}
-      <div className="border-border-default flex items-center gap-3 border-b px-6 py-4">
-        <DaemonMascot size={24} expression={sessionToExpression(session?.status)} />
-        <div className="min-w-0 flex-1">
-          <h1 className="font-mono text-sm font-semibold">{sessionLabel}</h1>
+      <div className="border-border-default flex items-center justify-between border-b px-6 py-4">
+        <div className="flex min-w-0 flex-col gap-1">
+          <div className="text-muted-foreground font-mono text-[10px] tracking-[0.2em] uppercase">
+            Executor
+          </div>
+          <div className="flex min-w-0 items-center gap-3">
+            <h1 className="text-foreground truncate text-xl font-semibold">Session</h1>
+            <code className="bg-phosphor-amber/10 text-phosphor-amber shrink-0 rounded px-1.5 py-0.5 font-mono text-xs">
+              {sessionLabel}
+            </code>
+            {session && <StatusBadge status={session.status} />}
+          </div>
         </div>
-        {session && <StatusBadge status={session.status} />}
-        {session?.specId && (
-          <Button size="sm" variant="outline" asChild>
-            <Link href={`/specs/${session.specId}`}>View Spec →</Link>
-          </Button>
-        )}
+        <div className="flex shrink-0 items-center gap-2">
+          {session?.specId && (
+            <Button size="sm" variant="outline" asChild>
+              <Link href={`/specs/${session.specId}`}>View Spec →</Link>
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Stat boxes */}

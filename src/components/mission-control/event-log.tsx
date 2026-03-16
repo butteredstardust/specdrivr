@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { usePolling } from '@/hooks/use-polling';
 
 interface AgentEvent {
@@ -43,7 +42,7 @@ export function EventLog({ sessionId, className }: EventLogProps) {
 
   return (
     <div className={className}>
-      <p className="text-text-muted mb-2 font-mono text-xs tracking-widest uppercase">EVENT LOG</p>
+      <p className="text-muted-foreground mb-2 font-mono text-[10px] tracking-[0.15em] uppercase">Event Log</p>
 
       <div className="bg-bg-elevated border-border-default rounded border">
         {error ? (
@@ -51,9 +50,9 @@ export function EventLog({ sessionId, className }: EventLogProps) {
             Could not load events. Retrying...
           </p>
         ) : isLoading && events.length === 0 ? (
-          <p className="text-text-muted px-3 py-2 font-mono text-xs">Connecting…</p>
+          <p className="text-muted-foreground px-3 py-2 font-mono text-xs">Connecting…</p>
         ) : sessionId === null || events.length === 0 ? (
-          <p className="text-text-muted px-3 py-2 font-mono text-xs">No active session.</p>
+          <p className="text-muted-foreground px-3 py-2 font-mono text-xs">No active session.</p>
         ) : (
           <ul className="divide-border-default divide-y">
             {events.map((e) => {
@@ -61,7 +60,7 @@ export function EventLog({ sessionId, className }: EventLogProps) {
               const time = new Date(e.createdAt).toLocaleTimeString('en-US', { hour12: false });
               return (
                 <li key={e.id} className="flex items-center gap-2 px-3 py-1.5">
-                  <span className="text-text-muted w-16 shrink-0 font-mono text-[10px]">
+                  <span className="text-muted-foreground w-16 shrink-0 font-mono text-[10px]">
                     {time}
                   </span>
                   <span
@@ -69,7 +68,7 @@ export function EventLog({ sessionId, className }: EventLogProps) {
                   >
                     {badge.label || e.eventType}
                   </span>
-                  <span className="text-text-secondary truncate font-mono text-[10px]">
+                  <span className="text-foreground truncate font-mono text-[10px]">
                     {e.message}
                   </span>
                 </li>
@@ -77,13 +76,6 @@ export function EventLog({ sessionId, className }: EventLogProps) {
             })}
           </ul>
         )}
-
-        {/* Footer */}
-        <div className="border-border-default border-t px-3 py-1.5">
-          <Link href="/sessions" className="text-accent-violet font-mono text-xs hover:underline">
-            View all sessions →
-          </Link>
-        </div>
       </div>
     </div>
   );

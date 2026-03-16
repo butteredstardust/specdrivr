@@ -1,6 +1,7 @@
-import { cookies } from 'next/headers';
+import { Suspense } from 'react';
+import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { auth } from '@/lib/auth';
+import { authInstance } from '@/lib/auth';
 import { projectRepository } from '@/repositories/project-repository';
 import { ShellProvider } from '@/components/shell/shell-context';
 import { Sidebar } from '@/components/shell/sidebar';
@@ -9,9 +10,12 @@ import { OnboardingWizard } from '@/components/onboarding-wizard';
 import { TaskDrawerProvider } from '@/components/shell/task-drawer-context';
 import { TaskDrawer } from '@/components/tasks/task-drawer';
 import { KeyboardShortcutsModal } from '@/components/ui/keyboard-shortcuts-modal';
+import { Skeleton } from '@/components/ui/skeleton';
 
-export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const session = await auth();
+async function AuthenticatedApp({ children }: { children: React.ReactNode }) {
+  const session = await authInstance.api.getSession({
+    headers: await headers(),
+  });
   if (!session?.user?.id) redirect('/login');
 
   const projects = await projectRepository.getByUserId(session.user.id);
@@ -57,5 +61,40 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <KeyboardShortcutsModal />
       </TaskDrawerProvider>
     </ShellProvider>
+  );
+}
+
+function LayoutSkeleton() {
+  return (
+    <div className="flex h-screen overflow-hidden relative">
+      <div className="w-56 border-r border-border-default bg-bg-surface p-4 space-y-4">
+        <Skeleton className="h-8 w-3/4" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-5/6" />
+      </div>
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <div className="h-14 border-b border-border-default p-4 flex justify-between items-center">
+          <Skeleton className="h-6 w-32" />
+          <Skeleton className="h-8 w-8 rounded-full" />
+        </div>
+        <main className="flex-1 overflow-y-auto p-6">
+          <div className="space-y-4">
+            <Skeleton className="h-8 w-1/4" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+export default function AppLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={<LayoutSkeleton />}>
+      <AuthenticatedApp>{children}</AuthenticatedApp>
+    </Suspense>
   );
 }

@@ -8,7 +8,7 @@ export default async function ProfilePage() {
 
   return (
     <div className="flex max-w-2xl flex-col gap-8">
-      <h2 className="text-text-muted font-mono text-xs tracking-widest uppercase">PROFILE</h2>
+      <h2 className="text-muted-foreground font-mono text-[10px] tracking-[0.2em] uppercase">Profile</h2>
       <ProfileForm
         user={{
           id: session.user.id,

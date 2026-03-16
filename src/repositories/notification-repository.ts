@@ -12,17 +12,50 @@ import { DatabaseError } from '@/lib/errors';
 export { type NotificationSelect as Notification } from '@/db/schema';
 
 export class NotificationRepository extends BaseRepository {
-  async getByUserId(userId: string, projectId?: number): Promise<Notification[]> {
+  async getByUserId(
+    userId: string,
+    options: {
+      projectId?: number;
+      unreadOnly?: boolean;
+      type?: string;
+      limit?: number;
+      offset?: number;
+    } = {}
+  ): Promise<{ notifications: Notification[]; total: number; unreadCount: number }> {
     const where = [eq(notifications.userId, userId)];
-    if (projectId) where.push(eq(notifications.projectId, projectId));
+    if (options.projectId) where.push(eq(notifications.projectId, options.projectId));
+    if (options.unreadOnly) where.push(sql`${notifications.readAt} IS NULL`);
+    if (options.type) where.push(eq(notifications.type, options.type));
 
-    return await this.executeQuery(() =>
-      db
-        .select()
-        .from(notifications)
-        .where(and(...where))
-        .orderBy(desc(notifications.createdAt))
-    );
+    const query = db
+      .select()
+      .from(notifications)
+      .where(and(...where))
+      .orderBy(desc(notifications.createdAt));
+
+    const paginatedQuery = query.limit(options.limit ?? 50).offset(options.offset ?? 0);
+
+    const [list, totalResult, unreadResult] = await Promise.all([
+      this.executeQuery(() => paginatedQuery),
+      this.executeQuery(() =>
+        db
+          .select({ count: sql<number>`count(*)` })
+          .from(notifications)
+          .where(and(...where))
+      ),
+      this.executeQuery(() =>
+        db
+          .select({ count: sql<number>`count(*)` })
+          .from(notifications)
+          .where(and(eq(notifications.userId, userId), sql`${notifications.readAt} IS NULL`))
+      ),
+    ]);
+
+    return {
+      notifications: list,
+      total: Number(totalResult[0]?.count ?? 0),
+      unreadCount: Number(unreadResult[0]?.count ?? 0),
+    };
   }
 
   async markAsRead(id: number, userId: string): Promise<boolean> {

@@ -43,6 +43,7 @@ interface ControlButtonProps {
   icon: React.ReactNode;
   label: string;
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+  className?: string;
   disabledTooltip?: string;
 }
 
@@ -52,11 +53,12 @@ function ControlButton({
   icon,
   label,
   variant = 'outline',
+  className,
   disabledTooltip = 'You need admin or owner role to control sessions.',
 }: ControlButtonProps) {
   if (canControl) {
     return (
-      <Button variant={variant} size="sm" onClick={onClick}>
+      <Button variant={variant} size="sm" onClick={onClick} className={className}>
         {icon}
         {label}
       </Button>
@@ -67,7 +69,7 @@ function ControlButton({
     <Tooltip>
       <TooltipTrigger asChild>
         <span>
-          <Button variant={variant} size="sm" disabled>
+          <Button variant={variant} size="sm" disabled className={className}>
             {icon}
             {label}
           </Button>
@@ -214,6 +216,8 @@ export function SessionPanel({
                 onClick={onPause}
                 icon={<Pause className="h-3 w-3" />}
                 label="Pause"
+                variant="outline"
+                className="border-phosphor-amber text-phosphor-amber hover:bg-phosphor-amber/10 border"
               />
             ) : (
               <ControlButton

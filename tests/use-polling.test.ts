@@ -32,7 +32,10 @@ describe('usePolling', () => {
 
     rerender({ url: '/api/v1/test' });
     await act(() => vi.advanceTimersByTimeAsync(100));
-    expect(fetchSpy).toHaveBeenCalledWith('/api/v1/test', { credentials: 'include' });
+    expect(fetchSpy).toHaveBeenCalledWith('/api/v1/test', {
+      credentials: 'include',
+      signal: expect.any(AbortSignal),
+    });
   });
 
   test('stops after 5 consecutive errors', async () => {
