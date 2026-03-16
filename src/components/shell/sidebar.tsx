@@ -72,7 +72,7 @@ function SystemIcon({ label, state, tooltip }: { label: string; state: HealthSta
       <TooltipTrigger asChild>
         <div className="flex cursor-default flex-col items-center gap-0.5">
           <div className="relative">
-            <DaemonMascot size={24} expression={healthToExpr(state)} />
+            <DaemonMascot size={32} expression={healthToExpr(state)} />
             <span className={cn('absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full border border-bg-surface', healthDot(state))} />
           </div>
           <span className="text-text-muted mt-0.5 font-mono text-[8px] tracking-wider">{label}</span>

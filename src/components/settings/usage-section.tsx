@@ -160,7 +160,7 @@ export function UsageSection({ projectId }: UsageSectionProps) {
             {snapshots.map((s) => (
               <tr
                 key={s.id}
-                className="border-border-default hover:bg-surface-hover border-b last:border-0"
+                className="border-border-default hover:bg-bg-elevated/50 border-b last:border-0"
               >
                 <td className="text-text-primary px-4 py-2.5 font-mono text-xs">
                   {formatDate(s.date)}

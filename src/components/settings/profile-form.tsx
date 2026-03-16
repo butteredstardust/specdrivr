@@ -48,11 +48,10 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="text-text-muted font-mono text-xs tracking-widest uppercase">PROFILE</h2>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <label className="text-text-secondary font-mono text-xs" htmlFor="profile-name">
-            Name
+            Display Name
           </label>
           <Input
             id="profile-name"
@@ -75,7 +74,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
         </div>
         <div>
           <Button type="submit" disabled={isSaving} size="sm">
-            {isSaving ? 'Saving…' : 'Save'}
+            {isSaving ? 'Saving…' : 'Save Profile'}
           </Button>
         </div>
       </form>

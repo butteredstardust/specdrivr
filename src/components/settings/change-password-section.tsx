@@ -22,7 +22,7 @@ function getStrength(password: string): 0 | 1 | 2 | 3 | 4 {
 }
 
 const STRENGTH_COLORS: Record<number, string> = {
-  0: 'bg-surface-hover',
+  0: 'bg-bg-elevated',
   1: 'bg-status-red',
   2: 'bg-phosphor-amber',
   3: 'bg-phosphor-amber',
@@ -38,7 +38,7 @@ function StrengthIndicator({ password }: { password: string }) {
         <div
           key={seg}
           className={`h-1 flex-1 rounded-full transition-colors ${
-            password.length > 0 && seg <= level ? STRENGTH_COLORS[level] : 'bg-surface-hover'
+            password.length > 0 && seg <= level ? STRENGTH_COLORS[level] : 'bg-bg-elevated'
           }`}
         />
       ))}

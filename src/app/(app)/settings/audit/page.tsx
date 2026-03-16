@@ -21,7 +21,7 @@ export default async function AuditPage() {
 
   return (
     <div className="flex max-w-4xl flex-col gap-8">
-      <h1 className="text-foreground text-lg font-semibold">AUDIT LOG</h1>
+      <h2 className="text-text-muted font-mono text-xs tracking-widest uppercase">AUDIT LOG</h2>
 
       {canAudit ? (
         <AuditLogSection projectId={project!.id} />

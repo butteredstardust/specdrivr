@@ -58,7 +58,7 @@ function DeliveryRow({ entry }: { entry: DeliveryRow }) {
   return (
     <>
       <tr
-        className="border-border-default hover:bg-surface-hover cursor-pointer border-b last:border-0"
+        className="border-border-default hover:bg-bg-elevated/50 cursor-pointer border-b last:border-0"
         onClick={() => setExpanded((v) => !v)}
       >
         <td className="text-text-primary px-4 py-2.5 font-mono text-xs">
@@ -108,7 +108,7 @@ function DeliveryRow({ entry }: { entry: DeliveryRow }) {
       {expanded && (
         <tr className="border-border-default border-b">
           <td colSpan={6} className="px-4 pt-0 pb-3">
-            <pre className="bg-bg-inset text-text-primary max-h-48 overflow-auto rounded-md p-3 font-mono text-xs">
+            <pre className="bg-bg-base text-text-primary max-h-48 overflow-auto rounded-md p-3 font-mono text-xs">
               {entry.responseBody || '(no response body)'}
             </pre>
           </td>

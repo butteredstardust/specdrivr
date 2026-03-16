@@ -58,7 +58,7 @@ function AuditRow({ entry }: { entry: AuditLogSelect }) {
   return (
     <>
       <tr
-        className="border-border-default hover:bg-surface-hover cursor-pointer border-b last:border-0"
+        className="border-border-default hover:bg-bg-elevated/50 cursor-pointer border-b last:border-0"
         onClick={() => setExpanded((v) => !v)}
       >
         <td className="text-text-muted px-4 py-2.5 font-mono text-xs">
@@ -81,7 +81,7 @@ function AuditRow({ entry }: { entry: AuditLogSelect }) {
       {expanded && (
         <tr className="border-border-default border-b">
           <td colSpan={6} className="px-4 pt-0 pb-3">
-            <pre className="bg-bg-inset text-text-primary max-h-64 overflow-auto rounded-md p-3 font-mono text-xs">
+            <pre className="bg-bg-base text-text-primary max-h-64 overflow-auto rounded-md p-3 font-mono text-xs">
               {entry.detail ? JSON.stringify(entry.detail, null, 2) : '(no detail)'}
             </pre>
           </td>
