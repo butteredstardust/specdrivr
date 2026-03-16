@@ -16,6 +16,8 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { PlayfulDaemon } from '@/components/ui/playful-daemon';
+import { PlayfulLogo } from '@/components/ui/playful-logo';
 import { useSystemHealth } from '@/components/layout/systems-bar';
 import { useShell } from '@/components/shell/shell-context';
 import { Badge } from '@/components/ui/badge';
@@ -231,17 +233,15 @@ export function Sidebar({ projects }: SidebarProps) {
         )}
       >
         {/* Logo */}
-        <div className="flex items-center gap-2.5 px-4 py-4">
+        <div className="flex items-center gap-3 px-4 py-4">
           {isCollapsed ? (
             <div className="flex w-full justify-center">
-              <DaemonMascot size={32} expression="idle" />
+              <PlayfulDaemon size={32} />
             </div>
           ) : (
             <>
-              <DaemonMascot size={32} expression="idle" />
-              <span className="text-text-primary flex-1 font-mono text-sm font-semibold tracking-wide">
-                Specdrivr
-              </span>
+              <PlayfulDaemon size={32} />
+              <PlayfulLogo />
               {devMode && (
                 <Badge className="border-phosphor-amber/30 bg-phosphor-amber/20 text-phosphor-amber font-mono text-[10px]">
                   DEV
