@@ -4,6 +4,8 @@ import { projectRepository } from '@/repositories/project-repository';
 import { CreateProjectDialog } from '@/components/projects/create-project-dialog';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/ui/page-header';
+import { PixelBadge } from '@/components/ui/pixel-badge';
 import {
   Table,
   TableBody,
@@ -16,14 +18,6 @@ import { MoreHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import type { UserRole } from '@/db/schema';
 
-function ProjectIdBadge({ id }: { id: number }) {
-  return (
-    <code className="bg-phosphor-amber/10 text-phosphor-amber inline-flex items-center rounded px-1.5 py-0.5 font-mono text-xs">
-      PROJ-{String(id).padStart(3, '0')}
-    </code>
-  );
-}
-
 export default async function ProjectsPage() {
   const session = await auth();
   if (!session?.user?.id) redirect('/login');
@@ -33,16 +27,11 @@ export default async function ProjectsPage() {
 
   return (
     <div className="-mx-6 -mt-6 flex min-h-full flex-col">
-      {/* Header */}
-      <div className="border-border-default flex items-center justify-between border-b px-6 py-4">
-        <div>
-          <div className="text-muted-foreground mb-1 font-mono text-[10px] tracking-[0.2em] uppercase">
-            Projects
-          </div>
-          <h1 className="text-foreground text-xl font-semibold">All Projects</h1>
-        </div>
-        <CreateProjectDialog userRole={userRole} />
-      </div>
+      <PageHeader
+        category="Projects"
+        title="All Projects"
+        action={<CreateProjectDialog userRole={userRole} />}
+      />
 
       {/* Content */}
       <div className="border-border-default border-b px-6 py-2.5">
@@ -78,7 +67,9 @@ export default async function ProjectsPage() {
                   className="border-border-default/50 hover:bg-bg-elevated/50"
                 >
                   <TableCell className="px-6 py-3">
-                    <ProjectIdBadge id={project.id} />
+                    <PixelBadge variant="amber">
+                      PROJ-{String(project.id).padStart(3, '0')}
+                    </PixelBadge>
                   </TableCell>
                   <TableCell className="text-foreground px-3 py-3 text-sm font-medium">
                     <Link href={`/specs?projectId=${project.id}`} className="hover:underline">

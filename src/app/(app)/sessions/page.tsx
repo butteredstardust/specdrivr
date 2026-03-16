@@ -1,21 +1,15 @@
 'use client';
 
-import { useState, useEffect, Fragment } from 'react';
-import Link from 'next/link';
+import { useState, useCallback, Fragment } from 'react';
+import { cn } from '@/lib/utils';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
-import { EventLog } from '@/components/mission-control/event-log';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
-import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { PageHeader } from '@/components/ui/page-header';
+import { PixelBadge } from '@/components/ui/pixel-badge';
 import {
   Table,
   TableBody,
@@ -24,85 +18,48 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
+import { EventLog } from '@/components/mission-control/event-log';
+import { Search, Loader2, MoreHorizontal } from 'lucide-react';
+import Link from 'next/link';
+import type { SessionStatus } from '@/db/schema';
 
 interface Session {
   id: number;
-  status: 'running' | 'paused' | 'completed' | 'failed' | 'cancelled';
+  specId: number;
+  status: SessionStatus;
   startedAt: string;
   endedAt?: string | null;
   tasksExecuted: number;
   tasksSucceeded: number;
   tasksFailed: number;
   totalTasks?: number | null;
-  specId?: number | null;
   specTitle?: string;
 }
 
-const TERMINAL_STATUSES = ['completed', 'failed', 'cancelled'] as const;
+const TERMINAL_STATUSES: readonly string[] = ['completed', 'failed', 'cancelled'];
 
-function SessionIdBadge({ id }: { id: number }) {
-  return (
-    <code className="bg-phosphor-amber/10 text-phosphor-amber inline-flex items-center rounded px-1.5 py-0.5 font-mono text-xs">
-      SES-{String(id).padStart(3, '0')}
-    </code>
-  );
-}
-
-function timeAgo(dateStr: string | null | undefined): string {
-  if (!dateStr) return '';
-  const date = new Date(dateStr);
-  if (isNaN(date.getTime())) return '';
-  const diff = Date.now() - date.getTime();
-  const mins = Math.floor(diff / 60_000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  return `${Math.floor(hrs / 24)}d ago`;
-}
-
-function StatusBadge({ status }: { status: Session['status'] }) {
-  const base =
-    'font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded inline-flex items-center gap-1.5';
-  const dot = 'h-1.5 w-1.5 rounded-full shrink-0';
+function StatusBadge({ status }: { status: SessionStatus }) {
   switch (status) {
     case 'running':
-      return (
-        <span className={`${base} bg-accent-violet/10 text-accent-violet`}>
-          <span className={`${dot} bg-accent-violet animate-pulse`} />
-          Running
-        </span>
-      );
-    case 'paused':
-      return (
-        <span className={`${base} bg-phosphor-amber/10 text-phosphor-amber`}>
-          <span className={`${dot} bg-phosphor-amber`} />
-          Paused
-        </span>
-      );
+      return <PixelBadge variant="violet" dot>Running</PixelBadge>;
     case 'completed':
-      return (
-        <span className={`${base} bg-status-emerald/10 text-status-emerald`}>
-          <span className={`${dot} bg-status-emerald`} />
-          Done
-        </span>
-      );
+      return <PixelBadge variant="emerald">Done</PixelBadge>;
+    case 'paused':
+      return <PixelBadge variant="amber">Paused</PixelBadge>;
     case 'failed':
-      return (
-        <span className={`${base} bg-status-red/10 text-status-red`}>
-          <span className={`${dot} bg-status-red`} />
-          Failed
-        </span>
-      );
+      return <PixelBadge variant="red">Failed</PixelBadge>;
     case 'cancelled':
-      return (
-        <span className={`${base} bg-secondary text-muted-foreground`}>
-          <span className={`${dot} bg-muted-foreground`} />
-          Cancelled
-        </span>
-      );
+      return <PixelBadge variant="muted">Stopped</PixelBadge>;
     default:
-      return <span className={`${base} bg-secondary text-muted-foreground`}>{status}</span>;
+      return <PixelBadge>{status}</PixelBadge>;
   }
 }
 
@@ -137,19 +94,64 @@ function getGroupLabel(isoString: string): string {
 }
 
 export default function SessionsPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
   const { activeProjectId } = useShell();
+
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [cancellingIds, setCancellingIds] = useState<Set<number>>(new Set());
 
-  const handleCancel = async (e: React.MouseEvent, sessionId: number) => {
-    e.stopPropagation();
+  const search = searchParams.get('search') ?? '';
+  const statusFilter = searchParams.get('status') ?? 'all';
+  const specFilter = searchParams.get('specId') ?? 'all';
+  const fromDate = searchParams.get('from') ?? '';
+  const toDate = searchParams.get('to') ?? '';
+
+  const updateFilters = useCallback(
+    (updates: Record<string, string | null>) => {
+      const params = new URLSearchParams(searchParams.toString());
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value === null || value === 'all' || value === '') {
+          params.delete(key);
+        } else {
+          params.set(key, value);
+        }
+      });
+      router.push(`${pathname}?${params.toString()}`);
+    },
+    [router, pathname, searchParams]
+  );
+
+  const buildFetchUrl = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (activeProjectId) params.set('projectId', String(activeProjectId));
+    return `/api/v1/sessions?${params.toString()}`;
+  };
+
+  const { data: sessions, isLoading } = usePolling<Session[]>({
+    url: buildFetchUrl(),
+    interval: 3000,
+    stopWhen: (data) =>
+      Array.isArray(data) &&
+      data.length > 0 &&
+      data.every((s) => TERMINAL_STATUSES.includes(s.status)),
+  });
+
+  const { data: specsData } = usePolling<Array<{ id: number; name: string }>>({
+    url: activeProjectId ? `/api/v1/specs?projectId=${activeProjectId}` : null,
+    interval: 60000,
+  });
+  const specs = specsData ?? [];
+
+  const handleCancel = async (sessionId: number) => {
     setCancellingIds((prev) => new Set(prev).add(sessionId));
     try {
-      await fetch(`/api/v1/sessions/${sessionId}/cancel`, {
-        method: 'POST',
-        credentials: 'include',
-      });
-    } catch {
+      const res = await fetch(`/api/v1/sessions/${sessionId}/cancel`, { method: 'POST' });
+      if (!res.ok) throw new Error('Failed to cancel session');
+    } catch (error) {
+      console.error('Cancel failed:', error);
+    } finally {
       setCancellingIds((prev) => {
         const next = new Set(prev);
         next.delete(sessionId);
@@ -157,46 +159,6 @@ export default function SessionsPage() {
       });
     }
   };
-
-  const [search, setSearch] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [specFilter, setSpecFilter] = useState('all');
-  const [fromDate, setFromDate] = useState('');
-  const [toDate, setToDate] = useState('');
-
-  useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearch(search), 300);
-    return () => clearTimeout(t);
-  }, [search]);
-
-  const { data: specsData } = usePolling<Array<{ id: number; name: string }>>({
-    url: activeProjectId ? `/api/v1/specs?projectId=${activeProjectId}` : null,
-    interval: 60_000,
-    stopWhen: () => true,
-  });
-  const specs = specsData ?? [];
-
-  const buildUrl = () => {
-    const params = new URLSearchParams();
-    if (debouncedSearch) params.set('search', debouncedSearch);
-    if (statusFilter !== 'all') params.set('status', statusFilter);
-    if (specFilter !== 'all') params.set('specId', specFilter);
-    if (fromDate) params.set('from', fromDate);
-    if (toDate) params.set('to', toDate);
-    return `/api/v1/sessions?${params}`;
-  };
-
-  const { data: sessions, isLoading } = usePolling<Session[]>({
-    url: buildUrl(),
-    interval: 5000,
-    stopWhen: (data) =>
-      Array.isArray(data) &&
-      data.length > 0 &&
-      data.every((s) => (TERMINAL_STATUSES as readonly string[]).includes(s.status)),
-  });
-
-  const isEmpty = !isLoading && (!sessions || sessions.length === 0);
 
   const isAnyFilterActive =
     search !== '' ||
@@ -206,12 +168,7 @@ export default function SessionsPage() {
     toDate !== '';
 
   const clearFilters = () => {
-    setSearch('');
-    setDebouncedSearch('');
-    setStatusFilter('all');
-    setSpecFilter('all');
-    setFromDate('');
-    setToDate('');
+    router.push(pathname);
   };
 
   const groups = new Map<string, Session[]>();
@@ -223,41 +180,43 @@ export default function SessionsPage() {
 
   return (
     <div className="-mx-6 -mt-6 flex min-h-full flex-col">
-      {/* Header */}
-      <div className="border-border-default flex items-center justify-between border-b px-6 py-4">
-        <div>
-          <div className="text-muted-foreground mb-1 font-mono text-[10px] tracking-[0.2em] uppercase">
-            Sessions
-          </div>
-          <h1 className="text-foreground text-xl font-semibold">Execution History</h1>
-        </div>
-      </div>
+      <PageHeader category="Executor" title="Sessions" />
 
-      {/* Filter bar — primary row */}
-      <div className="border-border-default flex items-center gap-3 border-b px-6 py-3">
-        <Input
-          type="text"
-          placeholder="Search sessions…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="h-8 w-52 text-xs"
-        />
-        <div className="flex items-center gap-1">
-          {(['all', 'running', 'completed', 'paused', 'failed', 'cancelled'] as const).map((s) => (
-            <Button
-              key={s}
-              size="sm"
-              variant={statusFilter === s ? 'default' : 'outline'}
-              onClick={() => setStatusFilter(s)}
-              className="h-7 px-2.5 font-mono text-[10px] tracking-wider uppercase"
-            >
-              {s === 'all' ? 'All' : s}
-            </Button>
-          ))}
+      {/* Filter Bar */}
+      <div className="border-border-default flex items-center gap-3 border-b px-6 py-2.5">
+        <div className="relative w-52">
+          <Search className="text-muted-foreground absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2" />
+          <Input
+            placeholder="Search sessions..."
+            className="h-8 pl-8 font-mono text-[10px] uppercase tracking-wider"
+            value={search}
+            onChange={(e) => updateFilters({ search: e.target.value })}
+          />
         </div>
+
+        <div className="flex items-center gap-1">
+            {(['all', 'running', 'completed', 'paused', 'failed', 'cancelled'] as const).map((s) => {
+              const isActive = statusFilter === s;
+              return (
+                <Button
+                  key={s}
+                  variant={isActive ? 'default' : 'secondary'}
+                  size="sm"
+                  onClick={() => updateFilters({ status: s })}
+                  className={cn(
+                    'h-7 px-2.5 font-mono text-[10px] tracking-wider uppercase transition-all',
+                    !isActive && 'bg-secondary/50 text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  {s}
+                </Button>
+              );
+            })}
+        </div>
+
         <div className="ml-auto flex items-center gap-2">
-          <Select value={specFilter} onValueChange={setSpecFilter}>
-            <SelectTrigger className="h-8 w-40 text-xs">
+          <Select value={specFilter} onValueChange={(val) => updateFilters({ specId: val })}>
+            <SelectTrigger className="h-8 w-40 font-mono text-[10px] uppercase tracking-wider">
               <SelectValue placeholder="All specs" />
             </SelectTrigger>
             <SelectContent>
@@ -272,21 +231,21 @@ export default function SessionsPage() {
           <Input
             type="date"
             value={fromDate}
-            onChange={(e) => setFromDate(e.target.value)}
-            className="h-8 w-36 text-xs"
+            onChange={(e) => updateFilters({ from: e.target.value })}
+            className="h-8 w-36 font-mono text-[10px]"
           />
           <Input
             type="date"
             value={toDate}
-            onChange={(e) => setToDate(e.target.value)}
-            className="h-8 w-36 text-xs"
+            onChange={(e) => updateFilters({ to: e.target.value })}
+            className="h-8 w-36 font-mono text-[10px]"
           />
           {isAnyFilterActive && (
             <Button
               variant="ghost"
               size="sm"
               onClick={clearFilters}
-              className="text-muted-foreground h-8 text-xs"
+              className="text-muted-foreground h-8 font-mono text-[10px] uppercase tracking-wider"
             >
               Clear
             </Button>
@@ -295,44 +254,34 @@ export default function SessionsPage() {
       </div>
 
       {/* Content */}
-      <div className="border-border-default border-b px-6 py-2.5">
+      <div className="flex-1">
         {!activeProjectId && !isLoading ? (
           <div className="flex flex-col items-center gap-4 py-16">
             <DaemonMascot size={48} expression="idle" />
             <p className="text-muted-foreground font-mono text-sm">
-              Select a project to view its sessions.
+              Select a project to view sessions.
             </p>
           </div>
         ) : isLoading && !sessions ? (
-          <div className="text-muted-foreground py-8 text-center font-mono text-xs">Loading…</div>
-        ) : isEmpty ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="text-muted-foreground h-6 w-6 animate-spin" />
+          </div>
+        ) : !sessions || sessions.length === 0 ? (
           <div className="flex flex-col items-center gap-4 py-16">
             <DaemonMascot size={48} expression="idle" />
-            <p className="text-muted-foreground font-mono text-sm">No sessions yet.</p>
+            <p className="text-muted-foreground font-mono text-sm">No sessions found.</p>
           </div>
         ) : (
           <Table>
             <TableHeader>
-              <TableRow className="border-border-default hover:bg-transparent">
-                <TableHead className="text-muted-foreground h-auto w-36 px-6 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
-                  ID
-                </TableHead>
-                <TableHead className="text-muted-foreground h-auto w-36 px-3 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
-                  Status
-                </TableHead>
-                <TableHead className="text-muted-foreground h-auto px-3 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
-                  Spec
-                </TableHead>
-                <TableHead className="text-muted-foreground h-auto w-40 px-3 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
-                  Started
-                </TableHead>
-                <TableHead className="text-muted-foreground h-auto w-24 px-3 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
-                  Duration
-                </TableHead>
-                <TableHead className="text-muted-foreground h-auto w-20 px-3 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
-                  Tasks
-                </TableHead>
-                <TableHead className="h-auto w-24 px-3 py-2.5" />
+              <TableRow className="border-border-default hover:bg-transparent text-muted-foreground font-mono text-[10px] uppercase tracking-[0.15em]">
+                <TableHead className="w-36 px-6 font-medium">Session ID</TableHead>
+                <TableHead className="w-36 px-3 font-medium">Status</TableHead>
+                <TableHead className="px-3 font-medium">Spec</TableHead>
+                <TableHead className="w-40 px-3 font-medium">Started</TableHead>
+                <TableHead className="w-24 px-3 font-medium">Duration</TableHead>
+                <TableHead className="w-24 px-3 font-medium">Tasks</TableHead>
+                <TableHead className="w-24 px-3" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -349,51 +298,66 @@ export default function SessionsPage() {
                     <Fragment key={session.id}>
                       <TableRow
                         className="border-border-default/50 hover:bg-bg-elevated/50 cursor-pointer"
-                        onClick={() =>
-                          setExpandedId((prev) => (prev === session.id ? null : session.id))
-                        }
+                        onClick={() => setExpandedId((prev) => (prev === session.id ? null : session.id))}
                       >
                         <TableCell className="px-6 py-3" onClick={(e) => e.stopPropagation()}>
                           <Link href={`/sessions/${session.id}`}>
-                            <SessionIdBadge id={session.id} />
+                            <PixelBadge variant="amber">
+                              SESS-{String(session.id).padStart(3, '0')}
+                            </PixelBadge>
                           </Link>
                         </TableCell>
                         <TableCell className="px-3 py-3">
                           <StatusBadge status={session.status} />
                         </TableCell>
-                        <TableCell className="text-muted-foreground px-3 py-3 font-mono text-xs">
-                          {session.specTitle ?? (session.specId ? `Spec #${session.specId}` : '—')}
+                        <TableCell className="px-3 py-3">
+                          <div className="flex flex-col">
+                            <span className="text-foreground text-sm font-medium">
+                              {session.specTitle || `Spec #${session.specId}`}
+                            </span>
+                          </div>
                         </TableCell>
-                        <TableCell className="text-muted-foreground px-3 py-3 font-mono text-xs">
-                          {timeAgo(session.startedAt)}
+                        <TableCell className="text-muted-foreground px-3 py-3 font-mono text-[10px] uppercase">
+                          {new Date(session.startedAt).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
                         </TableCell>
-                        <TableCell className="text-muted-foreground px-3 py-3 font-mono text-xs">
+                        <TableCell className="text-muted-foreground px-3 py-3 font-mono text-[10px]">
                           {formatDuration(session)}
                         </TableCell>
                         <TableCell className="px-3 py-3">
-                          <span className="bg-secondary text-muted-foreground rounded px-1.5 py-0.5 font-mono text-[10px]">
-                            {session.tasksSucceeded}/{session.totalTasks ?? session.tasksExecuted}{' '}
-                            tasks
+                          <span className="bg-secondary text-muted-foreground rounded px-1.5 py-0.5 font-mono text-[10px] whitespace-nowrap">
+                            {session.tasksSucceeded}/{session.totalTasks ?? session.tasksExecuted} tasks
                           </span>
                         </TableCell>
-                        <TableCell className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
-                          {session.status === 'running' && (
+                        <TableCell className="px-3 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center justify-end gap-2">
+                            {session.status === 'running' && (
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                disabled={cancellingIds.has(session.id)}
+                                onClick={() => handleCancel(session.id)}
+                                className="h-6 px-2 font-mono text-[10px] uppercase tracking-wider transition-colors"
+                              >
+                                {cancellingIds.has(session.id) ? 'Stopping…' : 'Stop'}
+                              </Button>
+                            )}
                             <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-6 px-2 font-mono text-[10px]"
-                              disabled={cancellingIds.has(session.id)}
-                              onClick={(e) => handleCancel(e, session.id)}
+                              variant="ghost"
+                              size="icon"
+                              className="text-muted-foreground h-6 w-6"
+                              asChild
                             >
-                              {cancellingIds.has(session.id) ? 'Cancelling…' : 'Cancel'}
+                              <Link href={`/sessions/${session.id}`}>
+                                <MoreHorizontal className="h-3.5 w-3.5" />
+                              </Link>
                             </Button>
-                          )}
+                          </div>
                         </TableCell>
                       </TableRow>
-                      <TableRow
-                        key={`${session.id}-log`}
-                        className="border-0 p-0 hover:bg-transparent"
-                      >
+                      <TableRow className="border-0 p-0 hover:bg-transparent">
                         <TableCell colSpan={7} className="p-0">
                           <Collapsible open={expandedId === session.id}>
                             <CollapsibleContent>
