@@ -103,18 +103,17 @@ export function SessionPanel({
 
   const canControl = userRole === 'admin' || userRole === 'owner';
 
-  const [elapsed, setElapsed] = useState(() => {
-    if (!session?.startedAt) return 0;
-    return Math.floor((Date.now() - new Date(session.startedAt).getTime()) / 1000);
-  });
+  const [elapsed, setElapsed] = useState(0);
+  const [prevStartedAt, setPrevStartedAt] = useState(session?.startedAt);
 
-  useEffect(() => {
-    if (!session?.startedAt) {
-      setElapsed(0);
-      return;
-    }
-    setElapsed(Math.floor((Date.now() - new Date(session.startedAt).getTime()) / 1000));
-  }, [session?.startedAt]);
+  if (session?.startedAt !== prevStartedAt) {
+    setPrevStartedAt(session?.startedAt);
+    setElapsed(
+      session?.startedAt
+        ? Math.floor((Date.now() - new Date(session.startedAt).getTime()) / 1000)
+        : 0
+    );
+  }
 
   useEffect(() => {
     if (panelState !== 'running') return;

@@ -114,6 +114,40 @@ async function main() {
   logger.info('Starting database seed...');
 
   try {
+    // Truncate all relevant tables to ensure a clean start
+    const tablesToReset = [
+      'test_results',
+      'audit_log',
+      'api_request_logs',
+      'git_commits',
+      'usage_snapshots',
+      'webhook_deliveries',
+      'webhooks',
+      'notification_preferences',
+      'notifications',
+      'agent_logs',
+      'agent_events',
+      'agent_sessions',
+      'file_changes',
+      'task_attempts',
+      'tasks',
+      'plan_reviews',
+      'plans',
+      'spec_versions',
+      'specifications',
+      'project_members',
+      'agent_config',
+      'invites',
+      'projects',
+      'accounts',
+      'users',
+    ];
+
+    logger.info('Truncating existing data...');
+    for (const table of tablesToReset) {
+      await db.execute(sql.raw(`TRUNCATE TABLE "${table}" CASCADE;`));
+    }
+
     await db.transaction(async (tx) => {
       // -------------------------------------------------------------------------
       // 1. Users + Accounts
@@ -253,32 +287,27 @@ async function main() {
 
       await tx.insert(agentConfig).values({ projectId: 5 }).onConflictDoNothing();
 
-      // -------------------------------------------------------------------------
-      // 4. Project Members
-      // -------------------------------------------------------------------------
-      const projectMembersData = [
-        // P1: Blaze UI
-        { projectId: 1, userId: 'user_alex', role: 'owner' as const, joinedAt: daysAgo(5) },
-        { projectId: 1, userId: 'user_sam', role: 'admin' as const, joinedAt: daysAgo(5) },
-        { projectId: 1, userId: 'user_jordan', role: 'member' as const, joinedAt: daysAgo(5) },
-        // P2: Auth Service
-        { projectId: 2, userId: 'user_sam', role: 'owner' as const, joinedAt: daysAgo(5) },
-        { projectId: 2, userId: 'user_alex', role: 'admin' as const, joinedAt: daysAgo(5) },
-        { projectId: 2, userId: 'user_jordan', role: 'member' as const, joinedAt: daysAgo(5) },
-        // P3: Payments v2
-        { projectId: 3, userId: 'user_alex', role: 'owner' as const, joinedAt: daysAgo(4) },
-        { projectId: 3, userId: 'user_sam', role: 'admin' as const, joinedAt: daysAgo(4) },
-        // P4: Data Pipeline
-        { projectId: 4, userId: 'user_jordan', role: 'owner' as const, joinedAt: daysAgo(4) },
-        { projectId: 4, userId: 'user_alex', role: 'member' as const, joinedAt: daysAgo(4) },
-        // P5: API Gateway
-        { projectId: 5, userId: 'user_alex', role: 'owner' as const, joinedAt: daysAgo(1) },
-        { projectId: 5, userId: 'user_jordan', role: 'admin' as const, joinedAt: daysAgo(1) },
-        { projectId: 5, userId: 'user_sam', role: 'member' as const, joinedAt: daysAgo(1) },
-      ];
+      // Ensure all demo users are members of ALL projects
+      const allProjectIds = demoProjects.map((p) => p.id);
+      const allUserIds = demoUsers.map((u) => u.id);
 
-      for (const m of projectMembersData) {
-        await tx.insert(projectMembers).values(m).onConflictDoNothing();
+      for (const projectId of allProjectIds) {
+        for (const userId of allUserIds) {
+          const isOwner =
+            (projectId === 1 && userId === 'user_alex') ||
+            (projectId === 2 && userId === 'user_sam') ||
+            (projectId === 4 && userId === 'user_jordan');
+
+          await tx
+            .insert(projectMembers)
+            .values({
+              projectId,
+              userId,
+              role: isOwner ? 'owner' : userId === 'user_jordan' ? 'member' : 'admin',
+              joinedAt: daysAgo(5),
+            })
+            .onConflictDoNothing();
+        }
       }
 
       // -------------------------------------------------------------------------
@@ -1464,82 +1493,54 @@ async function main() {
       }
 
       // -------------------------------------------------------------------------
-      // 17. Notifications (2+ per user)
+      // 17. Notifications (Comprehensive coverage for all users)
       // -------------------------------------------------------------------------
-      const notificationsData = [
-        // Alex
+      const notificationTemplates = [
         {
-          userId: 'user_alex',
           type: 'plan_approved',
           title: 'Plan approved',
-          body: 'Sam approved the plan for "Component Library Refactor".',
-          linkUrl: '/projects/blaze-ui/specs/1/plans/1',
-          actorUserId: 'user_sam',
-          projectId: 1,
-          resourceType: 'plan',
-          resourceId: '1',
-          createdAt: daysAgo(3),
+          body: 'The implementation plan for {resource} has been approved.',
         },
         {
-          userId: 'user_alex',
           type: 'session_complete',
           title: 'Session completed',
-          body: 'Agent session for "Component Library Refactor" completed — 6/6 tasks succeeded.',
-          linkUrl: '/projects/blaze-ui/specs/1/sessions/1',
-          projectId: 1,
-          resourceType: 'agent_session',
-          resourceId: '1',
-          createdAt: daysAgo(2),
-        },
-        // Sam
-        {
-          userId: 'user_sam',
-          type: 'plan_generated',
-          title: 'Plan ready for review',
-          body: 'A plan has been generated for "Stripe Checkout Flow" — awaiting approval.',
-          linkUrl: '/projects/payments-v2/specs/5/plans/4',
-          projectId: 3,
-          resourceType: 'plan',
-          resourceId: '4',
-          createdAt: daysAgo(1),
+          body: 'Agent session for {resource} finished successfully.',
         },
         {
-          userId: 'user_sam',
           type: 'task_blocked',
           title: 'Task blocked',
-          body: 'T-504 "Add monitoring hooks" is blocked on Data Pipeline.',
-          linkUrl: '/projects/data-pipeline/specs/7/tasks/504',
-          projectId: 4,
-          resourceType: 'task',
-          resourceId: '504',
-          createdAt: daysAgo(2),
+          body: 'A task in {resource} needs your attention.',
         },
-        // Jordan
         {
-          userId: 'user_jordan',
           type: 'session_failed',
           title: 'Session failed',
-          body: 'Agent session for "Batch Processor" failed — worker OOM killed.',
-          linkUrl: '/projects/data-pipeline/specs/7/sessions/4',
-          projectId: 4,
-          resourceType: 'agent_session',
-          resourceId: '4',
-          createdAt: daysAgo(2),
-        },
-        {
-          userId: 'user_jordan',
-          type: 'member_invited',
-          title: 'Added to project',
-          body: 'Alex Rivera added you to "Blaze UI Redesign" as a member.',
-          linkUrl: '/projects/blaze-ui',
-          actorUserId: 'user_alex',
-          projectId: 1,
-          createdAt: daysAgo(5),
+          body: 'Agent session for {resource} failed.',
         },
       ];
 
-      for (const n of notificationsData) {
-        await tx.insert(notifications).values(n).onConflictDoNothing();
+      for (const user of demoUsers) {
+        for (const project of demoProjects) {
+          // Add 2-3 notifications per user per project
+          for (let i = 0; i < 2; i++) {
+            const template =
+              notificationTemplates[
+                (user.id.length + project.id + i) % notificationTemplates.length
+              ];
+            await tx
+              .insert(notifications)
+              .values({
+                userId: user.id,
+                type: template.type,
+                title: template.title,
+                body: template.body.replace('{resource}', project.name),
+                linkUrl: `/projects/${project.id}`,
+                projectId: project.id,
+                createdAt: daysAgo(i + 1),
+                readAt: i === 0 ? null : daysAgo(0), // One unread, one read
+              })
+              .onConflictDoNothing();
+          }
+        }
       }
 
       // -------------------------------------------------------------------------
@@ -2159,7 +2160,7 @@ async function main() {
           sessions: 4,
           agentEvents: 23,
           agentLogs: 10,
-          notifications: 6,
+          notifications: 60,
           notifPrefs: 6,
           webhooks: 3,
           webhookDeliveries: 4,

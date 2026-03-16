@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { usePolling } from '@/hooks/use-polling';
 import {
@@ -191,7 +191,7 @@ function SidebarBottom({ collapsed }: { collapsed: boolean }) {
 
 export function Sidebar({ projects }: SidebarProps) {
   const pathname = usePathname();
-  const router = useRouter();
+
   const { activeProjectId, setActiveProjectId, devMode } = useShell();
   const [collapsed, setCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -282,7 +282,6 @@ export function Sidebar({ projects }: SidebarProps) {
               value={activeProjectId ? String(activeProjectId) : ''}
               onValueChange={(v) => {
                 setActiveProjectId(parseInt(v, 10));
-                router.push('/specs');
               }}
             >
               <SelectTrigger className="border-border-default bg-bg-elevated h-auto w-full border px-2.5 py-1.5 text-xs [&>svg:last-child]:hidden">

@@ -18,20 +18,19 @@ interface ShellContextValue {
 
 interface ShellProviderProps {
   user: ShellContextValue['user'];
+  initialId?: number | null;
   children: React.ReactNode;
 }
 
 const ShellContext = createContext<ShellContextValue | null>(null);
 
-export function ShellProvider({ user, children }: ShellProviderProps) {
+export function ShellProvider({ user, initialId, children }: ShellProviderProps) {
   const router = useRouter();
-  const [activeProjectId, setActiveProjectIdState] = useState<number | null>(null);
+  const [activeProjectId, setActiveProjectIdState] = useState<number | null>(initialId ?? null);
   const [devMode, setDevModeState] = useState<boolean>(false);
 
   // Hydrate from localStorage after mount to avoid SSR/client mismatch
   useEffect(() => {
-    const storedProject = localStorage.getItem('specdrivr:activeProjectId');
-    if (storedProject) setActiveProjectIdState(parseInt(storedProject, 10));
     const storedDevMode = localStorage.getItem('specdrivr:devMode');
     if (storedDevMode === 'true') setDevModeState(true);
   }, []);
@@ -42,8 +41,11 @@ export function ShellProvider({ user, children }: ShellProviderProps) {
 
   const setActiveProjectId = useCallback((id: number | null) => {
     setActiveProjectIdState(id);
-    if (id === null) localStorage.removeItem('specdrivr:activeProjectId');
-    else localStorage.setItem('specdrivr:activeProjectId', String(id));
+    if (id === null) {
+      document.cookie = 'active-project-id=; path=/; max-age=0; SameSite=Lax';
+    } else {
+      document.cookie = `active-project-id=${id}; path=/; max-age=31536000; SameSite=Lax`;
+    }
   }, []);
 
   const setDevMode = useCallback((v: boolean) => {

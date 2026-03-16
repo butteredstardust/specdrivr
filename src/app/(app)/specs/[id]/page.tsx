@@ -143,18 +143,13 @@ export default function SpecDetailPage(): React.ReactElement {
     };
   }, [specId, router, setPageLabel]);
 
-  // Poll when pending_plan
   const { data: polledSpec } = usePolling<Spec>({
     url: spec?.status === 'pending_plan' ? `/api/v1/specs/${specId}` : null,
     interval: 3000,
     stopWhen: (s) => s?.status !== 'pending_plan',
-    onData: (s) => setSpec(s),
   });
 
-  // Keep spec updated from poll
-  useEffect(() => {
-    if (polledSpec) setSpec(polledSpec);
-  }, [polledSpec]);
+  const displayedSpec = polledSpec ?? spec;
 
   if (notFoundState) {
     notFound();
@@ -198,17 +193,17 @@ export default function SpecDetailPage(): React.ReactElement {
         ) : (
           <div className="flex items-center justify-between gap-4">
             <div className="flex min-w-0 items-center gap-3">
-              <DaemonMascot size={20} expression={specStatusToExpression(spec?.status)} />
+              <DaemonMascot size={20} expression={specStatusToExpression(displayedSpec?.status)} />
               <code className="bg-phosphor-amber/10 text-phosphor-amber shrink-0 rounded px-1.5 py-0.5 font-mono text-xs">
                 SPEC-{String(specId).padStart(3, '0')}
               </code>
               <h1 className="text-foreground truncate text-xl font-semibold">
-                {spec?.name ?? '…'}
+                {displayedSpec?.name ?? '…'}
               </h1>
-              {spec && <StatusBadge status={spec.status} />}
+              {displayedSpec && <StatusBadge status={displayedSpec.status} />}
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              {spec?.status === 'pending_approval' && (
+              {displayedSpec?.status === 'pending_approval' && (
                 <Button
                   size="sm"
                   className="border-phosphor-amber text-phosphor-amber hover:bg-phosphor-amber/10 border"
@@ -260,22 +255,22 @@ export default function SpecDetailPage(): React.ReactElement {
                 <Skeleton className="h-4 w-4/5" />
                 <Skeleton className="h-4 w-3/5" />
               </div>
-            ) : spec ? (
+            ) : displayedSpec ? (
               <>
                 <TabsContent value="spec" className="mt-0">
-                  <SpecTab spec={spec} userRole={userRole} />
+                  <SpecTab spec={displayedSpec} userRole={userRole} />
                 </TabsContent>
                 <TabsContent value="plan" className="mt-0">
-                  <PlanTab spec={spec} userRole={userRole} />
+                  <PlanTab spec={displayedSpec} userRole={userRole} />
                 </TabsContent>
                 <TabsContent value="tasks" className="mt-0">
-                  <TasksTab specId={spec.id} userRole={userRole} />
+                  <TasksTab specId={displayedSpec.id} userRole={userRole} />
                 </TabsContent>
                 <TabsContent value="changes" className="mt-0">
-                  <ChangesTab specId={spec.id} />
+                  <ChangesTab specId={displayedSpec.id} />
                 </TabsContent>
                 <TabsContent value="activity" className="mt-0">
-                  <ActivityTab specId={spec.id} specStatus={spec.status} />
+                  <ActivityTab specId={displayedSpec.id} specStatus={displayedSpec.status} />
                 </TabsContent>
               </>
             ) : null}

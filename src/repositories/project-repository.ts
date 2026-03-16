@@ -45,10 +45,20 @@ export class ProjectRepository extends BaseRepository {
 
   async getByUserId(userId: string, limit = 50, offset = 0): Promise<Project[]> {
     const result = await this.executeQuery(() =>
-      db.select().from(projects).where(eq(projects.createdBy, userId)).limit(limit).offset(offset)
+      db
+        .select({
+          project: projects,
+        })
+        .from(projects)
+        .innerJoin(projectMembers, eq(projects.id, projectMembers.projectId))
+        .where(eq(projectMembers.userId, userId))
+        .limit(limit)
+        .offset(offset)
     );
 
-    return result;
+    return result
+      .map((r) => r.project)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
   async getActive(): Promise<Project[]> {

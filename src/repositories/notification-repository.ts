@@ -12,12 +12,15 @@ import { DatabaseError } from '@/lib/errors';
 export { type NotificationSelect as Notification } from '@/db/schema';
 
 export class NotificationRepository extends BaseRepository {
-  async getByUserId(userId: string): Promise<Notification[]> {
+  async getByUserId(userId: string, projectId?: number): Promise<Notification[]> {
+    const where = [eq(notifications.userId, userId)];
+    if (projectId) where.push(eq(notifications.projectId, projectId));
+
     return await this.executeQuery(() =>
       db
         .select()
         .from(notifications)
-        .where(eq(notifications.userId, userId))
+        .where(and(...where))
         .orderBy(desc(notifications.createdAt))
     );
   }
