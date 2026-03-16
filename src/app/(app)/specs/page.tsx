@@ -51,7 +51,11 @@ function StatusBadge({ status }: { status: SpecStatus }) {
     case 'pending_approval':
       return <PixelBadge variant="amber">Review</PixelBadge>;
     case 'executing':
-      return <PixelBadge variant="violet" dot>Running</PixelBadge>;
+      return (
+        <PixelBadge variant="violet" dot>
+          Running
+        </PixelBadge>
+      );
     case 'completed':
       return <PixelBadge variant="emerald">Done</PixelBadge>;
     case 'stalled':
@@ -78,6 +82,13 @@ export default function SpecsPage(): React.ReactElement {
       setActiveProjectId(urlProjectId);
     }
   }, [urlProjectId, activeProjectId, setActiveProjectId]);
+
+  // When activeProjectId changes from sidebar, update the URL
+  useEffect(() => {
+    if (activeProjectId !== null && activeProjectId !== urlProjectId) {
+      router.push(`/specs?projectId=${activeProjectId}`);
+    }
+  }, [activeProjectId, urlProjectId, router]);
 
   const effectiveProjectId = activeProjectId ?? urlProjectId;
 
@@ -155,7 +166,7 @@ export default function SpecsPage(): React.ReactElement {
                 <TabsTrigger
                   key={value}
                   value={value}
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:bg-secondary data-[state=inactive]:text-muted-foreground hover:text-foreground h-auto rounded px-2.5 py-1 font-mono text-[10px] tracking-wider uppercase data-[state=active]:shadow-none transition-all"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:bg-secondary data-[state=inactive]:text-muted-foreground hover:text-foreground h-auto rounded px-2.5 py-1 font-mono text-[10px] tracking-wider uppercase transition-all data-[state=active]:shadow-none"
                 >
                   {label}
                   {count > 0 && <span className="ml-1 opacity-60">{count}</span>}

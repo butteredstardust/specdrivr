@@ -49,7 +49,11 @@ const TERMINAL_STATUSES: readonly string[] = ['completed', 'failed', 'cancelled'
 function StatusBadge({ status }: { status: SessionStatus }) {
   switch (status) {
     case 'running':
-      return <PixelBadge variant="violet" dot>Running</PixelBadge>;
+      return (
+        <PixelBadge variant="violet" dot>
+          Running
+        </PixelBadge>
+      );
     case 'completed':
       return <PixelBadge variant="emerald">Done</PixelBadge>;
     case 'paused':
@@ -129,8 +133,10 @@ export default function SessionsPage() {
     return `/api/v1/sessions?${params.toString()}`;
   };
 
+  const sessionsUrl = buildFetchUrl();
+
   const { data: sessions, isLoading } = usePolling<Session[]>({
-    url: buildFetchUrl(),
+    url: sessionsUrl,
     interval: 3000,
     stopWhen: (data) =>
       Array.isArray(data) &&
@@ -185,38 +191,38 @@ export default function SessionsPage() {
       {/* Filter Bar */}
       <div className="border-border-default flex items-center gap-3 border-b px-6 py-2.5">
         <div className="relative w-52">
-          <Search className="text-muted-foreground absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2" />
+          <Search className="text-muted-foreground absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
           <Input
             placeholder="Search sessions..."
-            className="h-8 pl-8 font-mono text-[10px] uppercase tracking-wider"
+            className="h-8 pl-8 font-mono text-[10px] tracking-wider uppercase"
             value={search}
             onChange={(e) => updateFilters({ search: e.target.value })}
           />
         </div>
 
         <div className="flex items-center gap-1">
-            {(['all', 'running', 'completed', 'paused', 'failed', 'cancelled'] as const).map((s) => {
-              const isActive = statusFilter === s;
-              return (
-                <Button
-                  key={s}
-                  variant={isActive ? 'default' : 'secondary'}
-                  size="sm"
-                  onClick={() => updateFilters({ status: s })}
-                  className={cn(
-                    'h-7 px-2.5 font-mono text-[10px] tracking-wider uppercase transition-all',
-                    !isActive && 'bg-secondary/50 text-muted-foreground hover:text-foreground'
-                  )}
-                >
-                  {s}
-                </Button>
-              );
-            })}
+          {(['all', 'running', 'completed', 'paused', 'failed', 'cancelled'] as const).map((s) => {
+            const isActive = statusFilter === s;
+            return (
+              <Button
+                key={s}
+                variant={isActive ? 'default' : 'secondary'}
+                size="sm"
+                onClick={() => updateFilters({ status: s })}
+                className={cn(
+                  'h-7 px-2.5 font-mono text-[10px] tracking-wider uppercase transition-all',
+                  !isActive && 'bg-secondary/50 text-muted-foreground hover:text-foreground'
+                )}
+              >
+                {s}
+              </Button>
+            );
+          })}
         </div>
 
         <div className="ml-auto flex items-center gap-2">
           <Select value={specFilter} onValueChange={(val) => updateFilters({ specId: val })}>
-            <SelectTrigger className="h-8 w-40 font-mono text-[10px] uppercase tracking-wider">
+            <SelectTrigger className="h-8 w-40 font-mono text-[10px] tracking-wider uppercase">
               <SelectValue placeholder="All specs" />
             </SelectTrigger>
             <SelectContent>
@@ -245,7 +251,7 @@ export default function SessionsPage() {
               variant="ghost"
               size="sm"
               onClick={clearFilters}
-              className="text-muted-foreground h-8 font-mono text-[10px] uppercase tracking-wider"
+              className="text-muted-foreground h-8 font-mono text-[10px] tracking-wider uppercase"
             >
               Clear
             </Button>
@@ -274,7 +280,7 @@ export default function SessionsPage() {
         ) : (
           <Table>
             <TableHeader>
-              <TableRow className="border-border-default hover:bg-transparent text-muted-foreground font-mono text-[10px] uppercase tracking-[0.15em]">
+              <TableRow className="border-border-default text-muted-foreground font-mono text-[10px] tracking-[0.15em] uppercase hover:bg-transparent">
                 <TableHead className="w-36 px-6 font-medium">Session ID</TableHead>
                 <TableHead className="w-36 px-3 font-medium">Status</TableHead>
                 <TableHead className="px-3 font-medium">Spec</TableHead>
@@ -298,7 +304,9 @@ export default function SessionsPage() {
                     <Fragment key={session.id}>
                       <TableRow
                         className="border-border-default/50 hover:bg-bg-elevated/50 cursor-pointer"
-                        onClick={() => setExpandedId((prev) => (prev === session.id ? null : session.id))}
+                        onClick={() =>
+                          setExpandedId((prev) => (prev === session.id ? null : session.id))
+                        }
                       >
                         <TableCell className="px-6 py-3" onClick={(e) => e.stopPropagation()}>
                           <Link href={`/sessions/${session.id}`}>
@@ -328,10 +336,14 @@ export default function SessionsPage() {
                         </TableCell>
                         <TableCell className="px-3 py-3">
                           <span className="bg-secondary text-muted-foreground rounded px-1.5 py-0.5 font-mono text-[10px] whitespace-nowrap">
-                            {session.tasksSucceeded}/{session.totalTasks ?? session.tasksExecuted} tasks
+                            {session.tasksSucceeded}/{session.totalTasks ?? session.tasksExecuted}{' '}
+                            tasks
                           </span>
                         </TableCell>
-                        <TableCell className="px-3 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                        <TableCell
+                          className="px-3 py-3 text-right"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <div className="flex items-center justify-end gap-2">
                             {session.status === 'running' && (
                               <Button
@@ -339,7 +351,7 @@ export default function SessionsPage() {
                                 size="sm"
                                 disabled={cancellingIds.has(session.id)}
                                 onClick={() => handleCancel(session.id)}
-                                className="h-6 px-2 font-mono text-[10px] uppercase tracking-wider transition-colors"
+                                className="h-6 px-2 font-mono text-[10px] tracking-wider uppercase transition-colors"
                               >
                                 {cancellingIds.has(session.id) ? 'Stopping…' : 'Stop'}
                               </Button>

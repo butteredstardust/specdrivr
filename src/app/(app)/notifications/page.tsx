@@ -58,8 +58,10 @@ export default function NotificationsPage() {
     return `/api/v1/notifications?${params.toString()}`;
   };
 
+  const notificationsUrl = buildFetchUrl();
+
   const { data, isLoading, restart } = usePolling<NotificationsResponse>({
-    url: buildFetchUrl(),
+    url: notificationsUrl,
     interval: 5000,
   });
 
@@ -70,7 +72,7 @@ export default function NotificationsPage() {
   const handleMarkAllRead = async () => {
     if (!activeProjectId) return;
     try {
-      const res = await fetch(`/api/v1/notifications/mark-all-read?projectId=${activeProjectId}`, {
+      const res = await fetch(`/api/v1/notifications/read-all?projectId=${activeProjectId}`, {
         method: 'POST',
       });
       if (res.ok) restart();
@@ -155,7 +157,7 @@ export default function NotificationsPage() {
                 size="icon"
                 disabled={page <= 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
-                className="h-6 w-6 disabled:opacity-30 transition-all"
+                className="h-6 w-6 transition-all disabled:opacity-30"
               >
                 <ChevronLeft className="h-3.5 w-3.5" />
               </Button>
@@ -164,7 +166,7 @@ export default function NotificationsPage() {
                 size="icon"
                 disabled={page >= totalPages}
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                className="h-6 w-6 disabled:opacity-30 transition-all"
+                className="h-6 w-6 transition-all disabled:opacity-30"
               >
                 <ChevronRight className="h-3.5 w-3.5" />
               </Button>
@@ -197,26 +199,24 @@ export default function NotificationsPage() {
               <div
                 key={n.id}
                 className={cn(
-                  'border-border-default/50 flex items-center gap-4 border-b py-3 pr-6 transition-colors cursor-pointer',
+                  'border-border-default/50 flex cursor-pointer items-center gap-4 border-b py-3 pr-6 transition-colors',
                   !n.readAt
                     ? 'border-l-accent-violet bg-accent-violet/5 border-l-2 pl-[22px]'
                     : 'hover:bg-bg-elevated/50 border-l-2 border-l-transparent pl-[22px]'
                 )}
                 onClick={() => !n.readAt && handleMarkRead(n.id)}
               >
-                <div className="shrink-0">
-                  {getTypeIcon(n.type)}
-                </div>
+                <div className="shrink-0">{getTypeIcon(n.type)}</div>
                 <div className="min-w-0 flex-1">
-                  <p className={cn(
-                    'text-sm leading-snug',
-                    !n.readAt ? 'text-foreground font-medium' : 'text-muted-foreground'
-                  )}>
+                  <p
+                    className={cn(
+                      'text-sm leading-snug',
+                      !n.readAt ? 'text-foreground font-medium' : 'text-muted-foreground'
+                    )}
+                  >
                     {n.title}
                   </p>
-                  <p className="text-muted-foreground mt-0.5 text-xs line-clamp-1">
-                    {n.message}
-                  </p>
+                  <p className="text-muted-foreground mt-0.5 line-clamp-1 text-xs">{n.message}</p>
                   <p className="text-muted-foreground/60 mt-0.5 font-mono text-[10px] uppercase">
                     {formatRelativeTime(n.createdAt)}
                   </p>
