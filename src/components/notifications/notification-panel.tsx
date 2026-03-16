@@ -24,10 +24,10 @@ interface NotificationsResponse {
 
 function formatRelativeTime(iso: string): string {
   const secs = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-  if (secs < 60) return `${secs}s`;
-  if (secs < 3600) return `${Math.floor(secs / 60)}m`;
-  if (secs < 86400) return `${Math.floor(secs / 3600)}h`;
-  return `${Math.floor(secs / 86400)}d`;
+  if (secs < 60) return `${secs}s ago`;
+  if (secs < 3600) return `${Math.floor(secs / 60)}m ago`;
+  if (secs < 86400) return `${Math.floor(secs / 3600)}h ago`;
+  return `${Math.floor(secs / 86400)}d ago`;
 }
 
 export function NotificationPanel() {
@@ -86,27 +86,33 @@ export function NotificationPanel() {
           <div
             key={n.id}
             className={cn(
-              'border-border-default flex h-12 items-center gap-3 border-b px-4 last:border-0',
-              !n.readAt
-                ? 'bg-accent-violet/5 border-accent-violet border-l-2'
-                : 'border-l-2 border-transparent'
+              'border-border-default flex items-center gap-3 border-b px-4 py-3 transition-colors last:border-0',
+              !n.readAt ? 'bg-accent-violet/5' : 'hover:bg-bg-elevated/50'
             )}
           >
             <div className="min-w-0 flex-1">
-              <p className="text-text-primary truncate text-sm">{n.title}</p>
+              <p
+                className={cn(
+                  'truncate text-sm',
+                  !n.readAt ? 'text-text-primary font-medium' : 'text-text-secondary'
+                )}
+              >
+                {n.title}
+              </p>
             </div>
-            <span className="text-text-muted shrink-0 font-mono text-xs">
+            <span className="text-text-muted shrink-0 font-mono text-[10px]">
               {formatRelativeTime(n.createdAt)}
             </span>
+            {!n.readAt && <div className="bg-accent-violet h-1.5 w-1.5 shrink-0 rounded-full" />}
           </div>
         ))}
       </div>
 
       {/* Footer */}
-      <div className="border-border-default border-t px-4 py-2">
+      <div className="border-border-default border-t px-4 py-2.5">
         <Link
           href="/notifications"
-          className="text-accent-violet font-mono text-xs hover:underline"
+          className="text-accent-violet hover:text-accent-violet-dim font-mono text-xs transition-colors hover:underline"
         >
           View all notifications &rarr;
         </Link>

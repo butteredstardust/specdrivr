@@ -122,7 +122,7 @@ export default function SpecsPage(): React.ReactElement {
     // Escape the layout's p-6 so sections are full-bleed with border separators
     <div className="-mx-6 -mt-6 flex min-h-full flex-col">
       {/* Header */}
-      <div className="border-border flex items-center justify-between border-b px-6 py-4">
+      <div className="border-border-default flex items-center justify-between border-b px-6 py-4">
         <div>
           <div className="text-muted-foreground mb-1 font-mono text-[10px] tracking-[0.2em] uppercase">
             Specifications
@@ -146,7 +146,7 @@ export default function SpecsPage(): React.ReactElement {
       </div>
 
       {/* Filter tabs */}
-      <div className="border-border border-b px-6 py-2.5">
+      <div className="border-border-default border-b px-6 py-2.5">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
             {STATUS_TABS.map(({ value, label, status }) => {
@@ -186,7 +186,7 @@ export default function SpecsPage(): React.ReactElement {
             ) : (
               <Table className="caption-bottom text-sm">
                 <TableHeader>
-                  <TableRow className="border-border hover:bg-transparent">
+                  <TableRow className="border-border-default hover:bg-transparent">
                     <TableHead className="text-muted-foreground h-auto w-36 px-6 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
                       ID
                     </TableHead>
@@ -206,7 +206,7 @@ export default function SpecsPage(): React.ReactElement {
                   {filteredSpecs.map((spec) => (
                     <TableRow
                       key={spec.id}
-                      className="border-border/50 hover:bg-secondary/30 cursor-pointer"
+                      className="border-border-default/50 hover:bg-bg-elevated/50 cursor-pointer"
                       onClick={() => router.push(`/specs/${spec.id}`)}
                     >
                       <TableCell className="px-6 py-3">

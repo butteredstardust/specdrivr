@@ -79,7 +79,7 @@ export default function NotificationsPage() {
   return (
     <div className="-mx-6 -mt-6 flex min-h-full flex-col">
       {/* Header */}
-      <div className="border-border flex items-center justify-between border-b px-6 py-4">
+      <div className="border-border-default flex items-center justify-between border-b px-6 py-4">
         <div>
           <div className="text-muted-foreground mb-1 font-mono text-[10px] tracking-[0.2em] uppercase">
             Notifications
@@ -94,7 +94,7 @@ export default function NotificationsPage() {
       </div>
 
       {/* Filter tabs */}
-      <div className="border-border flex items-center gap-1 border-b px-6 py-3">
+      <div className="border-border-default flex items-center gap-1 border-b px-6 py-3">
         {STATUS_TABS.map(({ value, label }) => (
           <button
             key={value}
@@ -134,20 +134,15 @@ export default function NotificationsPage() {
           <div
             key={n.id}
             className={cn(
-              'border-border/50 flex items-center gap-3 border-b px-6 py-3 transition-colors',
-              !n.readAt ? 'bg-accent-violet/5' : 'hover:bg-secondary/30'
+              'border-border-default/50 flex items-center gap-4 border-b py-3 pr-6 transition-colors',
+              !n.readAt
+                ? 'border-l-accent-violet bg-accent-violet/5 border-l-2 pl-[22px]'
+                : 'hover:bg-bg-elevated/50 border-l-2 border-l-transparent pl-[22px]'
             )}
           >
             {/* Icon */}
             <div className="shrink-0">
-              <div
-                className={cn(
-                  'flex h-7 w-7 items-center justify-center rounded-full',
-                  !n.readAt ? 'bg-accent-violet/15' : 'bg-secondary'
-                )}
-              >
-                <DaemonMascot size={16} expression={!n.readAt ? 'working' : 'idle'} />
-              </div>
+              <DaemonMascot size={28} expression={!n.readAt ? 'working' : 'idle'} />
             </div>
 
             {/* Content */}
@@ -164,9 +159,6 @@ export default function NotificationsPage() {
                 {formatRelativeTime(n.createdAt)}
               </p>
             </div>
-
-            {/* Unread dot */}
-            {!n.readAt && <div className="bg-accent-violet h-2 w-2 shrink-0 rounded-full" />}
           </div>
         ))}
       </div>

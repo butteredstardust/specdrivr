@@ -206,7 +206,7 @@ export default function SessionsPage() {
   return (
     <div className="-mx-6 -mt-6 flex min-h-full flex-col">
       {/* Header */}
-      <div className="border-border flex items-center justify-between border-b px-6 py-4">
+      <div className="border-border-default flex items-center justify-between border-b px-6 py-4">
         <div>
           <div className="text-muted-foreground mb-1 font-mono text-[10px] tracking-[0.2em] uppercase">
             Sessions
@@ -216,7 +216,7 @@ export default function SessionsPage() {
       </div>
 
       {/* Filter bar — primary row */}
-      <div className="border-border flex items-center gap-3 border-b px-6 py-3">
+      <div className="border-border-default flex items-center gap-3 border-b px-6 py-3">
         <Input
           type="text"
           placeholder="Search sessions…"
@@ -280,7 +280,7 @@ export default function SessionsPage() {
       </div>
 
       {/* Content */}
-      <div className="border-border border-b px-6 py-2.5">
+      <div className="border-border-default border-b px-6 py-2.5">
         {!activeProjectId && !isLoading ? (
           <div className="flex flex-col items-center gap-4 py-16">
             <DaemonMascot size={48} expression="idle" />
@@ -298,7 +298,7 @@ export default function SessionsPage() {
         ) : (
           <Table>
             <TableHeader>
-              <TableRow className="border-border hover:bg-transparent">
+              <TableRow className="border-border-default hover:bg-transparent">
                 <TableHead className="text-muted-foreground h-auto w-36 px-6 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
                   ID
                 </TableHead>
@@ -332,7 +332,7 @@ export default function SessionsPage() {
                   {groupSessions.map((session) => (
                     <Fragment key={session.id}>
                       <TableRow
-                        className="border-border/50 hover:bg-secondary/30 cursor-pointer"
+                        className="border-border-default/50 hover:bg-bg-elevated/50 cursor-pointer"
                         onClick={() =>
                           setExpandedId((prev) => (prev === session.id ? null : session.id))
                         }
@@ -365,7 +365,7 @@ export default function SessionsPage() {
                         <TableCell colSpan={6} className="p-0">
                           <Collapsible open={expandedId === session.id}>
                             <CollapsibleContent>
-                              <div className="border-border border-b px-6 py-4">
+                              <div className="border-border-default border-b px-6 py-4">
                                 <EventLog sessionId={session.id} />
                               </div>
                             </CollapsibleContent>

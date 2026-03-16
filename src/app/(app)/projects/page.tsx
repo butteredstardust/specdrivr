@@ -34,7 +34,7 @@ export default async function ProjectsPage() {
   return (
     <div className="-mx-6 -mt-6 flex min-h-full flex-col">
       {/* Header */}
-      <div className="border-border flex items-center justify-between border-b px-6 py-4">
+      <div className="border-border-default flex items-center justify-between border-b px-6 py-4">
         <div>
           <div className="text-muted-foreground mb-1 font-mono text-[10px] tracking-[0.2em] uppercase">
             Projects
@@ -45,7 +45,7 @@ export default async function ProjectsPage() {
       </div>
 
       {/* Content */}
-      <div className="border-border border-b px-6 py-2.5">
+      <div className="border-border-default border-b px-6 py-2.5">
         {projects.length === 0 ? (
           <div className="flex flex-col items-center gap-4 py-16">
             <DaemonMascot size={48} expression="idle" />
@@ -55,7 +55,7 @@ export default async function ProjectsPage() {
         ) : (
           <Table>
             <TableHeader>
-              <TableRow className="border-border hover:bg-transparent">
+              <TableRow className="border-border-default hover:bg-transparent">
                 <TableHead className="text-muted-foreground h-auto w-36 px-6 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
                   ID
                 </TableHead>
@@ -73,7 +73,10 @@ export default async function ProjectsPage() {
             </TableHeader>
             <TableBody>
               {projects.map((project) => (
-                <TableRow key={project.id} className="border-border/50 hover:bg-secondary/30">
+                <TableRow
+                  key={project.id}
+                  className="border-border-default/50 hover:bg-bg-elevated/50"
+                >
                   <TableCell className="px-6 py-3">
                     <ProjectIdBadge id={project.id} />
                   </TableCell>
