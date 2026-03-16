@@ -32,23 +32,6 @@ interface Spec {
 
 type TabName = 'spec' | 'plan' | 'tasks' | 'changes' | 'activity';
 
-function specStatusToExpression(
-  status: SpecStatus | undefined
-): 'idle' | 'working' | 'success' | 'error' {
-  switch (status) {
-    case 'pending_plan':
-    case 'pending_approval':
-    case 'executing':
-      return 'working';
-    case 'completed':
-      return 'success';
-    case 'stalled':
-      return 'error';
-    default:
-      return 'idle';
-  }
-}
-
 const TABS: { id: TabName; label: string }[] = [
   { id: 'spec', label: 'SPEC' },
   { id: 'plan', label: 'PLAN' },
@@ -97,7 +80,6 @@ export default function SpecDetailPage(): React.ReactElement {
   const [isLoading, setIsLoading] = useState(true);
   const [notFoundState, setNotFoundState] = useState(false);
 
-  // Initial fetch
   useEffect(() => {
     if (isNaN(specId)) {
       notFound();
@@ -181,7 +163,6 @@ export default function SpecDetailPage(): React.ReactElement {
 
   return (
     <div className="-mx-6 -mt-6 flex min-h-full flex-col">
-      {/* Header */}
       <div className="border-border-default flex items-center justify-between border-b px-6 py-4">
         {isLoading ? (
           <div className="flex flex-col gap-2">
@@ -233,7 +214,6 @@ export default function SpecDetailPage(): React.ReactElement {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="flex-1 px-6">
         <Tabs
           value={activeTab}

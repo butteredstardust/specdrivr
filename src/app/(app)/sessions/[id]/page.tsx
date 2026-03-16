@@ -21,21 +21,6 @@ interface AgentSession {
 
 const TERMINAL_STATUSES = ['completed', 'failed', 'cancelled'];
 
-function sessionToExpression(status?: string) {
-  switch (status) {
-    case 'running':
-      return 'working' as const;
-    case 'paused':
-      return 'blocked' as const;
-    case 'completed':
-      return 'success' as const;
-    case 'failed':
-      return 'error' as const;
-    default:
-      return 'idle' as const;
-  }
-}
-
 function timeAgo(dateStr: string | null | undefined): string {
   if (!dateStr) return '—';
   const date = new Date(dateStr);
@@ -136,7 +121,6 @@ export default function SessionDetailPage({ params }: PageProps) {
 
   return (
     <div className="-mx-6 -mt-6 flex min-h-full flex-col">
-      {/* Header */}
       <div className="border-border-default flex items-center justify-between border-b px-6 py-4">
         <div className="flex min-w-0 flex-col gap-1">
           <div className="text-muted-foreground font-mono text-[10px] tracking-[0.2em] uppercase">
@@ -159,7 +143,6 @@ export default function SessionDetailPage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* Stat boxes */}
       {(session || isLoading) && (
         <div className="border-border-default grid grid-cols-4 gap-4 border-b px-6 py-4">
           <StatBox label="Started" value={timeAgo(session?.startedAt)} />
@@ -172,14 +155,11 @@ export default function SessionDetailPage({ params }: PageProps) {
         </div>
       )}
 
-      {/* Two-column body */}
       <div className="divide-border-default flex min-h-0 flex-1 divide-x overflow-hidden">
-        {/* Left: Task Execution Timeline */}
         <div className="w-1/2 overflow-y-auto p-4">
           <TaskTimeline sessionId={id} />
         </div>
 
-        {/* Right: Session Log */}
         <div className="w-1/2 overflow-y-auto p-4">
           <p className="text-text-muted mb-3 font-mono text-[9px] tracking-widest uppercase">
             Session Log
