@@ -1,0 +1,2 @@
+ALTER TABLE "task_attempts" ADD COLUMN "session_id" integer;--> statement-breakpoint
+ALTER TABLE "task_attempts" ADD CONSTRAINT "task_attempts_session_id_agent_sessions_id_fk" FOREIGN KEY ("session_id") REFERENCES "public"."agent_sessions"("id") ON DELETE set null ON UPDATE no action;

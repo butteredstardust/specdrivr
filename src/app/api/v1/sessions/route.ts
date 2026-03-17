@@ -5,7 +5,7 @@ import { handleApiError, formatErrorResponse } from '@/lib/error-handler';
 import { z } from 'zod';
 import { requireMember } from '@/lib/rbac';
 import { db } from '@/db';
-import { projectMembers, agentSessions, specifications, tasks } from '@/db/schema';
+import { projectMembers, agentSessions, specifications, tasks, agentConfig } from '@/db/schema';
 import { eq, and, count, inArray, sql, desc } from 'drizzle-orm';
 
 const SessionQuerySchema = z.object({
@@ -85,7 +85,9 @@ export async function GET(request: NextRequest) {
     }
 
     if (query.from) {
-      whereConditions.push(sql`${agentSessions.startedAt} >= ${new Date(query.from).toISOString()}`);
+      whereConditions.push(
+        sql`${agentSessions.startedAt} >= ${new Date(query.from).toISOString()}`
+      );
     }
 
     if (query.to) {
@@ -99,11 +101,13 @@ export async function GET(request: NextRequest) {
         currentTaskExternalId: tasks.externalId,
         currentTaskTitle: tasks.title,
         totalTasks: totalTasksSubq.total,
+        backend: agentConfig.backend,
       })
       .from(agentSessions)
       .leftJoin(specifications, eq(agentSessions.specId, specifications.id))
       .leftJoin(tasks, eq(agentSessions.currentTaskId, tasks.id))
       .leftJoin(totalTasksSubq, eq(agentSessions.planId, totalTasksSubq.planId))
+      .leftJoin(agentConfig, eq(agentSessions.projectId, agentConfig.projectId))
       .where(and(...whereConditions))
       .limit(query.limit)
       .offset(query.offset)
@@ -115,6 +119,7 @@ export async function GET(request: NextRequest) {
       currentTaskExternalId: r.currentTaskExternalId ?? null,
       currentTaskTitle: r.currentTaskTitle ?? null,
       totalTasks: r.totalTasks != null ? Number(r.totalTasks) : null,
+      backend: r.backend ?? 'gemini',
     }));
 
     return NextResponse.json({

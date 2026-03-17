@@ -412,6 +412,10 @@ export const updateAgentConfigSchema = z.object({
   maxDiffSizeKb: z.number().int().min(10).max(5000).default(500),
   prAutoCreate: z.boolean().default(false),
   prTargetBranch: z.string().min(1).max(100).default('main'),
+  geminiApiKey: z.string().nullable().optional(),
+  geminiModel: z.string().default('gemini-2.0-flash'),
+  claudeApiKey: z.string().nullable().optional(),
+  backend: z.string().default('gemini'),
 });
 
 /**

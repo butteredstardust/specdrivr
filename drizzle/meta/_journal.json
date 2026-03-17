@@ -22,6 +22,34 @@
       "when": 1773591183415,
       "tag": "0002_salty_meltdown",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1773772281661,
+      "tag": "0003_ambitious_mongu",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1773772656564,
+      "tag": "0004_fat_lady_vermin",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1773773449624,
+      "tag": "0005_cultured_nighthawk",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1773774402961,
+      "tag": "0006_melted_arclight",
+      "breakpoints": true
     }
   ]
 }

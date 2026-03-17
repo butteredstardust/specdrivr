@@ -9,6 +9,10 @@ import { usePolling } from '@/hooks/use-polling';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import CodeMirror from '@uiw/react-codemirror';
+import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
+import { languages } from '@codemirror/language-data';
+import { EditorView } from '@codemirror/view';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { SpecStatus } from '@/components/specs/spec-editor';
 import type { UserRole } from '@/db/schema';
@@ -83,11 +87,13 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
   const [planError, setPlanError] = useState<string | null>(null);
   const [startedAt] = useState(() => new Date());
 
-  // Feedback panels
+  // Feedbacks and Edits
   const [changesOpen, setChangesOpen] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
   const [feedbackText, setFeedbackText] = useState('');
   const [rejectText, setRejectText] = useState('');
+  const [editContent, setEditContent] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
   const [isActioning, setIsActioning] = useState(false);
 
   // Poll spec status when pending_plan
@@ -119,6 +125,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
       } else {
         const json = await res.json();
         setPlan(json.data ?? json);
+        setEditContent(json.data?.markdownContent || '');
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Failed to load plan';
@@ -134,6 +141,28 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
   }, [fetchPlan]);
 
   // Actions
+  const handleSaveEdit = async () => {
+    if (!plan || !editContent.trim()) return;
+    setIsActioning(true);
+    try {
+      const res = await fetch(`/api/v1/plans/${plan.id}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ markdownContent: editContent }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      toast.success('Plan saved successfully.');
+      setIsEditing(false);
+      router.refresh();
+      await fetchPlan(); // re-fetch to sync
+    } catch (err) {
+      clientLogger.error('PlanTab: save edit failed', err);
+      toast.error('Failed to save plan edits.');
+    } finally {
+      setIsActioning(false);
+    }
+  };
   const handleApprove = async () => {
     if (!plan) return;
     setIsActioning(true);
@@ -461,15 +490,73 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
           </div>
         </div>
 
-        {/* Plan document */}
+        {/* Plan document (Editable when pending_approval) */}
         <div>
-          <p className="text-text-muted mb-2 font-mono text-[10px] tracking-[0.2em] uppercase">
-            Plan Document
-          </p>
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-text-muted font-mono text-[10px] tracking-[0.2em] uppercase">
+              Plan Document
+            </p>
+            {canMember && (
+              <div className="flex gap-2">
+                {isEditing ? (
+                  <>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 text-[10px]"
+                      onClick={() => {
+                        setEditContent(plan.markdownContent);
+                        setIsEditing(false);
+                      }}
+                      disabled={isActioning}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-6 text-[10px]"
+                      onClick={handleSaveEdit}
+                      disabled={isActioning || editContent === plan.markdownContent}
+                    >
+                      Save Changes
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-6 text-[10px]"
+                    onClick={() => setIsEditing(true)}
+                  >
+                    Edit Plan
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
           <div className="border-border-default bg-bg-elevated rounded-md border p-4">
-            <div className="prose prose-invert max-w-none">
-              <ReactMarkdown>{plan.markdownContent}</ReactMarkdown>
-            </div>
+            {isEditing ? (
+              <CodeMirror
+                value={editContent}
+                onChange={(value) => setEditContent(value)}
+                extensions={[
+                  markdown({ base: markdownLanguage, codeLanguages: languages }),
+                  EditorView.lineWrapping,
+                ]}
+                theme="dark"
+                className="min-h-[300px] text-sm"
+                basicSetup={{
+                  lineNumbers: true,
+                  highlightActiveLineGutter: true,
+                  foldGutter: true,
+                }}
+              />
+            ) : (
+              <div className="prose prose-invert max-w-none">
+                <ReactMarkdown>{plan.markdownContent}</ReactMarkdown>
+              </div>
+            )}
           </div>
         </div>
 

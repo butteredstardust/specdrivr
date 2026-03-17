@@ -1,6 +1,6 @@
 import { db } from '@/db';
 import { projectMembers, invites, users, auditLog, type UserRole } from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, DatabaseError } from '@/lib/errors';
 
@@ -42,6 +42,22 @@ export class MemberRepository extends BaseRepository {
         .select({ userId: projectMembers.userId })
         .from(projectMembers)
         .where(eq(projectMembers.projectId, projectId))
+    );
+
+    return result.map((r) => r.userId);
+  }
+
+  async getAdminsByProjectId(projectId: number): Promise<string[]> {
+    const result = await this.executeQuery(() =>
+      db
+        .select({ userId: projectMembers.userId })
+        .from(projectMembers)
+        .where(
+          and(
+            eq(projectMembers.projectId, projectId),
+            sql`${projectMembers.role} IN ('admin', 'owner')`
+          )
+        )
     );
 
     return result.map((r) => r.userId);

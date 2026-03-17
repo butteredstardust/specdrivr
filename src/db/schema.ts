@@ -279,6 +279,9 @@ export const plans = pgTable(
       onDelete: 'set null',
     }),
     status: planStatusEnum('status').notNull().default('pending_approval'),
+    intent: text('intent'),
+    phaseLabel: text('phase_label'),
+    architectureDecisions: jsonb('architecture_decisions').default([]),
     markdownContent: text('markdown_content'),
     reviewerNotes: text('reviewer_notes'),
     approvedAt: timestamp('approved_at', { withTimezone: true }),
@@ -368,6 +371,7 @@ export const taskAttempts = pgTable(
     taskId: integer('task_id')
       .notNull()
       .references(() => tasks.id, { onDelete: 'cascade' }),
+    sessionId: integer('session_id').references(() => agentSessions.id, { onDelete: 'set null' }),
     seq: integer('seq').notNull(),
     status: taskAttemptStatusEnum('status').notNull().default('running'),
     logLines: jsonb('log_lines').default([]),
@@ -538,6 +542,10 @@ export const agentConfig = pgTable('agent_config', {
   githubWebhookSecret: text('github_webhook_secret'), // nullable — for HMAC validation
   slackBotToken: text('slack_bot_token'), // nullable
   slackChannelId: text('slack_channel_id'), // nullable
+  geminiApiKey: text('gemini_api_key'), // nullable
+  geminiModel: text('gemini_model').notNull().default('gemini-2.0-flash'),
+  claudeApiKey: text('claude_api_key'), // nullable
+  backend: text('backend').notNull().default('gemini'), // 'gemini' | 'claude'
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
