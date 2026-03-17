@@ -1,6 +1,6 @@
 import { db } from '@/db';
 import { projectMembers, invites, users, auditLog, type UserRole } from '@/db/schema';
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and, inArray } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, DatabaseError } from '@/lib/errors';
 
@@ -55,7 +55,7 @@ export class MemberRepository extends BaseRepository {
         .where(
           and(
             eq(projectMembers.projectId, projectId),
-            sql`${projectMembers.role} IN ('admin', 'owner')`
+            inArray(projectMembers.role, ['admin', 'owner'])
           )
         )
     );

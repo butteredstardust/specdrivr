@@ -17,7 +17,9 @@ const LiveTerminal = dynamic(
   () => import('@/components/ui/live-terminal').then((m) => ({ default: m.LiveTerminal })),
   {
     ssr: false,
-    loading: () => <div className="h-[320px] w-full animate-pulse rounded bg-[#0d0d0a]" />,
+    loading: () => (
+      <div className="h-[320px] w-full animate-pulse rounded bg-[var(--terminal-bg)]" />
+    ),
   }
 );
 
@@ -34,7 +36,7 @@ export interface AgentSession {
   currentTaskExternalId?: string | null;
   currentTaskTitle?: string | null;
   totalTasks?: number | null;
-  backend?: string;
+  backend?: 'gemini' | 'claude';
 }
 
 interface BlockedTask {
