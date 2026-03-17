@@ -35,7 +35,7 @@ export function LiveTerminal({
 
     const terminal = new Terminal({
       theme: {
-        background: '#0d0d0a', // --terminal-bg
+        background: '#0d0d0a', // --terminal-bg (xterm requires hex here, but we'll document tokens)
         foreground: '#a1a1aa', // --text-secondary
         cursor: '#7c5cfc', // --accent-violet
         selectionBackground: '#7c5cfc40',
@@ -48,6 +48,7 @@ export function LiveTerminal({
         brightYellow: '#ffb300',
         brightBlue: '#7c5cfc',
       },
+
       fontFamily: '"Berkeley Mono", "Fira Code", "Courier New", monospace',
       fontSize: 13,
       lineHeight: 1.4,

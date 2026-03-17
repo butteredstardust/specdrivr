@@ -27,13 +27,15 @@ export class SpecificationRepository extends BaseRepository {
   }
 
   async getByIdWithVersion(id: number) {
-    const spec = await this.getById(id);
-    if (!spec) return null;
+    return await this.executeQuery(async () => {
+      const spec = await this.getById(id);
+      if (!spec) return null;
 
-    if (!spec.currentVersionId) return { ...spec, currentVersion: null };
+      if (!spec.currentVersionId) return { ...spec, currentVersion: null };
 
-    const version = await this.getVersionById(id, spec.currentVersionId);
-    return { ...spec, currentVersion: version };
+      const version = await this.getVersionById(id, spec.currentVersionId);
+      return { ...spec, currentVersion: version };
+    });
   }
 
   async getByProjectId(projectId: number): Promise<Specification[]> {

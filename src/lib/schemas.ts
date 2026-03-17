@@ -389,6 +389,33 @@ export const updateMemberRoleSchema = z.object({
   role: userRoleSchema,
 });
 
+export const agentConfigFormSchema = z.object({
+  modelId: z.string().min(1, 'Execution model is required'),
+  planModelId: z.string().min(1, 'Plan model is required'),
+  maxConcurrentTasks: z.number().int().min(1).max(10),
+  taskTimeoutSeconds: z.number().int().min(30).max(3600),
+  maxRetriesPerTask: z.number().int().min(0).max(5),
+  retryDelaySeconds: z.number().int(),
+  requireApproval: z.boolean(),
+  autoGeneratePlan: z.boolean(),
+  branchPrefix: z.string().min(1).max(50),
+  commitMessagePrefix: z.string().min(1).max(50),
+  allowedFileGlobs: z.array(z.string()),
+  forbiddenFileGlobs: z.array(z.string()),
+  testCommand: z.string().max(255).nullable(),
+  lintCommand: z.string().max(255).nullable(),
+  setupCommand: z.string().max(255).nullable(),
+  maxDiffSizeKb: z.number().int().min(10).max(5000),
+  prAutoCreate: z.boolean(),
+  prTargetBranch: z.string().min(1).max(100),
+  geminiApiKey: z.string().max(255).nullable().optional(),
+  geminiModel: z.string().min(1).max(100),
+  claudeApiKey: z.string().max(255).nullable().optional(),
+  backend: z.enum(['gemini', 'claude']),
+});
+
+export type AgentConfigFormData = z.infer<typeof agentConfigFormSchema>;
+
 /**
  * Schema for updating agent configuration
  */

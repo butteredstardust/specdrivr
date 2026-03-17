@@ -25,7 +25,7 @@ interface AgentSession {
   currentTaskExternalId?: string | null;
   currentTaskTitle?: string | null;
   totalTasks?: number | null;
-  backend?: string;
+  backend?: 'gemini' | 'claude';
 }
 
 interface SessionPanelProps {
