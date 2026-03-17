@@ -11,6 +11,25 @@ vi.mock('@/lib/auth', () => ({
   auth: vi.fn(),
 }));
 
+// Mock Gemini
+vi.mock('@/lib/gemini', () => ({
+  generatePlan: vi.fn(),
+  generateTasks: vi.fn().mockResolvedValue({
+    tasks: [
+      {
+        title: 'Task 1',
+        description: 'Desc 1',
+        filesInvolved: ['file1.ts'],
+        dependsOnIndex: null,
+        estimatedMinutes: 30,
+        doneCriteria: 'Works',
+        verifyCommand: 'npm test',
+        recommendedModel: 'flash',
+      },
+    ],
+  }),
+}));
+
 import { auth } from '@/lib/auth';
 
 // Import route handlers
@@ -121,9 +140,18 @@ describe('API Route Integration Tests', () => {
         .insert(schema.specifications)
         .values({ projectId: project.id, name: 'S1' })
         .returning();
+      const [version] = await testDb
+        .insert(schema.specVersions)
+        .values({ specId: spec.id, versionNumber: 1, markdownContent: 'Content' })
+        .returning();
+      await testDb
+        .update(schema.specifications)
+        .set({ currentVersionId: version.id })
+        .where(eq(schema.specifications.id, spec.id));
+
       const [plan] = await testDb
         .insert(schema.plans)
-        .values({ specId: spec.id, status: 'pending_approval' })
+        .values({ specId: spec.id, status: 'pending_approval', specVersionId: version.id })
         .returning();
 
       const req = new NextRequest(`http://localhost/api/v1/plans/${plan.id}/approve`, {
@@ -143,9 +171,18 @@ describe('API Route Integration Tests', () => {
         .insert(schema.specifications)
         .values({ projectId: project.id, name: 'S1' })
         .returning();
+      const [version] = await testDb
+        .insert(schema.specVersions)
+        .values({ specId: spec.id, versionNumber: 1, markdownContent: 'Content' })
+        .returning();
+      await testDb
+        .update(schema.specifications)
+        .set({ currentVersionId: version.id })
+        .where(eq(schema.specifications.id, spec.id));
+
       const [plan] = await testDb
         .insert(schema.plans)
-        .values({ specId: spec.id, status: 'executing' })
+        .values({ specId: spec.id, status: 'executing', specVersionId: version.id })
         .returning();
 
       const req = new NextRequest(`http://localhost/api/v1/plans/${plan.id}/approve`, {
@@ -274,9 +311,18 @@ describe('API Route Integration Tests', () => {
         .insert(schema.specifications)
         .values({ projectId: project.id, name: 'S1' })
         .returning();
+      const [version] = await testDb
+        .insert(schema.specVersions)
+        .values({ specId: spec.id, versionNumber: 1, markdownContent: 'Content' })
+        .returning();
+      await testDb
+        .update(schema.specifications)
+        .set({ currentVersionId: version.id })
+        .where(eq(schema.specifications.id, spec.id));
+
       const [plan] = await testDb
         .insert(schema.plans)
-        .values({ specId: spec.id, status: 'pending_approval' })
+        .values({ specId: spec.id, status: 'pending_approval', specVersionId: version.id })
         .returning();
 
       const req = new NextRequest(`http://localhost/api/v1/plans/${plan.id}/reject`, {

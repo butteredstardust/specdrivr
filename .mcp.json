@@ -11,8 +11,8 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-filesystem",
-        "/Users/tuxgeek/Dev/specdrivr",
-        "/Users/tuxgeek/Dev"
+        ".",
+        ".."
       ]
     },
     "git": {
@@ -20,7 +20,7 @@
       "args": [
         "mcp-server-git",
         "--repository",
-        "/Users/tuxgeek/Dev/specdrivr"
+        "."
       ]
     },
     "memory": {
@@ -30,7 +30,7 @@
         "@modelcontextprotocol/server-memory"
       ],
       "env": {
-        "MEMORY_FILE_PATH": "/Users/tuxgeek/.claude/projects/specdrivr/memory/.mcp-memory.jsonl"
+        "MEMORY_FILE_PATH": ".mcp-memory.jsonl"
       }
     },
     "shadcn": {
@@ -83,6 +83,35 @@
       "args": [
         "-y",
         "mcp-await"
+      ]
+    },
+    "postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://specdrivr:specdrivr_password@localhost:5432/specdrivr"
+      ]
+    },
+    "docker": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@thelord/mcp-server-docker-npx"
+      ]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest"
+      ]
+    },
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
       ]
     }
   }

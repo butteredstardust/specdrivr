@@ -58,6 +58,10 @@ interface AgentConfigData {
   maxDiffSizeKb: number;
   prAutoCreate: boolean;
   prTargetBranch: string;
+  geminiApiKey: string | null;
+  geminiModel: string;
+  claudeApiKey: string | null;
+  backend: 'gemini' | 'claude';
 }
 
 // ---------------------------------------------------------------------------
@@ -83,6 +87,10 @@ const DEFAULTS: AgentConfigData = {
   maxDiffSizeKb: 500,
   prAutoCreate: false,
   prTargetBranch: 'main',
+  geminiApiKey: null,
+  geminiModel: 'gemini-2.0-flash',
+  claudeApiKey: null,
+  backend: 'gemini',
 };
 
 // ---------------------------------------------------------------------------
@@ -244,6 +252,10 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
       maxDiffSizeKb: data.maxDiffSizeKb ?? DEFAULTS.maxDiffSizeKb,
       prAutoCreate: data.prAutoCreate ?? DEFAULTS.prAutoCreate,
       prTargetBranch: data.prTargetBranch ?? DEFAULTS.prTargetBranch,
+      geminiApiKey: data.geminiApiKey ?? DEFAULTS.geminiApiKey,
+      geminiModel: data.geminiModel ?? DEFAULTS.geminiModel,
+      claudeApiKey: data.claudeApiKey ?? DEFAULTS.claudeApiKey,
+      backend: (data.backend as AgentConfigData['backend']) ?? DEFAULTS.backend,
     });
   }, []);
 
@@ -344,46 +356,160 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
     <TooltipProvider>
       <form onSubmit={handleSave} className="flex flex-col gap-10">
         {/* ------------------------------------------------------------------ */}
-        {/* EXECUTION                                                            */}
+        {/* AI PROVIDERS                                                         */}
         {/* ------------------------------------------------------------------ */}
         <section className="flex flex-col gap-4">
-          <SectionHeading>EXECUTION</SectionHeading>
-
-          <FormField label="MODEL" htmlFor="modelId" helper="Execution model for tasks">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Input
-                  id="modelId"
-                  value={form.modelId}
-                  onChange={(e) => set('modelId', e.target.value)}
-                  placeholder="claude-sonnet-4-6"
-                  disabled={!editable}
-                  className="font-mono text-sm"
-                />
-              </TooltipTrigger>
-              {!editable && <TooltipContent>Requires Admin or Owner role</TooltipContent>}
-            </Tooltip>
-          </FormField>
+          <SectionHeading>AI PROVIDERS</SectionHeading>
 
           <FormField
-            label="PLAN MODEL"
-            htmlFor="planModelId"
-            helper="Model used for plan generation"
+            label="EXECUTION BACKEND"
+            htmlFor="backend"
+            helper="Which AI agent executes your tasks. Both require the respective CLI installed on the agent machine."
           >
             <Tooltip>
               <TooltipTrigger asChild>
-                <Input
-                  id="planModelId"
-                  value={form.planModelId}
-                  onChange={(e) => set('planModelId', e.target.value)}
-                  placeholder="claude-opus-4-6"
+                <Select
+                  value={form.backend}
+                  onValueChange={(v) => set('backend', v as any)}
                   disabled={!editable}
-                  className="font-mono text-sm"
-                />
+                >
+                  <SelectTrigger id="backend" className="font-mono text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="gemini">Gemini CLI</SelectItem>
+                    <SelectItem value="claude">Claude Code</SelectItem>
+                  </SelectContent>
+                </Select>
               </TooltipTrigger>
               {!editable && <TooltipContent>Requires Admin or Owner role</TooltipContent>}
             </Tooltip>
           </FormField>
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            {/* Gemini Group */}
+            <div className="border-border-default bg-bg-surface flex flex-col gap-4 rounded-md border p-4">
+              <p className="text-text-secondary font-mono text-[10px] tracking-widest uppercase">
+                Google Gemini
+              </p>
+
+              <FormField
+                label="GEMINI API KEY"
+                htmlFor="geminiApiKey"
+                helper="Project-specific API key. Leave blank to use system default."
+              >
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Input
+                      id="geminiApiKey"
+                      type="password"
+                      value={form.geminiApiKey ?? ''}
+                      onChange={(e) => set('geminiApiKey', e.target.value || null)}
+                      placeholder="AIzaSy..."
+                      disabled={!editable}
+                      className="font-mono text-sm"
+                    />
+                  </TooltipTrigger>
+                  {!editable && <TooltipContent>Requires Admin or Owner role</TooltipContent>}
+                </Tooltip>
+              </FormField>
+
+              <FormField
+                label="GEMINI MODEL"
+                htmlFor="geminiModel"
+                helper="Model used for plan generation and Gemini execution"
+              >
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Input
+                      id="geminiModel"
+                      value={form.geminiModel}
+                      onChange={(e) => set('geminiModel', e.target.value)}
+                      placeholder="gemini-2.0-flash"
+                      disabled={!editable}
+                      className="font-mono text-sm"
+                    />
+                  </TooltipTrigger>
+                  {!editable && <TooltipContent>Requires Admin or Owner role</TooltipContent>}
+                </Tooltip>
+              </FormField>
+            </div>
+
+            {/* Claude Group */}
+            <div className="border-border-default bg-bg-surface flex flex-col gap-4 rounded-md border p-4">
+              <p className="text-text-secondary font-mono text-[10px] tracking-widest uppercase">
+                Anthropic Claude
+              </p>
+
+              <FormField
+                label="CLAUDE API KEY"
+                htmlFor="claudeApiKey"
+                helper="Project-specific API key. Leave blank to use system default."
+              >
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Input
+                      id="claudeApiKey"
+                      type="password"
+                      value={form.claudeApiKey ?? ''}
+                      onChange={(e) => set('claudeApiKey', e.target.value || null)}
+                      placeholder="sk-ant-..."
+                      disabled={!editable}
+                      className="font-mono text-sm"
+                    />
+                  </TooltipTrigger>
+                  {!editable && <TooltipContent>Requires Admin or Owner role</TooltipContent>}
+                </Tooltip>
+              </FormField>
+
+              <FormField
+                label="EXECUTION MODEL"
+                htmlFor="modelId"
+                helper="Execution model for tasks"
+              >
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Input
+                      id="modelId"
+                      value={form.modelId}
+                      onChange={(e) => set('modelId', e.target.value)}
+                      placeholder="claude-sonnet-4-6"
+                      disabled={!editable}
+                      className="font-mono text-sm"
+                    />
+                  </TooltipTrigger>
+                  {!editable && <TooltipContent>Requires Admin or Owner role</TooltipContent>}
+                </Tooltip>
+              </FormField>
+
+              <FormField
+                label="PLAN MODEL"
+                htmlFor="planModelId"
+                helper="Model used for plan generation"
+              >
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Input
+                      id="planModelId"
+                      value={form.planModelId}
+                      onChange={(e) => set('planModelId', e.target.value)}
+                      placeholder="claude-opus-4-6"
+                      disabled={!editable}
+                      className="font-mono text-sm"
+                    />
+                  </TooltipTrigger>
+                  {!editable && <TooltipContent>Requires Admin or Owner role</TooltipContent>}
+                </Tooltip>
+              </FormField>
+            </div>
+          </div>
+        </section>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* EXECUTION LIMITS                                                     */}
+        {/* ------------------------------------------------------------------ */}
+        <section className="flex flex-col gap-4">
+          <SectionHeading>EXECUTION LIMITS</SectionHeading>
 
           <FormField label="MAX CONCURRENT TASKS" htmlFor="maxConcurrentTasks">
             <Tooltip>

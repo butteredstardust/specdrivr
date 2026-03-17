@@ -27,6 +27,9 @@ export const envSchema = z.object({
   CRON_SECRET: z.string().min(32),
   RESEND_API_KEY: z.string().min(1, 'RESEND_API_KEY is required'),
   RESEND_FROM_EMAIL: z.string().email().default('noreply@specdrivr.dev'),
+  GEMINI_API_KEY: z.string().optional(),
+  GEMINI_MODEL: z.string().default('gemini-2.0-flash'),
+  AGENT_TOKEN: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -76,6 +79,9 @@ export function parseEnv(): Env {
         ? undefined
         : 're_dummy_key_for_testing'),
     RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+    GEMINI_MODEL: process.env.GEMINI_MODEL,
+    AGENT_TOKEN: process.env.AGENT_TOKEN,
   };
 
   if (process.env.VITEST && !process.env.DATABASE_URL) {

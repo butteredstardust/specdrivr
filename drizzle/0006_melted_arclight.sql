@@ -1,0 +1,1 @@
+ALTER TABLE "agent_config" ADD COLUMN "claude_api_key" text;

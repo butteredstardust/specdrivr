@@ -26,6 +26,16 @@ export class SpecificationRepository extends BaseRepository {
     return result[0] || null;
   }
 
+  async getByIdWithVersion(id: number) {
+    const spec = await this.getById(id);
+    if (!spec) return null;
+
+    if (!spec.currentVersionId) return { ...spec, currentVersion: null };
+
+    const version = await this.getVersionById(id, spec.currentVersionId);
+    return { ...spec, currentVersion: version };
+  }
+
   async getByProjectId(projectId: number): Promise<Specification[]> {
     return await this.executeQuery(() =>
       db.select().from(specifications).where(eq(specifications.projectId, projectId))
@@ -294,6 +304,10 @@ export class SpecificationRepository extends BaseRepository {
     });
 
     return updatedSpec;
+  }
+
+  async updateStatus(id: number, status: import('@/db/schema').SpecStatus): Promise<Specification> {
+    return this.update(id, { status });
   }
 
   async delete(id: number): Promise<void> {

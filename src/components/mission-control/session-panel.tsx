@@ -25,6 +25,7 @@ interface AgentSession {
   currentTaskExternalId?: string | null;
   currentTaskTitle?: string | null;
   totalTasks?: number | null;
+  backend?: string;
 }
 
 interface SessionPanelProps {
@@ -162,6 +163,11 @@ export function SessionPanel({
             <span className="bg-bg-elevated text-text-muted rounded px-1.5 py-0.5 font-mono text-[10px]">
               SES-{session!.id}
             </span>
+            {session?.backend && (
+              <span className="bg-bg-elevated text-text-secondary rounded px-1.5 py-0.5 font-mono text-[10px]">
+                {session.backend === 'claude' ? '🤖 Claude' : '✨ Gemini'}
+              </span>
+            )}
             {panelState === 'running' ? (
               <span className="flex items-center gap-1 font-mono text-xs font-semibold text-green-400">
                 <span
