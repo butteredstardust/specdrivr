@@ -99,7 +99,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         doneCriteria: t.doneCriteria,
         verifyCommand: t.verifyCommand,
         recommendedModel: t.recommendedModel === 'pro' ? 'pro' : 'sonnet', // Mapping flash/pro to project specific model names if needed, but schema uses 'sonnet' as default.
-      } as any);
+      });
 
       taskIdMap.set(i, externalId);
     }
