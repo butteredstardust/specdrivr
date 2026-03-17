@@ -2,18 +2,29 @@
 
 import { useState, useEffect } from 'react';
 import { usePolling } from '@/hooks/use-polling';
-import { CheckCircle2, AlertCircle, Clock, SkipForward } from 'lucide-react';
+import {
+  CheckCircle2,
+  AlertCircle,
+  Clock,
+  SkipForward,
+  ChevronDown,
+  ChevronRight,
+} from 'lucide-react';
 
 interface TaskItem {
   id: number;
   externalId: string;
   title: string;
+  description?: string | null;
   status: string;
   startedAt: string | null;
   completedAt: string | null;
   actualDurationMs: number | null;
   dependsOn: string[];
   orderIndex: number;
+  blockedReason?: string | null;
+  attemptCount?: number;
+  verificationPassed?: boolean | null;
 }
 
 const TERMINAL_TASK_STATUSES = ['done', 'blocked', 'failed', 'skipped'];
@@ -116,6 +127,8 @@ interface TaskTimelineProps {
 }
 
 export function TaskTimeline({ sessionId }: TaskTimelineProps) {
+  const [expandedTaskId, setExpandedTaskId] = useState<number | null>(null);
+
   const { data, isLoading } = usePolling<TaskItem[]>({
     url: `/api/v1/sessions/${sessionId}/tasks`,
     interval: 5000,
@@ -126,6 +139,10 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
   });
 
   const tasks = data ? [...data].sort((a, b) => a.orderIndex - b.orderIndex) : [];
+
+  const toggleTask = (id: number) => {
+    setExpandedTaskId((prev) => (prev === id ? null : id));
+  };
 
   return (
     <div>
@@ -141,6 +158,7 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
           {tasks.map((task, idx) => {
             const colors = statusColor(task.status);
             const isLast = idx === tasks.length - 1;
+            const isExpanded = expandedTaskId === task.id;
 
             return (
               <div key={task.id} className="relative flex gap-4">
@@ -148,7 +166,9 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
                 <div className="relative flex flex-col items-center pt-1">
                   {/* Vertical line (extends down from dot) */}
                   {!isLast && (
-                    <div className="bg-border-default/30 absolute top-6 left-1/2 h-12 w-0.5 -translate-x-1/2" />
+                    <div
+                      className={`bg-border-default/30 absolute top-6 left-1/2 w-0.5 -translate-x-1/2 ${isExpanded ? 'h-full' : 'h-12'}`}
+                    />
                   )}
 
                   {/* Dot */}
@@ -168,7 +188,8 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
                 {/* Right column: content card */}
                 <div className="flex-1 pt-0.5">
                   <div
-                    className={`rounded-lg border transition-all ${colors.bg} border-border-default/50 px-3 py-2.5`}
+                    onClick={() => toggleTask(task.id)}
+                    className={`cursor-pointer rounded-lg border transition-all ${colors.bg} border-border-default/50 hover:border-border-default px-3 py-2.5`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
@@ -185,12 +206,70 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
                       <div className="flex shrink-0 flex-col items-end gap-1">
                         {taskDuration(task)}
                         <span
-                          className={`rounded px-1.5 py-0.5 font-mono text-[9px] tracking-wider uppercase ${colors.bg} ${colors.text}`}
+                          className={`flex items-center gap-1 rounded px-1.5 py-0.5 font-mono text-[9px] tracking-wider uppercase ${colors.bg} ${colors.text}`}
                         >
                           {task.status.replace(/_/g, ' ')}
+                          {isExpanded ? (
+                            <ChevronDown className="h-3 w-3" />
+                          ) : (
+                            <ChevronRight className="h-3 w-3" />
+                          )}
                         </span>
                       </div>
                     </div>
+
+                    {isExpanded && (
+                      <div
+                        className="border-border-default/50 mt-3 cursor-auto space-y-2 border-t pt-3"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {task.description && (
+                          <div>
+                            <span className="text-muted-foreground mb-0.5 block font-mono text-[9px] tracking-wider uppercase">
+                              Description
+                            </span>
+                            <p className="text-foreground font-mono text-[10px] whitespace-pre-wrap">
+                              {task.description}
+                            </p>
+                          </div>
+                        )}
+                        {task.blockedReason && (
+                          <div>
+                            <span className="text-status-red mb-0.5 block font-mono text-[9px] tracking-wider uppercase">
+                              Blocked Reason
+                            </span>
+                            <p className="text-status-red font-mono text-[10px] whitespace-pre-wrap">
+                              {task.blockedReason}
+                            </p>
+                          </div>
+                        )}
+                        <div className="mt-2 flex gap-4">
+                          {task.attemptCount !== undefined && task.attemptCount > 0 && (
+                            <div>
+                              <span className="text-muted-foreground mb-0.5 block font-mono text-[9px] tracking-wider uppercase">
+                                Attempts
+                              </span>
+                              <p className="text-foreground font-mono text-[10px]">
+                                {task.attemptCount}
+                              </p>
+                            </div>
+                          )}
+                          {task.verificationPassed !== undefined &&
+                            task.verificationPassed !== null && (
+                              <div>
+                                <span className="text-muted-foreground mb-0.5 block font-mono text-[9px] tracking-wider uppercase">
+                                  Verification
+                                </span>
+                                <p
+                                  className={`font-mono text-[10px] ${task.verificationPassed ? 'text-status-emerald' : 'text-status-red'}`}
+                                >
+                                  {task.verificationPassed ? 'Passed' : 'Failed'}
+                                </p>
+                              </div>
+                            )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

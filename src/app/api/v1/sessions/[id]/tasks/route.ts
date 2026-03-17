@@ -46,12 +46,16 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       id: t.id,
       externalId: t.externalId,
       title: t.title,
+      description: t.description,
       status: t.status,
       startedAt: t.startedAt ? t.startedAt.toISOString() : null,
       completedAt: t.completedAt ? t.completedAt.toISOString() : null,
       actualDurationMs: t.actualDurationMs ?? null,
       dependsOn: t.dependsOn ?? [],
       orderIndex: t.executionOrder,
+      blockedReason: t.blockedReason,
+      attemptCount: t.attemptCount,
+      verificationPassed: t.verificationPassed,
     }));
 
     return NextResponse.json({ data });
