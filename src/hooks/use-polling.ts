@@ -17,6 +17,7 @@ type UsePollingResult<T> = {
   lastUpdated: Date | null;
   stop: () => void; // manual stop
   restart: () => void; // manual restart
+  mutate: () => void; // manual re-fetch
 };
 
 /**
@@ -48,6 +49,7 @@ export function usePolling<T>({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isStopped, setIsStopped] = useState<boolean>(false);
+  const [trigger, setTrigger] = useState<number>(0);
 
   const errorCountRef = useRef(0);
   const isFirstFetchRef = useRef(true);
@@ -72,6 +74,11 @@ export function usePolling<T>({
     isFirstFetchRef.current = true;
     setIsLoading(true);
     setError(null);
+    setTrigger((t) => t + 1);
+  }, []);
+
+  const mutate = useCallback(() => {
+    setTrigger((t) => t + 1);
   }, []);
 
   useEffect(() => {
@@ -154,7 +161,7 @@ export function usePolling<T>({
       clearInterval(timeoutId);
       controller.abort();
     };
-  }, [url, interval, enabled, isStopped, stop]);
+  }, [url, interval, enabled, isStopped, stop, trigger]);
 
   return {
     data,
@@ -163,5 +170,6 @@ export function usePolling<T>({
     lastUpdated,
     stop,
     restart,
+    mutate,
   };
 }
