@@ -85,12 +85,13 @@ ${generated.architectureDecisions.map((d) => `### ${d.title}\n**Rationale**: ${d
     await notificationRepository.createMany(notifications);
 
     logger.info({ specId, planId, durationMs: Date.now() - startMs }, 'Plan generation successful');
-  } catch (err: any) {
-    logger.error({ err, planId, specId }, 'Plan generation failed async');
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    logger.error({ err: error, planId, specId }, 'Plan generation failed async');
 
     await planRepository.update(planId, {
       status: 'abandoned', // or keep as is with error
-      generationError: err.message,
+      generationError: error.message,
     });
 
     // Set spec back to drafting or stalled? Spec says 'stalled' or 'drafting' are allowed for generation.

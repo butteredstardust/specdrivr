@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { toast } from 'sonner';
 import { X } from 'lucide-react';
 import { clientLogger } from '@/lib/logger-client';
@@ -31,11 +32,14 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { z } from 'zod';
 import { agentConfigFormSchema, type AgentConfigFormData } from '@/lib/schemas';
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
+
+type FormValues = z.infer<typeof agentConfigFormSchema>;
 
 interface AgentConfigFormProps {
   projectId: number;
@@ -206,7 +210,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
     formState: { isSubmitting, isDirty },
     watch,
     setValue,
-  } = useForm<AgentConfigFormData>({
+  } = useForm({
     resolver: zodResolver(agentConfigFormSchema),
     defaultValues: DEFAULTS,
   });
@@ -262,7 +266,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
   // Save
   // ---------------------------------------------------------------------------
 
-  const onFormSubmit = async (data: AgentConfigFormData) => {
+  const onFormSubmit = async (data: FormValues) => {
     if (!editable) return;
 
     try {

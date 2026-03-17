@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useCallback } from 'react';
+import type { Terminal } from '@xterm/xterm';
+import type { FitAddon } from '@xterm/addon-fit';
 
 interface LiveTerminalProps {
   sessionId: number;
@@ -16,8 +18,8 @@ export function LiveTerminal({
   active = true,
 }: LiveTerminalProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const terminalRef = useRef<any>(null);
-  const fitAddonRef = useRef<any>(null);
+  const terminalRef = useRef<Terminal | null>(null);
+  const fitAddonRef = useRef<FitAddon | null>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
   const isAtBottomRef = useRef(true);
 
@@ -33,20 +35,31 @@ export function LiveTerminal({
     // @ts-expect-error - CSS modules might not have declarations
     await import('@xterm/xterm/css/xterm.css');
 
+    // Resolve theme colors from CSS variables
+    const styles = getComputedStyle(document.documentElement);
+    const terminalBg = styles.getPropertyValue('--terminal-bg').trim() || 'rgb(13, 13, 10)';
+    const textSecondary =
+      styles.getPropertyValue('--text-secondary').trim() || 'rgb(161, 161, 170)';
+    const accentViolet = styles.getPropertyValue('--accent-violet').trim() || 'rgb(124, 92, 252)';
+    const statusEmerald = styles.getPropertyValue('--status-emerald').trim() || 'rgb(5, 150, 105)';
+    const statusRed = styles.getPropertyValue('--status-red').trim() || 'rgb(220, 38, 38)';
+    const phosphorAmber = styles.getPropertyValue('--phosphor-amber').trim() || 'rgb(255, 179, 0)';
+    const terminalGreen = styles.getPropertyValue('--terminal-green').trim() || 'rgb(57, 255, 20)';
+
     const terminal = new Terminal({
       theme: {
-        background: '#0d0d0a', // --terminal-bg (xterm requires hex here, but we'll document tokens)
-        foreground: '#a1a1aa', // --text-secondary
-        cursor: '#7c5cfc', // --accent-violet
-        selectionBackground: '#7c5cfc40',
-        black: '#0a0a0b',
-        green: '#059669',
-        yellow: '#ffb300',
-        blue: '#7c5cfc',
-        red: '#dc2626',
-        brightGreen: '#39ff14', // --terminal-green
-        brightYellow: '#ffb300',
-        brightBlue: '#7c5cfc',
+        background: terminalBg,
+        foreground: textSecondary,
+        cursor: accentViolet,
+        selectionBackground: `${accentViolet}40`,
+        black: 'rgb(10, 10, 11)',
+        green: statusEmerald,
+        yellow: phosphorAmber,
+        blue: accentViolet,
+        red: statusRed,
+        brightGreen: terminalGreen,
+        brightYellow: phosphorAmber,
+        brightBlue: accentViolet,
       },
 
       fontFamily: '"Berkeley Mono", "Fira Code", "Courier New", monospace',
@@ -131,10 +144,12 @@ export function LiveTerminal({
 
   // Init terminal on mount
   useEffect(() => {
-    let cleanup: any;
-    initTerminal().then((c) => (cleanup = c));
+    let cleanupFn: (() => void) | undefined;
+    initTerminal().then((c) => {
+      cleanupFn = c;
+    });
     return () => {
-      if (cleanup) cleanup();
+      if (cleanupFn) cleanupFn();
       terminalRef.current?.dispose();
       terminalRef.current = null;
       fitAddonRef.current = null;

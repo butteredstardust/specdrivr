@@ -198,9 +198,10 @@ async function executeTask(task: Task): Promise<void> {
     if (exitCode !== 0) {
       throw new Error(`Process exited with code ${exitCode}`);
     }
-  } catch (err: any) {
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
     exitCode = exitCode || 1;
-    errorMessage = err.message;
+    errorMessage = errorMsg;
 
     await streamLog(`Task failed with exit code ${exitCode}`, task.id, 'error');
 
@@ -268,9 +269,10 @@ async function main() {
 
       await executeTask(task);
       consecutiveErrors = 0;
-    } catch (err: any) {
+    } catch (err) {
       consecutiveErrors++;
-      await streamLog(`Error (${consecutiveErrors}/5): ${err.message}`, undefined, 'error');
+      const msg = err instanceof Error ? err.message : String(err);
+      await streamLog(`Error (${consecutiveErrors}/5): ${msg}`, undefined, 'error');
 
       if (consecutiveErrors >= 5) {
         await streamLog('Too many consecutive errors — stopping agent.', undefined, 'error');
