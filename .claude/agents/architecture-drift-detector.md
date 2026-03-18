@@ -32,6 +32,7 @@ claude agent architecture-drift-detector "Verify Server/Client boundary integrit
 ## What It Enforces
 
 ### 1. Repository Pattern
+
 **Rule:** All database access through `src/repositories/`
 
 ```typescript
@@ -62,6 +63,7 @@ export function UserCard({ userId }: { userId: number }) {
 ```
 
 ### 2. Server/Client Boundary
+
 **Rule:** Don't import Server Components into Client Components
 
 ```typescript
@@ -90,6 +92,7 @@ export function Dashboard() {
 ```
 
 ### 3. Server Actions Pattern
+
 **Rule:** Use Server Actions for UI mutations (not Route Handlers)
 
 ```typescript
@@ -335,8 +338,10 @@ BASELINE FOR TRACKING:
 ## Integration
 
 ### Code Review Checklist
+
 ```markdown
 ## Architecture
+
 - [ ] No direct db imports in components
 - [ ] Server/Client boundary maintained
 - [ ] Server Actions have 'use server' + await auth()
@@ -347,6 +352,7 @@ BASELINE FOR TRACKING:
 ```
 
 ### CI/CD Integration
+
 ```yaml
 - name: Architecture Check
   run: |
@@ -354,6 +360,7 @@ BASELINE FOR TRACKING:
 ```
 
 ### Monthly Review
+
 ```bash
 # 1st of month
 claude agent architecture-drift-detector "Architecture compliance status"

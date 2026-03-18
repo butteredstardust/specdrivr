@@ -23,6 +23,7 @@ claude agent shadcn-ui-auditor "Check component consistency in src/components/"
 ## What It Checks
 
 ### 1. Component Selection
+
 ```typescript
 // ✓ CORRECT - Use shadcn/ui component
 import { Button } from '@/components/ui/button';
@@ -33,6 +34,7 @@ const Button = ({ children }) => <button className="custom">{children}</button>;
 ```
 
 ### 2. Design Tokens
+
 ```typescript
 // ✓ CORRECT - Use CSS variable tokens
 <Button className="bg-[--accent-violet] text-[--text-primary]">
@@ -42,6 +44,7 @@ const Button = ({ children }) => <button className="custom">{children}</button>;
 ```
 
 ### 3. Props Usage
+
 ```typescript
 // ✓ CORRECT - Use component props
 <Input placeholder="Enter name" />
@@ -52,6 +55,7 @@ const Button = ({ children }) => <button className="custom">{children}</button>;
 ```
 
 ### 4. Composition
+
 ```typescript
 // ✓ CORRECT - Compose with slot pattern
 <Card>
@@ -78,6 +82,7 @@ const Button = ({ children }) => <button className="custom">{children}</button>;
 
 ```markdown
 ## Component Quality
+
 - [ ] Using shadcn/ui components
 - [ ] Following variant patterns
 - [ ] Using design tokens (not hex colors)

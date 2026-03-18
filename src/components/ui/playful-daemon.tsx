@@ -4,15 +4,15 @@ import { useEffect, useState, useCallback } from 'react';
 import { DaemonMascot } from './daemon-mascot';
 import { cn } from '@/lib/utils';
 
-type MascotState = 
-  | 'idle' 
-  | 'jumping' 
-  | 'waving' 
-  | 'sparking' 
-  | 'glitch' 
-  | 'scan' 
-  | 'reboot' 
-  | 'spin' 
+type MascotState =
+  | 'idle'
+  | 'jumping'
+  | 'waving'
+  | 'sparking'
+  | 'glitch'
+  | 'scan'
+  | 'reboot'
+  | 'spin'
   | 'pulse'
   | 'tilt'
   | 'thruster'
@@ -27,7 +27,7 @@ export function PlayfulDaemon({ size = 32 }: { size?: number }) {
 
   const triggerRandomAnimation = useCallback(() => {
     const roll = Math.random();
-    
+
     if (roll < 0.12) {
       // Jump
       setState('jumping');
@@ -52,7 +52,7 @@ export function PlayfulDaemon({ size = 32 }: { size?: number }) {
       // Scan
       setState('scan');
       setTimeout(() => setState('idle'), 1000);
-    } else if (roll < 0.60) {
+    } else if (roll < 0.6) {
       // Reboot
       setState('reboot');
       setTimeout(() => setState('idle'), 1500);
@@ -109,34 +109,31 @@ export function PlayfulDaemon({ size = 32 }: { size?: number }) {
   }, [triggerRandomAnimation]);
 
   return (
-    <div className="relative flex items-center justify-center w-10 h-10">
+    <div className="relative flex h-10 w-10 items-center justify-center">
       <div
         className={cn(
-          "transition-all duration-300 ease-in-out",
-          state === 'idle' && "animate-daemon-float",
-          state === 'jumping' && "animate-daemon-jump",
-          state === 'waving' && "animate-daemon-wave",
-          state === 'glitch' && "animate-daemon-glitch",
-          state === 'scan' && "animate-daemon-scan",
-          state === 'reboot' && "animate-daemon-reboot",
-          state === 'spin' && "animate-daemon-spin",
-          state === 'pulse' && "animate-daemon-pulse",
-          state === 'tilt' && "animate-daemon-tilt",
-          state === 'thruster' && "animate-daemon-thruster",
-          state === 'bounce' && "animate-daemon-bounce",
-          state === 'think' && "animate-daemon-think",
-          state === 'sleep' && "animate-daemon-sleep"
+          'transition-all duration-300 ease-in-out',
+          state === 'idle' && 'animate-daemon-float',
+          state === 'jumping' && 'animate-daemon-jump',
+          state === 'waving' && 'animate-daemon-wave',
+          state === 'glitch' && 'animate-daemon-glitch',
+          state === 'scan' && 'animate-daemon-scan',
+          state === 'reboot' && 'animate-daemon-reboot',
+          state === 'spin' && 'animate-daemon-spin',
+          state === 'pulse' && 'animate-daemon-pulse',
+          state === 'tilt' && 'animate-daemon-tilt',
+          state === 'thruster' && 'animate-daemon-thruster',
+          state === 'bounce' && 'animate-daemon-bounce',
+          state === 'think' && 'animate-daemon-think',
+          state === 'sleep' && 'animate-daemon-sleep'
         )}
       >
-        <DaemonMascot 
-          size={size} 
-          expression={expression === 'success' ? 'success' : 'idle'} 
-        />
+        <DaemonMascot size={size} expression={expression === 'success' ? 'success' : 'idle'} />
       </div>
 
       {state === 'sparking' && (
-        <div 
-          className="absolute pointer-events-none"
+        <div
+          className="pointer-events-none absolute"
           style={{ transform: `translate(${sparkPos.x}px, ${sparkPos.y}px)` }}
         >
           <svg width="12" height="12" viewBox="0 0 12 12" className="animate-daemon-spark">

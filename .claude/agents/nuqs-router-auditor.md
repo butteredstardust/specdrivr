@@ -23,6 +23,7 @@ claude agent nuqs-router-auditor "Validate URL state management"
 ## What It Checks
 
 ### 1. Type-Safe Query Parameters
+
 ```typescript
 // ✓ CORRECT - Type-safe with Nuqs
 'use client';
@@ -60,6 +61,7 @@ export function ProjectFilters() {
 ```
 
 ### 2. Consistent Parameter Names
+
 ```typescript
 // ✓ CORRECT - Consistent, semantic names
 const SEARCH_PARAMS = {
@@ -78,21 +80,19 @@ export function useFilters() {
 }
 
 // ❌ WRONG - Inconsistent parameter names
-const [search, setSearch] = useQueryState('q');        // different name
-const [page, setPage] = useQueryState('p');           // abbreviated
+const [search, setSearch] = useQueryState('q'); // different name
+const [page, setPage] = useQueryState('p'); // abbreviated
 const [sortBy, setSortBy] = useQueryState('sort_by'); // mixed naming
 ```
 
 ### 3. Default Values and Validation
+
 ```typescript
 // ✓ CORRECT - Defaults and validation
 const SORT_OPTIONS = ['newest', 'oldest', 'popular'] as const;
 
 export function useSortParam() {
-  const [sort, setSort] = useQueryState(
-    'sort',
-    parseAsString.withDefault('newest')
-  );
+  const [sort, setSort] = useQueryState('sort', parseAsString.withDefault('newest'));
 
   const isValidSort = SORT_OPTIONS.includes(sort as any);
 
@@ -108,6 +108,7 @@ const [sort, setSort] = useQueryState('sort');
 ```
 
 ### 4. Array Parameters (Multi-Select)
+
 ```typescript
 // ✓ CORRECT - Array parsing with type safety
 'use client';
@@ -149,6 +150,7 @@ const tags = tagsString.split(',');
 ```
 
 ### 5. Shallow Routing
+
 ```typescript
 // ✓ CORRECT - Shallow routing to avoid re-renders
 'use client';
@@ -176,6 +178,7 @@ const handlePageChange = (page: number) => {
 ```
 
 ### 6. Server-Side Access
+
 ```typescript
 // ✓ CORRECT - Read search params on server
 'use server';
@@ -219,6 +222,7 @@ export function ProjectList() {
 ```
 
 ### 7. Sync Multiple Params
+
 ```typescript
 // ✓ CORRECT - Batch URL updates
 'use client';
@@ -262,6 +266,7 @@ const handleSearch = (value: string) => {
 ## Integration
 
 Create `src/lib/searchParams.ts`:
+
 ```typescript
 import { parseAsString, parseAsInteger, parseAsArrayOf } from 'nuqs/server';
 
@@ -283,6 +288,7 @@ export const searchParamsParsers = {
 ```
 
 Use in pages:
+
 ```typescript
 import { searchParamsParsers } from '@/lib/searchParams';
 

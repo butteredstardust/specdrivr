@@ -141,12 +141,12 @@ export function SessionPanel({
         <DaemonMascot size={48} expression="idle" />
         <p className="text-text-muted font-mono text-xs tracking-widest uppercase">SYSTEM READY</p>
         <p className="text-text-secondary text-sm">No active session.</p>
-        <Link
-          href="/specs"
-          className="text-phosphor-amber text-sm underline-offset-2 hover:underline"
-        >
-          Start a new spec →
-        </Link>
+        <Button asChild variant="phosphor" size="sm" className="mt-1">
+          <Link href="/specs/new">
+            Start a new spec
+            <ChevronRight className="ml-1 h-3 w-3" />
+          </Link>
+        </Button>
       </div>
     );
   }

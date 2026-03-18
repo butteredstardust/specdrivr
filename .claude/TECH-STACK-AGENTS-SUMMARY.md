@@ -17,6 +17,7 @@ These 12 agents are specialized auditors tailored to your exact technology stack
 ## 🚀 Framework & Architecture (4 Agents)
 
 ### 1. **nextjs-16-optimizer**
+
 - **Purpose:** Ensure Next.js 16 App Router and Server Components best practices
 - **Usage:** `claude agent nextjs-16-optimizer "Audit App Router and Server Components"`
 - **What it finds:**
@@ -34,6 +35,7 @@ These 12 agents are specialized auditors tailored to your exact technology stack
   - ✓ Proper Route Handler usage
 
 ### 2. **react-19-best-practices**
+
 - **Purpose:** Verify React 19 patterns, concurrent features, and new APIs
 - **Usage:** `claude agent react-19-best-practices "Check React 19 patterns"`
 - **What it finds:**
@@ -51,6 +53,7 @@ These 12 agents are specialized auditors tailored to your exact technology stack
   - ✓ Clear Server/Client boundaries
 
 ### 3. **betterauth-auditor**
+
 - **Purpose:** Audit BetterAuth session management and security
 - **Usage:** `claude agent betterauth-auditor "Check session security"`
 - **What it finds:**
@@ -72,6 +75,7 @@ These 12 agents are specialized auditors tailored to your exact technology stack
 ## 🗄️ Database & Data (3 Agents)
 
 ### 4. **drizzle-orm-auditor**
+
 - **Purpose:** Optimize Drizzle ORM queries and schema design
 - **Usage:** `claude agent drizzle-orm-auditor "Audit Drizzle queries"`
 - **What it finds:**
@@ -89,6 +93,7 @@ These 12 agents are specialized auditors tailored to your exact technology stack
   - ✓ Index strategy
 
 ### 5. **postgresql-performance-auditor**
+
 - **Purpose:** Audit PostgreSQL schema design and query performance
 - **Usage:** `claude agent postgresql-performance-auditor "Audit database performance"`
 - **What it finds:**
@@ -106,6 +111,7 @@ These 12 agents are specialized auditors tailored to your exact technology stack
   - ✓ Vacuum and maintenance
 
 ### 6. **redis-cache-optimizer**
+
 - **Purpose:** Optimize Redis caching and session management
 - **Usage:** `claude agent redis-cache-optimizer "Audit caching strategy"`
 - **What it finds:**
@@ -127,6 +133,7 @@ These 12 agents are specialized auditors tailored to your exact technology stack
 ## ✅ Validation & Type Safety (2 Agents)
 
 ### 7. **zod-schema-validator**
+
 - **Purpose:** Validate Zod schemas for correctness and best practices
 - **Usage:** `claude agent zod-schema-validator "Audit Zod schemas"`
 - **What it finds:**
@@ -146,6 +153,7 @@ These 12 agents are specialized auditors tailored to your exact technology stack
   - ✓ Error handling in actions
 
 ### 8. **typescript-strict-mode-advisor**
+
 - **Purpose:** Enforce TypeScript strict mode and advanced patterns
 - **Usage:** `claude agent typescript-strict-mode-advisor "Check strict mode compliance"`
 - **What it finds:**
@@ -169,6 +177,7 @@ These 12 agents are specialized auditors tailored to your exact technology stack
 ## 🎨 UI & Frontend (3 Agents)
 
 ### 9. **shadcn-ui-auditor**
+
 - **Purpose:** Ensure shadcn/ui components follow design system
 - **Usage:** `claude agent shadcn-ui-auditor "Audit component usage"`
 - **What it finds:**
@@ -187,6 +196,7 @@ These 12 agents are specialized auditors tailored to your exact technology stack
   - ✓ Accessibility compliance
 
 ### 10. **tailwind-css-variables-auditor**
+
 - **Purpose:** Audit Tailwind and CSS variables for design token consistency
 - **Usage:** `claude agent tailwind-css-variables-auditor "Check design tokens"`
 - **What it finds:**
@@ -206,6 +216,7 @@ These 12 agents are specialized auditors tailored to your exact technology stack
   - ✓ No hardcoded colors
 
 ### 11. **nuqs-router-auditor**
+
 - **Purpose:** Audit Nuqs search parameters for type safety
 - **Usage:** `claude agent nuqs-router-auditor "Check URL state management"`
 - **What it finds:**
@@ -230,6 +241,7 @@ These 12 agents are specialized auditors tailored to your exact technology stack
 ## 🧪 Testing & Quality (1 Agent)
 
 ### 12. **vitest-playwright-auditor**
+
 - **Purpose:** Audit Vitest and Playwright tests for coverage and quality
 - **Usage:** `claude agent vitest-playwright-auditor "Audit test coverage"`
 - **What it finds:**
@@ -257,23 +269,24 @@ These 12 agents are specialized auditors tailored to your exact technology stack
 
 ### Time Saved Per Development Cycle
 
-| Agent | Frequency | Time Saved |
-|-------|-----------|-----------|
-| nextjs-16-optimizer | Code review | 10 min |
-| react-19-best-practices | Code review | 10 min |
-| betterauth-auditor | Per auth change | 15 min |
-| drizzle-orm-auditor | Per DB change | 10 min |
-| postgresql-performance-auditor | Quarterly | 2-4 hours |
-| redis-cache-optimizer | Quarterly | 1-2 hours |
-| zod-schema-validator | Per form | 10 min |
-| typescript-strict-mode-advisor | Quarterly | 1-2 hours |
-| shadcn-ui-auditor | Per component | 10 min |
-| tailwind-css-variables-auditor | Design updates | 1 hour |
-| nuqs-router-auditor | Per filter | 10 min |
-| vitest-playwright-auditor | Quarterly | 2-3 hours |
-| **TOTAL** | | **~12 hours/month** |
+| Agent                          | Frequency       | Time Saved          |
+| ------------------------------ | --------------- | ------------------- |
+| nextjs-16-optimizer            | Code review     | 10 min              |
+| react-19-best-practices        | Code review     | 10 min              |
+| betterauth-auditor             | Per auth change | 15 min              |
+| drizzle-orm-auditor            | Per DB change   | 10 min              |
+| postgresql-performance-auditor | Quarterly       | 2-4 hours           |
+| redis-cache-optimizer          | Quarterly       | 1-2 hours           |
+| zod-schema-validator           | Per form        | 10 min              |
+| typescript-strict-mode-advisor | Quarterly       | 1-2 hours           |
+| shadcn-ui-auditor              | Per component   | 10 min              |
+| tailwind-css-variables-auditor | Design updates  | 1 hour              |
+| nuqs-router-auditor            | Per filter      | 10 min              |
+| vitest-playwright-auditor      | Quarterly       | 2-3 hours           |
+| **TOTAL**                      |                 | **~12 hours/month** |
 
 ### Risk Reduction
+
 - ✓ Prevents architectural drift (Next.js, React patterns)
 - ✓ Prevents performance issues (Drizzle N+1, DB indexes)
 - ✓ Prevents security issues (BetterAuth, session management)
@@ -286,6 +299,7 @@ These 12 agents are specialized auditors tailored to your exact technology stack
 ## 🚀 Quick Start Guide
 
 ### Phase 1: Security & Validation (This Week)
+
 ```bash
 # Check auth and validation
 claude agent betterauth-auditor "Check session security"
@@ -293,6 +307,7 @@ claude agent zod-schema-validator "Audit Zod schemas"
 ```
 
 ### Phase 2: Database & Performance (Next Week)
+
 ```bash
 # Audit database layer
 claude agent drizzle-orm-auditor "Audit Drizzle queries"
@@ -301,6 +316,7 @@ claude agent redis-cache-optimizer "Cache strategy review"
 ```
 
 ### Phase 3: Frontend & Type Safety (Following Week)
+
 ```bash
 # Check frontend patterns
 claude agent nextjs-16-optimizer "Next.js optimization"
@@ -311,6 +327,7 @@ claude agent typescript-strict-mode-advisor "Type safety"
 ```
 
 ### Phase 4: Routing & Testing (Month 2)
+
 ```bash
 # URL state and testing
 claude agent nuqs-router-auditor "URL state management"
@@ -322,8 +339,10 @@ claude agent vitest-playwright-auditor "Test coverage"
 ## 📋 Integration Points
 
 ### Code Review Workflow
+
 ```markdown
 ## Tech Stack Compliance
+
 - [ ] `nextjs-16-optimizer` passed
 - [ ] `react-19-best-practices` passed
 - [ ] `zod-schema-validator` passed (if forms changed)
@@ -332,6 +351,7 @@ claude agent vitest-playwright-auditor "Test coverage"
 ```
 
 ### Pre-Deployment Checklist
+
 ```bash
 # Run full tech stack audit
 claude agent nextjs-16-optimizer "Final Next.js check"
@@ -375,26 +395,27 @@ claude agent vitest-playwright-auditor "Final test check"
 
 Each agent has complete documentation:
 
-| Agent | File | Type |
-|-------|------|------|
-| nextjs-16-optimizer | `.claude/agents/nextjs-16-optimizer.md` | Framework |
-| react-19-best-practices | `.claude/agents/react-19-best-practices.md` | UI/Framework |
-| betterauth-auditor | `.claude/agents/betterauth-auditor.md` | Auth |
-| drizzle-orm-auditor | `.claude/agents/drizzle-orm-auditor.md` | Database |
-| postgresql-performance-auditor | `.claude/agents/postgresql-performance-auditor.md` | Database |
-| redis-cache-optimizer | `.claude/agents/redis-cache-optimizer.md` | Caching |
-| zod-schema-validator | `.claude/agents/zod-schema-validator.md` | Validation |
-| typescript-strict-mode-advisor | `.claude/agents/typescript-strict-mode-advisor.md` | Type Safety |
-| shadcn-ui-auditor | `.claude/agents/shadcn-ui-auditor.md` | Components |
-| tailwind-css-variables-auditor | `.claude/agents/tailwind-css-variables-auditor.md` | Styling |
-| nuqs-router-auditor | `.claude/agents/nuqs-router-auditor.md` | Routing |
-| vitest-playwright-auditor | `.claude/agents/vitest-playwright-auditor.md` | Testing |
+| Agent                          | File                                               | Type         |
+| ------------------------------ | -------------------------------------------------- | ------------ |
+| nextjs-16-optimizer            | `.claude/agents/nextjs-16-optimizer.md`            | Framework    |
+| react-19-best-practices        | `.claude/agents/react-19-best-practices.md`        | UI/Framework |
+| betterauth-auditor             | `.claude/agents/betterauth-auditor.md`             | Auth         |
+| drizzle-orm-auditor            | `.claude/agents/drizzle-orm-auditor.md`            | Database     |
+| postgresql-performance-auditor | `.claude/agents/postgresql-performance-auditor.md` | Database     |
+| redis-cache-optimizer          | `.claude/agents/redis-cache-optimizer.md`          | Caching      |
+| zod-schema-validator           | `.claude/agents/zod-schema-validator.md`           | Validation   |
+| typescript-strict-mode-advisor | `.claude/agents/typescript-strict-mode-advisor.md` | Type Safety  |
+| shadcn-ui-auditor              | `.claude/agents/shadcn-ui-auditor.md`              | Components   |
+| tailwind-css-variables-auditor | `.claude/agents/tailwind-css-variables-auditor.md` | Styling      |
+| nuqs-router-auditor            | `.claude/agents/nuqs-router-auditor.md`            | Routing      |
+| vitest-playwright-auditor      | `.claude/agents/vitest-playwright-auditor.md`      | Testing      |
 
 ---
 
 ## 🎓 Examples
 
 ### Example: Pre-Code Review
+
 ```bash
 # Developer checks before submitting PR
 claude agent typescript-strict-mode-advisor "Check my type safety"
@@ -407,6 +428,7 @@ claude agent zod-schema-validator "Check my validation"
 ```
 
 ### Example: Form Addition
+
 ```bash
 # Adding new form
 claude agent zod-schema-validator "Validate new form schema"
@@ -417,6 +439,7 @@ claude agent react-19-best-practices "Check form patterns"
 ```
 
 ### Example: Database Optimization
+
 ```bash
 # Quarterly DB review
 claude agent drizzle-orm-auditor "Find N+1 patterns"
@@ -442,16 +465,17 @@ claude agent redis-cache-optimizer "Optimize caching"
 
 These 12 tech stack-specific agents **complement** the 6 remaining generic agents:
 
-| Generic Agent | Complemented By |
-|---------------|-----------------|
-| rbac-auditor | betterauth-auditor (session-level) |
-| secret-scanner | (unique — no overlap) |
-| migration-reviewer | drizzle-orm-auditor + postgresql-performance-auditor |
-| responsive-design-checker | (unique — no overlap) |
-| dependency-auditor | (unique — no overlap) |
-| architecture-drift-detector | (unique — broad compliance) |
+| Generic Agent               | Complemented By                                      |
+| --------------------------- | ---------------------------------------------------- |
+| rbac-auditor                | betterauth-auditor (session-level)                   |
+| secret-scanner              | (unique — no overlap)                                |
+| migration-reviewer          | drizzle-orm-auditor + postgresql-performance-auditor |
+| responsive-design-checker   | (unique — no overlap)                                |
+| dependency-auditor          | (unique — no overlap)                                |
+| architecture-drift-detector | (unique — broad compliance)                          |
 
 **Removed 4 generic agents** that were fully superseded:
+
 - ~~query-optimizer~~ → `drizzle-orm-auditor` + `postgresql-performance-auditor`
 - ~~input-validation-auditor~~ → `zod-schema-validator`
 - ~~coverage-gap-analyzer~~ → `vitest-playwright-auditor`

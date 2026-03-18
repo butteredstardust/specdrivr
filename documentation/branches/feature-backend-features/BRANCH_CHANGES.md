@@ -1,14 +1,14 @@
-File Name | Summary of Changes | Summary Reason for Change | Expected Impact | Best Practice Evaluation Score | Reason for Deletion
----|---|---|---|---|---
-`src/lib/gemini.ts` | Implemented Gemini API client for plan and task generation | Core AI orchestration | Enable spec-to-plan workflow | 10/10 | Not deleted
-`src/lib/agent-models.ts` | Model and CLI mapping for Multi-Backend support | Backend abstraction | Support Gemini and Claude Code | 10/10 | Not deleted
-`scripts/agent.ts` | Developed autonomous agent harness with real-time streaming | Execution engine | Live task execution | 10/10 | Not deleted
-`src/app/api/v1/sessions/[id]/log/route.ts` | Log ingestion endpoint | Streaming infra | Real-time log capture | 10/10 | Not deleted
-`src/app/api/v1/sessions/[id]/stream/route.ts` | SSE streaming endpoint | Streaming infra | Live browser feedback | 10/10 | Not deleted
-`src/components/ui/live-terminal.tsx` | Xterm.js based real-time terminal component | UI Component | Engaging execution view | 10/10 | Not deleted
-`src/db/schema.ts` | Added intent, phase_label, backend, and session_id columns | Schema evolution | Support AI and streaming | 10/10 | Not deleted
-`src/app/(app)/page.tsx` | Refactored Mission Control dashboard | UI/UX Improvement | Enhanced command center | 10/10 | Not deleted
-`src/components/settings/agent-config-form.tsx` | Added AI Provider settings (Gemini/Claude) | Configuration | Project-level credentials | 10/10 | Not deleted
-`src/components/specs/plan-tab.tsx` | Restored Markdown editability for plans | UI/UX Improvement | Human-in-the-loop control | 10/10 | Not deleted
-`tests/agent-models.test.ts` | Unit tests for model resolution | Validation | Robust backend switching | 10/10 | Not deleted
-`tests/gemini-schemas.test.ts` | Unit tests for structured AI outputs | Validation | Type-safe AI responses | 10/10 | Not deleted
+| File Name                                       | Summary of Changes                                          | Summary Reason for Change | Expected Impact                | Best Practice Evaluation Score | Reason for Deletion |
+| ----------------------------------------------- | ----------------------------------------------------------- | ------------------------- | ------------------------------ | ------------------------------ | ------------------- |
+| `src/lib/gemini.ts`                             | Implemented Gemini API client for plan and task generation  | Core AI orchestration     | Enable spec-to-plan workflow   | 10/10                          | Not deleted         |
+| `src/lib/agent-models.ts`                       | Model and CLI mapping for Multi-Backend support             | Backend abstraction       | Support Gemini and Claude Code | 10/10                          | Not deleted         |
+| `scripts/agent.ts`                              | Developed autonomous agent harness with real-time streaming | Execution engine          | Live task execution            | 10/10                          | Not deleted         |
+| `src/app/api/v1/sessions/[id]/log/route.ts`     | Log ingestion endpoint                                      | Streaming infra           | Real-time log capture          | 10/10                          | Not deleted         |
+| `src/app/api/v1/sessions/[id]/stream/route.ts`  | SSE streaming endpoint                                      | Streaming infra           | Live browser feedback          | 10/10                          | Not deleted         |
+| `src/components/ui/live-terminal.tsx`           | Xterm.js based real-time terminal component                 | UI Component              | Engaging execution view        | 10/10                          | Not deleted         |
+| `src/db/schema.ts`                              | Added intent, phase_label, backend, and session_id columns  | Schema evolution          | Support AI and streaming       | 10/10                          | Not deleted         |
+| `src/app/(app)/page.tsx`                        | Refactored Mission Control dashboard                        | UI/UX Improvement         | Enhanced command center        | 10/10                          | Not deleted         |
+| `src/components/settings/agent-config-form.tsx` | Added AI Provider settings (Gemini/Claude)                  | Configuration             | Project-level credentials      | 10/10                          | Not deleted         |
+| `src/components/specs/plan-tab.tsx`             | Restored Markdown editability for plans                     | UI/UX Improvement         | Human-in-the-loop control      | 10/10                          | Not deleted         |
+| `tests/agent-models.test.ts`                    | Unit tests for model resolution                             | Validation                | Robust backend switching       | 10/10                          | Not deleted         |
+| `tests/gemini-schemas.test.ts`                  | Unit tests for structured AI outputs                        | Validation                | Type-safe AI responses         | 10/10                          | Not deleted         |

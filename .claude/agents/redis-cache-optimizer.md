@@ -23,6 +23,7 @@ claude agent redis-cache-optimizer "Check cache invalidation patterns"
 ## What It Checks
 
 ### 1. Session Storage with BetterAuth
+
 ```typescript
 // ✓ CORRECT - Redis handles sessions automatically
 export const auth = betterAuth({
@@ -42,6 +43,7 @@ export async function createSession(userId: string) {
 ```
 
 ### 2. Cache Key Naming
+
 ```typescript
 // ✓ CORRECT - Consistent, namespaced keys
 const CACHE_KEYS = {
@@ -60,6 +62,7 @@ const cached2 = await redis.get('data');
 ```
 
 ### 3. Cache Invalidation Strategy
+
 ```typescript
 // ✓ CORRECT - Explicit invalidation on updates
 'use server';
@@ -80,7 +83,7 @@ export async function updateProject(id: string, data: ProjectInput) {
 }
 
 // ❌ WRONG - Stale cache not invalidated
-'use server';
+('use server');
 export async function updateProject(id: string, data: ProjectInput) {
   await db.update(projects).set(data).where(eq(projects.id, id));
   // Cache becomes stale!
@@ -88,6 +91,7 @@ export async function updateProject(id: string, data: ProjectInput) {
 ```
 
 ### 4. Cache Expiration Patterns
+
 ```typescript
 // ✓ CORRECT - Explicit TTL based on data freshness
 async function getCachedProject(id: string) {
@@ -99,11 +103,7 @@ async function getCachedProject(id: string) {
   });
 
   // Cache for 1 hour (static data)
-  await redis.setex(
-    CACHE_KEYS.project(id),
-    3600,
-    JSON.stringify(project)
-  );
+  await redis.setex(CACHE_KEYS.project(id), 3600, JSON.stringify(project));
 
   return project;
 }
@@ -118,11 +118,7 @@ async function getCachedLeaderboard() {
   });
 
   // Cache for 5 minutes (volatile data)
-  await redis.setex(
-    CACHE_KEYS.leaderboard,
-    300,
-    JSON.stringify(leaders)
-  );
+  await redis.setex(CACHE_KEYS.leaderboard, 300, JSON.stringify(leaders));
 
   return leaders;
 }
@@ -133,6 +129,7 @@ await redis.set(CACHE_KEYS.project(id), JSON.stringify(project));
 ```
 
 ### 5. Connection Management
+
 ```typescript
 // ✓ CORRECT - Singleton Redis connection
 import { createClient } from 'redis';
@@ -156,11 +153,12 @@ export function getRedis() {
 async function getCached() {
   const client = new Redis(process.env.REDIS_URL);
   const data = await client.get('key');
-  client.disconnect();  // Connection leak
+  client.disconnect(); // Connection leak
 }
 ```
 
 ### 6. Batch Operations
+
 ```typescript
 // ✓ CORRECT - Use pipeline for multiple operations
 async function invalidateUserCaches(userId: string) {
@@ -178,6 +176,7 @@ await redis.del(CACHE_KEYS.userPreferences(userId));
 ```
 
 ### 7. Cache Hit Rate Monitoring
+
 ```typescript
 // ✓ CORRECT - Log cache operations
 async function getCachedData(key: string) {
@@ -215,6 +214,7 @@ const cached = await redis.get(key);
 ## Integration
 
 Add to Server Actions:
+
 ```typescript
 'use server';
 export async function updateData(id: string, data: Input) {
@@ -233,8 +233,10 @@ export async function updateData(id: string, data: Input) {
 ```
 
 Add to deployment:
+
 ```markdown
 ## Redis Configuration
+
 - [ ] Connection pooling configured
 - [ ] Session storage using Redis
 - [ ] Cache invalidation on updates

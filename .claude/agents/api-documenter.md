@@ -9,6 +9,7 @@
 ## How to Use
 
 ### From CLI
+
 ```bash
 claude agent api-documenter "Generate OpenAPI spec from src/app/api"
 claude agent api-documenter "Update docs for new auth endpoints"
@@ -16,7 +17,9 @@ claude agent api-documenter "Generate client SDK documentation"
 ```
 
 ### Periodic Updates
+
 Run after adding new API routes:
+
 ```bash
 # After git commit:
 git add src/app/api/v1/your-endpoint/route.ts
@@ -29,6 +32,7 @@ git commit -m "docs: update OpenAPI spec"
 ## What It Does
 
 ### 1. Traverse Route Handlers
+
 Scans all files in `src/app/api/` and identifies:
 
 ```
@@ -40,6 +44,7 @@ src/app/api/v1/tasks/[id]/attempts/route.ts → POST /api/v1/tasks/:id/attempts
 ### 2. Extract OpenAPI Metadata
 
 From each route handler, extracts:
+
 ```typescript
 // Example: src/app/api/v1/projects/route.ts
 
@@ -91,6 +96,7 @@ export async function POST(request: NextRequest) { ... }
 ### 3. Generate OpenAPI Schema
 
 Creates `openapi.json` with:
+
 - Full endpoint list
 - Request/response schemas
 - Authentication requirements
@@ -100,6 +106,7 @@ Creates `openapi.json` with:
 ### 4. Validate Consistency
 
 Checks that:
+
 - ✓ Schema definitions match actual Zod validators in code
 - ✓ All endpoints have auth documentation
 - ✓ Response codes documented match implementation
@@ -108,6 +115,7 @@ Checks that:
 ## Examples
 
 ### Basic Route (Auto-Documented)
+
 ```typescript
 // src/app/api/v1/projects/route.ts
 export async function GET(request: NextRequest) {
@@ -120,6 +128,7 @@ export async function GET(request: NextRequest) {
 ```
 
 ### Full Documentation
+
 ```typescript
 /**
  * @openapi
@@ -154,6 +163,7 @@ export async function GET(
 ## Output Structure
 
 Generated `openapi.json`:
+
 ```json
 {
   "openapi": "3.1.0",
@@ -193,24 +203,28 @@ Generated `openapi.json`:
 ## Publishing Options
 
 ### Option 1: Swagger UI
+
 ```bash
 # Add to package.json
 "docs": "swagger-ui-express openapi.json"
 ```
 
 ### Option 2: Redoc (Static)
+
 ```html
 <!-- In docs/index.html -->
 <redoc spec-url="./openapi.json"></redoc>
 ```
 
 ### Option 3: GitHub Pages
+
 ```bash
 # Commit openapi.json to repo
 # View on: https://editor.swagger.io/?url=https://raw.githubusercontent.com/your-org/specdrivr/main/openapi.json
 ```
 
 ### Option 4: API Portal (Stoplight, Postman, etc.)
+
 1. Generate `openapi.json`
 2. Upload to Stoplight / Postman
 3. Share with team
@@ -236,6 +250,7 @@ git commit -m "api: add my-endpoint with OpenAPI docs"
 ```
 
 ### CI/CD Integration
+
 ```yaml
 # .github/workflows/docs.yml
 name: Generate API Docs
@@ -286,6 +301,7 @@ const ProjectQuerySchema = z.object({
 ## API Endpoint Checklist
 
 Before committing a new endpoint, ensure:
+
 - [ ] Handler exports `GET`, `POST`, `PUT`, `DELETE`, etc.
 - [ ] Calls `await auth()` (documented automatically)
 - [ ] Has JSDoc or `@openapi` comment with description
@@ -303,12 +319,15 @@ Before committing a new endpoint, ensure:
 ## Troubleshooting
 
 ### Schema Not Inferred
+
 Add explicit `@openapi` comment with schema reference
 
 ### Missing Endpoint
+
 Verify file matches pattern: `src/app/api/**/route.ts`
 
 ### Auth Not Detected
+
 Ensure route calls `await auth()` as first line
 
 ---

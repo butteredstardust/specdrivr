@@ -53,6 +53,7 @@ const projects = await db.select().from(projects);
 - **Never trust client input**
 
 ### UI Components
+
 - **shadcn/ui** - Prefer standard components. Use `@/components/ui/*`.
 - **Custom Components** - Only build custom components if no `shadcn/ui` equivalent exists.
 
@@ -118,10 +119,10 @@ import { env } from '@/lib/env-script'; // No server-only, safe for scripts
 - Standalone scripts use `env-script.ts` which bypasses the server-only import
 - This maintains security boundaries while enabling script usage
 
-
-
 ## 3. Architecture & Component Rules
+
 ## 4. Technical Stack
+
 - **Framework**: Next.js 16.1.6 (App Router)
 - **Language**: TypeScript 5.9.3
 - **Database**: PostgreSQL (v16+) with Drizzle ORM 0.45.1
@@ -361,7 +362,9 @@ test('should create new project', async ({ page }) => {
 ## Database Practices
 
 ### Database Schema Updates
+
 Never use `pnpm db:push` for schema changes. Follow the migration flow:
+
 1. `pnpm db:generate` - Create a new migration file.
 2. `pnpm db:migrate` - Apply the migration to the database.
 

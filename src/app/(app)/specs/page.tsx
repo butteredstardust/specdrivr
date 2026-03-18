@@ -77,18 +77,22 @@ export default function SpecsPage(): React.ReactElement {
     ? parseInt(searchParams.get('projectId')!, 10)
     : null;
 
+  // Sync URL and activeProjectId
   useEffect(() => {
     if (urlProjectId !== null && activeProjectId !== urlProjectId) {
       setActiveProjectId(urlProjectId);
+    } else if (activeProjectId !== null && urlProjectId === null) {
+      // If we have an active project but it's not in the URL, put it there
+      router.replace(`/specs?projectId=${activeProjectId}`, { scroll: false });
+    } else if (
+      activeProjectId !== null &&
+      urlProjectId !== null &&
+      activeProjectId !== urlProjectId
+    ) {
+      // If they are both set but different, sidebar (activeProjectId) wins for the URL
+      router.replace(`/specs?projectId=${activeProjectId}`, { scroll: false });
     }
-  }, [urlProjectId, activeProjectId, setActiveProjectId]);
-
-  // When activeProjectId changes from sidebar, update the URL
-  useEffect(() => {
-    if (activeProjectId !== null && activeProjectId !== urlProjectId) {
-      router.push(`/specs?projectId=${activeProjectId}`);
-    }
-  }, [activeProjectId, urlProjectId, router]);
+  }, [urlProjectId, activeProjectId, setActiveProjectId, router]);
 
   const effectiveProjectId = activeProjectId ?? urlProjectId;
 
@@ -121,14 +125,15 @@ export default function SpecsPage(): React.ReactElement {
 
   const newSpecButton = (
     <Button
+      variant="phosphor"
       size="sm"
       disabled={!canCreate}
       onClick={canCreate ? () => router.push('/specs/new') : undefined}
       aria-disabled={!canCreate}
-      className="gap-1.5"
+      className="gap-2"
     >
       <Plus className="h-3.5 w-3.5" />
-      New Spec
+      New Specification
     </Button>
   );
 

@@ -5,10 +5,13 @@
 > **Cross-reference:** For AI-specific adapters, see `CLAUDE.md` and `GEMINI.md`. For human guidance, see `documentation/DEVELOPMENT.md`.
 
 ## 1. Purpose
+
 Define absolute behavioral anchors, technical constraints, and architectural mandates. Compliance is mandatory; deviations cause system integrity failure.
 
 ## 2. Tech Stack Overview
+
 Specdrivr is built on a modern, high-performance stack optimized for AI-native development:
+
 - **Core Framework**: Next.js 16.1.6 (App Router) + React 19.2.4.
 - **Language**: TypeScript 5.9.3 with strictly enforced safety rules.
 - **Database**: PostgreSQL @16+ with Drizzle ORM 0.45.1.
@@ -18,7 +21,9 @@ Specdrivr is built on a modern, high-performance stack optimized for AI-native d
 - **Safety**: Zod 3.22 for runtime validation; Pino 10.3 for structured logging.
 
 ## 3. Key Project Files & Directories
+
 Orientation for agents navigating the codebase:
+
 - **`documentation/`**: Canonical docs (DESIGN_SYSTEM.md, USER_INTERFACE.md, DEVELOPMENT.md).
 - **`src/repositories/`**: Single source of truth for all database access.
 - **`src/actions/`**: Server Actions for UI-driven mutations (requires `auth()` checks).
@@ -29,10 +34,12 @@ Orientation for agents navigating the codebase:
 - **`.husky/`**: Pre-commit/Pre-push quality gates.
 
 ## 4. Design System Summary
-*See `DESIGN_SYSTEM.md` for full specifications.*
+
+_See `DESIGN_SYSTEM.md` for full specifications._
+
 - **Visual Aesthetic**: "Linear" style—matte surfaces, subtle borders, high contrast, obsidian-tinted interactive states.
 - **Design Tokens**: Defined as CSS variables in `globals.css`. Never use hex codes.
-- **Component Selection**: 
+- **Component Selection**:
   1. **shadcn/ui**: Standard interface controls (Button, Input). Prefer standard components.
   2. **Custom**: Only use custom components when absolutely necessary; must inherit from `DESIGN_SYSTEM.md`.
 - **Import Standard**:
@@ -40,48 +47,60 @@ Orientation for agents navigating the codebase:
   - Icons: `import { Check } from 'lucide-react'` (or preferred icon set).
 
 ## 5. Git Hooks & Integrity Protection
+
 The project uses Husky to enforce quality at the local boundary.
+
 - **`.husky/pre-commit`**: Automatically runs `pnpm lint` and `pnpm typecheck`.
 - **`.husky/pre-push`**: Automatically runs `pnpm test` and verifies hook checksums.
 - **Hook Integrity**: SHA256 checksums in `.husky/hooks-checksum.txt` prevent tampering.
 
 ### Bypass Protocol (Emergency Only)
+
 Bypassing hooks should be rarer than 1 in 100 operations.
+
 1. **Root Cause Analysis (RCA)**: Perform a deep audit to ensure the failure isn't masking a critical bug or architectural regression.
 2. **Justification**: If a bypass is necessary (e.g., environment-specific test flake during doc update), document the rationale in `BRANCH_CHANGES.md`.
 3. **Execution**: Use `git push --no-verify` ONLY if the RCA confirms safety OR the user provides a direct order.
 
 ## 6. Core Engineering Rules
+
 - **Package Manager**: Use `pnpm` exclusively. Never use `npm` or `yarn`.
 - **Workflow**: One logical change per PR on feature/bugfix branches.
 - **TypeScript**: Strict mode. No `any`. Explicit return types. Infer from Zod/Drizzle.
 
 ## 7. Architecture & Component Rules
+
 - **RSC Patterns**: Server Components by default. `"use client"` only for interactivity/state.
 - **Boundary Preservation**: Never import Server Components into Client Components.
 - **Repositories**: Never import `db` in components. Use repository methods wrapped in `executeQuery`.
 
 ## 8. Database Access Rules
+
 - **Migrations**: Generate via `pnpm db:generate`; apply via `pnpm db:migrate`. NEVER `db:push`.
 - **Transactions**: Multi-step writes must wrap in `db.transaction(async (tx) => { ... })`.
 
 ## 9. API & Server Action Patterns
+
 - **Auth First**: Call `await auth()` as the first line in all protected actions.
 - **Validation**: Zod is the single source of truth. Always use `.safeParse()` at boundaries.
 
 ## 10. Security Requirements
+
 - **RBAC**: Use `src/lib/rbac.ts` for project-level permission checks.
 - **XSS**: Sanitize all user HTML via `DOMPurify.sanitize()`.
 - **Secrets**: Import from `@/lib/env`. Never access process[dot]env directly.
 
 ## 11. Logging & Observability
+
 - **Pino Standard**: Use `logger` (server) or `clientLogger` (client). Include Correlation IDs.
 
 ## 12. Testing Requirements
+
 - **Coverage**: Target >=80% on business logic/repositories.
 - **Integrity**: Never use `.only`/`.skip` in committed tests.
 
 ## 13. Common Agent Mistakes
+
 - Missing `await auth()` first.
 - Direct `db` imports in components.
 - Hex codes in CSS/Tailwind (use design tokens).
@@ -89,21 +108,24 @@ Bypassing hooks should be rarer than 1 in 100 operations.
 - **Custom UI**: Writing a custom component when a `shadcn/ui` equivalent exists.
 
 ## 14. Prohibited Patterns
-- NO `any` usage. 
+
+- NO `any` usage.
 - NO unawaited Next.js dynamic APIs (`params`, `searchParams`, etc.).
 - NO `useEffect` for data fetching.
 - NO writing custom components when a `shadcn/ui` equivalent exists.
 - NO visual decisions without consulting `DESIGN_SYSTEM.md`.
 
 ## 15. Standard Commands Reference
-| Scope | Command |
-|---|---|
+
+| Scope   | Command                          |
+| ------- | -------------------------------- |
 | Install | `pnpm install --frozen-lockfile` |
-| Dev | `pnpm dev` |
-| DB Gen | `pnpm db:generate` |
-| DB Mig | `pnpm db:migrate` |
-| Test | `pnpm test` |
-| Lint | `pnpm lint` |
+| Dev     | `pnpm dev`                       |
+| DB Gen  | `pnpm db:generate`               |
+| DB Mig  | `pnpm db:migrate`                |
+| Test    | `pnpm test`                      |
+| Lint    | `pnpm lint`                      |
+
 `, `cookies`, `headers` in Next.js 16. 30. Using Route Handlers for simple button clicks (use Server Actions instead).
 
 **Server Actions** 31. Throwing from Server Action; should return `{ success, error }`. 32. Forgetting `'use server'` directive. 33. Not calling `revalidatePath` or `revalidateTag` after mutations.

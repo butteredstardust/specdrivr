@@ -23,6 +23,7 @@ claude agent vitest-playwright-auditor "Review test patterns"
 ## What It Checks
 
 ### 1. Vitest Unit Test Structure
+
 ```typescript
 // ✓ CORRECT - Well-structured unit test
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
@@ -61,6 +62,7 @@ describe('email validation', () => {
 ```
 
 ### 2. Server Action Testing
+
 ```typescript
 // ✓ CORRECT - Test Server Actions with auth
 import { describe, it, expect, vi } from 'vitest';
@@ -116,6 +118,7 @@ describe('createProjectAction', () => {
 ```
 
 ### 3. Database Testing Patterns
+
 ```typescript
 // ✓ CORRECT - Test with real database or transactions
 import { describe, it, expect, beforeEach } from 'vitest';
@@ -162,6 +165,7 @@ describe('User Repository', () => {
 ```
 
 ### 4. Playwright E2E Test Structure
+
 ```typescript
 // ✓ CORRECT - Organized E2E tests
 import { test, expect } from '@playwright/test';
@@ -218,6 +222,7 @@ test('create project', async ({ page }) => {
 ```
 
 ### 5. Test Isolation and Cleanup
+
 ```typescript
 // ✓ CORRECT - Proper test isolation
 describe('Auth Flow', () => {
@@ -246,16 +251,17 @@ let testUser: User;
 
 describe('Auth Flow', () => {
   it('setup', async () => {
-    testUser = await createTestUser();  // Shared state!
+    testUser = await createTestUser(); // Shared state!
   });
 
   it('should authenticate', async () => {
-    expect(testUser).toBeDefined();  // Depends on test order
+    expect(testUser).toBeDefined(); // Depends on test order
   });
 });
 ```
 
 ### 6. Coverage Requirements
+
 ```typescript
 // ✓ CORRECT - Tests covering multiple scenarios
 describe('updateProjectStatus', () => {
@@ -290,15 +296,20 @@ describe('updateProjectStatus', () => {
 ```
 
 ### 7. Async and Error Testing
+
 ```typescript
 // ✓ CORRECT - Test error scenarios
 describe('API Error Handling', () => {
   it('should handle network timeout', async () => {
-    vi.stubGlobal('fetch', vi.fn(() =>
-      new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('timeout')), 5000);
-      })
-    ));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        () =>
+          new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('timeout')), 5000);
+          })
+      )
+    );
 
     const result = await fetchData();
     expect(result.success).toBe(false);
@@ -307,11 +318,14 @@ describe('API Error Handling', () => {
 
   it('should retry on transient error', async () => {
     let attempts = 0;
-    vi.stubGlobal('fetch', vi.fn(async () => {
-      attempts++;
-      if (attempts < 2) throw new Error('Service unavailable');
-      return { ok: true, json: async () => ({ data: 'test' }) };
-    }));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        attempts++;
+        if (attempts < 2) throw new Error('Service unavailable');
+        return { ok: true, json: async () => ({ data: 'test' }) };
+      })
+    );
 
     const result = await fetchDataWithRetry();
     expect(result.success).toBe(true);
@@ -344,6 +358,7 @@ describe('API', () => {
 ## Integration
 
 Add to CI/CD:
+
 ```yaml
 # .github/workflows/test.yml
 - name: Run unit tests
@@ -357,6 +372,7 @@ Add to CI/CD:
 ```
 
 Add to `package.json`:
+
 ```json
 {
   "scripts": {

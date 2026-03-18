@@ -33,6 +33,7 @@ claude agent migration-reviewer "Audit all migrations for consistency"
 ## What It Checks
 
 ### 1. Data Loss Risk
+
 ```sql
 -- ❌ RISKY: Dropping column without backup
 ALTER TABLE tasks DROP COLUMN oldField;
@@ -43,6 +44,7 @@ ALTER TABLE tasks ADD COLUMN newField VARCHAR(255) DEFAULT 'value';
 ```
 
 ### 2. Enum Compatibility
+
 ```sql
 -- ❌ PROBLEM: Adding enum value that conflicts
 ALTER TYPE task_status ADD VALUE 'pending' BEFORE 'in_progress';
@@ -53,6 +55,7 @@ ALTER TYPE task_status ADD VALUE 'archived' AFTER 'completed';
 ```
 
 ### 3. Foreign Key Constraints
+
 ```sql
 -- ❌ PROBLEM: Adding FK without verifying data exists
 ALTER TABLE tasks ADD CONSTRAINT tasks_plan_id_fk
@@ -66,6 +69,7 @@ ALTER TABLE tasks ADD CONSTRAINT tasks_plan_id_fk
 ```
 
 ### 4. Index Strategy
+
 ```sql
 -- ❌ INEFFICIENT: Index on low-cardinality column
 CREATE INDEX idx_tasks_status ON tasks(status);
@@ -143,6 +147,7 @@ Checklist to apply:
 ## Safety Checks
 
 ### Column Additions
+
 ```sql
 -- ✓ SAFE: ADD with default and nullable
 ALTER TABLE table_name ADD COLUMN newCol VARCHAR(255) DEFAULT 'value' NOT NULL;
@@ -153,6 +158,7 @@ ALTER TABLE table_name ADD COLUMN requiredCol TEXT NOT NULL;
 ```
 
 ### Data Type Changes
+
 ```sql
 -- ❌ RISKY: Incompatible type change
 ALTER TABLE tasks ALTER COLUMN priority TYPE TEXT;
@@ -164,6 +170,7 @@ ALTER TABLE tasks ALTER COLUMN priority TYPE TEXT;
 ```
 
 ### Constraint Addition
+
 ```sql
 -- ❌ RISKY: Add constraint without verification
 ALTER TABLE orders ADD CONSTRAINT valid_amount CHECK (amount > 0);
@@ -195,6 +202,7 @@ Use this before applying migrations:
 ## Rollback Procedures
 
 ### Simple Rollback
+
 ```sql
 -- Most Drizzle migrations can be rolled back:
 -- The old migration file shows the schema
@@ -206,6 +214,7 @@ ALTER TABLE table_name DROP COLUMN newCol;
 ```
 
 ### Verify Safe to Apply
+
 ```sql
 -- Before applying migration, verify:
 SELECT COUNT(*) FROM tasks WHERE planId NOT IN (SELECT id FROM plans);
@@ -218,6 +227,7 @@ SELECT COUNT(DISTINCT status) FROM tasks;
 ## Integration
 
 ### Pre-Migration Workflow
+
 ```bash
 # 1. Generate migration
 /create-migration
@@ -233,7 +243,9 @@ pnpm db:studio
 ```
 
 ### CI/CD Validation
+
 Add to GitHub Actions:
+
 ```yaml
 - name: Validate Migrations
   run: |

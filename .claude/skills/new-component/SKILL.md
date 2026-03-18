@@ -26,11 +26,11 @@ Create a new component following shadcn/ui patterns and project conventions.
 
 ## File Location
 
-| Type | Location |
-|------|----------|
-| Shared UI primitive | `src/components/ui/[name].tsx` |
-| Feature component | `src/components/[feature]/[name].tsx` |
-| Page-specific | `src/app/(app)/[route]/_components/[name].tsx` |
+| Type                | Location                                       |
+| ------------------- | ---------------------------------------------- |
+| Shared UI primitive | `src/components/ui/[name].tsx`                 |
+| Feature component   | `src/components/[feature]/[name].tsx`          |
+| Page-specific       | `src/app/(app)/[route]/_components/[name].tsx` |
 
 ## Server Component Template
 
@@ -103,9 +103,7 @@ export function ProjectCard({ project, className }: ProjectCardProps) {
         <Badge variant="secondary">{project.status}</Badge>
       </CardHeader>
       <CardContent>
-        <p className="text-[var(--text-secondary)]">
-          {project.description}
-        </p>
+        <p className="text-[var(--text-secondary)]">{project.description}</p>
       </CardContent>
     </Card>
   );

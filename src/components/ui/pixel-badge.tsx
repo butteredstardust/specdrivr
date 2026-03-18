@@ -23,26 +23,32 @@ const pixelBadgeVariants = cva(
 );
 
 export interface PixelBadgeProps
-  extends React.HTMLAttributes<HTMLSpanElement>,
-    VariantProps<typeof pixelBadgeVariants> {
+  extends React.HTMLAttributes<HTMLSpanElement>, VariantProps<typeof pixelBadgeVariants> {
   dot?: boolean;
   dotClassName?: string;
 }
 
-export function PixelBadge({ className, variant, dot, dotClassName, children, ...props }: PixelBadgeProps) {
+export function PixelBadge({
+  className,
+  variant,
+  dot,
+  dotClassName,
+  children,
+  ...props
+}: PixelBadgeProps) {
   return (
     <span className={cn(pixelBadgeVariants({ variant }), className)} {...props}>
       {dot && (
-        <span 
+        <span
           className={cn(
-            'h-1.5 w-1.5 rounded-full shrink-0',
+            'h-1.5 w-1.5 shrink-0 rounded-full',
             variant === 'violet' && 'bg-accent-violet animate-pulse',
             variant === 'amber' && 'bg-phosphor-amber',
             variant === 'emerald' && 'bg-status-emerald',
             variant === 'red' && 'bg-status-red',
             variant === 'default' && 'bg-muted-foreground',
             dotClassName
-          )} 
+          )}
         />
       )}
       {children}

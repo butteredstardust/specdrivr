@@ -23,6 +23,7 @@ claude agent react-19-best-practices "Audit concurrent feature usage"
 ## What It Checks
 
 ### 1. New useActionState Hook
+
 ```typescript
 // ✓ CORRECT - React 19 useActionState for forms
 'use client';
@@ -71,6 +72,7 @@ export function LoginForm() {
 ```
 
 ### 2. New useOptimistic Hook
+
 ```typescript
 // ✓ CORRECT - useOptimistic for instant UI updates
 'use client';
@@ -124,6 +126,7 @@ export function TodoList({ todos }: { todos: Todo[] }) {
 ```
 
 ### 3. Server Actions with Clarity
+
 ```typescript
 // ✓ CORRECT - Clear distinction of server/client
 'use server';
@@ -179,6 +182,7 @@ export function TaskItem({ task }) {
 ```
 
 ### 4. Improved Form Handling
+
 ```typescript
 // ✓ CORRECT - Form with server action
 'use client';
@@ -242,6 +246,7 @@ export function CreateProjectForm() {
 ```
 
 ### 5. Async Transitions with useTransition
+
 ```typescript
 // ✓ CORRECT - useTransition for async operations
 'use client';
@@ -281,6 +286,7 @@ export function ProjectFilters() {
 ```
 
 ### 6. Context + Server Components
+
 ```typescript
 // ✓ CORRECT - Context provider wraps layout
 // src/app/layout.tsx
@@ -322,6 +328,7 @@ export default function RootLayout({ children }) {
 ```
 
 ### 7. React.use() for Promises
+
 ```typescript
 // ✓ CORRECT - React.use() for async operations
 'use client';
@@ -373,8 +380,10 @@ export function UserProfile({ userId }: { userId: string }) {
 ## Integration
 
 Add to form components:
+
 ```markdown
 ## React 19 Forms
+
 - [ ] Using `useActionState` hook
 - [ ] Server Action boundaries clear
 - [ ] Form disabled during submission
@@ -382,8 +391,10 @@ Add to form components:
 ```
 
 Add to component patterns:
+
 ```markdown
 ## React 19 Patterns
+
 - [ ] useOptimistic for instant updates
 - [ ] useTransition for async state
 - [ ] React.use() for promises

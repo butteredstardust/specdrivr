@@ -23,6 +23,7 @@ claude agent postgresql-performance-auditor "Check query performance"
 ## What It Checks
 
 ### 1. Index Strategy
+
 ```sql
 -- ✓ CORRECT - Indexes on foreign keys and frequent filters
 CREATE TABLE tasks (
@@ -45,6 +46,7 @@ CREATE TABLE tasks (
 ```
 
 ### 2. Schema Normalization
+
 ```sql
 -- ✓ CORRECT - Proper normalization
 CREATE TABLE users (
@@ -68,6 +70,7 @@ CREATE TABLE users (
 ```
 
 ### 3. Column Type Correctness
+
 ```sql
 -- ✓ CORRECT - Appropriate types
 CREATE TABLE posts (
@@ -91,6 +94,7 @@ CREATE TABLE posts (
 ```
 
 ### 4. Constraint Enforcement
+
 ```sql
 -- ✓ CORRECT - Constraints at database level
 CREATE TABLE orders (
@@ -111,13 +115,16 @@ CREATE TABLE orders (
 ```
 
 ### 5. Query Optimization Patterns
+
 ```typescript
 // ✓ CORRECT - Efficient query with indexes
-const orders = await db.select({
-  id: orders.id,
-  total: orders.total,
-  userName: users.name,
-}).from(orders)
+const orders = await db
+  .select({
+    id: orders.id,
+    total: orders.total,
+    userName: users.name,
+  })
+  .from(orders)
   .leftJoin(users, eq(orders.userId, users.id))
   .where(eq(orders.status, 'completed'))
   .orderBy(desc(orders.createdAt))
@@ -125,10 +132,11 @@ const orders = await db.select({
 
 // ❌ WRONG - Full table scan or inefficient query
 const orders = await db.select().from(orders);
-const filtered = orders.filter(o => o.status === 'completed');
+const filtered = orders.filter((o) => o.status === 'completed');
 ```
 
 ### 6. Vacuum & Maintenance
+
 ```sql
 -- ✓ CORRECT - Scheduled maintenance
 VACUUM ANALYZE;
@@ -142,6 +150,7 @@ ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
 ```
 
 ### 7. Slow Query Detection
+
 ```sql
 -- ✓ CORRECT - Log slow queries
 ALTER SYSTEM SET log_min_duration_statement = 1000;  -- log queries > 1 second
@@ -168,8 +177,10 @@ ORDER BY mean_exec_time DESC LIMIT 10;
 ## Integration
 
 Add to migration reviews:
+
 ```markdown
 ## PostgreSQL Schema Quality
+
 - [ ] All foreign keys have indexes
 - [ ] Constraints at database level
 - [ ] Appropriate column types
@@ -178,6 +189,7 @@ Add to migration reviews:
 ```
 
 Add to deployment checklist:
+
 ```bash
 # Before release
 claude agent postgresql-performance-auditor "Final database performance review"

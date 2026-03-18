@@ -76,11 +76,12 @@ export function CreateProjectDialog({
 
   const triggerButton = (
     <Button
+      variant="phosphor"
       size="sm"
       disabled={!canCreate}
       onClick={canCreate ? () => setOpen(true) : undefined}
       aria-disabled={!canCreate}
-      className="gap-1.5"
+      className="gap-2"
     >
       <Plus className="h-3.5 w-3.5" />
       {label}

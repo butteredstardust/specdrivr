@@ -23,6 +23,7 @@ claude agent tailwind-css-variables-auditor "Check design token consistency"
 ## What It Checks
 
 ### 1. CSS Variables Definition
+
 ```css
 /* ✓ CORRECT - Organized CSS variables */
 :root {
@@ -69,6 +70,7 @@ claude agent tailwind-css-variables-auditor "Check design token consistency"
 ```
 
 ### 2. Tailwind Config Integration
+
 ```javascript
 // ✓ CORRECT - CSS variables in Tailwind config
 export default {
@@ -124,6 +126,7 @@ export default {
 ```
 
 ### 3. Component Class Usage
+
 ```typescript
 // ✓ CORRECT - Use CSS variable classes
 export function Button({ children, variant = 'primary' }: ButtonProps) {
@@ -149,6 +152,7 @@ export function Button({ children }) {
 ```
 
 ### 4. Dark Mode with CSS Variables
+
 ```css
 /* ✓ CORRECT - CSS variables for light/dark modes */
 :root {
@@ -178,6 +182,7 @@ export function Button({ children }) {
 ```
 
 ### 5. Spacing System Consistency
+
 ```typescript
 // ✓ CORRECT - Use spacing scale consistently
 export function Card({ children }: { children: React.ReactNode }) {
@@ -203,6 +208,7 @@ export function Card({ children }) {
 ```
 
 ### 6. Design Token Documentation
+
 ```typescript
 // ✓ CORRECT - Document design tokens
 /**
@@ -240,6 +246,7 @@ export const DESIGN_TOKENS = {
 ```
 
 ### 7. Avoiding Design Token Bypass
+
 ```typescript
 // ✓ CORRECT - Always use design tokens
 const className = cn(
@@ -270,6 +277,7 @@ const className = 'p-4 bg-blue-500 text-white';
 ## Integration
 
 Create `src/styles/tokens.css`:
+
 ```css
 @layer base {
   :root {
@@ -307,6 +315,7 @@ Create `src/styles/tokens.css`:
 ```
 
 Add to components:
+
 ```typescript
 import { cn } from '@/lib/utils';
 

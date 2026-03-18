@@ -47,7 +47,13 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: { code: 'INVALID_QUERY', message: 'Invalid query parameters', details: error.errors } },
+        {
+          error: {
+            code: 'INVALID_QUERY',
+            message: 'Invalid query parameters',
+            details: error.errors,
+          },
+        },
         { status: 400 }
       );
     }

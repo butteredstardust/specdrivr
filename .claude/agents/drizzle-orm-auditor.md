@@ -23,24 +23,26 @@ claude agent drizzle-orm-auditor "Check schema design patterns"
 ## What It Checks
 
 ### 1. Query Optimization
+
 ```typescript
 // ✓ CORRECT - Select only needed columns
-const users = await db.select({
-  id: users.id,
-  email: users.email,
-  name: users.name,
-}).from(users);
+const users = await db
+  .select({
+    id: users.id,
+    email: users.email,
+    name: users.name,
+  })
+  .from(users);
 
 // ❌ WRONG - Select all columns unnecessarily
 const users = await db.select().from(users);
 ```
 
 ### 2. Relations & Joins
+
 ```typescript
 // ✓ CORRECT - Use leftJoin for related data
-const results = await db.select()
-  .from(tasks)
-  .leftJoin(plans, eq(tasks.planId, plans.id));
+const results = await db.select().from(tasks).leftJoin(plans, eq(tasks.planId, plans.id));
 
 // ❌ WRONG - N+1 query pattern
 const tasks = await db.select().from(tasks);
@@ -50,6 +52,7 @@ for (const task of tasks) {
 ```
 
 ### 3. Transactions
+
 ```typescript
 // ✓ CORRECT - Use transactions for multi-step writes
 await db.transaction(async (tx) => {
@@ -63,6 +66,7 @@ await db.update(inventory).set(...);
 ```
 
 ### 4. Type Safety
+
 ```typescript
 // ✓ CORRECT - Use Drizzle types
 import { eq, and, or } from 'drizzle-orm';
@@ -83,6 +87,7 @@ const result = db.execute('SELECT * FROM users WHERE id = $1', [userId]);
 ## Integration
 
 Run after schema changes:
+
 ```bash
 /create-migration
 claude agent drizzle-orm-auditor "Validate migration and queries"

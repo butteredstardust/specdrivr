@@ -10,55 +10,34 @@
     },
     "memory": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-memory"
-      ],
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
       "env": {
         "MEMORY_FILE_PATH": ".mcp-memory.jsonl"
       }
     },
     "playwright": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@playwright/mcp@latest"
-      ]
+      "args": ["-y", "@playwright/mcp@latest"]
     },
     "shadcn": {
       "command": "npx",
-      "args": [
-        "shadcn@latest",
-        "mcp"
-      ]
+      "args": ["shadcn@latest", "mcp"]
     },
     "docker": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@thelord/mcp-server-docker-npx"
-      ]
+      "args": ["-y", "@thelord/mcp-server-docker-npx"]
     },
     "next-devtools": {
       "command": "npx",
-      "args": [
-        "-y",
-        "next-devtools-mcp@latest"
-      ]
+      "args": ["-y", "next-devtools-mcp@latest"]
     },
     "vitest": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@djankies/vitest-mcp"
-      ]
+      "args": ["-y", "@djankies/vitest-mcp"]
     },
     "context7": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@upstash/context7-mcp"
-      ]
+      "args": ["-y", "@upstash/context7-mcp"]
     }
   }
 }

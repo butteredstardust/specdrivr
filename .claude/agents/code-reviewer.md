@@ -9,13 +9,16 @@
 ## How to Use
 
 ### From CLI
+
 ```bash
 claude agent code-reviewer "Fix useEffect in notification-bell component"
 claude agent code-reviewer "Review PR changes for hook violations"
 ```
 
 ### From User Instructions
+
 Include in a PR description:
+
 ```
 ## Review Checklist
 - [ ] Run code-reviewer agent before push
@@ -26,6 +29,7 @@ Include in a PR description:
 ## What It Does
 
 ### 1. Identify Modified Files
+
 - Finds all staged changes
 - Identifies components, actions, API routes
 
@@ -33,21 +37,22 @@ Include in a PR description:
 
 Validates against these architectural mandates from `AGENTS.md`:
 
-| Rule | Check |
-|------|-------|
-| ✓ Server Actions have `'use server'` | File contains directive at top |
-| ✓ Server Actions call `await auth()` | First line is authentication check |
-| ✓ No throws in actions | Returns `{ success, error }` instead |
-| ✓ Client components don't import repositories | Grep for `'use client'` + `@/repositories` |
-| ✓ No direct `process.env` access | Uses `@/lib/env` instead |
-| ✓ All `<form>` elements use Zod + React Hook Form | Grep for `useForm()` and `z.object` |
-| ✓ `dangerouslySetInnerHTML` is sanitized | Uses `DOMPurify.sanitize()` |
-| ✓ No raw `<img>` tags | Uses `next/image` |
-| ✓ No hardcoded hex colors | Uses CSS variable tokens |
+| Rule                                              | Check                                      |
+| ------------------------------------------------- | ------------------------------------------ |
+| ✓ Server Actions have `'use server'`              | File contains directive at top             |
+| ✓ Server Actions call `await auth()`              | First line is authentication check         |
+| ✓ No throws in actions                            | Returns `{ success, error }` instead       |
+| ✓ Client components don't import repositories     | Grep for `'use client'` + `@/repositories` |
+| ✓ No direct `process.env` access                  | Uses `@/lib/env` instead                   |
+| ✓ All `<form>` elements use Zod + React Hook Form | Grep for `useForm()` and `z.object`        |
+| ✓ `dangerouslySetInnerHTML` is sanitized          | Uses `DOMPurify.sanitize()`                |
+| ✓ No raw `<img>` tags                             | Uses `next/image`                          |
+| ✓ No hardcoded hex colors                         | Uses CSS variable tokens                   |
 
 ### 3. Suggest Fixes
 
 For each violation found:
+
 - Highlights the file and line number
 - Explains the rule
 - Provides code example from `hook-violation-fixer` skill
@@ -56,6 +61,7 @@ For each violation found:
 ### 4. Report Summary
 
 Returns:
+
 - **Passed:** Count of compliant files
 - **Violations:** Count and types of violations
 - **Suggestions:** Prioritized fixes
@@ -88,6 +94,7 @@ $ git push
 ## Integration
 
 ### Pre-Push Workflow (Recommended)
+
 ```bash
 # Before pushing:
 1. Stage your changes: git add .
@@ -97,7 +104,9 @@ $ git push
 ```
 
 ### CI Integration (Optional)
+
 Add to GitHub Actions:
+
 ```yaml
 - name: Code Review
   run: |
@@ -112,6 +121,7 @@ Add to GitHub Actions:
 - ❌ Doesn't check performance
 
 For those, use:
+
 - Tests: `pnpm test`
 - Linting: `pnpm lint`
 - Type checking: `pnpm typecheck`

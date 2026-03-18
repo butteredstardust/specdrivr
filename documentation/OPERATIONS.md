@@ -10,14 +10,14 @@ _Spec-driven autonomous code execution for engineering teams_
 
 ## **17.1 Performance**
 
-| **Metric**                      | **Target**                                               |
-| ------------------------------- | -------------------------------------------------------- |
-| Page load (Time to Interactive) | < 2 seconds on 4G connection                             |
-| API response time (p95)         | < 300ms for all read endpoints                           |
-| Plan generation latency         | < 30 seconds for specs up to 5,000 words                 |
-| Task log streaming lag          | < 1 second from event creation to UI display (via 3s poll)  |
-| Diff rendering                  | < 500ms for diffs up to 10,000 lines (Shiki server-side) |
-| Notification badge update       | < 3 seconds from event creation to badge update          |
+| **Metric**                      | **Target**                                                 |
+| ------------------------------- | ---------------------------------------------------------- |
+| Page load (Time to Interactive) | < 2 seconds on 4G connection                               |
+| API response time (p95)         | < 300ms for all read endpoints                             |
+| Plan generation latency         | < 30 seconds for specs up to 5,000 words                   |
+| Task log streaming lag          | < 1 second from event creation to UI display (via 3s poll) |
+| Diff rendering                  | < 500ms for diffs up to 10,000 lines (Shiki server-side)   |
+| Notification badge update       | < 3 seconds from event creation to badge update            |
 
 ## **17.2 Security**
 
@@ -28,7 +28,6 @@ _Spec-driven autonomous code execution for engineering teams_
 - Secrets: never stored in database. Never logged. Never returned in API responses (except one-time token reveal). AGENT_TOKEN visible only in infrastructure environment variables.
 - import 'server-only' on lib/db.ts, lib/env.ts, lib/logger.ts - build-time enforcement of server boundary.
 - Audit log: all administrative actions are written to audit_log within the same DB transaction as the action. Cannot be suppressed.
-
 
 ## **17.3 Accessibility**
 

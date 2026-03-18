@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
+import { RefreshCw, MessageSquareQuote } from 'lucide-react';
 import { clientLogger } from '@/lib/logger-client';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { Button } from '@/components/ui/button';
@@ -87,19 +88,22 @@ export function TaskDrawerOverview({ task, onRetry, onTaskUpdated }: TaskDrawerO
           {task.blockedReason && (
             <p className="text-text-secondary text-sm leading-relaxed">{task.blockedReason}</p>
           )}
-          <div className="space-y-2 pt-2">
+          <div className="space-y-3 pt-2">
             <Textarea
               placeholder="Add context to unblock DAEMON (min 10 chars)..."
               value={humanContext}
               onChange={(e) => setHumanContext(e.target.value)}
-              className="bg-bg-base text-sm"
+              className="bg-bg-base border-border-default focus:ring-phosphor-amber/30 min-h-[100px] text-sm focus:ring-1"
               rows={3}
             />
             <Button
+              variant="phosphor"
               size="sm"
               disabled={humanContext.length < 10 || isSubmitting}
               onClick={handleRetryWithContext}
+              className="h-8 w-full gap-1.5"
             >
+              <MessageSquareQuote className="h-3.5 w-3.5" />
               RETRY WITH CONTEXT
             </Button>
           </div>
@@ -119,7 +123,8 @@ export function TaskDrawerOverview({ task, onRetry, onTaskUpdated }: TaskDrawerO
             <p className="text-text-secondary text-sm leading-relaxed">{task.blockedReason}</p>
           )}
           <div className="pt-2">
-            <Button size="sm" variant="destructive" onClick={onRetry}>
+            <Button variant="violet" size="sm" onClick={onRetry} className="h-8 w-full gap-1.5">
+              <RefreshCw className="h-3.5 w-3.5" />
               RETRY TASK
             </Button>
           </div>

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { PixelBadge } from '@/components/ui/pixel-badge';
+import { Button } from '@/components/ui/button';
 
 interface RecentSession {
   id: number;
@@ -31,12 +32,9 @@ export function RecentSessions({ sessions }: RecentSessionsProps) {
             specification.
           </p>
         </div>
-        <Link
-          href="/specs/new"
-          className="text-bg-default bg-foreground hover:bg-foreground/90 rounded-md px-4 py-2 text-sm font-medium"
-        >
-          Create Specification
-        </Link>
+        <Button asChild variant="phosphor">
+          <Link href="/specs/new">Create Specification</Link>
+        </Button>
       </div>
     );
   }

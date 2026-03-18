@@ -27,7 +27,9 @@ claude agent rbac-auditor "Verify permission checks on admin endpoints"
 ## What It Does
 
 ### 1. Scans All Protected Resources
+
 Identifies endpoints that should require permission checks:
+
 - `src/actions/*.ts` — Server Actions (mutations)
 - `src/app/api/v1/**/route.ts` — API routes (data access)
 - Admin endpoints (should require `requireAdmin()`)
@@ -36,6 +38,7 @@ Identifies endpoints that should require permission checks:
 ### 2. Verifies Permission Calls
 
 Checks for:
+
 ```typescript
 // ✓ CORRECT
 const { allowed } = await requireAdmin(userId, projectId);
@@ -50,6 +53,7 @@ const admin = checkIsAdmin(userId); // Wrong function
 ### 3. Reports Violations
 
 **Example output:**
+
 ```
 RBAC AUDIT REPORT
 
@@ -93,6 +97,7 @@ RISK LEVEL: 🔴 HIGH
 ### 4. Suggests Fixes
 
 For each violation, suggests exact remediation:
+
 ```typescript
 // VIOLATION: Missing permission check
 // BEFORE:
@@ -104,7 +109,7 @@ export async function deleteSpecAction(formData: FormData) {
 }
 
 // AFTER:
-'use server';
+('use server');
 export async function deleteSpecAction(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -119,7 +124,13 @@ export async function deleteSpecAction(formData: FormData) {
 
   const { allowed } = await requireMember(session.user.id, spec.projectId);
   if (!allowed) {
-    return { success: false, error: { code: 'FORBIDDEN', message: 'You must be a project member to delete specifications' } };
+    return {
+      success: false,
+      error: {
+        code: 'FORBIDDEN',
+        message: 'You must be a project member to delete specifications',
+      },
+    };
   }
 
   await specificationRepository.delete(specId);
@@ -131,7 +142,9 @@ export async function deleteSpecAction(formData: FormData) {
 ## Integration Points
 
 ### CI/CD Pipeline
+
 Add to pre-deployment checks:
+
 ```yaml
 # .github/workflows/security.yml
 - name: RBAC Audit
@@ -141,16 +154,21 @@ Add to pre-deployment checks:
 ```
 
 ### Code Review Checklist
+
 Include in PR template:
+
 ```markdown
 ## Security Checklist
+
 - [ ] Run RBAC auditor: `claude agent rbac-auditor "Check my changes"`
 - [ ] All permission checks verified
 - [ ] No new public endpoints
 ```
 
 ### Local Development
+
 Before pushing:
+
 ```bash
 # Check your branch changes
 claude agent rbac-auditor "Audit actions/ and api/ changes"
@@ -159,13 +177,16 @@ claude agent rbac-auditor "Audit actions/ and api/ changes"
 ## Permission Check Reference
 
 ### `requireAdmin(userId, projectId)`
+
 **Use for:** Actions only project admins can perform
+
 - Delete projects
 - Manage project settings
 - Change project members
 - View billing
 
 **Example:**
+
 ```typescript
 const { allowed } = await requireAdmin(userId, projectId);
 if (!allowed) {
@@ -174,13 +195,16 @@ if (!allowed) {
 ```
 
 ### `requireMember(userId, projectId)`
+
 **Use for:** Actions members can perform
+
 - View specs
 - Create tasks
 - Submit attempts
 - View project data
 
 **Example:**
+
 ```typescript
 const { allowed } = await requireMember(userId, projectId);
 if (!allowed) {
@@ -189,6 +213,7 @@ if (!allowed) {
 ```
 
 ### Public Endpoints (No check)
+
 - Login / signup
 - Accept invite (with token validation)
 - Public project pages (if applicable)
@@ -197,24 +222,28 @@ if (!allowed) {
 ## Common Violations & Fixes
 
 ### 1. Missing Permission Check
+
 ```
 Detected: endpoint accesses project data without permission
 Fixed: Added requireMember() call
 ```
 
 ### 2. Wrong Function
+
 ```
 Detected: Used requireMember() for admin-only operation
 Fixed: Changed to requireAdmin()
 ```
 
 ### 3. Wrong Resource ID
+
 ```
 Detected: Checking permissions on wrong project
 Fixed: Updated to check actual project being accessed
 ```
 
 ### 4. Missing Auth Call
+
 ```
 Detected: No await auth() before permission checks
 Fixed: Added auth() call as first line
@@ -247,12 +276,16 @@ Estimated fix time: 15 minutes
 ## Troubleshooting
 
 ### Agent Not Finding Endpoints
+
 Ensure files follow naming convention:
+
 - Server Actions: `src/actions/[name].ts`
 - API routes: `src/app/api/**/route.ts`
 
 ### False Positives
+
 If agent flags legitimate public endpoints:
+
 ```typescript
 // Add comment to suppress:
 // @audit-ignore: public-endpoint
