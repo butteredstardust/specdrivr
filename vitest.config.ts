@@ -23,6 +23,7 @@ export default defineConfig({
       '**/dist/**',
       '**/cypress/**',
       '**/.{idea,git,cache,output,temp}/**',
+      '**/.worktrees/**',
       'tests/e2e/**',
     ],
     fileParallelism: false,
