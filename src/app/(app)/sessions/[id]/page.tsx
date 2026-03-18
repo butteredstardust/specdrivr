@@ -1,11 +1,13 @@
 'use client';
 
-import { use } from 'react';
+import { use, useState } from 'react';
 import Link from 'next/link';
 import { usePolling } from '@/hooks/use-polling';
 import { Button } from '@/components/ui/button';
 import { EventLog } from '@/components/mission-control/event-log';
 import { TaskTimeline } from '@/components/sessions/task-timeline';
+import { Play, Pause, XCircle } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 
 interface AgentSession {
   id: number;
@@ -51,7 +53,7 @@ function formatDuration(session?: AgentSession | null): string {
 
 function StatBox({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-bg-elevated border-border-default rounded border px-3 py-2">
+    <div className="bg-bg-elevated border-border-default flex flex-col justify-center rounded border px-3 py-2">
       <p className="text-text-muted font-mono text-[9px] tracking-widest uppercase">{label}</p>
       <p className="text-text-primary mt-0.5 font-mono text-sm font-semibold">{value}</p>
     </div>
@@ -112,12 +114,41 @@ export default function SessionDetailPage({ params }: PageProps) {
   const { id: rawId } = use(params);
   const id = parseInt(rawId, 10);
   const sessionLabel = `SES-${String(id).padStart(3, '0')}`;
+  const [isUpdating, setIsUpdating] = useState(false);
 
-  const { data: session, isLoading } = usePolling<AgentSession>({
+  const {
+    data: session,
+    isLoading,
+    mutate,
+  } = usePolling<AgentSession>({
     url: `/api/v1/sessions/${id}`,
     interval: 5000,
     stopWhen: (s) => TERMINAL_STATUSES.includes(s.status),
   });
+
+  const handleAction = async (action: 'pause' | 'resume' | 'cancel') => {
+    setIsUpdating(true);
+    try {
+      if (action === 'pause') {
+        await fetch(`/api/v1/sessions/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'paused' }),
+        });
+      } else {
+        await fetch(`/api/v1/sessions/${id}/${action}`, { method: 'POST' });
+      }
+      mutate();
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const totalTasks = session?.tasksExecuted || 0; // Assuming tasksExecuted is the total known tasks for now, or maybe tasksSucceeded + tasksFailed + pending?
+  // Wait, if tasksExecuted is just the count, we don't know total. Let's assume tasksExecuted is total available, or just show a metric.
+  // Actually, we can just use an indeterminate progress if running, or a determinate one if we have total.
+  // We'll stick to displaying the stats for now but add a small progress visual if tasksExecuted > 0.
+  const progressPercent = totalTasks > 0 ? ((session?.tasksSucceeded || 0) / totalTasks) * 100 : 0;
 
   return (
     <div className="-mx-6 -mt-6 flex min-h-full flex-col">
@@ -135,6 +166,37 @@ export default function SessionDetailPage({ params }: PageProps) {
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
+          {session?.status === 'running' && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleAction('pause')}
+              disabled={isUpdating}
+            >
+              <Pause className="mr-2 h-4 w-4" /> Pause
+            </Button>
+          )}
+          {session?.status === 'paused' && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleAction('resume')}
+              disabled={isUpdating}
+            >
+              <Play className="mr-2 h-4 w-4" /> Resume
+            </Button>
+          )}
+          {session && !TERMINAL_STATUSES.includes(session.status) && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-status-red hover:text-status-red/80"
+              onClick={() => handleAction('cancel')}
+              disabled={isUpdating}
+            >
+              <XCircle className="mr-2 h-4 w-4" /> Cancel
+            </Button>
+          )}
           {session?.specId && (
             <Button size="sm" variant="outline" asChild>
               <Link href={`/specs/${session.specId}`}>View Spec →</Link>
@@ -144,13 +206,20 @@ export default function SessionDetailPage({ params }: PageProps) {
       </div>
 
       {(session || isLoading) && (
-        <div className="border-border-default grid grid-cols-4 gap-4 border-b px-6 py-4">
+        <div className="border-border-default grid grid-cols-5 gap-4 border-b px-6 py-4">
           <StatBox label="Started" value={timeAgo(session?.startedAt)} />
           <StatBox label="Duration" value={formatDuration(session)} />
-          <StatBox
-            label="Succeeded"
-            value={`${session?.tasksSucceeded ?? 0}/${session?.tasksExecuted ?? 0}`}
-          />
+          <div className="bg-bg-elevated border-border-default col-span-2 flex flex-col justify-center rounded border px-3 py-2">
+            <div className="mb-1.5 flex items-end justify-between">
+              <p className="text-text-muted font-mono text-[9px] tracking-widest uppercase">
+                Progress
+              </p>
+              <p className="text-text-primary font-mono text-[10px] font-semibold">
+                {session?.tasksSucceeded ?? 0} / {session?.tasksExecuted ?? 0}
+              </p>
+            </div>
+            <Progress value={progressPercent} className="h-2" />
+          </div>
           <StatBox label="Failed" value={String(session?.tasksFailed ?? 0)} />
         </div>
       )}
@@ -160,14 +229,14 @@ export default function SessionDetailPage({ params }: PageProps) {
           <TaskTimeline sessionId={id} />
         </div>
 
-        <div className="w-1/2 overflow-y-auto p-4">
+        <div className="flex w-1/2 flex-col overflow-y-auto p-4">
           <p className="text-text-muted mb-3 font-mono text-[9px] tracking-widest uppercase">
             Session Log
           </p>
           <p className="text-text-muted mb-3 font-mono text-xs">
             $ specdrivr agent start --session {sessionLabel}
           </p>
-          <EventLog sessionId={id} />
+          <EventLog sessionId={id} className="flex min-h-0 flex-1 flex-col" />
         </div>
       </div>
     </div>

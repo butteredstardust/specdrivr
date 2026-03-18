@@ -22,8 +22,12 @@ export interface CreateTaskData {
   title: string;
   description: string;
   planId?: number | null;
+  specId?: number | null;
   status?: TaskStatus;
+  dependsOn?: string[];
+  executionOrder?: number;
   estimateHours?: number | null;
+  estimatedMinutes?: number | null;
   verifyCommand?: string | null;
   doneCriteria?: string | null;
   recommendedModel?: string;
@@ -121,8 +125,14 @@ export class TaskRepository extends BaseRepository {
       externalId: data.externalId,
       title: data.title,
       planId: data.planId ?? 1,
+      specId: data.specId ?? null,
       status: data.status ?? ('todo' as const),
-      estimatedMinutes: data.estimateHours ? data.estimateHours * 60 : null,
+      dependsOn: data.dependsOn ?? [],
+      executionOrder: data.executionOrder ?? 0,
+      estimatedMinutes:
+        data.estimatedMinutes ?? (data.estimateHours ? data.estimateHours * 60 : null),
+      verifyCommand: data.verifyCommand ?? null,
+      doneCriteria: data.doneCriteria ?? null,
       recommendedModel: data.recommendedModel ?? 'sonnet',
       attemptCount: 0,
       completedAt: null,

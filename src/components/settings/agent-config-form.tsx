@@ -1,6 +1,9 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { toast } from 'sonner';
 import { X } from 'lucide-react';
 import { clientLogger } from '@/lib/logger-client';
@@ -29,42 +32,24 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { agentConfigFormSchema, type AgentConfigFormData } from '@/lib/schemas';
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
+
+type FormValues = z.infer<typeof agentConfigFormSchema>;
 
 interface AgentConfigFormProps {
   projectId: number;
   userRole: UserRole;
 }
 
-interface AgentConfigData {
-  modelId: string;
-  planModelId: string;
-  maxConcurrentTasks: number;
-  taskTimeoutSeconds: number;
-  maxRetriesPerTask: number;
-  retryDelaySeconds: number;
-  requireApproval: boolean;
-  autoGeneratePlan: boolean;
-  branchPrefix: string;
-  commitMessagePrefix: string;
-  allowedFileGlobs: string[];
-  forbiddenFileGlobs: string[];
-  testCommand: string | null;
-  lintCommand: string | null;
-  setupCommand: string | null;
-  maxDiffSizeKb: number;
-  prAutoCreate: boolean;
-  prTargetBranch: string;
-}
-
 // ---------------------------------------------------------------------------
 // Defaults (mirror schema defaults)
 // ---------------------------------------------------------------------------
 
-const DEFAULTS: AgentConfigData = {
+const DEFAULTS: AgentConfigFormData = {
   modelId: 'claude-sonnet-4-6',
   planModelId: 'claude-opus-4-6',
   maxConcurrentTasks: 3,
@@ -83,6 +68,10 @@ const DEFAULTS: AgentConfigData = {
   maxDiffSizeKb: 500,
   prAutoCreate: false,
   prTargetBranch: 'main',
+  geminiApiKey: null,
+  geminiModel: 'gemini-2.0-flash',
+  claudeApiKey: null,
+  backend: 'gemini',
 };
 
 // ---------------------------------------------------------------------------
@@ -98,14 +87,13 @@ function canEdit(role: UserRole): boolean {
 // ---------------------------------------------------------------------------
 
 interface GlobTagInputProps {
-  id: string;
   value: string[];
   onChange: (next: string[]) => void;
   disabled: boolean;
   placeholder?: string;
 }
 
-function GlobTagInput({ id, value, onChange, disabled, placeholder }: GlobTagInputProps) {
+function GlobTagInput({ value, onChange, disabled, placeholder }: GlobTagInputProps) {
   const [inputVal, setInputVal] = useState('');
 
   const addTag = (raw: string) => {
@@ -161,7 +149,6 @@ function GlobTagInput({ id, value, onChange, disabled, placeholder }: GlobTagInp
         </div>
       )}
       <Input
-        id={id}
         value={inputVal}
         onChange={(e) => setInputVal(e.target.value)}
         onKeyDown={handleKeyDown}
@@ -214,38 +201,53 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
 export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
   const editable = canEdit(userRole);
 
-  // Form state — initialised from DEFAULTS, overwritten on first data load
-  const [form, setForm] = useState<AgentConfigData>(DEFAULTS);
-  const [isSaving, setIsSaving] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    formState: { isSubmitting, isDirty },
+    watch,
+    setValue,
+  } = useForm({
+    resolver: zodResolver(agentConfigFormSchema),
+    defaultValues: DEFAULTS,
+  });
 
-  // AlertDialog for disabling requireApproval
+  // AlertDialog state
   const [approvalDialogOpen, setApprovalDialogOpen] = useState(false);
-  const [pendingApprovalOff, setPendingApprovalOff] = useState(false);
 
   // One-shot fetch via usePolling — stop immediately after first successful load
-  const onData = useCallback((data: AgentConfigSelect | null) => {
-    if (!data) return;
-    setForm({
-      modelId: data.modelId ?? DEFAULTS.modelId,
-      planModelId: data.planModelId ?? DEFAULTS.planModelId,
-      maxConcurrentTasks: data.maxConcurrentTasks ?? DEFAULTS.maxConcurrentTasks,
-      taskTimeoutSeconds: data.taskTimeoutSeconds ?? DEFAULTS.taskTimeoutSeconds,
-      maxRetriesPerTask: data.maxRetriesPerTask ?? DEFAULTS.maxRetriesPerTask,
-      retryDelaySeconds: data.retryDelaySeconds ?? DEFAULTS.retryDelaySeconds,
-      requireApproval: data.requireApproval ?? DEFAULTS.requireApproval,
-      autoGeneratePlan: data.autoGeneratePlan ?? DEFAULTS.autoGeneratePlan,
-      branchPrefix: data.branchPrefix ?? DEFAULTS.branchPrefix,
-      commitMessagePrefix: data.commitMessagePrefix ?? DEFAULTS.commitMessagePrefix,
-      allowedFileGlobs: data.allowedFileGlobs ?? DEFAULTS.allowedFileGlobs,
-      forbiddenFileGlobs: data.forbiddenFileGlobs ?? DEFAULTS.forbiddenFileGlobs,
-      testCommand: data.testCommand ?? null,
-      lintCommand: data.lintCommand ?? null,
-      setupCommand: data.setupCommand ?? null,
-      maxDiffSizeKb: data.maxDiffSizeKb ?? DEFAULTS.maxDiffSizeKb,
-      prAutoCreate: data.prAutoCreate ?? DEFAULTS.prAutoCreate,
-      prTargetBranch: data.prTargetBranch ?? DEFAULTS.prTargetBranch,
-    });
-  }, []);
+  const onData = useCallback(
+    (data: AgentConfigSelect | null) => {
+      if (!data) return;
+      reset({
+        modelId: data.modelId ?? DEFAULTS.modelId,
+        planModelId: data.planModelId ?? DEFAULTS.planModelId,
+        maxConcurrentTasks: data.maxConcurrentTasks ?? DEFAULTS.maxConcurrentTasks,
+        taskTimeoutSeconds: data.taskTimeoutSeconds ?? DEFAULTS.taskTimeoutSeconds,
+        maxRetriesPerTask: data.maxRetriesPerTask ?? DEFAULTS.maxRetriesPerTask,
+        retryDelaySeconds: data.retryDelaySeconds ?? DEFAULTS.retryDelaySeconds,
+        requireApproval: data.requireApproval ?? DEFAULTS.requireApproval,
+        autoGeneratePlan: data.autoGeneratePlan ?? DEFAULTS.autoGeneratePlan,
+        branchPrefix: data.branchPrefix ?? DEFAULTS.branchPrefix,
+        commitMessagePrefix: data.commitMessagePrefix ?? DEFAULTS.commitMessagePrefix,
+        allowedFileGlobs: data.allowedFileGlobs ?? DEFAULTS.allowedFileGlobs,
+        forbiddenFileGlobs: data.forbiddenFileGlobs ?? DEFAULTS.forbiddenFileGlobs,
+        testCommand: data.testCommand ?? null,
+        lintCommand: data.lintCommand ?? null,
+        setupCommand: data.setupCommand ?? null,
+        maxDiffSizeKb: data.maxDiffSizeKb ?? DEFAULTS.maxDiffSizeKb,
+        prAutoCreate: data.prAutoCreate ?? DEFAULTS.prAutoCreate,
+        prTargetBranch: data.prTargetBranch ?? DEFAULTS.prTargetBranch,
+        geminiApiKey: data.geminiApiKey ?? DEFAULTS.geminiApiKey,
+        geminiModel: data.geminiModel ?? DEFAULTS.geminiModel,
+        claudeApiKey: data.claudeApiKey ?? DEFAULTS.claudeApiKey,
+        backend: (data.backend as 'gemini' | 'claude') ?? DEFAULTS.backend,
+      });
+    },
+    [reset]
+  );
 
   const onError = useCallback((err: Error) => {
     clientLogger.error('Failed to load agent config', err);
@@ -260,21 +262,11 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
   });
 
   // ---------------------------------------------------------------------------
-  // Field helpers
-  // ---------------------------------------------------------------------------
-
-  const set = <K extends keyof AgentConfigData>(key: K, value: AgentConfigData[K]) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
-  };
-
-  // ---------------------------------------------------------------------------
   // Save
   // ---------------------------------------------------------------------------
 
-  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const onFormSubmit = async (data: FormValues) => {
     if (!editable) return;
-    setIsSaving(true);
 
     try {
       const res = await fetch(`/api/v1/projects/${projectId}/agent-config`, {
@@ -282,59 +274,47 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...form,
-          // Coerce empty strings to null for nullable commands
-          testCommand: form.testCommand?.trim() || null,
-          lintCommand: form.lintCommand?.trim() || null,
-          setupCommand: form.setupCommand?.trim() || null,
+          ...data,
+          testCommand: data.testCommand?.trim() || null,
+          lintCommand: data.lintCommand?.trim() || null,
+          setupCommand: data.setupCommand?.trim() || null,
         }),
       });
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
+        const errData = await res.json().catch(() => ({}));
         throw new Error(
-          (data as { error?: { message?: string } })?.error?.message ?? `HTTP ${res.status}`
+          (errData as { error?: { message?: string } })?.error?.message ?? `HTTP ${res.status}`
         );
       }
 
       toast.success('Agent configuration saved.');
+      reset(data); // Mark form as pristine
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
       clientLogger.error('Failed to save agent config', error);
       toast.error('Failed to save agent configuration');
-    } finally {
-      setIsSaving(false);
     }
   };
 
-  // ---------------------------------------------------------------------------
-  // RequireApproval toggle — guard with AlertDialog when turning off
-  // ---------------------------------------------------------------------------
+  const currentRequireApproval = watch('requireApproval');
 
   const handleRequireApprovalChange = (checked: boolean) => {
-    if (!checked && form.requireApproval) {
-      // Turning OFF — show confirmation dialog
-      setPendingApprovalOff(true);
+    if (!checked && currentRequireApproval) {
       setApprovalDialogOpen(true);
       return;
     }
-    set('requireApproval', checked);
+    setValue('requireApproval', checked, { shouldDirty: true });
   };
 
   const confirmDisableApproval = () => {
-    set('requireApproval', false);
-    setPendingApprovalOff(false);
+    setValue('requireApproval', false, { shouldDirty: true });
     setApprovalDialogOpen(false);
   };
 
   const cancelDisableApproval = () => {
-    setPendingApprovalOff(false);
     setApprovalDialogOpen(false);
   };
-
-  // ---------------------------------------------------------------------------
-  // Render
-  // ---------------------------------------------------------------------------
 
   if (isLoading) {
     return <p className="text-text-muted font-mono text-xs">Loading agent configuration…</p>;
@@ -342,65 +322,170 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
 
   return (
     <TooltipProvider>
-      <form onSubmit={handleSave} className="flex flex-col gap-10">
+      <form onSubmit={handleSubmit(onFormSubmit)} className="flex flex-col gap-10">
         {/* ------------------------------------------------------------------ */}
-        {/* EXECUTION                                                            */}
+        {/* AI PROVIDERS                                                         */}
         {/* ------------------------------------------------------------------ */}
         <section className="flex flex-col gap-4">
-          <SectionHeading>EXECUTION</SectionHeading>
-
-          <FormField label="MODEL" htmlFor="modelId" helper="Execution model for tasks">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Input
-                  id="modelId"
-                  value={form.modelId}
-                  onChange={(e) => set('modelId', e.target.value)}
-                  placeholder="claude-sonnet-4-6"
-                  disabled={!editable}
-                  className="font-mono text-sm"
-                />
-              </TooltipTrigger>
-              {!editable && <TooltipContent>Requires Admin or Owner role</TooltipContent>}
-            </Tooltip>
-          </FormField>
+          <SectionHeading>AI PROVIDERS</SectionHeading>
 
           <FormField
-            label="PLAN MODEL"
-            htmlFor="planModelId"
-            helper="Model used for plan generation"
+            label="EXECUTION BACKEND"
+            helper="Which AI agent executes your tasks. Both require the respective CLI installed on the agent machine."
           >
             <Tooltip>
               <TooltipTrigger asChild>
-                <Input
-                  id="planModelId"
-                  value={form.planModelId}
-                  onChange={(e) => set('planModelId', e.target.value)}
-                  placeholder="claude-opus-4-6"
-                  disabled={!editable}
-                  className="font-mono text-sm"
-                />
+                <div className="w-full">
+                  <Controller
+                    name="backend"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        disabled={!editable}
+                      >
+                        <SelectTrigger className="font-mono text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="gemini">Gemini CLI</SelectItem>
+                          <SelectItem value="claude">Claude Code</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
               </TooltipTrigger>
               {!editable && <TooltipContent>Requires Admin or Owner role</TooltipContent>}
             </Tooltip>
           </FormField>
 
-          <FormField label="MAX CONCURRENT TASKS" htmlFor="maxConcurrentTasks">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            {/* Gemini Group */}
+            <div className="border-border-default bg-bg-surface flex flex-col gap-4 rounded-md border p-4">
+              <p className="text-text-secondary font-mono text-[10px] tracking-widest uppercase">
+                Google Gemini
+              </p>
+
+              <FormField
+                label="GEMINI API KEY"
+                helper="Project-specific API key. Leave blank to use system default."
+              >
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Input
+                      {...register('geminiApiKey')}
+                      type="password"
+                      placeholder="AIzaSy..."
+                      disabled={!editable}
+                      className="font-mono text-sm"
+                    />
+                  </TooltipTrigger>
+                  {!editable && <TooltipContent>Requires Admin or Owner role</TooltipContent>}
+                </Tooltip>
+              </FormField>
+
+              <FormField
+                label="GEMINI MODEL"
+                helper="Model used for plan generation and Gemini execution"
+              >
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Input
+                      {...register('geminiModel')}
+                      placeholder="gemini-2.0-flash"
+                      disabled={!editable}
+                      className="font-mono text-sm"
+                    />
+                  </TooltipTrigger>
+                  {!editable && <TooltipContent>Requires Admin or Owner role</TooltipContent>}
+                </Tooltip>
+              </FormField>
+            </div>
+
+            {/* Claude Group */}
+            <div className="border-border-default bg-bg-surface flex flex-col gap-4 rounded-md border p-4">
+              <p className="text-text-secondary font-mono text-[10px] tracking-widest uppercase">
+                Anthropic Claude
+              </p>
+
+              <FormField
+                label="CLAUDE API KEY"
+                helper="Project-specific API key. Leave blank to use system default."
+              >
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Input
+                      {...register('claudeApiKey')}
+                      type="password"
+                      placeholder="sk-ant-..."
+                      disabled={!editable}
+                      className="font-mono text-sm"
+                    />
+                  </TooltipTrigger>
+                  {!editable && <TooltipContent>Requires Admin or Owner role</TooltipContent>}
+                </Tooltip>
+              </FormField>
+
+              <FormField label="EXECUTION MODEL" helper="Execution model for tasks">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Input
+                      {...register('modelId')}
+                      placeholder="claude-sonnet-4-6"
+                      disabled={!editable}
+                      className="font-mono text-sm"
+                    />
+                  </TooltipTrigger>
+                  {!editable && <TooltipContent>Requires Admin or Owner role</TooltipContent>}
+                </Tooltip>
+              </FormField>
+
+              <FormField label="PLAN MODEL" helper="Model used for plan generation">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Input
+                      {...register('planModelId')}
+                      placeholder="claude-opus-4-6"
+                      disabled={!editable}
+                      className="font-mono text-sm"
+                    />
+                  </TooltipTrigger>
+                  {!editable && <TooltipContent>Requires Admin or Owner role</TooltipContent>}
+                </Tooltip>
+              </FormField>
+            </div>
+          </div>
+        </section>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* EXECUTION LIMITS                                                     */}
+        {/* ------------------------------------------------------------------ */}
+        <section className="flex flex-col gap-4">
+          <SectionHeading>EXECUTION LIMITS</SectionHeading>
+
+          <FormField label="MAX CONCURRENT TASKS">
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex items-center gap-4">
-                  <Slider
-                    id="maxConcurrentTasks"
-                    min={1}
-                    max={10}
-                    step={1}
-                    value={[form.maxConcurrentTasks]}
-                    onValueChange={([v]) => set('maxConcurrentTasks', v!)}
-                    disabled={!editable}
-                    className="flex-1"
+                  <Controller
+                    name="maxConcurrentTasks"
+                    control={control}
+                    render={({ field }) => (
+                      <Slider
+                        min={1}
+                        max={10}
+                        step={1}
+                        value={[field.value]}
+                        onValueChange={([v]) => field.onChange(v!)}
+                        disabled={!editable}
+                        className="flex-1"
+                      />
+                    )}
                   />
                   <span className="text-text-secondary w-16 font-mono text-sm">
-                    {form.maxConcurrentTasks} tasks
+                    {watch('maxConcurrentTasks')} tasks
                   </span>
                 </div>
               </TooltipTrigger>
@@ -410,18 +495,15 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
 
           <FormField
             label="TASK TIMEOUT (SECONDS)"
-            htmlFor="taskTimeoutSeconds"
-            helper={`Tasks will be killed after ${Math.round(form.taskTimeoutSeconds / 60)} minutes`}
+            helper={`Tasks will be killed after ${Math.round(watch('taskTimeoutSeconds') / 60)} minutes`}
           >
             <Tooltip>
               <TooltipTrigger asChild>
                 <Input
-                  id="taskTimeoutSeconds"
+                  {...register('taskTimeoutSeconds', { valueAsNumber: true })}
                   type="number"
                   min={30}
                   max={3600}
-                  value={form.taskTimeoutSeconds}
-                  onChange={(e) => set('taskTimeoutSeconds', parseInt(e.target.value, 10) || 30)}
                   disabled={!editable}
                   className="font-mono text-sm"
                 />
@@ -430,22 +512,27 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
             </Tooltip>
           </FormField>
 
-          <FormField label="MAX RETRIES" htmlFor="maxRetriesPerTask">
+          <FormField label="MAX RETRIES">
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex items-center gap-4">
-                  <Slider
-                    id="maxRetriesPerTask"
-                    min={0}
-                    max={5}
-                    step={1}
-                    value={[form.maxRetriesPerTask]}
-                    onValueChange={([v]) => set('maxRetriesPerTask', v!)}
-                    disabled={!editable}
-                    className="flex-1"
+                  <Controller
+                    name="maxRetriesPerTask"
+                    control={control}
+                    render={({ field }) => (
+                      <Slider
+                        min={0}
+                        max={5}
+                        step={1}
+                        value={[field.value]}
+                        onValueChange={([v]) => field.onChange(v!)}
+                        disabled={!editable}
+                        className="flex-1"
+                      />
+                    )}
                   />
                   <span className="text-text-secondary w-16 font-mono text-sm">
-                    {form.maxRetriesPerTask}
+                    {watch('maxRetriesPerTask')}
                   </span>
                 </div>
               </TooltipTrigger>
@@ -453,38 +540,44 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
             </Tooltip>
           </FormField>
 
-          <FormField label="RETRY DELAY" htmlFor="retryDelaySeconds">
+          <FormField label="RETRY DELAY">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Select
-                  value={String(form.retryDelaySeconds)}
-                  onValueChange={(v) => set('retryDelaySeconds', parseInt(v, 10))}
-                  disabled={!editable}
-                >
-                  <SelectTrigger id="retryDelaySeconds" className="font-mono text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="15">15s</SelectItem>
-                    <SelectItem value="30">30s</SelectItem>
-                    <SelectItem value="60">1 min</SelectItem>
-                    <SelectItem value="300">5 min</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="w-full">
+                  <Controller
+                    name="retryDelaySeconds"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        value={String(field.value)}
+                        onValueChange={(v) => field.onChange(parseInt(v, 10))}
+                        disabled={!editable}
+                      >
+                        <SelectTrigger className="font-mono text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="15">15s</SelectItem>
+                          <SelectItem value="30">30s</SelectItem>
+                          <SelectItem value="60">1 min</SelectItem>
+                          <SelectItem value="300">5 min</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
               </TooltipTrigger>
               {!editable && <TooltipContent>Requires Admin or Owner role</TooltipContent>}
             </Tooltip>
           </FormField>
 
-          <FormField label="MAX DIFF SIZE (KB)" htmlFor="maxDiffSizeKb">
+          <FormField label="MAX DIFF SIZE (KB)">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Input
-                  id="maxDiffSizeKb"
+                  {...register('maxDiffSizeKb', { valueAsNumber: true })}
                   type="number"
                   min={1}
-                  value={form.maxDiffSizeKb}
-                  onChange={(e) => set('maxDiffSizeKb', parseInt(e.target.value, 10) || 1)}
                   disabled={!editable}
                   className="font-mono text-sm"
                 />
@@ -500,13 +593,11 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
         <section className="flex flex-col gap-4">
           <SectionHeading>EXECUTION COMMANDS</SectionHeading>
 
-          <FormField label="TEST COMMAND" htmlFor="testCommand">
+          <FormField label="TEST COMMAND">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Input
-                  id="testCommand"
-                  value={form.testCommand ?? ''}
-                  onChange={(e) => set('testCommand', e.target.value || null)}
+                  {...register('testCommand')}
                   placeholder="pnpm test"
                   disabled={!editable}
                   className="font-mono text-sm"
@@ -516,13 +607,11 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
             </Tooltip>
           </FormField>
 
-          <FormField label="LINT COMMAND" htmlFor="lintCommand">
+          <FormField label="LINT COMMAND">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Input
-                  id="lintCommand"
-                  value={form.lintCommand ?? ''}
-                  onChange={(e) => set('lintCommand', e.target.value || null)}
+                  {...register('lintCommand')}
                   placeholder="pnpm lint"
                   disabled={!editable}
                   className="font-mono text-sm"
@@ -532,13 +621,11 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
             </Tooltip>
           </FormField>
 
-          <FormField label="SETUP COMMAND" htmlFor="setupCommand">
+          <FormField label="SETUP COMMAND">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Input
-                  id="setupCommand"
-                  value={form.setupCommand ?? ''}
-                  onChange={(e) => set('setupCommand', e.target.value || null)}
+                  {...register('setupCommand')}
                   placeholder="pnpm install"
                   disabled={!editable}
                   className="font-mono text-sm"
@@ -555,13 +642,11 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
         <section className="flex flex-col gap-4">
           <SectionHeading>GIT SETTINGS</SectionHeading>
 
-          <FormField label="BRANCH PREFIX" htmlFor="branchPrefix">
+          <FormField label="BRANCH PREFIX">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Input
-                  id="branchPrefix"
-                  value={form.branchPrefix}
-                  onChange={(e) => set('branchPrefix', e.target.value)}
+                  {...register('branchPrefix')}
                   placeholder="daemon"
                   disabled={!editable}
                   className="font-mono text-sm"
@@ -571,13 +656,11 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
             </Tooltip>
           </FormField>
 
-          <FormField label="COMMIT PREFIX" htmlFor="commitMessagePrefix">
+          <FormField label="COMMIT PREFIX">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Input
-                  id="commitMessagePrefix"
-                  value={form.commitMessagePrefix}
-                  onChange={(e) => set('commitMessagePrefix', e.target.value)}
+                  {...register('commitMessagePrefix')}
                   placeholder="feat"
                   disabled={!editable}
                   className="font-mono text-sm"
@@ -588,34 +671,34 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
           </FormField>
 
           <div className="flex items-center justify-between">
-            <Label
-              htmlFor="prAutoCreate"
-              className="text-text-secondary font-mono text-xs uppercase"
-            >
+            <Label className="text-text-secondary font-mono text-xs uppercase">
               AUTO-CREATE PULL REQUESTS
             </Label>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span tabIndex={!editable ? 0 : undefined}>
-                  <Switch
-                    id="prAutoCreate"
-                    checked={form.prAutoCreate}
-                    onCheckedChange={(v) => set('prAutoCreate', v)}
-                    disabled={!editable}
+                <div className="flex items-center">
+                  <Controller
+                    name="prAutoCreate"
+                    control={control}
+                    render={({ field }) => (
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={!editable}
+                      />
+                    )}
                   />
-                </span>
+                </div>
               </TooltipTrigger>
               {!editable && <TooltipContent>Requires Admin or Owner role</TooltipContent>}
             </Tooltip>
           </div>
 
-          <FormField label="PR TARGET BRANCH" htmlFor="prTargetBranch">
+          <FormField label="PR TARGET BRANCH">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Input
-                  id="prTargetBranch"
-                  value={form.prTargetBranch}
-                  onChange={(e) => set('prTargetBranch', e.target.value)}
+                  {...register('prTargetBranch')}
                   placeholder="main"
                   disabled={!editable}
                   className="font-mono text-sm"
@@ -633,44 +716,42 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
           <SectionHeading>PLANNING</SectionHeading>
 
           <div className="flex items-center justify-between">
-            <Label
-              htmlFor="requireApproval"
-              className="text-text-secondary font-mono text-xs uppercase"
-            >
+            <Label className="text-text-secondary font-mono text-xs uppercase">
               REQUIRE PLAN APPROVAL
             </Label>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span tabIndex={!editable ? 0 : undefined}>
+                <div className="flex items-center">
                   <Switch
-                    id="requireApproval"
-                    checked={pendingApprovalOff ? true : form.requireApproval}
+                    checked={currentRequireApproval}
                     onCheckedChange={handleRequireApprovalChange}
                     disabled={!editable}
                   />
-                </span>
+                </div>
               </TooltipTrigger>
               {!editable && <TooltipContent>Requires Admin or Owner role</TooltipContent>}
             </Tooltip>
           </div>
 
           <div className="flex items-center justify-between">
-            <Label
-              htmlFor="autoGeneratePlan"
-              className="text-text-secondary font-mono text-xs uppercase"
-            >
+            <Label className="text-text-secondary font-mono text-xs uppercase">
               AUTO-GENERATE PLAN ON SPEC SAVE
             </Label>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span tabIndex={!editable ? 0 : undefined}>
-                  <Switch
-                    id="autoGeneratePlan"
-                    checked={form.autoGeneratePlan}
-                    onCheckedChange={(v) => set('autoGeneratePlan', v)}
-                    disabled={!editable}
+                <div className="flex items-center">
+                  <Controller
+                    name="autoGeneratePlan"
+                    control={control}
+                    render={({ field }) => (
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={!editable}
+                      />
+                    )}
                   />
-                </span>
+                </div>
               </TooltipTrigger>
               {!editable && <TooltipContent>Requires Admin or Owner role</TooltipContent>}
             </Tooltip>
@@ -685,18 +766,22 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
 
           <FormField
             label="ALLOWED FILE GLOBS"
-            htmlFor="allowedFileGlobs"
             helper="Type a glob pattern and press Enter or comma to add. Leave empty to allow all files."
           >
             <Tooltip>
               <TooltipTrigger asChild>
-                <div>
-                  <GlobTagInput
-                    id="allowedFileGlobs"
-                    value={form.allowedFileGlobs}
-                    onChange={(v) => set('allowedFileGlobs', v)}
-                    disabled={!editable}
-                    placeholder="src/**/*.ts"
+                <div className="w-full">
+                  <Controller
+                    name="allowedFileGlobs"
+                    control={control}
+                    render={({ field }) => (
+                      <GlobTagInput
+                        value={field.value}
+                        onChange={field.onChange}
+                        disabled={!editable}
+                        placeholder="src/**/*.ts"
+                      />
+                    )}
                   />
                 </div>
               </TooltipTrigger>
@@ -706,18 +791,22 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
 
           <FormField
             label="FORBIDDEN FILE GLOBS"
-            htmlFor="forbiddenFileGlobs"
             helper="Files matching these patterns will never be touched by the agent."
           >
             <Tooltip>
               <TooltipTrigger asChild>
-                <div>
-                  <GlobTagInput
-                    id="forbiddenFileGlobs"
-                    value={form.forbiddenFileGlobs}
-                    onChange={(v) => set('forbiddenFileGlobs', v)}
-                    disabled={!editable}
-                    placeholder="**/*.env"
+                <div className="w-full">
+                  <Controller
+                    name="forbiddenFileGlobs"
+                    control={control}
+                    render={({ field }) => (
+                      <GlobTagInput
+                        value={field.value}
+                        onChange={field.onChange}
+                        disabled={!editable}
+                        placeholder="**/*.env"
+                      />
+                    )}
                   />
                 </div>
               </TooltipTrigger>
@@ -751,8 +840,8 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
           <Tooltip>
             <TooltipTrigger asChild>
               <span tabIndex={!editable ? 0 : undefined}>
-                <Button type="submit" disabled={!editable || isSaving} size="sm">
-                  {isSaving ? 'Saving…' : 'Save Configuration'}
+                <Button type="submit" disabled={!editable || isSubmitting || !isDirty} size="sm">
+                  {isSubmitting ? 'Saving…' : 'Save Configuration'}
                 </Button>
               </span>
             </TooltipTrigger>

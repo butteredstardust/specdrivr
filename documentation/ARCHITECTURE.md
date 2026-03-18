@@ -48,8 +48,8 @@ _Spec-driven autonomous code execution for engineering teams_
 - The web application (Next.js) never exposes database credentials to the client. All DB access goes through Server Actions or Route Handlers on the server only.
 - lib/db.ts, lib/env.ts, and lib/logger.ts all carry import 'server-only' - any accidental client import is a compile-time error.
 - The DAEMON agent communicates via the public API only. No direct DB access from the agent process.
-- User sessions are stored in the database (Postgres) with a 30-day TTL. Revoking a session deletes the record immediately.
-- API tokens are stored as bcrypt hashes. The raw token is shown exactly once (on creation) and cannot be recovered.
+- User sessions are stored in the database (Postgres) with a 7-day TTL (defined in `src/lib/auth.ts`). Revoking a session deletes the record immediately.
+- API tokens (Agent Tokens) use a prefix-based lookup for performance: the first 10 characters are used to find the record, and the full token is verified via `bcrypt.compare`. The raw token is shown exactly once (on creation) and cannot be recovered.
 
 # **23\. Stack-Specific Engineering Constraints**
 
@@ -153,7 +153,8 @@ Example: commit 33a0f48 fixed an esbuild vulnerability via pnpm overrides. Alway
 | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | Session retrieval in Server Components: the data returned by auth() is reactive to the DB record. | Always use `const session = await auth();` from `src/lib/auth.ts`. It wraps the Better Auth client for internal use.              |
 | Middleware session check: the edge session check in proxy.ts is restricted to cookie existence.   | `proxy.ts` performs a fast existence check for `better-auth.session_token`. Cryptographic verification happens in Route Handlers. |
-| User metadata and roles: the `users` table is extended with custom fields like `role`.            | Access roles via `session.user.role`. This is populated via the `additionalFields` configuration in `src/lib/auth.ts`.            |
+| User metadata and roles: the `users` table is extended with custom fields like `role`, `isActive`, `theme`, and `onboardingStep`.            | These are defined as `additionalFields` in `src/lib/auth.ts`. Access roles via `session.user.role`.            |
+| Session Security & Cache: the implementation uses `cookieCache` (5m) and `trustedOrigins` for security. | Configured in `authInstance` in `src/lib/auth.ts`. |
 | API Route endpoints: authentication logic is unified under a single catch-all route.              | Use `/api/auth/[...auth]` handled by `toNextJsHandler`. Do not implement manual sign-in routes.                                   |
 
 # **24\. Concurrency & Race Condition Handling**
@@ -197,7 +198,7 @@ Resolution: tasks are picked up by the agent by querying SELECT \* FROM tasks WH
 
 Scenario: Admin removes Member from a project while Member has an active session. Member's requests should immediately return 403.
 
-Resolution: all project-scoped endpoints check project_members status and role on every request (not cached in the session token). Caching membership in the JWT is not acceptable - role changes must take effect immediately. The session token contains only userId; role is always fetched fresh from the DB per request. This is a deliberate performance trade-off: one extra DB read per request vs stale permission data.
+Resolution: the system uses a centralized RBAC system in `src/lib/rbac.ts`. Project-scoped actions check membership via `memberRepository` on every request. The `ROLE_HIERARCHY` (`viewer` < `member` < `admin` < `owner`) and a `PERMISSIONS` matrix define access levels for all core operations. Membership is never cached in the JWT; it is always fetched fresh from the DB to ensure immediate revocation.
 
 ## **24.6 Session Heartbeat Race**
 

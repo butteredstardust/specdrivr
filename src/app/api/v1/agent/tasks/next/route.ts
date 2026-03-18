@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAgentToken } from '@/lib/agent-auth';
 import { handleApiError } from '@/lib/error-handler';
-import { taskRepository } from '@/repositories/task-repository';
+import { taskRepository, agentConfigRepository } from '@/repositories';
 import { getGitHubConfig, getAgentBranchName, getAgentCommitMessage } from '@/lib/github';
 import { logger } from '@/lib/logger';
 
@@ -26,6 +26,8 @@ export async function GET(request: NextRequest) {
     if (!nextTask) {
       return NextResponse.json({ data: null });
     }
+
+    const agentConfig = await agentConfigRepository.getByProjectId(agentToken.projectId);
 
     let githubConfig = null;
     const ghConfig = await getGitHubConfig(agentToken.projectId);
@@ -53,6 +55,13 @@ export async function GET(request: NextRequest) {
       data: {
         ...nextTask,
         githubConfig,
+        agentConfig: agentConfig
+          ? {
+              backend: agentConfig.backend,
+              geminiApiKey: agentConfig.geminiApiKey,
+              claudeApiKey: agentConfig.claudeApiKey,
+            }
+          : null,
       },
     });
   } catch (error) {

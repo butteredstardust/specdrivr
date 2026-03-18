@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { planRepository } from '@/repositories/plan-repository';
+import {
+  planRepository,
+  specificationRepository,
+  taskRepository,
+  agentConfigRepository,
+} from '@/repositories';
 import { auth } from '@/lib/auth';
 import { handleApiError, formatErrorResponse } from '@/lib/error-handler';
 import { requireAdmin } from '@/lib/rbac';
-import { specificationRepository } from '@/repositories/specification-repository';
+import { generateTasks } from '@/lib/gemini';
 import { z } from 'zod';
 
 interface RouteParams {
@@ -35,10 +40,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         { status: 404 }
       );
 
-    const spec = await specificationRepository.getById(plan.specId);
-    if (!spec)
+    const spec = await specificationRepository.getByIdWithVersion(plan.specId);
+    if (!spec || !spec.currentVersion)
       return NextResponse.json(
-        { error: { code: 'NOT_FOUND', message: 'Specification not found' } },
+        { error: { code: 'NOT_FOUND', message: 'Specification or version not found' } },
         { status: 404 }
       );
 
@@ -54,14 +59,58 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const body = await request.json();
     const parsed = ApprovePlanSchema.parse({ id: planId, ...body });
 
+    // 1. Approve the plan and create agent session
     const { plan: updatedPlan, sessionId } = await planRepository.approvePlan({
       planId: parsed.id,
       userId: session.user.id,
       notes: parsed.notes,
     });
 
+    const config = await agentConfigRepository.getByProjectId(spec.projectId);
+
+    // 2. Generate tasks immediately after approval
+    const generatedTasks = await generateTasks(
+      { name: spec.name, content: spec.currentVersion.markdownContent },
+      { markdownContent: updatedPlan.markdownContent || '' },
+      { apiKey: config?.geminiApiKey, model: config?.geminiModel }
+    );
+
+    // 3. Create task records in order
+    const taskIdMap = new Map<number, string>(); // generatedIndex → externalId
+
+    for (let i = 0; i < generatedTasks.tasks.length; i++) {
+      const t = generatedTasks.tasks[i];
+      const externalId = `T-${(i + 1).toString().padStart(3, '0')}`;
+
+      const dependsOn =
+        t.dependsOnIndex !== null
+          ? ([taskIdMap.get(t.dependsOnIndex)].filter(Boolean) as string[])
+          : [];
+
+      await taskRepository.create({
+        planId: updatedPlan.id,
+        externalId,
+        title: t.title,
+        description: t.description,
+        status: 'todo',
+        dependsOn,
+        executionOrder: i + 1,
+        estimatedMinutes: t.estimatedMinutes,
+        doneCriteria: t.doneCriteria,
+        verifyCommand: t.verifyCommand,
+        recommendedModel: t.recommendedModel === 'pro' ? 'pro' : 'sonnet', // Mapping flash/pro to project specific model names if needed, but schema uses 'sonnet' as default.
+      });
+
+      taskIdMap.set(i, externalId);
+    }
+
+    // Update plan task count
+    await planRepository.update(updatedPlan.id, {
+      taskCount: generatedTasks.tasks.length,
+    });
+
     return NextResponse.json({
-      data: { plan: updatedPlan, sessionId },
+      data: { plan: updatedPlan, sessionId, tasksCount: generatedTasks.tasks.length },
     });
   } catch (error) {
     if (error instanceof z.ZodError) {

@@ -28,6 +28,7 @@ export { tokenRepository, TokenRepository } from './token-repository';
 export { inviteRepository, InviteRepository } from './invite-repository';
 export { sessionRepository, SessionRepository } from './session-repository';
 export { agentConfigRepository, AgentConfigRepository } from './agent-config-repository';
+export { agentLogRepository, AgentLogRepository } from './agent-log-repository';
 export { BaseRepository } from './base-repository';
 
 /**

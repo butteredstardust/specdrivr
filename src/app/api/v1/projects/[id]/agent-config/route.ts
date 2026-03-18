@@ -34,6 +34,10 @@ const updateAgentConfigSchema = z.object({
   githubWebhookSecret: z.string().nullable().optional(),
   slackBotToken: z.string().nullable().optional(),
   slackChannelId: z.string().nullable().optional(),
+  geminiApiKey: z.string().nullable().optional(),
+  geminiModel: z.string().optional(),
+  claudeApiKey: z.string().nullable().optional(),
+  backend: z.enum(['gemini', 'claude']).optional(),
 });
 
 export async function GET(_request: NextRequest, { params }: RouteParams) {

@@ -1,80 +1,104 @@
 'use client';
 
-import { usePolling } from '@/hooks/use-polling';
-
-interface AgentEvent {
-  id: number;
-  sessionId: number;
-  eventType: string;
-  message: string;
-  createdAt: string;
-}
+import { useState, useEffect } from 'react';
+import { TerminalLog } from '@/components/ui/terminal-log';
+import { Filter } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface EventLogProps {
   sessionId: number | null;
   className?: string;
 }
 
-const EVENT_BADGE: Record<string, { label: string; className: string }> = {
-  TASK_DONE: { label: 'TASK_DONE', className: 'text-status-emerald bg-status-emerald/10' },
-  TASK_FAILED: { label: 'TASK_FAILED', className: 'text-status-red bg-status-red/10' },
-  TASK_BLOCKED: { label: 'BLOCKED', className: 'text-phosphor-amber bg-phosphor-amber/10' },
-  TASK_START: { label: 'TASK_START', className: 'text-text-secondary bg-bg-elevated' },
-  SESSION_COMPLETED: {
-    label: 'SESSION_DONE',
-    className: 'text-status-emerald bg-status-emerald/10',
-  },
-  SESSION_FAILED: { label: 'SESSION_FAIL', className: 'text-status-red bg-status-red/10' },
-  SESSION_PAUSED: { label: 'PAUSED', className: 'text-phosphor-amber bg-phosphor-amber/10' },
-};
-
-const DEFAULT_BADGE = { label: '', className: 'text-text-muted bg-bg-elevated' };
-
 export function EventLog({ sessionId, className }: EventLogProps) {
-  const url = sessionId !== null ? `/api/v1/sessions/${sessionId}/events?limit=30` : null;
+  const [logs, setLogs] = useState<string[]>([]);
+  const [showErrorsOnly, setShowErrorsOnly] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const { data, isLoading, error } = usePolling<AgentEvent[]>({
-    url,
-    interval: 5000,
-  });
+  useEffect(() => {
+    if (sessionId === null) return;
 
-  const events = Array.from(new Map((data ?? []).map((e) => [e.id, e])).values());
+    setLogs([]);
+    setError(null);
+    setIsConnected(false);
+
+    const es = new EventSource(`/api/v1/sessions/${sessionId}/stream`);
+
+    es.onopen = () => {
+      setIsConnected(true);
+    };
+
+    es.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'connected' || data.type === 'history_end') {
+          return;
+        }
+        if (data.line !== undefined) {
+          const date = new Date(data.ts || Date.now());
+          const timeStr = date.toLocaleTimeString('en-US', { hour12: false });
+          let formattedLine = `[${timeStr}] ${data.line}`;
+
+          if (data.level === 'error') {
+            formattedLine = `ERROR: ${formattedLine}`;
+          } else if (data.level === 'warn') {
+            formattedLine = `WARN: ${formattedLine}`;
+          }
+
+          setLogs((prev) => [...prev, formattedLine]);
+        }
+      } catch {
+        // ignore parse errors
+      }
+    };
+
+    es.onerror = (err) => {
+      console.error('SSE Error:', err);
+      setError('Connection lost. Reconnecting...');
+      setIsConnected(false);
+    };
+
+    return () => {
+      es.close();
+    };
+  }, [sessionId]);
+
+  const filteredLogs = showErrorsOnly ? logs.filter((l) => l.includes('ERROR:')) : logs;
 
   return (
     <div className={className}>
-      <p className="text-muted-foreground mb-2 font-mono text-[10px] tracking-[0.15em] uppercase">Event Log</p>
+      <div className="mb-2 flex items-center justify-between">
+        <p className="text-muted-foreground font-mono text-[10px] tracking-[0.15em] uppercase">
+          Session Log
+        </p>
+        <Button
+          variant="ghost"
+          size="sm"
+          className={`h-6 px-2 font-mono text-[10px] ${showErrorsOnly ? 'bg-bg-elevated' : ''}`}
+          onClick={() => setShowErrorsOnly(!showErrorsOnly)}
+        >
+          <Filter className="mr-1 h-3 w-3" />
+          {showErrorsOnly ? 'Errors Only' : 'All Logs'}
+        </Button>
+      </div>
 
-      <div className="bg-bg-elevated border-border-default rounded border">
-        {error ? (
-          <p className="text-status-red px-3 py-2 font-mono text-xs">
-            Could not load events. Retrying...
-          </p>
-        ) : isLoading && events.length === 0 ? (
-          <p className="text-muted-foreground px-3 py-2 font-mono text-xs">Connecting…</p>
-        ) : sessionId === null || events.length === 0 ? (
+      <div className="bg-bg-elevated border-border-default relative flex min-h-0 flex-1 flex-col overflow-hidden rounded border">
+        {error && (
+          <div className="bg-status-red/10 text-status-red border-status-red/20 absolute top-0 right-0 left-0 z-10 border-b px-3 py-1 font-mono text-[10px]">
+            {error}
+          </div>
+        )}
+        {!isConnected && logs.length === 0 && !error ? (
+          <p className="text-muted-foreground px-3 py-2 font-mono text-xs">Connecting to stream…</p>
+        ) : sessionId === null ? (
           <p className="text-muted-foreground px-3 py-2 font-mono text-xs">No active session.</p>
         ) : (
-          <ul className="divide-border-default divide-y">
-            {events.map((e) => {
-              const badge = EVENT_BADGE[e.eventType] ?? { ...DEFAULT_BADGE, label: e.eventType };
-              const time = new Date(e.createdAt).toLocaleTimeString('en-US', { hour12: false });
-              return (
-                <li key={e.id} className="flex items-center gap-2 px-3 py-1.5">
-                  <span className="text-muted-foreground w-16 shrink-0 font-mono text-[10px]">
-                    {time}
-                  </span>
-                  <span
-                    className={`shrink-0 rounded px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase ${badge.className}`}
-                  >
-                    {badge.label || e.eventType}
-                  </span>
-                  <span className="text-foreground truncate font-mono text-[10px]">
-                    {e.message}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
+          <TerminalLog
+            lines={filteredLogs}
+            className="h-full max-h-none flex-1 rounded-none border-0"
+            autoScroll={true}
+          />
         )}
       </div>
     </div>
