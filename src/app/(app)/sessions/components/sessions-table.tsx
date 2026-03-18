@@ -3,7 +3,15 @@
 import * as React from 'react';
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { MoreHorizontal, ChevronRight, ChevronDown, Loader2, AlertCircle } from 'lucide-react';
+import {
+  MoreHorizontal,
+  ChevronRight,
+  ChevronDown,
+  Loader2,
+  AlertCircle,
+  XCircle,
+} from 'lucide-react';
+import { clientLogger } from '@/lib/logger-client';
 import { Session } from '../types';
 
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
@@ -43,7 +51,7 @@ function StatusBadge({ status }: { status: Session['status'] }) {
     case 'failed':
       return <PixelBadge variant="red">Failed</PixelBadge>;
     case 'cancelled':
-      return <PixelBadge variant="muted">Stopped</PixelBadge>;
+      return <PixelBadge variant="muted">Cancelled</PixelBadge>;
     default:
       return <PixelBadge>{status}</PixelBadge>;
   }
@@ -106,7 +114,7 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
       const res = await fetch(`/api/v1/sessions/${sessionId}/cancel`, { method: 'POST' });
       if (!res.ok) throw new Error('Failed to cancel session');
     } catch (error) {
-      console.error('Cancel failed:', error);
+      clientLogger.error('Cancel failed', { error });
     } finally {
       setCancellingIds((prev) => {
         const next = new Set(prev);
@@ -253,7 +261,8 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
                             onClick={() => handleCancel(session.id)}
                             className="h-6 px-2 font-mono text-[10px] tracking-wider uppercase transition-colors"
                           >
-                            {cancellingIds.has(session.id) ? 'Stopping…' : 'Stop'}
+                            <XCircle className="mr-1 h-3 w-3" />
+                            {cancellingIds.has(session.id) ? 'Cancelling…' : 'Cancel'}
                           </Button>
                         )}
                         <Button

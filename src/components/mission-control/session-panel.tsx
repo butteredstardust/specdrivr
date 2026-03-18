@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Pause, Play, X, RefreshCw, CheckCircle, ChevronRight } from 'lucide-react';
+import { Pause, Play, XCircle, RefreshCw, CheckCircle, ChevronRight } from 'lucide-react';
 import type { UserRole } from '@/db/schema';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { Button } from '@/components/ui/button';
@@ -223,7 +223,7 @@ export function SessionPanel({
                 icon={<Pause className="h-3 w-3" />}
                 label="Pause"
                 variant="outline"
-                className="border-phosphor-amber text-phosphor-amber hover:bg-phosphor-amber/10 border"
+                className="border-phosphor-amber/50 text-phosphor-amber hover:bg-phosphor-amber/10"
               />
             ) : (
               <ControlButton
@@ -231,12 +231,13 @@ export function SessionPanel({
                 onClick={onResume}
                 icon={<Play className="h-3 w-3" />}
                 label="Resume"
+                variant="default"
               />
             )}
             <ControlButton
               canControl={canControl}
               onClick={onCancel}
-              icon={<X className="h-3 w-3" />}
+              icon={<XCircle className="h-3 w-3" />}
               label="Cancel"
               variant="destructive"
             />
@@ -294,7 +295,7 @@ export function SessionPanel({
             <ControlButton
               canControl={canControl}
               onClick={onDismiss}
-              icon={<X className="h-3 w-3" />}
+              icon={<XCircle className="h-3 w-3" />}
               label="Dismiss"
               variant="ghost"
               disabledTooltip="Requires admin role"
