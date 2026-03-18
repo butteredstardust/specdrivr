@@ -9,6 +9,7 @@ import { usePolling } from '@/hooks/use-polling';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { CheckCircle2 } from 'lucide-react';
 import CodeMirror from '@uiw/react-codemirror';
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 import { languages } from '@codemirror/language-data';
@@ -470,14 +471,28 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
               </Tooltip>
             )}
             {canAdmin ? (
-              <Button size="sm" variant="violet" onClick={handleApprove} disabled={isActioning}>
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-status-emerald/50 text-status-emerald hover:bg-status-emerald/10 h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase"
+                onClick={handleApprove}
+                disabled={isActioning}
+              >
+                <CheckCircle2 className="h-3.5 w-3.5" />
                 Approve & Execute
               </Button>
             ) : (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span tabIndex={0}>
-                    <Button size="sm" variant="violet" disabled aria-disabled>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-status-emerald/50 text-status-emerald h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase opacity-50"
+                      disabled
+                      aria-disabled
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5" />
                       Approve & Execute
                     </Button>
                   </span>
@@ -571,14 +586,17 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
             <div className="flex gap-2">
               <Button
                 size="sm"
+                variant="phosphor"
                 onClick={handleRequestChanges}
                 disabled={isActioning || !feedbackText.trim()}
+                className="h-8 font-mono text-[10px] tracking-widest uppercase"
               >
                 Submit Feedback
               </Button>
               <Button
                 size="sm"
                 variant="ghost"
+                className="h-8 font-mono text-[10px] tracking-widest uppercase"
                 onClick={() => {
                   setChangesOpen(false);
                   setFeedbackText('');
@@ -603,7 +621,8 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
             <div className="flex gap-2">
               <Button
                 size="sm"
-                className="bg-status-red hover:bg-status-red/80 text-white"
+                variant="outline"
+                className="bg-status-red/10 border-status-red/50 text-status-red hover:bg-status-red/20 h-8 font-mono text-[10px] tracking-widest uppercase"
                 onClick={handleReject}
                 disabled={isActioning || !rejectText.trim()}
               >
@@ -612,6 +631,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
               <Button
                 size="sm"
                 variant="ghost"
+                className="h-8 font-mono text-[10px] tracking-widest uppercase"
                 onClick={() => {
                   setRejectOpen(false);
                   setRejectText('');

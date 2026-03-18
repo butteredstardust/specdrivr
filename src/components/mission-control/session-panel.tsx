@@ -226,7 +226,8 @@ export function SessionPanel({
                 onClick={onResume}
                 icon={<Play className="mr-1.5 h-3 w-3" />}
                 label="Resume"
-                variant="default"
+                variant="outline"
+                className="border-status-emerald/50 text-status-emerald hover:bg-status-emerald/10"
               />
             )}
             <ControlButton
@@ -234,7 +235,8 @@ export function SessionPanel({
               onClick={onCancel}
               icon={<XCircle className="mr-1.5 h-3 w-3" />}
               label="Cancel"
-              variant="destructive"
+              variant="outline"
+              className="border-status-red/50 text-status-red hover:bg-status-red/10"
             />
           </div>
         </div>

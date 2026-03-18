@@ -158,7 +158,8 @@ export default function SessionDetailPage({ params }: PageProps) {
           {session?.status === 'paused' && (
             <Button
               size="sm"
-              variant="default"
+              variant="outline"
+              className="border-status-emerald/50 text-status-emerald hover:bg-status-emerald/10"
               onClick={() => handleAction('resume')}
               disabled={isUpdating}
             >
@@ -169,7 +170,8 @@ export default function SessionDetailPage({ params }: PageProps) {
           {session && !TERMINAL_STATUSES.includes(session.status) && (
             <Button
               size="sm"
-              variant="destructive"
+              variant="outline"
+              className="border-status-red/50 text-status-red hover:bg-status-red/10 h-8 font-mono text-[10px] tracking-widest uppercase"
               onClick={() => handleAction('cancel')}
               disabled={isUpdating}
             >

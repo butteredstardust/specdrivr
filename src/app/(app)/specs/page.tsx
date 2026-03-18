@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useQueryState, parseAsString } from 'nuqs';
 import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
 import { PageHeader } from '@/components/ui/page-header';
 import { PixelBadge } from '@/components/ui/pixel-badge';
 import {
@@ -18,7 +19,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Plus, MoreHorizontal } from 'lucide-react';
+import { Plus, MoreHorizontal, Search, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import type { UserRole, SpecStatus } from '@/db/schema';
 
@@ -97,6 +99,14 @@ export default function SpecsPage(): React.ReactElement {
   const effectiveProjectId = activeProjectId ?? urlProjectId;
 
   const [activeTab, setActiveTab] = useState<string>('all');
+  const [search, setSearch] = useQueryState(
+    'search',
+    parseAsString.withDefault('').withOptions({
+      shallow: true,
+      history: 'replace',
+      throttleMs: 300,
+    })
+  );
 
   const specsUrl =
     effectiveProjectId !== null ? `/api/v1/specs?projectId=${effectiveProjectId}` : null;
@@ -108,20 +118,35 @@ export default function SpecsPage(): React.ReactElement {
 
   const canCreate = userRole === 'member' || userRole === 'admin' || userRole === 'owner';
 
-  const allSpecs = specs ?? [];
+  const allSpecs = useMemo(() => specs ?? [], [specs]);
+
   const countByStatus = (value: string, status?: SpecStatus) => {
+    if (value === 'all') return allSpecs.length;
     if (value === 'pending') {
       return allSpecs.filter((s) => s.status === 'pending_plan' || s.status === 'pending_approval')
         .length;
     }
-    return status ? allSpecs.filter((s) => s.status === status).length : allSpecs.length;
+    return status ? allSpecs.filter((s) => s.status === status).length : 0;
   };
-  const filteredSpecs = allSpecs.filter((spec) => {
-    if (activeTab === 'all') return true;
-    if (activeTab === 'pending')
-      return spec.status === 'pending_plan' || spec.status === 'pending_approval';
-    return spec.status === activeTab;
-  });
+
+  const filteredSpecs = useMemo(() => {
+    let result = allSpecs;
+
+    // Filter by tab
+    if (activeTab === 'pending') {
+      result = result.filter((s) => s.status === 'pending_plan' || s.status === 'pending_approval');
+    } else if (activeTab !== 'all') {
+      result = result.filter((s) => s.status === activeTab);
+    }
+
+    // Filter by search
+    if (search) {
+      const term = search.toLowerCase();
+      result = result.filter((s) => s.name.toLowerCase().includes(term));
+    }
+
+    return result;
+  }, [allSpecs, activeTab, search]);
 
   const newSpecButton = (
     <Button
@@ -160,28 +185,59 @@ export default function SpecsPage(): React.ReactElement {
           }
         />
 
-        {/* Filter tabs */}
-        <div className="border-border-default border-b px-6 py-2.5">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
-              {STATUS_TABS.map(({ value, label, status }) => {
-                const count = countByStatus(value, status);
-                return (
-                  <TabsTrigger
-                    key={value}
-                    value={value}
-                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:bg-secondary data-[state=inactive]:text-text-secondary hover:text-text-primary h-auto rounded px-2.5 py-1 font-mono text-xs tracking-wider uppercase transition-all data-[state=active]:shadow-none"
-                  >
-                    {label}
-                    {count > 0 && <span className="ml-1 opacity-60">{count}</span>}
-                  </TabsTrigger>
-                );
-              })}
-            </TabsList>
+        {/* Toolbar: Search + Filter tabs */}
+        <div className="border-border-default flex flex-wrap items-center gap-4 border-b px-6 py-3">
+          {/* Search */}
+          <div className="relative w-64">
+            <Search className="text-text-muted absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
+            <Input
+              placeholder="SEARCH SPECS..."
+              className="bg-bg-elevated h-8 pl-8 font-mono text-[10px] tracking-widest uppercase transition-all focus:ring-1 focus:ring-accent-violet/30"
+              value={search}
+              onChange={(e) => setSearch(e.target.value || null)}
+            />
+            {search && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSearch(null)}
+                className="text-text-muted hover:text-text-primary absolute top-1/2 right-1 h-6 w-6 -translate-y-1/2"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            )}
+          </div>
 
-            {/* Single shared content panel keyed by activeTab */}
-            <TabsContent value={activeTab} className="mt-0">
-              {effectiveProjectId === null ? (
+          <div className="bg-border-default/50 mx-1 h-4 w-px" />
+
+          {/* Status Filter Tabs */}
+          <div className="flex items-center gap-1.5">
+            {STATUS_TABS.map(({ value, label, status }) => {
+              const count = countByStatus(value, status);
+              const isActive = activeTab === value;
+              return (
+                <Button
+                  key={value}
+                  variant={isActive ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setActiveTab(value)}
+                  className={cn(
+                    'h-7 px-3 font-mono text-[10px] tracking-widest uppercase transition-all',
+                    isActive
+                      ? 'bg-accent-violet text-white shadow-sm'
+                      : 'text-text-muted hover:bg-bg-elevated hover:text-text-primary'
+                  )}
+                >
+                  {label}
+                  {count > 0 && <span className="ml-1.5 opacity-50">{count}</span>}
+                </Button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex-1">
+          {effectiveProjectId === null ? (
                 <div className="flex flex-col items-center gap-3 py-16">
                   <DaemonMascot size={48} expression="idle" />
                   <p className="text-text-secondary font-mono text-sm">No project selected.</p>
@@ -265,8 +321,6 @@ export default function SpecsPage(): React.ReactElement {
                   </TableBody>
                 </Table>
               )}
-            </TabsContent>
-          </Tabs>
         </div>
       </div>
     </TooltipProvider>
