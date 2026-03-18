@@ -11,7 +11,7 @@ interface MatrixScreensaverProps {
 
 export function MatrixScreensaver({
   className,
-  color = '#7c5cfc', // --accent-violet
+  color = 'var(--accent-violet)',
   backgroundColor = 'rgba(13, 13, 10, 0.15)', // --terminal-bg with opacity
 }: MatrixScreensaverProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -22,6 +22,14 @@ export function MatrixScreensaver({
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+
+    // Resolve CSS variables to actual colors for canvas drawing
+    const styles = getComputedStyle(document.documentElement);
+    const resolvedColor = color.startsWith('var(') 
+      ? styles.getPropertyValue(color.slice(4, -1)).trim() || '#7c5cfc'
+      : color;
+    const amberColor = styles.getPropertyValue('--phosphor-amber').trim() || '#ffa500';
+    const terminalBgColor = styles.getPropertyValue('--terminal-bg').trim() || '#0d0d0a';
 
     let width = (canvas.width = canvas.offsetWidth);
     let height = (canvas.height = canvas.offsetHeight);
@@ -70,7 +78,7 @@ export function MatrixScreensaver({
       ctx.globalAlpha = 0.15; // Keep background rain very faint
       for (let i = 0; i < drops.length; i++) {
         const char = letters[Math.floor(Math.random() * letters.length)];
-        ctx.fillStyle = Math.random() > 0.98 ? '#ffa500' : color;
+        ctx.fillStyle = Math.random() > 0.98 ? amberColor : resolvedColor;
 
         ctx.fillText(char, i * fontSize, drops[i] * fontSize);
 
@@ -99,16 +107,16 @@ export function MatrixScreensaver({
 
           if (type === 3) {
             // Eyes - Amber
-            ctx.fillStyle = '#ffa500';
+            ctx.fillStyle = amberColor;
           } else if (type === 4) {
             // Mouth - Happy Smile (Amber)
-            ctx.fillStyle = '#ffa500';
+            ctx.fillStyle = amberColor;
           } else if (type === 2) {
             // Antenna - Occasional flicker
-            ctx.fillStyle = Math.random() > 0.1 ? color : '#ffa500';
+            ctx.fillStyle = Math.random() > 0.1 ? resolvedColor : amberColor;
           } else {
             // Body - Violet with slight flicker
-            ctx.fillStyle = color;
+            ctx.fillStyle = resolvedColor;
             ctx.globalAlpha = Math.random() > 0.05 ? 1.0 : 0.6;
           }
 
