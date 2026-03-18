@@ -94,7 +94,7 @@ export function SpecEditor(props: SpecEditorProps) {
           placeholder="Untitled spec"
           className="text-text-primary placeholder:text-text-muted flex-1 border-none bg-transparent font-mono text-sm shadow-none outline-none focus-visible:ring-0"
         />
-        {saveError && <p className="text-sm text-red-400">{saveError}</p>}
+        {saveError && <p className="text-status-red text-sm">{saveError}</p>}
         <Button size="sm" onClick={handleSave} disabled={isSaving || !isDirty}>
           {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
         </Button>
