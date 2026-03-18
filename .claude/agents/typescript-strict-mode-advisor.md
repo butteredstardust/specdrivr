@@ -23,6 +23,7 @@ claude agent typescript-strict-mode-advisor "Audit advanced type patterns"
 ## What It Checks
 
 ### 1. Strict Mode Configuration
+
 ```json
 {
   "compilerOptions": {
@@ -45,6 +46,7 @@ claude agent typescript-strict-mode-advisor "Audit advanced type patterns"
 ```
 
 ### 2. Proper Type Annotations
+
 ```typescript
 // ✓ CORRECT - Explicit return types
 export async function fetchUser(id: string): Promise<User | null> {
@@ -70,6 +72,7 @@ export function validateEmail(email) {
 ```
 
 ### 3. Null/Undefined Handling
+
 ```typescript
 // ✓ CORRECT - Explicit null checks
 async function updateProject(id: string | null): Promise<void> {
@@ -92,13 +95,14 @@ async function updateProject(id: string | null): Promise<void> {
 // ❌ WRONG - Ignoring nullability
 async function updateProject(id: string | null) {
   const project = await db.query.projects.findFirst({
-    where: eq(projects.id, id),  // TS Error: potentially null
+    where: eq(projects.id, id), // TS Error: potentially null
   });
-  project.name = 'New Name';  // Could be null!
+  project.name = 'New Name'; // Could be null!
 }
 ```
 
 ### 4. Generic Type Parameters
+
 ```typescript
 // ✓ CORRECT - Proper generic constraints
 export async function paginate<T extends { id: string }>(
@@ -129,11 +133,10 @@ export function paginate(items: any[], page: number, pageSize: number) {
 ```
 
 ### 5. Discriminated Unions
+
 ```typescript
 // ✓ CORRECT - Discriminated union for type safety
-type Result<T> =
-  | { success: true; data: T }
-  | { success: false; error: string };
+type Result<T> = { success: true; data: T } | { success: false; error: string };
 
 async function handleAction(): Promise<Result<User>> {
   try {
@@ -147,9 +150,9 @@ async function handleAction(): Promise<Result<User>> {
 // Usage with type narrowing
 const result = await handleAction();
 if (result.success) {
-  console.log(result.data.name);  // Type: User
+  console.log(result.data.name); // Type: User
 } else {
-  console.log(result.error);      // Type: string
+  console.log(result.error); // Type: string
 }
 
 // ❌ WRONG - Generic result object
@@ -161,11 +164,12 @@ type Result = {
 
 const result = await handleAction();
 if (result.success) {
-  console.log(result.data.name);  // Type: any (unsafe)
+  console.log(result.data.name); // Type: any (unsafe)
 }
 ```
 
 ### 6. Const Assertions
+
 ```typescript
 // ✓ CORRECT - Const assertions for literals
 export const ROLES = ['admin', 'user', 'moderator'] as const;
@@ -190,6 +194,7 @@ export const CONFIG = { maxRetries: 3, timeout: 5000 };
 ```
 
 ### 7. Utility Types
+
 ```typescript
 // ✓ CORRECT - Leverage utility types
 interface User {
@@ -232,6 +237,7 @@ type UserPreview = {
 ```
 
 ### 8. Never Type for Exhaustiveness
+
 ```typescript
 // ✓ CORRECT - Exhaustiveness checking with never
 type Action =
@@ -282,6 +288,7 @@ function handleAction(action: Action) {
 ## Integration
 
 Add to `tsconfig.json` baseline:
+
 ```json
 {
   "compilerOptions": {
@@ -296,8 +303,10 @@ Add to `tsconfig.json` baseline:
 ```
 
 Add to code review:
+
 ```markdown
 ## TypeScript Strict Mode
+
 - [ ] All functions have return types
 - [ ] No implicit `any`
 - [ ] Null checks explicit

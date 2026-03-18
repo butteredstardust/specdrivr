@@ -32,18 +32,21 @@ claude agent dependency-auditor "Find unused packages that can be removed"
 ## What It Does
 
 ### 1. Security Scanning
+
 - Checks npm registry for known vulnerabilities
 - Identifies CVEs affecting your packages
 - Suggests patched versions
 - Rates severity (critical, high, medium, low)
 
 ### 2. Update Analysis
+
 - Finds outdated packages
 - Checks for major version updates
 - Identifies breaking changes
 - Recommends safe update strategy
 
 ### 3. Unused Dependencies
+
 - Scans codebase for actual imports
 - Identifies packages in `package.json` not used in code
 - Safe to remove without breaking anything
@@ -219,19 +222,25 @@ ALERTS:
 ## Update Strategy
 
 ### Patch Updates (3.22.0 → 3.22.1)
+
 **Safe to apply immediately**
+
 - Bug fixes only
 - No breaking changes
 - `pnpm update`
 
 ### Minor Updates (3.22.0 → 3.23.0)
+
 **Generally safe, test first**
+
 - New features
 - Backward compatible
 - `pnpm update`
 
 ### Major Updates (3.0.0 → 4.0.0)
+
 **Review carefully, test thoroughly**
+
 - Breaking changes likely
 - May require code changes
 - `pnpm update package@^4.0.0` (manual)
@@ -262,7 +271,9 @@ git push
 ## Automation
 
 ### Dependabot Integration
+
 Add `.github/dependabot.yml`:
+
 ```yaml
 version: 2
 updates:
@@ -274,7 +285,9 @@ updates:
 ```
 
 ### Renovate Integration
+
 Add `renovate.json`:
+
 ```json
 {
   "extends": ["config:base"],

@@ -32,12 +32,14 @@ claude agent responsive-design-checker "Test all components on mobile (320px)"
 ## What It Tests
 
 ### Breakpoints
+
 - **Mobile (320px)** — iPhone SE, small phones
 - **Tablet (768px)** — iPad, tablets
 - **Desktop (1024px)** — Laptop, standard desktop
 - **Wide (1280px)** — Large desktop, 4K monitors
 
 ### Checks Per Breakpoint
+
 1. **Layout integrity** — No overlapping elements
 2. **Text readability** — No truncation, readable font size
 3. **Touch targets** — Minimum 44×44px for mobile
@@ -202,6 +204,7 @@ Next steps:
 ## Responsive Patterns
 
 ### Tailwind Responsive Classes
+
 ```typescript
 // ✓ CORRECT responsive pattern
 <div className="w-full px-4 md:px-6 lg:px-8">
@@ -218,6 +221,7 @@ Next steps:
 ```
 
 ### Mobile-First Approach
+
 ```typescript
 // ✓ MOBILE-FIRST (better practice)
 <div className="text-sm md:text-base lg:text-lg">
@@ -229,6 +233,7 @@ Next steps:
 ```
 
 ### Touch Targets
+
 ```typescript
 // ✓ 44×44px minimum
 <button className="w-11 h-11 md:w-10 h-10">
@@ -242,6 +247,7 @@ Next steps:
 ```
 
 ### Flexible Widths
+
 ```typescript
 // ✓ RESPONSIVE
 <input className="w-full max-w-md" />
@@ -258,8 +264,10 @@ Next steps:
 ## Integration
 
 ### Pre-Mobile Release Checklist
+
 ```markdown
 ## Responsive Design
+
 - [ ] Run responsive-design-checker on all components
 - [ ] All critical issues fixed
 - [ ] Test on iOS Safari (different rendering)
@@ -270,6 +278,7 @@ Next steps:
 ```
 
 ### CI/CD Integration
+
 ```yaml
 # .github/workflows/responsive.yml
 - name: Responsive Design Check
@@ -278,7 +287,9 @@ Next steps:
 ```
 
 ### Regular Testing
+
 Monthly:
+
 ```bash
 claude agent responsive-design-checker "Monthly responsive audit"
 ```

@@ -104,12 +104,14 @@ export function SpecTab({ spec, userRole }: SpecTabProps): React.ReactElement {
               &quot;Write a specification to begin plan generation.&quot;
             </p>
             {canEdit && (
-              <Button asChild size="sm" variant="outline">
-                <Link href={`/specs/${spec.id}/edit`}>
-                  <Pencil className="mr-1.5 h-3.5 w-3.5" />
-                  Write spec
-                </Link>
-              </Button>
+              <div className="flex gap-2">
+                <Button asChild size="sm" variant="outline">
+                  <Link href={`/specs/${spec.id}/edit`}>
+                    <Pencil className="mr-1.5 h-3.5 w-3.5" />
+                    Write spec
+                  </Link>
+                </Button>
+              </div>
             )}
           </div>
         )}

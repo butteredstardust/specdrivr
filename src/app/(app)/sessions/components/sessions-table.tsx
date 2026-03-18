@@ -171,7 +171,7 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
         <p className="text-muted-foreground font-mono text-sm">
           No sessions found matching your filters.
         </p>
-        <Button asChild variant="outline" className="mt-2">
+        <Button asChild variant="phosphor" className="mt-2">
           <Link href="/plans">Create Session</Link>
         </Button>
       </div>

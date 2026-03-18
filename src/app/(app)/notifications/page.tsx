@@ -6,7 +6,15 @@ import { usePolling } from '@/hooks/use-polling';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
-import { Bell, CheckCircle2, AlertCircle, Info, ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  Bell,
+  CheckCircle2,
+  AlertCircle,
+  Info,
+  ChevronLeft,
+  ChevronRight,
+  CheckCheck,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 function formatRelativeTime(iso: string): string {
@@ -113,11 +121,12 @@ export default function NotificationsPage() {
         action={
           unreadCount > 0 && (
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={handleMarkAllRead}
-              className="text-text-secondary hover:text-text-primary h-8 font-mono text-xs tracking-wider uppercase transition-all"
+              className="text-text-muted hover:text-text-primary h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase transition-colors"
             >
+              <CheckCheck className="h-3.5 w-3.5" />
               Mark all read
             </Button>
           )
@@ -141,7 +150,8 @@ export default function NotificationsPage() {
                 tab !== t.value && 'bg-secondary/50 text-text-secondary hover:text-text-primary'
               )}
             >
-              {t.label} {t.value === 'unread' && unreadCount > 0 && `(${unreadCount})`}
+              {t.label}
+              {t.value === 'unread' && unreadCount > 0 && ` (${unreadCount})`}
             </Button>
           ))}
         </div>

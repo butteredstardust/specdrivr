@@ -5,11 +5,12 @@ import Link from 'next/link';
 import CodeMirror from '@uiw/react-codemirror';
 import { markdown } from '@codemirror/lang-markdown';
 import ReactMarkdown from 'react-markdown';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { clientLogger } from '@/lib/logger-client';
 
 export type SpecStatus =
   | 'drafting'
@@ -60,6 +61,41 @@ export function SpecEditor(props: SpecEditorProps) {
     }
   }, [isSaving, onSave, title, content]);
 
+  const handleSaveAndGenerate = useCallback(async () => {
+    if (isSaving) return;
+    setIsSaving(true);
+    setSaveError(null);
+    try {
+      // 1. Save spec
+      const saveRes = await onSave(title, content);
+      if (!saveRes.success) {
+        setSaveError(saveRes.error ?? 'Failed to save spec');
+        setIsSaving(false);
+        return;
+      }
+
+      // 2. We need the spec ID to trigger generation.
+      // If it's a new spec, onSave should have handled the redirect or returned the ID.
+      // For now, let's assume we have specId if we're in edit mode.
+      if (_specId) {
+        const genRes = await fetch(`/api/v1/specs/${_specId}/plan/generate`, {
+          method: 'POST',
+          credentials: 'include',
+        });
+        if (!genRes.ok) {
+          toast.error('Spec saved, but plan generation failed to start.');
+        } else {
+          toast.success('Spec saved. Plan generation started.');
+        }
+      }
+    } catch (err) {
+      clientLogger.error('Save & Generate failed', err);
+      toast.error('Failed to initiate plan generation');
+    } finally {
+      setIsSaving(false);
+    }
+  }, [isSaving, onSave, title, content, _specId]);
+
   // Ctrl+Enter / Cmd+Enter shortcut
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -95,12 +131,36 @@ export function SpecEditor(props: SpecEditorProps) {
           className="text-text-primary placeholder:text-text-muted flex-1 border-none bg-transparent font-mono text-sm shadow-none outline-none focus-visible:ring-0"
         />
         {saveError && <p className="text-status-red text-sm">{saveError}</p>}
-        <Button size="sm" onClick={handleSave} disabled={isSaving || !isDirty}>
-          {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleSave}
+            disabled={isSaving || !isDirty}
+            className="h-8 font-mono text-[10px] tracking-widest uppercase"
+          >
+            {isSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Save Draft'}
+          </Button>
+          <Button
+            size="sm"
+            variant="violet"
+            onClick={handleSaveAndGenerate}
+            disabled={isSaving || !title.trim() || content.length < 50}
+            className="h-8 gap-1.5"
+          >
+            {isSaving ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <>
+                <Plus className="h-3.5 w-3.5" />
+                Save & Generate Plan
+              </>
+            )}
+          </Button>
+        </div>
         <Link
           href="/specs"
-          className="text-text-muted hover:text-text-secondary font-mono text-xs transition-colors"
+          className="text-text-muted hover:text-text-secondary ml-2 font-mono text-xs transition-colors"
         >
           Back
         </Link>

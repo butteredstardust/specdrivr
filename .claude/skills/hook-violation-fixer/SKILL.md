@@ -29,7 +29,7 @@ export async function createProjectAction(formData: FormData) {
 }
 
 // ✓ AFTER
-'use server';
+('use server');
 
 export async function createProjectAction(formData: FormData) {
   const session = await auth();
@@ -38,6 +38,7 @@ export async function createProjectAction(formData: FormData) {
 ```
 
 **Checklist:**
+
 - [ ] Add `'use server';` at top of file (before imports)
 - [ ] Verify file is in `src/actions/`
 - [ ] Re-run `git push` to verify
@@ -63,7 +64,7 @@ export async function deleteProjectAction(formData: FormData) {
 }
 
 // ✓ AFTER
-'use server';
+('use server');
 
 import { auth } from '@/lib/auth';
 
@@ -79,6 +80,7 @@ export async function deleteProjectAction(formData: FormData) {
 ```
 
 **Checklist:**
+
 - [ ] Import `auth` from `@/lib/auth`
 - [ ] Call `await auth()` as FIRST line (before any other await)
 - [ ] Check authentication result
@@ -115,7 +117,7 @@ export async function updateProjectAction(formData: FormData) {
 }
 
 // ✓ AFTER
-'use server';
+('use server');
 
 import { auth } from '@/lib/auth';
 
@@ -133,17 +135,23 @@ export async function updateProjectAction(formData: FormData) {
   }
 
   try {
-    const updated = await projectRepository.update(projectId, { /* ... */ });
+    const updated = await projectRepository.update(projectId, {
+      /* ... */
+    });
     revalidatePath('/dashboard');
     return { success: true, data: updated };
   } catch (error) {
     logger.error('Failed to update project', { error, projectId });
-    return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to update project' } };
+    return {
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'Failed to update project' },
+    };
   }
 }
 ```
 
 **Checklist:**
+
 - [ ] Replace all `throw` statements with `return { success: false, error: { ... } }`
 - [ ] Use error codes: `UNAUTHORIZED`, `FORBIDDEN`, `NOT_FOUND`, `INVALID_INPUT`, `INTERNAL_ERROR`
 - [ ] Wrap repository calls in try-catch
@@ -213,6 +221,7 @@ export async function ProjectList() {
 ```
 
 **Checklist:**
+
 - [ ] Remove `@/repositories` import from client component
 - [ ] Create Server Action in `src/actions/` to fetch data
 - [ ] Or convert component to Server Component (remove `'use client'`)
@@ -244,11 +253,13 @@ const apiUrl = env.API_URL;
 ```
 
 **Where to use `@/lib/env`:**
+
 - Server-side code (API routes, Server Actions)
 - Server Components
 - Build-time code
 
 **What goes in `@/lib/env.ts`:**
+
 ```typescript
 // src/lib/env.ts
 import { z } from 'zod';
@@ -264,6 +275,7 @@ export const env = envSchema.parse(process.env);
 ```
 
 **For CLIENT-SIDE CODE** (if needed):
+
 ```typescript
 // ❌ Don't do this
 if (process.env.NODE_ENV === 'development') {
@@ -279,6 +291,7 @@ if (process.env.NODE_ENV === 'development') {
 ```
 
 **Checklist:**
+
 - [ ] Import `env` from `@/lib/env` (server-only)
 - [ ] Replace `process.env.VAR` with `env.VAR`
 - [ ] For NODE_ENV checks in client components, use `clientLogger` instead
@@ -314,6 +327,7 @@ export function TerminalLog({ htmlLog }: { htmlLog: string }) {
 ```
 
 **Checklist:**
+
 - [ ] Import `DOMPurify` from `isomorphic-dompurify`
 - [ ] Wrap HTML content with `DOMPurify.sanitize(content)`
 - [ ] ALWAYS sanitize user-provided HTML
@@ -348,6 +362,7 @@ export function Avatar({ src, alt }: { src: string; alt: string }) {
 ```
 
 **Checklist:**
+
 - [ ] Import `Image` from `next/image`
 - [ ] Replace `<img>` with `<Image />`
 - [ ] Provide explicit `width` and `height` (or use `fill` with parent position:relative)
@@ -427,6 +442,7 @@ export function CreateProjectForm() {
 ```
 
 **Checklist:**
+
 - [ ] Import `useForm` from `react-hook-form`
 - [ ] Define Zod schema
 - [ ] Use `zodResolver(schema)` in useForm options
@@ -461,6 +477,7 @@ export function CreateProjectForm() {
 ```
 
 **Available Design Tokens** (from `src/app/globals.css`):
+
 - `--brand-primary`
 - `--accent-violet`
 - `--text-primary`, `--text-secondary`
@@ -469,6 +486,7 @@ export function CreateProjectForm() {
 - `--status-done`, `--status-failed`, `--status-blocked`
 
 Or using Tailwind:
+
 ```typescript
 // ❌ BEFORE
 <button className="bg-[#22d3ee] text-[#ffffff]">Click</button>
@@ -478,6 +496,7 @@ Or using Tailwind:
 ```
 
 **Checklist:**
+
 - [ ] Replace all hex values with CSS variable equivalents
 - [ ] Use `var(--token-name)` syntax
 - [ ] Check `src/app/globals.css` for available tokens
@@ -489,13 +508,13 @@ Or using Tailwind:
 
 For violations in these categories, refer to:
 
-| Check | File | Reference |
-|-------|------|-----------|
-| **Artifacts** | `scripts/hooks/checks/artifacts.sh` | Don't commit `*.exp`, `*_output.txt`, `migrate-*.ts` |
-| **Secrets** | `scripts/hooks/checks/secrets.sh` | AGENTS.md §10 - Never commit secrets in code |
-| **Large Files** | `scripts/hooks/checks/large-files.sh` | Keep files <5MB; use Git LFS for media |
-| **Migrations** | `scripts/hooks/checks/migrations.sh` | Use `create-migration` skill workflow |
-| **Conflicts** | `scripts/hooks/checks/conflicts.sh` | Resolve merge conflicts before push |
+| Check           | File                                  | Reference                                            |
+| --------------- | ------------------------------------- | ---------------------------------------------------- |
+| **Artifacts**   | `scripts/hooks/checks/artifacts.sh`   | Don't commit `*.exp`, `*_output.txt`, `migrate-*.ts` |
+| **Secrets**     | `scripts/hooks/checks/secrets.sh`     | AGENTS.md §10 - Never commit secrets in code         |
+| **Large Files** | `scripts/hooks/checks/large-files.sh` | Keep files <5MB; use Git LFS for media               |
+| **Migrations**  | `scripts/hooks/checks/migrations.sh`  | Use `create-migration` skill workflow                |
+| **Conflicts**   | `scripts/hooks/checks/conflicts.sh`   | Resolve merge conflicts before push                  |
 
 ---
 

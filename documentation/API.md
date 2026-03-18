@@ -14,16 +14,15 @@ Authentication: Pass the session cookie (browser clients) or Authorization: Bear
 
 ## **6.1 Authentication Endpoints**
 
-| **Method** | **Path**                  | **Description**                                       | **Auth required** |
-| ---------- | ------------------------- | ----------------------------------------------------- | ----------------- |
-| **POST**   | /api/auth/sign-in         | Email + password login via BetterAuth.                | No                |
-| **POST**   | /api/auth/sign-out        | BetterAuth session invalidation.                      | Yes               |
-| **POST**   | /api/auth/forgot-password | BetterAuth password reset flow.                       | No                |
-| **POST**   | /api/auth/reset-password  | BetterAuth password reset execution.                  | No                |
-| **GET**    | /api/auth/get-session     | Returns current user and session data.                | Yes               |
+| **Method** | **Path**                  | **Description**                        | **Auth required** |
+| ---------- | ------------------------- | -------------------------------------- | ----------------- |
+| **POST**   | /api/auth/sign-in         | Email + password login via BetterAuth. | No                |
+| **POST**   | /api/auth/sign-out        | BetterAuth session invalidation.       | Yes               |
+| **POST**   | /api/auth/forgot-password | BetterAuth password reset flow.        | No                |
+| **POST**   | /api/auth/reset-password  | BetterAuth password reset execution.   | No                |
+| **GET**    | /api/auth/get-session     | Returns current user and session data. | Yes               |
 
 Note: All authentication is handled by the BetterAuth catch-all handler at `/api/auth/[...auth]`. Custom `/api/v1/auth` routes are deprecated in favor of BetterAuth standard paths.
-
 
 ## **6.2 Projects**
 

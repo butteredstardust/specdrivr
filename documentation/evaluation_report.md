@@ -86,13 +86,13 @@ None identified.
 
 ## Engineering Score
 
-| Criteria | Score |
-| :--- | :--- |
-| Architecture correctness (25) | 24 |
-| Security posture (20) | 20 |
-| Type safety (15) | 15 |
-| Database integrity (15) | 15 |
-| Code quality (10) | 9 |
-| Testing maturity (10) | 9 |
-| Dependency hygiene (5) | 5 |
-| **Total** | **97/100** |
+| Criteria                      | Score      |
+| :---------------------------- | :--------- |
+| Architecture correctness (25) | 24         |
+| Security posture (20)         | 20         |
+| Type safety (15)              | 15         |
+| Database integrity (15)       | 15         |
+| Code quality (10)             | 9          |
+| Testing maturity (10)         | 9          |
+| Dependency hygiene (5)        | 5          |
+| **Total**                     | **97/100** |

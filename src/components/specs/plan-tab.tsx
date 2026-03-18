@@ -340,14 +340,14 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
         </p>
         <TooltipProvider>
           {canMember ? (
-            <Button size="sm" onClick={handleRegenerate} disabled={isActioning}>
+            <Button variant="phosphor" size="sm" onClick={handleRegenerate} disabled={isActioning}>
               Re-generate Plan
             </Button>
           ) : (
             <Tooltip>
               <TooltipTrigger asChild>
                 <span tabIndex={0}>
-                  <Button size="sm" disabled aria-disabled>
+                  <Button variant="phosphor" size="sm" disabled aria-disabled>
                     Re-generate Plan
                   </Button>
                 </span>
@@ -377,14 +377,14 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
         </div>
         <TooltipProvider>
           {canMember ? (
-            <Button size="sm" onClick={handleRegenerate} disabled={isActioning}>
+            <Button variant="phosphor" size="sm" onClick={handleRegenerate} disabled={isActioning}>
               Re-generate Plan
             </Button>
           ) : (
             <Tooltip>
               <TooltipTrigger asChild>
                 <span tabIndex={0}>
-                  <Button size="sm" disabled aria-disabled>
+                  <Button variant="phosphor" size="sm" disabled aria-disabled>
                     Re-generate Plan
                   </Button>
                 </span>
@@ -470,24 +470,14 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
               </Tooltip>
             )}
             {canAdmin ? (
-              <Button
-                size="sm"
-                className="bg-accent-violet hover:bg-accent-violet/80 text-white"
-                onClick={handleApprove}
-                disabled={isActioning}
-              >
+              <Button size="sm" variant="violet" onClick={handleApprove} disabled={isActioning}>
                 Approve & Execute
               </Button>
             ) : (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span tabIndex={0}>
-                    <Button
-                      size="sm"
-                      className="bg-accent-violet text-white"
-                      disabled
-                      aria-disabled
-                    >
+                    <Button size="sm" variant="violet" disabled aria-disabled>
                       Approve & Execute
                     </Button>
                   </span>

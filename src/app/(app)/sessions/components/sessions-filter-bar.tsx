@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useQueryState, parseAsString } from 'nuqs';
-import { Search } from 'lucide-react';
+import { Search, X, Calendar as CalendarIcon, Hash } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,18 +16,44 @@ import {
 import { DatePicker } from '@/components/ui/date-picker';
 import { format, parse } from 'date-fns';
 
-const STATUS_OPTIONS = ['all', 'running', 'completed', 'paused', 'failed', 'cancelled'] as const;
+const STATUS_OPTIONS = [
+  { value: 'all', label: 'ALL' },
+  { value: 'running', label: 'RUNNING' },
+  { value: 'completed', label: 'DONE' },
+  { value: 'paused', label: 'PAUSED' },
+  { value: 'failed', label: 'FAILED' },
+  { value: 'cancelled', label: 'CANCELLED' },
+] as const;
 
 interface SessionsFilterBarProps {
   specs: Array<{ id: number; name: string }>;
 }
 
 export function SessionsFilterBar({ specs }: SessionsFilterBarProps) {
-  const [search, setSearch] = useQueryState('search', parseAsString.withDefault(''));
-  const [status, setStatus] = useQueryState('status', parseAsString.withDefault('all'));
-  const [specId, setSpecId] = useQueryState('specId', parseAsString.withDefault('all'));
-  const [from, setFrom] = useQueryState('from', parseAsString.withDefault(''));
-  const [to, setTo] = useQueryState('to', parseAsString.withDefault(''));
+  const [search, setSearch] = useQueryState(
+    'search',
+    parseAsString.withDefault('').withOptions({
+      shallow: true,
+      history: 'replace',
+      throttleMs: 300,
+    })
+  );
+  const [status, setStatus] = useQueryState(
+    'status',
+    parseAsString.withDefault('all').withOptions({ shallow: true, history: 'replace' })
+  );
+  const [specId, setSpecId] = useQueryState(
+    'specId',
+    parseAsString.withDefault('all').withOptions({ shallow: true, history: 'replace' })
+  );
+  const [from, setFrom] = useQueryState(
+    'from',
+    parseAsString.withDefault('').withOptions({ shallow: true, history: 'replace' })
+  );
+  const [to, setTo] = useQueryState(
+    'to',
+    parseAsString.withDefault('').withOptions({ shallow: true, history: 'replace' })
+  );
 
   const isAnyFilterActive =
     search !== '' || status !== 'all' || specId !== 'all' || from !== '' || to !== '';
@@ -52,71 +78,100 @@ export function SessionsFilterBar({ specs }: SessionsFilterBarProps) {
   };
 
   return (
-    <div className="border-border-default flex flex-wrap items-center gap-3 border-b px-6 py-2.5">
-      <div className="relative w-52">
-        <Search className="text-muted-foreground absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
+    <div className="border-border-default flex flex-wrap items-center gap-4 border-b px-6 py-3">
+      {/* Search */}
+      <div className="relative w-64">
+        <Search className="text-text-muted absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
         <Input
-          placeholder="Search sessions..."
-          className="h-8 pl-8 font-mono text-[10px] tracking-wider uppercase"
+          placeholder="SEARCH SESSIONS..."
+          className="bg-bg-elevated focus:ring-accent-violet/30 h-8 pl-8 font-mono text-[10px] tracking-widest uppercase transition-all focus:ring-1"
           value={search}
           onChange={(e) => setSearch(e.target.value || null)}
         />
+        {search && (
+          <button
+            onClick={() => setSearch(null)}
+            className="text-text-muted hover:text-text-primary absolute top-1/2 right-2.5 -translate-y-1/2"
+          >
+            <X className="h-3 w-3" />
+          </button>
+        )}
       </div>
 
-      <div className="flex items-center gap-1">
-        {STATUS_OPTIONS.map((s) => {
-          const isActive = status === s;
+      <div className="bg-border-default/50 mx-1 h-4 w-px" />
+
+      {/* Status Filter */}
+      <div className="flex items-center gap-1.5">
+        {STATUS_OPTIONS.map((opt) => {
+          const isActive = status === opt.value;
           return (
             <Button
-              key={s}
-              variant={isActive ? 'default' : 'secondary'}
+              key={opt.value}
+              variant={isActive ? 'default' : 'ghost'}
               size="sm"
-              onClick={() => setStatus(s === 'all' ? null : s)}
+              onClick={() => setStatus(opt.value === 'all' ? null : opt.value)}
               className={cn(
-                'h-7 px-2.5 font-mono text-[10px] tracking-wider uppercase transition-all',
-                !isActive && 'bg-secondary/50 text-muted-foreground hover:text-foreground'
+                'h-7 px-3 font-mono text-[10px] tracking-widest transition-all',
+                isActive
+                  ? 'bg-accent-violet text-white shadow-sm'
+                  : 'text-text-muted hover:bg-bg-elevated hover:text-text-primary'
               )}
             >
-              {s}
+              {opt.label}
             </Button>
           );
         })}
       </div>
 
-      <div className="ml-auto flex items-center gap-2">
-        <Select value={specId} onValueChange={(val) => setSpecId(val === 'all' ? null : val)}>
-          <SelectTrigger className="h-8 w-40 font-mono text-[10px] tracking-wider uppercase">
-            <SelectValue placeholder="All specs" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All specs</SelectItem>
-            {specs.map((spec) => (
-              <SelectItem key={spec.id} value={String(spec.id)}>
-                {spec.name}
+      <div className="ml-auto flex items-center gap-3">
+        {/* Spec Select */}
+        <div className="flex items-center gap-2">
+          <Hash className="text-text-muted h-3 w-3" />
+          <Select value={specId} onValueChange={(val) => setSpecId(val === 'all' ? null : val)}>
+            <SelectTrigger className="bg-bg-elevated h-8 w-44 font-mono text-[10px] tracking-widest uppercase">
+              <SelectValue placeholder="ALL SPECS" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all" className="font-mono text-[10px]">
+                ALL SPECS
               </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <DatePicker
-          date={parseDateString(from)}
-          setDate={(d) => setFrom(formatDateString(d) || null)}
-          placeholder="From date"
-          className="h-8 w-36 font-mono text-[10px]"
-        />
-        <DatePicker
-          date={parseDateString(to)}
-          setDate={(d) => setTo(formatDateString(d) || null)}
-          placeholder="To date"
-          className="h-8 w-36 font-mono text-[10px]"
-        />
+              {specs.map((spec) => (
+                <SelectItem key={spec.id} value={String(spec.id)} className="font-mono text-[10px]">
+                  {spec.name.toUpperCase()}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Date Range */}
+        <div className="flex items-center gap-2">
+          <CalendarIcon className="text-text-muted h-3 w-3" />
+          <div className="flex items-center">
+            <DatePicker
+              date={parseDateString(from)}
+              setDate={(d) => setFrom(formatDateString(d) || null)}
+              placeholder="FROM"
+              className="h-8 w-28 rounded-r-none border-r-0 font-mono text-[9px] tracking-widest uppercase"
+            />
+            <DatePicker
+              date={parseDateString(to)}
+              setDate={(d) => setTo(formatDateString(d) || null)}
+              placeholder="TO"
+              className="h-8 w-28 rounded-l-none font-mono text-[9px] tracking-widest uppercase"
+            />
+          </div>
+        </div>
+
         {isAnyFilterActive && (
           <Button
             variant="ghost"
             size="sm"
             onClick={clearFilters}
-            className="text-muted-foreground h-8 font-mono text-[10px] tracking-wider uppercase"
+            className="text-text-muted hover:text-status-red h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase transition-colors"
           >
-            Clear
+            <X className="h-3.5 w-3.5" />
+            CLEAR
           </Button>
         )}
       </div>

@@ -29,6 +29,7 @@ claude agent secret-scanner "Scan src/lib/ for hardcoded secrets"
 ## What It Detects
 
 ### API Keys & Tokens
+
 - AWS keys: `AKIA...`, `aws_secret_access_key`
 - GitHub tokens: `ghp_`, `gho_`, `ghu_`
 - OpenAI API keys: `sk-...`
@@ -37,12 +38,14 @@ claude agent secret-scanner "Scan src/lib/ for hardcoded secrets"
 - JWT secrets in code
 
 ### Environment Files
+
 - `.env` files (should be `.env.example` only)
 - `.env.local` (local overrides)
 - `.env.production` (production secrets)
 - `.env.*.secret` (any secret files)
 
 ### Code Patterns
+
 - Hardcoded password strings
 - Bearer tokens in code
 - Private keys (SSH, RSA, etc.)
@@ -50,6 +53,7 @@ claude agent secret-scanner "Scan src/lib/ for hardcoded secrets"
 - Database URLs with credentials
 
 ### Common Mistakes
+
 ```typescript
 // ❌ WRONG - Secrets in code
 const GITHUB_TOKEN = 'ghp_1234567890abcdefghijklmnopqrstuvwxyz';
@@ -141,6 +145,7 @@ NEXT STEPS:
 ## Prevention Strategies
 
 ### 1. Use Environment Variables
+
 ```typescript
 // ✓ CORRECT
 const githubToken = process.env.GITHUB_TOKEN;
@@ -149,11 +154,13 @@ const dbPassword = env.DATABASE_PASSWORD;
 
 // ❌ WRONG
 const githubToken = 'ghp_abc123...'; // LEAKED
-const stripeKey = 'sk_live_abc...';  // LEAKED
+const stripeKey = 'sk_live_abc...'; // LEAKED
 ```
 
 ### 2. Protect .env Files
+
 Add to `.gitignore`:
+
 ```
 .env
 .env.*.local
@@ -165,35 +172,41 @@ Add to `.gitignore`:
 ```
 
 Keep only:
+
 ```
 .env.example     # Template with dummy values
 ```
 
 ### 3. Use Pre-commit Hooks
+
 Add to `.husky/pre-commit`:
+
 ```bash
 claude agent secret-scanner "Check staged files before commit"
 ```
 
 ### 4. Document Safe Patterns
+
 In `DEVELOPMENT.md`:
+
 ```markdown
 ## Environment Variables
 
 Never commit real credentials. Use .env.example:
 
 .env.example:
-  GITHUB_TOKEN=your_token_here
-  STRIPE_SECRET_KEY=sk_test_...
+GITHUB*TOKEN=your_token_here
+STRIPE_SECRET_KEY=sk_test*...
 
 .env.local (local development, not committed):
-  GITHUB_TOKEN=ghp_actualtoken...
-  STRIPE_SECRET_KEY=sk_test_actualkey...
+GITHUB_TOKEN=ghp_actualtoken...
+STRIPE_SECRET_KEY=sk_test_actualkey...
 ```
 
 ## Rotating Compromised Secrets
 
 ### GitHub Token
+
 1. Visit https://github.com/settings/tokens
 2. Delete the compromised token
 3. Generate new token
@@ -201,6 +214,7 @@ Never commit real credentials. Use .env.example:
 5. Redeploy
 
 ### Stripe Key
+
 1. Go to Stripe Dashboard → Settings → API Keys
 2. Reveal old key, then delete
 3. Reveal new key
@@ -208,6 +222,7 @@ Never commit real credentials. Use .env.example:
 5. Redeploy
 
 ### Database Password
+
 1. Connect to database with admin account
 2. ALTER USER password to new value
 3. Update `DATABASE_PASSWORD` in all environments
@@ -237,12 +252,14 @@ git push --force-with-lease  # Only if not yet on main
 ## CI/CD Integration
 
 Add to GitHub Actions:
+
 ```yaml
 - name: Scan for Secrets
   run: claude agent secret-scanner "Full repo scan"
 ```
 
 Block merge if secrets found:
+
 ```yaml
 - name: Fail on Secrets
   if: failure()

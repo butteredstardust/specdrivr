@@ -23,6 +23,7 @@ claude agent betterauth-auditor "Check token handling and expiration"
 ## What It Checks
 
 ### 1. Session Validation
+
 ```typescript
 // ✓ CORRECT - Always call auth()
 export async function protectedAction() {
@@ -41,6 +42,7 @@ export async function protectedAction(userId: string) {
 ```
 
 ### 2. Token Management
+
 ```typescript
 // ✓ CORRECT - Use session tokens
 const token = session.auth.accessToken;
@@ -50,6 +52,7 @@ localStorage.setItem('token', response.token);
 ```
 
 ### 3. Session Expiration
+
 ```typescript
 // ✓ CORRECT - Check expiration
 if (session.expiresAt < Date.now()) {
@@ -72,6 +75,7 @@ const user = session.user; // Assume valid
 ## Integration
 
 Add to pre-deployment:
+
 ```bash
 claude agent betterauth-auditor "Final auth security check"
 ```

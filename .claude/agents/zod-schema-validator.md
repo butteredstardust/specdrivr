@@ -23,14 +23,17 @@ claude agent zod-schema-validator "Check form validation schemas"
 ## What It Checks
 
 ### 1. Schema Definition Completeness
+
 ```typescript
 // ✓ CORRECT - All required fields defined
-const userSchema = z.object({
-  id: z.string().uuid(),
-  email: z.string().email(),
-  name: z.string().min(1).max(100),
-  createdAt: z.date(),
-}).strict();
+const userSchema = z
+  .object({
+    id: z.string().uuid(),
+    email: z.string().email(),
+    name: z.string().min(1).max(100),
+    createdAt: z.date(),
+  })
+  .strict();
 
 // ❌ WRONG - Missing required fields or loose schema
 const userSchema = z.object({
@@ -40,6 +43,7 @@ const userSchema = z.object({
 ```
 
 ### 2. Type Inference Accuracy
+
 ```typescript
 // ✓ CORRECT - Explicit type extraction
 const userSchema = z.object({
@@ -56,9 +60,11 @@ type User = {
 ```
 
 ### 3. Validation Rules Clarity
+
 ```typescript
 // ✓ CORRECT - Clear validation rules with messages
-const passwordSchema = z.string()
+const passwordSchema = z
+  .string()
   .min(8, 'Password must be at least 8 characters')
   .regex(/[A-Z]/, 'Password must contain uppercase letter')
   .regex(/[0-9]/, 'Password must contain number');
@@ -68,18 +74,18 @@ const passwordSchema = z.string().min(1).max(255);
 ```
 
 ### 4. Refinement Patterns
+
 ```typescript
 // ✓ CORRECT - Use .refine() for complex validation
-const registerSchema = z.object({
-  password: z.string().min(8),
-  confirmPassword: z.string(),
-}).refine(
-  (data) => data.password === data.confirmPassword,
-  {
+const registerSchema = z
+  .object({
+    password: z.string().min(8),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
     message: 'Passwords do not match',
     path: ['confirmPassword'],
-  }
-);
+  });
 
 // ❌ WRONG - Manual equality checks in action
 const registerSchema = z.object({
@@ -90,12 +96,13 @@ const registerSchema = z.object({
 ```
 
 ### 5. Optional vs Nullable
+
 ```typescript
 // ✓ CORRECT - Clear optionality
 const userSchema = z.object({
   id: z.string(),
-  bio: z.string().optional(),           // can be undefined
-  nickname: z.string().nullable(),      // can be null
+  bio: z.string().optional(), // can be undefined
+  nickname: z.string().nullable(), // can be null
   deletedAt: z.date().nullable().optional(), // can be null or undefined
 });
 
@@ -107,6 +114,7 @@ const userSchema = z.object({
 ```
 
 ### 6. Error Handling in Actions
+
 ```typescript
 // ✓ CORRECT - Parse and handle validation errors
 'use server';
@@ -119,7 +127,7 @@ export async function createUser(formData: FormData) {
   if (!result.success) {
     return {
       success: false,
-      errors: result.error.flatten()
+      errors: result.error.flatten(),
     };
   }
 
@@ -132,6 +140,7 @@ const data = userSchema.parse(formData);
 ```
 
 ### 7. Reusable Schema Composition
+
 ```typescript
 // ✓ CORRECT - Compose schemas
 const baseUserSchema = z.object({
@@ -168,8 +177,10 @@ const updateUserSchema = z.object({
 ## Integration
 
 Add to form components:
+
 ```markdown
 ## Zod Validation
+
 - [ ] Schema defined in `src/lib/schemas/`
 - [ ] Using `safeParse()` for error handling
 - [ ] All validation messages present
@@ -178,6 +189,7 @@ Add to form components:
 ```
 
 Add to Server Actions:
+
 ```typescript
 'use server';
 const result = mySchema.safeParse(input);

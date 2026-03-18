@@ -30,7 +30,7 @@ async function main() {
       LEFT JOIN users u ON p.created_by = u.id
       WHERE p.created_by IS NOT NULL AND u.id IS NULL
     `);
-    
+
     if (orphans.length > 0) {
       logger.warn({ orphans }, '⚠️ Found projects with invalid owner references');
     } else {
@@ -45,7 +45,10 @@ async function main() {
     `);
 
     if (specsWithoutVersions.length > 0) {
-      logger.warn({ count: specsWithoutVersions.length }, '⚠️ Found specifications without any versions');
+      logger.warn(
+        { count: specsWithoutVersions.length },
+        '⚠️ Found specifications without any versions'
+      );
     } else {
       logger.info('✅ All specifications have versions');
     }

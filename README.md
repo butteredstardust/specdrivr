@@ -13,6 +13,7 @@ Built for engineering teams who believe AI should handle the mechanical parts wh
 Most AI tools treat development as "here's a prompt, here's your output." That works for scripts. It doesn't work for systems.
 
 The problem: **AI agents don't understand your codebase, your architecture, or your constraints.** So they:
+
 - Build things in the wrong place (data access scattered everywhere).
 - Miss security requirements (forget to auth-check).
 - Create consistency nightmares (each agent thinks differently about the same problem).
@@ -33,26 +34,26 @@ Specdrivr is a platform that manages the spec-to-execution pipeline for AI-augme
 4. **Tracks sessions** — Monitor what the agent does, roll back if needed.
 5. **Enforces architecture** — Pre-commit hooks ensure every change respects your system design.
 
-It's not a template. It's the orchestration layer that makes spec-driven development *actually work with AI*.
+It's not a template. It's the orchestration layer that makes spec-driven development _actually work with AI_.
 
 ### The Stack
 
-| Layer | Technology | Why |
-|---|---|---|
-| **Framework** | Next.js 16 + App Router | Type-safe server-first architecture, built for AI-generated code |
-| **Language** | TypeScript 5.9 | Type safety catches AI mistakes at compile time |
-| **Database** | PostgreSQL + Drizzle ORM | Migrations as code. Predictable. No surprises. |
-| **Auth** | better-auth | Session-based auth. Human-grade security. |
-| **API** | REST + Server Actions | AI agents understand this pattern immediately |
-| **UI** | shadcn/ui + Tailwind 4 | Design system for consistency |
-| **Validation** | Zod | Every boundary validated. Every input checked. |
-| **Logging** | Pino | Full audit trail of what the agent did |
+| Layer          | Technology               | Why                                                              |
+| -------------- | ------------------------ | ---------------------------------------------------------------- |
+| **Framework**  | Next.js 16 + App Router  | Type-safe server-first architecture, built for AI-generated code |
+| **Language**   | TypeScript 5.9           | Type safety catches AI mistakes at compile time                  |
+| **Database**   | PostgreSQL + Drizzle ORM | Migrations as code. Predictable. No surprises.                   |
+| **Auth**       | better-auth              | Session-based auth. Human-grade security.                        |
+| **API**        | REST + Server Actions    | AI agents understand this pattern immediately                    |
+| **UI**         | shadcn/ui + Tailwind 4   | Design system for consistency                                    |
+| **Validation** | Zod                      | Every boundary validated. Every input checked.                   |
+| **Logging**    | Pino                     | Full audit trail of what the agent did                           |
 
 ---
 
 ## The Architecture (Constraints That Enable AI)
 
-Specdrivr's platform is built on strict architectural rules. The app enforces these same rules for projects built *inside* it. This isn't bureaucracy—it's what makes AI agents predictable.
+Specdrivr's platform is built on strict architectural rules. The app enforces these same rules for projects built _inside_ it. This isn't bureaucracy—it's what makes AI agents predictable.
 
 ### Repository Pattern
 
@@ -91,6 +92,7 @@ Define what you're building in plain language:
 ### 2. System Creates Tasks
 
 Specdrivr breaks your spec into tasks:
+
 - Task 1: Set up OAuth application configs
 - Task 2: Implement OAuth callback handler
 - Task 3: Build user creation from OAuth claims
@@ -100,6 +102,7 @@ Specdrivr breaks your spec into tasks:
 ### 3. AI Agent Executes
 
 An AI agent claims tasks one by one:
+
 - Agent reads your architecture docs (AGENTS.md, CLAUDE.md)
 - Agent understands your constraints (repositories, server actions, etc.)
 - Agent executes against your codebase
@@ -108,6 +111,7 @@ An AI agent claims tasks one by one:
 ### 4. You Review & Merge
 
 Every session creates a full audit trail:
+
 - What changed
 - Why it changed
 - What was tested
@@ -130,7 +134,7 @@ pnpm db:generate      # Generate migrations from schema
 pnpm db:migrate       # Apply pending migrations
 ```
 
-For projects *being built inside Specdrivr*: **No `db:push`.** Ever. Migrations are code. They're reviewed. They're applied. This is how production stays safe.
+For projects _being built inside Specdrivr_: **No `db:push`.** Ever. Migrations are code. They're reviewed. They're applied. This is how production stays safe.
 
 ---
 
@@ -172,7 +176,7 @@ These files answer every "where do I put this?" question. The agent reads them o
 
 - **AI builds features reliably.** When the agent understands the constraints, it doesn't fight them. It builds fast.
 - **Pre-commit hooks save time.** Yes, they slow down commits. But they catch 80% of bugs before review. Your team reviews logic, not formatting.
-- **Specs are your product documentation.** Every spec becomes a permanent record of *why* something was built the way it was.
+- **Specs are your product documentation.** Every spec becomes a permanent record of _why_ something was built the way it was.
 - **Human judgment still matters.** The agent executes. You decide if the execution solves the problem. This isn't replacement. It's augmentation.
 
 ---
@@ -196,6 +200,7 @@ Should work across all pages and respect the user's OS setting by default.
 ### What Happens
 
 **Session Created**
+
 ```
 Spec: "Dark Mode Support"
 Tasks Created:
@@ -208,6 +213,7 @@ Tasks Created:
 ```
 
 **Agent Executes**
+
 - Agent reads `AGENTS.md` and `CLAUDE.md`
 - Agent understands: "Use Server Components. No scattered CSS. Database access through repositories."
 - Agent executes each task
@@ -215,12 +221,14 @@ Tasks Created:
 - Within 2 hours: All tasks complete. All tests pass. All hooks green.
 
 **Review & Merge**
+
 - Team reviews the logic (not the formatting)
 - Approves the implementation
 - Merges to main
 - Dark mode works. Spec complete.
 
 **The Audit Trail**
+
 - Every task has a timestamp
 - Every commit references its task
 - Every change is traceable back to the original spec
@@ -230,18 +238,18 @@ Tasks Created:
 
 ## The Tech Stack (Why These Choices)
 
-| Component | Choice | Reason |
-|---|---|---|
-| **Platform** | Next.js 16 | Server-first. AI-friendly. Built for type safety. |
-| **Database** | PostgreSQL + Drizzle | Migrations as code. Predictable. Type-safe ORM. |
-| **Auth** | better-auth | Session-based. Human-friendly. Production-grade. |
-| **Validation** | Zod | Every boundary is checked. AI mistakes are caught early. |
-| **Logging** | Pino | Structured logging. Full audit trail of execution. |
-| **Components** | shadcn/ui | Consistent design system. Accessible. Predictable. |
-| **Testing** | Vitest + Playwright | Fast unit tests. Real E2E validation. |
-| **Git Hooks** | Husky | Enforces quality before commits land. |
+| Component      | Choice               | Reason                                                   |
+| -------------- | -------------------- | -------------------------------------------------------- |
+| **Platform**   | Next.js 16           | Server-first. AI-friendly. Built for type safety.        |
+| **Database**   | PostgreSQL + Drizzle | Migrations as code. Predictable. Type-safe ORM.          |
+| **Auth**       | better-auth          | Session-based. Human-friendly. Production-grade.         |
+| **Validation** | Zod                  | Every boundary is checked. AI mistakes are caught early. |
+| **Logging**    | Pino                 | Structured logging. Full audit trail of execution.       |
+| **Components** | shadcn/ui            | Consistent design system. Accessible. Predictable.       |
+| **Testing**    | Vitest + Playwright  | Fast unit tests. Real E2E validation.                    |
+| **Git Hooks**  | Husky                | Enforces quality before commits land.                    |
 
-We chose each tool because it works *with AI*, not despite it. Type safety, predictability, and clarity—these are what make AI agents reliable.
+We chose each tool because it works _with AI_, not despite it. Type safety, predictability, and clarity—these are what make AI agents reliable.
 
 ---
 

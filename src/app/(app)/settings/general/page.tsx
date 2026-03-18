@@ -19,7 +19,9 @@ export default async function GeneralPage() {
 
   return (
     <div className="flex max-w-2xl flex-col gap-8">
-      <h2 className="text-muted-foreground font-mono text-[10px] tracking-[0.2em] uppercase">General</h2>
+      <h2 className="text-muted-foreground font-mono text-[10px] tracking-[0.2em] uppercase">
+        General
+      </h2>
 
       {project ? (
         <>

@@ -14,7 +14,7 @@ export function PlayfulLogo() {
 
       // Duration of the effect - make it longer to be noticeable
       const duration = nextEffect === 'glitch' ? 800 : 500;
-      
+
       setTimeout(() => {
         setEffect('none');
       }, duration);
@@ -22,7 +22,7 @@ export function PlayfulLogo() {
 
     // Trigger every 30 seconds
     const interval = setInterval(triggerEffect, 30000);
-    
+
     // Initial trigger after 2 seconds for immediate feedback
     const initialTimeout = setTimeout(triggerEffect, 2000);
 
@@ -33,12 +33,12 @@ export function PlayfulLogo() {
   }, []);
 
   return (
-    <span 
+    <span
       className={cn(
-        "text-text-primary flex-1 font-mono text-lg font-bold tracking-tight",
-        effect === 'none' && "transition-all duration-300",
-        effect === 'glitch' && "animate-logo-glitch",
-        effect === 'spark' && "animate-logo-spark"
+        'text-text-primary flex-1 font-mono text-lg font-bold tracking-tight',
+        effect === 'none' && 'transition-all duration-300',
+        effect === 'glitch' && 'animate-logo-glitch',
+        effect === 'spark' && 'animate-logo-spark'
       )}
     >
       specdrivr

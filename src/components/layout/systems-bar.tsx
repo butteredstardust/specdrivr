@@ -27,7 +27,14 @@ export function useSystemHealth(): SystemHealth {
   const { data: health } = usePolling<HealthData>({ url, interval: 30_000 });
 
   if (!health) {
-    return { git: 'unknown', api: 'unknown', agt: 'unknown', pg: 'unknown', overall: 'unknown', agentLastSeen: null };
+    return {
+      git: 'unknown',
+      api: 'unknown',
+      agt: 'unknown',
+      pg: 'unknown',
+      overall: 'unknown',
+      agentLastSeen: null,
+    };
   }
 
   const minsAgo = health.agentLastSeen

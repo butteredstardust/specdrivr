@@ -99,7 +99,8 @@ export function TaskRow({
                 dot={task.status === 'in_progress'}
                 className="w-16 justify-center"
               >
-                {STATUS_CHAR[task.status]} {task.status.replace('_', ' ')}
+                {STATUS_CHAR[task.status]}
+                {task.status.replace('_', ' ')}
               </PixelBadge>
               <span className="bg-phosphor-amber/10 text-phosphor-amber shrink-0 rounded-sm px-1.5 py-0.5 font-mono text-xs">
                 {externalId ?? `T-${String(task.id).padStart(3, '0')}`}
@@ -195,7 +196,8 @@ export function TaskRow({
                           ] as TaskStatus[]
                         ).map((s) => (
                           <DropdownMenuItem key={s} onClick={() => onOverride?.(task.id, s)}>
-                            {STATUS_CHAR[s]} {s.replace('_', ' ')}
+                            {STATUS_CHAR[s]}
+                            {s.replace('_', ' ')}
                           </DropdownMenuItem>
                         ))}
                       </DropdownMenuSubContent>

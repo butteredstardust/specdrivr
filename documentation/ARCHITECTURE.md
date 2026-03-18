@@ -17,7 +17,7 @@ _Spec-driven autonomous code execution for engineering teams_
 | Database           | PostgreSQL 16                                     | ACID transactions; JSONB for log lines and metadata                     |
 | ORM                | Drizzle ORM + drizzle-kit                         | Type-safe queries; schema-first migrations; no code generation          |
 | Auth               | [Better Auth](https://www.better-auth.com/)       | Credentials + Email/Password; session in httpOnly cookie; CSRF built-in |
-| Cache / Queues     | Redis (ioredis)                                   | Rate limiting; agent task queue; production-grade TCP client |
+| Cache / Queues     | Redis (ioredis)                                   | Rate limiting; agent task queue; production-grade TCP client            |
 | File storage       | S3-compatible (AWS or self-hosted MinIO)          | Spec attachments; diff snapshots for long sessions                      |
 | Email              | Resend                                            | Transactional email for invites, notifications, password reset          |
 | UI components      | shadcn/ui (Radix + Tailwind)                      | Accessible, unstyled primitives; customisable without overrides         |
@@ -75,11 +75,11 @@ This section documents known pitfalls and required mitigations for the specific 
 
 ## **23.3 Redis / ioredis**
 
-| **Pitfall**                                                                                                                              | **Mitigation**                                                                                                                                                |
-| ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Pitfall**                                                                                                                                    | **Mitigation**                                                                                                                                                 |
+| ---------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Connection pooling and reconnection: ioredis must be initialized as a singleton with connection pooling to avoid exhausting connection limits. | Use global singleton pattern in lib/redis.ts. Implement proper error handling and reconnection strategies. Connection pool should be shared across all routes. |
-| Redis keys: rate limiting and queue management.                                                                                          | Prefix all keys: ratelimit:{ip}:{endpoint}, queue:task:{taskId}. Never store a bare key.                                                                      |
-| Rate limit bypass via header spoofing: using X-Forwarded-For as the rate limit key allows clients to spoof IP addresses.                 | Extract real IP from Vercel's trusted x-vercel-forwarded-for header in production. In development, fall back to req.ip. Never trust X-Forwarded-For directly. |
+| Redis keys: rate limiting and queue management.                                                                                                | Prefix all keys: ratelimit:{ip}:{endpoint}, queue:task:{taskId}. Never store a bare key.                                                                       |
+| Rate limit bypass via header spoofing: using X-Forwarded-For as the rate limit key allows clients to spoof IP addresses.                       | Extract real IP from Vercel's trusted x-vercel-forwarded-for header in production. In development, fall back to req.ip. Never trust X-Forwarded-For directly.  |
 
 ## **23.4 Plan Generation as a Long-Running Job**
 
@@ -149,13 +149,13 @@ Example: commit 33a0f48 fixed an esbuild vulnerability via pnpm overrides. Alway
 
 ## **23.10 Better Auth Implementation Patterns**
 
-| **Target**                                                                                        | **Best Practice**                                                                                                                 |
-| ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| Session retrieval in Server Components: the data returned by auth() is reactive to the DB record. | Always use `const session = await auth();` from `src/lib/auth.ts`. It wraps the Better Auth client for internal use.              |
-| Middleware session check: the edge session check in proxy.ts is restricted to cookie existence.   | `proxy.ts` performs a fast existence check for `better-auth.session_token`. Cryptographic verification happens in Route Handlers. |
-| User metadata and roles: the `users` table is extended with custom fields like `role`, `isActive`, `theme`, and `onboardingStep`.            | These are defined as `additionalFields` in `src/lib/auth.ts`. Access roles via `session.user.role`.            |
-| Session Security & Cache: the implementation uses `cookieCache` (5m) and `trustedOrigins` for security. | Configured in `authInstance` in `src/lib/auth.ts`. |
-| API Route endpoints: authentication logic is unified under a single catch-all route.              | Use `/api/auth/[...auth]` handled by `toNextJsHandler`. Do not implement manual sign-in routes.                                   |
+| **Target**                                                                                                                        | **Best Practice**                                                                                                                 |
+| --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Session retrieval in Server Components: the data returned by auth() is reactive to the DB record.                                 | Always use `const session = await auth();` from `src/lib/auth.ts`. It wraps the Better Auth client for internal use.              |
+| Middleware session check: the edge session check in proxy.ts is restricted to cookie existence.                                   | `proxy.ts` performs a fast existence check for `better-auth.session_token`. Cryptographic verification happens in Route Handlers. |
+| User metadata and roles: the `users` table is extended with custom fields like `role`, `isActive`, `theme`, and `onboardingStep`. | These are defined as `additionalFields` in `src/lib/auth.ts`. Access roles via `session.user.role`.                               |
+| Session Security & Cache: the implementation uses `cookieCache` (5m) and `trustedOrigins` for security.                           | Configured in `authInstance` in `src/lib/auth.ts`.                                                                                |
+| API Route endpoints: authentication logic is unified under a single catch-all route.                                              | Use `/api/auth/[...auth]` handled by `toNextJsHandler`. Do not implement manual sign-in routes.                                   |
 
 # **24\. Concurrency & Race Condition Handling**
 

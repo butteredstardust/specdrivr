@@ -29,6 +29,7 @@ claude agent nextjs-16-optimizer "Find performance issues in Server Components"
 ## What It Checks
 
 ### 1. Server Component Defaults
+
 ```typescript
 // ✓ CORRECT - Default to Server Component
 export async function Page() {
@@ -44,6 +45,7 @@ export function Page() {
 ```
 
 ### 2. Data Fetching Patterns
+
 ```typescript
 // ✓ CORRECT - Fetch in Server Component
 export async function Page() {
@@ -63,6 +65,7 @@ export function Page() {
 ```
 
 ### 3. Dynamic Imports
+
 ```typescript
 // ✓ CORRECT - Code splitting with dynamic import
 const HeavyComponent = dynamic(() => import('./heavy'), { ssr: false });
@@ -72,6 +75,7 @@ import { HeavyComponent } from './heavy';
 ```
 
 ### 4. Streaming & Suspense
+
 ```typescript
 // ✓ CORRECT - Stream UI with Suspense
 export default function Page() {
@@ -90,6 +94,7 @@ export async function Page() {
 ```
 
 ### 5. Route Handlers vs Server Actions
+
 ```typescript
 // ✓ CORRECT - Server Action for form
 'use server';
@@ -187,6 +192,7 @@ Next.js 16 Readiness: 92/100 (Excellent)
 ## Next.js 16 Best Practices
 
 ### Parallel Routes (Advanced)
+
 ```typescript
 // src/app/@modal/page.ts
 export default function Modal() {
@@ -205,12 +211,14 @@ export default function Layout({ modal, children }) {
 ```
 
 ### Intercepting Routes
+
 ```typescript
 // src/app/(.)projects/[id]/page.tsx
 // Intercepts /projects/[id] when navigated from /dashboard
 ```
 
 ### Search Params & nuqs
+
 ```typescript
 // ✓ CORRECT - Type-safe search params with nuqs
 'use client';
@@ -225,8 +233,10 @@ export function Filters() {
 ## Integration
 
 ### Pre-deployment Checklist
+
 ```markdown
 ## Next.js 16
+
 - [ ] Server Components used by default
 - [ ] Suspense boundaries on slow queries
 - [ ] Dynamic imports for heavy components

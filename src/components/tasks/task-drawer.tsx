@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Drawer } from 'vaul';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { X, ChevronRight, RefreshCw, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -30,40 +31,41 @@ import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
 import { clientLogger } from '@/lib/logger-client';
 import { toast } from 'sonner';
-import { X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { TaskDrawerOverview } from './task-drawer-overview';
 import { TaskDrawerAttempts } from './task-drawer-attempts';
 import { TaskDrawerChanges } from './task-drawer-changes';
+
+export type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'done' | 'failed' | 'skipped';
 
 export interface Task {
   id: number;
   externalId: string;
   title: string;
-  status: 'todo' | 'in_progress' | 'blocked' | 'done' | 'failed' | 'skipped';
-  description?: string | null;
-  blockedReason?: string | null;
-  humanContext?: string | null;
+  description: string | null;
+  status: TaskStatus;
+  orderIndex: number;
   dependsOn: string[];
-  totalCostUsd?: number | null;
-  promptTokensUsed?: number | null;
-  completionTokensUsed?: number | null;
-  planId: number;
-  specId?: number | null;
-  executionOrder: number;
+  blockedReason: string | null;
+  humanContext: string | null;
+  verificationPassed: boolean;
+  promptTokensUsed: number | null;
+  completionTokensUsed: number | null;
+  totalCostUsd: number | null;
 }
 
-const TASK_STATUSES: Task['status'][] = [
-  'todo',
-  'in_progress',
-  'blocked',
-  'done',
-  'failed',
-  'skipped',
-];
+const TASK_STATUS_CONFIG: Record<TaskStatus, { label: string; char: string; variant: any }> = {
+  todo: { label: 'TODO', char: '○', variant: 'muted' },
+  in_progress: { label: 'RUNNING', char: '▶', variant: 'violet' },
+  blocked: { label: 'BLOCKED', char: '⚠', variant: 'amber' },
+  done: { label: 'DONE', char: '✓', variant: 'emerald' },
+  failed: { label: 'FAILED', char: '✕', variant: 'red' },
+  skipped: { label: 'SKIPPED', char: '-', variant: 'muted' },
+};
 
 type DaemonExpression = 'idle' | 'working' | 'success' | 'blocked' | 'error';
 
-function statusToExpression(status: Task['status']): DaemonExpression {
+function statusToExpression(status: TaskStatus): DaemonExpression {
   switch (status) {
     case 'todo':
       return 'idle';
@@ -89,8 +91,9 @@ export function TaskDrawer() {
 
   const [localTask, setLocalTask] = useState<Task | null>(null);
   const [forceConfirmOpen, setForceConfirmOpen] = useState(false);
+  const [isActioning, setIsActioning] = useState(false);
 
-  const { data: polledTask, isLoading } = usePolling<Task>({
+  const { data: polledTask, isLoading: _isLoading } = usePolling<Task>({
     url: activeTaskId ? `/api/v1/tasks/${activeTaskId}` : null,
     interval: 3000,
     stopWhen: (t) => !['todo', 'in_progress'].includes(t.status),
@@ -118,7 +121,7 @@ export function TaskDrawer() {
         const json = await res.json();
         const updated = json.data !== undefined ? json.data : json;
         setLocalTask(updated);
-        toast.success(`Status updated to ${newStatus}`);
+        toast.success(`Task marked as ${newStatus}`);
       } catch (err) {
         clientLogger.error('Status change error', err);
         toast.error('Failed to update status');
@@ -127,63 +130,54 @@ export function TaskDrawer() {
     [task]
   );
 
-  const handleRetry = useCallback(async () => {
-    if (!task) return;
-    try {
-      const res = await fetch(`/api/v1/tasks/${task.id}/retry`, {
-        method: 'POST',
-        credentials: 'include',
-      });
-      if (!res.ok) {
-        toast.error('Retry not yet available');
+  const handleMarkDone = useCallback(
+    async (force: boolean) => {
+      if (!task) return;
+      if (task.status === 'done') return;
+
+      if (!force && !task.verificationPassed) {
+        setForceConfirmOpen(true);
         return;
       }
-      toast.success('Retry initiated');
-      const json = await res.json().catch(() => ({}));
-      const updated = json.data !== undefined ? json.data : json;
-      if (updated?.id) setLocalTask(updated);
-    } catch (err) {
-      clientLogger.error('Retry error', err);
-      toast.error('Retry not yet available');
-    }
-  }, [task]);
 
-  const handleMarkDone = useCallback(
-    async (force = false) => {
-      if (!task) return;
+      setIsActioning(true);
       try {
-        const body: Record<string, unknown> = { status: 'done' };
-        if (force) body.forceDone = true;
-
-        const res = await fetch(`/api/v1/tasks/${task.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
+        const res = await fetch(`/api/v1/tasks/${task.id}/complete`, {
+          method: 'POST',
           credentials: 'include',
-          body: JSON.stringify(body),
         });
-
-        if (res.status === 422 && !force) {
-          setForceConfirmOpen(true);
-          return;
-        }
-
-        if (!res.ok) {
-          toast.error('Failed to mark as done');
-          return;
-        }
-
-        const json = await res.json();
-        const updated = json.data !== undefined ? json.data : json;
-        setLocalTask(updated);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        toast.success('Task marked as done.');
         setForceConfirmOpen(false);
-        toast.success('Task marked as done');
+        const updated = await res.json();
+        setLocalTask(updated.data ?? updated);
       } catch (err) {
         clientLogger.error('Mark done error', err);
         toast.error('Failed to mark as done');
+      } finally {
+        setIsActioning(false);
       }
     },
     [task]
   );
+
+  const handleRetry = useCallback(async () => {
+    if (!task) return;
+    setIsActioning(true);
+    try {
+      const res = await fetch(`/api/v1/tasks/${task.id}/unblock`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      toast.success('Task queued for retry.');
+    } catch (err) {
+      clientLogger.error('Retry failed', err);
+      toast.error('Failed to retry task');
+    } finally {
+      setIsActioning(false);
+    }
+  }, [task]);
 
   const handleMarkBlocked = useCallback(async () => {
     if (!task) return;
@@ -224,13 +218,29 @@ export function TaskDrawer() {
                   <TooltipProvider>
                     {canManage ? (
                       <Select value={task.status} onValueChange={handleStatusChange}>
-                        <SelectTrigger className="h-8 w-36 text-xs font-medium">
-                          <SelectValue />
+                        <SelectTrigger className="bg-bg-elevated h-8 w-40 border-none px-2 shadow-none focus:ring-0">
+                          <SelectValue>
+                            <PixelBadge
+                              variant={TASK_STATUS_CONFIG[task.status].variant}
+                              dot={task.status === 'in_progress'}
+                              className="w-32 justify-center"
+                            >
+                              {TASK_STATUS_CONFIG[task.status].char}
+                              {TASK_STATUS_CONFIG[task.status].label}
+                            </PixelBadge>
+                          </SelectValue>
                         </SelectTrigger>
-                        <SelectContent>
-                          {TASK_STATUSES.map((s) => (
-                            <SelectItem key={s} value={s} className="text-xs">
-                              {s}
+                        <SelectContent className="bg-bg-surface border-border-default">
+                          {(Object.keys(TASK_STATUS_CONFIG) as Array<TaskStatus>).map((s) => (
+                            <SelectItem key={s} value={s} className="focus:bg-bg-elevated py-2">
+                              <PixelBadge
+                                variant={TASK_STATUS_CONFIG[s].variant}
+                                dot={s === 'in_progress'}
+                                className="w-32 justify-center"
+                              >
+                                {TASK_STATUS_CONFIG[s].char}
+                                {TASK_STATUS_CONFIG[s].label}
+                              </PixelBadge>
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -239,11 +249,14 @@ export function TaskDrawer() {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <span>
-                            <Select disabled value={task.status}>
-                              <SelectTrigger className="h-8 w-36 cursor-not-allowed text-xs font-medium opacity-50">
-                                <SelectValue />
-                              </SelectTrigger>
-                            </Select>
+                            <PixelBadge
+                              variant={TASK_STATUS_CONFIG[task.status].variant}
+                              dot={task.status === 'in_progress'}
+                              className="w-32 justify-center opacity-60"
+                            >
+                              {TASK_STATUS_CONFIG[task.status].char}
+                              {TASK_STATUS_CONFIG[task.status].label}
+                            </PixelBadge>
                           </span>
                         </TooltipTrigger>
                         <TooltipContent>Requires Admin or Owner role</TooltipContent>
@@ -301,11 +314,6 @@ export function TaskDrawer() {
                 />
               </>
             )}
-            {!task && isLoading && (
-              <div className="flex flex-1 items-center justify-center">
-                <span className="text-text-muted font-mono text-xs">Loading...</span>
-              </div>
-            )}
           </Drawer.Content>
         </Drawer.Portal>
       </Drawer.Root>
@@ -313,15 +321,21 @@ export function TaskDrawer() {
       <AlertDialog open={forceConfirmOpen} onOpenChange={setForceConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Force mark as done?</AlertDialogTitle>
+            <AlertDialogTitle>Force Mark as Done?</AlertDialogTitle>
             <AlertDialogDescription>
-              This task has unmet conditions. Forcing it to done may leave dependencies in an
-              inconsistent state. Are you sure?
+              This task has not passed automated verification. Marking it as done manually may cause
+              issues with dependent tasks.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => handleMarkDone(true)}>Force Done</AlertDialogAction>
+            <AlertDialogCancel disabled={isActioning}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-status-red hover:bg-status-red/90"
+              onClick={() => handleMarkDone(true)}
+              disabled={isActioning}
+            >
+              Force Mark Done
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -329,17 +343,13 @@ export function TaskDrawer() {
   );
 }
 
-// ---------------------------------------------------------------------------
-// DrawerFooter (inline)
-// ---------------------------------------------------------------------------
-
 interface DrawerFooterProps {
   task: Task;
   canManage: boolean;
   devMode: boolean;
-  onRetry: () => void;
-  onMarkBlocked: () => void;
-  onMarkDone: () => void;
+  onRetry: () => Promise<void>;
+  onMarkBlocked: () => Promise<void>;
+  onMarkDone: () => Promise<void>;
 }
 
 function DrawerFooter({
@@ -354,24 +364,38 @@ function DrawerFooter({
   const [jsonOpen, setJsonOpen] = useState(false);
 
   return (
-    <div className="bg-bg-elevated/50 border-border-default shrink-0 space-y-3 border-t px-6 py-4">
-      <div className="flex items-center gap-2">
+    <div className="bg-bg-elevated/50 border-border-default shrink-0 space-y-4 border-t px-6 py-5">
+      <div className="flex items-center gap-3">
         {showRerun && (
-          <Button variant="outline" size="sm" onClick={onRetry}>
+          <Button variant="violet" size="sm" onClick={onRetry} className="h-8 gap-1.5">
+            <RefreshCw className="h-3.5 w-3.5" />
             RE-RUN
           </Button>
         )}
 
         <TooltipProvider>
           {canManage ? (
-            <Button variant="outline" size="sm" onClick={onMarkBlocked}>
+            <Button
+              variant="phosphor"
+              size="sm"
+              onClick={onMarkBlocked}
+              className="h-8 gap-1.5"
+              disabled={task.status === 'blocked'}
+            >
+              <AlertCircle className="h-3.5 w-3.5" />
               MARK BLOCKED
             </Button>
           ) : (
             <Tooltip>
               <TooltipTrigger asChild>
                 <span>
-                  <Button variant="outline" size="sm" disabled className="cursor-not-allowed">
+                  <Button
+                    variant="phosphor"
+                    size="sm"
+                    disabled
+                    className="h-8 cursor-not-allowed gap-1.5"
+                  >
+                    <AlertCircle className="h-3.5 w-3.5" />
                     MARK BLOCKED
                   </Button>
                 </span>
@@ -383,14 +407,27 @@ function DrawerFooter({
 
         <TooltipProvider>
           {canManage ? (
-            <Button variant="outline" size="sm" onClick={onMarkDone}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onMarkDone}
+              className="border-border-default hover:bg-bg-elevated text-text-secondary hover:text-text-primary h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase transition-colors"
+              disabled={task.status === 'done'}
+            >
+              <CheckCircle2 className="text-status-emerald h-3.5 w-3.5" />
               MARK DONE
             </Button>
           ) : (
             <Tooltip>
               <TooltipTrigger asChild>
                 <span>
-                  <Button variant="outline" size="sm" disabled className="cursor-not-allowed">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled
+                    className="h-8 cursor-not-allowed gap-1.5 font-mono text-[10px] tracking-widest uppercase opacity-50"
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5" />
                     MARK DONE
                   </Button>
                 </span>
@@ -401,24 +438,31 @@ function DrawerFooter({
         </TooltipProvider>
       </div>
 
-      {devMode && (
-        <div className="text-text-muted flex items-center gap-4 font-mono text-[10px]">
-          <span>Prompt: {task.promptTokensUsed?.toLocaleString() ?? '---'}</span>
-          <span>Completion: {task.completionTokensUsed?.toLocaleString() ?? '---'}</span>
-          <span>Cost: ${task.totalCostUsd != null ? task.totalCostUsd.toFixed(4) : '---'}</span>
+      {(devMode || jsonOpen) && (
+        <div className="space-y-3">
+          {devMode && (
+            <div className="text-text-muted flex items-center gap-4 font-mono text-[10px] tracking-wider uppercase">
+              <span>Prompt: {task.promptTokensUsed?.toLocaleString() ?? '---'}</span>
+              <span>Completion: {task.completionTokensUsed?.toLocaleString() ?? '---'}</span>
+              <span>Cost: ${task.totalCostUsd != null ? task.totalCostUsd.toFixed(4) : '---'}</span>
+            </div>
+          )}
+          {devMode && (
+            <Collapsible open={jsonOpen} onOpenChange={setJsonOpen}>
+              <CollapsibleTrigger className="text-text-muted hover:text-text-secondary flex cursor-pointer items-center gap-1.5 font-mono text-[10px] tracking-widest uppercase select-none">
+                {jsonOpen ? 'Hide JSON' : 'Inspect JSON'}
+                <ChevronRight
+                  className={cn('h-3 w-3 transition-transform', jsonOpen && 'rotate-90')}
+                />
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <pre className="bg-terminal-bg text-terminal-green border-border-subtle mt-2 overflow-auto rounded border p-3 font-mono text-[10px]">
+                  {JSON.stringify(task, null, 2)}
+                </pre>
+              </CollapsibleContent>
+            </Collapsible>
+          )}
         </div>
-      )}
-      {devMode && (
-        <Collapsible open={jsonOpen} onOpenChange={setJsonOpen}>
-          <CollapsibleTrigger className="text-text-muted hover:text-text-secondary cursor-pointer font-mono text-[10px] select-none">
-            JSON inspector
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <pre className="bg-terminal-bg text-terminal-green mt-2 overflow-auto rounded p-3 font-mono text-[10px]">
-              {JSON.stringify(task, null, 2)}
-            </pre>
-          </CollapsibleContent>
-        </Collapsible>
       )}
     </div>
   );

@@ -2,9 +2,7 @@
   "mcpServers": {
     "fetch": {
       "command": "uvx",
-      "args": [
-        "mcp-server-fetch"
-      ]
+      "args": ["mcp-server-fetch"]
     },
     "filesystem": {
       "command": "npx",
@@ -17,11 +15,7 @@
     },
     "git": {
       "command": "uvx",
-      "args": [
-        "mcp-server-git",
-        "--repository",
-        "/Users/tuxgeek/Dev/specdrivr"
-      ]
+      "args": ["mcp-server-git", "--repository", "/Users/tuxgeek/Dev/specdrivr"]
     },
     "postgres": {
       "command": "npx",
@@ -33,65 +27,41 @@
     },
     "memory": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-memory"
-      ],
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
       "env": {
         "MEMORY_FILE_PATH": "/Users/tuxgeek/.claude/projects/specdrivr/memory/.mcp-memory.jsonl"
       }
     },
     "shadcn": {
       "command": "npx",
-      "args": [
-        "shadcn@latest",
-        "mcp"
-      ]
+      "args": ["shadcn@latest", "mcp"]
     },
     "next-devtools": {
       "command": "npx",
-      "args": [
-        "-y",
-        "next-devtools-mcp@latest"
-      ]
+      "args": ["-y", "next-devtools-mcp@latest"]
     },
     "vitest": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@djankies/vitest-mcp"
-      ]
+      "args": ["-y", "@djankies/vitest-mcp"]
     },
     "shell": {
       "command": "npx",
-      "args": [
-        "-y",
-        "hyper-mcp-shell"
-      ]
+      "args": ["-y", "hyper-mcp-shell"]
     },
     "redis": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@hamaster/redis-mcp-server"
-      ],
+      "args": ["-y", "@hamaster/redis-mcp-server"],
       "env": {
         "REDIS_URL": "redis://localhost:6379"
       }
     },
     "eslint": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@eslint/mcp"
-      ]
+      "args": ["-y", "@eslint/mcp"]
     },
     "await": {
       "command": "npx",
-      "args": [
-        "-y",
-        "mcp-await"
-      ]
+      "args": ["-y", "mcp-await"]
     }
   }
 }

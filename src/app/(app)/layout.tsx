@@ -49,7 +49,7 @@ async function AuthenticatedApp({ children }: { children: React.ReactNode }) {
   return (
     <ShellProvider user={shellUser} initialId={validatedProjectId}>
       <TaskDrawerProvider>
-        <div className="flex h-screen overflow-hidden relative">
+        <div className="relative flex h-screen overflow-hidden">
           <Sidebar projects={projects} />
           <div className="flex flex-1 flex-col overflow-hidden">
             <TopBar />
@@ -66,15 +66,15 @@ async function AuthenticatedApp({ children }: { children: React.ReactNode }) {
 
 function LayoutSkeleton() {
   return (
-    <div className="flex h-screen overflow-hidden relative">
-      <div className="w-56 border-r border-border-default bg-bg-surface p-4 space-y-4">
+    <div className="relative flex h-screen overflow-hidden">
+      <div className="border-border-default bg-bg-surface w-56 space-y-4 border-r p-4">
         <Skeleton className="h-8 w-3/4" />
         <Skeleton className="h-4 w-full" />
         <Skeleton className="h-4 w-full" />
         <Skeleton className="h-4 w-5/6" />
       </div>
       <div className="flex flex-1 flex-col overflow-hidden">
-        <div className="h-14 border-b border-border-default p-4 flex justify-between items-center">
+        <div className="border-border-default flex h-14 items-center justify-between border-b p-4">
           <Skeleton className="h-6 w-32" />
           <Skeleton className="h-8 w-8 rounded-full" />
         </div>
