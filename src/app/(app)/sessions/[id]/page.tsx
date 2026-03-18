@@ -173,31 +173,34 @@ export default function SessionDetailPage({ params }: PageProps) {
             <Button
               size="sm"
               variant="outline"
+              className="border-phosphor-amber/50 text-phosphor-amber hover:bg-phosphor-amber/10"
               onClick={() => handleAction('pause')}
               disabled={isUpdating}
             >
-              <Pause className="mr-2 h-4 w-4" /> Pause
+              <Pause className="mr-1.5 h-3.5 w-3.5" />
+              Pause
             </Button>
           )}
           {session?.status === 'paused' && (
             <Button
               size="sm"
-              variant="outline"
+              variant="default"
               onClick={() => handleAction('resume')}
               disabled={isUpdating}
             >
-              <Play className="mr-2 h-4 w-4" /> Resume
+              <Play className="mr-1.5 h-3.5 w-3.5" />
+              Resume
             </Button>
           )}
           {session && !TERMINAL_STATUSES.includes(session.status) && (
             <Button
               size="sm"
-              variant="outline"
-              className="text-status-red hover:text-status-red/80"
+              variant="destructive"
               onClick={() => handleAction('cancel')}
               disabled={isUpdating}
             >
-              <XCircle className="mr-2 h-4 w-4" /> Cancel
+              <XCircle className="mr-1.5 h-3.5 w-3.5" />
+              Cancel
             </Button>
           )}
           {session?.specId && (
