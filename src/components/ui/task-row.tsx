@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ChevronRight, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PixelBadge } from '@/components/ui/pixel-badge';
 import { cn } from '@/lib/utils';
 
 type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'done' | 'failed' | 'skipped';
@@ -47,13 +48,16 @@ const STATUS_CHAR: Record<TaskStatus, string> = {
   skipped: '-',
 };
 
-const STATUS_CLASS: Record<TaskStatus, string> = {
-  todo: 'text-text-muted',
-  in_progress: 'text-accent-violet animate-blink',
-  blocked: 'text-phosphor-amber',
-  done: 'text-status-emerald',
-  failed: 'text-status-red',
-  skipped: 'text-text-muted opacity-50',
+const STATUS_VARIANT: Record<
+  TaskStatus,
+  'default' | 'violet' | 'amber' | 'emerald' | 'red' | 'muted'
+> = {
+  todo: 'muted',
+  in_progress: 'violet',
+  blocked: 'amber',
+  done: 'emerald',
+  failed: 'red',
+  skipped: 'muted',
 };
 
 const ROLE_RANK: Record<UserRole, number> = { viewer: 0, member: 1, admin: 2, owner: 3 };
@@ -90,14 +94,13 @@ export function TaskRow({
         <div className={cn('rounded-sm', rowBorderClass, className)}>
           <CollapsibleTrigger asChild>
             <div className="hover:bg-bg-elevated flex h-9 cursor-pointer items-center gap-2 px-3 select-none">
-              <span
-                className={cn(
-                  'w-4 shrink-0 text-center font-mono text-sm',
-                  STATUS_CLASS[task.status]
-                )}
+              <PixelBadge
+                variant={STATUS_VARIANT[task.status]}
+                dot={task.status === 'in_progress'}
+                className="w-16 justify-center"
               >
-                {STATUS_CHAR[task.status]}
-              </span>
+                {STATUS_CHAR[task.status]} {task.status.replace('_', ' ')}
+              </PixelBadge>
               <span className="bg-phosphor-amber/10 text-phosphor-amber shrink-0 rounded-sm px-1.5 py-0.5 font-mono text-xs">
                 {externalId ?? `T-${String(task.id).padStart(3, '0')}`}
               </span>
@@ -123,25 +126,35 @@ export function TaskRow({
                 </span>
               )}
               {onOpenDrawer && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 shrink-0"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onOpenDrawer(task.id);
-                  }}
-                  aria-label="Open task details"
-                >
-                  <ChevronRight className="h-3 w-3" />
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 shrink-0"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenDrawer(task.id);
+                      }}
+                      aria-label="Open task details"
+                    >
+                      <ChevronRight className="h-3 w-3" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Open task details</TooltipContent>
+                </Tooltip>
               )}
               <DropdownMenu>
-                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                  <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0">
-                    <MoreHorizontal className="h-3 w-3" />
-                  </Button>
-                </DropdownMenuTrigger>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0">
+                        <MoreHorizontal className="h-3 w-3" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent>Task actions</TooltipContent>
+                </Tooltip>
                 <DropdownMenuContent align="end">
                   <Tooltip>
                     <TooltipTrigger asChild>

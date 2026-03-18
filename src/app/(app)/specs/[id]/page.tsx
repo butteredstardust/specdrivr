@@ -18,6 +18,7 @@ import { TasksTab } from '@/components/specs/tasks-tab';
 import { ChangesTab } from '@/components/specs/changes-tab';
 import { ActivityTab } from '@/components/specs/activity-tab';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { PixelBadge } from '@/components/ui/pixel-badge';
 import type { SpecStatus } from '@/components/specs/spec-editor';
 import type { UserRole } from '@/db/schema';
 
@@ -41,26 +42,27 @@ const TABS: { id: TabName; label: string }[] = [
 ];
 
 function StatusBadge({ status }: { status: SpecStatus }) {
-  const base = 'font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded';
   switch (status) {
     case 'drafting':
-      return <span className={`${base} bg-secondary text-muted-foreground`}>Draft</span>;
+      return <PixelBadge variant="muted">Draft</PixelBadge>;
     case 'pending_plan':
-      return <span className={`${base} text-phosphor-amber bg-phosphor-amber/10`}>Pending</span>;
+      return <PixelBadge variant="amber">Pending</PixelBadge>;
     case 'pending_approval':
-      return <span className={`${base} text-phosphor-amber bg-phosphor-amber/10`}>Review</span>;
+      return <PixelBadge variant="amber">Review</PixelBadge>;
     case 'executing':
-      return <span className={`${base} text-primary bg-primary/10`}>Running</span>;
-    case 'completed':
-      return <span className={`${base} text-status-emerald bg-status-emerald/10`}>Done</span>;
-    case 'stalled':
-      return <span className={`${base} text-status-red bg-status-red/10`}>Stalled</span>;
-    case 'archived':
       return (
-        <span className={`${base} bg-secondary text-muted-foreground opacity-60`}>Archived</span>
+        <PixelBadge variant="violet" dot>
+          Running
+        </PixelBadge>
       );
+    case 'completed':
+      return <PixelBadge variant="emerald">Done</PixelBadge>;
+    case 'stalled':
+      return <PixelBadge variant="red">Stalled</PixelBadge>;
+    case 'archived':
+      return <PixelBadge variant="muted">Archived</PixelBadge>;
     default:
-      return <span className={`${base} bg-secondary text-muted-foreground`}>{status}</span>;
+      return <PixelBadge variant="muted">{status}</PixelBadge>;
   }
 }
 
@@ -171,7 +173,7 @@ export default function SpecDetailPage(): React.ReactElement {
           </div>
         ) : (
           <div className="flex min-w-0 flex-col gap-1">
-            <div className="text-muted-foreground mb-1 font-mono text-[10px] tracking-[0.2em] uppercase">
+            <div className="text-text-secondary mb-1 font-mono text-xs tracking-[0.2em] uppercase">
               Project Spec
             </div>
             <div className="flex min-w-0 items-center gap-3">

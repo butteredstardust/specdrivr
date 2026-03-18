@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
-import { CheckCircle, XCircle, Clock, PlayCircle } from 'lucide-react';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { PixelBadge } from '@/components/ui/pixel-badge';
 
 interface RecentSession {
   id: number;
@@ -48,22 +48,26 @@ export function RecentSessions({ sessions }: RecentSessionsProps) {
       </h2>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {sessions.map((session) => {
-          const isSuccess = session.status === 'completed';
-          const isFailed = session.status === 'failed';
-          const isCancelled = session.status === 'cancelled';
+          let variant: 'violet' | 'emerald' | 'red' | 'muted' | 'amber' = 'violet';
+          let label: string = session.status;
 
-          let StatusIcon = PlayCircle;
-          let statusColor = 'text-accent-violet';
-
-          if (isSuccess) {
-            StatusIcon = CheckCircle;
-            statusColor = 'text-status-emerald';
-          } else if (isFailed) {
-            StatusIcon = XCircle;
-            statusColor = 'text-status-red';
-          } else if (isCancelled) {
-            StatusIcon = Clock;
-            statusColor = 'text-text-muted';
+          switch (session.status) {
+            case 'completed':
+              variant = 'emerald';
+              label = 'Done';
+              break;
+            case 'failed':
+              variant = 'red';
+              break;
+            case 'cancelled':
+              variant = 'muted';
+              break;
+            case 'paused':
+              variant = 'amber';
+              break;
+            case 'running':
+              variant = 'violet';
+              break;
           }
 
           return (
@@ -74,12 +78,9 @@ export function RecentSessions({ sessions }: RecentSessionsProps) {
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2">
-                  <span
-                    className={`flex items-center gap-1 font-mono text-[10px] font-semibold uppercase ${statusColor}`}
-                  >
-                    <StatusIcon className="h-3 w-3" />
-                    {session.status}
-                  </span>
+                  <PixelBadge variant={variant} dot={session.status === 'running'}>
+                    {label}
+                  </PixelBadge>
                 </div>
                 <span className="text-text-muted font-mono text-[10px]">
                   {formatDistanceToNow(new Date(session.startedAt), { addSuffix: true })}

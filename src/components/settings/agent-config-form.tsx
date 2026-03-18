@@ -364,7 +364,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             {/* Gemini Group */}
             <div className="border-border-default bg-bg-surface flex flex-col gap-4 rounded-md border p-4">
-              <p className="text-text-secondary font-mono text-[10px] tracking-widest uppercase">
+              <p className="text-text-secondary font-mono text-xs tracking-widest uppercase">
                 Google Gemini
               </p>
 
@@ -406,7 +406,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
 
             {/* Claude Group */}
             <div className="border-border-default bg-bg-surface flex flex-col gap-4 rounded-md border p-4">
-              <p className="text-text-secondary font-mono text-[10px] tracking-widest uppercase">
+              <p className="text-text-secondary font-mono text-xs tracking-widest uppercase">
                 Anthropic Claude
               </p>
 

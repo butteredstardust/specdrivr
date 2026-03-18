@@ -61,7 +61,7 @@ export function SettingsNav({ userRole }: SettingsNavProps) {
     <nav className="flex flex-col gap-5">
       {NAV_GROUPS.map((group) => (
         <div key={group.label}>
-          <p className="text-muted-foreground mb-1 px-2 font-mono text-[10px] tracking-[0.15em] uppercase">
+          <p className="text-text-secondary mb-1 px-2 font-mono text-xs tracking-[0.15em] uppercase">
             {group.label}
           </p>
           <div className="flex flex-col gap-0.5">

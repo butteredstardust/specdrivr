@@ -130,7 +130,7 @@ function PasswordInput({ id, value, onChange, disabled, placeholder }: PasswordI
         variant="ghost"
         size="icon"
         onClick={() => setShow((prev) => !prev)}
-        className="text-text-muted hover:text-text-primary absolute top-1/2 right-1.5 h-6 w-6 -translate-y-1/2 p-0 disabled:pointer-events-none"
+        className="text-text-secondary hover:text-text-primary absolute top-1/2 right-1.5 h-6 w-6 -translate-y-1/2 p-0 disabled:pointer-events-none"
         aria-label={show ? 'Hide value' : 'Show value'}
         disabled={disabled}
         tabIndex={-1}
@@ -169,8 +169,8 @@ function FormField({ label, htmlFor, children }: FormFieldProps) {
 function ConnectedBadge({ connected }: { connected: boolean }) {
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2 py-0.5 font-mono text-[10px] tracking-wider uppercase ${
-        connected ? 'bg-status-emerald/10 text-status-emerald' : 'bg-bg-surface text-text-muted'
+      className={`inline-flex items-center rounded-full px-2 py-0.5 font-mono text-xs tracking-wider uppercase ${
+        connected ? 'bg-status-emerald/10 text-status-emerald' : 'bg-bg-surface text-text-secondary'
       }`}
     >
       {connected ? 'Connected' : 'Not connected'}
@@ -313,7 +313,7 @@ function GitHubCard({ projectId, editable, initialData, onSaved }: GitHubCardPro
             <Github className="text-text-secondary h-5 w-5" />
             <CardTitle className="text-text-primary text-sm font-semibold">GitHub</CardTitle>
           </div>
-          <CardDescription className="text-text-muted text-xs">
+          <CardDescription className="text-text-secondary text-xs">
             Connect your repository for automated commits.
           </CardDescription>
           <ConnectedBadge connected={connected} />
@@ -433,7 +433,7 @@ function GitHubCard({ projectId, editable, initialData, onSaved }: GitHubCardPro
 
           {connected && (
             <div className="border-border-default bg-bg-base flex items-center gap-2 rounded-md border px-3 py-2">
-              <p className="text-text-muted min-w-0 flex-1 truncate font-mono text-xs">
+              <p className="text-text-secondary min-w-0 flex-1 truncate font-mono text-xs">
                 {webhookUrl}
               </p>
               <Button
@@ -441,7 +441,7 @@ function GitHubCard({ projectId, editable, initialData, onSaved }: GitHubCardPro
                 variant="ghost"
                 size="icon"
                 onClick={copyWebhookUrl}
-                className="text-text-muted hover:text-text-primary h-7 w-7 shrink-0 p-0"
+                className="text-text-secondary hover:text-text-primary h-7 w-7 shrink-0 p-0"
                 aria-label="Copy webhook URL"
               >
                 <Copy className="h-3.5 w-3.5" />
@@ -611,7 +611,7 @@ function SlackCard({ projectId, editable, initialData, onSaved }: SlackCardProps
             <Hash className="text-text-secondary h-5 w-5" />
             <CardTitle className="text-text-primary text-sm font-semibold">Slack</CardTitle>
           </div>
-          <CardDescription className="text-text-muted text-xs">
+          <CardDescription className="text-text-secondary text-xs">
             Send notifications to Slack.
           </CardDescription>
           <ConnectedBadge connected={connected} />
@@ -979,7 +979,7 @@ function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
             <Globe className="text-text-secondary h-5 w-5" />
             <CardTitle className="text-text-primary text-sm font-semibold">Webhooks</CardTitle>
           </div>
-          <CardDescription className="text-text-muted text-xs">
+          <CardDescription className="text-text-secondary text-xs">
             Send events to external endpoints.
           </CardDescription>
         </CardHeader>
@@ -1001,9 +1001,9 @@ function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
 
           {/* Webhook list */}
           {isLoading ? (
-            <p className="text-text-muted font-mono text-xs">Loading webhooks…</p>
+            <p className="text-text-secondary font-mono text-xs">Loading webhooks…</p>
           ) : webhooks.length === 0 ? (
-            <p className="text-text-muted text-xs">No webhooks configured.</p>
+            <p className="text-text-secondary text-xs">No webhooks configured.</p>
           ) : (
             <div className="divide-border-default flex flex-col divide-y">
               {webhooks.map((wh) => (
@@ -1015,8 +1015,8 @@ function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
                     variant="outline"
                     className={
                       wh.status === 'active'
-                        ? 'border-status-emerald/30 bg-status-emerald/10 text-status-emerald font-mono text-[10px]'
-                        : 'border-status-red/30 bg-status-red/10 text-status-red font-mono text-[10px]'
+                        ? 'border-status-emerald/30 bg-status-emerald/10 text-status-emerald font-mono text-xs'
+                        : 'border-status-red/30 bg-status-red/10 text-status-red font-mono text-xs'
                     }
                   >
                     {wh.status}
@@ -1027,7 +1027,7 @@ function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="text-text-muted hover:text-text-primary h-7 w-7 shrink-0"
+                          className="text-text-secondary hover:text-text-primary h-7 w-7 shrink-0"
                           aria-label="Webhook actions"
                         >
                           <MoreHorizontal className="h-4 w-4" />
@@ -1055,7 +1055,7 @@ function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="text-text-muted h-7 w-7 shrink-0"
+                              className="text-text-secondary h-7 w-7 shrink-0"
                               aria-label="Webhook actions"
                               disabled
                             >
@@ -1143,7 +1143,7 @@ export function IntegrationsSection({ projectId, userRole }: IntegrationsSection
   }, [restartConfig]);
 
   if (isLoading) {
-    return <p className="text-text-muted font-mono text-xs">Loading integrations…</p>;
+    return <p className="text-text-secondary font-mono text-xs">Loading integrations…</p>;
   }
 
   return (

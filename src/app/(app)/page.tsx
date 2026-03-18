@@ -151,7 +151,7 @@ export default function MissionControlPage() {
       {/* Header */}
       <div className="border-border-default flex items-center justify-between border-b px-6 py-4">
         <div>
-          <div className="text-muted-foreground mb-1 font-mono text-[10px] tracking-[0.2em] uppercase">
+          <div className="text-text-secondary mb-1 font-mono text-xs tracking-[0.2em] uppercase">
             Mission Control
           </div>
           <h1 className="text-foreground text-xl font-semibold">Dashboard</h1>
@@ -190,7 +190,7 @@ export default function MissionControlPage() {
                   </div>
                 </div>
                 <div>
-                  <h2 className="text-text-muted mb-2 font-mono text-xs tracking-widest uppercase">
+                  <h2 className="text-text-secondary mb-2 font-mono text-xs tracking-widest uppercase">
                     Live Terminal
                   </h2>
                   <LiveTerminal
