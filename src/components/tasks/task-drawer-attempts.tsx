@@ -3,16 +3,23 @@
 import { useState } from 'react';
 import { usePolling } from '@/hooks/use-polling';
 import { TerminalLog } from '@/components/ui/terminal-log';
+import dynamic from 'next/dynamic';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+const LiveTerminal = dynamic(
+  () => import('@/components/ui/live-terminal').then((m) => ({ default: m.LiveTerminal })),
+  { ssr: false }
+);
 
 interface Attempt {
   id: number;
   seq: number;
   status: 'running' | 'completed' | 'failed';
   logLines: string[];
+  sessionId?: number | null;
   startedAt?: string | null;
   completedAt?: string | null;
   durationMs?: number | null;
@@ -110,11 +117,15 @@ export function TaskDrawerAttempts({ taskId, taskStatus }: TaskDrawerAttemptsPro
               )}
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-2">
-              <TerminalLog
-                lines={attempt.logLines ?? []}
-                maxHeight="320px"
-                autoScroll={attempt.status === 'running'}
-              />
+              {attempt.status === 'running' && attempt.sessionId ? (
+                <LiveTerminal sessionId={attempt.sessionId} height={320} active={isOpen} />
+              ) : (
+                <TerminalLog
+                  lines={attempt.logLines ?? []}
+                  maxHeight="320px"
+                  autoScroll={attempt.status === 'running'}
+                />
+              )}
             </CollapsibleContent>
           </Collapsible>
         );

@@ -1,6 +1,5 @@
 {
   "mcpServers": {
-
     "postgres": {
       "command": "npx",
       "args": [
@@ -9,7 +8,6 @@
         "postgresql://specdrivr:specdrivr_password@localhost:5432/specdrivr"
       ]
     },
-
     "memory": {
       "command": "npx",
       "args": [
@@ -17,10 +15,9 @@
         "@modelcontextprotocol/server-memory"
       ],
       "env": {
-        "MEMORY_FILE_PATH": "/Users/tuxgeek/Dev/specdrivr/.mcp-memory.jsonl"
+        "MEMORY_FILE_PATH": ".mcp-memory.jsonl"
       }
     },
-
     "playwright": {
       "command": "npx",
       "args": [
@@ -28,7 +25,6 @@
         "@playwright/mcp@latest"
       ]
     },
-
     "shadcn": {
       "command": "npx",
       "args": [
@@ -36,7 +32,6 @@
         "mcp"
       ]
     },
-
     "docker": {
       "command": "npx",
       "args": [
@@ -44,7 +39,6 @@
         "@thelord/mcp-server-docker-npx"
       ]
     },
-
     "next-devtools": {
       "command": "npx",
       "args": [
@@ -52,7 +46,6 @@
         "next-devtools-mcp@latest"
       ]
     },
-
     "vitest": {
       "command": "npx",
       "args": [
@@ -60,14 +53,12 @@
         "@djankies/vitest-mcp"
       ]
     },
-
     "context7": {
       "command": "npx",
       "args": [
         "-y",
-        "@context7/mcp-server"
+        "@upstash/context7-mcp"
       ]
     }
-
   }
 }

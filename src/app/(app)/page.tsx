@@ -10,8 +10,20 @@ import { SessionPanel } from '@/components/mission-control/session-panel';
 import { EventLog } from '@/components/mission-control/event-log';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { UserRole } from '@/db/schema';
+import dynamic from 'next/dynamic';
+import { RecentSessions } from '@/components/mission-control/recent-sessions';
 
-interface AgentSession {
+const LiveTerminal = dynamic(
+  () => import('@/components/ui/live-terminal').then((m) => ({ default: m.LiveTerminal })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[320px] w-full animate-pulse rounded bg-[var(--terminal-bg)]" />
+    ),
+  }
+);
+
+export interface AgentSession {
   id: number;
   status: 'running' | 'paused' | 'completed' | 'failed' | 'cancelled';
   startedAt: string;
@@ -24,6 +36,7 @@ interface AgentSession {
   currentTaskExternalId?: string | null;
   currentTaskTitle?: string | null;
   totalTasks?: number | null;
+  backend?: 'gemini' | 'claude';
 }
 
 interface BlockedTask {
@@ -40,9 +53,7 @@ export default function MissionControlPage() {
   const [dismissed, setDismissed] = useState(false);
 
   const sessionsUrl =
-    activeProjectId !== null
-      ? `/api/v1/sessions?projectId=${activeProjectId}&status=running&limit=1`
-      : null;
+    activeProjectId !== null ? `/api/v1/sessions?projectId=${activeProjectId}&limit=4` : null;
 
   const tasksUrl =
     activeProjectId !== null
@@ -51,7 +62,7 @@ export default function MissionControlPage() {
 
   const { data: sessionsData } = usePolling<AgentSession[]>({
     url: sessionsUrl,
-    interval: 10_000,
+    interval: 3_000,
   });
 
   const { data: tasksData } = usePolling<BlockedTask[]>({
@@ -59,7 +70,15 @@ export default function MissionControlPage() {
     interval: 30_000,
   });
 
-  const activeSession = sessionsData?.[0] ?? null;
+  const activeSession =
+    sessionsData &&
+    sessionsData.length > 0 &&
+    ['running', 'paused'].includes(sessionsData[0].status)
+      ? sessionsData[0]
+      : null;
+
+  const recentSessions = sessionsData || [];
+
   const blockedTasks = tasksData ?? [];
 
   const [prevTasks, setPrevTasks] = useState(tasksData);
@@ -152,22 +171,38 @@ export default function MissionControlPage() {
               <NeedsAttentionBanner blockedTasks={blockedTasks} onDismiss={handleDismiss} />
             )}
 
-            <div className="divide-border-default grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] lg:divide-x">
-              <div className="pb-6 lg:pr-6 lg:pb-0">
-                <SessionPanel
-                  session={activeSession}
-                  userRole={userRole}
-                  onPause={handlePause}
-                  onResume={handleResume}
-                  onCancel={handleCancel}
-                  onRetry={handleRetry}
-                  onDismiss={handleDismiss}
-                />
+            {activeSession ? (
+              <div className="flex flex-col gap-6">
+                <div className="divide-border-default border-border-default grid grid-cols-1 border-b pb-6 lg:grid-cols-[1fr_1.2fr] lg:divide-x">
+                  <div className="pb-6 lg:pr-6 lg:pb-0">
+                    <SessionPanel
+                      session={activeSession}
+                      userRole={userRole}
+                      onPause={handlePause}
+                      onResume={handleResume}
+                      onCancel={handleCancel}
+                      onRetry={handleRetry}
+                      onDismiss={handleDismiss}
+                    />
+                  </div>
+                  <div className="lg:pl-6">
+                    <EventLog sessionId={activeSession.id} />
+                  </div>
+                </div>
+                <div>
+                  <h2 className="text-text-muted mb-2 font-mono text-xs tracking-widest uppercase">
+                    Live Terminal
+                  </h2>
+                  <LiveTerminal
+                    sessionId={activeSession.id}
+                    height={400}
+                    active={activeSession.status === 'running'}
+                  />
+                </div>
               </div>
-              <div className="lg:pl-6">
-                <EventLog sessionId={activeSession?.id ?? null} />
-              </div>
-            </div>
+            ) : (
+              <RecentSessions sessions={recentSessions} />
+            )}
           </>
         )}
       </div>
