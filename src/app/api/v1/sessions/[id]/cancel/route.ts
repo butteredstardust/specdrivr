@@ -22,6 +22,12 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
 
     const { id } = await params;
     const sessionId = parseInt(id, 10);
+    if (isNaN(sessionId)) {
+      return NextResponse.json(
+        { error: { code: 'BAD_REQUEST', message: 'Invalid session ID' } },
+        { status: 400 }
+      );
+    }
 
     const agentSession = await agentSessionRepository.getById(sessionId);
     if (!agentSession) {
