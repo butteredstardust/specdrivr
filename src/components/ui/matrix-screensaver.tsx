@@ -25,11 +25,10 @@ export function MatrixScreensaver({
 
     // Resolve CSS variables to actual colors for canvas drawing
     const styles = getComputedStyle(document.documentElement);
-    const resolvedColor = color.startsWith('var(') 
-      ? styles.getPropertyValue(color.slice(4, -1)).trim() || '#7c5cfc'
+    const resolvedColor = color.startsWith('var(')
+      ? styles.getPropertyValue(color.slice(4, -1)).trim()
       : color;
-    const amberColor = styles.getPropertyValue('--phosphor-amber').trim() || '#ffa500';
-    const terminalBgColor = styles.getPropertyValue('--terminal-bg').trim() || '#0d0d0a';
+    const amberColor = styles.getPropertyValue('--phosphor-amber').trim();
 
     let width = (canvas.width = canvas.offsetWidth);
     let height = (canvas.height = canvas.offsetHeight);
