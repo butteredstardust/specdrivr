@@ -133,14 +133,14 @@ export default function SpecsPage(): React.ReactElement {
   );
 
   return (
-    // Escape the layout's p-6 so sections are full-bleed with border separators
-    <div className="-mx-6 -mt-6 flex min-h-full flex-col">
-      <PageHeader
-        category="Specifications"
-        title="Specs"
-        action={
-          <TooltipProvider>
-            {canCreate ? (
+    <TooltipProvider>
+      {/* Escape the layout's p-6 so sections are full-bleed with border separators */}
+      <div className="-mx-6 -mt-6 flex min-h-full flex-col">
+        <PageHeader
+          category="Specifications"
+          title="Specs"
+          action={
+            canCreate ? (
               newSpecButton
             ) : (
               <Tooltip>
@@ -151,112 +151,115 @@ export default function SpecsPage(): React.ReactElement {
                   <p>Only members, admins, and owners can create specs.</p>
                 </TooltipContent>
               </Tooltip>
-            )}
-          </TooltipProvider>
-        }
-      />
+            )
+          }
+        />
 
-      {/* Filter tabs */}
-      <div className="border-border-default border-b px-6 py-2.5">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
-            {STATUS_TABS.map(({ value, label, status }) => {
-              const count = countByStatus(value, status);
-              return (
-                <TabsTrigger
-                  key={value}
-                  value={value}
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:bg-secondary data-[state=inactive]:text-text-secondary hover:text-text-primary h-auto rounded px-2.5 py-1 font-mono text-xs tracking-wider uppercase transition-all data-[state=active]:shadow-none"
-                >
-                  {label}
-                  {count > 0 && <span className="ml-1 opacity-60">{count}</span>}
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
+        {/* Filter tabs */}
+        <div className="border-border-default border-b px-6 py-2.5">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
+              {STATUS_TABS.map(({ value, label, status }) => {
+                const count = countByStatus(value, status);
+                return (
+                  <TabsTrigger
+                    key={value}
+                    value={value}
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:bg-secondary data-[state=inactive]:text-text-secondary hover:text-text-primary h-auto rounded px-2.5 py-1 font-mono text-xs tracking-wider uppercase transition-all data-[state=active]:shadow-none"
+                  >
+                    {label}
+                    {count > 0 && <span className="ml-1 opacity-60">{count}</span>}
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
 
-          {/* Single shared content panel keyed by activeTab */}
-          <TabsContent value={activeTab} className="mt-0">
-            {effectiveProjectId === null ? (
-              <div className="flex flex-col items-center gap-4 py-16">
-                <DaemonMascot size={48} expression="idle" />
-                <p className="text-muted-foreground font-mono text-sm">
-                  Select a project to view specs.
-                </p>
-              </div>
-            ) : isLoading ? (
-              <div className="text-muted-foreground py-8 text-center font-mono text-xs">
-                Loading…
-              </div>
-            ) : filteredSpecs.length === 0 ? (
-              <div className="flex flex-col items-center gap-4 py-16">
-                <DaemonMascot size={48} expression="idle" />
-                <p className="text-muted-foreground font-mono text-sm">No specs yet.</p>
-              </div>
-            ) : (
-              <Table className="caption-bottom text-sm">
-                <TableHeader>
-                  <TableRow className="border-border-default text-text-secondary font-mono text-xs tracking-[0.15em] uppercase hover:bg-transparent">
-                    <TableHead className="h-auto w-36 px-6 py-2.5 font-medium">ID</TableHead>
-                    <TableHead className="h-auto px-3 py-2.5 font-medium">Name</TableHead>
-                    <TableHead className="h-auto w-36 px-3 py-2.5 font-medium">Status</TableHead>
-                    <TableHead className="h-auto w-16 px-3 py-2.5 font-medium">v</TableHead>
-                    <TableHead className="h-auto w-24 px-3 py-2.5 font-medium">Tasks</TableHead>
-                    <TableHead className="h-auto w-10" />
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredSpecs.map((spec) => (
-                    <TableRow
-                      key={spec.id}
-                      className="border-border-default/50 hover:bg-bg-elevated/50 cursor-pointer"
-                      onClick={() => router.push(`/specs/${spec.id}`)}
-                    >
-                      <TableCell className="px-6 py-3">
-                        <PixelBadge variant="amber">
-                          SPEC-{String(spec.id).padStart(3, '0')}
-                        </PixelBadge>
-                      </TableCell>
-                      <TableCell className="text-text-primary px-3 py-3 text-sm">
-                        {spec.name}
-                      </TableCell>
-                      <TableCell className="px-3 py-3">
-                        <StatusBadge status={spec.status} />
-                      </TableCell>
-                      <TableCell className="text-muted-foreground px-3 py-3 font-mono text-[10px]">
-                        {spec.currentVersionNumber ? `v${spec.currentVersionNumber}` : '—'}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground px-3 py-3 font-mono text-[10px]">
-                        {spec.taskCount != null ? `${spec.taskCount}` : '—'}
-                      </TableCell>
-                      <TableCell
-                        className="px-3 py-3 text-right"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-muted-foreground h-6 w-6"
-                              asChild
-                            >
-                              <Link href={`/specs/${spec.id}`} onClick={(e) => e.stopPropagation()}>
-                                <MoreHorizontal className="h-3.5 w-3.5" />
-                              </Link>
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>View spec details</TooltipContent>
-                        </Tooltip>
-                      </TableCell>
+            {/* Single shared content panel keyed by activeTab */}
+            <TabsContent value={activeTab} className="mt-0">
+              {effectiveProjectId === null ? (
+                <div className="flex flex-col items-center gap-4 py-16">
+                  <DaemonMascot size={48} expression="idle" />
+                  <p className="text-muted-foreground font-mono text-sm">
+                    Select a project to view specs.
+                  </p>
+                </div>
+              ) : isLoading ? (
+                <div className="text-muted-foreground py-8 text-center font-mono text-xs">
+                  Loading…
+                </div>
+              ) : filteredSpecs.length === 0 ? (
+                <div className="flex flex-col items-center gap-4 py-16">
+                  <DaemonMascot size={48} expression="idle" />
+                  <p className="text-muted-foreground font-mono text-sm">No specs yet.</p>
+                </div>
+              ) : (
+                <Table className="caption-bottom text-sm">
+                  <TableHeader>
+                    <TableRow className="border-border-default text-text-secondary font-mono text-xs tracking-[0.15em] uppercase hover:bg-transparent">
+                      <TableHead className="h-auto w-36 px-6 py-2.5 font-medium">ID</TableHead>
+                      <TableHead className="h-auto px-3 py-2.5 font-medium">Name</TableHead>
+                      <TableHead className="h-auto w-36 px-3 py-2.5 font-medium">Status</TableHead>
+                      <TableHead className="h-auto w-16 px-3 py-2.5 font-medium">v</TableHead>
+                      <TableHead className="h-auto w-24 px-3 py-2.5 font-medium">Tasks</TableHead>
+                      <TableHead className="h-auto w-10" />
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </TabsContent>
-        </Tabs>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredSpecs.map((spec) => (
+                      <TableRow
+                        key={spec.id}
+                        className="border-border-default/50 hover:bg-bg-elevated/50 cursor-pointer"
+                        onClick={() => router.push(`/specs/${spec.id}`)}
+                      >
+                        <TableCell className="px-6 py-3">
+                          <PixelBadge variant="amber">
+                            SPEC-{String(spec.id).padStart(3, '0')}
+                          </PixelBadge>
+                        </TableCell>
+                        <TableCell className="text-text-primary px-3 py-3 text-sm">
+                          {spec.name}
+                        </TableCell>
+                        <TableCell className="px-3 py-3">
+                          <StatusBadge status={spec.status} />
+                        </TableCell>
+                        <TableCell className="text-muted-foreground px-3 py-3 font-mono text-[10px]">
+                          {spec.currentVersionNumber ? `v${spec.currentVersionNumber}` : '—'}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground px-3 py-3 font-mono text-[10px]">
+                          {spec.taskCount != null ? `${spec.taskCount}` : '—'}
+                        </TableCell>
+                        <TableCell
+                          className="px-3 py-3 text-right"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-muted-foreground h-6 w-6"
+                                asChild
+                              >
+                                <Link
+                                  href={`/specs/${spec.id}`}
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <MoreHorizontal className="h-3.5 w-3.5" />
+                                </Link>
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>View spec details</TooltipContent>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }
