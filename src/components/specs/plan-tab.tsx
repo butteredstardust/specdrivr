@@ -288,7 +288,15 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
   }
 
   if (!plan) {
-    return <p className="text-text-muted py-8 text-center font-mono text-xs">No plan found.</p>;
+    return (
+      <div className="flex flex-col items-center gap-3 py-16">
+        <DaemonMascot size={48} expression="idle" />
+        <p className="text-text-secondary font-mono text-sm">No plan found.</p>
+        <p className="text-text-muted font-mono text-xs italic">
+          &quot;Approve your specification to generate an implementation plan.&quot;
+        </p>
+      </div>
+    );
   }
 
   // --- State 4: approved | executing | completed ---

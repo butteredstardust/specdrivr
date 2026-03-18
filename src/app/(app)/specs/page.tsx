@@ -177,10 +177,11 @@ export default function SpecsPage(): React.ReactElement {
             {/* Single shared content panel keyed by activeTab */}
             <TabsContent value={activeTab} className="mt-0">
               {effectiveProjectId === null ? (
-                <div className="flex flex-col items-center gap-4 py-16">
+                <div className="flex flex-col items-center gap-3 py-16">
                   <DaemonMascot size={48} expression="idle" />
-                  <p className="text-muted-foreground font-mono text-sm">
-                    Select a project to view specs.
+                  <p className="text-text-secondary font-mono text-sm">No project selected.</p>
+                  <p className="text-text-muted font-mono text-xs italic">
+                    &quot;Select a project from the sidebar to view specifications.&quot;
                   </p>
                 </div>
               ) : isLoading ? (
@@ -188,9 +189,12 @@ export default function SpecsPage(): React.ReactElement {
                   Loading…
                 </div>
               ) : filteredSpecs.length === 0 ? (
-                <div className="flex flex-col items-center gap-4 py-16">
+                <div className="flex flex-col items-center gap-3 py-16">
                   <DaemonMascot size={48} expression="idle" />
-                  <p className="text-muted-foreground font-mono text-sm">No specs yet.</p>
+                  <p className="text-text-secondary font-mono text-sm">No specs yet.</p>
+                  <p className="text-text-muted font-mono text-xs italic">
+                    &quot;Create your first specification to begin building.&quot;
+                  </p>
                 </div>
               ) : (
                 <Table className="caption-bottom text-sm">

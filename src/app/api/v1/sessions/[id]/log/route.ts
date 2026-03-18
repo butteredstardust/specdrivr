@@ -48,7 +48,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     agentLogRepository
       .create({
         sessionId: sId,
-        taskId: body.taskId!,
+        taskId: body.taskId,
         projectId: session.projectId,
         level: body.level,
         message: body.line,

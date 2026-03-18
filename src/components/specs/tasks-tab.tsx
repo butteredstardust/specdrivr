@@ -81,10 +81,11 @@ export function TasksTab({ specId, userRole }: TasksTabProps): React.ReactElemen
 
   if (list.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-4 py-16">
+      <div className="flex flex-col items-center gap-3 py-16">
         <DaemonMascot size={48} expression="idle" />
-        <p className="text-text-secondary font-mono text-sm">
-          No tasks yet. Approve the plan to begin execution.
+        <p className="text-text-secondary font-mono text-sm">No tasks yet.</p>
+        <p className="text-text-muted font-mono text-xs italic">
+          &quot;Approve the plan to begin task execution.&quot;
         </p>
       </div>
     );

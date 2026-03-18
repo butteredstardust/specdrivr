@@ -7,6 +7,7 @@ import { clientLogger } from '@/lib/logger-client';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { PixelBadge } from '@/components/ui/pixel-badge';
 import type { Task } from './task-drawer';
 
 interface TaskDrawerOverviewProps {
@@ -52,7 +53,7 @@ export function TaskDrawerOverview({ task, onRetry, onTaskUpdated }: TaskDrawerO
   }, [task.id, humanContext, onTaskUpdated, onRetry]);
 
   return (
-    <div className="space-y-6 p-5">
+    <div className="space-y-8 p-6">
       {/* Description */}
       <div className="prose prose-sm prose-invert max-w-none">
         <ReactMarkdown>{task.description ?? ''}</ReactMarkdown>
@@ -60,18 +61,15 @@ export function TaskDrawerOverview({ task, onRetry, onTaskUpdated }: TaskDrawerO
 
       {/* Dependencies */}
       {task.dependsOn.length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           <span className="text-text-muted font-mono text-xs tracking-widest uppercase">
             Dependencies
           </span>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {task.dependsOn.map((extId) => (
-              <span
-                key={extId}
-                className="bg-phosphor-amber/10 text-phosphor-amber rounded-sm px-1.5 py-0.5 font-mono text-xs"
-              >
+              <PixelBadge key={extId} variant="default">
                 {extId}
-              </span>
+              </PixelBadge>
             ))}
           </div>
         </div>
@@ -79,48 +77,52 @@ export function TaskDrawerOverview({ task, onRetry, onTaskUpdated }: TaskDrawerO
 
       {/* Blocked state panel */}
       {task.status === 'blocked' && (
-        <div className="bg-status-red/10 border-status-red/30 space-y-3 rounded-md border p-4">
-          <div className="flex items-center gap-2">
+        <div className="bg-phosphor-amber/5 border-phosphor-amber/30 space-y-4 rounded-lg border p-5">
+          <div className="flex items-center gap-2.5">
             <DaemonMascot size={24} expression="blocked" />
-            <span className="text-status-red font-mono text-xs tracking-widest uppercase">
+            <span className="text-phosphor-amber font-mono text-xs font-semibold tracking-widest uppercase">
               BLOCKED
             </span>
           </div>
           {task.blockedReason && (
-            <p className="text-text-secondary text-sm">{task.blockedReason}</p>
+            <p className="text-text-secondary text-sm leading-relaxed">{task.blockedReason}</p>
           )}
-          <Textarea
-            placeholder="Add context for retry (min 10 chars)..."
-            value={humanContext}
-            onChange={(e) => setHumanContext(e.target.value)}
-            className="text-sm"
-            rows={3}
-          />
-          <Button
-            size="sm"
-            disabled={humanContext.length < 10 || isSubmitting}
-            onClick={handleRetryWithContext}
-          >
-            RETRY WITH CONTEXT
-          </Button>
+          <div className="space-y-2 pt-2">
+            <Textarea
+              placeholder="Add context to unblock DAEMON (min 10 chars)..."
+              value={humanContext}
+              onChange={(e) => setHumanContext(e.target.value)}
+              className="bg-bg-base text-sm"
+              rows={3}
+            />
+            <Button
+              size="sm"
+              disabled={humanContext.length < 10 || isSubmitting}
+              onClick={handleRetryWithContext}
+            >
+              RETRY WITH CONTEXT
+            </Button>
+          </div>
         </div>
       )}
 
       {/* Failed state panel */}
       {task.status === 'failed' && (
-        <div className="bg-phosphor-amber/10 border-phosphor-amber/30 space-y-3 rounded-md border p-4">
-          <div className="flex items-center gap-2">
+        <div className="bg-status-red/5 border-status-red/30 space-y-4 rounded-lg border p-5">
+          <div className="flex items-center gap-2.5">
             <DaemonMascot size={24} expression="error" />
-            <span className="text-phosphor-amber font-mono text-xs tracking-widest uppercase">
+            <span className="text-status-red font-mono text-xs font-semibold tracking-widest uppercase">
               FAILED
             </span>
           </div>
           {task.blockedReason && (
-            <p className="text-text-secondary font-mono text-xs">{task.blockedReason}</p>
+            <p className="text-text-secondary text-sm leading-relaxed">{task.blockedReason}</p>
           )}
-          <Button size="sm" onClick={onRetry}>
-            RETRY
-          </Button>
+          <div className="pt-2">
+            <Button size="sm" variant="destructive" onClick={onRetry}>
+              RETRY TASK
+            </Button>
+          </div>
         </div>
       )}
     </div>

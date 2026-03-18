@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Redis from 'ioredis';
-import { authInstance } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import { agentLogRepository, agentSessionRepository } from '@/repositories';
 import { requireMember } from '@/lib/rbac';
-import { headers } from 'next/headers';
 import { env } from '@/lib/env';
 
 interface RouteParams {
@@ -12,10 +11,9 @@ interface RouteParams {
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
   // 1. Auth — session cookie required
-  const session = await authInstance.api.getSession({
-    headers: await headers(),
-  });
+  const session = await auth();
   if (!session) {
+    console.log('[SSE] Unauthorized access attempt');
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -33,14 +31,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   }
 
   // 3. Send recent log history first (last 200 lines from agent_logs)
-  // Note: findBySessionId returns latest first, we want chronological for the stream
   const history = await agentLogRepository.findBySessionId(sId, { limit: 200 });
   const chronologicalHistory = [...history].reverse();
 
   // 4. Set up SSE response stream
   const encoder = new TextEncoder();
 
-  // Create a dedicated Redis subscriber (must be a separate connection — ioredis requirement)
+  // Create a dedicated Redis subscriber
   const subscriber = new Redis(env.REDIS_URL || 'redis://localhost:6379');
   const channel = `session:${sId}:logs`;
 
@@ -58,10 +55,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       for (const log of chronologicalHistory) {
         sendEvent(
           JSON.stringify({
+            id: String(log.id),
             line: log.message,
             taskId: log.taskId,
             level: log.level,
-            ts: log.timestamp.getTime(),
+            ts: log.timestamp instanceof Date ? log.timestamp.getTime() : Date.now(),
           }),
           'log'
         );
@@ -73,7 +71,14 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
       subscriber.on('message', (ch: string, message: string) => {
         if (ch === channel) {
-          sendEvent(message, 'log');
+          try {
+            const data = JSON.parse(message);
+            // Ensure ID is present for live messages too
+            if (!data.id) data.id = `live-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+            sendEvent(JSON.stringify(data), 'log');
+          } catch {
+            sendEvent(message, 'log');
+          }
         }
       });
 
