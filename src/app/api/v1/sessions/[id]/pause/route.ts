@@ -37,7 +37,7 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
 
     const updated = await agentSessionRepository.update(
       sessionId,
-      { status: 'running' },
+      { status: 'paused' },
       session.user.id
     );
     return NextResponse.json({ data: updated });

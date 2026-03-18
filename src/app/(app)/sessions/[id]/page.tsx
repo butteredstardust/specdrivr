@@ -129,15 +129,7 @@ export default function SessionDetailPage({ params }: PageProps) {
   const handleAction = async (action: 'pause' | 'resume' | 'cancel') => {
     setIsUpdating(true);
     try {
-      if (action === 'pause') {
-        await fetch(`/api/v1/sessions/${id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: 'paused' }),
-        });
-      } else {
-        await fetch(`/api/v1/sessions/${id}/${action}`, { method: 'POST' });
-      }
+      await fetch(`/api/v1/sessions/${id}/${action}`, { method: 'POST' });
       mutate();
     } finally {
       setIsUpdating(false);
