@@ -13,11 +13,12 @@ describe('DaemonMascot', () => {
     expect(container.querySelector('svg')?.getAttribute('viewBox')).toBe('0 0 34 40');
   });
 
-  test('applies size prop to width and height', () => {
-    const { container } = render(<DaemonMascot size={48} />);
+  test('applies size prop to width and calculates proportional height', () => {
+    const size = 34;
+    const { container } = render(<DaemonMascot size={size} />);
     const svg = container.querySelector('svg');
-    expect(svg?.getAttribute('width')).toBe('48');
-    expect(svg?.getAttribute('height')).toBe('48');
+    expect(svg?.getAttribute('width')).toBe(String(size));
+    expect(svg?.getAttribute('height')).toBe('40'); // 34 * (40/34) = 40
   });
 
   test('renders silhouette only at size <= 16', () => {
