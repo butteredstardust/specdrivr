@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Pause, Play, XCircle, RefreshCw, CheckCircle, ChevronRight } from 'lucide-react';
+import { Pause, Play, XCircle, RefreshCw, ChevronRight } from 'lucide-react';
 import type { UserRole } from '@/db/schema';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { PixelBadge } from '@/components/ui/pixel-badge';
 
 type SessionPanelState = 'idle' | 'running' | 'paused' | 'completed' | 'failed' | 'cancelled';
 
@@ -169,17 +170,11 @@ export function SessionPanel({
               </span>
             )}
             {panelState === 'running' ? (
-              <span className="text-status-emerald flex items-center gap-1 font-mono text-xs font-semibold">
-                <span
-                  className="bg-status-emerald h-1.5 w-1.5 animate-pulse rounded-full"
-                  aria-hidden="true"
-                />
+              <PixelBadge variant="violet" dot>
                 RUNNING
-              </span>
+              </PixelBadge>
             ) : (
-              <span className="text-phosphor-amber flex items-center gap-1 font-mono text-xs font-semibold">
-                <Pause className="h-3 w-3" /> PAUSED
-              </span>
+              <PixelBadge variant="amber">PAUSED</PixelBadge>
             )}
             <span className="text-text-muted ml-auto font-mono text-xs">
               {mm}:{ss}
@@ -220,7 +215,7 @@ export function SessionPanel({
               <ControlButton
                 canControl={canControl}
                 onClick={onPause}
-                icon={<Pause className="h-3 w-3" />}
+                icon={<Pause className="mr-1.5 h-3 w-3" />}
                 label="Pause"
                 variant="outline"
                 className="border-phosphor-amber/50 text-phosphor-amber hover:bg-phosphor-amber/10"
@@ -229,7 +224,7 @@ export function SessionPanel({
               <ControlButton
                 canControl={canControl}
                 onClick={onResume}
-                icon={<Play className="h-3 w-3" />}
+                icon={<Play className="mr-1.5 h-3 w-3" />}
                 label="Resume"
                 variant="default"
               />
@@ -237,7 +232,7 @@ export function SessionPanel({
             <ControlButton
               canControl={canControl}
               onClick={onCancel}
-              icon={<XCircle className="h-3 w-3" />}
+              icon={<XCircle className="mr-1.5 h-3 w-3" />}
               label="Cancel"
               variant="destructive"
             />
@@ -251,9 +246,7 @@ export function SessionPanel({
     return (
       <div className="flex flex-col items-center gap-3 py-4 text-center">
         <DaemonMascot size={48} expression="success" />
-        <p className="text-status-emerald flex items-center gap-1 font-mono text-xs font-semibold tracking-widest uppercase">
-          <CheckCircle className="h-3 w-3" /> EXECUTION COMPLETE
-        </p>
+        <PixelBadge variant="emerald">EXECUTION COMPLETE</PixelBadge>
         {session && (
           <div className="text-text-secondary flex gap-4 font-mono text-xs">
             <span>Executed: {session.tasksExecuted}</span>
@@ -278,6 +271,7 @@ export function SessionPanel({
       <TooltipProvider>
         <div className="flex flex-col items-center gap-3 py-4 text-center">
           <DaemonMascot size={48} expression="error" />
+          <PixelBadge variant="red">EXECUTION FAILED</PixelBadge>
           {session?.errorMessage && (
             <Alert variant="destructive" className="text-left">
               <AlertDescription>{session.errorMessage}</AlertDescription>
@@ -287,7 +281,7 @@ export function SessionPanel({
             <ControlButton
               canControl={canControl}
               onClick={onRetry}
-              icon={<RefreshCw className="h-3 w-3" />}
+              icon={<RefreshCw className="mr-1.5 h-3 w-3" />}
               label="Retry"
               variant="outline"
               disabledTooltip="Requires admin role"
@@ -295,7 +289,7 @@ export function SessionPanel({
             <ControlButton
               canControl={canControl}
               onClick={onDismiss}
-              icon={<XCircle className="h-3 w-3" />}
+              icon={<XCircle className="mr-1.5 h-3 w-3" />}
               label="Dismiss"
               variant="ghost"
               disabledTooltip="Requires admin role"
@@ -310,7 +304,7 @@ export function SessionPanel({
   return (
     <div className="flex flex-col items-center gap-3 py-6 text-center">
       <DaemonMascot size={48} expression="idle" />
-      <p className="text-text-muted text-sm">Session cancelled.</p>
+      <PixelBadge variant="muted">CANCELLED</PixelBadge>
       <Link
         href="/specs"
         className="text-phosphor-amber text-sm underline-offset-2 hover:underline"

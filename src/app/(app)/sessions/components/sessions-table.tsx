@@ -28,6 +28,7 @@ import {
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { EventLog } from '@/components/mission-control/event-log';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface SessionsTableProps {
   sessions: Session[] | null;
@@ -178,123 +179,138 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
   }
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow className="border-border-default text-muted-foreground font-mono text-[10px] tracking-[0.15em] uppercase hover:bg-transparent">
-          <TableHead className="w-10 px-3"></TableHead>
-          <TableHead className="w-36 px-6 font-medium">Session ID</TableHead>
-          <TableHead className="w-36 px-3 font-medium">Status</TableHead>
-          <TableHead className="px-3 font-medium">Spec</TableHead>
-          <TableHead className="w-40 px-3 font-medium">Started</TableHead>
-          <TableHead className="w-24 px-3 font-medium">Duration</TableHead>
-          <TableHead className="w-24 px-3 font-medium">Tasks</TableHead>
-          <TableHead className="w-24 px-3" />
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {groupedSessions.map(([label, groupSessions]) => (
-          <React.Fragment key={`group-${label}`}>
-            <TableRow className="border-0 hover:bg-transparent">
-              <TableCell colSpan={8} className="px-6 pt-4 pb-1">
-                <span className="text-muted-foreground font-mono text-[10px] font-semibold tracking-[0.2em] uppercase">
-                  {label}
-                </span>
-              </TableCell>
-            </TableRow>
-            {groupSessions.map((session) => {
-              const isExpanded = expandedId === session.id;
-              return (
-                <React.Fragment key={session.id}>
-                  <TableRow className="border-border-default/50 hover:bg-bg-elevated/50 group">
-                    <TableCell className="px-3 py-3 text-center">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-muted-foreground h-6 w-6"
-                        onClick={() => toggleExpand(session.id)}
-                      >
-                        {isExpanded ? (
-                          <ChevronDown className="h-4 w-4" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </TableCell>
-                    <TableCell className="px-6 py-3">
-                      <Link href={`/sessions/${session.id}`}>
-                        <PixelBadge variant="amber">
-                          SESS-{String(session.id).padStart(3, '0')}
-                        </PixelBadge>
-                      </Link>
-                    </TableCell>
-                    <TableCell className="px-3 py-3">
-                      <StatusBadge status={session.status} />
-                    </TableCell>
-                    <TableCell className="px-3 py-3">
-                      <div className="flex flex-col">
-                        <span className="text-foreground text-sm font-medium">
-                          {session.specTitle || `Spec #${session.specId}`}
+    <TooltipProvider>
+      <Table>
+        <TableHeader>
+          <TableRow className="border-border-default text-text-secondary font-mono text-xs tracking-[0.15em] uppercase hover:bg-transparent">
+            <TableHead className="w-10 px-3"></TableHead>
+            <TableHead className="w-36 px-6 font-medium">Session ID</TableHead>
+            <TableHead className="w-36 px-3 font-medium">Status</TableHead>
+            <TableHead className="px-3 font-medium">Spec</TableHead>
+            <TableHead className="w-40 px-3 font-medium">Started</TableHead>
+            <TableHead className="w-24 px-3 font-medium">Duration</TableHead>
+            <TableHead className="w-24 px-3 font-medium">Tasks</TableHead>
+            <TableHead className="w-24 px-3" />
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {groupedSessions.map(([label, groupSessions]) => (
+            <React.Fragment key={`group-${label}`}>
+              <TableRow className="border-0 hover:bg-transparent">
+                <TableCell colSpan={8} className="px-6 pt-4 pb-1">
+                  <span className="text-muted-foreground font-mono text-[10px] font-semibold tracking-[0.2em] uppercase">
+                    {label}
+                  </span>
+                </TableCell>
+              </TableRow>
+              {groupSessions.map((session) => {
+                const isExpanded = expandedId === session.id;
+                return (
+                  <React.Fragment key={session.id}>
+                    <TableRow className="border-border-default/50 hover:bg-bg-elevated/50 group">
+                      <TableCell className="px-3 py-3 text-center">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-muted-foreground h-6 w-6"
+                              onClick={() => toggleExpand(session.id)}
+                            >
+                              {isExpanded ? (
+                                <ChevronDown className="h-4 w-4" />
+                              ) : (
+                                <ChevronRight className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {isExpanded ? 'Collapse details' : 'Expand details'}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell className="px-6 py-3">
+                        <Link href={`/sessions/${session.id}`}>
+                          <PixelBadge variant="amber">
+                            SESS-{String(session.id).padStart(3, '0')}
+                          </PixelBadge>
+                        </Link>
+                      </TableCell>
+                      <TableCell className="px-3 py-3">
+                        <StatusBadge status={session.status} />
+                      </TableCell>
+                      <TableCell className="px-3 py-3">
+                        <div className="flex flex-col">
+                          <span className="text-text-primary text-sm font-medium">
+                            {session.specTitle || `Spec #${session.specId}`}
+                          </span>
+                        </div>
+                      </TableCell>{' '}
+                      <TableCell className="text-muted-foreground px-3 py-3 font-mono text-[10px] uppercase">
+                        {new Date(session.startedAt).toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground px-3 py-3 font-mono text-[10px]">
+                        {formatDuration(session)}
+                      </TableCell>
+                      <TableCell className="px-3 py-3">
+                        <span className="bg-secondary text-muted-foreground rounded px-1.5 py-0.5 font-mono text-[10px] whitespace-nowrap">
+                          {session.tasksSucceeded}/{session.totalTasks ?? session.tasksExecuted}{' '}
+                          tasks
                         </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground px-3 py-3 font-mono text-[10px] uppercase">
-                      {new Date(session.startedAt).toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground px-3 py-3 font-mono text-[10px]">
-                      {formatDuration(session)}
-                    </TableCell>
-                    <TableCell className="px-3 py-3">
-                      <span className="bg-secondary text-muted-foreground rounded px-1.5 py-0.5 font-mono text-[10px] whitespace-nowrap">
-                        {session.tasksSucceeded}/{session.totalTasks ?? session.tasksExecuted} tasks
-                      </span>
-                    </TableCell>
-                    <TableCell className="px-3 py-3 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        {session.status === 'running' && (
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            disabled={cancellingIds.has(session.id)}
-                            onClick={() => handleCancel(session.id)}
-                            className="h-6 px-2 font-mono text-[10px] tracking-wider uppercase transition-colors"
-                          >
-                            <XCircle className="mr-1 h-3 w-3" />
-                            {cancellingIds.has(session.id) ? 'Cancelling…' : 'Cancel'}
-                          </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-muted-foreground h-6 w-6"
-                          asChild
-                        >
-                          <Link href={`/sessions/${session.id}`}>
-                            <MoreHorizontal className="h-3.5 w-3.5" />
-                          </Link>
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow className="border-0 p-0 hover:bg-transparent">
-                    <TableCell colSpan={8} className="p-0">
-                      <Collapsible open={isExpanded}>
-                        <CollapsibleContent>
-                          <div className="border-border-default border-b px-6 py-4">
-                            <LazyEventLog sessionId={session.id} isExpanded={isExpanded} />
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    </TableCell>
-                  </TableRow>
-                </React.Fragment>
-              );
-            })}
-          </React.Fragment>
-        ))}
-      </TableBody>
-    </Table>
+                      </TableCell>
+                      <TableCell className="px-3 py-3 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          {session.status === 'running' && (
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              disabled={cancellingIds.has(session.id)}
+                              onClick={() => handleCancel(session.id)}
+                              className="h-6 px-2 font-mono text-[10px] tracking-wider uppercase transition-colors"
+                            >
+                              <XCircle className="mr-1 h-3 w-3" />
+                              {cancellingIds.has(session.id) ? 'Cancelling…' : 'Cancel'}
+                            </Button>
+                          )}
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-muted-foreground h-6 w-6"
+                                asChild
+                              >
+                                <Link href={`/sessions/${session.id}`}>
+                                  <MoreHorizontal className="h-3.5 w-3.5" />
+                                </Link>
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>View session details</TooltipContent>
+                          </Tooltip>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow className="border-0 p-0 hover:bg-transparent">
+                      <TableCell colSpan={8} className="p-0">
+                        <Collapsible open={isExpanded}>
+                          <CollapsibleContent>
+                            <div className="border-border-default border-b px-6 py-4">
+                              <LazyEventLog sessionId={session.id} isExpanded={isExpanded} />
+                            </div>
+                          </CollapsibleContent>
+                        </Collapsible>
+                      </TableCell>
+                    </TableRow>
+                  </React.Fragment>
+                );
+              })}
+            </React.Fragment>
+          ))}
+        </TableBody>
+      </Table>
+    </TooltipProvider>
   );
 }

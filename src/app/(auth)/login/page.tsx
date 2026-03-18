@@ -58,13 +58,17 @@ export default function LoginPage() {
         <DaemonMascot size={48} expression={expression} />
         <div className="text-center">
           <p className="text-text-primary font-mono text-sm font-bold tracking-widest">SPECDRIVR</p>
-          <p className="text-text-muted text-xs">Build what you spec.</p>
+          <p className="text-text-secondary font-mono text-xs tracking-tight uppercase">
+            Build what you spec.
+          </p>
         </div>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email" className="text-text-secondary font-mono text-xs uppercase">
+              Email
+            </Label>
             <Input
               id="email"
               type="email"
@@ -76,7 +80,9 @@ export default function LoginPage() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password" className="text-text-secondary font-mono text-xs uppercase">
+              Password
+            </Label>
             <Input
               id="password"
               type="password"
@@ -89,21 +95,21 @@ export default function LoginPage() {
 
           {error && (
             <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription className="font-mono text-xs">{error}</AlertDescription>
             </Alert>
           )}
 
           <Button
             type="submit"
             disabled={loading}
-            className="bg-accent-violet hover:bg-accent-violet-dim w-full"
+            className="bg-accent-violet hover:bg-accent-violet-dim w-full font-mono text-sm tracking-wider uppercase transition-colors"
           >
             {loading ? 'Signing in…' : 'Sign In'}
           </Button>
           <div className="text-right">
             <Link
               href="/forgot-password"
-              className="text-text-muted hover:text-text-secondary text-xs"
+              className="text-text-muted hover:text-text-secondary font-mono text-[10px] uppercase underline-offset-4 hover:underline"
             >
               Forgot password?
             </Link>
@@ -112,7 +118,7 @@ export default function LoginPage() {
 
         {isDev && (
           <div className="border-border-muted mt-4 space-y-2 border-t border-dashed pt-4">
-            <p className="text-text-muted font-mono text-xs">DEV QUICK LOGIN</p>
+            <p className="text-text-secondary font-mono text-xs tracking-widest">DEV QUICK LOGIN</p>
             {[
               { label: 'Owner', email: 'alex@specdrivr.dev' },
               { label: 'Admin', email: 'sam@specdrivr.dev' },
@@ -123,7 +129,7 @@ export default function LoginPage() {
                 type="button"
                 variant="outline"
                 size="sm"
-                className="w-full text-xs"
+                className="hover:bg-accent-violet/5 hover:text-accent-violet w-full font-mono text-xs transition-colors"
                 onClick={async () => {
                   setEmail(quickEmail);
                   setPassword('Password123!');

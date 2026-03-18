@@ -166,7 +166,7 @@ export default function SpecsPage(): React.ReactElement {
                 <TabsTrigger
                   key={value}
                   value={value}
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:bg-secondary data-[state=inactive]:text-muted-foreground hover:text-foreground h-auto rounded px-2.5 py-1 font-mono text-[10px] tracking-wider uppercase transition-all data-[state=active]:shadow-none"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:bg-secondary data-[state=inactive]:text-text-secondary hover:text-text-primary h-auto rounded px-2.5 py-1 font-mono text-xs tracking-wider uppercase transition-all data-[state=active]:shadow-none"
                 >
                   {label}
                   {count > 0 && <span className="ml-1 opacity-60">{count}</span>}
@@ -196,22 +196,12 @@ export default function SpecsPage(): React.ReactElement {
             ) : (
               <Table className="caption-bottom text-sm">
                 <TableHeader>
-                  <TableRow className="border-border-default hover:bg-transparent">
-                    <TableHead className="text-muted-foreground h-auto w-36 px-6 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
-                      ID
-                    </TableHead>
-                    <TableHead className="text-muted-foreground h-auto px-3 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
-                      Name
-                    </TableHead>
-                    <TableHead className="text-muted-foreground h-auto w-36 px-3 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
-                      Status
-                    </TableHead>
-                    <TableHead className="text-muted-foreground h-auto w-16 px-3 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
-                      v
-                    </TableHead>
-                    <TableHead className="text-muted-foreground h-auto w-24 px-3 py-2.5 font-mono text-[10px] font-medium tracking-[0.15em] uppercase">
-                      Tasks
-                    </TableHead>
+                  <TableRow className="border-border-default text-text-secondary font-mono text-xs tracking-[0.15em] uppercase hover:bg-transparent">
+                    <TableHead className="h-auto w-36 px-6 py-2.5 font-medium">ID</TableHead>
+                    <TableHead className="h-auto px-3 py-2.5 font-medium">Name</TableHead>
+                    <TableHead className="h-auto w-36 px-3 py-2.5 font-medium">Status</TableHead>
+                    <TableHead className="h-auto w-16 px-3 py-2.5 font-medium">v</TableHead>
+                    <TableHead className="h-auto w-24 px-3 py-2.5 font-medium">Tasks</TableHead>
                     <TableHead className="h-auto w-10" />
                   </TableRow>
                 </TableHeader>
@@ -227,7 +217,7 @@ export default function SpecsPage(): React.ReactElement {
                           SPEC-{String(spec.id).padStart(3, '0')}
                         </PixelBadge>
                       </TableCell>
-                      <TableCell className="text-foreground px-3 py-3 text-sm">
+                      <TableCell className="text-text-primary px-3 py-3 text-sm">
                         {spec.name}
                       </TableCell>
                       <TableCell className="px-3 py-3">
@@ -243,16 +233,21 @@ export default function SpecsPage(): React.ReactElement {
                         className="px-3 py-3 text-right"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-muted-foreground h-6 w-6"
-                          asChild
-                        >
-                          <Link href={`/specs/${spec.id}`} onClick={(e) => e.stopPropagation()}>
-                            <MoreHorizontal className="h-3.5 w-3.5" />
-                          </Link>
-                        </Button>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-muted-foreground h-6 w-6"
+                              asChild
+                            >
+                              <Link href={`/specs/${spec.id}`} onClick={(e) => e.stopPropagation()}>
+                                <MoreHorizontal className="h-3.5 w-3.5" />
+                              </Link>
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>View spec details</TooltipContent>
+                        </Tooltip>
                       </TableCell>
                     </TableRow>
                   ))}

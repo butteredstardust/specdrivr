@@ -173,7 +173,7 @@ export function NotificationPreferencesSection() {
     <section className="flex flex-col gap-6">
       <p className="text-text-secondary text-sm">Choose when DAEMON notifies you.</p>
 
-      {loadError && <p className="text-status-red text-sm">{loadError}</p>}
+      {loadError && <p className="text-status-red font-mono text-xs">{loadError}</p>}
 
       {/* Table header */}
       <div className="border-border-muted grid grid-cols-[1fr_4rem_4rem] items-center gap-2 border-b pb-2">

@@ -116,7 +116,7 @@ export default function NotificationsPage() {
               variant="outline"
               size="sm"
               onClick={handleMarkAllRead}
-              className="text-muted-foreground hover:text-foreground h-8 font-mono text-[10px] tracking-wider uppercase transition-all"
+              className="text-text-secondary hover:text-text-primary h-8 font-mono text-xs tracking-wider uppercase transition-all"
             >
               Mark all read
             </Button>
@@ -137,8 +137,8 @@ export default function NotificationsPage() {
                 setPage(1);
               }}
               className={cn(
-                'h-7 px-2.5 font-mono text-[10px] tracking-wider uppercase transition-all',
-                tab !== t.value && 'bg-secondary/50 text-muted-foreground hover:text-foreground'
+                'h-7 px-2.5 font-mono text-xs tracking-wider uppercase transition-all',
+                tab !== t.value && 'bg-secondary/50 text-text-secondary hover:text-text-primary'
               )}
             >
               {t.label} {t.value === 'unread' && unreadCount > 0 && `(${unreadCount})`}
@@ -148,7 +148,7 @@ export default function NotificationsPage() {
 
         {totalPages > 1 && (
           <div className="flex items-center gap-2">
-            <span className="text-muted-foreground font-mono text-[10px] uppercase">
+            <span className="text-text-secondary font-mono text-xs uppercase">
               Page {page} of {totalPages}
             </span>
             <div className="flex items-center gap-1">
@@ -180,16 +180,16 @@ export default function NotificationsPage() {
         {activeProjectId === null ? (
           <div className="flex flex-col items-center gap-4 py-16">
             <DaemonMascot size={48} expression="idle" />
-            <p className="text-muted-foreground font-mono text-sm">
+            <p className="text-text-secondary font-mono text-sm">
               Select a project to view notifications.
             </p>
           </div>
         ) : isLoading && !data ? (
-          <div className="text-muted-foreground py-16 text-center font-mono text-xs">Loading…</div>
+          <div className="text-text-secondary py-16 text-center font-mono text-xs">Loading…</div>
         ) : notifications.length === 0 ? (
           <div className="flex flex-col items-center gap-4 py-16">
-            <Bell className="text-muted-foreground/20 h-12 w-12" />
-            <p className="text-muted-foreground font-mono text-sm">
+            <Bell className="text-text-muted/20 h-12 w-12" />
+            <p className="text-text-secondary font-mono text-sm">
               No {tab === 'unread' ? 'unread ' : ''}notifications.
             </p>
           </div>
@@ -211,13 +211,13 @@ export default function NotificationsPage() {
                   <p
                     className={cn(
                       'text-sm leading-snug',
-                      !n.readAt ? 'text-foreground font-medium' : 'text-muted-foreground'
+                      !n.readAt ? 'text-text-primary font-medium' : 'text-text-secondary'
                     )}
                   >
                     {n.title}
                   </p>
-                  <p className="text-muted-foreground mt-0.5 line-clamp-1 text-xs">{n.message}</p>
-                  <p className="text-muted-foreground/60 mt-0.5 font-mono text-[10px] uppercase">
+                  <p className="text-text-secondary mt-0.5 line-clamp-1 text-xs">{n.message}</p>
+                  <p className="text-text-muted mt-0.5 font-mono text-xs uppercase">
                     {formatRelativeTime(n.createdAt)}
                   </p>
                 </div>
