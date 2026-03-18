@@ -97,9 +97,12 @@ export function SpecTab({ spec, userRole }: SpecTabProps): React.ReactElement {
             <ReactMarkdown>{content}</ReactMarkdown>
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-4 py-16">
+          <div className="flex flex-col items-center gap-3 py-16">
             <DaemonMascot size={48} expression="idle" />
-            <p className="text-muted-foreground font-mono text-sm">No content yet.</p>
+            <p className="text-text-secondary font-mono text-sm">No content yet.</p>
+            <p className="text-text-muted mb-4 font-mono text-xs italic">
+              &quot;Write a specification to begin plan generation.&quot;
+            </p>
             {canEdit && (
               <Button asChild size="sm" variant="outline">
                 <Link href={`/specs/${spec.id}/edit`}>

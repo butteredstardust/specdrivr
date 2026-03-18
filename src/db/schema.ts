@@ -492,9 +492,7 @@ export const agentLogs = pgTable(
   'agent_logs',
   {
     id: serial('id').primaryKey(),
-    taskId: integer('task_id')
-      .notNull()
-      .references(() => tasks.id, { onDelete: 'cascade' }),
+    taskId: integer('task_id').references(() => tasks.id, { onDelete: 'cascade' }),
     sessionId: integer('session_id').references(() => agentSessions.id, { onDelete: 'set null' }),
     projectId: integer('project_id').references(() => projects.id, { onDelete: 'cascade' }),
     level: logLevelEnum('level').notNull().default('info'),

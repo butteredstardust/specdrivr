@@ -67,7 +67,7 @@ export function TaskDrawerAttempts({ taskId, taskStatus }: TaskDrawerAttemptsPro
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-8">
+      <div className="flex items-center justify-center py-16">
         <span className="text-text-muted font-mono text-xs">Loading attempts...</span>
       </div>
     );
@@ -75,15 +75,15 @@ export function TaskDrawerAttempts({ taskId, taskStatus }: TaskDrawerAttemptsPro
 
   if (!attempts || attempts.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 p-8">
-        <DaemonMascot size={32} expression="idle" />
-        <span className="text-text-muted font-mono text-xs">No attempts yet.</span>
+      <div className="flex flex-col items-center justify-center gap-3 py-16">
+        <DaemonMascot size={48} expression="idle" />
+        <span className="text-text-secondary font-mono text-sm">No attempts yet.</span>
       </div>
     );
   }
 
   return (
-    <div className="space-y-3 p-5">
+    <div className="space-y-4 p-6">
       {attempts.map((attempt, index) => {
         const isLatestRunning = index === 0 && attempt.status === 'running';
         const isOpen = isLatestRunning || expandedIds.has(attempt.id);
@@ -94,24 +94,26 @@ export function TaskDrawerAttempts({ taskId, taskStatus }: TaskDrawerAttemptsPro
             open={isOpen}
             onOpenChange={() => toggleExpanded(attempt.id)}
           >
-            <CollapsibleTrigger className="border-border-default hover:bg-bg-elevated flex w-full items-center gap-3 rounded-md border px-3 py-2 transition-colors">
+            <CollapsibleTrigger className="border-border-default hover:bg-bg-elevated data-[state=open]:bg-bg-elevated/50 flex w-full items-center gap-4 rounded-md border px-4 py-3 transition-colors">
               <ChevronRight
                 className={cn(
-                  'text-text-muted h-3.5 w-3.5 transition-transform',
+                  'text-text-muted h-4 w-4 transition-transform',
                   isOpen && 'rotate-90'
                 )}
               />
-              <span className="text-text-primary font-mono text-xs">Attempt #{attempt.seq}</span>
+              <span className="text-text-primary font-mono text-sm font-medium">
+                Attempt #{attempt.seq}
+              </span>
               <span
                 className={cn(
-                  'rounded-sm px-1.5 py-0.5 font-mono text-[10px] uppercase',
+                  'rounded-sm px-2 py-0.5 font-mono text-[10px] tracking-widest uppercase',
                   statusBadgeClass[attempt.status]
                 )}
               >
                 {attempt.status}
               </span>
               {attempt.durationMs != null && (
-                <span className="text-text-muted ml-auto font-mono text-[10px]">
+                <span className="text-text-muted ml-auto font-mono text-xs">
                   {formatDuration(attempt.durationMs)}
                 </span>
               )}

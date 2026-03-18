@@ -25,7 +25,7 @@ export function TaskDrawerChanges({ taskId }: TaskDrawerChangesProps) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-8">
+      <div className="flex items-center justify-center py-16">
         <span className="text-text-muted font-mono text-xs">Loading changes...</span>
       </div>
     );
@@ -33,9 +33,9 @@ export function TaskDrawerChanges({ taskId }: TaskDrawerChangesProps) {
 
   if (!changes || changes.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 p-8">
-        <DaemonMascot size={32} expression="idle" />
-        <span className="text-text-muted font-mono text-xs">No file changes yet.</span>
+      <div className="flex flex-col items-center justify-center gap-3 py-16">
+        <DaemonMascot size={48} expression="idle" />
+        <span className="text-text-secondary font-mono text-sm">No file changes yet.</span>
       </div>
     );
   }

@@ -10,8 +10,15 @@ interface EventLogProps {
   className?: string;
 }
 
+interface LogEntry {
+  id: string;
+  line: string;
+  level: string;
+  timestamp: string;
+}
+
 export function EventLog({ sessionId, className }: EventLogProps) {
-  const [logs, setLogs] = useState<string[]>([]);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
   const [showErrorsOnly, setShowErrorsOnly] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,34 +30,60 @@ export function EventLog({ sessionId, className }: EventLogProps) {
     setError(null);
     setIsConnected(false);
 
-    const es = new EventSource(`/api/v1/sessions/${sessionId}/stream`);
+    const es = new EventSource(`/api/v1/sessions/${sessionId}/stream`, {
+      withCredentials: true,
+    });
+
+    const handleLog = (event: MessageEvent) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.line !== undefined) {
+          const date = new Date(data.ts || Date.now());
+          const timeStr = date.toLocaleTimeString('en-US', {
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+          });
+          const formattedLine = `[${timeStr}] ${data.line}`;
+
+          const entry: LogEntry = {
+            id: data.id || `log-${Date.now()}-${Math.random()}`,
+            line: formattedLine,
+            level: data.level || 'info',
+            timestamp: timeStr,
+          };
+
+          if (data.level === 'error') {
+            entry.line = `ERROR: ${entry.line}`;
+          } else if (data.level === 'warn') {
+            entry.line = `WARN: ${entry.line}`;
+          }
+
+          setLogs((prev) => {
+            // Prevent duplicates by checking ID
+            if (prev.some((p) => p.id === entry.id)) return prev;
+            return [...prev, entry];
+          });
+        }
+      } catch (err) {
+        console.error('Failed to parse log event:', err);
+      }
+    };
+
+    const handleConnected = () => {
+      setIsConnected(true);
+      setError(null);
+    };
+
+    es.addEventListener('log', handleLog as any);
+    es.addEventListener('connected', handleConnected as any);
+    es.addEventListener('history_end', () => {
+      // Optional: mark history as finished
+    });
 
     es.onopen = () => {
       setIsConnected(true);
-    };
-
-    es.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === 'connected' || data.type === 'history_end') {
-          return;
-        }
-        if (data.line !== undefined) {
-          const date = new Date(data.ts || Date.now());
-          const timeStr = date.toLocaleTimeString('en-US', { hour12: false });
-          let formattedLine = `[${timeStr}] ${data.line}`;
-
-          if (data.level === 'error') {
-            formattedLine = `ERROR: ${formattedLine}`;
-          } else if (data.level === 'warn') {
-            formattedLine = `WARN: ${formattedLine}`;
-          }
-
-          setLogs((prev) => [...prev, formattedLine]);
-        }
-      } catch {
-        // ignore parse errors
-      }
     };
 
     es.onerror = (err) => {
@@ -60,11 +93,14 @@ export function EventLog({ sessionId, className }: EventLogProps) {
     };
 
     return () => {
+      es.removeEventListener('log', handleLog as any);
+      es.removeEventListener('connected', handleConnected as any);
       es.close();
     };
   }, [sessionId]);
 
-  const filteredLogs = showErrorsOnly ? logs.filter((l) => l.includes('ERROR:')) : logs;
+  const filteredLogs = showErrorsOnly ? logs.filter((l) => l.level === 'error') : logs;
+  const logLines = filteredLogs.map((l) => l.line);
 
   return (
     <div className={className}>
@@ -95,7 +131,7 @@ export function EventLog({ sessionId, className }: EventLogProps) {
           <p className="text-muted-foreground px-3 py-2 font-mono text-xs">No active session.</p>
         ) : (
           <TerminalLog
-            lines={filteredLogs}
+            lines={logLines}
             className="h-full max-h-none flex-1 rounded-none border-0"
             autoScroll={true}
           />

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { clientLogger } from '@/lib/logger-client';
 import { usePolling } from '@/hooks/use-polling';
 import { cn } from '@/lib/utils';
+import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import type { SpecStatus } from '@/components/specs/spec-editor';
 
 interface ActivityEvent {
@@ -96,7 +97,15 @@ export function ActivityTab({ specId, specStatus }: ActivityTabProps): React.Rea
   );
 
   if (sorted.length === 0) {
-    return <p className="text-text-muted py-8 text-center font-mono text-xs">No activity yet.</p>;
+    return (
+      <div className="flex flex-col items-center gap-3 py-16">
+        <DaemonMascot size={48} expression="idle" />
+        <p className="text-text-secondary font-mono text-sm">No activity yet.</p>
+        <p className="text-text-muted font-mono text-xs italic">
+          &quot;Events will be logged as the agent executes your plan.&quot;
+        </p>
+      </div>
+    );
   }
 
   return (

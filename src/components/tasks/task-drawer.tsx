@@ -24,6 +24,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { PixelBadge } from '@/components/ui/pixel-badge';
 import { useTaskDrawer } from '@/components/shell/task-drawer-context';
 import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
@@ -214,18 +215,16 @@ export function TaskDrawer() {
             {task && (
               <>
                 {/* Header */}
-                <div className="border-border-default flex shrink-0 items-center gap-3 border-b px-5 py-4">
-                  <span className="bg-phosphor-amber/10 text-phosphor-amber rounded-sm px-1.5 py-0.5 font-mono text-xs">
-                    {task.externalId}
-                  </span>
-                  <span className="text-text-primary flex-1 truncate text-base font-medium">
+                <div className="bg-bg-base border-border-default flex shrink-0 items-center gap-4 border-b px-6 py-5">
+                  <PixelBadge variant="amber">{task.externalId}</PixelBadge>
+                  <span className="text-text-primary flex-1 truncate text-lg font-semibold tracking-tight">
                     {task.title}
                   </span>
-                  <DaemonMascot size={24} expression={statusToExpression(task.status)} />
+                  <DaemonMascot size={28} expression={statusToExpression(task.status)} />
                   <TooltipProvider>
                     {canManage ? (
                       <Select value={task.status} onValueChange={handleStatusChange}>
-                        <SelectTrigger className="h-7 w-32 text-xs">
+                        <SelectTrigger className="h-8 w-36 text-xs font-medium">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -241,7 +240,7 @@ export function TaskDrawer() {
                         <TooltipTrigger asChild>
                           <span>
                             <Select disabled value={task.status}>
-                              <SelectTrigger className="h-7 w-32 cursor-not-allowed text-xs opacity-50">
+                              <SelectTrigger className="h-8 w-36 cursor-not-allowed text-xs font-medium opacity-50">
                                 <SelectValue />
                               </SelectTrigger>
                             </Select>
@@ -254,7 +253,7 @@ export function TaskDrawer() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 shrink-0"
+                    className="text-text-muted hover:text-text-primary h-8 w-8 shrink-0 rounded-full"
                     onClick={closeDrawer}
                   >
                     <X className="h-4 w-4" />
@@ -263,12 +262,12 @@ export function TaskDrawer() {
 
                 {/* Tabs */}
                 <Tabs defaultValue="overview" className="flex min-h-0 flex-1 flex-col">
-                  <TabsList className="border-border-default mx-5 mt-3 mb-0 h-auto shrink-0 justify-start gap-0 rounded-none border-b bg-transparent p-0">
+                  <TabsList className="border-border-default mx-6 mt-4 mb-0 h-auto shrink-0 justify-start gap-4 rounded-none border-b bg-transparent p-0">
                     {DRAWER_TABS.map((tab) => (
                       <TabsTrigger
                         key={tab}
                         value={tab}
-                        className="data-[state=active]:border-accent-violet data-[state=active]:text-text-primary data-[state=inactive]:text-text-muted rounded-none bg-transparent px-4 py-2 font-mono text-xs tracking-widest uppercase shadow-none data-[state=active]:border-b-2"
+                        className="data-[state=active]:border-accent-violet data-[state=active]:text-text-primary data-[state=inactive]:text-text-muted hover:text-text-secondary rounded-none bg-transparent px-1 py-2.5 font-mono text-xs tracking-widest uppercase shadow-none transition-colors data-[state=active]:border-b-2 data-[state=inactive]:border-transparent"
                       >
                         {tab}
                       </TabsTrigger>
@@ -355,7 +354,7 @@ function DrawerFooter({
   const [jsonOpen, setJsonOpen] = useState(false);
 
   return (
-    <div className="border-border-default shrink-0 space-y-3 border-t px-5 py-3">
+    <div className="bg-bg-elevated/50 border-border-default shrink-0 space-y-3 border-t px-6 py-4">
       <div className="flex items-center gap-2">
         {showRerun && (
           <Button variant="outline" size="sm" onClick={onRetry}>
@@ -411,11 +410,11 @@ function DrawerFooter({
       )}
       {devMode && (
         <Collapsible open={jsonOpen} onOpenChange={setJsonOpen}>
-          <CollapsibleTrigger className="text-text-muted cursor-pointer font-mono text-[10px] select-none">
+          <CollapsibleTrigger className="text-text-muted hover:text-text-secondary cursor-pointer font-mono text-[10px] select-none">
             JSON inspector
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <pre className="bg-terminal-bg text-terminal-green mt-1 overflow-auto rounded p-3 font-mono text-[10px]">
+            <pre className="bg-terminal-bg text-terminal-green mt-2 overflow-auto rounded p-3 font-mono text-[10px]">
               {JSON.stringify(task, null, 2)}
             </pre>
           </CollapsibleContent>
