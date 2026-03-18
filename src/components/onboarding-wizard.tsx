@@ -141,7 +141,7 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
               {!displayName.trim() && !nameError && (
                 <p className="text-muted-foreground mt-1 text-sm">Name cannot be empty.</p>
               )}
-              {nameError && <p className="mt-1 text-sm text-red-400">{nameError}</p>}
+              {nameError && <p className="text-status-red mt-1 text-sm">{nameError}</p>}
             </div>
             <div className="mt-2 flex justify-end">
               <Button onClick={handleSetName} disabled={isSubmitting || !displayName.trim()}>
@@ -164,7 +164,7 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
                 placeholder="Project name"
                 disabled={isSubmitting}
               />
-              {projectError && <p className="mt-1 text-sm text-red-400">{projectError}</p>}
+              {projectError && <p className="text-status-red mt-1 text-sm">{projectError}</p>}
             </div>
             <div className="mt-2 flex justify-end">
               <Button onClick={handleCreateProject} disabled={isSubmitting || !projectName.trim()}>

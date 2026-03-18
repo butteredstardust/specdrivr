@@ -49,9 +49,9 @@ function renderDiffLines(patch: string): React.ReactNode[] {
   return patch.split('\n').map((line, i) => {
     let className = 'text-text-secondary px-2';
     if (line.startsWith('+') && !line.startsWith('+++'))
-      className = 'bg-green-950/40 text-green-400 px-2';
+      className = 'bg-[var(--bg-diff-added)] text-status-emerald px-2';
     else if (line.startsWith('-') && !line.startsWith('---'))
-      className = 'bg-red-950/40 text-red-400 px-2';
+      className = 'bg-[var(--bg-diff-deleted)] text-status-red px-2';
     else if (line.startsWith('@@')) className = 'text-text-muted px-2';
     return (
       <div key={i} className={`font-mono text-xs leading-5 whitespace-pre ${className}`}>
@@ -69,7 +69,7 @@ const statusPrefix: Record<DiffFile['status'], string> = {
 };
 
 const statusColor: Record<DiffFile['status'], string> = {
-  added: 'text-green-400',
+  added: 'text-status-emerald',
   modified: 'text-phosphor-amber',
   deleted: 'text-status-red',
   renamed: 'text-phosphor-amber',
@@ -103,7 +103,7 @@ export function DiffViewer({ files, className }: DiffViewerProps) {
         <span className="text-text-muted font-mono text-xs font-semibold tracking-widest uppercase">
           FILE CHANGES
         </span>
-        <span className="font-mono text-xs text-green-400">+{totalAdditions}</span>
+        <span className="text-status-emerald font-mono text-xs">+{totalAdditions}</span>
         <span className="text-status-red font-mono text-xs">−{totalDeletions}</span>
       </div>
 

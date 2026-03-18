@@ -120,6 +120,8 @@
   --status-emerald: #22a16e;
   --status-red: #e03232;
   --status-orange: #d97706;
+  --bg-diff-added: rgba(34, 161, 110, 0.1);
+  --bg-diff-deleted: rgba(224, 50, 50, 0.1);
   --terminal-bg: #0d0d0a;
   --terminal-green: #39ff14;
 }

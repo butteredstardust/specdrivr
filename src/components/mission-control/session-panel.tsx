@@ -169,9 +169,9 @@ export function SessionPanel({
               </span>
             )}
             {panelState === 'running' ? (
-              <span className="flex items-center gap-1 font-mono text-xs font-semibold text-green-400">
+              <span className="text-status-emerald flex items-center gap-1 font-mono text-xs font-semibold">
                 <span
-                  className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-400"
+                  className="bg-status-emerald h-1.5 w-1.5 animate-pulse rounded-full"
                   aria-hidden="true"
                 />
                 RUNNING
@@ -250,13 +250,13 @@ export function SessionPanel({
     return (
       <div className="flex flex-col items-center gap-3 py-4 text-center">
         <DaemonMascot size={48} expression="success" />
-        <p className="flex items-center gap-1 font-mono text-xs font-semibold tracking-widest text-green-400 uppercase">
+        <p className="text-status-emerald flex items-center gap-1 font-mono text-xs font-semibold tracking-widest uppercase">
           <CheckCircle className="h-3 w-3" /> EXECUTION COMPLETE
         </p>
         {session && (
           <div className="text-text-secondary flex gap-4 font-mono text-xs">
             <span>Executed: {session.tasksExecuted}</span>
-            <span className="text-green-400">OK: {session.tasksSucceeded}</span>
+            <span className="text-status-emerald">OK: {session.tasksSucceeded}</span>
             <span className="text-status-red">Failed: {session.tasksFailed}</span>
           </div>
         )}

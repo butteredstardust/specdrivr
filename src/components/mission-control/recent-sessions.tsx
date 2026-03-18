@@ -53,11 +53,11 @@ export function RecentSessions({ sessions }: RecentSessionsProps) {
           const isCancelled = session.status === 'cancelled';
 
           let StatusIcon = PlayCircle;
-          let statusColor = 'text-blue-400';
+          let statusColor = 'text-accent-violet';
 
           if (isSuccess) {
             StatusIcon = CheckCircle;
-            statusColor = 'text-green-400';
+            statusColor = 'text-status-emerald';
           } else if (isFailed) {
             StatusIcon = XCircle;
             statusColor = 'text-status-red';
