@@ -1,6 +1,7 @@
 'use client';
 
 import { use, useState } from 'react';
+import { clientLogger } from '@/lib/logger-client';
 import Link from 'next/link';
 import { usePolling } from '@/hooks/use-polling';
 import { Button } from '@/components/ui/button';
@@ -129,7 +130,17 @@ export default function SessionDetailPage({ params }: PageProps) {
   const handleAction = async (action: 'pause' | 'resume' | 'cancel') => {
     setIsUpdating(true);
     try {
-      await fetch(`/api/v1/sessions/${id}/${action}`, { method: 'POST' });
+      const response = await fetch(`/api/v1/sessions/${id}/${action}`, { method: 'POST' });
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        clientLogger.error('Session action failed', {
+          action,
+          sessionId: id,
+          status: response.status,
+          body,
+        });
+        return;
+      }
       mutate();
     } finally {
       setIsUpdating(false);
