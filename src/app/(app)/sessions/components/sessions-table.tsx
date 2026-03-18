@@ -245,7 +245,7 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
                             {session.specTitle || `Spec #${session.specId}`}
                           </span>
                         </div>
-                      </TableCell>{' '}
+                      </TableCell>
                       <TableCell className="text-muted-foreground px-3 py-3 font-mono text-[10px] uppercase">
                         {new Date(session.startedAt).toLocaleTimeString([], {
                           hour: '2-digit',
