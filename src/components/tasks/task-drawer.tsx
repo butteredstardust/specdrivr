@@ -414,10 +414,10 @@ function DrawerFooter({
               variant="outline"
               size="sm"
               onClick={onMarkDone}
-              className="border-border-default hover:bg-bg-elevated text-text-secondary hover:text-text-primary h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase transition-colors"
+              className="border-status-emerald/50 text-status-emerald hover:bg-status-emerald/10 h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase transition-colors"
               disabled={task.status === 'done'}
             >
-              <CheckCircle2 className="text-status-emerald h-3.5 w-3.5" />
+              <CheckCircle2 className="h-3.5 w-3.5" />
               MARK DONE
             </Button>
           ) : (
