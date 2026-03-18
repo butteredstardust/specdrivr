@@ -1,9 +1,13 @@
-import { auth } from '@/lib/auth';
-import { redirect } from 'next/navigation';
-import { projectRepository } from '@/repositories/project-repository';
+'use client';
+
+import { useState, useMemo } from 'react';
+import { useQueryState, parseAsString } from 'nuqs';
+import { useShell } from '@/components/shell/shell-context';
+import { usePolling } from '@/hooks/use-polling';
 import { CreateProjectDialog } from '@/components/projects/create-project-dialog';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { PageHeader } from '@/components/ui/page-header';
 import { PixelBadge } from '@/components/ui/pixel-badge';
 import {
@@ -15,16 +19,44 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, Search, X } from 'lucide-react';
 import Link from 'next/link';
 import type { UserRole } from '@/db/schema';
 
-export default async function ProjectsPage() {
-  const session = await auth();
-  if (!session?.user?.id) redirect('/login');
+interface Project {
+  id: number;
+  name: string;
+  description: string | null;
+  createdAt: string;
+}
 
-  const projects = await projectRepository.getByUserId(session.user.id);
-  const userRole = (session.user.role ?? 'viewer') as UserRole;
+export default function ProjectsPage() {
+  const { user } = useShell();
+  const userRole = (user.role ?? 'viewer') as UserRole;
+
+  const { data: projects, isLoading } = usePolling<Project[]>({
+    url: '/api/v1/projects',
+    interval: 10000,
+  });
+
+  const [search, setSearch] = useQueryState(
+    'search',
+    parseAsString.withDefault('').withOptions({
+      shallow: true,
+      history: 'replace',
+      throttleMs: 300,
+    })
+  );
+
+  const allProjects = useMemo(() => projects ?? [], [projects]);
+
+  const filteredProjects = useMemo(() => {
+    if (!search) return allProjects;
+    const term = search.toLowerCase();
+    return allProjects.filter(
+      (p) => p.name.toLowerCase().includes(term) || p.description?.toLowerCase().includes(term)
+    );
+  }, [allProjects, search]);
 
   return (
     <TooltipProvider>
@@ -35,13 +67,52 @@ export default async function ProjectsPage() {
           action={<CreateProjectDialog userRole={userRole} />}
         />
 
+        {/* Toolbar */}
+        <div className="border-border-default flex items-center border-b px-6 py-3">
+          <div className="relative w-full md:w-64">
+            <Search className="text-text-muted absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
+            <Input
+              placeholder="SEARCH PROJECTS..."
+              className="bg-bg-elevated focus:ring-accent-violet/30 h-8 pl-8 font-mono text-[10px] tracking-widest uppercase transition-all focus:ring-1"
+              value={search}
+              onChange={(e) => setSearch(e.target.value || null)}
+            />
+            {search && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSearch(null)}
+                className="text-text-muted hover:text-text-primary absolute top-1/2 right-1 h-6 w-6 -translate-y-1/2"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            )}
+          </div>
+
+          <div className="bg-border-default/50 mx-1 h-4 w-px" />
+
+          <div className="flex items-center gap-2">
+            <span className="text-text-muted font-mono text-[10px] tracking-widest uppercase opacity-50">
+              Total: {allProjects.length}
+            </span>
+          </div>
+        </div>
+
         {/* Content */}
-        <div className="border-border-default border-b px-6 py-2.5">
-          {projects.length === 0 ? (
-            <div className="flex flex-col items-center gap-4 py-16">
+        <div className="flex-1">
+          {isLoading && allProjects.length === 0 ? (
+            <div className="text-muted-foreground py-16 text-center font-mono text-xs">
+              Loading projects…
+            </div>
+          ) : filteredProjects.length === 0 ? (
+            <div className="flex flex-col items-center gap-3 py-16">
               <DaemonMascot size={48} expression="idle" />
-              <p className="text-muted-foreground font-mono text-sm">No projects yet.</p>
-              <CreateProjectDialog userRole={userRole} triggerLabel="Create your first project" />
+              <p className="text-text-secondary font-mono text-sm">
+                {search ? 'No projects matching search.' : 'No projects yet.'}
+              </p>
+              {!search && (
+                <CreateProjectDialog userRole={userRole} triggerLabel="Create your first project" />
+              )}
             </div>
           ) : (
             <Table>
@@ -55,7 +126,7 @@ export default async function ProjectsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {projects.map((project) => (
+                {filteredProjects.map((project) => (
                   <TableRow
                     key={project.id}
                     className="border-border-default/50 hover:bg-bg-elevated/50"
@@ -77,21 +148,23 @@ export default async function ProjectsPage() {
                       {new Date(project.createdAt).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="px-3 py-3 text-right">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-muted-foreground h-6 w-6"
-                            asChild
-                          >
-                            <Link href={`/settings?projectId=${project.id}`}>
-                              <MoreHorizontal className="h-3.5 w-3.5" />
-                            </Link>
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Project settings</TooltipContent>
-                      </Tooltip>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-muted-foreground h-6 w-6"
+                              asChild
+                            >
+                              <Link href={`/settings?projectId=${project.id}`}>
+                                <MoreHorizontal className="h-3.5 w-3.5" />
+                              </Link>
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Project settings</TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </TableCell>
                   </TableRow>
                 ))}
