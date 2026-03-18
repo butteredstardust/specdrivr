@@ -1,3 +1,5 @@
+import { cn } from '@/lib/utils';
+
 type Expression = 'idle' | 'working' | 'success' | 'blocked' | 'error';
 
 interface DaemonMascotProps {
@@ -57,12 +59,13 @@ export function DaemonMascot({
   className,
 }: DaemonMascotProps): React.ReactElement {
   const isAnimatedAntenna = expression === 'idle' || expression === 'working';
+  const gradientId = `daemon-gradient-${expression}`;
 
   const renderTier = (): React.ReactNode => {
     if (size <= 16) {
       return (
         <g data-tier="silhouette">
-          <rect x="4" y="8" width="26" height="30" rx="4" fill="#9b7ffd" />
+          <rect x="4" y="8" width="26" height="30" rx="6" fill="#9b7ffd" />
         </g>
       );
     }
@@ -70,9 +73,9 @@ export function DaemonMascot({
     if (size <= 24) {
       return (
         <g data-tier="simplified">
-          <rect x="4" y="12" width="26" height="22" rx="4" fill="#9b7ffd" />
-          <circle cx="12" cy="22" r="2" fill="#ffb300" />
-          <circle cx="22" cy="22" r="2" fill="#ffb300" />
+          <rect x="4" y="12" width="26" height="22" rx="8" fill="#9b7ffd" />
+          <circle cx="12" cy="22" r="2.5" fill="#ffb300" />
+          <circle cx="22" cy="22" r="2.5" fill="#ffb300" />
         </g>
       );
     }
@@ -80,7 +83,7 @@ export function DaemonMascot({
     return (
       <g data-tier="full">
         <defs>
-          <linearGradient id="daemon-body-gradient" x1="0" y1="0" x2="0" y2="1">
+          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#9b7ffd" />
             <stop offset="50%" stopColor="#7c5cfc" />
             <stop offset="100%" stopColor="#5b3fd4" />
@@ -88,28 +91,28 @@ export function DaemonMascot({
         </defs>
 
         {/* Antenna wire */}
-        <line x1="17" y1="12" x2="17" y2="7" stroke="#9b7ffd" strokeWidth="1.5" />
+        <line x1="17" y1="12" x2="17" y2="7" stroke="#9b7ffd" strokeWidth="2" />
         {/* Antenna dot */}
         <circle
           cx="17"
           cy="6"
-          r="2"
+          r="2.5"
           fill="#ffb300"
           className={isAnimatedAntenna ? 'animate-pulse' : undefined}
         />
 
         {/* Body */}
-        <rect x="4" y="12" width="26" height="22" rx="4" fill="url(#daemon-body-gradient)" />
+        <rect x="4" y="12" width="26" height="22" rx="10" fill={`url(#${gradientId})`} />
 
         {/* Head / screen panel */}
-        <rect x="7" y="15" width="20" height="14" rx="2" fill="#1a1025" />
+        <rect x="7" y="15" width="20" height="14" rx="4" fill="#1a1025" />
 
         {/* Eyes */}
         {renderEyes(expression)}
 
         {/* Feet */}
-        <rect x="8" y="33" width="6" height="4" rx="2" fill="#5b3fd4" />
-        <rect x="20" y="33" width="6" height="4" rx="2" fill="#5b3fd4" />
+        <rect x="8" y="33" width="7" height="5" rx="2.5" fill="#5b3fd4" />
+        <rect x="19" y="33" width="7" height="5" rx="2.5" fill="#5b3fd4" />
       </g>
     );
   };
@@ -118,8 +121,8 @@ export function DaemonMascot({
     <svg
       viewBox="0 0 34 40"
       width={size}
-      height={size}
-      className={className}
+      height={size * (40 / 34)}
+      className={cn('shrink-0 drop-shadow-sm', className)}
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
     >

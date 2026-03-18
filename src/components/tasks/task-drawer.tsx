@@ -217,7 +217,7 @@ export function TaskDrawer() {
                   <span className="text-text-primary flex-1 truncate text-lg font-semibold tracking-tight">
                     {task.title}
                   </span>
-                  <DaemonMascot size={28} expression={statusToExpression(task.status)} />
+                  <DaemonMascot size={32} expression={statusToExpression(task.status)} />
                   <TooltipProvider>
                     {canManage ? (
                       <Select value={task.status} onValueChange={handleStatusChange}>
