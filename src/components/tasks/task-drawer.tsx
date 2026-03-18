@@ -25,7 +25,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
-import { PixelBadge } from '@/components/ui/pixel-badge';
+import { PixelBadge, type PixelBadgeProps } from '@/components/ui/pixel-badge';
 import { useTaskDrawer } from '@/components/shell/task-drawer-context';
 import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
@@ -54,7 +54,10 @@ export interface Task {
   totalCostUsd: number | null;
 }
 
-const TASK_STATUS_CONFIG: Record<TaskStatus, { label: string; char: string; variant: any }> = {
+const TASK_STATUS_CONFIG: Record<
+  TaskStatus,
+  { label: string; char: string; variant: PixelBadgeProps['variant'] }
+> = {
   todo: { label: 'TODO', char: '○', variant: 'muted' },
   in_progress: { label: 'RUNNING', char: '▶', variant: 'violet' },
   blocked: { label: 'BLOCKED', char: '⚠', variant: 'amber' },
