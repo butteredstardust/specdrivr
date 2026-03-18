@@ -76,11 +76,11 @@ export function EventLog({ sessionId, className }: EventLogProps) {
       setError(null);
     };
 
-    es.addEventListener('log', handleLog as any);
-    es.addEventListener('connected', handleConnected as any);
-    es.addEventListener('history_end', () => {
+    es.addEventListener('log', handleLog as (event: Event) => void);
+    es.addEventListener('connected', handleConnected as (event: Event) => void);
+    es.addEventListener('history_end', (() => {
       // Optional: mark history as finished
-    });
+    }) as (event: Event) => void);
 
     es.onopen = () => {
       setIsConnected(true);
@@ -93,8 +93,8 @@ export function EventLog({ sessionId, className }: EventLogProps) {
     };
 
     return () => {
-      es.removeEventListener('log', handleLog as any);
-      es.removeEventListener('connected', handleConnected as any);
+      es.removeEventListener('log', handleLog as (event: Event) => void);
+      es.removeEventListener('connected', handleConnected as (event: Event) => void);
       es.close();
     };
   }, [sessionId]);

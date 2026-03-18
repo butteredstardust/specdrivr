@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth';
 import { agentLogRepository, agentSessionRepository } from '@/repositories';
 import { requireMember } from '@/lib/rbac';
 import { env } from '@/lib/env';
+import { logger } from '@/lib/logger';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -13,7 +14,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   // 1. Auth — session cookie required
   const session = await auth();
   if (!session) {
-    console.log('[SSE] Unauthorized access attempt');
+    logger.info('[SSE] Unauthorized access attempt');
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

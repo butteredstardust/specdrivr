@@ -89,12 +89,14 @@ export function SessionsFilterBar({ specs }: SessionsFilterBarProps) {
           onChange={(e) => setSearch(e.target.value || null)}
         />
         {search && (
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setSearch(null)}
-            className="text-text-muted hover:text-text-primary absolute top-1/2 right-2.5 -translate-y-1/2"
+            className="text-text-muted hover:text-text-primary absolute top-1/2 right-1 h-6 w-6 -translate-y-1/2"
           >
             <X className="h-3 w-3" />
-          </button>
+          </Button>
         )}
       </div>
 
