@@ -5,7 +5,16 @@ import tseslint from 'typescript-eslint';
 const eslintConfig = [
   ...tseslint.configs.recommended,
   {
-    ignores: ['.next/**', 'node_modules/**', 'dist/**', 'build/**'],
+    ignores: [
+      '.next/**',
+      'node_modules/**',
+      'dist/**',
+      'build/**',
+      '.worktrees/**',
+      'out/**',
+      'coverage/**',
+      'public/static/**',
+    ],
   },
   {
     files: ['**/*.{js,mjs,cjs,ts,tsx,jsx}'],
