@@ -27,23 +27,23 @@ export default async function ProjectsPage() {
   const userRole = (session.user.role ?? 'viewer') as UserRole;
 
   return (
-    <div className="-mx-6 -mt-6 flex min-h-full flex-col">
-      <PageHeader
-        category="Projects"
-        title="All Projects"
-        action={<CreateProjectDialog userRole={userRole} />}
-      />
+    <TooltipProvider>
+      <div className="-mx-6 -mt-6 flex min-h-full flex-col">
+        <PageHeader
+          category="Projects"
+          title="All Projects"
+          action={<CreateProjectDialog userRole={userRole} />}
+        />
 
-      {/* Content */}
-      <div className="border-border-default border-b px-6 py-2.5">
-        {projects.length === 0 ? (
-          <div className="flex flex-col items-center gap-4 py-16">
-            <DaemonMascot size={48} expression="idle" />
-            <p className="text-muted-foreground font-mono text-sm">No projects yet.</p>
-            <CreateProjectDialog userRole={userRole} triggerLabel="Create your first project" />
-          </div>
-        ) : (
-          <TooltipProvider>
+        {/* Content */}
+        <div className="border-border-default border-b px-6 py-2.5">
+          {projects.length === 0 ? (
+            <div className="flex flex-col items-center gap-4 py-16">
+              <DaemonMascot size={48} expression="idle" />
+              <p className="text-muted-foreground font-mono text-sm">No projects yet.</p>
+              <CreateProjectDialog userRole={userRole} triggerLabel="Create your first project" />
+            </div>
+          ) : (
             <Table>
               <TableHeader>
                 <TableRow className="border-border-default text-text-secondary font-mono text-xs tracking-[0.15em] uppercase hover:bg-transparent">
@@ -97,9 +97,9 @@ export default async function ProjectsPage() {
                 ))}
               </TableBody>
             </Table>
-          </TooltipProvider>
-        )}
+          )}
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }
