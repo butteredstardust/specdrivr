@@ -675,6 +675,75 @@ export class TaskRepository extends BaseRepository {
       logger.error({ err }, 'Failed to send task blocked Slack notification');
     }
   }
+
+  async completeTaskAttempt(
+    taskId: number,
+    data: {
+      status: 'done' | 'failed';
+      output?: string;
+      exitCode?: number;
+      errorMessage?: string;
+    }
+  ): Promise<void> {
+    const task = await this.getById(taskId);
+    if (!task) {
+      throw new NotFoundError(`Task with ID ${taskId} not found`);
+    }
+
+    // 1. Update task status (this triggers webhooks via update method)
+    await this.update(taskId, {
+      status: data.status === 'done' ? 'done' : 'failed',
+    });
+
+    // 2. Create task attempt record
+    await this.executeQuery(async () => {
+      const [latestAttempt] = await db
+        .select({ seq: schema.taskAttempts.seq })
+        .from(schema.taskAttempts)
+        .where(eq(schema.taskAttempts.taskId, taskId))
+        .orderBy(desc(schema.taskAttempts.seq))
+        .limit(1);
+
+      const nextSeq = (latestAttempt?.seq ?? 0) + 1;
+
+      const [runningSession] = await db
+        .select({ id: agentSessions.id })
+        .from(agentSessions)
+        .where(and(eq(agentSessions.planId, task.planId), eq(agentSessions.status, 'running')))
+        .limit(1);
+
+      await db.insert(schema.taskAttempts).values({
+        taskId,
+        sessionId: runningSession?.id || null,
+        seq: nextSeq,
+        status: data.status === 'done' ? 'succeeded' : 'failed',
+        logLines: data.output ? [data.output] : [],
+        exitCode: data.exitCode,
+        errorMessage: data.errorMessage,
+        endedAt: new Date(),
+      });
+    });
+
+    // 3. Check if all tasks in the plan are done
+    const allTasks = await this.getByPlanId(task.planId);
+    const allDone = allTasks.every((t) => t.status === 'done' || t.status === 'skipped');
+
+    if (allDone) {
+      const [session] = await db
+        .select()
+        .from(agentSessions)
+        .where(and(eq(agentSessions.planId, task.planId), eq(agentSessions.status, 'running')))
+        .limit(1);
+
+      if (session) {
+        const { agentSessionRepository } = await import('@/repositories/agent-session-repository');
+        await agentSessionRepository.update(session.id, {
+          status: 'completed',
+          endedAt: new Date(),
+        });
+      }
+    }
+  }
 }
 
 export const taskRepository = new TaskRepository();
