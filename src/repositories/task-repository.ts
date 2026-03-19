@@ -139,7 +139,7 @@ export class TaskRepository extends BaseRepository {
       description: data.description.trim(),
       externalId: data.externalId,
       title: data.title,
-      planId: data.planId ?? 1,
+      planId: data.planId as number, // Required by DB
       specId: data.specId ?? null,
       status: data.status ?? ('todo' as const),
       dependsOn: data.dependsOn ?? [],
