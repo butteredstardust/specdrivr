@@ -97,6 +97,21 @@ export class TaskRepository extends BaseRepository {
     return result as Task[];
   }
 
+  /**
+   * Returns all blocked tasks belonging to a specific project.
+   * Joins through specifications to scope by projectId.
+   */
+  async getBlockedByProjectId(projectId: number): Promise<Task[]> {
+    return this.executeQuery(() =>
+      db
+        .select(getTableColumns(tasks))
+        .from(tasks)
+        .innerJoin(specifications, eq(tasks.specId, specifications.id))
+        .where(and(eq(tasks.status, 'blocked'), eq(specifications.projectId, projectId)))
+        .orderBy(desc(tasks.createdAt))
+    ) as Promise<Task[]>;
+  }
+
   async getByExternalId(externalId: string): Promise<Task | null> {
     const result = await this.executeQuery(() =>
       db.select().from(tasks).where(eq(tasks.externalId, externalId)).limit(1)

@@ -106,7 +106,10 @@ export default function SessionDetailPage({ params }: PageProps) {
   const handleAction = async (action: 'pause' | 'resume' | 'cancel') => {
     setIsUpdating(true);
     try {
-      const response = await fetch(`/api/v1/sessions/${id}/${action}`, { method: 'POST' });
+      const response = await fetch(`/api/v1/sessions/${id}/${action}`, {
+        method: 'POST',
+        credentials: 'include',
+      });
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
         clientLogger.error('Session action failed', {
