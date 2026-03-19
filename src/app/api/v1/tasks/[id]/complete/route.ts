@@ -27,9 +27,15 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
   try {
     const body = await request.json();
-    const parsed = CompleteTaskSchema.parse(body);
+    const parsed = CompleteTaskSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: { code: 'INVALID_INPUT', details: parsed.error.errors } },
+        { status: 400 }
+      );
+    }
 
-    const { sessionId } = await taskRepository.completeTaskAttempt(taskId, parsed);
+    const { sessionId } = await taskRepository.completeTaskAttempt(taskId, parsed.data);
 
     // Notify clients via SSE
     if (sessionId) {

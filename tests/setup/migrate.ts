@@ -8,7 +8,7 @@ config({ path: path.resolve(process.cwd(), '.env') });
 config({ path: path.resolve(process.cwd(), '.env.local') });
 
 export async function setup() {
-  console.log('[test setup] Creating template database...');
+  process.stdout.write('[test setup] Creating template database...\n');
   const baseDbUrl =
     process.env.DATABASE_URL ||
     'postgresql://specdrivr:specdrivr_password@localhost:5432/specdrivr';
@@ -24,7 +24,7 @@ export async function setup() {
     await sql`DROP DATABASE IF EXISTS specdrivr_test_template`;
     await sql`CREATE DATABASE specdrivr_test_template`;
   } catch (e) {
-    console.error('[test setup] Failed to create template db:', e);
+    process.stderr.write(`[test setup] Failed to create template db: ${String(e)}\n`);
     throw e;
   } finally {
     await sql.end();
@@ -33,7 +33,7 @@ export async function setup() {
   const templateUrl = new URL(baseDbUrl);
   templateUrl.pathname = '/specdrivr_test_template';
 
-  console.log('[test setup] Running db:migrate on template database...');
+  process.stdout.write('[test setup] Running db:migrate on template database...\n');
   execSync('pnpm db:migrate', {
     stdio: 'inherit',
     env: {
@@ -41,5 +41,5 @@ export async function setup() {
       DATABASE_URL: templateUrl.toString(),
     },
   });
-  console.log('[test setup] Migration complete.');
+  process.stdout.write('[test setup] Migration complete.\n');
 }
