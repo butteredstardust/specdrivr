@@ -40,7 +40,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
   // Create a dedicated Redis subscriber
   const subscriber = new Redis(env.REDIS_URL || 'redis://localhost:6379');
-  const channel = `session:${sId}:logs`;
+  const logChannel = `session:${sId}:logs`;
+  const updateChannel = `session:${sId}:updates`;
 
   const stream = new ReadableStream({
     async start(controller) {
@@ -68,10 +69,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       sendEvent(JSON.stringify({ type: 'history_end' }), 'history_end');
 
       // 3. Subscribe to live events
-      await subscriber.subscribe(channel);
+      await subscriber.subscribe(logChannel, updateChannel);
 
       subscriber.on('message', (ch: string, message: string) => {
-        if (ch === channel) {
+        if (ch === logChannel) {
           try {
             const data = JSON.parse(message);
             // Ensure ID is present for live messages too
@@ -80,12 +81,19 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           } catch {
             sendEvent(message, 'log');
           }
+        } else if (ch === updateChannel) {
+          // This is a status/data update
+          try {
+            sendEvent(message, 'update');
+          } catch {
+            sendEvent(JSON.stringify({ type: 'update' }), 'update');
+          }
         }
       });
 
       // 4. Handle client disconnect
       request.signal.addEventListener('abort', () => {
-        subscriber.unsubscribe(channel);
+        subscriber.unsubscribe(logChannel, updateChannel);
         subscriber.quit();
         try {
           controller.close();
@@ -95,7 +103,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       });
     },
     cancel() {
-      subscriber.unsubscribe(channel);
+      subscriber.unsubscribe(logChannel, updateChannel);
       subscriber.quit();
     },
   });
