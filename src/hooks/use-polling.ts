@@ -8,6 +8,7 @@ type UsePollingOptions<T> = {
   stopWhen?: (data: T) => boolean; // stop automatically when condition met
   onData?: (data: T) => void; // called on each successful response
   onError?: (error: Error) => void; // called on fetch failure
+  initialData?: T; // optional initial data to skip first loading state
 };
 
 type UsePollingResult<T> = {
@@ -43,10 +44,11 @@ export function usePolling<T>({
   stopWhen,
   onData,
   onError,
+  initialData,
 }: UsePollingOptions<T>): UsePollingResult<T> {
-  const [data, setData] = useState<T | null>(null);
+  const [data, setData] = useState<T | null>(initialData ?? null);
   const [error, setError] = useState<Error | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(initialData === undefined);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isStopped, setIsStopped] = useState<boolean>(false);
   const [trigger, setTrigger] = useState<number>(0);
