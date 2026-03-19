@@ -8,10 +8,8 @@ import {
   type AgentEventSelect,
   projects,
   specifications,
-  tasks,
-  agentConfig,
 } from '@/db/schema';
-import { eq, desc, inArray, asc, and, count, sql } from 'drizzle-orm';
+import { eq, desc, inArray, asc } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, DatabaseError } from '@/lib/errors';
 import { dispatchWebhookEvent, type WebhookEventType } from '@/lib/webhooks';
@@ -21,99 +19,7 @@ import { logger } from '@/lib/logger';
 
 export { type AgentSessionSelect as AgentSession } from '@/db/schema';
 
-export interface SessionQuery {
-  projectId?: number;
-  specId?: number;
-  status?: import('@/db/schema').SessionStatus;
-  search?: string;
-  from?: string;
-  to?: string;
-  limit?: number;
-  offset?: number;
-}
-
 export class AgentSessionRepository extends BaseRepository {
-  async getEnrichedSessions(query: SessionQuery, allowedProjectIds: number[]) {
-    return await this.executeQuery(async () => {
-      const limit = query.limit ?? 50;
-      const offset = query.offset ?? 0;
-
-      const totalTasksSubq = db
-        .select({ planId: tasks.planId, total: count().as('total') })
-        .from(tasks)
-        .groupBy(tasks.planId)
-        .as('task_counts');
-
-      const whereConditions = [];
-
-      if (query.projectId) {
-        whereConditions.push(eq(agentSessions.projectId, query.projectId));
-      } else {
-        if (allowedProjectIds.length === 0) {
-          return { data: [], count: 0 };
-        }
-        whereConditions.push(inArray(agentSessions.projectId, allowedProjectIds));
-      }
-
-      if (query.status) {
-        whereConditions.push(eq(agentSessions.status, query.status));
-      }
-
-      if (query.specId) {
-        whereConditions.push(eq(agentSessions.specId, query.specId));
-      }
-
-      if (query.search) {
-        whereConditions.push(sql`${specifications.name} ILIKE ${'%' + query.search + '%'}`);
-      }
-
-      if (query.from) {
-        whereConditions.push(
-          sql`${agentSessions.startedAt} >= ${new Date(query.from).toISOString()}`
-        );
-      }
-
-      if (query.to) {
-        whereConditions.push(
-          sql`${agentSessions.startedAt} <= ${new Date(query.to).toISOString()}`
-        );
-      }
-
-      const rows = await db
-        .select({
-          session: agentSessions,
-          specName: specifications.name,
-          currentTaskExternalId: tasks.externalId,
-          currentTaskTitle: tasks.title,
-          totalTasks: totalTasksSubq.total,
-          backend: agentConfig.backend,
-        })
-        .from(agentSessions)
-        .leftJoin(specifications, eq(agentSessions.specId, specifications.id))
-        .leftJoin(tasks, eq(agentSessions.currentTaskId, tasks.id))
-        .leftJoin(totalTasksSubq, eq(agentSessions.planId, totalTasksSubq.planId))
-        .leftJoin(agentConfig, eq(agentSessions.projectId, agentConfig.projectId))
-        .where(whereConditions.length ? and(...whereConditions) : undefined)
-        .limit(limit)
-        .offset(offset)
-        .orderBy(desc(agentSessions.startedAt));
-
-      const enrichedSessions = rows.map((r) => ({
-        ...r.session,
-        specTitle: r.specName ?? null,
-        currentTaskExternalId: r.currentTaskExternalId ?? null,
-        currentTaskTitle: r.currentTaskTitle ?? null,
-        totalTasks: r.totalTasks != null ? Number(r.totalTasks) : null,
-        backend: r.backend ?? 'gemini',
-      }));
-
-      return {
-        data: enrichedSessions,
-        count: enrichedSessions.length,
-      };
-    });
-  }
-
   async getAll(limit = 50, offset = 0): Promise<AgentSession[]> {
     return await this.executeQuery(() =>
       db

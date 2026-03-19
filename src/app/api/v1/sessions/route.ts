@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { agentSessionRepository } from '@/repositories/agent-session-repository';
+import { getEnrichedSessions } from '@/queries/agent-sessions-query';
 import { auth } from '@/lib/auth';
 import { handleApiError, formatErrorResponse } from '@/lib/error-handler';
 import { z } from 'zod';
@@ -65,10 +66,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const { data: enrichedSessions, count } = await agentSessionRepository.getEnrichedSessions(
-      query,
-      allowedProjectIds
-    );
+    const { data: enrichedSessions, count } = await getEnrichedSessions(query, allowedProjectIds);
 
     return NextResponse.json({
       data: enrichedSessions,
