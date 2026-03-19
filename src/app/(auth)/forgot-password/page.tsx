@@ -1,7 +1,11 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useRef } from 'react';
 import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { forgotPasswordSchema } from '@/lib/schemas';
 import { toast } from 'sonner';
 import { authClient } from '@/lib/auth-client';
 import { clientLogger } from '@/lib/logger-client';
@@ -11,9 +15,23 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
+type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;
 type State = 'idle' | 'sent';
 
 export default function ForgotPasswordPage() {
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ForgotPasswordValues>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: '',
+    },
+  });
+
   const resetAction = async (prevState: State, formData: FormData): Promise<State> => {
     const email = formData.get('email') as string;
     try {
@@ -34,6 +52,10 @@ export default function ForgotPasswordPage() {
 
   const [state, formAction, isPending] = useActionState(resetAction, 'idle');
 
+  const onValid = () => {
+    formRef.current?.requestSubmit();
+  };
+
   return (
     <Card className="border-border-default bg-bg-surface w-full max-w-sm">
       <CardHeader className="items-center gap-2 pb-2">
@@ -52,18 +74,25 @@ export default function ForgotPasswordPage() {
             </Link>
           </div>
         ) : (
-          <form action={formAction} className="space-y-4">
+          <form
+            ref={formRef}
+            action={formAction}
+            onSubmit={handleSubmit(onValid)}
+            className="space-y-4"
+          >
             <div className="space-y-1.5">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
-                name="email"
+                {...register('email')}
                 type="email"
                 autoFocus
                 placeholder="you@example.com"
                 className="border-border-default bg-bg-base"
-                required
               />
+              {errors.email && (
+                <p className="text-status-red text-[10px]">{errors.email.message}</p>
+              )}
             </div>
             <Button
               type="submit"
