@@ -57,12 +57,11 @@ export const createTaskSchema = z.object({
 
   planId: z
     .number({
+      required_error: 'Plan ID is required',
       invalid_type_error: 'Plan ID must be a number',
     })
     .int('Plan ID must be an integer')
-    .positive('Plan ID must be a positive number')
-    .optional()
-    .nullable(),
+    .positive('Plan ID must be a positive number'),
 
   status: taskStatusSchema.optional().default('todo'),
 

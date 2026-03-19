@@ -92,6 +92,34 @@ export class AgentSessionRepository extends BaseRepository {
       throw new DatabaseError('Failed to create agent session');
     }
 
+    // 1. Log Session Started event
+    await this.executeQuery(() =>
+      db.insert(agentEvents).values({
+        sessionId: session.id,
+        specId: session.specId || null,
+        eventType: 'SESSION_STARTED',
+        message: `Agent session SESS-${String(session.id).padStart(3, '0')} started`,
+        metadata: {
+          projectId: session.projectId,
+          planId: session.planId,
+          startedBy: session.startedBy,
+        },
+      })
+    );
+
+    // 2. Log Plan Approved event if this session is linked to a plan
+    if (session.planId) {
+      await this.executeQuery(() =>
+        db.insert(agentEvents).values({
+          sessionId: session.id,
+          specId: session.specId || null,
+          eventType: 'PLAN_APPROVED',
+          message: `Plan #${session.planId} approved and execution started`,
+          metadata: { planId: session.planId },
+        })
+      );
+    }
+
     // Trigger session.started webhook
     void dispatchWebhookEvent(session.projectId, 'session.started', {
       sessionId: session.id,

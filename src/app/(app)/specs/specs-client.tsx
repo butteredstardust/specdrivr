@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useQueryState, parseAsString } from 'nuqs';
 import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
@@ -71,32 +71,22 @@ function StatusBadge({ status }: { status: SpecStatus }) {
 
 export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.ReactElement {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const { activeProjectId, setActiveProjectId, user } = useShell();
+  // Source of truth for project is the shell (which manages state and cookies)
+  const { activeProjectId, user } = useShell();
   const userRole = (user.role ?? 'viewer') as UserRole;
 
-  const urlProjectId = searchParams.get('projectId')
-    ? parseInt(searchParams.get('projectId')!, 10)
-    : null;
-
-  // Sync URL and activeProjectId
+  // Optional: Sync activeProjectId to URL for deep linking/bookmarking support
   useEffect(() => {
-    if (urlProjectId !== null && activeProjectId !== urlProjectId) {
-      setActiveProjectId(urlProjectId);
-    } else if (activeProjectId !== null && urlProjectId === null) {
-      // If we have an active project but it's not in the URL, put it there
-      router.replace(`/specs?projectId=${activeProjectId}`, { scroll: false });
-    } else if (
-      activeProjectId !== null &&
-      urlProjectId !== null &&
-      activeProjectId !== urlProjectId
-    ) {
-      // If they are both set but different, sidebar (activeProjectId) wins for the URL
-      router.replace(`/specs?projectId=${activeProjectId}`, { scroll: false });
+    if (activeProjectId !== null) {
+      const url = new URL(window.location.href);
+      if (url.searchParams.get('projectId') !== String(activeProjectId)) {
+        url.searchParams.set('projectId', String(activeProjectId));
+        router.replace(url.pathname + url.search, { scroll: false });
+      }
     }
-  }, [urlProjectId, activeProjectId, setActiveProjectId, router]);
+  }, [activeProjectId, router]);
 
-  const effectiveProjectId = activeProjectId ?? urlProjectId;
+  const effectiveProjectId = activeProjectId;
 
   const [activeTab, setActiveTab] = useState<string>('all');
   const [search, setSearch] = useQueryState(
