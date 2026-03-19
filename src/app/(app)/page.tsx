@@ -2,7 +2,7 @@ import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { authInstance } from '@/lib/auth';
 import { projectRepository } from '@/repositories/project-repository';
-import { agentSessionRepository } from '@/repositories/agent-session-repository';
+import { getEnrichedSessions } from '@/queries/agent-sessions-query';
 import { taskRepository } from '@/repositories/task-repository';
 import { DashboardClient, type AgentSession, type BlockedTask } from './dashboard-client';
 
@@ -35,7 +35,7 @@ export default async function MissionControlPage() {
   let initialTasks: BlockedTask[] = [];
 
   if (validatedProjectId) {
-    const enrichedSessionsResult = await agentSessionRepository.getEnrichedSessions(
+    const enrichedSessionsResult = await getEnrichedSessions(
       { projectId: validatedProjectId, limit: 4 },
       [validatedProjectId]
     );

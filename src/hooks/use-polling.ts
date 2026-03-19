@@ -94,6 +94,13 @@ export function usePolling<T>({
 
     let isMounted = true;
     const controller = new AbortController();
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const scheduleNext = (delay: number) => {
+      if (isMounted && !isStopped) {
+        timeoutId = setTimeout(fetchData, delay);
+      }
+    };
 
     const fetchData = async () => {
       try {
@@ -125,6 +132,8 @@ export function usePolling<T>({
 
         if (stopWhenRef.current && stopWhenRef.current(payload)) {
           stop();
+        } else {
+          scheduleNext(interval);
         }
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') return;
@@ -149,6 +158,11 @@ export function usePolling<T>({
 
         if (errorCountRef.current >= 5) {
           stop();
+        } else {
+          const backoffDelay = interval * Math.pow(2, errorCountRef.current);
+          const jitter = backoffDelay * 0.1 * (Math.random() * 2 - 1);
+          const nextDelay = Math.min(60000, backoffDelay + jitter);
+          scheduleNext(nextDelay);
         }
       }
     };
@@ -156,11 +170,9 @@ export function usePolling<T>({
     // Initial fetch
     fetchData();
 
-    const timeoutId = setInterval(fetchData, interval);
-
     return () => {
       isMounted = false;
-      clearInterval(timeoutId);
+      if (timeoutId) clearTimeout(timeoutId);
       controller.abort();
     };
   }, [url, interval, enabled, isStopped, stop, trigger]);
