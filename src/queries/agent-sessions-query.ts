@@ -86,7 +86,10 @@ export async function getEnrichedSessions(query: SessionQuery, allowedProjectIds
 
   const enrichedSessions = rows.map((r) => ({
     ...r.session,
-    specTitle: r.specName ?? null,
+    startedAt: r.session.startedAt.toISOString(),
+    endedAt: r.session.endedAt?.toISOString() ?? null,
+    lastHeartbeatAt: r.session.lastHeartbeatAt?.toISOString() ?? null,
+    specName: r.specName ?? null,
     currentTaskExternalId: r.currentTaskExternalId ?? null,
     currentTaskTitle: r.currentTaskTitle ?? null,
     totalTasks: r.totalTasks != null ? Number(r.totalTasks) : null,

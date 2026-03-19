@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useRef, useState, useEffect } from 'react';
+import { useActionState, useRef, useState, useEffect, startTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
@@ -78,7 +78,12 @@ export default function LoginPage() {
   const expression = isPending ? 'working' : state.expression;
 
   const onValid = () => {
-    formRef.current?.requestSubmit();
+    const form = formRef.current;
+    if (form) {
+      startTransition(() => {
+        formAction(new FormData(form));
+      });
+    }
   };
 
   return (
