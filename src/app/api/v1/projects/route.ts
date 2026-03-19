@@ -3,6 +3,7 @@ import { projectRepository } from '@/repositories/project-repository';
 import { formatErrorResponse, handleApiError } from '@/lib/error-handler';
 import { auth } from '@/lib/auth';
 import { z } from 'zod';
+import { parseUrlParams } from '@/lib/api-utils';
 
 const ProjectQuerySchema = z.object({
   userId: z.string().optional(),
@@ -33,8 +34,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { searchParams } = new URL(request.url);
-    const query = ProjectQuerySchema.parse(Object.fromEntries(searchParams.entries()));
+    const query = parseUrlParams(request, ProjectQuerySchema);
 
     let projects;
 

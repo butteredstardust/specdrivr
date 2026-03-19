@@ -8,6 +8,7 @@ import { requireMember } from '@/lib/rbac';
 import { db } from '@/db';
 import { projectMembers } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { parseUrlParams } from '@/lib/api-utils';
 
 const SessionQuerySchema = z.object({
   projectId: z.coerce.number().int().positive().optional(),
@@ -36,8 +37,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { searchParams } = new URL(request.url);
-    const query = SessionQuerySchema.parse(Object.fromEntries(searchParams.entries()));
+    const query = parseUrlParams(request, SessionQuerySchema);
 
     let allowedProjectIds: number[] = [];
 

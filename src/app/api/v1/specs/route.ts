@@ -5,6 +5,7 @@ import { auth } from '@/lib/auth';
 import { requireMember } from '@/lib/rbac';
 import { z } from 'zod';
 import { getEnrichedSpecs } from '@/queries/specs-query';
+import { safeParseUrlParams } from '@/lib/api-utils';
 
 const SpecsQuerySchema = z.object({
   projectId: z.coerce.number().int().positive(),
@@ -23,8 +24,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { searchParams } = new URL(request.url);
-    const parsed = SpecsQuerySchema.safeParse(Object.fromEntries(searchParams.entries()));
+    const parsed = safeParseUrlParams(request, SpecsQuerySchema);
     if (!parsed.success) {
       return NextResponse.json(
         formatErrorResponse({ message: 'Invalid query parameters', details: parsed.error.errors }),
