@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useRef } from 'react';
+import { useActionState, useRef, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
@@ -70,7 +70,10 @@ export default function LoginPage() {
     expression: 'idle',
   });
 
-  const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+  const [isDev, setIsDev] = useState(false);
+  useEffect(() => {
+    setIsDev(window.location.hostname === 'localhost');
+  }, []);
 
   const expression = isPending ? 'working' : state.expression;
 
