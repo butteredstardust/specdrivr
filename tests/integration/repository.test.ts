@@ -210,4 +210,146 @@ describe('Repository Integration Tests', () => {
       expect(claimed3?.externalId).toBe('T-2');
     });
   });
+
+  describe('TaskRepository.completeTaskAttempt', () => {
+    it('atomically updates task, inserts attempt record, and closes session when plan is complete', async () => {
+      const user = await createTestUser('user_1', 'test@example.com');
+      const project = await createTestProject('Test Project', user.id);
+
+      const spec = await specificationRepository.createWithVersion({
+        projectId: project.id,
+        name: 'Auth Spec',
+        markdownContent: '# v1',
+        createdBy: user.id,
+      });
+
+      const [plan] = await testDb
+        .insert(schema.plans)
+        .values({ specId: spec.id, status: 'executing', specVersionId: spec.currentVersionId })
+        .returning();
+
+      const [session] = await testDb
+        .insert(schema.agentSessions)
+        .values({ projectId: project.id, planId: plan.id, status: 'running' })
+        .returning();
+
+      const [task] = await testDb
+        .insert(schema.tasks)
+        .values({
+          planId: plan.id,
+          specId: spec.id,
+          externalId: 'T-1',
+          title: 'Complete me',
+          status: 'in_progress',
+          executionOrder: 1,
+        })
+        .returning();
+
+      const result = await taskRepository.completeTaskAttempt(task.id, {
+        status: 'done',
+        output: 'All checks passed',
+        exitCode: 0,
+      });
+
+      // 1. Returns the running session ID
+      expect(result.sessionId).toBe(session.id);
+
+      // 2. Task is marked done with completedAt set
+      const [updatedTask] = await testDb
+        .select()
+        .from(schema.tasks)
+        .where(eq(schema.tasks.id, task.id));
+      expect(updatedTask.status).toBe('done');
+      expect(updatedTask.completedAt).not.toBeNull();
+
+      // 3. A taskAttempt record was created with correct values
+      const [attempt] = await testDb
+        .select()
+        .from(schema.taskAttempts)
+        .where(eq(schema.taskAttempts.taskId, task.id));
+      expect(attempt).toBeDefined();
+      expect(attempt.status).toBe('succeeded');
+      expect(attempt.sessionId).toBe(session.id);
+      expect(attempt.logLines).toContain('All checks passed');
+
+      // 4. Session was closed because all plan tasks are done
+      const [updatedSession] = await testDb
+        .select()
+        .from(schema.agentSessions)
+        .where(eq(schema.agentSessions.id, session.id));
+      expect(updatedSession.status).toBe('completed');
+      expect(updatedSession.endedAt).not.toBeNull();
+    });
+
+    it('marks task as failed without closing the session when other tasks remain', async () => {
+      const user = await createTestUser('user_2', 'other@example.com');
+      const project = await createTestProject('Other Project', user.id);
+
+      const spec = await specificationRepository.createWithVersion({
+        projectId: project.id,
+        name: 'Spec B',
+        markdownContent: '# v1',
+        createdBy: user.id,
+      });
+
+      const [plan] = await testDb
+        .insert(schema.plans)
+        .values({ specId: spec.id, status: 'executing', specVersionId: spec.currentVersionId })
+        .returning();
+
+      const [session] = await testDb
+        .insert(schema.agentSessions)
+        .values({ projectId: project.id, planId: plan.id, status: 'running' })
+        .returning();
+
+      // Two tasks — T-A fails, T-B is still todo
+      const [taskA] = await testDb
+        .insert(schema.tasks)
+        .values({
+          planId: plan.id,
+          specId: spec.id,
+          externalId: 'T-A',
+          title: 'Task A',
+          status: 'in_progress',
+          executionOrder: 1,
+        })
+        .returning();
+      await testDb
+        .insert(schema.tasks)
+        .values({
+          planId: plan.id,
+          specId: spec.id,
+          externalId: 'T-B',
+          title: 'Task B',
+          status: 'todo',
+          executionOrder: 2,
+        });
+
+      await taskRepository.completeTaskAttempt(taskA.id, {
+        status: 'failed',
+        errorMessage: 'oops',
+      });
+
+      const [updatedTask] = await testDb
+        .select()
+        .from(schema.tasks)
+        .where(eq(schema.tasks.id, taskA.id));
+      expect(updatedTask.status).toBe('failed');
+      expect(updatedTask.completedAt).toBeNull();
+
+      const [attempt] = await testDb
+        .select()
+        .from(schema.taskAttempts)
+        .where(eq(schema.taskAttempts.taskId, taskA.id));
+      expect(attempt.status).toBe('failed');
+      expect(attempt.errorMessage).toBe('oops');
+
+      // Session should still be running — T-B is not done
+      const [updatedSession] = await testDb
+        .select()
+        .from(schema.agentSessions)
+        .where(eq(schema.agentSessions.id, session.id));
+      expect(updatedSession.status).toBe('running');
+    });
+  });
 });

@@ -75,27 +75,39 @@ export function useSSE<T>({ url, sseUrl, enabled = true }: UseSSEOptions): UseSS
     if (!enabled || !sseUrl) return;
 
     const eventSource = new EventSource(sseUrl, { withCredentials: true });
+    // Track errors per connection attempt; reset on any successful message.
+    // This prevents a mutate()-storm when the server repeatedly errors before
+    // the browser's native SSE reconnect loop re-establishes the connection.
+    const errorCountRef = { current: 0 };
+    const MAX_ERROR_MUTATES = 3;
 
-    eventSource.onmessage = (event) => {
+    const handleMessage = (event: MessageEvent) => {
+      errorCountRef.current = 0; // reset on any successful message
       try {
         const parsed = JSON.parse(event.data);
         if (parsed.type === 'update' || parsed.type === 'ping') {
           mutate();
         }
       } catch {
-        // ignore
+        // ignore malformed frames
       }
     };
 
-    // Explicitly listen to 'update' events
+    eventSource.onmessage = handleMessage;
+
+    // Explicitly listen to named 'update' events
     eventSource.addEventListener('update', () => {
+      errorCountRef.current = 0;
       mutate();
     });
 
     eventSource.onerror = () => {
-      clientLogger.error(`SSE connection error for ${sseUrl}`);
-      // Fallback: trigger a refetch and let it reconnect naturally
-      mutate();
+      if (errorCountRef.current < MAX_ERROR_MUTATES) {
+        errorCountRef.current += 1;
+        clientLogger.error(`SSE connection error for ${sseUrl} (attempt ${errorCountRef.current})`);
+        mutate();
+      }
+      // Beyond MAX_ERROR_MUTATES we let the browser reconnect silently.
     };
 
     return () => {

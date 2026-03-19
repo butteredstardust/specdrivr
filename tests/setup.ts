@@ -54,7 +54,9 @@ beforeAll(async () => {
       await sql.unsafe(`CREATE DATABASE "${dbName}" TEMPLATE specdrivr_test_template`);
     }
   } catch (e) {
-    console.error(`[test setup] Failed to create worker db ${dbName}:`, e);
+    process.stderr.write(`[test setup] Failed to create worker db ${dbName}: ${String(e)}\n`);
+    // Re-throw so the worker fails loudly rather than silently continuing
+    throw e;
   } finally {
     await sql.end();
   }
