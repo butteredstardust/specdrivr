@@ -70,9 +70,7 @@ export default function LoginPage() {
     expression: 'idle',
   });
 
-  const isDev =
-    process.env.NODE_ENV === 'development' ||
-    process.env.NEXT_PUBLIC_APP_URL?.includes('localhost');
+  const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
 
   const expression = isPending ? 'working' : state.expression;
 

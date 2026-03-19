@@ -9,7 +9,7 @@ import {
   type TaskStatus,
 } from '@/db/schema';
 import * as schema from '@/db/schema';
-import { eq, desc, sql, and, asc, getTableColumns } from 'drizzle-orm';
+import { eq, desc, sql, and, asc, getTableColumns, inArray } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, ValidationError, DatabaseError } from '@/lib/errors';
 import { dispatchWebhookEvent, type WebhookEventType } from '@/lib/webhooks';
@@ -684,7 +684,7 @@ export class TaskRepository extends BaseRepository {
       exitCode?: number;
       errorMessage?: string;
     }
-  ): Promise<void> {
+  ): Promise<{ sessionId: number | null }> {
     const task = await this.getById(taskId);
     if (!task) {
       throw new NotFoundError(`Task with ID ${taskId} not found`);
@@ -694,6 +694,8 @@ export class TaskRepository extends BaseRepository {
     await this.update(taskId, {
       status: data.status === 'done' ? 'done' : 'failed',
     });
+
+    let runningSessionId: number | null = null;
 
     // 2. Create task attempt record
     await this.executeQuery(async () => {
@@ -712,9 +714,11 @@ export class TaskRepository extends BaseRepository {
         .where(and(eq(agentSessions.planId, task.planId), eq(agentSessions.status, 'running')))
         .limit(1);
 
+      runningSessionId = runningSession?.id || null;
+
       await db.insert(schema.taskAttempts).values({
         taskId,
-        sessionId: runningSession?.id || null,
+        sessionId: runningSessionId,
         seq: nextSeq,
         status: data.status === 'done' ? 'succeeded' : 'failed',
         logLines: data.output ? [data.output] : [],
@@ -728,21 +732,30 @@ export class TaskRepository extends BaseRepository {
     const allTasks = await this.getByPlanId(task.planId);
     const allDone = allTasks.every((t) => t.status === 'done' || t.status === 'skipped');
 
-    if (allDone) {
-      const [session] = await db
-        .select()
-        .from(agentSessions)
-        .where(and(eq(agentSessions.planId, task.planId), eq(agentSessions.status, 'running')))
-        .limit(1);
-
-      if (session) {
-        const { agentSessionRepository } = await import('@/repositories/agent-session-repository');
-        await agentSessionRepository.update(session.id, {
-          status: 'completed',
-          endedAt: new Date(),
-        });
-      }
+    if (allDone && runningSessionId) {
+      const { agentSessionRepository } = await import('@/repositories/agent-session-repository');
+      await agentSessionRepository.update(runningSessionId, {
+        status: 'completed',
+        endedAt: new Date(),
+      });
     }
+
+    let activeSessionId: number | null = runningSessionId;
+    if (!activeSessionId) {
+      const [pausedSession] = await db
+        .select({ id: agentSessions.id })
+        .from(agentSessions)
+        .where(
+          and(
+            eq(agentSessions.planId, task.planId),
+            inArray(agentSessions.status, ['running', 'paused'])
+          )
+        )
+        .limit(1);
+      if (pausedSession) activeSessionId = pausedSession.id;
+    }
+
+    return { sessionId: activeSessionId };
   }
 }
 

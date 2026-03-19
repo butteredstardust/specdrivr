@@ -57,24 +57,31 @@ export async function getEnrichedSessions(query: SessionQuery, allowedProjectIds
       whereConditions.push(sql`${agentSessions.startedAt} <= ${new Date(query.to).toISOString()}`);
     }
 
-    const rows = await db
-      .select({
-        session: agentSessions,
-        specName: specifications.name,
-        currentTaskExternalId: tasks.externalId,
-        currentTaskTitle: tasks.title,
-        totalTasks: totalTasksSubq.total,
-        backend: agentConfig.backend,
-      })
-      .from(agentSessions)
-      .leftJoin(specifications, eq(agentSessions.specId, specifications.id))
-      .leftJoin(tasks, eq(agentSessions.currentTaskId, tasks.id))
-      .leftJoin(totalTasksSubq, eq(agentSessions.planId, totalTasksSubq.planId))
-      .leftJoin(agentConfig, eq(agentSessions.projectId, agentConfig.projectId))
-      .where(whereConditions.length ? and(...whereConditions) : undefined)
-      .limit(limit)
-      .offset(offset)
-      .orderBy(desc(agentSessions.startedAt));
+    const [rows, countResult] = await Promise.all([
+      db
+        .select({
+          session: agentSessions,
+          specName: specifications.name,
+          currentTaskExternalId: tasks.externalId,
+          currentTaskTitle: tasks.title,
+          totalTasks: totalTasksSubq.total,
+          backend: agentConfig.backend,
+        })
+        .from(agentSessions)
+        .leftJoin(specifications, eq(agentSessions.specId, specifications.id))
+        .leftJoin(tasks, eq(agentSessions.currentTaskId, tasks.id))
+        .leftJoin(totalTasksSubq, eq(agentSessions.planId, totalTasksSubq.planId))
+        .leftJoin(agentConfig, eq(agentSessions.projectId, agentConfig.projectId))
+        .where(whereConditions.length ? and(...whereConditions) : undefined)
+        .limit(limit)
+        .offset(offset)
+        .orderBy(desc(agentSessions.startedAt)),
+      db
+        .select({ count: sql<number>`count(*)` })
+        .from(agentSessions)
+        .leftJoin(specifications, eq(agentSessions.specId, specifications.id))
+        .where(whereConditions.length ? and(...whereConditions) : undefined),
+    ]);
 
     const enrichedSessions = rows.map((r) => ({
       ...r.session,
@@ -87,7 +94,7 @@ export async function getEnrichedSessions(query: SessionQuery, allowedProjectIds
 
     return {
       data: enrichedSessions,
-      count: enrichedSessions.length,
+      count: Number(countResult[0]?.count ?? 0),
     };
   } catch (error) {
     throw error;
