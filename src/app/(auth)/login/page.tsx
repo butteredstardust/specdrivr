@@ -3,6 +3,10 @@
 import { useActionState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { loginSchema } from '@/lib/schemas';
 import { authClient } from '@/lib/auth-client';
 import { clientLogger } from '@/lib/logger-client';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
@@ -11,6 +15,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+
+type LoginValues = z.infer<typeof loginSchema>;
 
 type LoginState = {
   error: string | null;
@@ -22,6 +28,19 @@ export default function LoginPage() {
   const searchParams = useSearchParams();
   const next = searchParams.get('next') ?? '/';
   const formRef = useRef<HTMLFormElement>(null);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<LoginValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
 
   const loginAction = async (prevState: LoginState, formData: FormData): Promise<LoginState> => {
     const email = formData.get('email') as string;
@@ -56,6 +75,10 @@ export default function LoginPage() {
 
   const expression = isPending ? 'working' : state.expression;
 
+  const onValid = () => {
+    formRef.current?.requestSubmit();
+  };
+
   return (
     <Card className="border-border-default bg-bg-surface w-full max-w-sm">
       <CardHeader className="items-center gap-2 pb-2">
@@ -68,20 +91,25 @@ export default function LoginPage() {
         </div>
       </CardHeader>
       <CardContent>
-        <form ref={formRef} action={formAction} className="space-y-4">
+        <form
+          ref={formRef}
+          action={formAction}
+          onSubmit={handleSubmit(onValid)}
+          className="space-y-4"
+        >
           <div className="space-y-1.5">
             <Label htmlFor="email" className="text-text-secondary font-mono text-xs uppercase">
               Email
             </Label>
             <Input
               id="email"
-              name="email"
+              {...register('email')}
               type="email"
               autoFocus
               placeholder="you@example.com"
               className="border-border-default bg-bg-base"
-              required
             />
+            {errors.email && <p className="text-status-red text-[10px]">{errors.email.message}</p>}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="password" className="text-text-secondary font-mono text-xs uppercase">
@@ -89,17 +117,21 @@ export default function LoginPage() {
             </Label>
             <Input
               id="password"
-              name="password"
+              {...register('password')}
               type="password"
               placeholder="••••••••"
               className="border-border-default bg-bg-base"
-              required
             />
+            {errors.password && (
+              <p className="text-status-red text-[10px]">{errors.password.message}</p>
+            )}
           </div>
 
-          {state.error && (
+          {(state.error || errors.root) && (
             <Alert variant="destructive">
-              <AlertDescription className="font-mono text-xs">{state.error}</AlertDescription>
+              <AlertDescription className="font-mono text-xs">
+                {state.error || errors.root?.message}
+              </AlertDescription>
             </Alert>
           )}
 
@@ -135,13 +167,9 @@ export default function LoginPage() {
                 size="sm"
                 className="hover:bg-accent-violet/5 hover:text-accent-violet w-full font-mono text-xs transition-colors"
                 onClick={() => {
-                  if (formRef.current) {
-                    (formRef.current.elements.namedItem('email') as HTMLInputElement).value =
-                      quickEmail;
-                    (formRef.current.elements.namedItem('password') as HTMLInputElement).value =
-                      'Password123!';
-                    formRef.current.requestSubmit();
-                  }
+                  setValue('email', quickEmail);
+                  setValue('password', 'Password123!');
+                  formRef.current?.requestSubmit();
                 }}
               >
                 {label}

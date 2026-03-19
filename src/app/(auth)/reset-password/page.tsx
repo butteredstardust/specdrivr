@@ -1,8 +1,12 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { resetPasswordSchema } from '@/lib/schemas';
 import { toast } from 'sonner';
 import { authClient } from '@/lib/auth-client';
 import { clientLogger } from '@/lib/logger-client';
@@ -11,6 +15,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+
+type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;
 
 function getStrength(password: string): number {
   let score = 0;
@@ -32,18 +38,27 @@ export default function ResetPasswordPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
+  const formRef = useRef<HTMLFormElement>(null);
 
-  const [newPassword, setNewPassword] = useState('');
+  const [passwordValue, setPasswordValue] = useState('');
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ResetPasswordValues>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      password: '',
+      confirmPassword: '',
+    },
+  });
 
   const resetAction = async (
     prevState: string | null,
     formData: FormData
   ): Promise<string | null> => {
-    const confirmPassword = formData.get('confirm-password') as string;
-
-    if (newPassword !== confirmPassword) {
-      return 'Passwords do not match.';
-    }
+    const newPassword = formData.get('password') as string;
 
     if (!token) return 'Missing token.';
 
@@ -61,6 +76,10 @@ export default function ResetPasswordPage() {
 
   const [error, formAction, isPending] = useActionState(resetAction, null);
 
+  const onValid = () => {
+    formRef.current?.requestSubmit();
+  };
+
   if (!token) {
     return (
       <Card className="border-border-default bg-bg-surface w-full max-w-sm">
@@ -75,7 +94,7 @@ export default function ResetPasswordPage() {
     );
   }
 
-  const strength = getStrength(newPassword);
+  const strength = getStrength(passwordValue);
 
   return (
     <Card className="border-border-default bg-bg-surface w-full max-w-sm">
@@ -84,19 +103,23 @@ export default function ResetPasswordPage() {
         <p className="font-mono text-sm font-bold tracking-widest">SPECDRIVR</p>
       </CardHeader>
       <CardContent>
-        <form action={formAction} className="space-y-4">
+        <form
+          ref={formRef}
+          action={formAction}
+          onSubmit={handleSubmit(onValid)}
+          className="space-y-4"
+        >
           <div className="space-y-1.5">
-            <Label htmlFor="new-password">New Password</Label>
+            <Label htmlFor="password">New Password</Label>
             <Input
-              id="new-password"
-              name="new-password"
+              id="password"
+              {...register('password', {
+                onChange: (e) => setPasswordValue(e.target.value),
+              })}
               type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
               className="border-border-default bg-bg-base"
-              required
             />
-            {newPassword && (
+            {passwordValue && (
               <div className="mt-1 flex gap-1">
                 {[0, 1, 2, 3].map((i) => (
                   <div
@@ -106,16 +129,21 @@ export default function ResetPasswordPage() {
                 ))}
               </div>
             )}
+            {errors.password && (
+              <p className="text-status-red text-[10px]">{errors.password.message}</p>
+            )}
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="confirm-password">Confirm Password</Label>
+            <Label htmlFor="confirmPassword">Confirm Password</Label>
             <Input
-              id="confirm-password"
-              name="confirm-password"
+              id="confirmPassword"
+              {...register('confirmPassword')}
               type="password"
               className="border-border-default bg-bg-base"
-              required
             />
+            {errors.confirmPassword && (
+              <p className="text-status-red text-[10px]">{errors.confirmPassword.message}</p>
+            )}
           </div>
           {error && <p className="text-status-red text-xs">{error}</p>}
           <Button
