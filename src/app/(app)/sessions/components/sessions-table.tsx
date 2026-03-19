@@ -112,7 +112,10 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
   const handleCancel = async (sessionId: number) => {
     setCancellingIds((prev) => new Set(prev).add(sessionId));
     try {
-      const res = await fetch(`/api/v1/sessions/${sessionId}/cancel`, { method: 'POST' });
+      const res = await fetch(`/api/v1/sessions/${sessionId}/cancel`, {
+        method: 'POST',
+        credentials: 'include',
+      });
       if (!res.ok) throw new Error('Failed to cancel session');
     } catch (error) {
       clientLogger.error('Cancel failed', { error });
