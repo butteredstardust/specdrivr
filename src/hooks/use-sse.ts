@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { clientLogger } from '@/lib/logger-client';
 
 type UseSSEOptions = {
@@ -11,6 +11,7 @@ type UseSSEResult<T> = {
   data: T | null;
   error: Error | null;
   isLoading: boolean;
+  isRefetching: boolean;
   mutate: () => void;
 };
 
@@ -18,7 +19,10 @@ export function useSSE<T>({ url, sseUrl, enabled = true }: UseSSEOptions): UseSS
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isRefetching, setIsRefetching] = useState<boolean>(false);
   const [trigger, setTrigger] = useState<number>(0);
+
+  const isFirstFetchRef = useRef(true);
 
   const mutate = useCallback(() => {
     setTrigger((t) => t + 1);
@@ -32,6 +36,10 @@ export function useSSE<T>({ url, sseUrl, enabled = true }: UseSSEOptions): UseSS
     const controller = new AbortController();
 
     const fetchData = async () => {
+      if (!isFirstFetchRef.current) {
+        setIsRefetching(true);
+      }
+
       try {
         const response = await fetch(url, { credentials: 'include', signal: controller.signal });
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -41,12 +49,16 @@ export function useSSE<T>({ url, sseUrl, enabled = true }: UseSSEOptions): UseSS
         if (!isMounted) return;
         setData(payload);
         setError(null);
-        setIsLoading(false);
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') return;
         if (!isMounted) return;
         setError(err instanceof Error ? err : new Error(String(err)));
-        setIsLoading(false);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+          setIsRefetching(false);
+          isFirstFetchRef.current = false;
+        }
       }
     };
 
@@ -91,5 +103,5 @@ export function useSSE<T>({ url, sseUrl, enabled = true }: UseSSEOptions): UseSS
     };
   }, [sseUrl, enabled, mutate]);
 
-  return { data, error, isLoading, mutate };
+  return { data, error, isLoading, isRefetching, mutate };
 }
