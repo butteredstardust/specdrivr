@@ -1,151 +1,55 @@
-'use client';
+import { cookies, headers } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { authInstance } from '@/lib/auth';
+import { projectRepository } from '@/repositories/project-repository';
+import { agentSessionRepository } from '@/repositories/agent-session-repository';
+import { taskRepository } from '@/repositories/task-repository';
+import { DashboardClient, type AgentSession, type BlockedTask } from './dashboard-client';
 
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { useShell } from '@/components/shell/shell-context';
-import { usePolling } from '@/hooks/use-polling';
-import { clientLogger } from '@/lib/logger-client';
-import { NeedsAttentionBanner } from '@/components/mission-control/needs-attention-banner';
-import { SessionPanel } from '@/components/mission-control/session-panel';
-import { EventLog } from '@/components/mission-control/event-log';
-import { Skeleton } from '@/components/ui/skeleton';
-import type { UserRole } from '@/db/schema';
-import dynamic from 'next/dynamic';
-import { RecentSessions } from '@/components/mission-control/recent-sessions';
-import { MatrixScreensaver } from '@/components/ui/matrix-screensaver';
-
-const LiveTerminal = dynamic(
-  () => import('@/components/ui/live-terminal').then((m) => ({ default: m.LiveTerminal })),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="h-[320px] w-full animate-pulse rounded bg-[var(--terminal-bg)]" />
-    ),
-  }
-);
-
-export interface AgentSession {
-  id: number;
-  status: 'running' | 'paused' | 'completed' | 'failed' | 'cancelled';
-  startedAt: string;
-  tasksExecuted: number;
-  tasksSucceeded: number;
-  tasksFailed: number;
-  errorMessage?: string | null;
-  specId?: number | null;
-  specName?: string | null;
-  currentTaskExternalId?: string | null;
-  currentTaskTitle?: string | null;
-  totalTasks?: number | null;
-  backend?: 'gemini' | 'claude';
-}
-
-interface BlockedTask {
-  id: number;
-  externalId: string;
-  title: string;
-  specId: number;
-}
-
-export default function MissionControlPage() {
-  const { activeProjectId, user } = useShell();
-  const userRole = (user.role ?? 'viewer') as UserRole;
-
-  const [dismissed, setDismissed] = useState(false);
-
-  const sessionsUrl =
-    activeProjectId !== null ? `/api/v1/sessions?projectId=${activeProjectId}&limit=4` : null;
-
-  const tasksUrl =
-    activeProjectId !== null
-      ? `/api/v1/tasks?status=blocked&projectId=${activeProjectId}&limit=50`
-      : null;
-
-  const { data: sessionsData } = usePolling<AgentSession[]>({
-    url: sessionsUrl,
-    interval: 3_000,
+export default async function MissionControlPage() {
+  const session = await authInstance.api.getSession({
+    headers: await headers(),
   });
 
-  const { data: tasksData } = usePolling<BlockedTask[]>({
-    url: tasksUrl,
-    interval: 30_000,
-  });
-
-  const activeSession =
-    sessionsData &&
-    sessionsData.length > 0 &&
-    ['running', 'paused'].includes(sessionsData[0].status)
-      ? sessionsData[0]
-      : null;
-
-  const recentSessions = sessionsData || [];
-
-  const blockedTasks = tasksData ?? [];
-
-  const [prevTasks, setPrevTasks] = useState(tasksData);
-
-  if (tasksData !== prevTasks) {
-    setPrevTasks(tasksData);
-    setDismissed(false);
+  if (!session?.user?.id) {
+    redirect('/login');
   }
 
-  async function handleSessionPatch(sessionId: number, status: string) {
-    try {
-      const response = await fetch(`/api/v1/sessions/${sessionId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ status }),
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-    } catch (err) {
-      clientLogger.error('Failed to update session status', { sessionId, status, err });
-      toast.error('Failed to update session');
+  const projects = await projectRepository.getByUserId(session.user.id);
+  const cookieStore = await cookies();
+  const activeProjectIdStr = cookieStore.get('active-project-id')?.value;
+
+  let validatedProjectId: number | null = null;
+  if (activeProjectIdStr) {
+    const id = parseInt(activeProjectIdStr, 10);
+    if (projects.some((p) => p.id === id)) {
+      validatedProjectId = id;
     }
   }
 
-  const handlePause = async () => {
-    if (!activeSession) return;
-    await handleSessionPatch(activeSession.id, 'paused');
-  };
+  if (validatedProjectId === null && projects.length > 0) {
+    validatedProjectId = projects[0].id;
+  }
 
-  const handleResume = async () => {
-    if (!activeSession) return;
-    await handleSessionPatch(activeSession.id, 'running');
-  };
+  let initialSessions: AgentSession[] = [];
+  let initialTasks: BlockedTask[] = [];
 
-  const handleCancel = async () => {
-    if (!activeSession) return;
-    await handleSessionPatch(activeSession.id, 'cancelled');
-  };
+  if (validatedProjectId) {
+    const enrichedSessionsResult = await agentSessionRepository.getEnrichedSessions(
+      { projectId: validatedProjectId, limit: 4 },
+      [validatedProjectId]
+    );
+    initialSessions = enrichedSessionsResult.data as unknown as AgentSession[];
 
-  const handleRetry = async () => {
-    if (!activeSession) return;
-    try {
-      const response = await fetch(`/api/v1/sessions/${activeSession.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ status: 'cancelled' }),
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      toast.info('Session cancelled. Start a new session from the spec page.');
-    } catch (err) {
-      clientLogger.error('Failed to cancel session for retry', {
-        sessionId: activeSession.id,
-        err,
-      });
-      toast.error('Failed to update session');
-    }
-  };
+    // The API route currently gets all blocked tasks and doesn't filter by projectId
+    // but ideally we should only pass the blocked tasks relevant to the project or user.
+    // For now, mirroring the API's current behavior of getting all blocked tasks.
+    const blockedTasks = await taskRepository.getByStatus('blocked');
 
-  const handleDismiss = () => {
-    setDismissed(true);
-  };
+    // Attempt to filter in memory if possible, otherwise just use them all.
+    // Actually, taskRepository doesn't eagerly load specs/projects in getByStatus.
+    initialTasks = blockedTasks as unknown as BlockedTask[];
+  }
 
   return (
     <div className="-mx-6 -mt-6 flex min-h-full flex-col">
@@ -161,61 +65,7 @@ export default function MissionControlPage() {
 
       {/* Content */}
       <div className="flex flex-col gap-6 px-6 py-6">
-        {activeProjectId === null ? (
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <Skeleton className="h-40 w-full" />
-            <Skeleton className="h-40 w-full" />
-          </div>
-        ) : (
-          <>
-            {blockedTasks.length > 0 && !dismissed && (
-              <NeedsAttentionBanner blockedTasks={blockedTasks} onDismiss={handleDismiss} />
-            )}
-
-            {activeSession ? (
-              <div className="flex flex-col gap-6">
-                <div className="divide-border-default border-border-default grid grid-cols-1 border-b pb-6 lg:grid-cols-[1fr_1.2fr] lg:divide-x">
-                  <div className="pb-6 lg:pr-6 lg:pb-0">
-                    <SessionPanel
-                      session={activeSession}
-                      userRole={userRole}
-                      onPause={handlePause}
-                      onResume={handleResume}
-                      onCancel={handleCancel}
-                      onRetry={handleRetry}
-                      onDismiss={handleDismiss}
-                    />
-                  </div>
-                  <div className="lg:pl-6">
-                    <EventLog sessionId={activeSession.id} />
-                  </div>
-                </div>
-                <div>
-                  <h2 className="text-text-secondary mb-2 font-mono text-xs tracking-widest uppercase">
-                    Live Terminal
-                  </h2>
-                  <div className="relative overflow-hidden rounded-md">
-                    <LiveTerminal
-                      sessionId={activeSession.id}
-                      height={400}
-                      active={activeSession.status === 'running'}
-                    />
-                    {activeSession.status === 'paused' && (
-                      <div className="bg-terminal-bg pointer-events-none absolute inset-0 flex items-center justify-center">
-                        <MatrixScreensaver className="absolute inset-0" />
-                        <div className="text-accent-violet border-accent-violet/30 z-10 rounded border bg-black/80 px-4 py-2 font-mono text-xs tracking-widest uppercase shadow-[0_0_15px_rgba(124,92,252,0.2)] backdrop-blur-sm">
-                          System Idle
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <RecentSessions sessions={recentSessions} />
-            )}
-          </>
-        )}
+        <DashboardClient initialSessions={initialSessions} initialTasks={initialTasks} />
       </div>
     </div>
   );
