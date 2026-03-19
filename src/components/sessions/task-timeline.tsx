@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { usePolling } from '@/hooks/use-polling';
+import { useSSE } from '@/hooks/use-sse';
 import {
   CheckCircle2,
   AlertCircle,
@@ -26,8 +26,6 @@ interface TaskItem {
   attemptCount?: number;
   verificationPassed?: boolean | null;
 }
-
-const TERMINAL_TASK_STATUSES = ['done', 'blocked', 'failed', 'skipped'];
 
 function statusColor(status: string): { bg: string; text: string; dot: string } {
   switch (status) {
@@ -129,13 +127,10 @@ interface TaskTimelineProps {
 export function TaskTimeline({ sessionId }: TaskTimelineProps) {
   const [expandedTaskId, setExpandedTaskId] = useState<number | null>(null);
 
-  const { data, isLoading } = usePolling<TaskItem[]>({
+  const { data, isLoading } = useSSE<TaskItem[]>({
     url: `/api/v1/sessions/${sessionId}/tasks`,
-    interval: 5000,
-    stopWhen: (tasks) =>
-      Array.isArray(tasks) &&
-      tasks.length > 0 &&
-      tasks.every((t) => TERMINAL_TASK_STATUSES.includes(t.status)),
+    sseUrl: `/api/v1/sessions/${sessionId}/stream`,
+    enabled: true,
   });
 
   const tasks = data ? [...data].sort((a, b) => a.orderIndex - b.orderIndex) : [];

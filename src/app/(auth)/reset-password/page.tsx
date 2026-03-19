@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useActionState, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -34,9 +34,32 @@ export default function ResetPasswordPage() {
   const token = searchParams.get('token');
 
   const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+
+  const resetAction = async (
+    prevState: string | null,
+    formData: FormData
+  ): Promise<string | null> => {
+    const confirmPassword = formData.get('confirm-password') as string;
+
+    if (newPassword !== confirmPassword) {
+      return 'Passwords do not match.';
+    }
+
+    if (!token) return 'Missing token.';
+
+    const { error: resetError } = await authClient.resetPassword({ newPassword, token });
+
+    if (resetError) {
+      clientLogger.error('Reset password failed', resetError);
+      return 'Failed to reset password. The link may have expired.';
+    }
+
+    toast.success('Password updated. Please sign in.');
+    router.push('/login');
+    return null;
+  };
+
+  const [error, formAction, isPending] = useActionState(resetAction, null);
 
   if (!token) {
     return (
@@ -54,25 +77,6 @@ export default function ResetPasswordPage() {
 
   const strength = getStrength(newPassword);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    if (newPassword !== confirmPassword) {
-      setError('Passwords do not match.');
-      return;
-    }
-    setLoading(true);
-    const { error: resetError } = await authClient.resetPassword({ newPassword, token });
-    if (resetError) {
-      clientLogger.error('Reset password failed', resetError);
-      setError('Failed to reset password. The link may have expired.');
-      setLoading(false);
-      return;
-    }
-    toast.success('Password updated. Please sign in.');
-    router.push('/login');
-  };
-
   return (
     <Card className="border-border-default bg-bg-surface w-full max-w-sm">
       <CardHeader className="items-center gap-2 pb-2">
@@ -80,15 +84,17 @@ export default function ResetPasswordPage() {
         <p className="font-mono text-sm font-bold tracking-widest">SPECDRIVR</p>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form action={formAction} className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="new-password">New Password</Label>
             <Input
               id="new-password"
+              name="new-password"
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               className="border-border-default bg-bg-base"
+              required
             />
             {newPassword && (
               <div className="mt-1 flex gap-1">
@@ -105,19 +111,19 @@ export default function ResetPasswordPage() {
             <Label htmlFor="confirm-password">Confirm Password</Label>
             <Input
               id="confirm-password"
+              name="confirm-password"
               type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
               className="border-border-default bg-bg-base"
+              required
             />
           </div>
           {error && <p className="text-status-red text-xs">{error}</p>}
           <Button
             type="submit"
-            disabled={loading}
+            disabled={isPending}
             className="bg-accent-violet hover:bg-accent-violet-dim w-full"
           >
-            {loading ? 'Updating…' : 'Reset Password'}
+            {isPending ? 'Updating…' : 'Reset Password'}
           </Button>
         </form>
       </CardContent>

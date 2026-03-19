@@ -26,7 +26,5 @@ export default defineConfig({
       '**/.worktrees/**',
       'tests/e2e/**',
     ],
-    fileParallelism: false,
-    maxWorkers: 1,
   },
 });

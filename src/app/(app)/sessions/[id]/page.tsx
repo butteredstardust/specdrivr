@@ -3,7 +3,7 @@
 import { use, useState } from 'react';
 import { clientLogger } from '@/lib/logger-client';
 import Link from 'next/link';
-import { usePolling } from '@/hooks/use-polling';
+import { useSSE } from '@/hooks/use-sse';
 import { Button } from '@/components/ui/button';
 import { PixelBadge } from '@/components/ui/pixel-badge';
 import { EventLog } from '@/components/mission-control/event-log';
@@ -98,10 +98,9 @@ export default function SessionDetailPage({ params }: PageProps) {
     data: session,
     isLoading,
     mutate,
-  } = usePolling<AgentSession>({
+  } = useSSE<AgentSession>({
     url: `/api/v1/sessions/${id}`,
-    interval: 5000,
-    stopWhen: (s) => TERMINAL_STATUSES.includes(s.status),
+    sseUrl: `/api/v1/sessions/${id}/stream`,
   });
 
   const handleAction = async (action: 'pause' | 'resume' | 'cancel') => {

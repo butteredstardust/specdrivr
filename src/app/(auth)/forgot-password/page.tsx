@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useActionState } from 'react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { authClient } from '@/lib/auth-client';
@@ -11,15 +11,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
-type State = 'idle' | 'loading' | 'sent';
+type State = 'idle' | 'sent';
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState('');
-  const [state, setState] = useState<State>('idle');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setState('loading');
+  const resetAction = async (prevState: State, formData: FormData): Promise<State> => {
+    const email = formData.get('email') as string;
     try {
       await authClient.requestPasswordReset({
         email,
@@ -33,8 +29,10 @@ export default function ForgotPasswordPage() {
       toast.error('Something went wrong. Please try again.');
     }
     // Always show success (prevents email enumeration)
-    setState('sent');
+    return 'sent';
   };
+
+  const [state, formAction, isPending] = useActionState(resetAction, 'idle');
 
   return (
     <Card className="border-border-default bg-bg-surface w-full max-w-sm">
@@ -54,25 +52,25 @@ export default function ForgotPasswordPage() {
             </Link>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form action={formAction} className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
+                name="email"
                 type="email"
                 autoFocus
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 className="border-border-default bg-bg-base"
+                required
               />
             </div>
             <Button
               type="submit"
-              disabled={state === 'loading'}
+              disabled={isPending}
               className="bg-accent-violet hover:bg-accent-violet-dim w-full"
             >
-              {state === 'loading' ? 'Sending…' : 'Send Reset Link'}
+              {isPending ? 'Sending…' : 'Send Reset Link'}
             </Button>
             <div className="text-center">
               <Link href="/login" className="text-text-muted hover:text-text-secondary text-xs">
