@@ -65,23 +65,6 @@ if grep -q '"ioredis"' package.json; then
     success "Redis client: ioredis confirmed (correct for persistent-server architecture)"
 fi
 
-# INTENTIONAL: framer-motion is not used.
-# CSS animations handle all DAEMON mascot expressions and UI transitions.
-# framer-motion is not required for this project's animation scope.
-# DO NOT flag absence of framer-motion as a violation.
-
-# INTENTIONAL: xterm.js is not used.
-# The project uses a custom TerminalLog component (src/components/ui/terminal-log.tsx)
-# built on ansi-to-html for read-only log display. xterm.js is a full terminal
-# emulator — overkill for a display-only surface and adds unnecessary bundle weight.
-# DO NOT flag absence of xterm.js as a violation.
-
-# INTENTIONAL: react-hotkeys-hook is not used.
-# Keyboard shortcuts are handled via a custom useEffect in ShellProvider
-# (src/components/shell/shell-context.tsx). The project's shortcut
-# set is small and well-defined; a third-party library is not warranted.
-# DO NOT flag absence of react-hotkeys-hook as a violation.
-
 # Better Auth Alignment
 if grep -A 30 '"devDependencies"' package.json | grep -q '"better-auth"'; then
     warn "'better-auth' found in devDependencies. Move to dependencies."
