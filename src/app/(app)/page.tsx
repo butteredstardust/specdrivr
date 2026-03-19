@@ -41,13 +41,7 @@ export default async function MissionControlPage() {
     );
     initialSessions = enrichedSessionsResult.data as unknown as AgentSession[];
 
-    // The API route currently gets all blocked tasks and doesn't filter by projectId
-    // but ideally we should only pass the blocked tasks relevant to the project or user.
-    // For now, mirroring the API's current behavior of getting all blocked tasks.
-    const blockedTasks = await taskRepository.getByStatus('blocked');
-
-    // Attempt to filter in memory if possible, otherwise just use them all.
-    // Actually, taskRepository doesn't eagerly load specs/projects in getByStatus.
+    const blockedTasks = await taskRepository.getBlockedByProjectId(validatedProjectId);
     initialTasks = blockedTasks as unknown as BlockedTask[];
   }
 
