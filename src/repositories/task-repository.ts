@@ -804,7 +804,7 @@ export class TaskRepository extends BaseRepository {
           if (spec) {
             void dispatchWebhookEvent(
               spec.pid,
-              finalStatus === 'done' ? 'task.done' : ('task.failed' as WebhookEventType),
+              finalStatus === 'done' ? 'task.done' : 'task.failed',
               {
                 taskId: task.id,
                 specId: plan.specId,
