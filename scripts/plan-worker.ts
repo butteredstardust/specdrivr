@@ -11,13 +11,53 @@ import {
 import { generatePlan, generateTasks } from '../src/lib/gemini';
 import { logger } from '../src/lib/logger';
 import { env } from '../src/lib/env';
-import { type PlanJobSelect as PlanJob } from '../src/db/schema';
+import { type PlanJobSelect as PlanJob, agentEvents, agentSessions } from '../src/db/schema';
+import { db } from '../src/db';
+import { eq, desc } from 'drizzle-orm';
 
 const POLL_INTERVAL_MS = 5000;
+
+async function logEvent(
+  job: PlanJob,
+  eventType: string,
+  message: string,
+  metadata: Record<string, unknown> = {}
+) {
+  try {
+    // Attempt to find session for the plan
+    if (!job.planId) return;
+
+    const [session] = await db
+      .select({ id: agentSessions.id })
+      .from(agentSessions)
+      .where(eq(agentSessions.planId, job.planId))
+      .orderBy(desc(agentSessions.startedAt))
+      .limit(1);
+
+    if (session) {
+      await db.insert(agentEvents).values({
+        sessionId: session.id,
+        specId: job.specId,
+        eventType,
+        message,
+        metadata: { ...metadata, jobId: job.id, jobType: job.type },
+      });
+    }
+  } catch (err) {
+    logger.warn({ err, jobId: job.id }, 'Failed to log background job event to agent_events');
+  }
+}
 
 async function processJob(job: PlanJob) {
   const startMs = Date.now();
   logger.info({ jobId: job.id, type: job.type }, '🚀 Processing plan job');
+
+  // Log job start
+  await logEvent(
+    job,
+    'JOB_STARTED',
+    job.type === 'generate_plan' ? 'Generating execution plan...' : 'Architecting tasks...'
+  );
 
   try {
     if (!job.specId) throw new Error(`Job ${job.id} is missing specId`);
@@ -168,6 +208,13 @@ ${generated.architectureDecisions.map((d: { title: string; rationale: string; tr
       completedAt: new Date(),
     });
 
+    // Log job completion
+    await logEvent(
+      job,
+      'JOB_COMPLETED',
+      job.type === 'generate_plan' ? 'Execution plan generated.' : 'Tasks architected successfully.'
+    );
+
     logger.info(
       { jobId: job.id, durationMs: Date.now() - startMs },
       '✅ Job completed successfully'
@@ -181,6 +228,14 @@ ${generated.architectureDecisions.map((d: { title: string; rationale: string; tr
       error: error.message,
       completedAt: new Date(),
     });
+
+    // Log job failure
+    await logEvent(
+      job,
+      'JOB_FAILED',
+      `${job.type === 'generate_plan' ? 'Plan generation' : 'Task architecture'} failed: ${error.message}`,
+      { error: error.message }
+    );
 
     // If it was a plan generation job, set spec to stalled
     if (job.type === 'generate_plan' && job.specId) {

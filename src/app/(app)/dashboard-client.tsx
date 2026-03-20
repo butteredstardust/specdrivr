@@ -13,6 +13,7 @@ import type { UserRole } from '@/db/schema';
 import dynamic from 'next/dynamic';
 import { RecentSessions } from '@/components/mission-control/recent-sessions';
 import { MatrixScreensaver } from '@/components/ui/matrix-screensaver';
+import { ProjectActivityFeed } from '@/components/mission-control/activity-feed';
 
 const LiveTerminal = dynamic(
   () => import('@/components/ui/live-terminal').then((m) => ({ default: m.LiveTerminal })),
@@ -185,29 +186,39 @@ export function DashboardClient({ initialSessions, initialTasks }: DashboardClie
                   <EventLog sessionId={activeSession.id} />
                 </div>
               </div>
-              <div>
-                <h2 className="text-text-secondary mb-2 font-mono text-xs tracking-widest uppercase">
-                  Live Terminal
-                </h2>
-                <div className="relative overflow-hidden rounded-md">
-                  <LiveTerminal
-                    sessionId={activeSession.id}
-                    height={400}
-                    active={activeSession.status === 'running'}
-                  />
-                  {activeSession.status === 'paused' && (
-                    <div className="bg-terminal-bg pointer-events-none absolute inset-0 flex items-center justify-center">
-                      <MatrixScreensaver className="absolute inset-0" />
-                      <div className="text-accent-violet border-accent-violet/30 z-10 rounded border bg-black/80 px-4 py-2 font-mono text-xs tracking-widest uppercase shadow-[0_0_15px_rgba(124,92,252,0.2)] backdrop-blur-sm">
-                        System Idle
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.2fr_1fr]">
+                <div>
+                  <h2 className="text-text-secondary mb-2 font-mono text-xs tracking-widest uppercase">
+                    Live Terminal
+                  </h2>
+                  <div className="relative overflow-hidden rounded-md">
+                    <LiveTerminal
+                      sessionId={activeSession.id}
+                      height={400}
+                      active={activeSession.status === 'running'}
+                    />
+                    {activeSession.status === 'paused' && (
+                      <div className="bg-terminal-bg pointer-events-none absolute inset-0 flex items-center justify-center">
+                        <MatrixScreensaver className="absolute inset-0" />
+                        <div className="text-accent-violet border-accent-violet/30 z-10 rounded border bg-black/80 px-4 py-2 font-mono text-xs tracking-widest uppercase shadow-[0_0_15px_rgba(124,92,252,0.2)] backdrop-blur-sm">
+                          System Idle
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <ProjectActivityFeed projectId={activeProjectId!} />
                 </div>
               </div>
             </div>
           ) : (
-            <RecentSessions sessions={recentSessions} />
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.5fr_1fr]">
+              <RecentSessions sessions={recentSessions} />
+              <div className="bg-bg-surface border-border-default h-fit rounded-xl border p-6">
+                <ProjectActivityFeed projectId={activeProjectId!} />
+              </div>
+            </div>
           )}
         </>
       )}
