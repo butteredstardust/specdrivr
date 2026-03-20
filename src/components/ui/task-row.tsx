@@ -28,6 +28,7 @@ interface TaskRowProps {
     description?: string | null;
     errorMessage?: string | null;
     orderIndex: number;
+    totalCostUsd?: number | null;
   };
   externalId?: string;
   dependsOn?: string[];
@@ -77,7 +78,7 @@ export function TaskRow({
   onOpenDrawer,
   className,
 }: TaskRowProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(task.status === 'failed');
   const canUnblock = hasRole(userRole, 'member');
   const canOverride = hasRole(userRole, 'admin');
 
@@ -120,6 +121,11 @@ export function TaskRow({
                     </span>
                   ))}
                 </div>
+              )}
+              {task.totalCostUsd && task.totalCostUsd > 0 && (
+                <span className="text-text-muted shrink-0 font-mono text-[10px]">
+                  ${Number(task.totalCostUsd).toFixed(4)}
+                </span>
               )}
               {task.status === 'blocked' && task.errorMessage && (
                 <span className="text-phosphor-amber max-w-48 truncate text-xs">

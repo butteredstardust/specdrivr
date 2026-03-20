@@ -5,6 +5,8 @@ import {
   plans,
   specifications,
   agentSessions,
+  agentEvents,
+  taskAttempts,
   type TaskSelect as Task,
   type TaskStatus,
 } from '@/db/schema';
