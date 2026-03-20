@@ -476,9 +476,9 @@ export const agentEvents = pgTable(
   'agent_events',
   {
     id: serial('id').primaryKey(),
-    sessionId: integer('session_id')
-      .notNull()
-      .references(() => agentSessions.id, { onDelete: 'cascade' }),
+    sessionId: integer('session_id').references(() => agentSessions.id, {
+      onDelete: 'cascade',
+    }),
     specId: integer('spec_id').references(() => specifications.id, { onDelete: 'set null' }),
     taskId: integer('task_id').references(() => tasks.id, { onDelete: 'set null' }),
     userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
