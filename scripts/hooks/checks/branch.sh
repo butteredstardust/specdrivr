@@ -17,8 +17,8 @@ for protected in main master develop staging; do
 done
 
 # 2. Branch naming convention
-if ! echo "$current_branch" | grep -qE "^(feature|bugfix|refactor|docs|test|chore|hotfix|release)/[a-z0-9_-]+$"; then
-    die "Branch '$current_branch' must follow: <type>/kebab-or-snake-case\nAllowed types: feature|bugfix|refactor|docs|test|chore|hotfix|release"
+if ! echo "$current_branch" | grep -qE "^(feat|feature|fix|bugfix|refactor|docs|test|chore|hotfix|release)/[a-z0-9_-]+$"; then
+    die "Branch '$current_branch' must follow: <type>/kebab-or-snake-case\nAllowed types: feat|feature|fix|bugfix|refactor|docs|test|chore|hotfix|release"
 fi
 
 success "Branch '$current_branch' verified."
