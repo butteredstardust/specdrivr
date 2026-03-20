@@ -8,6 +8,8 @@ Spec-driven autonomous code execution for engineering teams
 
 ---
 
+[Status: GROUND TRUTH]
+
 ## Table of Contents
 
 **Part 1 — Screen Inventory & Navigation**

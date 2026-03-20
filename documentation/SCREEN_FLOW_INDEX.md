@@ -1,5 +1,7 @@
 # Specdrivr — Screen & Flow Documentation Index
 
+[Status: GROUND TRUTH]
+
 **Version 1.0 · Complete UI/UX/Flow Specification for Frontend Development**
 
 ---

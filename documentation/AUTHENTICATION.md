@@ -6,6 +6,10 @@ Version 1.0 · Confidential
 
 _Spec-driven autonomous code execution for engineering teams_
 
+---
+
+[Status: GROUND TRUTH]
+
 # **7\. Authentication & Authorisation**
 
 ## **7.1 Auth System**
