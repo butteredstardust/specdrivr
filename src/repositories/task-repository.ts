@@ -952,7 +952,7 @@ export class TaskRepository extends BaseRepository {
         title: `feat(${task.externalId}): ${task.title}`,
         head: task.gitBranch,
         base: config.prTargetBranch || ghConfig.branch || 'main',
-        body: `### Task Detail\n${task.description}\n\n**Done Criteria**:\n${task.doneCriteria}\n\n---\n*Automated PR created by Specdrivr DAEMON*`,
+        body: `### Task Detail\n${task.description}\n\n**Expected Files**:\n${(task.expectedFiles ?? []).join('\n')}\n\n---\n*Automated PR created by Specdrivr DAEMON*`,
       });
 
       if (pr?.html_url) {

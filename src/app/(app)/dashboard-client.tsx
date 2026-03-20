@@ -68,7 +68,7 @@ export function DashboardClient({ initialSessions, initialTasks }: DashboardClie
       ? `/api/v1/tasks?status=blocked&projectId=${activeProjectId}&limit=50`
       : null;
 
-  const { data: sessionsData } = usePolling<AgentSession[]>({
+  const { data: sessionsData, mutate } = usePolling<AgentSession[]>({
     url: sessionsUrl,
     interval: 3_000,
     initialData: initialSessions,
@@ -208,9 +208,7 @@ export function DashboardClient({ initialSessions, initialTasks }: DashboardClie
                     )}
                   </div>
                 </div>
-                <div>
-                  {activeProjectId && <ProjectActivityFeed projectId={activeProjectId} />}
-                </div>
+                <div>{activeProjectId && <ProjectActivityFeed projectId={activeProjectId} />}</div>
               </div>
             </div>
           ) : (
