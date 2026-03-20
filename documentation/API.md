@@ -6,191 +6,80 @@ Version 1.0 · Confidential
 
 _Spec-driven autonomous code execution for engineering teams_
 
-# **6\. API Specification**
+# **6. API Specification**
 
-All endpoints are versioned under /api/v1. All responses return JSON with the envelope { data } on success or { error: { code, message } } on failure. Authentication is required on all endpoints unless explicitly noted.
+All endpoints are versioned under /api/v1. Responses follow a standard envelope: `{ data }` on success, or `{ error: { code, message } }` on failure. Authentication is required for all endpoints.
 
-Authentication: Pass the session cookie (browser clients) or Authorization: Bearer {api_token} header (agent / integrations). The AGENT_TOKEN is a project-scoped API token, not a user session.
+## **6.1 Authentication**
 
-## **6.1 Authentication Endpoints**
+Authentication is managed by BetterAuth under `/api/auth/[...auth]`.
 
-| **Method** | **Path**                  | **Description**                        | **Auth required** |
-| ---------- | ------------------------- | -------------------------------------- | ----------------- |
-| **POST**   | /api/auth/sign-in         | Email + password login via BetterAuth. | No                |
-| **POST**   | /api/auth/sign-out        | BetterAuth session invalidation.       | Yes               |
-| **POST**   | /api/auth/forgot-password | BetterAuth password reset flow.        | No                |
-| **POST**   | /api/auth/reset-password  | BetterAuth password reset execution.   | No                |
-| **GET**    | /api/auth/get-session     | Returns current user and session data. | Yes               |
-
-Note: All authentication is handled by the BetterAuth catch-all handler at `/api/auth/[...auth]`. Custom `/api/v1/auth` routes are deprecated in favor of BetterAuth standard paths.
+| **Method** | **Path**              | **Description**                       |
+| ---------- | --------------------- | ------------------------------------- |
+| **POST**   | /api/auth/sign-in     | Sign in with email and password.      |
+| **POST**   | /api/auth/sign-up     | Create a new user account.            |
+| **POST**   | /api/auth/sign-out    | Invalidate the current session.       |
+| **GET**    | /api/auth/get-session | Returns the current user and session. |
 
 ## **6.2 Projects**
 
-| **Method** | **Path**             | **Description**                                                                             |
-| ---------- | -------------------- | ------------------------------------------------------------------------------------------- |
-| **GET**    | /api/v1/projects     | List all projects the current user is a member of. **[PLANNED]**                            |
-| **POST**   | /api/v1/projects     | Create project. Body: { name, repositoryUrl, repositoryBranch, description }. **[PLANNED]** |
-| **GET**    | /api/v1/projects/:id | Get single project with member count and last session summary.                              |
-| **PATCH**  | /api/v1/projects/:id | Update project settings. Admin only.                                                        |
-| **DELETE** | /api/v1/projects/:id | Delete project and all children. Owner only. Requires confirmation token.                   |
+| **Method** | **Path**             | **Description**                                             |
+| ---------- | -------------------- | ----------------------------------------------------------- |
+| **GET**    | /api/v1/projects     | List projects for the current user. Supports pagination.    |
+| **POST**   | /api/v1/projects     | Create a new project. Body: `{ name, description? }`.       |
+| **GET**    | /api/v1/projects/:id | Get a single project by ID.                                 |
+| **PATCH**  | /api/v1/projects/:id | Update project details (Admin/Owner only).                  |
+| **DELETE** | /api/v1/projects/:id | Delete a project and all associated data (Owner only).      |
 
 ## **6.3 Specifications**
 
-| **Method** | **Path**                        | **Description**                                                                                              |
-| ---------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| **GET**    | /api/v1/specs                   | List specs for active project. Supports ?status=, ?search=, ?page=. **[PLANNED]**                            |
-| **POST**   | /api/v1/specs                   | Create spec. Body: { name, markdownContent, projectId }. Creates spec + version 1. **[PLANNED]**             |
-| **GET**    | /api/v1/specs/:id               | Get spec with current version, plan summary, and task counts. **[PLANNED]**                                  |
-| **PATCH**  | /api/v1/specs/:id               | Update spec name or status only. Content edits create a new version. **[PLANNED]**                           |
-| **DELETE** | /api/v1/specs/:id               | Delete spec. Fails if status = executing. Admin only. **[PLANNED]**                                          |
-| **GET**    | /api/v1/specs/:id/versions      | List all spec versions with metadata (no content).                                                           |
-| **GET**    | /api/v1/specs/:id/versions/:vId | Get a specific version's full markdownContent.                                                               |
-| **POST**   | /api/v1/specs/:id/versions      | Create new version. Body: { markdownContent }. Increments versionNumber. Abandons current non-complete plan. |
+| **Method** | **Path**                         | **Description**                                              |
+| ---------- | -------------------------------- | ------------------------------------------------------------ |
+| **GET**    | /api/v1/specs                    | List all specifications for a project (?projectId= required). |
+| **POST**   | /api/v1/specs                    | Create a spec + initial version. Body: `{ name, markdown }`. |
+| **GET**    | /api/v1/specs/:id                | Get specification with current version and plan summary.     |
+| **POST**   | /api/v1/specs/:id/versions       | Create a new version. Content change resets plans.           |
+| **GET**    | /api/v1/specs/:id/plan/generate  | **Trigger async plan generation** using Gemini.              |
 
 ## **6.4 Plans**
 
-| **Method** | **Path**                          | **Description**                                                                                                |
-| ---------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| **POST**   | /api/v1/specs/:id/plan/generate   | Triggers async plan generation. Returns immediately with { status: pending_plan }. Poll GET to check progress. |
-| **GET**    | /api/v1/specs/:id/plan            | Get current plan with all architecture decisions and tasks. Used for polling during generation.                |
-| **POST**   | /api/v1/plans/:id/approve         | Approve plan. Admin/Owner only. Body: { notes? }. Creates agent_session, sets status = executing.              |
-| **POST**   | /api/v1/plans/:id/reject          | Reject plan. Admin/Owner only. Body: { notes } (required). Sets status = rejected.                             |
-| **POST**   | /api/v1/plans/:id/request-changes | Request changes. Admin/Owner only. Body: { notes } (required). Sets status = changes_requested.                |
-| **POST**   | /api/v1/plans/:id/abandon         | Abandon plan. Sets status = abandoned.                                                                         |
+| **Method** | **Path**                          | **Description**                                         |
+| ---------- | --------------------------------- | ------------------------------------------------------- |
+| **GET**    | /api/v1/specs/:id/plan            | Get the latest plan for the given specification.        |
+| **POST**   | /api/v1/plans/:id/approve         | Approve a plan. Creates a session and sets to executing. |
+| **POST**   | /api/v1/plans/:id/reject          | Reject a plan with notes.                               |
+| **POST**   | /api/v1/plans/:id/request-changes | Request changes to the plan.                            |
 
 ## **6.5 Tasks**
 
-| **Method** | **Path**                   | **Description**                                                     |
-| ---------- | -------------------------- | ------------------------------------------------------------------- |
-| **GET**    | /api/v1/tasks/:id          | Full task detail including current attempt and blockedReason.       |
-| **PATCH**  | /api/v1/tasks/:id          | Update humanContext, status (manual override), or blockedReason.    |
-| **POST**   | /api/v1/tasks/:id/retry    | Re-queue task for execution. Increments attemptCount. **[PLANNED]** |
-| **GET**    | /api/v1/tasks/:id/attempts | List all attempts newest-first with logLines and duration.          |
-| **GET**    | /api/v1/tasks/:id/changes  | List all file_changes produced by this task's attempts.             |
+| **Method** | **Path**                      | **Description**                                      |
+| ---------- | ----------------------------- | ---------------------------------------------------- |
+| **GET**    | /api/v1/tasks/:id             | Get detailed task information and current status.    |
+| **PATCH**  | /api/v1/tasks/:id             | Update human context or manually override status.    |
+| **POST**   | /api/v1/tasks/:id/retry       | Re-queue a failed or done task.                      |
+| **GET**    | /api/v1/tasks/:id/attempts    | List execution attempts with full logs.              |
+| **POST**   | /api/v1/tasks/:id/complete     | **Agent Endpoint**: Report task result (done/failed). |
 
-## **6.6 Sessions** [Status: Verified Specification / Implementation Pending]
+## **6.6 Sessions**
 
-| **Method** | **Path**                       | **Description**                                                                 |
-| ---------- | ------------------------------ | ------------------------------------------------------------------------------- |
-| **GET**    | /api/v1/sessions               | List sessions. Supports ?projectId=, ?specId=, ?status=, ?from=, ?to=.          |
-| **GET**    | /api/v1/sessions/:id           | Get session with task counts and status.                                        |
-| **POST**   | /api/v1/sessions/:id/pause     | Pause running session. Agent stops after completing current task. **[PLANNED]** |
-| **POST**   | /api/v1/sessions/:id/resume    | Resume paused session.                                                          |
-| **POST**   | /api/v1/sessions/:id/cancel    | Cancel session. Marks in-progress tasks as failed.                              |
-| **GET**    | /api/v1/sessions/:id/events    | List agent events for this session, newest-first. **[PLANNED]**                 |
-| **POST**   | /api/v1/sessions/:id/heartbeat | Agent-only. Updates lastHeartbeatAt. Returns { shouldStop: bool }.              |
+| **Method** | **Path**                       | **Description**                                       |
+| ---------- | ------------------------------ | ----------------------------------------------------- |
+| **GET**    | /api/v1/sessions/:id           | Get session health, task counts, and status.          |
+| **POST**   | /api/v1/sessions/:id/heartbeat | **Agent Endpoint**: Update agent lastActiveAt.        |
+| **POST**   | /api/v1/sessions/:id/log       | **Agent Endpoint**: Append a log line to the session. |
+| **POST**   | /api/v1/sessions/:id/cancel    | Mark a session as cancelled.                          |
 
-## **6.7 Team Management** [Status: Verified Specification / Implementation Pending]
+## **6.7 Agent Internal**
 
-| **Method** | **Path**                                      | **Description**                                                            |
-| ---------- | --------------------------------------------- | -------------------------------------------------------------------------- |
-| **GET**    | /api/v1/projects/:id/members                  | List project members with role and status.                                 |
-| **POST**   | /api/v1/projects/:id/invites                  | Send invite. Body: { email, role }. Admin only. **[PLANNED]**              |
-| **PATCH**  | /api/v1/projects/:id/members/:userId          | Update member role or status. Admin only. Cannot escalate beyond own role. |
-| **DELETE** | /api/v1/projects/:id/members/:userId          | Remove member. Admin only. Cannot remove self.                             |
-| **POST**   | /api/v1/projects/:id/invites/:inviteId/resend | Resend invite email. Resets token expiry to +7 days. **[PLANNED]**         |
+| **Method** | **Path**                     | **Description**                                       |
+| ---------- | ---------------------------- | ----------------------------------------------------- |
+| **GET**    | /api/v1/agent/tasks/next     | **Atomic claim** of the next available task via HTTP. |
+| **GET**    | /api/v1/verify-repo          | **Admin**: Verify repository integration and health.  |
 
-## **6.8 Notifications & User**
+## **6.8 API Standards**
 
-| **Method** | **Path**                       | **Description**                                                         |
-| ---------- | ------------------------------ | ----------------------------------------------------------------------- |
-| **GET**    | /api/v1/notifications          | List notifications. Supports ?unread=true, ?page=. Returns 50 per page. |
-| **POST**   | /api/v1/notifications/read-all | Mark all notifications as read.                                         |
-| **PATCH**  | /api/v1/notifications/:id      | Mark single notification read/unread. **[PLANNED]**                     |
-| **GET**    | /api/v1/users/me               | Current user profile.                                                   |
-| **PATCH**  | /api/v1/users/me               | Update name. Email cannot be changed via API.                           |
-| **POST**   | /api/v1/users/me/password      | Change password. Body: { currentPassword, newPassword }. **[PLANNED]**  |
-| **GET**    | /api/v1/users/me/tokens        | List API tokens (masked).                                               |
-| **POST**   | /api/v1/users/me/tokens        | Generate API token. Returns full raw token once only.                   |
-| **DELETE** | /api/v1/users/me/tokens/:id    | Revoke API token immediately. **[PLANNED]**                             |
-
-## **6.9 API Error Codes**
-
-| **HTTP Status** | **Error Code**      | **Meaning**                                                                             |
-| --------------- | ------------------- | --------------------------------------------------------------------------------------- |
-| 400             | VALIDATION_ERROR    | Zod validation failed. Includes field-level errors array.                               |
-| 401             | UNAUTHORIZED        | No valid session or token.                                                              |
-| 403             | FORBIDDEN           | Authenticated but insufficient role (RBAC) for this action.                             |
-| 404             | NOT_FOUND           | Entity does not exist or does not belong to the active project.                         |
-| 409             | CONFLICT            | Duplicate name, stale version, or concurrent edit detected.                             |
-| 422             | PRECONDITION_FAILED | Action is valid but entity state prevents it (e.g. approving an already-rejected plan). |
-| 429             | RATE_LIMITED        | Too many requests. Retry-After header included.                                         |
-| 500             | INTERNAL_ERROR      | Unexpected server error. Request ID included for tracing.                               |
-
-## **6.10 API Standards**
-
-### **Standard Response Envelope**
-
-All successful responses MUST use the following envelope:
-
-```json
-{
-  "data": [ ... ],
-  "meta": {
-    "page": 1,
-    "total": 100
-  }
-}
-```
-
-Single entity responses may omit the `meta` field:
-
-```json
-{
-  "data": { ... }
-}
-```
-
-### **Error Handling**
-
-All API responses use a standardized envelope. Validation is performed via Zod at the route boundary.
-Errors return a standard HTTP status along with a JSON body:
-
-```json
-{
-  "error": {
-    "code": "SNAKE_CASE_CODE",
-    "message": "Human readable description."
-  }
-}
-```
-
-**Common HTTP Status Codes:**
-
-- `400 Bad Request`: Malformed request.
-- `401 Unauthorized`: Missing or invalid session.
-- `403 Forbidden`: Authenticated, but lacking specific project role (RBAC).
-- `404 Not Found`: Resource does not exist or user lacks access to view it.
-- `409 Conflict`: Constraint violation (e.g., unique key violation).
-- `422 Unprocessable Entity`: Zod validation failure.
-- `429 Too Many Requests`: Rate limit exceeded.
-- `500 Internal Server Error`: Unhandled server exception (raw errors/stacks are never exposed to the client).
-
-### **Pagination**
-
-Collection endpoints support cursor-based or offset-based pagination. Successful responses include a data envelope and optional metadata:
-
-```json
-{
-  "data": [ ... ],
-  "meta": {
-    "page": 1,
-    "total": 100
-  }
-}
-```
-
-### **Rate Limiting & Quotas**
-
-Rate limiting is enforced at the `src/lib/rate-limiter.ts` layer using ioredis with token bucket algorithms.
-
-**Limits by Tier:**
-
-- **Auth Endpoints:** 10 requests / minute / IP
-- **Standard API (User):** 100 requests / minute / user session
-- **Agent API (Token):** 1000 requests / minute / API token
-
-## Development Gaps & Technical Debt
-
-- **Authentication Endpoints:** The specification lists custom endpoints (`/api/auth/sign-in/email`), but the implementation utilizes `better-auth` via `/api/auth/[...all]`. The custom signup endpoint at `/api/v1/auth/signup` bridges the gap but doesn't strictly align with the old spec.
-- **Pagination & Envelopes:** Many implemented endpoints (e.g., `/api/v1/projects`) return raw arrays or partial envelopes, deviating slightly from the strict `{ data: [], meta: {} }` spec.
+- **Enveloping**: All data returned in a `data` key.
+- **Pagination**: Meta object returned for lists: `{ data: [], meta: { page, limit, total } }`.
+- **Errors**: Standardized `{ error: { code, message, details? } }`.
+- **RBAC**: Checked at the route handler level via `src/lib/rbac.ts`.
+- **Safety**: `isomorphic-dompurify` used for sanitizing HTML/Markdown on both client and server.
