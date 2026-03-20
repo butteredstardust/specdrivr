@@ -20,7 +20,7 @@ import { PlayfulDaemon } from '@/components/ui/playful-daemon';
 import { PlayfulLogo } from '@/components/ui/playful-logo';
 import { useSystemHealth } from '@/components/layout/systems-bar';
 import { useShell } from '@/components/shell/shell-context';
-import { Badge } from '@/components/ui/badge';
+import { PixelBadge } from '@/components/ui/pixel-badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
@@ -322,14 +322,20 @@ export function Sidebar({ projects }: SidebarProps) {
                 <Icon className="h-4 w-4 shrink-0" />
                 {!isCollapsed && label}
                 {!isCollapsed && showBadge && (
-                  <span className="bg-accent-violet ml-auto flex h-4 w-4 items-center justify-center rounded-full font-mono text-[9px] text-white">
+                  <PixelBadge
+                    variant="violet"
+                    className="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full p-0 text-[9px] shadow-sm"
+                  >
                     {badgeText}
-                  </span>
+                  </PixelBadge>
                 )}
                 {isCollapsed && showBadge && (
-                  <span className="bg-accent-violet absolute -top-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full font-mono text-[8px] text-white">
+                  <PixelBadge
+                    variant="violet"
+                    className="absolute top-2 right-2 flex h-3.5 min-w-3.5 items-center justify-center rounded-full p-0 text-[8px] shadow-sm"
+                  >
                     {badgeText}
-                  </span>
+                  </PixelBadge>
                 )}
               </Link>
             );
