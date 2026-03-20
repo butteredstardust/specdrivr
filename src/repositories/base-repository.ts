@@ -21,7 +21,7 @@ export abstract class BaseRepository {
   protected async publishToSession(
     sessionId: number,
     channel: 'logs' | 'updates' | 'events',
-    payload: any
+    payload: unknown
   ): Promise<void> {
     try {
       if (!this.redis) {
@@ -31,7 +31,10 @@ export abstract class BaseRepository {
       await this.redis.publish(fullChannel, JSON.stringify(payload));
     } catch (err) {
       // Don't crash the repository operation if Redis fails
-      console.error(`[BaseRepository] Failed to publish to Redis session:${sessionId}:${channel}`, err);
+      console.error(
+        `[BaseRepository] Failed to publish to Redis session:${sessionId}:${channel}`,
+        err
+      );
     }
   }
 }
