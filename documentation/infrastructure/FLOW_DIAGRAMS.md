@@ -25,12 +25,12 @@ sequenceDiagram
     API->>DB: Save Spec (status: drafting)
     API->>API: Set status: pending_plan
     API-->>User: Redirect to Spec Detail (PLAN tab)
-    
+
     API->>Gemini: POST /v1/models/gemini-2.0-flash:generateContent
     Gemini-->>API: Returns JSON Plan (tasks, deps, etc.)
     API->>DB: Save Plan & Tasks
     API->>DB: Update Spec (status: pending_approval)
-    
+
     User->>API: POST /api/v1/plans/:id/approve
     API->>DB: Update Plan (status: approved)
     API->>DB: Update Spec (status: executing)
@@ -60,10 +60,10 @@ sequenceDiagram
         API->>DB: SELECT FOR UPDATE SKIP LOCKED
         DB-->>API: Next atomic Task (T-042)
         API-->>Agent: Returns Task payload
-        
+
         Agent->>LLM: POST /v1/chat/completions (Execute Task)
         LLM-->>Agent: Code Changes + Cost
-        
+
         Agent->>API: POST /api/v1/sessions/:id/log (Stream Output)
         Agent->>API: PATCH /api/v1/tasks/042 (Report Cost)
         Agent->>API: POST /api/v1/tasks/042/complete (Done/Fail)

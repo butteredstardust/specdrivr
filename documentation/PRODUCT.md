@@ -90,11 +90,11 @@ Software specifications should be executable. The gap between "what we want to b
 
 Triggered after invite acceptance or first login when `onboarding_step` in the database is less than 3. A centered modal dialog (`Dialog`) is used.
 
-| **Step** | **Title**                    | **Content**                                                                                                                                  |
-| -------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1 / 3    | Welcome                      | DAEMON idle (64px) + "Welcome to Specdrivr, {Name}!" + [Get Started]                                                                         |
-| 2 / 3    | Set your display name        | Input field for display name. Updates `users.name` via `PATCH /api/v1/users/me`.                                                              |
-| 3 / 3    | Create your first project    | Input field for project name. Creates project via `POST /api/v1/projects` and sets `onboarding_step = 3`.                                    |
+| **Step** | **Title**                 | **Content**                                                                                               |
+| -------- | ------------------------- | --------------------------------------------------------------------------------------------------------- |
+| 1 / 3    | Welcome                   | DAEMON idle (64px) + "Welcome to Specdrivr, {Name}!" + [Get Started]                                      |
+| 2 / 3    | Set your display name     | Input field for display name. Updates `users.name` via `PATCH /api/v1/users/me`.                          |
+| 3 / 3    | Create your first project | Input field for project name. Creates project via `POST /api/v1/projects` and sets `onboarding_step = 3`. |
 
 `onboarding_step` is set to 3 on completion. Never shown again. The modal cannot be dismissed by clicking outside or pressing Escape.
 

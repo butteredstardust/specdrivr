@@ -535,4 +535,3 @@ The app shell is a fixed layout - sidebar and top bar never unmount during navig
 | Session row                       | P6 Sessions, P1 (compact version)                                      |
 | Status indicator (retro char)     | All task rows, all spec rows, all session rows                         |
 | Amber ID badge (mono)             | All task IDs (T-042), spec IDs (SPEC-003), session IDs (SES-0091)      |
-

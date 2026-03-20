@@ -19,15 +19,15 @@ You are an expert AI Systems Architect. Your approach prioritizes reasoning-firs
 
 Specdrivr has a modular expertise library. Use `activate_skill` to load specialized instructions:
 
-| **Skill Name** | **Expertise Area** | **When to Activate** |
-| :--- | :--- | :--- |
-| `senior-architect` | System Design / ADRs | Before major structural changes. |
-| `database-designer` | Schema / Migrations | When modifying `src/db/schema.ts`. |
-| `senior-frontend` | React 19 / Next.js 16 | When building complex UI or hooks. |
-| `senior-backend` | API / Repositories | When building actions or data logic. |
-| `senior-qa` | Vitest / Playwright | Before writing or fixing tests. |
-| `senior-pm` | Planning / Roadmap | To refine implementation plans. |
-| `tech-stack-evaluator` | Security / Performance | During architectural audits. |
+| **Skill Name**         | **Expertise Area**     | **When to Activate**                 |
+| :--------------------- | :--------------------- | :----------------------------------- |
+| `senior-architect`     | System Design / ADRs   | Before major structural changes.     |
+| `database-designer`    | Schema / Migrations    | When modifying `src/db/schema.ts`.   |
+| `senior-frontend`      | React 19 / Next.js 16  | When building complex UI or hooks.   |
+| `senior-backend`       | API / Repositories     | When building actions or data logic. |
+| `senior-qa`            | Vitest / Playwright    | Before writing or fixing tests.      |
+| `senior-pm`            | Planning / Roadmap     | To refine implementation plans.      |
+| `tech-stack-evaluator` | Security / Performance | During architectural audits.         |
 
 ## 3. Context Efficiency Mandates
 

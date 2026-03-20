@@ -12,13 +12,13 @@ Specdrivr utilizes Redis (via `ioredis`) for high-performance distributed state 
 
 ## 2. Key Namespace Registry
 
-| **Prefix** | **Purpose** | **TTL** | **Managing Service** |
-|---|---|---|---|
-| `ratelimit:*` | API rate limiting counters. | 1m - 1h | `lib/rate-limiter.ts` |
-| `lock:*` | Distributed concurrency locks. | 30s - 5m | `lib/lock-manager.ts` |
-| `auth:session:*` | BetterAuth cached session data. | 5m | `lib/auth.ts` |
-| `agent:heartbeat:*` | Agent health tracking. | 60s | `api/v1/sessions/heartbeat` |
-| `cache:rbac:*` | User project permissions. | 10m | `lib/rbac.ts` |
+| **Prefix**          | **Purpose**                     | **TTL**  | **Managing Service**        |
+| ------------------- | ------------------------------- | -------- | --------------------------- |
+| `ratelimit:*`       | API rate limiting counters.     | 1m - 1h  | `lib/rate-limiter.ts`       |
+| `lock:*`            | Distributed concurrency locks.  | 30s - 5m | `lib/lock-manager.ts`       |
+| `auth:session:*`    | BetterAuth cached session data. | 5m       | `lib/auth.ts`               |
+| `agent:heartbeat:*` | Agent health tracking.          | 60s      | `api/v1/sessions/heartbeat` |
+| `cache:rbac:*`      | User project permissions.       | 10m      | `lib/rbac.ts`               |
 
 ## 3. Usage Rules
 

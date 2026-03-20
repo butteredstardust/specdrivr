@@ -16,32 +16,41 @@ pnpm db:seed      # Seed database with test data
 ## Database Enums
 
 ### `plan_status`
+
 Plan lifecycle: `pending_approval`, `executing`, `rejected`, `abandoned`, `changes_requested`, `completed`
 
 ### `spec_status`
+
 Specification states: `drafting`, `pending_plan`, `pending_approval`, `executing`, `completed`, `stalled`, `archived`
 
 ### `task_status`
+
 Task workflow: `todo`, `in_progress`, `done`, `blocked`, `failed`, `skipped`
 
 ### `session_status`
+
 Agent session states: `running`, `paused`, `completed`, `failed`, `cancelled`
 
 ### `project_status`
+
 Project states: `active`, `archived`
 
 ### `log_level`
+
 Logging levels: `debug`, `info`, `warn`, `error`
 
 ### `user_role`
+
 User permissions: `owner`, `admin`, `member`, `viewer`
 
 ### `task_attempt_status`
+
 Attempt workflow: `running`, `succeeded`, `failed`
 
 ## Core Tables
 
 ### `users`
+
 Standard user table managed by BetterAuth with custom extensions.
 
 ```sql
@@ -64,6 +73,7 @@ last_active_at: timestamp with time zone
 ```
 
 ### `projects`
+
 Main project container for all work.
 
 ```sql
@@ -82,6 +92,7 @@ updated_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 ### `project_members`
+
 Association table for project members and their roles.
 
 ```sql
@@ -96,6 +107,7 @@ created_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 ### `specifications`
+
 User-written specifications that drive plan generation.
 
 ```sql
@@ -110,6 +122,7 @@ updated_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 ### `spec_versions`
+
 Historical versions of specifications.
 
 ```sql
@@ -122,6 +135,7 @@ created_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 ### `plans`
+
 AI-generated execution plans containing multiple tasks.
 
 ```sql
@@ -146,6 +160,7 @@ created_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 ### `tasks`
+
 Individual work items within a plan.
 
 ```sql
@@ -181,6 +196,7 @@ updated_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 ### `agent_sessions`
+
 Runtime container for task execution.
 
 ```sql
@@ -209,6 +225,7 @@ ended_at: timestamp with time zone
 ```
 
 ### `task_attempts`
+
 Detailed logs for each execution attempt of a task.
 
 ```sql
@@ -229,6 +246,7 @@ ended_at: timestamp with time zone
 ```
 
 ### `file_changes`
+
 Snapshots of file modifications produced by tasks.
 
 ```sql
@@ -249,6 +267,7 @@ created_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 ### `agent_config`
+
 Per-project agent settings.
 
 ```sql
@@ -287,6 +306,7 @@ updated_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 ### `audit_log`
+
 Security and governance audit trail.
 
 ```sql
@@ -303,6 +323,7 @@ created_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 ### `agent_events`
+
 Session-scoped event stream for the live Mission Control feed.
 
 ```sql
@@ -318,6 +339,7 @@ created_at: timestamp with time zone NOT NULL DEFAULT now()
 ```
 
 ### `agent_logs`
+
 Task-scoped technical logs for the terminal view.
 
 ```sql

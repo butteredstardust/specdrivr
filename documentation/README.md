@@ -5,6 +5,7 @@ Welcome to the master product specification for Specdrivr.
 [Status: GROUND TRUTH]
 
 ## 🏗️ Infrastructure Specs
+
 Global system architecture, technical constraints, and development guidelines.
 
 - **[Architecture](./infrastructure/ARCHITECTURE.md)**: System overview, tech stack, and security.
@@ -30,6 +31,7 @@ Global system architecture, technical constraints, and development guidelines.
 - **[Integrations](./infrastructure/INTEGRATIONS.md)**: External services and webhooks.
 
 ## 📦 Feature Modules
+
 Vertical slices of the application combining UI, flows, and business logic.
 
 - **[Product Map & Status](./PRODUCT_MAP.md)**: High-level dashboard of implemented features.
@@ -41,7 +43,9 @@ Vertical slices of the application combining UI, flows, and business logic.
 - **[Settings & Admin](./modules/settings.md)**: Profile, Security, Audit Log, and Usage.
 
 ## 🔮 Future Vision
+
 - **[Future Specifications](./FUTURE_SPECIFICATIONS.md)**: Planned features and visionary designs.
 
 ---
-*For new developers: Start with [Architecture](./infrastructure/ARCHITECTURE.md) and the [Auth Module](./modules/auth.md).*
+
+_For new developers: Start with [Architecture](./infrastructure/ARCHITECTURE.md) and the [Auth Module](./modules/auth.md)._

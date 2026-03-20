@@ -15,6 +15,7 @@ Specdrivr uses Vitest for unit/integration testing and Playwright for E2E testin
 Do NOT mock Drizzle directly. Use the **Test DB + Factory** pattern.
 
 ### 2.1 The Factory Pattern
+
 Use helpers from `tests/helpers.ts` to populate the test database with clean state.
 
 ```typescript
@@ -44,20 +45,23 @@ vi.mock('@/lib/gemini', () => ({
   geminiService: {
     generatePlan: vi.fn().mockResolvedValue({
       intent: 'Test Plan',
-      tasks: [{ title: 'T1', dependsOn: [] }]
-    })
-  }
+      tasks: [{ title: 'T1', dependsOn: [] }],
+    }),
+  },
 }));
 ```
 
 ## 4. E2E Testing (Playwright)
 
 ### 4.1 ARIA-First Selectors
+
 Always use ARIA labels to ensure accessibility and resilient tests.
+
 - **Good**: `page.getByRole('button', { name: 'Approve' })`
 - **Bad**: `page.locator('.btn-primary')`
 
 ### 4.2 Auth State
+
 Use the `auth.setup.ts` pattern to preserve login state across tests, avoiding repeated login flows.
 
 ## 5. Testing Checklist for Agents
