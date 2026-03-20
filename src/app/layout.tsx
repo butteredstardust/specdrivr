@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
+import { Toaster } from 'sonner';
 import './globals.css';
 
 const inter = Inter({
@@ -29,7 +30,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         suppressHydrationWarning
       >
         <ThemeProvider forcedTheme="dark" attribute="class">
-          <NuqsAdapter>{children}</NuqsAdapter>
+          <NuqsAdapter>
+            {children}
+            <Toaster
+              position="bottom-right"
+              toastOptions={{
+                className:
+                  'font-mono text-xs border-border-default bg-bg-surface text-text-primary',
+              }}
+            />
+          </NuqsAdapter>
         </ThemeProvider>
       </body>
     </html>

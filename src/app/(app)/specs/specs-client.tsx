@@ -49,9 +49,8 @@ function StatusBadge({ status }: { status: SpecStatus }) {
     case 'drafting':
       return <PixelBadge>Draft</PixelBadge>;
     case 'pending_plan':
-      return <PixelBadge variant="amber">Pending</PixelBadge>;
     case 'pending_approval':
-      return <PixelBadge variant="amber">Review</PixelBadge>;
+      return <PixelBadge variant="amber">Pending</PixelBadge>;
     case 'executing':
       return (
         <PixelBadge variant="violet" dot>
@@ -158,7 +157,7 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
       {/* Escape the layout's p-6 so sections are full-bleed with border separators */}
       <div className="-mx-6 -mt-6 flex min-h-full flex-col">
         <PageHeader
-          category="Specifications"
+          category="SPECIFICATIONS"
           title="Specs"
           action={
             canCreate ? (
@@ -183,7 +182,7 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
             <Search className="text-text-muted absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
             <Input
               placeholder="SEARCH SPECS..."
-              className="bg-bg-elevated focus:ring-accent-violet/30 h-8 pl-8 font-mono text-[10px] tracking-widest uppercase transition-all focus:ring-1"
+              className="bg-bg-elevated focus:ring-accent-violet/30 h-8 pl-8 font-mono text-[10px] tracking-[0.08em] uppercase transition-all focus:ring-1"
               value={search}
               onChange={(e) => setSearch(e.target.value || null)}
             />
@@ -213,7 +212,7 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
                   size="sm"
                   onClick={() => setActiveTab(value)}
                   className={cn(
-                    'h-7 px-3 font-mono text-[10px] tracking-widest uppercase transition-all',
+                    'h-7 px-3 font-mono text-[10px] tracking-[0.08em] uppercase transition-all',
                     isActive
                       ? 'bg-accent-violet text-white shadow-sm'
                       : 'text-text-muted hover:bg-bg-elevated hover:text-text-primary'
@@ -249,7 +248,7 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
           ) : (
             <Table className="caption-bottom text-sm">
               <TableHeader>
-                <TableRow className="border-border-default text-text-secondary font-mono text-xs tracking-[0.15em] uppercase hover:bg-transparent">
+                <TableRow className="border-border-default text-text-muted font-mono text-[11px] tracking-[0.08em] uppercase hover:bg-transparent">
                   <TableHead className="h-auto w-36 px-6 py-2.5 font-medium">ID</TableHead>
                   <TableHead className="h-auto px-3 py-2.5 font-medium">Name</TableHead>
                   <TableHead className="h-auto w-36 px-3 py-2.5 font-medium">Status</TableHead>
