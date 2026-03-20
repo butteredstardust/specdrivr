@@ -274,7 +274,7 @@ export class PlanRepository extends BaseRepository {
 
         // Log the decision to agent_events
         const decisionEvent = {
-          sessionId: 0,
+          sessionId: null,
           specId: plan.specId,
           eventType: updatedPlan.status === 'rejected' ? 'PLAN_REJECTED' : 'CHANGES_REQUESTED',
           message: `Plan ${updatedPlan.status === 'rejected' ? 'rejected' : 'changes requested'} by ${data.userId}`,
@@ -358,7 +358,7 @@ export class PlanRepository extends BaseRepository {
 
         // Log the decision to agent_events
         const decisionEvent = {
-          sessionId: 0,
+          sessionId: null,
           specId: plan.specId,
           eventType: updatedPlan.status === 'rejected' ? 'PLAN_REJECTED' : 'CHANGES_REQUESTED',
           message: `Plan ${updatedPlan.status === 'rejected' ? 'rejected' : 'changes requested'} by ${data.userId}`,
