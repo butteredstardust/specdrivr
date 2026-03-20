@@ -8,7 +8,7 @@ import { authClient } from '@/lib/auth-client';
 import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+import { PixelBadge } from '@/components/ui/pixel-badge';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -126,9 +126,12 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
             >
               <Bell className="text-text-secondary h-4 w-4" />
               {unreadCount > 0 && (
-                <Badge className="bg-accent-violet absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center p-0 text-[10px]">
+                <PixelBadge
+                  variant="violet"
+                  className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full p-0 text-[9px] shadow-sm"
+                >
                   {unreadCount > 9 ? '9+' : unreadCount}
-                </Badge>
+                </PixelBadge>
               )}
             </Button>
           </PopoverTrigger>

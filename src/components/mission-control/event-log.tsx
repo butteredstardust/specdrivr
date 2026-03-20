@@ -81,7 +81,7 @@ export function EventLog({ sessionId, onUpdate, className }: EventLogProps) {
       try {
         const data = JSON.parse(event.data);
         const timeStr = formatTimestamp(data.createdAt);
-        
+
         const entry: LogEntry = {
           id: `event-${data.id || Date.now()}-${Math.random()}`,
           line: `[${timeStr}] ✨ EVENT: ${data.message}`,
@@ -139,13 +139,13 @@ export function EventLog({ sessionId, onUpdate, className }: EventLogProps) {
   return (
     <div className={className}>
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-muted-foreground font-mono text-[10px] tracking-[0.15em] uppercase">
+        <p className="text-text-muted font-mono text-[11px] tracking-[0.08em] uppercase">
           Session Log
         </p>
         <Button
           variant="ghost"
           size="sm"
-          className={`h-6 px-2 font-mono text-[10px] ${showErrorsOnly ? 'bg-bg-elevated' : ''}`}
+          className={`h-6 px-2 font-mono text-[10px] tracking-[0.08em] uppercase ${showErrorsOnly ? 'bg-bg-elevated' : ''}`}
           onClick={() => setShowErrorsOnly(!showErrorsOnly)}
         >
           <Filter className="mr-1 h-3 w-3" />

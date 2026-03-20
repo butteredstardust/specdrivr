@@ -52,7 +52,7 @@ export function TerminalLog({
       )}
       style={{ maxHeight }}
     >
-      <div className="space-y-0.5 font-mono text-xs leading-relaxed">
+      <div className="space-y-0 font-mono text-[11px] leading-tight">
         {lines.map((line, i) => (
           <div
             key={i}

@@ -21,7 +21,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
+import { PixelBadge } from '@/components/ui/pixel-badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
@@ -168,13 +168,9 @@ function FormField({ label, htmlFor, children }: FormFieldProps) {
 
 function ConnectedBadge({ connected }: { connected: boolean }) {
   return (
-    <span
-      className={`inline-flex items-center rounded-full px-2 py-0.5 font-mono text-xs tracking-wider uppercase ${
-        connected ? 'bg-status-emerald/10 text-status-emerald' : 'bg-bg-surface text-text-secondary'
-      }`}
-    >
+    <PixelBadge variant={connected ? 'emerald' : 'muted'} className="font-mono text-[10px]">
       {connected ? 'Connected' : 'Not connected'}
-    </span>
+    </PixelBadge>
   );
 }
 
@@ -1011,16 +1007,12 @@ function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
                   <p className="text-text-secondary min-w-0 flex-1 truncate font-mono text-xs">
                     {wh.url}
                   </p>
-                  <Badge
-                    variant="outline"
-                    className={
-                      wh.status === 'active'
-                        ? 'border-status-emerald/30 bg-status-emerald/10 text-status-emerald font-mono text-xs'
-                        : 'border-status-red/30 bg-status-red/10 text-status-red font-mono text-xs'
-                    }
+                  <PixelBadge
+                    variant={wh.status === 'active' ? 'emerald' : 'red'}
+                    className="font-mono text-[10px]"
                   >
                     {wh.status}
-                  </Badge>
+                  </PixelBadge>
                   {editable ? (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
