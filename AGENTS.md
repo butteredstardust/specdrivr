@@ -149,7 +149,7 @@ Bypassing hooks should be rarer than 1 in 100 operations.
 
 **Middleware** 34. Adding middleware inside `app/` directory instead of `src/middleware.ts`. 35. Missing `matcher` config — middleware runs on static assets. 36. Importing repositories or Drizzle into middleware. 37. Manually editing `next-env.d.ts`.
 
-**UI Components & Styling** 38. Writing a custom component when a `shadcn/ui` equivalent exists. 39. Hardcoded hex colors; use design tokens from `src/app/globals.css`. 40. Adding custom CSS instead of Tailwind utility classes. 41. Creating new CSS files for minor tweaks; extend existing tokens. 42. Modifying `shadcn/ui` source files in `@/components/ui/`; customize via CSS variables only. 43. Building a new screen without checking `USER_INTERFACE.md` for planned flow and layout. 44. Making visual decisions without consulting `DESIGN_SYSTEM.md`. 45. Using one-off inline styles for values that appear more than once — promote to a design token.
+**UI Components & Styling** 38. Writing a custom component when a `shadcn/ui` equivalent exists. 39. Hardcoded hex colors; use design tokens from `src/app/globals.css`. 40. Adding custom CSS instead of Tailwind utility classes. 41. Creating new CSS files for minor tweaks; extend existing tokens. 42. Modifying `shadcn/ui` source files in `@/components/ui/`; customize via CSS variables only. 43. Building a new screen without checking the **Modular Specifications** for planned flow and layout. 44. Making visual decisions without consulting `DESIGN_SYSTEM.md`. 45. Using one-off inline styles for values that appear more than once — promote to a design token.
 
 **Component Architecture** 47. Importing a Server Component into a Client Component (silent downgrade). 48. Using `useEffect` for data fetching instead of Server Components.
 
@@ -183,7 +183,7 @@ Bypassing hooks should be rarer than 1 in 100 operations.
 - NO importing Server Components into Client Components.
 - NO custom component when a `shadcn/ui` equivalent exists.
 - NO visual decisions (color, spacing, typography, layout) without consulting `DESIGN_SYSTEM.md`.
-- NO new screens built without referencing `USER_INTERFACE.md` for flow and layout context.
+- NO new screens built without referencing the **Modular Specifications** for flow and layout context.
 - NO hardcoded visual values in custom components; always use CSS variable design tokens.
 
 ## Server Actions Pattern

@@ -27,7 +27,7 @@ Global system architecture, technical constraints, and development guidelines.
 - **[Environment Variables](./infrastructure/ENVIRONMENT_VARIABLES.md)**: Registry of all Zod-validated vars.
 - **[Design System](./infrastructure/DESIGN_SYSTEM.md)**: UI tokens, mascot, and app shell patterns.
 - **[Development](./infrastructure/DEVELOPMENT.md)**: Setup, Git workflow, and testing.
-- **[Authentication & RBAC](./infrastructure/AUTHENTICATION.md)**: Technical auth specs (Legacy - see Module/Auth).
+- **[Authentication & RBAC](./modules/auth.md)**: Technical auth specs and RBAC rules.
 - **[Integrations](./infrastructure/INTEGRATIONS.md)**: External services and webhooks.
 
 ## 📦 Feature Modules
