@@ -2,7 +2,7 @@
 
 **AI Agent Operations Manual** for Specdrivr - an AI-native orchestration platform.
 
-> **Cross-reference:** For AI-specific adapters, see `CLAUDE.md` and `GEMINI.md`. For human guidance, see `documentation/DEVELOPMENT.md`.
+> **Cross-reference:** For AI-specific adapters, see `CLAUDE.md` and `GEMINI.md`. For human guidance, see `documentation/infrastructure/DEVELOPMENT.md`.
 
 ## 1. Purpose
 
@@ -52,13 +52,13 @@ Every task must end with these steps:
 
 ## 6. Design System Summary
 
-_See `DESIGN_SYSTEM.md` for full specifications._
+_See `documentation/infrastructure/DESIGN_SYSTEM.md` for full specifications._
 
 - **Visual Aesthetic**: "Linear" style—matte surfaces, subtle borders, high contrast, obsidian-tinted interactive states.
 - **Design Tokens**: Defined as CSS variables in `globals.css`. Never use hex codes.
 - **Component Selection**:
   1. **shadcn/ui**: Standard interface controls (Button, Input). Prefer standard components.
-  2. **Custom**: Only use custom components when absolutely necessary; must inherit from `DESIGN_SYSTEM.md`.
+  2. **Custom**: Only use custom components when absolutely necessary; must inherit from `documentation/infrastructure/DESIGN_SYSTEM.md`.
 - **Import Standard**:
   - Components: `import { Button } from '@/components/ui/button'`.
   - Icons: `import { Check } from 'lucide-react'` (or preferred icon set).
@@ -130,7 +130,7 @@ Bypassing hooks should be rarer than 1 in 100 operations.
 - NO unawaited Next.js dynamic APIs (`params`, `searchParams`, etc.).
 - NO `useEffect` for data fetching.
 - NO writing custom components when a `shadcn/ui` equivalent exists.
-- NO visual decisions without consulting `DESIGN_SYSTEM.md`.
+- NO visual decisions without consulting `documentation/infrastructure/DESIGN_SYSTEM.md`.
 
 ## 15. Standard Commands Reference
 
@@ -149,7 +149,7 @@ Bypassing hooks should be rarer than 1 in 100 operations.
 
 **Middleware** 34. Adding middleware inside `app/` directory instead of `src/middleware.ts`. 35. Missing `matcher` config — middleware runs on static assets. 36. Importing repositories or Drizzle into middleware. 37. Manually editing `next-env.d.ts`.
 
-**UI Components & Styling** 38. Writing a custom component when a `shadcn/ui` equivalent exists. 39. Hardcoded hex colors; use design tokens from `src/app/globals.css`. 40. Adding custom CSS instead of Tailwind utility classes. 41. Creating new CSS files for minor tweaks; extend existing tokens. 42. Modifying `shadcn/ui` source files in `@/components/ui/`; customize via CSS variables only. 43. Building a new screen without checking the **Modular Specifications** for planned flow and layout. 44. Making visual decisions without consulting `DESIGN_SYSTEM.md`. 45. Using one-off inline styles for values that appear more than once — promote to a design token.
+**UI Components & Styling** 38. Writing a custom component when a `shadcn/ui` equivalent exists. 39. Hardcoded hex colors; use design tokens from `src/app/globals.css`. 40. Adding custom CSS instead of Tailwind utility classes. 41. Creating new CSS files for minor tweaks; extend existing tokens. 42. Modifying `shadcn/ui` source files in `@/components/ui/`; customize via CSS variables only. 43. Building a new screen without checking the **Modular Specifications** for planned flow and layout. 44. Making visual decisions without consulting `documentation/infrastructure/DESIGN_SYSTEM.md`. 45. Using one-off inline styles for values that appear more than once — promote to a design token.
 
 **Component Architecture** 47. Importing a Server Component into a Client Component (silent downgrade). 48. Using `useEffect` for data fetching instead of Server Components.
 
@@ -182,7 +182,7 @@ Bypassing hooks should be rarer than 1 in 100 operations.
 - NO middleware files outside `src/middleware.ts`.
 - NO importing Server Components into Client Components.
 - NO custom component when a `shadcn/ui` equivalent exists.
-- NO visual decisions (color, spacing, typography, layout) without consulting `DESIGN_SYSTEM.md`.
+- NO visual decisions (color, spacing, typography, layout) without consulting `documentation/infrastructure/DESIGN_SYSTEM.md`.
 - NO new screens built without referencing the **Modular Specifications** for flow and layout context.
 - NO hardcoded visual values in custom components; always use CSS variable design tokens.
 
@@ -259,7 +259,7 @@ Before submitting any Pull Request:
 
 ## Summary
 
-Specdrivr enforces strict type safety, security, and performance standards. Always use repositories, validate inputs with Zod, log with Pino, and avoid prohibited patterns. When in doubt, consult `documentation/DEVELOPMENT.md` for implementations and `CLAUDE.md` for AI-specific constraints. Cross-reference all three docs to maintain consistency.
+Specdrivr enforces strict type safety, security, and performance standards. Always use repositories, validate inputs with Zod, log with Pino, and avoid prohibited patterns. When in doubt, consult `documentation/infrastructure/DEVELOPMENT.md` for implementations and `CLAUDE.md` for AI-specific constraints. Cross-reference all three docs to maintain consistency.
 
 Remember: your changes will be reviewed by humans and automated systems. Follow these guidelines precisely.
 
