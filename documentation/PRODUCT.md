@@ -6,6 +6,10 @@ Version 1.0 · Confidential
 
 _Spec-driven autonomous code execution for engineering teams_
 
+---
+
+[Status: GROUND TRUTH]
+
 # **1\. Executive Summary**
 
 Specdrivr is a spec-driven autonomous coding platform that enables engineering teams to write plain-English specifications in Markdown and have an AI agent - DAEMON - translate those specs into a structured execution plan, receive human approval, then autonomously execute and commit code changes against a target repository.
@@ -82,17 +86,17 @@ Software specifications should be executable. The gap between "what we want to b
 | Technical level | Low - reads summaries; does not review diffs                                                                               |
 | Key flows used  | Dashboard / Mission Control → Sessions → Spec Activity                                                                     |
 
-# **14\. Onboarding** [Status: Verified Specification / Implementation Pending]
+# **14\. Onboarding**
 
-Triggered after invite acceptance or first login when onboardingDone = false. A full-page modal overlay (backdrop blur, app dimly visible behind). Three steps, ~30 seconds total. No skip button.
+Triggered after invite acceptance or first login when `onboarding_step` in the database is less than 3. A centered modal dialog (`Dialog`) is used.
 
-| **Step** | **Title**     | **Content**                                                                                                                                                                                                                                  |
-| -------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1 / 3    | Welcome       | DAEMON idle (64px) + "Welcome to Specdrivr, {Name}. I'm DAEMON. I'll execute your specifications as code. Here's how we work together." + \[Get Started →\]                                                                                  |
-| 2 / 3    | The Flow      | Visual flow diagram: \[Write Spec\] → \[I Generate a Plan\] → \[You Approve\] → \[I Build It\]. Human steps in violet, DAEMON steps in amber. Caption: "You stay in control. I never execute without your approval." + \[← Back\] \[Next →\] |
-| 3 / 3    | First Project | Inline form: Project name · Repository URL · Branch. \[Create Project & Start\]. On success: overlay closes, land on /specs (empty state).                                                                                                   |
+| **Step** | **Title**                 | **Content**                                                                                               |
+| -------- | ------------------------- | --------------------------------------------------------------------------------------------------------- |
+| 1 / 3    | Welcome                   | DAEMON idle (64px) + "Welcome to Specdrivr, {Name}!" + [Get Started]                                      |
+| 2 / 3    | Set your display name     | Input field for display name. Updates `users.name` via `PATCH /api/v1/users/me`.                          |
+| 3 / 3    | Create your first project | Input field for project name. Creates project via `POST /api/v1/projects` and sets `onboarding_step = 3`. |
 
-onboardingDone flag is set to true on step 3 completion. Never shown again. Can be restarted via Settings → General → \[Restart Onboarding Tour\] link.
+`onboarding_step` is set to 3 on completion. Never shown again. The modal cannot be dismissed by clicking outside or pressing Escape.
 
 # **16\. Error States & Edge Cases** [Status: Verified Specification / Implementation Pending]
 

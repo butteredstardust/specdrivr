@@ -1,104 +1,55 @@
-**SPECDRIVR**
+# Specdrivr — Master Specification Index
 
-Master Product Specification - Index
+[Status: GROUND TRUTH]
 
-Version 1.0 · Confidential
+This index maps features to their new "Vertical Slice" module documentation.
 
-_Spec-driven autonomous code execution for engineering teams_
-
----
-
-This specification has been split into the following purpose-specific files:
-
-## Product Specification
-
-**Audience**: Stakeholders, Product Managers, Engineers
-
-- **[PRODUCT.md](PRODUCT.md)** - Product overview, vision, user personas, onboarding, error states, and microcopy
-  - Executive Summary
-  - Product Vision & Goals
-  - User Personas
-  - Onboarding
-  - Error States & Edge Cases
-  - Empty States & Microcopy Reference
-
-- **[PRODUCT_FEATURES.md](PRODUCT_FEATURES.md)** - Authentication flows, RBAC, settings, notifications, and user management
-  - Authentication System (Login, Forgot Password, Reset Password)
-  - User Management & RBAC (Owner, Admin, Member, Viewer roles)
-  - Plan Review & Rejection workflows
-  - Onboarding Flow
-  - Notification System
-  - Settings (Project, Agent, Advanced, Danger Zone)
-  - User Profile & Preferences
-
-## Technical Architecture
-
-**Audience**: Engineers, Architects
-
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - System architecture and engineering constraints
-  - System Architecture
-  - Stack-Specific Engineering Constraints
-  - Concurrency & Race Condition Handling
-
-- **[DATABASE.md](DATABASE.md)** - Database schema and data models
-  - Data Model
-  - Extended Data Model - Missing & Corrected Fields
-  - Reference Seed Data
-
-- **[API.md](API.md)** - Complete API specification
-  - API Specification
-
-- **[AUTHENTICATION.md](AUTHENTICATION.md)** - Authentication and authorization
-  - Authentication & Authorisation
-
-## Design & User Experience
-
-**Audience**: Designers, Frontend Engineers
-
-- **[DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)** - Design system and UI specifications
-  - Design System
-  - DAEMON Mascot Specification
-  - Application Shell
-  - Pages - Detailed Specification
-  - State Machines
-  - Notification System
-
-- **[USER_INTERFACE.md](USER_INTERFACE.md)** - Complete screen inventory, interaction flows, and state machines
-  - Complete Screen Inventory (P1-P8 + overlays)
-  - Navigation Flow Diagram
-  - All 26 Interaction Flows
-  - 4 State Machines (Spec, Plan, Task, Session)
-  - Conditional Rendering Truth Tables
-  - Mock Data Requirements
-  - Component Cross-Reference
-  - Anti-Patterns to Avoid
-
-## Integration & Development
-
-**Audience**: Engineers, DevOps
-
-- **[INTEGRATIONS.md](INTEGRATIONS.md)** - External service integrations
-  - Integrations
-  - Cost & Usage Tracking
-
-- **[DEVELOPMENT.md](DEVELOPMENT.md)** - Development environment and workflows
-  - Async Simulation Requirements (Development / Demo Mode)
-  - Git Workflow Specification
-  - Developer Integration Reference
-
-## Operations
-
-**Audience**: Engineering Managers, DevOps
-
-- **[OPERATIONS.md](OPERATIONS.md)** - Non-functional requirements and compliance
-  - Non-Functional Requirements
-  - Document Control
+| Feature Area             | Documentation Module                                     | Audience                 |
+| ------------------------ | -------------------------------------------------------- | ------------------------ |
+| **Product Status**       | [PRODUCT_MAP.md](./PRODUCT_MAP.md)                       | All stakeholders         |
+| **Authentication**       | [modules/auth.md](./modules/auth.md)                     | All developers           |
+| **RBAC / Team**          | [modules/auth.md](./modules/auth.md)                     | Admin, Owner             |
+| **Onboarding**           | [modules/auth.md](./modules/auth.md)                     | Frontend Engineers       |
+| **Project Mgmt**         | [modules/projects.md](./modules/projects.md)             | All developers           |
+| **Spec Editor**          | [modules/specifications.md](./modules/specifications.md) | Frontend, Product        |
+| **Planning & AI**        | [modules/specifications.md](./modules/specifications.md) | Backend, AI Engineers    |
+| **Task Management**      | [modules/tasks.md](./modules/tasks.md)                   | All developers           |
+| **Human Intervention**   | [modules/tasks.md](./modules/tasks.md)                   | All developers           |
+| **Agent Execution**      | [modules/execution.md](./modules/execution.md)           | Backend, Agent Engineers |
+| **Live Logs / Terminal** | [modules/execution.md](./modules/execution.md)           | All developers           |
+| **Session Lifecycle**    | [modules/execution.md](./modules/execution.md)           | All developers           |
+| **Settings / Admin**     | [modules/settings.md](./modules/settings.md)             | All developers           |
+| **Usage / Cost**         | [modules/settings.md](./modules/settings.md)             | Admin, DevOps            |
+| **Audit Log**            | [modules/settings.md](./modules/settings.md)             | Compliance, Admin        |
 
 ---
 
-**Document Information**
+## Technical Infrastructure
 
-- Version: 1.0
-- Status: Confidential
-- Last Updated: 2026-03-08
-- History: Split for maintainability
+| Specification      | Path                                                                                 |
+| ------------------ | ------------------------------------------------------------------------------------ |
+| System Arch        | [infrastructure/ARCHITECTURE.md](./infrastructure/ARCHITECTURE.md)                   |
+| Database Schema    | [infrastructure/DATABASE.md](./infrastructure/DATABASE.md)                           |
+| API Reference      | [infrastructure/API.md](./infrastructure/API.md)                                     |
+| AI Protocols       | [infrastructure/AI_PROTOCOLS.md](./infrastructure/AI_PROTOCOLS.md)                   |
+| Billing & Cost     | [infrastructure/BILLING_ALGORITHM.md](./infrastructure/BILLING_ALGORITHM.md)         |
+| Webhook Schemas    | [infrastructure/WEBHOOK_SCHEMAS.md](./infrastructure/WEBHOOK_SCHEMAS.md)             |
+| State Machines     | [infrastructure/STATE_MACHINES.md](./infrastructure/STATE_MACHINES.md)               |
+| Core Flow Diagrams | [infrastructure/FLOW_DIAGRAMS.md](./infrastructure/FLOW_DIAGRAMS.md)                 |
+| Error Registry     | [infrastructure/ERROR_REGISTRY.md](./infrastructure/ERROR_REGISTRY.md)               |
+| Redis Registry     | [infrastructure/REDIS_REGISTRY.md](./infrastructure/REDIS_REGISTRY.md)               |
+| Testing Handbook   | [infrastructure/TESTING_HANDBOOK.md](./infrastructure/TESTING_HANDBOOK.md)           |
+| Coding Patterns    | [infrastructure/CODING_PATTERNS.md](./infrastructure/CODING_PATTERNS.md)             |
+| Symbol Registry    | [infrastructure/SYMBOL_REGISTRY.md](./infrastructure/SYMBOL_REGISTRY.md)             |
+| Directory Map      | [infrastructure/DIRECTORY_MAP.md](./infrastructure/DIRECTORY_MAP.md)                 |
+| Troubleshooting    | [infrastructure/TROUBLESHOOTING.md](./infrastructure/TROUBLESHOOTING.md)             |
+| Workflows/Recipes  | [infrastructure/WORKFLOWS.md](./infrastructure/WORKFLOWS.md)                         |
+| Automation Scripts | [infrastructure/SCRIPTS_REFERENCE.md](./infrastructure/SCRIPTS_REFERENCE.md)         |
+| Env Variables      | [infrastructure/ENVIRONMENT_VARIABLES.md](./infrastructure/ENVIRONMENT_VARIABLES.md) |
+| Design & Mascot    | [infrastructure/DESIGN_SYSTEM.md](./infrastructure/DESIGN_SYSTEM.md)                 |
+| Development / CI   | [infrastructure/DEVELOPMENT.md](./infrastructure/DEVELOPMENT.md)                     |
+| External Services  | [infrastructure/INTEGRATIONS.md](./infrastructure/INTEGRATIONS.md)                   |
+
+---
+
+_Last Updated: 2026-03-20_
