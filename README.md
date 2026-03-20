@@ -1,5 +1,7 @@
 # Specdrivr
 
+[Status: GROUND TRUTH]
+
 **Spec-driven development platform for AI-augmented teams.**
 
 The application that orchestrates spec-driven development workflows. Write what you want to build. Specdrivr translates that into tasks. Your AI agent executes them. Your team reviews. Ship.

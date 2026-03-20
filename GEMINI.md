@@ -8,31 +8,39 @@ You are an expert AI Systems Architect. Your approach prioritizes reasoning-firs
 
 ## 1. Reasoning-First Protocol
 
+- **Ground Truth First**: Before any Directive, verify the implementation status of related features in `documentation/PRODUCT_MAP.md`.
 - **Planning First**: Always create/update `implementation_plan.md` before significant changes.
 - **Knowledge Audit**: Consult existing KIs and documentation before starting research.
-- **Project Skills**: Leverage the expertise library in `.agents/skills/` (Architect, Frontend, Backend, QA, DB, Evaluator, **PM**, **Roadmap**).
-- **Subagent Awareness**: Be aware of Claude Code subagents in `.claude/agents/` (Fullstack, Next.js, **Product Manager**, etc.) when planning cross-agent workflows.
-- **Validation**: Verify all assumptions about the codebase. NO `process[dot]env` access outside `@/lib/env` or `@/lib/env-script`.
+- **One-Shot Success**: ALWAYS consult `infrastructure/CODING_PATTERNS.md` and `infrastructure/DIRECTORY_MAP.md` before writing code.
+- **Troubleshooting**: If a build or test fails, follow the `infrastructure/TROUBLESHOOTING.md` decision tree.
+- **Validation**: Verify all assumptions about the codebase. NO `process[dot]env` access outside `@/lib/env`.
 
-## 2. Git Hooks & RCA Protocol
+## 2. Skills & Specialized Expertise
 
-- **Integrity**: Adhere to `AGENTS.md` Section 5.
-- **RCA Mandatory**: Never bypass hooks without a documented Root Cause Analysis (RCA) in `BRANCH_CHANGES.md`.
-- **User Override**: If a user provides a direct order to bypass, document it as the justification.
+Specdrivr has a modular expertise library. Use `activate_skill` to load specialized instructions:
 
-## 3. Technical Constraints
+| **Skill Name**         | **Expertise Area**     | **When to Activate**                 |
+| :--------------------- | :--------------------- | :----------------------------------- |
+| `senior-architect`     | System Design / ADRs   | Before major structural changes.     |
+| `database-designer`    | Schema / Migrations    | When modifying `src/db/schema.ts`.   |
+| `senior-frontend`      | React 19 / Next.js 16  | When building complex UI or hooks.   |
+| `senior-backend`       | API / Repositories     | When building actions or data logic. |
+| `senior-qa`            | Vitest / Playwright    | Before writing or fixing tests.      |
+| `senior-pm`            | Planning / Roadmap     | To refine implementation plans.      |
+| `tech-stack-evaluator` | Security / Performance | During architectural audits.         |
 
-- **Key Files**: Reference `AGENTS.md` Section 3 for file locations.
+## 3. Context Efficiency Mandates
+
+- **Surgical Reads**: Use `start_line` and `end_line` in `read_file` to minimize context usage.
+- **Vertical Scoping**: Focus searches on specific module directories (e.g., `documentation/modules/auth.md`) rather than reading the entire docs folder.
+- **Parallel Search**: Use `grep_search` with specific `include_pattern` to find symbols across multiple files in one turn.
+
+## 4. Technical Constraints
+
 - **Package Manager**: Use `pnpm` exclusively.
 - **Database**: `db:generate` then `db:migrate`. Never `db:push`.
 - **Security**: Sanctitize all user-input HTML via `DOMPurify`.
-
-## 4. UI & Design Standards
-
-- **Design Tokens**: Use CSS variables from `globals.css`. No hex codes.
-- **Components**: Standardize on `shadcn/ui` components. Only use custom components when absolutely necessary.
-- **Imports**: Import components from `@/components/ui/*`.
-- **Security**: Import from `@/lib/env`. Never access `process[dot]env` directly.
+- **Imports**: Import components from `@/components/ui/*`. Use design tokens from `globals.css`.
 
 ## 5. Documentation & Reporting
 
