@@ -9,12 +9,7 @@ import {
   type TaskStatus,
 } from '@/db/schema';
 import * as schema from '@/db/schema';
-import {
-  planRepository,
-  specificationRepository,
-  agentSessionRepository,
-  agentConfigRepository,
-} from '@/repositories';
+import { specificationRepository, agentConfigRepository } from '@/repositories';
 import { getGitHubConfig, createPullRequest } from '@/lib/github';
 import { eq, desc, sql, and, asc, getTableColumns, inArray } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
@@ -334,7 +329,8 @@ export class TaskRepository extends BaseRepository {
 
         return updatedTask as Task;
       });
-    }).then((updatedTask) => {      if (!updatedTask) return updatedTask;
+    }).then((updatedTask) => {
+      if (!updatedTask) return updatedTask;
 
       const t = updatedTask;
 
@@ -849,7 +845,10 @@ export class TaskRepository extends BaseRepository {
   /**
    * Triggers GitHub PR creation if configured for the project.
    */
-  private async triggerPullRequestAutomation(taskId: number, planCompleted: boolean): Promise<void> {
+  private async triggerPullRequestAutomation(
+    taskId: number,
+    planCompleted: boolean
+  ): Promise<void> {
     try {
       const task = await this.getById(taskId);
       if (!task || !task.specId) return;
