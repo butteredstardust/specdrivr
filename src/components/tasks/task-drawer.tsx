@@ -442,13 +442,19 @@ function DrawerFooter({
         </TooltipProvider>
       </div>
 
-      {(devMode || jsonOpen) && (
+      {(devMode || jsonOpen || (task.totalCostUsd && task.totalCostUsd > 0)) && (
         <div className="space-y-3">
-          {devMode && (
+          {(devMode || (task.totalCostUsd && task.totalCostUsd > 0)) && (
             <div className="text-text-muted flex items-center gap-4 font-mono text-[10px] tracking-wider uppercase">
-              <span>Prompt: {task.promptTokensUsed?.toLocaleString() ?? '---'}</span>
-              <span>Completion: {task.completionTokensUsed?.toLocaleString() ?? '---'}</span>
-              <span>Cost: ${task.totalCostUsd != null ? task.totalCostUsd.toFixed(4) : '---'}</span>
+              {devMode && (
+                <>
+                  <span>Prompt: {task.promptTokensUsed?.toLocaleString() ?? '---'}</span>
+                  <span>Completion: {task.completionTokensUsed?.toLocaleString() ?? '---'}</span>
+                </>
+              )}
+              {task.totalCostUsd != null && task.totalCostUsd > 0 && (
+                <span>Cost: ${task.totalCostUsd.toFixed(4)}</span>
+              )}
             </div>
           )}
           {devMode && (

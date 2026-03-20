@@ -86,7 +86,7 @@ export function TaskRow({
     task.status === 'in_progress'
       ? 'border-l-2 border-accent-violet bg-accent-violet/5'
       : task.status === 'blocked'
-        ? 'border-l-2 border-status-red'
+        ? 'border-l-2 border-phosphor-amber bg-phosphor-amber/5'
         : 'border-l-2 border-transparent';
 
   return (
