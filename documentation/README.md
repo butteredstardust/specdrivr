@@ -20,6 +20,7 @@ Global system architecture, technical constraints, and development guidelines.
 - **[Redis Registry](./infrastructure/REDIS_REGISTRY.md)**: Key prefixes, TTLs, and cache policies.
 - **[Testing Handbook](./infrastructure/TESTING_HANDBOOK.md)**: Standardized patterns for mocks and E2E.
 - **[Coding Patterns](./infrastructure/CODING_PATTERNS.md)**: Copy-pasteable "Golden Path" snippets.
+- **[Symbol Registry](./infrastructure/SYMBOL_REGISTRY.md)**: Core method signatures for Repositories.
 - **[Directory Map](./infrastructure/DIRECTORY_MAP.md)**: Strict folder responsibilities and rules.
 - **[Troubleshooting](./infrastructure/TROUBLESHOOTING.md)**: Decision tree for agent-led healing.
 - **[Workflows & Recipes](./infrastructure/WORKFLOWS.md)**: Checklists for common technical tasks.
