@@ -27,6 +27,12 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     const { id } = await params;
     const planId = parseInt(id, 10);
+    if (isNaN(planId)) {
+      return NextResponse.json(
+        { error: { code: 'INVALID_INPUT', message: 'Invalid plan ID' } },
+        { status: 400 }
+      );
+    }
 
     const plan = await planRepository.getById(planId);
     if (!plan)
@@ -51,14 +57,16 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    let body = {};
+    // I-4: Only extract `notes` from the body — never allow body to override the URL-derived planId
+    let notes: string | null | undefined;
     try {
-      body = await request.json();
+      const body = (await request.json()) as Record<string, unknown>;
+      notes = typeof body.notes === 'string' ? body.notes : undefined;
     } catch {
       // Empty body is okay for simple approval
     }
 
-    const parsed = ApprovePlanSchema.parse({ id: planId, ...body });
+    const parsed = ApprovePlanSchema.parse({ id: planId, notes });
 
     // 1. Approve the plan and create agent session
     const { plan: updatedPlan, sessionId } = await planRepository.approvePlan({

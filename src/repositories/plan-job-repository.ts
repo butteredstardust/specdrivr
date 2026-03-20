@@ -1,6 +1,6 @@
 import { db } from '@/db';
 import { planJobs, type PlanJobInsert, type PlanJobSelect as PlanJob } from '@/db/schema';
-import { eq, and, desc, lt, inArray } from 'drizzle-orm';
+import { eq, and, asc, desc, lt, inArray } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError } from '@/lib/errors';
 
@@ -45,7 +45,7 @@ export class PlanJobRepository extends BaseRepository {
           .select()
           .from(planJobs)
           .where(eq(planJobs.status, 'pending'))
-          .orderBy(desc(planJobs.createdAt))
+          .orderBy(asc(planJobs.createdAt))
           .limit(1)
           .for('update', { skipLocked: true });
 

@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  planRepository,
-  specificationRepository,
-  memberRepository,
-  planJobRepository,
-} from '@/repositories';
+import { specificationRepository, memberRepository, planJobRepository } from '@/repositories';
+import { db } from '@/db';
+import { plans } from '@/db/schema';
 import { auth } from '@/lib/auth';
 import { handleApiError } from '@/lib/error-handler';
 import { NotFoundError, AuthorizationError } from '@/lib/errors';
@@ -26,6 +23,12 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
 
     const { id } = await params;
     const specId = parseInt(id, 10);
+    if (isNaN(specId)) {
+      return NextResponse.json(
+        { error: { code: 'INVALID_INPUT', message: 'Invalid spec ID' } },
+        { status: 400 }
+      );
+    }
 
     const spec = await specificationRepository.getById(specId);
     if (!spec) {
@@ -50,24 +53,30 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // 1. Create a plan record immediately
-    const plan = await planRepository.create({
-      specId,
-      specVersionId: spec.currentVersionId,
-      status: 'pending_approval',
-      createdBy: session.user.id,
-    });
+    // I-6: Wrap all 3 writes atomically. If job creation fails, the plan and spec
+    // status change are rolled back — the spec cannot get stuck in 'pending_plan'.
+    const plan = await db.transaction(async (tx) => {
+      const [createdPlan] = await tx
+        .insert(plans)
+        .values({
+          specId,
+          specVersionId: spec.currentVersionId ?? null,
+          status: 'pending_approval',
+          createdBy: session.user.id,
+        })
+        .returning();
 
-    // 2. Update spec status to 'pending_plan'
-    await specificationRepository.updateStatus(specId, 'pending_plan');
+      await specificationRepository.updateStatus(specId, 'pending_plan');
 
-    // 3. Queue background job
-    await planJobRepository.create({
-      projectId: spec.projectId,
-      specId,
-      planId: plan.id,
-      type: 'generate_plan',
-      status: 'pending',
+      await planJobRepository.create({
+        projectId: spec.projectId,
+        specId,
+        planId: createdPlan.id,
+        type: 'generate_plan',
+        status: 'pending',
+      });
+
+      return createdPlan;
     });
 
     logger.info({ specId, planId: plan.id }, 'Plan generation job queued');

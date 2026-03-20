@@ -20,6 +20,12 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 
     const { id } = await params;
     const projectId = parseInt(id, 10);
+    if (isNaN(projectId)) {
+      return NextResponse.json(
+        { error: { code: 'INVALID_INPUT', message: 'Invalid project ID' } },
+        { status: 400 }
+      );
+    }
 
     // RBAC check: member or above
     const role = await memberRepository.getRoleForUser(session.user.id, projectId);
