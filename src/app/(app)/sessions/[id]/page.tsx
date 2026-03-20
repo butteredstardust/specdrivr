@@ -8,8 +8,10 @@ import { Button } from '@/components/ui/button';
 import { PixelBadge } from '@/components/ui/pixel-badge';
 import { EventLog } from '@/components/mission-control/event-log';
 import { TaskTimeline } from '@/components/sessions/task-timeline';
-import { Play, Pause, XCircle } from 'lucide-react';
+import { Play, Pause, XCircle, ExternalLink, AlertCircle } from 'lucide-react';
+import { GitHubLogoIcon } from '@radix-ui/react-icons';
 import { Progress } from '@/components/ui/progress';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface AgentSession {
   id: number;
@@ -21,6 +23,8 @@ interface AgentSession {
   tasksExecuted: number;
   tasksSucceeded: number;
   tasksFailed: number;
+  pullRequestUrl?: string | null;
+  errorMessage?: string | null;
 }
 
 const TERMINAL_STATUSES = ['completed', 'failed', 'cancelled'];
@@ -142,6 +146,18 @@ export default function SessionDetailPage({ params }: PageProps) {
               {sessionLabel}
             </code>
             {session && <StatusBadge status={session.status} />}
+            {session?.pullRequestUrl && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 gap-1.5 border-border-default bg-bg-elevated/50 px-2 py-0"
+                onClick={() => window.open(session.pullRequestUrl!, '_blank')}
+              >
+                <GitHubLogoIcon className="h-3.5 w-3.5" />
+                <span className="text-[10px] font-medium tracking-tight">VIEW PR</span>
+                <ExternalLink className="h-3 w-3 opacity-50" />
+              </Button>
+            )}
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -208,6 +224,18 @@ export default function SessionDetailPage({ params }: PageProps) {
         </div>
       )}
 
+      {session?.status === 'failed' && session.errorMessage && (
+        <div className="border-border-default border-b px-6 py-4">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Execution Failed</AlertTitle>
+            <AlertDescription className="font-mono text-xs">
+              {session.errorMessage}
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+
       <div className="divide-border-default flex min-h-0 flex-1 divide-x overflow-hidden">
         <div className="w-1/2 overflow-y-auto p-4">
           <TaskTimeline sessionId={id} />
@@ -220,7 +248,7 @@ export default function SessionDetailPage({ params }: PageProps) {
           <p className="text-text-secondary mb-3 font-mono text-xs">
             $ specdrivr agent start --session {sessionLabel}
           </p>
-          <EventLog sessionId={id} className="flex min-h-0 flex-1 flex-col" />
+          <EventLog sessionId={id} onUpdate={mutate} className="flex min-h-0 flex-1 flex-col" />
         </div>
       </div>
     </div>

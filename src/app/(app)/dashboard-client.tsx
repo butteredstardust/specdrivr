@@ -39,6 +39,7 @@ export interface AgentSession {
   currentTaskTitle?: string | null;
   totalTasks?: number | null;
   backend?: 'gemini' | 'claude';
+  pullRequestUrl?: string | null;
 }
 
 export interface BlockedTask {
@@ -183,7 +184,7 @@ export function DashboardClient({ initialSessions, initialTasks }: DashboardClie
                   />
                 </div>
                 <div className="lg:pl-6">
-                  <EventLog sessionId={activeSession.id} />
+                  <EventLog sessionId={activeSession.id} onUpdate={mutate} />
                 </div>
               </div>
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.2fr_1fr]">
@@ -208,7 +209,7 @@ export function DashboardClient({ initialSessions, initialTasks }: DashboardClie
                   </div>
                 </div>
                 <div>
-                  <ProjectActivityFeed projectId={activeProjectId!} />
+                  {activeProjectId && <ProjectActivityFeed projectId={activeProjectId} />}
                 </div>
               </div>
             </div>
@@ -216,7 +217,7 @@ export function DashboardClient({ initialSessions, initialTasks }: DashboardClie
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.5fr_1fr]">
               <RecentSessions sessions={recentSessions} />
               <div className="bg-bg-surface border-border-default h-fit rounded-xl border p-6">
-                <ProjectActivityFeed projectId={activeProjectId!} />
+                {activeProjectId && <ProjectActivityFeed projectId={activeProjectId} />}
               </div>
             </div>
           )}

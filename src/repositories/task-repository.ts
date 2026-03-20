@@ -355,14 +355,16 @@ export class TaskRepository extends BaseRepository {
           .where(eq(agentSessions.id, sessionId));
 
         // 6. Log TASK_START event
-        await tx.insert(agentEvents).values({
+        const startEvent = {
           sessionId,
           specId: updatedTask.specId,
           taskId: updatedTask.id,
           eventType: 'TASK_START',
           message: `Agent started Task ${updatedTask.externalId}: ${updatedTask.title}`,
           metadata: { externalId: updatedTask.externalId },
-        });
+        };
+        await tx.insert(agentEvents).values(startEvent);
+        void this.publishToSession(sessionId, 'events', startEvent);
 
         return updatedTask as Task;
       });
@@ -870,8 +872,9 @@ export class TaskRepository extends BaseRepository {
             // Log granular task events
             void (async () => {
               try {
-                await db.insert(agentEvents).values({
-                  sessionId: session?.id || 0,
+                const sId = session?.id || 0;
+                const eventData = {
+                  sessionId: sId,
                   specId: plan.specId,
                   taskId: task.id,
                   eventType: finalStatus === 'done' ? 'TASK_DONE' : 'TASK_FAILED',
@@ -884,7 +887,12 @@ export class TaskRepository extends BaseRepository {
                     exitCode: data.exitCode,
                     error: data.errorMessage,
                   },
-                });
+                };
+                await db.insert(agentEvents).values(eventData);
+                if (sId) {
+                  void this.publishToSession(sId, 'events', eventData);
+                  void this.publishToSession(sId, 'updates', { type: 'update' });
+                }
               } catch (err) {
                 logger.warn({ err, taskId: task.id }, 'Failed to log task completion event');
               }

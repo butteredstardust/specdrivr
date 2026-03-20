@@ -189,13 +189,15 @@ export class PlanRepository extends BaseRepository {
         });
 
         // 6. Log PLAN_APPROVED event
-        await tx.insert(agentEvents).values({
+        const approveEvent = {
           sessionId: session.id,
           specId: plan.specId,
           eventType: 'PLAN_APPROVED',
           message: `Plan approved by ${data.userId}`,
           metadata: { planId: plan.id, userId: data.userId },
-        });
+        };
+        await tx.insert(agentEvents).values(approveEvent);
+        void this.publishToSession(session.id, 'events', approveEvent);
 
         return { plan: updatedPlan, sessionId: session.id };
       });
@@ -271,13 +273,15 @@ export class PlanRepository extends BaseRepository {
         });
 
         // Log the decision to agent_events
-        await tx.insert(agentEvents).values({
+        const decisionEvent = {
           sessionId: 0,
           specId: plan.specId,
           eventType: updatedPlan.status === 'rejected' ? 'PLAN_REJECTED' : 'CHANGES_REQUESTED',
           message: `Plan ${updatedPlan.status === 'rejected' ? 'rejected' : 'changes requested'} by ${data.userId}`,
           metadata: { planId: plan.id, userId: data.userId, notes: data.notes },
-        });
+        };
+        await tx.insert(agentEvents).values(decisionEvent);
+        // Rejections aren't currently tied to an active session, so we don't publish to session:id:events here
 
         return updatedPlan;
       });
@@ -353,13 +357,15 @@ export class PlanRepository extends BaseRepository {
         });
 
         // Log the decision to agent_events
-        await tx.insert(agentEvents).values({
+        const decisionEvent = {
           sessionId: 0,
           specId: plan.specId,
           eventType: updatedPlan.status === 'rejected' ? 'PLAN_REJECTED' : 'CHANGES_REQUESTED',
           message: `Plan ${updatedPlan.status === 'rejected' ? 'rejected' : 'changes requested'} by ${data.userId}`,
           metadata: { planId: plan.id, userId: data.userId, notes: data.notes },
-        });
+        };
+        await tx.insert(agentEvents).values(decisionEvent);
+        // Rejections aren't currently tied to an active session, so we don't publish to session:id:events here
 
         return updatedPlan;
       });

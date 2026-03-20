@@ -166,31 +166,32 @@ export class AgentSessionRepository extends BaseRepository {
     }
 
     // 1. Log Session Started event
-    await this.executeQuery(() =>
-      db.insert(agentEvents).values({
-        sessionId: session.id,
-        specId: session.specId || null,
-        eventType: 'SESSION_STARTED',
-        message: `Agent session SESS-${String(session.id).padStart(3, '0')} started`,
-        metadata: {
-          projectId: session.projectId,
-          planId: session.planId,
-          startedBy: session.startedBy,
-        },
-      })
-    );
+    const startEvent = {
+      sessionId: session.id,
+      specId: session.specId || null,
+      eventType: 'SESSION_STARTED',
+      message: `Agent session SESS-${String(session.id).padStart(3, '0')} started`,
+      metadata: {
+        projectId: session.projectId,
+        planId: session.planId,
+        startedBy: session.startedBy,
+      },
+    };
+
+    await this.executeQuery(() => db.insert(agentEvents).values(startEvent));
+    void this.publishToSession(session.id, 'events', startEvent);
 
     // 2. Log Plan Approved event if this session is linked to a plan
     if (session.planId) {
-      await this.executeQuery(() =>
-        db.insert(agentEvents).values({
-          sessionId: session.id,
-          specId: session.specId || null,
-          eventType: 'PLAN_APPROVED',
-          message: `Plan #${session.planId} approved and execution started`,
-          metadata: { planId: session.planId },
-        })
-      );
+      const planEvent = {
+        sessionId: session.id,
+        specId: session.specId || null,
+        eventType: 'PLAN_APPROVED',
+        message: `Plan #${session.planId} approved and execution started`,
+        metadata: { planId: session.planId },
+      };
+      await this.executeQuery(() => db.insert(agentEvents).values(planEvent));
+      void this.publishToSession(session.id, 'events', planEvent);
     }
 
     // Trigger session.started webhook
@@ -246,15 +247,20 @@ export class AgentSessionRepository extends BaseRepository {
 
           const eventType = eventTypeMap[data.status];
           if (eventType) {
-            await tx.insert(agentEvents).values({
+            const eventData = {
               sessionId: id,
               specId: updatedSession.specId,
               eventType,
               message: `Session status changed to ${data.status}`,
               metadata: { actorId },
-            });
+            };
+            await tx.insert(agentEvents).values(eventData);
+            void this.publishToSession(id, 'events', eventData);
           }
         }
+
+        // 5. Trigger session update channel
+        void this.publishToSession(id, 'updates', { type: 'update', status: data.status });
 
         return updatedSession;
       });
