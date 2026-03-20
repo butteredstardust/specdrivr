@@ -37,6 +37,8 @@ This index maps features to their new "Vertical Slice" module documentation.
 | State Machines     | [infrastructure/STATE_MACHINES.md](./infrastructure/STATE_MACHINES.md) |
 | Core Flow Diagrams | [infrastructure/FLOW_DIAGRAMS.md](./infrastructure/FLOW_DIAGRAMS.md) |
 | Error Registry     | [infrastructure/ERROR_REGISTRY.md](./infrastructure/ERROR_REGISTRY.md) |
+| Redis Registry     | [infrastructure/REDIS_REGISTRY.md](./infrastructure/REDIS_REGISTRY.md) |
+| Testing Handbook   | [infrastructure/TESTING_HANDBOOK.md](./infrastructure/TESTING_HANDBOOK.md) |
 | Coding Patterns    | [infrastructure/CODING_PATTERNS.md](./infrastructure/CODING_PATTERNS.md) |
 | Directory Map      | [infrastructure/DIRECTORY_MAP.md](./infrastructure/DIRECTORY_MAP.md)   |
 | Troubleshooting    | [infrastructure/TROUBLESHOOTING.md](./infrastructure/TROUBLESHOOTING.md) |

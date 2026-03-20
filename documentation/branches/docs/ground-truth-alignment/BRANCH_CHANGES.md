@@ -19,6 +19,8 @@ This branch performs a complete structural reorganization of the Specdrivr docum
 | `documentation/README.md` | Updated as master index. | Single entry point for all documentation. | High: Better navigation. | 10/10 | N/A |
 | `AGENTS.md` | Added tool strategies and closing rituals. | Improve agent autonomy and context efficiency. | High: Better task completion. | 10/10 | N/A |
 | `GEMINI.md` | Formalized reasoning loops and skill mapping. | Optimize Gemini's planning and execution. | High: Better adherence to plans. | 10/10 | N/A |
+| `infrastructure/REDIS_REGISTRY.md` | Centralized Redis key prefixes and TTL policies. | Prevent key collisions and memory leaks. | High: Improved distributed state safety. | 10/10 | N/A |
+| `infrastructure/TESTING_HANDBOOK.md` | Added standardized mocking and E2E patterns. | Improve agent success in writing and fixing tests. | High: Better test quality. | 10/10 | N/A |
 | `USER_INTERFACE.md` | Content migrated to modules and deleted. | Overly large (1600+ lines) and fragmented. | High: Reduced context noise. | 10/10 | Reorganized into vertical modules. |
 | `PRODUCT_FEATURES.md` | Content migrated to modules and deleted. | Redundant with modular specifications. | High: Reduced duplication. | 10/10 | Reorganized into vertical modules. |
 | `MASTER_SPECIFICATION.md` | Deleted. | Redundant with new README.md. | Low: Cleanup. | 10/10 | Consolidated into README.md. |
