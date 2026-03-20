@@ -4,12 +4,15 @@ import {
   specVersions,
   plans,
   auditLog,
+  agentConfig,
+  planJobs,
   type SpecificationSelect as Specification,
 } from '@/db/schema';
 import { eq, and, ne, desc, sql } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, DatabaseError } from '@/lib/errors';
 import { dispatchWebhookEvent } from '@/lib/webhooks';
+import { logger } from '@/lib/logger';
 
 export { type SpecificationSelect as Specification } from '@/db/schema';
 
@@ -260,6 +263,50 @@ export class SpecificationRepository extends BaseRepository {
         specId: updatedSpec.id,
         data: {},
       });
+
+      // Handle Auto-Generation logic
+      (async () => {
+        try {
+          const [config] = await db
+            .select()
+            .from(agentConfig)
+            .where(eq(agentConfig.projectId, updatedSpec.projectId))
+            .limit(1);
+
+          if (config?.autoGeneratePlan) {
+            logger.info({ specId: updatedSpec.id }, 'Auto-generating plan for new spec version');
+
+            // 1. Create plan
+            const [plan] = await db
+              .insert(plans)
+              .values({
+                specId: updatedSpec.id,
+                specVersionId: updatedSpec.currentVersionId,
+                status: 'pending_approval',
+                createdBy: updatedSpec.createdBy,
+              })
+              .returning();
+
+            // 2. Update spec status
+            await db
+              .update(specifications)
+              .set({ status: 'pending_plan' })
+              .where(eq(specifications.id, updatedSpec.id));
+
+            // 3. Queue job
+            await db.insert(planJobs).values({
+              projectId: updatedSpec.projectId,
+              specId: updatedSpec.id,
+              planId: plan.id,
+              type: 'generate_plan',
+              status: 'pending',
+            });
+          }
+        } catch (err) {
+          logger.error({ err, specId: updatedSpec.id }, 'Failed to trigger auto-plan generation');
+        }
+      })();
+
       return updatedSpec;
     });
   }
