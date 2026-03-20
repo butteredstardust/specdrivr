@@ -16,6 +16,8 @@ Global system architecture, technical constraints, and development guidelines.
 - **[State Machines](./infrastructure/STATE_MACHINES.md)**: Status enums and transition rules.
 - **[Core Flow Diagrams](./infrastructure/FLOW_DIAGRAMS.md)**: Mermaid sequence diagrams for async flows.
 - **[Error Registry](./infrastructure/ERROR_REGISTRY.md)**: Standardized error codes and envelopes.
+- **[Redis Registry](./infrastructure/REDIS_REGISTRY.md)**: Key prefixes, TTLs, and cache policies.
+- **[Testing Handbook](./infrastructure/TESTING_HANDBOOK.md)**: Standardized patterns for mocks and E2E.
 - **[Coding Patterns](./infrastructure/CODING_PATTERNS.md)**: Copy-pasteable "Golden Path" snippets.
 - **[Directory Map](./infrastructure/DIRECTORY_MAP.md)**: Strict folder responsibilities and rules.
 - **[Troubleshooting](./infrastructure/TROUBLESHOOTING.md)**: Decision tree for agent-led healing.
