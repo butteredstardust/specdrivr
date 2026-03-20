@@ -37,7 +37,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const { sessionId } = await taskRepository.completeTaskAttempt(taskId, parsed.data);
+    const { sessionId: _sessionId } = await taskRepository.completeTaskAttempt(taskId, parsed.data);
 
     return NextResponse.json({ data: { success: true } });
   } catch (error) {
