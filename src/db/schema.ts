@@ -450,6 +450,7 @@ export const agentSessions = pgTable(
     totalPromptTokens: integer('total_prompt_tokens').default(0),
     totalCompletionTokens: integer('total_completion_tokens').default(0),
     totalCostUsd: doublePrecision('total_cost_usd').default(0),
+    maxConcurrentTasks: integer('max_concurrent_tasks').notNull().default(1),
     pauseCount: integer('pause_count').notNull().default(0),
     agentVersion: text('agent_version'),
     gitBaseBranch: text('git_base_branch'),

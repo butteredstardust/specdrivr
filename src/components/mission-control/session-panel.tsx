@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Pause, Play, XCircle, RefreshCw, ChevronRight } from 'lucide-react';
+import { Pause, Play, XCircle, RefreshCw, ChevronRight, ExternalLink } from 'lucide-react';
+import { GitHubLogoIcon } from '@radix-ui/react-icons';
 import type { UserRole } from '@/db/schema';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,7 @@ interface AgentSession {
   currentTaskTitle?: string | null;
   totalTasks?: number | null;
   backend?: 'gemini' | 'claude';
+  pullRequestUrl?: string | null;
 }
 
 interface SessionPanelProps {
@@ -257,12 +259,29 @@ export function SessionPanel({
           </div>
         )}
         {session?.specId && (
-          <Link
-            href={`/specs/${session.specId}?tab=changes`}
-            className="text-phosphor-amber text-sm underline-offset-2 hover:underline"
-          >
-            View Changes →
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href={`/specs/${session.specId}?tab=changes`}
+              className="text-phosphor-amber text-sm underline-offset-2 hover:underline"
+            >
+              View Changes →
+            </Link>
+            {session.pullRequestUrl && (
+              <>
+                <span className="text-border-default">|</span>
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="text-text-secondary hover:text-text-primary h-auto p-0 text-sm font-normal"
+                  onClick={() => window.open(session.pullRequestUrl!, '_blank')}
+                >
+                  <GitHubLogoIcon className="mr-1.5 h-3.5 w-3.5" />
+                  View PR
+                  <ExternalLink className="ml-1 h-3 w-3 opacity-50" />
+                </Button>
+              </>
+            )}
+          </div>
         )}
       </div>
     );

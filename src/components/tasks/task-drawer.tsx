@@ -52,6 +52,7 @@ export interface Task {
   promptTokensUsed: number | null;
   completionTokensUsed: number | null;
   totalCostUsd: number | null;
+  pullRequestUrl?: string | null;
 }
 
 const TASK_STATUS_CONFIG: Record<
