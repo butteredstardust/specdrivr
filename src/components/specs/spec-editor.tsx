@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { clientLogger } from '@/lib/logger-client';
+import { specdrivrTheme } from '@/lib/editor-theme';
 
 export type SpecStatus =
   | 'drafting'
@@ -190,7 +191,7 @@ export function SpecEditor(props: SpecEditorProps) {
             value={content}
             onChange={setContent}
             extensions={[markdown()]}
-            theme="dark"
+            theme={specdrivrTheme}
             height="100%"
             className="h-full"
             editable={!isReadOnly}

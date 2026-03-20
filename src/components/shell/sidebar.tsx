@@ -164,7 +164,7 @@ function SidebarBottom({ collapsed }: { collapsed: boolean }) {
     <div className="border-border-default border-t">
       {/* Systems icons */}
       <div className="px-3 pt-3 pb-1">
-        <span className="text-text-muted mb-2 block px-1 font-mono text-[8px] tracking-[0.2em] uppercase">
+        <span className="text-text-muted mb-2 block px-1 font-mono text-[11px] tracking-[0.08em] uppercase">
           Systems
         </span>
         <div className="flex items-end justify-around">
@@ -179,7 +179,7 @@ function SidebarBottom({ collapsed }: { collapsed: boolean }) {
       <div className="px-3 pt-1 pb-3">
         <div className="flex items-center gap-1.5">
           <DaemonMascot size={20} expression={overallExpr} />
-          <span className={cn('font-mono text-[10px] tracking-wider uppercase', statusClass)}>
+          <span className={cn('font-mono text-[11px] tracking-[0.08em] uppercase', statusClass)}>
             DAEMON · {statusText}
           </span>
         </div>

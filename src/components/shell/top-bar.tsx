@@ -167,7 +167,7 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
               <p className="text-text-primary text-sm font-semibold">{user?.name}</p>
               <p className="text-text-muted truncate text-xs">{user?.email}</p>
               {user?.role && (
-                <span className="text-text-muted mt-1 inline-block font-mono text-[10px] tracking-widest uppercase">
+                <span className="text-text-muted mt-1 inline-block font-mono text-[11px] tracking-[0.08em] uppercase">
                   {user.role}
                 </span>
               )}

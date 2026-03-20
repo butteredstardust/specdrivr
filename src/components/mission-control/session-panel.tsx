@@ -8,7 +8,7 @@ import type { UserRole } from '@/db/schema';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
+import { Progress, ASCIIProgress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PixelBadge } from '@/components/ui/pixel-badge';
 
@@ -190,11 +190,19 @@ export function SessionPanel({
           )}
 
           {/* Progress bar */}
-          <div className="flex flex-col gap-1">
-            <Progress value={progressPct} className="h-1.5" />
-            <span className="text-text-muted font-mono text-[10px]">
-              {succeeded}/{totalTasks > 0 ? totalTasks : '?'} tasks · {progressPct}%
-            </span>
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-text-muted font-mono text-[10px]">
+                {succeeded}/{totalTasks > 0 ? totalTasks : '?'} tasks · {progressPct}%
+              </span>
+              <ASCIIProgress
+                value={succeeded}
+                max={totalTasks > 0 ? totalTasks : 100}
+                length={15}
+                className="text-status-emerald"
+              />
+            </div>
+            <Progress value={progressPct} className="h-1" />
           </div>
 
           {/* Current task pill */}

@@ -30,7 +30,7 @@ export function ProjectActivityFeed({ projectId, className }: ProjectActivityFee
   if (!activity || activity.length === 0) {
     return (
       <div className={cn('flex flex-col gap-4', className)}>
-        <h2 className="text-text-muted font-mono text-[10px] tracking-widest uppercase">
+        <h2 className="text-text-muted font-mono text-[11px] tracking-[0.08em] uppercase">
           Activity Feed
         </h2>
         <p className="text-text-muted text-xs italic">Waiting for activity...</p>
@@ -40,7 +40,7 @@ export function ProjectActivityFeed({ projectId, className }: ProjectActivityFee
 
   return (
     <div className={cn('flex flex-col gap-4', className)}>
-      <h2 className="text-text-muted font-mono text-[10px] tracking-widest uppercase">
+      <h2 className="text-text-muted font-mono text-[11px] tracking-[0.08em] uppercase">
         Activity Feed
       </h2>
       <div className="flex flex-col gap-3">
@@ -60,7 +60,7 @@ function ActivityRow({ item }: { item: ActivityItem }) {
     <div className="group animate-in fade-in slide-in-from-left-1 flex items-start gap-3">
       <div
         className={cn(
-          'bg-bg-elevated border-border-muted mt-0.5 shrink-0 rounded-full border p-1.5',
+          'bg-bg-elevated border-border-muted mt-0.5 shrink-0 rounded-md border p-1.5',
           colorClass
         )}
       >

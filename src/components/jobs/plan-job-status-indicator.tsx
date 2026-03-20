@@ -22,7 +22,7 @@ export function PlanJobStatusIndicator({ projectId, className }: PlanJobStatusIn
   return (
     <div
       className={cn(
-        'bg-bg-elevated/80 border-border-muted animate-in fade-in slide-in-from-bottom-2 flex items-center gap-3 rounded-full border px-4 py-2 shadow-lg backdrop-blur-sm',
+        'bg-bg-elevated/80 border-border-muted animate-in fade-in slide-in-from-bottom-2 flex items-center gap-3 rounded-lg border px-4 py-2 shadow-lg backdrop-blur-sm',
         className
       )}
     >
@@ -33,7 +33,7 @@ export function PlanJobStatusIndicator({ projectId, className }: PlanJobStatusIn
         </div>
       </div>
       <div className="flex flex-col gap-0.5">
-        <span className="font-mono text-[10px] tracking-widest uppercase opacity-50">
+        <span className="text-text-muted font-mono text-[10px] tracking-[0.08em] uppercase">
           AI AGENT WORKING
         </span>
         <span className="text-text-primary text-xs font-medium">

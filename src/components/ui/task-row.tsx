@@ -100,7 +100,9 @@ export function TaskRow({
                 dot={task.status === 'in_progress'}
                 className="w-16 justify-center"
               >
-                {STATUS_CHAR[task.status]}
+                <span className={cn(task.status === 'in_progress' && 'animate-blink')}>
+                  {STATUS_CHAR[task.status]}
+                </span>
                 {task.status.replace('_', ' ')}
               </PixelBadge>
               <span className="bg-phosphor-amber/10 text-phosphor-amber shrink-0 rounded-sm px-1.5 py-0.5 font-mono text-xs">
