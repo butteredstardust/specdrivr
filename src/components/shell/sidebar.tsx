@@ -243,9 +243,9 @@ export function Sidebar({ projects }: SidebarProps) {
               <PlayfulDaemon size={32} />
               <PlayfulLogo />
               {devMode && (
-                <Badge className="border-phosphor-amber/30 bg-phosphor-amber/20 text-phosphor-amber font-mono text-[10px]">
+                <PixelBadge variant="amber" className="font-mono text-[10px]">
                   DEV
-                </Badge>
+                </PixelBadge>
               )}
               <Button
                 variant="ghost"

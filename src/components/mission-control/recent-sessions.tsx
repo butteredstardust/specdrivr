@@ -14,7 +14,7 @@ interface RecentSession {
   tasksExecuted: number;
   tasksSucceeded?: number;
   tasksFailed?: number;
-  totalTasks?: number;
+  totalTasks?: number | null;
   specTitle?: string | null;
   specName?: string | null;
   backend?: string;
