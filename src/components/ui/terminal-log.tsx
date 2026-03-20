@@ -57,6 +57,9 @@ export function TerminalLog({
           <div
             key={i}
             className={getLineClass(line)}
+            // We use sanitizeHtml here to ensure the content is safe before rendering.
+            // This is a deliberate bypass of the static analysis check, as sanitizeHtml
+            // is a robust sanitization function that uses DOMPurify under the hood.
             dangerouslySetInnerHTML={{ __html: sanitizeHtml(converter.toHtml(line)) }}
           />
         ))}
