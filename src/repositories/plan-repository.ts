@@ -5,6 +5,7 @@ import {
   agentSessions,
   planReviews,
   auditLog,
+  agentEvents,
   type PlanSelect as Plan,
 } from '@/db/schema';
 import { eq } from 'drizzle-orm';
@@ -187,6 +188,15 @@ export class PlanRepository extends BaseRepository {
           detail: { sessionId: session.id },
         });
 
+        // 6. Log PLAN_APPROVED event
+        await tx.insert(agentEvents).values({
+          sessionId: session.id,
+          specId: plan.specId,
+          eventType: 'PLAN_APPROVED',
+          message: `Plan approved by ${data.userId}`,
+          metadata: { planId: plan.id, userId: data.userId },
+        });
+
         return { plan: updatedPlan, sessionId: session.id };
       });
     }).then((result) => {
@@ -260,6 +270,15 @@ export class PlanRepository extends BaseRepository {
           detail: { notes: data.notes },
         });
 
+        // Log the decision to agent_events
+        await tx.insert(agentEvents).values({
+          sessionId: 0,
+          specId: plan.specId,
+          eventType: updatedPlan.status === 'rejected' ? 'PLAN_REJECTED' : 'CHANGES_REQUESTED',
+          message: `Plan ${updatedPlan.status === 'rejected' ? 'rejected' : 'changes requested'} by ${data.userId}`,
+          metadata: { planId: plan.id, userId: data.userId, notes: data.notes },
+        });
+
         return updatedPlan;
       });
     }).then((updatedPlan) => {
@@ -331,6 +350,15 @@ export class PlanRepository extends BaseRepository {
           targetType: 'plan',
           targetId: String(data.planId),
           detail: { notes: data.notes },
+        });
+
+        // Log the decision to agent_events
+        await tx.insert(agentEvents).values({
+          sessionId: 0,
+          specId: plan.specId,
+          eventType: updatedPlan.status === 'rejected' ? 'PLAN_REJECTED' : 'CHANGES_REQUESTED',
+          message: `Plan ${updatedPlan.status === 'rejected' ? 'rejected' : 'changes requested'} by ${data.userId}`,
+          metadata: { planId: plan.id, userId: data.userId, notes: data.notes },
         });
 
         return updatedPlan;

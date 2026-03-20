@@ -234,6 +234,28 @@ export class AgentSessionRepository extends BaseRepository {
           });
         }
 
+        // Log lifecycle events
+        if (data.status) {
+          const eventTypeMap: Record<string, string> = {
+            running: 'SESSION_RESUMED',
+            paused: 'SESSION_PAUSED',
+            cancelled: 'SESSION_CANCELLED',
+            completed: 'SESSION_COMPLETED',
+            failed: 'SESSION_FAILED',
+          };
+
+          const eventType = eventTypeMap[data.status];
+          if (eventType) {
+            await tx.insert(agentEvents).values({
+              sessionId: id,
+              specId: updatedSession.specId,
+              eventType,
+              message: `Session status changed to ${data.status}`,
+              metadata: { actorId },
+            });
+          }
+        }
+
         return updatedSession;
       });
     }).then((updatedSession) => {
