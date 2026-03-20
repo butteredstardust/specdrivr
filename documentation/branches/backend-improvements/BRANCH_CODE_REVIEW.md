@@ -16,6 +16,9 @@ The changes in this branch significantly improve the data integrity and user exp
 ### Data & Seed
 - **`db/seed.ts`**: The addition of real diff data transforms the 'Changes' tab from a skeleton view into a working demonstration. The diffs are realistic and technically accurate for the tasks they describe.
 
+### UI/UX Enhancements
+- **`src/components/ui/matrix-screensaver.tsx`**: The "Ghost in the Machine" implementation is a creative and high-fidelity restyling. The use of per-cell character caching and ghost-echo objects demonstrates strong attention to performance and visual polish. The aesthetic inversion (White-on-Black) aligns perfectly with a premium, minimalist design system.
+
 ## Potential Improvements (Post-Merge)
 - **Audit Logs**: Consider adding similar automated logging for manual user actions on specifications (e.g., status changes, manual task updates) to the `ActivityTab`.
 - **UI Fallbacks**: While we've fixed the data orphaning, the `DiffViewer` could benefit from an explicit "No diff available" messaging even if a record exists but lacks a `patch`.
