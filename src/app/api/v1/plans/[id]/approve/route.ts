@@ -1,13 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  planRepository,
-  specificationRepository,
-  taskRepository,
-  agentConfigRepository,
-  planJobRepository,
-} from '@/repositories';
+import { planRepository, specificationRepository, planJobRepository } from '@/repositories';
 import { auth } from '@/lib/auth';
-import { env } from '@/lib/env';
 import { handleApiError, formatErrorResponse } from '@/lib/error-handler';
 import { requireAdmin } from '@/lib/rbac';
 import { logger } from '@/lib/logger';

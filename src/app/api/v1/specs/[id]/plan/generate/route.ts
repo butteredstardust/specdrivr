@@ -3,8 +3,6 @@ import {
   planRepository,
   specificationRepository,
   memberRepository,
-  notificationRepository,
-  agentConfigRepository,
   planJobRepository,
 } from '@/repositories';
 import { auth } from '@/lib/auth';
