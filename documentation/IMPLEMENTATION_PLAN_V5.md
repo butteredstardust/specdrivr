@@ -86,7 +86,7 @@ This document serves as the definitive execution roadmap for Specdrivr, incorpor
 *Focus: Hardening system boundaries.*
 
 ### 6.1 Blocking Security Hooks
-- [ ] Convert non-blocking pre-push checks (XSS, Secrets, Migrations) into blocking failures.
+- [x] Convert non-blocking pre-push checks (XSS, Secrets, Migrations) into blocking failures.
 
 ### 6.2 Agent Sandbox & Jail
 - [ ] Implement virtual root/directory restriction in the DAEMON agent runtime.
