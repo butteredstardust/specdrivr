@@ -354,6 +354,16 @@ export class TaskRepository extends BaseRepository {
           .set({ currentTaskId: updatedTask.id })
           .where(eq(agentSessions.id, sessionId));
 
+        // 6. Log TASK_START event
+        await tx.insert(agentEvents).values({
+          sessionId,
+          specId: updatedTask.specId,
+          taskId: updatedTask.id,
+          eventType: 'TASK_START',
+          message: `Agent started Task ${updatedTask.externalId}: ${updatedTask.title}`,
+          metadata: { externalId: updatedTask.externalId },
+        });
+
         return updatedTask as Task;
       });
     }).then((updatedTask) => {
@@ -852,10 +862,33 @@ export class TaskRepository extends BaseRepository {
               }
             );
 
-            // Handle GitHub PR Automation
+            // Trigger GitHub PR Automation
             if (finalStatus === 'done') {
               void this.triggerPullRequestAutomation(task.id, planCompleted);
             }
+
+            // Log granular task events
+            void (async () => {
+              try {
+                await db.insert(agentEvents).values({
+                  sessionId: session?.id || 0,
+                  specId: plan.specId,
+                  taskId: task.id,
+                  eventType: finalStatus === 'done' ? 'TASK_DONE' : 'TASK_FAILED',
+                  message:
+                    finalStatus === 'done'
+                      ? `Task completed: ${task.externalId}`
+                      : `Task failed: ${task.externalId}`,
+                  metadata: {
+                    externalId: task.externalId,
+                    exitCode: data.exitCode,
+                    error: data.errorMessage,
+                  },
+                });
+              } catch (err) {
+                logger.warn({ err, taskId: task.id }, 'Failed to log task completion event');
+              }
+            })();
           }
         } catch (err) {
           logger.error(
