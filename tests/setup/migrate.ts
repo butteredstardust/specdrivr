@@ -33,8 +33,12 @@ export async function setup() {
   const templateUrl = new URL(baseDbUrl);
   templateUrl.pathname = '/specdrivr_test_template';
 
+  const migrateCmd = process.platform === 'win32' 
+    ? 'node_modules\\.bin\\drizzle-kit.cmd migrate'
+    : './node_modules/.bin/drizzle-kit migrate';
+
   process.stdout.write('[test setup] Running db:migrate on template database...\n');
-  execSync('pnpm db:migrate', {
+  execSync(migrateCmd, {
     stdio: 'inherit',
     env: {
       ...process.env,
