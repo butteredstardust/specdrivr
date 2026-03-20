@@ -34,7 +34,7 @@ Five-tab interface for managing the spec lifecycle:
 2. **PLAN**: 
    - Displays the AI-generated implementation plan.
    - If `pending_approval`: Shows `[ABANDON]`, `[REQUEST CHANGES]`, and `[APPROVE & EXECUTE]`.
-3. **TASKS**: Filterable, dependency-ordered list of tasks.
+3. **TASKS**: Filterable, dependency-ordered list of tasks. (Detailed in [tasks.md](./tasks.md)).
 4. **CHANGES**: File tree and Shiki diff viewer showing agent-authored code.
 5. **ACTIVITY**: Scoped event log for the specification.
 
