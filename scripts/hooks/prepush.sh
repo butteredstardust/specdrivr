@@ -49,7 +49,9 @@ BLOCKING_CHECKS=(
     "migrations"
     "conflicts"
     "xss"
-    "suite" # Build/Test is mandatory for stability
+    "server-actions" # Missing await auth() = unauthenticated endpoint (security)
+    "client-repos"   # Repository imports in client components = architectural violation / data leak
+    "suite"          # Typecheck is mandatory for type safety
 )
 
 # Track failures
