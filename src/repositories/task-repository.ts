@@ -9,7 +9,7 @@ import {
   type TaskStatus,
 } from '@/db/schema';
 import * as schema from '@/db/schema';
-import { eq, desc, sql, and, asc, getTableColumns } from 'drizzle-orm';
+import { eq, desc, sql, and, asc, getTableColumns, inArray } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, ValidationError, DatabaseError } from '@/lib/errors';
 import { dispatchWebhookEvent, type WebhookEventType } from '@/lib/webhooks';
@@ -97,6 +97,21 @@ export class TaskRepository extends BaseRepository {
     return result as Task[];
   }
 
+  /**
+   * Returns all blocked tasks belonging to a specific project.
+   * Joins through specifications to scope by projectId.
+   */
+  async getBlockedByProjectId(projectId: number): Promise<Task[]> {
+    return this.executeQuery(() =>
+      db
+        .select(getTableColumns(tasks))
+        .from(tasks)
+        .innerJoin(specifications, eq(tasks.specId, specifications.id))
+        .where(and(eq(tasks.status, 'blocked'), eq(specifications.projectId, projectId)))
+        .orderBy(desc(tasks.createdAt))
+    ) as Promise<Task[]>;
+  }
+
   async getByExternalId(externalId: string): Promise<Task | null> {
     const result = await this.executeQuery(() =>
       db.select().from(tasks).where(eq(tasks.externalId, externalId)).limit(1)
@@ -124,7 +139,7 @@ export class TaskRepository extends BaseRepository {
       description: data.description.trim(),
       externalId: data.externalId,
       title: data.title,
-      planId: data.planId ?? 1,
+      planId: data.planId as number, // Required by DB
       specId: data.specId ?? null,
       status: data.status ?? ('todo' as const),
       dependsOn: data.dependsOn ?? [],
@@ -674,6 +689,140 @@ export class TaskRepository extends BaseRepository {
     } catch (err) {
       logger.error({ err }, 'Failed to send task blocked Slack notification');
     }
+  }
+
+  async completeTaskAttempt(
+    taskId: number,
+    data: {
+      status: 'done' | 'failed';
+      output?: string;
+      exitCode?: number;
+      errorMessage?: string;
+    }
+  ): Promise<{ sessionId: number | null }> {
+    const task = await this.getById(taskId);
+    if (!task) {
+      throw new NotFoundError(`Task with ID ${taskId} not found`);
+    }
+
+    const finalStatus = data.status === 'done' ? ('done' as const) : ('failed' as const);
+    let activeSessionId: number | null = null;
+    let planCompleted = false;
+
+    // Steps 1–3 are atomic: task update + attempt insert + optional session close
+    await this.executeQuery(() =>
+      db.transaction(async (tx) => {
+        // 1. Update task status and completedAt
+        await tx
+          .update(tasks)
+          .set({
+            status: finalStatus,
+            completedAt: finalStatus === 'done' ? new Date() : null,
+            updatedAt: new Date(),
+          })
+          .where(eq(tasks.id, taskId));
+
+        // 2. Create task attempt record
+        const [latestAttempt] = await tx
+          .select({ seq: schema.taskAttempts.seq })
+          .from(schema.taskAttempts)
+          .where(eq(schema.taskAttempts.taskId, taskId))
+          .orderBy(desc(schema.taskAttempts.seq))
+          .limit(1);
+
+        const nextSeq = (latestAttempt?.seq ?? 0) + 1;
+
+        const [runningSession] = await tx
+          .select({ id: agentSessions.id })
+          .from(agentSessions)
+          .where(and(eq(agentSessions.planId, task.planId), eq(agentSessions.status, 'running')))
+          .limit(1);
+
+        activeSessionId = runningSession?.id ?? null;
+
+        await tx.insert(schema.taskAttempts).values({
+          taskId,
+          sessionId: activeSessionId,
+          seq: nextSeq,
+          status: finalStatus === 'done' ? 'succeeded' : 'failed',
+          logLines: data.output ? [data.output] : [],
+          exitCode: data.exitCode,
+          errorMessage: data.errorMessage,
+          endedAt: new Date(),
+        });
+
+        // 3. Check if all tasks in the plan are done and close the session atomically
+        const allTasks = await tx
+          .select({ status: tasks.status })
+          .from(tasks)
+          .where(eq(tasks.planId, task.planId));
+
+        const allDone = allTasks.every((t) => t.status === 'done' || t.status === 'skipped');
+
+        if (allDone && activeSessionId) {
+          await tx
+            .update(agentSessions)
+            .set({ status: 'completed', endedAt: new Date() })
+            .where(eq(agentSessions.id, activeSessionId));
+          planCompleted = true;
+        }
+
+        // Fallback: find any running or paused session for SSE notification
+        if (!activeSessionId) {
+          const [fallbackSession] = await tx
+            .select({ id: agentSessions.id })
+            .from(agentSessions)
+            .where(
+              and(
+                eq(agentSessions.planId, task.planId),
+                inArray(agentSessions.status, ['running', 'paused'])
+              )
+            )
+            .limit(1);
+          if (fallbackSession) activeSessionId = fallbackSession.id;
+        }
+      })
+    );
+
+    // Post-commit: fire webhooks and log outside the transaction
+    if (finalStatus === 'done' || finalStatus === 'failed') {
+      (async () => {
+        try {
+          const [plan] = await db.select().from(plans).where(eq(plans.id, task.planId)).limit(1);
+          const [spec] = await db
+            .select({ pid: specifications.projectId })
+            .from(specifications)
+            .where(eq(specifications.id, plan.specId))
+            .limit(1);
+          const [session] = await db
+            .select({ id: agentSessions.id })
+            .from(agentSessions)
+            .where(eq(agentSessions.planId, plan.id))
+            .orderBy(desc(agentSessions.startedAt))
+            .limit(1);
+
+          if (spec) {
+            void dispatchWebhookEvent(
+              spec.pid,
+              finalStatus === 'done' ? 'task.done' : 'task.failed',
+              {
+                taskId: task.id,
+                specId: plan.specId,
+                sessionId: session?.id,
+                data: planCompleted ? { planCompleted: true } : {},
+              }
+            );
+          }
+        } catch (err) {
+          logger.error(
+            { err },
+            `Failed to dispatch task.${finalStatus} webhook after completeTaskAttempt`
+          );
+        }
+      })();
+    }
+
+    return { sessionId: activeSessionId };
   }
 }
 

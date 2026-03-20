@@ -1,8 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useActionState, useRef, useState, useEffect, startTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { loginSchema } from '@/lib/schemas';
 import { authClient } from '@/lib/auth-client';
 import { clientLogger } from '@/lib/logger-client';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
@@ -12,22 +16,36 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
+type LoginValues = z.infer<typeof loginSchema>;
+
+type LoginState = {
+  error: string | null;
+  expression: 'idle' | 'working' | 'error';
+};
+
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get('next') ?? '/';
+  const formRef = useRef<HTMLFormElement>(null);
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [expression, setExpression] = useState<'idle' | 'working' | 'error'>('idle');
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<LoginValues>({
+    // useForm()
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setExpression('working');
+  const loginAction = async (prevState: LoginState, formData: FormData): Promise<LoginState> => {
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
 
     const { data, error: signInError } = await authClient.signIn.email({
       email,
@@ -37,20 +55,36 @@ export default function LoginPage() {
 
     if (signInError) {
       clientLogger.error('Login failed', signInError);
-      setError('Invalid email or password.');
-      setExpression('error');
-      setLoading(false);
-      return;
+      return { error: 'Invalid email or password.', expression: 'error' };
     }
 
     if (data) {
       router.push(next);
     }
+
+    return { error: null, expression: 'working' };
   };
 
-  const isDev =
-    process.env.NODE_ENV === 'development' ||
-    process.env.NEXT_PUBLIC_APP_URL?.includes('localhost');
+  const [state, formAction, isPending] = useActionState(loginAction, {
+    error: null,
+    expression: 'idle',
+  });
+
+  const [isDev, setIsDev] = useState(false);
+  useEffect(() => {
+    setIsDev(window.location.hostname === 'localhost');
+  }, []);
+
+  const expression = isPending ? 'working' : state.expression;
+
+  const onValid = () => {
+    const form = formRef.current;
+    if (form) {
+      startTransition(() => {
+        formAction(new FormData(form));
+      });
+    }
+  };
 
   return (
     <Card className="border-border-default bg-bg-surface w-full max-w-sm">
@@ -64,20 +98,25 @@ export default function LoginPage() {
         </div>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          ref={formRef}
+          action={formAction}
+          onSubmit={handleSubmit(onValid)}
+          className="space-y-4"
+        >
           <div className="space-y-1.5">
             <Label htmlFor="email" className="text-text-secondary font-mono text-xs uppercase">
               Email
             </Label>
             <Input
               id="email"
+              {...register('email')}
               type="email"
               autoFocus
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               className="border-border-default bg-bg-base"
             />
+            {errors.email && <p className="text-status-red text-[10px]">{errors.email.message}</p>}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="password" className="text-text-secondary font-mono text-xs uppercase">
@@ -85,26 +124,30 @@ export default function LoginPage() {
             </Label>
             <Input
               id="password"
+              {...register('password')}
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               className="border-border-default bg-bg-base"
             />
+            {errors.password && (
+              <p className="text-status-red text-[10px]">{errors.password.message}</p>
+            )}
           </div>
 
-          {error && (
+          {(state.error || errors.root) && (
             <Alert variant="destructive">
-              <AlertDescription className="font-mono text-xs">{error}</AlertDescription>
+              <AlertDescription className="font-mono text-xs">
+                {state.error || errors.root?.message}
+              </AlertDescription>
             </Alert>
           )}
 
           <Button
             type="submit"
-            disabled={loading}
+            disabled={isPending}
             className="bg-accent-violet hover:bg-accent-violet-dim w-full font-mono text-sm tracking-wider uppercase transition-colors"
           >
-            {loading ? 'Signing in…' : 'Sign In'}
+            {isPending ? 'Signing in…' : 'Sign In'}
           </Button>
           <div className="text-right">
             <Link
@@ -130,15 +173,10 @@ export default function LoginPage() {
                 variant="outline"
                 size="sm"
                 className="hover:bg-accent-violet/5 hover:text-accent-violet w-full font-mono text-xs transition-colors"
-                onClick={async () => {
-                  setEmail(quickEmail);
-                  setPassword('Password123!');
-                  const { data } = await authClient.signIn.email({
-                    email: quickEmail,
-                    password: 'Password123!',
-                    callbackURL: next,
-                  });
-                  if (data) router.push(next);
+                onClick={() => {
+                  setValue('email', quickEmail);
+                  setValue('password', 'Password123!');
+                  formRef.current?.requestSubmit();
                 }}
               >
                 {label}

@@ -4,9 +4,8 @@ import { handleApiError, formatErrorResponse } from '@/lib/error-handler';
 import { auth } from '@/lib/auth';
 import { requireMember } from '@/lib/rbac';
 import { z } from 'zod';
-import { db } from '@/db';
-import { tasks, specVersions, specifications } from '@/db/schema';
-import { count, eq, desc, sql } from 'drizzle-orm';
+import { getEnrichedSpecs } from '@/queries/specs-query';
+import { safeParseUrlParams } from '@/lib/api-utils';
 
 const SpecsQuerySchema = z.object({
   projectId: z.coerce.number().int().positive(),
@@ -25,8 +24,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { searchParams } = new URL(request.url);
-    const parsed = SpecsQuerySchema.safeParse(Object.fromEntries(searchParams.entries()));
+    const parsed = safeParseUrlParams(request, SpecsQuerySchema);
     if (!parsed.success) {
       return NextResponse.json(
         formatErrorResponse({ message: 'Invalid query parameters', details: parsed.error.errors }),
@@ -47,39 +45,12 @@ export async function GET(request: NextRequest) {
     const safeLimit = Math.min(limit, 100);
     const offset = (page - 1) * safeLimit;
 
-    // Subquery: count tasks per spec
-    const taskCountSubq = db
-      .select({ specId: tasks.specId, total: count().as('total') })
-      .from(tasks)
-      .groupBy(tasks.specId)
-      .as('task_counts');
+    const { data: rows, total } = await getEnrichedSpecs({
+      projectId,
+      limit: safeLimit,
+      offset,
+    });
 
-    const [rows, countResult] = await Promise.all([
-      db
-        .select({
-          id: specifications.id,
-          name: specifications.name,
-          status: specifications.status,
-          currentVersionId: specifications.currentVersionId,
-          createdAt: specifications.createdAt,
-          updatedAt: specifications.updatedAt,
-          taskCount: taskCountSubq.total,
-          currentVersionNumber: specVersions.versionNumber,
-        })
-        .from(specifications)
-        .leftJoin(taskCountSubq, eq(specifications.id, taskCountSubq.specId))
-        .leftJoin(specVersions, eq(specifications.currentVersionId, specVersions.id))
-        .where(eq(specifications.projectId, projectId))
-        .orderBy(desc(specifications.createdAt))
-        .limit(safeLimit)
-        .offset(offset),
-      db
-        .select({ count: sql<number>`count(*)` })
-        .from(specifications)
-        .where(eq(specifications.projectId, projectId)),
-    ]);
-
-    const total = Number(countResult[0]?.count ?? 0);
     return NextResponse.json({
       data: rows,
       meta: { page, limit: safeLimit, total, totalPages: Math.ceil(total / safeLimit) },

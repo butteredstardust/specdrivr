@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth';
 import { handleApiError, formatErrorResponse } from '@/lib/error-handler';
 import { requireMember, requireAdmin } from '@/lib/rbac';
 import { z } from 'zod';
+import { parseUrlParams } from '@/lib/api-utils';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -33,8 +34,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const { id } = await params;
     const projectId = parseInt(id, 10);
 
-    const { searchParams } = new URL(request.url);
-    const query = MemberQuerySchema.parse(Object.fromEntries(searchParams.entries()));
+    const query = parseUrlParams(request, MemberQuerySchema);
 
     // RBAC: require member to view member list
     const { allowed } = await requireMember(session.user.id, projectId);

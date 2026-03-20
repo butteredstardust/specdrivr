@@ -1,8 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useActionState, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { resetPasswordSchema } from '@/lib/schemas';
 import { toast } from 'sonner';
 import { authClient } from '@/lib/auth-client';
 import { clientLogger } from '@/lib/logger-client';
@@ -11,6 +15,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+
+type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;
 
 function getStrength(password: string): number {
   let score = 0;
@@ -32,11 +38,48 @@ export default function ResetPasswordPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
+  const formRef = useRef<HTMLFormElement>(null);
 
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [passwordValue, setPasswordValue] = useState('');
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ResetPasswordValues>({
+    // useForm()
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      password: '',
+      confirmPassword: '',
+    },
+  });
+
+  const resetAction = async (
+    prevState: string | null,
+    formData: FormData
+  ): Promise<string | null> => {
+    const newPassword = formData.get('password') as string;
+
+    if (!token) return 'Missing token.';
+
+    const { error: resetError } = await authClient.resetPassword({ newPassword, token });
+
+    if (resetError) {
+      clientLogger.error('Reset password failed', resetError);
+      return 'Failed to reset password. The link may have expired.';
+    }
+
+    toast.success('Password updated. Please sign in.');
+    router.push('/login');
+    return null;
+  };
+
+  const [error, formAction, isPending] = useActionState(resetAction, null);
+
+  const onValid = () => {
+    formRef.current?.requestSubmit();
+  };
 
   if (!token) {
     return (
@@ -52,26 +95,7 @@ export default function ResetPasswordPage() {
     );
   }
 
-  const strength = getStrength(newPassword);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    if (newPassword !== confirmPassword) {
-      setError('Passwords do not match.');
-      return;
-    }
-    setLoading(true);
-    const { error: resetError } = await authClient.resetPassword({ newPassword, token });
-    if (resetError) {
-      clientLogger.error('Reset password failed', resetError);
-      setError('Failed to reset password. The link may have expired.');
-      setLoading(false);
-      return;
-    }
-    toast.success('Password updated. Please sign in.');
-    router.push('/login');
-  };
+  const strength = getStrength(passwordValue);
 
   return (
     <Card className="border-border-default bg-bg-surface w-full max-w-sm">
@@ -80,17 +104,23 @@ export default function ResetPasswordPage() {
         <p className="font-mono text-sm font-bold tracking-widest">SPECDRIVR</p>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          ref={formRef}
+          action={formAction}
+          onSubmit={handleSubmit(onValid)}
+          className="space-y-4"
+        >
           <div className="space-y-1.5">
-            <Label htmlFor="new-password">New Password</Label>
+            <Label htmlFor="password">New Password</Label>
             <Input
-              id="new-password"
+              id="password"
+              {...register('password', {
+                onChange: (e) => setPasswordValue(e.target.value),
+              })}
               type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
               className="border-border-default bg-bg-base"
             />
-            {newPassword && (
+            {passwordValue && (
               <div className="mt-1 flex gap-1">
                 {[0, 1, 2, 3].map((i) => (
                   <div
@@ -100,24 +130,29 @@ export default function ResetPasswordPage() {
                 ))}
               </div>
             )}
+            {errors.password && (
+              <p className="text-status-red text-[10px]">{errors.password.message}</p>
+            )}
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="confirm-password">Confirm Password</Label>
+            <Label htmlFor="confirmPassword">Confirm Password</Label>
             <Input
-              id="confirm-password"
+              id="confirmPassword"
+              {...register('confirmPassword')}
               type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
               className="border-border-default bg-bg-base"
             />
+            {errors.confirmPassword && (
+              <p className="text-status-red text-[10px]">{errors.confirmPassword.message}</p>
+            )}
           </div>
           {error && <p className="text-status-red text-xs">{error}</p>}
           <Button
             type="submit"
-            disabled={loading}
+            disabled={isPending}
             className="bg-accent-violet hover:bg-accent-violet-dim w-full"
           >
-            {loading ? 'Updating…' : 'Reset Password'}
+            {isPending ? 'Updating…' : 'Reset Password'}
           </Button>
         </form>
       </CardContent>

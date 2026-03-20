@@ -5,15 +5,20 @@ import { cn } from '@/lib/utils';
 
 interface MatrixScreensaverProps {
   className?: string;
+  // Props retained for API compatibility; Ghost in the Machine has fixed palette
   color?: string;
   backgroundColor?: string;
 }
 
-export function MatrixScreensaver({
-  className,
-  color = 'var(--accent-violet)',
-  backgroundColor = 'rgba(13, 13, 10, 0.15)', // --terminal-bg with opacity
-}: MatrixScreensaverProps) {
+/**
+ * "Ghost in the Machine" — Concept #5
+ *
+ * A purely white background with slowly falling black characters.
+ * Half the speed of classic Matrix, giving it an eerie, quiet quality.
+ * When a column finishes, it leaves ghost-traces (low opacity echoes).
+ * No green, no glow. Unsettling in its stillness.
+ */
+export function MatrixScreensaver({ className }: MatrixScreensaverProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -23,123 +28,167 @@ export function MatrixScreensaver({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Resolve CSS variables to actual colors for canvas drawing
-    const styles = getComputedStyle(document.documentElement);
-    const resolvedColor = color.startsWith('var(')
-      ? styles.getPropertyValue(color.slice(4, -1)).trim()
-      : color;
-    const amberColor = styles.getPropertyValue('--phosphor-amber').trim();
-
     let width = (canvas.width = canvas.offsetWidth);
     let height = (canvas.height = canvas.offsetHeight);
 
-    const letters = '○▶⚠✕✓$@#!01'.split('');
-    const fontSize = 16;
+    const fontSize = 14;
+    // Classic matrix characters — rendered in cold monochrome
+    const chars = '01アウエオカキクケコサシスセソタチツテトナニヌネノ'.split('');
 
-    // Map of the Daemon silhouette (14x16 grid for better visibility)
-    // 1 = body, 2 = antenna, 3 = eyes, 4 = mouth
-    const daemonMap = [
-      [0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0],
-      [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 3, 3, 1, 1],
-      [1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 3, 3, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 1],
-      [1, 1, 1, 4, 4, 4, 4, 4, 4, 4, 4, 1, 1, 1],
-      [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-      [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-      [0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0],
-      [0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0],
-    ];
-
-    // State for background rain
-    let columns = Math.floor(width / fontSize);
-    const drops: number[] = [];
-    for (let i = 0; i < columns; i++) {
-      drops[i] = Math.random() * -100;
+    // Ghost echoes: columns that have finished their run and leave faint traces
+    interface GhostColumn {
+      x: number;
+      chars: string[];
+      alpha: number; // fades from ~0.08 to 0
     }
 
+    let columns = Math.floor(width / fontSize);
+
+    // Drop: current head position for each column (in rows). null = inactive
+    const heads: (number | null)[] = Array.from({ length: columns }, () =>
+      Math.random() > 0.4 ? Math.floor(Math.random() * -60) : null
+    );
+
+    // Speed: each column falls at its own leisurely pace (rows per tick)
+    const speeds: number[] = Array.from({ length: columns }, () => 0.15 + Math.random() * 0.25);
+
+    // Trail length for each column (in character rows)
+    const trailLengths: number[] = Array.from(
+      { length: columns },
+      () => 6 + Math.floor(Math.random() * 10)
+    );
+
+    // Ghost echoes of completed columns
+    const ghosts: GhostColumn[] = [];
+
+    // Per-cell character cache so individual chars don't flicker on every frame
+    // Each column stores the last character drawn at each row
+    const colChars: string[][] = Array.from({ length: columns }, () => []);
+
+    const getChar = (col: number, row: number): string => {
+      // Assign a character the first time, rarely refresh it
+      if (!colChars[col][row] || Math.random() < 0.03) {
+        colChars[col][row] = chars[Math.floor(Math.random() * chars.length)];
+      }
+      return colChars[col][row];
+    };
+
     const draw = () => {
-      // Draw semi-transparent background to create the iconic Matrix trail effect
-      ctx.fillStyle = 'rgba(13, 13, 10, 0.2)';
+      // White background — clean and clinical
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
       ctx.fillRect(0, 0, width, height);
 
-      ctx.font = `${fontSize}px monospace`;
+      ctx.font = `${fontSize}px "SF Mono", "Fira Mono", "Cascadia Code", monospace`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      // 1. Draw ambient background rain (Classic Matrix style but subtle)
-      ctx.globalAlpha = 0.15; // Keep background rain very faint
-      for (let i = 0; i < drops.length; i++) {
-        const char = letters[Math.floor(Math.random() * letters.length)];
-        ctx.fillStyle = Math.random() > 0.98 ? amberColor : resolvedColor;
+      const maxRows = Math.ceil(height / fontSize);
 
-        ctx.fillText(char, i * fontSize, drops[i] * fontSize);
-
-        if (drops[i] * fontSize > height && Math.random() > 0.975) {
-          drops[i] = 0;
+      // 1. Draw ghost echoes first (behind active columns)
+      for (let g = ghosts.length - 1; g >= 0; g--) {
+        const ghost = ghosts[g];
+        ghost.alpha -= 0.003; // very slow fade
+        if (ghost.alpha <= 0) {
+          ghosts.splice(g, 1);
+          continue;
         }
-        drops[i]++;
+        ctx.globalAlpha = ghost.alpha;
+        ctx.fillStyle = 'rgba(0, 0, 0, 1)';
+        const rows = Math.min(ghost.chars.length, maxRows);
+        for (let r = 0; r < rows; r++) {
+          ctx.fillText(ghost.chars[r], ghost.x, r * fontSize + fontSize / 2);
+        }
       }
       ctx.globalAlpha = 1.0;
 
-      // 2. Draw centered mascot (The focal point)
-      const mapWidth = daemonMap[0].length;
-      const mapHeight = daemonMap.length;
+      // 2. Draw active falling columns
+      for (let col = 0; col < heads.length; col++) {
+        const headRow = heads[col];
+        if (headRow === null) continue;
 
-      const startX = (width - mapWidth * fontSize) / 2 + fontSize / 2;
-      const startY = (height - mapHeight * fontSize) / 2 + fontSize / 2;
+        const x = col * fontSize + fontSize / 2;
+        const trail = trailLengths[col];
 
-      for (let row = 0; row < mapHeight; row++) {
-        for (let col = 0; col < mapWidth; col++) {
-          const type = daemonMap[row][col];
-          if (type === 0) continue;
+        for (let t = 0; t <= trail; t++) {
+          const row = Math.floor(headRow) - t;
+          if (row < 0 || row > maxRows) continue;
 
-          const x = startX + col * fontSize;
-          const y = startY + row * fontSize;
-          const char = letters[Math.floor(Math.random() * letters.length)];
+          // Opacity: head is most opaque, tail fades to near-invisible
+          const ratio = 1 - t / trail;
+          const opacity = ratio * ratio; // quadratic falloff, more tail fade
 
-          if (type === 3) {
-            // Eyes - Amber
-            ctx.fillStyle = amberColor;
-          } else if (type === 4) {
-            // Mouth - Happy Smile (Amber)
-            ctx.fillStyle = amberColor;
-          } else if (type === 2) {
-            // Antenna - Occasional flicker
-            ctx.fillStyle = Math.random() > 0.1 ? resolvedColor : amberColor;
+          // Tip of the column: slightly lighter grey to create a "leading edge"
+          if (t === 0) {
+            ctx.fillStyle = 'rgba(80, 80, 80, 1)';
+            ctx.globalAlpha = 0.9;
           } else {
-            // Body - Violet with slight flicker
-            ctx.fillStyle = resolvedColor;
-            ctx.globalAlpha = Math.random() > 0.05 ? 1.0 : 0.6;
+            ctx.fillStyle = 'rgba(0, 0, 0, 1)';
+            ctx.globalAlpha = Math.max(0.03, opacity * 0.85);
           }
 
-          ctx.fillText(char, x, y);
-          ctx.globalAlpha = 1.0;
+          ctx.fillText(getChar(col, row), x, row * fontSize + fontSize / 2);
+        }
+        ctx.globalAlpha = 1.0;
+
+        // Advance head
+        heads[col] = (headRow as number) + speeds[col];
+
+        // Column has exited the canvas — spawn a ghost and reset
+        const bottomEdge = Math.floor(headRow) - trail;
+        if (bottomEdge > maxRows) {
+          // Capture ghost echo
+          const ghostChars: string[] = [];
+          for (let r = 0; r < maxRows; r++) {
+            ghostChars.push(getChar(col, r));
+          }
+          ghosts.push({ x, chars: ghostChars, alpha: 0.06 });
+
+          // Random pause before restarting this column
+          if (Math.random() > 0.3) {
+            heads[col] = Math.floor(Math.random() * -60);
+            // Refresh column character cache
+            colChars[col] = [];
+            trailLengths[col] = 6 + Math.floor(Math.random() * 10);
+            speeds[col] = 0.15 + Math.random() * 0.25;
+          } else {
+            heads[col] = null; // stays dark for a while
+            setTimeout(
+              () => {
+                if (heads[col] === null) {
+                  heads[col] = Math.floor(Math.random() * -60);
+                  colChars[col] = [];
+                  trailLengths[col] = 6 + Math.floor(Math.random() * 10);
+                  speeds[col] = 0.15 + Math.random() * 0.25;
+                }
+              },
+              2000 + Math.random() * 6000
+            );
+          }
         }
       }
     };
 
-    const intervalId = setInterval(draw, 200);
+    // Slower tick than classic Matrix — eerie, deliberate
+    const intervalId = setInterval(draw, 50);
 
     const handleResize = () => {
       if (!canvas) return;
       width = canvas.width = canvas.offsetWidth;
       height = canvas.height = canvas.offsetHeight;
-      const newColumns = Math.floor(width / fontSize);
 
-      // Expand or shrink drops array smoothly
+      const newColumns = Math.floor(width / fontSize);
       if (newColumns > columns) {
         for (let i = columns; i < newColumns; i++) {
-          drops[i] = Math.random() * -100;
+          heads[i] = Math.random() > 0.4 ? Math.floor(Math.random() * -60) : null;
+          speeds[i] = 0.15 + Math.random() * 0.25;
+          trailLengths[i] = 6 + Math.floor(Math.random() * 10);
+          colChars[i] = [];
         }
       } else {
-        drops.length = newColumns;
+        heads.length = newColumns;
+        speeds.length = newColumns;
+        trailLengths.length = newColumns;
+        colChars.length = newColumns;
       }
       columns = newColumns;
     };
@@ -150,7 +199,13 @@ export function MatrixScreensaver({
       clearInterval(intervalId);
       window.removeEventListener('resize', handleResize);
     };
-  }, [color, backgroundColor]);
+  }, []);
 
-  return <canvas ref={canvasRef} className={cn('block h-full w-full', className)} />;
+  return (
+    <canvas
+      ref={canvasRef}
+      className={cn('block h-full w-full', className)}
+      style={{ background: '#ffffff' }}
+    />
+  );
 }

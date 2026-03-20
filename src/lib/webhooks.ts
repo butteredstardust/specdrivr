@@ -15,6 +15,7 @@ export type WebhookEventType =
   | 'session.cancelled'
   | 'task.blocked'
   | 'task.done'
+  | 'task.failed'
   | 'task.retried'
   | 'task.unblocked'
   | 'spec.created'

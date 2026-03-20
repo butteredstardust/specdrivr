@@ -15,12 +15,27 @@ function SessionsContent() {
   const { activeProjectId } = useShell();
 
   // Read URL params via nuqs to build the fetch URL
-  const [search] = useQueryState('search', parseAsString.withDefault(''));
-  const [status] = useQueryState('status', parseAsString.withDefault('all'));
-  const [specId] = useQueryState('specId', parseAsString.withDefault('all'));
-  const [from] = useQueryState('from', parseAsString.withDefault(''));
-  const [to] = useQueryState('to', parseAsString.withDefault(''));
-  const [page] = useQueryState('page', parseAsInteger.withDefault(1));
+  const [search] = useQueryState(
+    'search',
+    parseAsString.withDefault('').withOptions({ shallow: true })
+  );
+  const [status] = useQueryState(
+    'status',
+    parseAsString.withDefault('all').withOptions({ shallow: true })
+  );
+  const [specId] = useQueryState(
+    'specId',
+    parseAsString.withDefault('all').withOptions({ shallow: true })
+  );
+  const [from] = useQueryState(
+    'from',
+    parseAsString.withDefault('').withOptions({ shallow: true })
+  );
+  const [to] = useQueryState('to', parseAsString.withDefault('').withOptions({ shallow: true }));
+  const [page] = useQueryState(
+    'page',
+    parseAsInteger.withDefault(1).withOptions({ shallow: true })
+  );
   const limit = 50;
 
   const buildFetchUrl = () => {
