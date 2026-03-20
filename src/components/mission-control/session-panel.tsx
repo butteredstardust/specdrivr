@@ -29,6 +29,7 @@ interface AgentSession {
   totalTasks?: number | null;
   backend?: 'gemini' | 'claude';
   pullRequestUrl?: string | null;
+  totalCostUsd?: number | null;
 }
 
 interface SessionPanelProps {
@@ -252,10 +253,17 @@ export function SessionPanel({
         <DaemonMascot size={48} expression="success" />
         <PixelBadge variant="emerald">EXECUTION COMPLETE</PixelBadge>
         {session && (
-          <div className="text-text-secondary flex gap-4 font-mono text-xs">
-            <span>Executed: {session.tasksExecuted}</span>
-            <span className="text-status-emerald">OK: {session.tasksSucceeded}</span>
-            <span className="text-status-red">Failed: {session.tasksFailed}</span>
+          <div className="flex flex-col items-center gap-1.5 font-mono text-xs">
+            <div className="text-text-secondary flex gap-4">
+              <span>Executed: {session.tasksExecuted}</span>
+              <span className="text-status-emerald">OK: {session.tasksSucceeded}</span>
+              <span className="text-status-red">Failed: {session.tasksFailed}</span>
+            </div>
+            {session.totalCostUsd != null && session.totalCostUsd > 0 && (
+              <span className="text-text-muted">
+                TOTAL COST: ${session.totalCostUsd.toFixed(4)}
+              </span>
+            )}
           </div>
         )}
         {session?.specId && (
@@ -293,6 +301,11 @@ export function SessionPanel({
         <div className="flex flex-col items-center gap-3 py-4 text-center">
           <DaemonMascot size={48} expression="error" />
           <PixelBadge variant="red">EXECUTION FAILED</PixelBadge>
+          {session?.totalCostUsd != null && session.totalCostUsd > 0 && (
+            <span className="text-text-muted font-mono text-[10px]">
+              EST. COST: ${session.totalCostUsd.toFixed(4)}
+            </span>
+          )}
           {session?.errorMessage && (
             <Alert variant="destructive" className="text-left">
               <AlertDescription>{session.errorMessage}</AlertDescription>
