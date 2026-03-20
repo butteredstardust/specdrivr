@@ -21,7 +21,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const nextTask = await taskRepository.claimNextTaskForProject(agentToken.projectId);
+    const { searchParams } = new URL(request.url);
+    const sessionIdStr = searchParams.get('sessionId');
+
+    if (!sessionIdStr) {
+      return NextResponse.json(
+        { error: { code: 'VALIDATION_ERROR', message: 'sessionId is required' } },
+        { status: 400 }
+      );
+    }
+
+    const sessionId = parseInt(sessionIdStr);
+
+    const nextTask = await taskRepository.claimNextTaskForProject(agentToken.projectId, sessionId);
 
     if (!nextTask) {
       return NextResponse.json({ data: null });

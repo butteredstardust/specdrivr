@@ -279,13 +279,10 @@ export class TaskRepository extends BaseRepository {
    * Finds the next 'todo' task for a running session in a project and marks it 'in_progress'.
    * Respects dependencies: a task is only claimable if all tasks in its 'dependsOn' array are 'done'.
    */
-  async claimNextTaskForProject(projectId: number): Promise<Task | null> {
+  async claimNextTaskForProject(projectId: number, sessionId: number): Promise<Task | null> {
     return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
         // 1. Find next task that is 'todo' AND has all dependencies met
-        // We use a subquery to ensure NO tasks exist in the same plan that:
-        // - have an externalId present in the current task's dependsOn array
-        // - and are NOT 'done'
         const [nextTask] = await tx
           .select({ task: tasks })
           .from(tasks)
@@ -293,13 +290,14 @@ export class TaskRepository extends BaseRepository {
           .where(
             and(
               eq(agentSessions.projectId, projectId),
+              eq(agentSessions.id, sessionId), // Scope to the specific session
               eq(agentSessions.status, 'running'),
               eq(tasks.status, 'todo'),
               // Dependency Gate:
               sql`NOT EXISTS (
-              SELECT 1 FROM ${tasks} AS t2 
-              WHERE t2.plan_id = ${tasks.planId} 
-              AND t2.external_id = ANY(${tasks.dependsOn}) 
+              SELECT 1 FROM ${tasks} AS t2
+              WHERE t2.plan_id = ${tasks.planId}
+              AND t2.external_id = ANY(${tasks.dependsOn})
               AND t2.status != 'done'
             )`
             )
@@ -321,10 +319,15 @@ export class TaskRepository extends BaseRepository {
           .where(eq(tasks.id, nextTask.task.id))
           .returning();
 
+        // 3. Update agent session with current task ID
+        await tx
+          .update(agentSessions)
+          .set({ currentTaskId: updatedTask.id })
+          .where(eq(agentSessions.id, sessionId));
+
         return updatedTask as Task;
       });
-    }).then((updatedTask) => {
-      if (!updatedTask) return updatedTask;
+    }).then((updatedTask) => {      if (!updatedTask) return updatedTask;
 
       const t = updatedTask;
 
