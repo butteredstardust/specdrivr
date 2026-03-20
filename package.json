@@ -23,7 +23,9 @@
     "test:e2e:ui": "playwright test --ui",
     "test": "pnpm test:unit && pnpm test:e2e",
     "prepare": "husky",
-    "agent": "tsx scripts/agent.ts"
+    "agent": "tsx scripts/agent.ts",
+    "worker": "tsx scripts/plan-worker.ts",
+    "ghost-buster": "tsx scripts/ghost-buster.ts"
   },
   "pnpm": {
     "overrides": {

@@ -65,6 +65,15 @@ export const taskAttemptStatusEnum = pgEnum('task_attempt_status', [
   'failed',
 ]);
 
+export const planJobStatusEnum = pgEnum('plan_job_status', [
+  'pending',
+  'running',
+  'completed',
+  'failed',
+]);
+
+export const planJobTypeEnum = pgEnum('plan_job_type', ['generate_plan', 'generate_tasks']);
+
 // ---------------------------------------------------------------------------
 // Users
 // ---------------------------------------------------------------------------
@@ -600,6 +609,26 @@ export const notificationPreferences = pgTable(
 );
 
 // ---------------------------------------------------------------------------
+// Plan Jobs (background tasks for plan/task generation)
+// ---------------------------------------------------------------------------
+
+export const planJobs = pgTable('plan_jobs', {
+  id: serial('id').primaryKey(),
+  projectId: integer('project_id')
+    .notNull()
+    .references(() => projects.id, { onDelete: 'cascade' }),
+  specId: integer('spec_id').references(() => specifications.id, { onDelete: 'cascade' }),
+  planId: integer('plan_id').references(() => plans.id, { onDelete: 'cascade' }),
+  status: planJobStatusEnum('status').notNull().default('pending'),
+  type: planJobTypeEnum('type').notNull(),
+  error: text('error'),
+  startedAt: timestamp('started_at', { withTimezone: true }),
+  completedAt: timestamp('completed_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+// ---------------------------------------------------------------------------
 // Webhooks
 // ---------------------------------------------------------------------------
 
@@ -892,6 +921,21 @@ export const auditLogRelations = relations(auditLog, ({ one }) => ({
   }),
 }));
 
+export const planJobsRelations = relations(planJobs, ({ one }) => ({
+  project: one(projects, {
+    fields: [planJobs.projectId],
+    references: [projects.id],
+  }),
+  specification: one(specifications, {
+    fields: [planJobs.specId],
+    references: [specifications.id],
+  }),
+  plan: one(plans, {
+    fields: [planJobs.planId],
+    references: [plans.id],
+  }),
+}));
+
 // ---------------------------------------------------------------------------
 // Inferred types
 // ---------------------------------------------------------------------------
@@ -965,3 +1009,5 @@ export type ProjectStatus = (typeof projectStatusEnum.enumValues)[number];
 export type LogLevel = (typeof logLevelEnum.enumValues)[number];
 export type UserRole = (typeof userRoleEnum.enumValues)[number];
 export type TaskAttemptStatus = (typeof taskAttemptStatusEnum.enumValues)[number];
+export type PlanJobStatus = (typeof planJobStatusEnum.enumValues)[number];
+export type PlanJobType = (typeof planJobTypeEnum.enumValues)[number];

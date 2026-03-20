@@ -5,7 +5,7 @@ import { sql } from 'drizzle-orm';
 
 // Directly read from process.env to avoid env-core.ts initialization issues during Vitest
 const databaseUrl =
-  process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/specdrivr';
+  process.env.DATABASE_URL || 'postgresql://specdrivr:specdrivr_password@localhost:5432/specdrivr';
 
 const testQueryClient = postgres(databaseUrl, { max: 1 });
 export const testDb = drizzle(testQueryClient, { schema });
@@ -28,6 +28,7 @@ export async function cleanDatabase() {
     'agent_sessions',
     'audit_log',
     'plan_reviews',
+    'plan_jobs',
     'agent_events',
     'agent_logs',
     'notifications',

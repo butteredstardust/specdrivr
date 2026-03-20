@@ -5,6 +5,7 @@ import { specificationRepository } from '@/repositories/specification-repository
 import { planRepository } from '@/repositories/plan-repository';
 import { taskRepository } from '@/repositories/task-repository';
 import { agentSessionRepository } from '@/repositories/agent-session-repository';
+import { planJobRepository } from '@/repositories/plan-job-repository';
 import * as schema from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
@@ -100,6 +101,62 @@ describe('Repository Integration Tests', () => {
         .from(schema.tasks)
         .where(eq(schema.tasks.id, task.id));
       expect(updatedTask.status).toBe('todo');
+    });
+  });
+
+  describe('PlanJobRepository', () => {
+    it('claims pending jobs atomically', async () => {
+      const user = await createTestUser('user_1', 'test@example.com');
+      const project = await createTestProject('Test Project', user.id);
+
+      await planJobRepository.create({
+        projectId: project.id,
+        type: 'generate_plan',
+        status: 'pending',
+      });
+
+      await planJobRepository.create({
+        projectId: project.id,
+        type: 'generate_tasks',
+        status: 'pending',
+      });
+
+      const claimed1 = await planJobRepository.claimNext();
+      expect(claimed1).not.toBeNull();
+      expect(claimed1?.status).toBe('running');
+
+      const claimed2 = await planJobRepository.claimNext();
+      expect(claimed2).not.toBeNull();
+      expect(claimed2?.id).not.toBe(claimed1?.id);
+
+      const claimed3 = await planJobRepository.claimNext();
+      expect(claimed3).toBeNull();
+    });
+
+    it('recovers stuck jobs', async () => {
+      const user = await createTestUser('user_1', 'test@example.com');
+      const project = await createTestProject('Test Project', user.id);
+
+      const staleDate = new Date(Date.now() - 20 * 60 * 1000); // 20m ago
+      const [stuckJob] = await testDb
+        .insert(schema.planJobs)
+        .values({
+          projectId: project.id,
+          type: 'generate_plan',
+          status: 'running',
+          startedAt: staleDate,
+        })
+        .returning();
+
+      const recoveredCount = await planJobRepository.recoverStuckJobs(15);
+      expect(recoveredCount).toBe(1);
+
+      const [updatedJob] = await testDb
+        .select()
+        .from(schema.planJobs)
+        .where(eq(schema.planJobs.id, stuckJob.id));
+      expect(updatedJob.status).toBe('failed');
+      expect(updatedJob.error).toContain('Job timed out');
     });
   });
 
