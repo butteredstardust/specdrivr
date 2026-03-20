@@ -66,23 +66,23 @@ This document serves as the definitive execution roadmap for Specdrivr, incorpor
 
 ---
 
-## **Phase 5 — Reliability & Orchestration (The "Self-Healing" Milestone)**
+## **Phase 5 — Reliability & Orchestration (Completed)**
 *Focus: Resilience and state-tracked execution.*
 
 ### 5.1 Asynchronous Background Worker
-- [ ] Implement a dedicated `PlanWorker` process to handle Gemini/Claude plan generation.
-- [ ] Create a `plan_jobs` table to track job state and provide better UI feedback.
+- [x] Implement a dedicated `PlanWorker` process to handle Gemini/Claude plan generation.
+- [x] Create a `plan_jobs` table to track job state and provide better UI feedback.
 
 ### 5.2 Ghost Task Recovery ("Ghost Buster")
-- [ ] Implement the automated recovery logic for tasks in sessions that miss heartbeats.
-- [ ] Create a recurring Cron job to revert `in_progress` tasks to `todo` after timeout.
+- [x] Implement the automated recovery logic for tasks in sessions that miss heartbeats.
+- [x] Create a recurring Cron job (CLI) to revert `in_progress` tasks to `todo` after timeout.
 
 ### 5.3 Atomic Concurrency Enforcement
-- [ ] Update the task-claiming API to strictly enforce `maxConcurrentTasks` per session.
+- [x] Update the task-claiming API to strictly enforce `maxConcurrentTasks` per session.
 
 ---
 
-## **Phase 6 — Security & Governance**
+## **Phase 6 — Security & Governance (In Progress)**
 *Focus: Hardening system boundaries.*
 
 ### 6.1 Blocking Security Hooks
@@ -96,7 +96,7 @@ This document serves as the definitive execution roadmap for Specdrivr, incorpor
 
 ---
 
-## **Phase 7 — Integration & Scaling**
+## **Phase 7 — Integration & Scaling (In Progress)**
 *Focus: Reliability and cost management.*
 
 ### 7.1 Advanced Integration Service
@@ -110,7 +110,7 @@ This document serves as the definitive execution roadmap for Specdrivr, incorpor
 
 ---
 
-## **Phase 8 — Advanced UX & Analytics**
+## **Phase 8 — Advanced UX & Analytics (In Progress)**
 *Focus: Polishing and visibility.*
 
 ### 8.1 Shiki Diff Integration
@@ -124,14 +124,14 @@ This document serves as the definitive execution roadmap for Specdrivr, incorpor
 
 ---
 
-## **Phase 9 — Enterprise Quality & Ops**
+## **Phase 9 — Enterprise Quality & Ops (In Progress)**
 *Focus: Scale and automation.*
 
 ### 9.1 Playwright E2E Testing
 - [ ] Automate the full Spec -> Plan -> Execute lifecycle testing.
 
 ### 9.2 GitHub PR Automation
-- [ ] Implement automated PR creation via Octokit upon spec completion.
+- [x] Implement automated PR creation via Octokit upon spec completion.
 
 ### 9.3 Self-Hosted Docker Deployment
 - [ ] Provide official Docker Compose configurations for the full stack.
