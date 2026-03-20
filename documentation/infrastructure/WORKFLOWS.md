@@ -27,9 +27,9 @@ Use this when adding a new resource or action to the system.
 1.  **Schema**: Define the request/response Zod schemas in `src/lib/schemas.ts`.
 2.  **Repository**: Implement the data access logic in the relevant `src/repositories/` file.
 3.  **Route Handler**: Create the `route.ts` file under `src/app/api/v1/`.
-    -   Must use `import 'server-only'`.
-    -   Must call `await auth()` first.
-    -   Must use `checkPermission()` from `lib/rbac`.
+    - Must use `import 'server-only'`.
+    - Must call `await auth()` first.
+    - Must use `checkPermission()` from `lib/rbac`.
 4.  **Error Registry**: If adding a new error condition, update `infrastructure/ERROR_REGISTRY.md`.
 5.  **Documentation**: Add the endpoint to `infrastructure/API.md`.
 
@@ -39,7 +39,7 @@ Use this when building a major new feature area.
 
 1.  **Architecture**: Determine the "Vertical Slice" boundaries (UI, Flow, Logic).
 2.  **Documentation**: Create `documentation/modules/{feature}.md`.
-    -   Include: Overview, UI, Interaction Flows, and **Agent Handbook**.
+    - Include: Overview, UI, Interaction Flows, and **Agent Handbook**.
 3.  **Indexing**: Add the new module to `documentation/README.md` and `SPECIFICATION_INDEX.md`.
 4.  **Status**: Update the high-level roadmap in `documentation/PRODUCT_MAP.md`.
 

@@ -15,21 +15,24 @@ Specdrivr tracks the operational cost of AI interactions per specification and p
 The system uses a versioned pricing table to handle changes in model costs over time.
 
 ### 2.1 Pricing Table
-| Model | Input (per 1k tokens) | Output (per 1k tokens) |
-|---|---|---|
-| **gemini-2.0-flash** | $0.00010 | $0.00040 |
-| **gemini-2.0-pro** | $0.00125 | $0.00500 |
-| **claude-3-5-sonnet** | $0.00300 | $0.01500 |
-| **claude-3-haiku** | $0.00025 | $0.00125 |
+
+| Model                 | Input (per 1k tokens) | Output (per 1k tokens) |
+| --------------------- | --------------------- | ---------------------- |
+| **gemini-2.0-flash**  | $0.00010              | $0.00040               |
+| **gemini-2.0-pro**    | $0.00125              | $0.00500               |
+| **claude-3-5-sonnet** | $0.00300              | $0.01500               |
+| **claude-3-haiku**    | $0.00025              | $0.00125               |
 
 ## 3. Calculation Formula
 
 Costs are calculated at the time of task completion or plan generation.
 
 ### 3.1 Base Formula
+
 $$Cost_{Total} = \left( \frac{Tokens_{Input}}{1000} \times Price_{Input} \right) + \left( \frac{Tokens_{Output}}{1000} \times Price_{Output} \right)$$
 
 ### 3.2 Implementation Rule
+
 - **Precision**: Store costs as `NUMERIC(10,4)` in the database to handle sub-cent values.
 - **Aggregation**: Daily usage is aggregated per project and stored in the `usage_stats` table to optimize dashboard performance.
 

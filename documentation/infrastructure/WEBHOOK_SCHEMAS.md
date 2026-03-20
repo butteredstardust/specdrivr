@@ -13,7 +13,9 @@ Specdrivr supports outgoing webhooks to notify external systems of session and t
 ## 2. Security
 
 ### 2.1 HMAC Signing
+
 All outgoing webhooks are signed using the project's configured secret (HMAC-SHA256).
+
 - **Header**: `X-Specdrivr-Signature`
 - **Payload**: The raw UTF-8 JSON body.
 - **Verification**: Receivers should compute the HMAC-SHA256 hash of the payload using their secret and compare it to the header.
@@ -23,6 +25,7 @@ All outgoing webhooks are signed using the project's configured secret (HMAC-SHA
 All events follow a standardized envelope.
 
 ### 3.1 Common Envelope
+
 ```json
 {
   "id": "evt_0123456789",
@@ -37,6 +40,7 @@ All events follow a standardized envelope.
 ### 3.2 Event-Specific Data
 
 #### `session.completed`
+
 ```json
 {
   "sessionId": "ses_001",
@@ -48,6 +52,7 @@ All events follow a standardized envelope.
 ```
 
 #### `task.blocked`
+
 ```json
 {
   "taskId": "t_042",

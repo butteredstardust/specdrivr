@@ -37,15 +37,16 @@ _Spec-driven autonomous code execution for engineering teams_
 
 The DAEMON agent is a standalone process that polls the Specdrivr API. It authenticates via an `AGENT_TOKEN` and operates in a pull-based model.
 
-| **Agent action**      | **API call**                                                                                  | **Notes** |
-| --------------------- | --------------------------------------------------------------------------------------------- | --------- |
-| **Heartbeat**         | `POST /api/v1/sessions/{id}/heartbeat`                                                        | Every 15s. Returns `{ shouldStop: bool }`. |
-| **Poll for next task**| `GET /api/v1/agent/tasks/next?sessionId={id}`                                                 | Atomic claim via `FOR UPDATE SKIP LOCKED`. |
-| **Write log line**    | `POST /api/v1/sessions/{id}/log`                                                              | Buffers locally; flushes every 100ms. |
-| **Complete task**     | `POST /api/v1/tasks/{id}/complete`                                                            | Reports `{ status: "done" | "failed" }`. |
-| **Update task (Cost)**| `PATCH /api/v1/tasks/{id}`                                                                    | Used for reporting `totalCostUsd` from LLM output. |
+| **Agent action**       | **API call**                                  | **Notes**                                          |
+| ---------------------- | --------------------------------------------- | -------------------------------------------------- | ------------ |
+| **Heartbeat**          | `POST /api/v1/sessions/{id}/heartbeat`        | Every 15s. Returns `{ shouldStop: bool }`.         |
+| **Poll for next task** | `GET /api/v1/agent/tasks/next?sessionId={id}` | Atomic claim via `FOR UPDATE SKIP LOCKED`.         |
+| **Write log line**     | `POST /api/v1/sessions/{id}/log`              | Buffers locally; flushes every 100ms.              |
+| **Complete task**      | `POST /api/v1/tasks/{id}/complete`            | Reports `{ status: "done"                          | "failed" }`. |
+| **Update task (Cost)** | `PATCH /api/v1/tasks/{id}`                    | Used for reporting `totalCostUsd` from LLM output. |
 
 ### **Agent Exit Rules**
+
 1. **Heartbeat Stop**: If `/heartbeat` returns `shouldStop: true`, the agent stops after finishing the current task.
 2. **Consecutive Errors**: If the agent fails to communicate with the API for **5 consecutive attempts**, it stops to prevent infinite retry loops.
 3. **Session Health**: If `lastHeartbeatAt` is > 60 seconds old, the server marks the session as `failed` (Zombie Session).

@@ -25,9 +25,9 @@ Specdrivr is built on a modern, high-performance stack optimized for AI-native d
 Orientation for agents navigating the codebase:
 
 - **`documentation/`**: Canonical docs.
-    - **Product Status**: `PRODUCT_MAP.md` (Check this first).
-    - **One-Shot Success**: `infrastructure/CODING_PATTERNS.md` & `infrastructure/DIRECTORY_MAP.md`.
-    - **Self-Healing**: `infrastructure/TROUBLESHOOTING.md`.
+  - **Product Status**: `PRODUCT_MAP.md` (Check this first).
+  - **One-Shot Success**: `infrastructure/CODING_PATTERNS.md` & `infrastructure/DIRECTORY_MAP.md`.
+  - **Self-Healing**: `infrastructure/TROUBLESHOOTING.md`.
 - **`src/repositories/`**: Single source of truth for all database access.
 - **`src/actions/`**: Server Actions for mutations.
 - **`src/queries/`**: Shared read-only logic.
@@ -46,8 +46,8 @@ Every task must end with these steps:
 
 1.  **Verification**: Run `pnpm test` and `pnpm lint`.
 2.  **Branch Documentation**:
-    -   Update/Create `documentation/branches/{branch}/BRANCH_CHANGES.md`.
-    -   Update/Create `documentation/branches/{branch}/BRANCH_CODE_REVIEW.md`.
+    - Update/Create `documentation/branches/{branch}/BRANCH_CHANGES.md`.
+    - Update/Create `documentation/branches/{branch}/BRANCH_CODE_REVIEW.md`.
 3.  **Final Summary**: Provide an Executive Summary, Completion Statement, and a checklist of deliverables.
 
 ## 6. Design System Summary

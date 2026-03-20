@@ -30,7 +30,8 @@ export async function myAction(rawData: unknown) {
 
   // 2. Validate Input
   const validated = actionSchema.safeParse(rawData);
-  if (!validated.success) return { error: { code: 'ERR_VALIDATION_FAILED', details: validated.error.flatten() } };
+  if (!validated.success)
+    return { error: { code: 'ERR_VALIDATION_FAILED', details: validated.error.flatten() } };
 
   // 3. Check Permissions
   const { projectId, ...data } = validated.data;
@@ -60,17 +61,14 @@ import { eq } from 'drizzle-orm';
 
 export class MyRepository extends BaseRepository {
   async updateStatus(id: number, status: string) {
-    return this.executeQuery(
-      async (db) => {
-        const [updated] = await db
-          .update(projects)
-          .set({ status })
-          .where(eq(projects.id, id))
-          .returning();
-        return updated;
-      },
-      'Failed to update project status'
-    );
+    return this.executeQuery(async (db) => {
+      const [updated] = await db
+        .update(projects)
+        .set({ status })
+        .where(eq(projects.id, id))
+        .returning();
+      return updated;
+    }, 'Failed to update project status');
   }
 }
 ```
@@ -95,7 +93,7 @@ export function TaskRow({ status, title }: TaskRowProps) {
   return (
     <div className="flex items-center gap-2 border-l-4" style={{ borderColor: token.color }}>
       <StatusIndicator status={status} />
-      <span className="font-mono text-xs text-muted-foreground">{token.label}</span>
+      <span className="text-muted-foreground font-mono text-xs">{token.label}</span>
       <h4 className="font-medium">{title}</h4>
     </div>
   );
