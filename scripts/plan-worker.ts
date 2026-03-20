@@ -11,14 +11,18 @@ import {
 import { generatePlan, generateTasks } from '../src/lib/gemini';
 import { logger } from '../src/lib/logger';
 import { env } from '../src/lib/env';
+import { type PlanJobSelect as PlanJob } from '../src/db/schema';
 
 const POLL_INTERVAL_MS = 5000;
 
-async function processJob(job: any) {
+async function processJob(job: PlanJob) {
   const startMs = Date.now();
   logger.info({ jobId: job.id, type: job.type }, '🚀 Processing plan job');
 
   try {
+    if (!job.specId) throw new Error(`Job ${job.id} is missing specId`);
+    if (!job.planId) throw new Error(`Job ${job.id} is missing planId`);
+
     const spec = await specificationRepository.getByIdWithVersion(job.specId);
     if (!spec || !spec.currentVersion) {
       throw new Error(`Specification ${job.specId} or its current version not found`);
@@ -26,7 +30,7 @@ async function processJob(job: any) {
 
     const config = await agentConfigRepository.getByProjectId(job.projectId);
     const apiKey = config?.geminiApiKey || env.GEMINI_API_KEY || '';
-    
+
     if (!apiKey && env.NODE_ENV === 'production') {
       throw new Error('Gemini API key is missing');
     }
@@ -50,7 +54,7 @@ async function processJob(job: any) {
 ${generated.intent}
 
 ## Architecture Decisions
-${generated.architectureDecisions.map((d: any) => `### ${d.title}\n**Rationale**: ${d.rationale}\n\n**Trade-offs**: ${d.tradeoffs}`).join('\n\n')}
+${generated.architectureDecisions.map((d: { title: string; rationale: string; tradeoffs: string }) => `### ${d.title}\n**Rationale**: ${d.rationale}\n\n**Trade-offs**: ${d.tradeoffs}`).join('\n\n')}
 
 *Estimated time: ${generated.estimatedTotalMinutes} minutes*
 `;
@@ -83,7 +87,6 @@ ${generated.architectureDecisions.map((d: any) => `### ${d.title}\n**Rationale**
       }));
 
       await notificationRepository.createMany(notifications);
-
     } else if (job.type === 'generate_tasks') {
       const plan = await planRepository.getById(job.planId);
       if (!plan) throw new Error(`Plan ${job.planId} not found`);
@@ -165,7 +168,10 @@ ${generated.architectureDecisions.map((d: any) => `### ${d.title}\n**Rationale**
       completedAt: new Date(),
     });
 
-    logger.info({ jobId: job.id, durationMs: Date.now() - startMs }, '✅ Job completed successfully');
+    logger.info(
+      { jobId: job.id, durationMs: Date.now() - startMs },
+      '✅ Job completed successfully'
+    );
   } catch (err) {
     const error = err instanceof Error ? err : new Error(String(err));
     logger.error({ err: error, jobId: job.id }, '❌ Job failed');
@@ -177,7 +183,7 @@ ${generated.architectureDecisions.map((d: any) => `### ${d.title}\n**Rationale**
     });
 
     // If it was a plan generation job, set spec to stalled
-    if (job.type === 'generate_plan') {
+    if (job.type === 'generate_plan' && job.specId) {
       await specificationRepository.updateStatus(job.specId, 'stalled');
     }
   }
