@@ -3,12 +3,13 @@
 import { useState, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
-import { RefreshCw, MessageSquareQuote } from 'lucide-react';
+import { RefreshCw, MessageSquareQuote, ExternalLink } from 'lucide-react';
 import { clientLogger } from '@/lib/logger-client';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { PixelBadge } from '@/components/ui/pixel-badge';
+import { GitHubLogoIcon } from '@radix-ui/react-icons';
 import type { Task } from './task-drawer';
 
 interface TaskDrawerOverviewProps {
@@ -73,6 +74,30 @@ export function TaskDrawerOverview({ task, onRetry, onTaskUpdated }: TaskDrawerO
               </PixelBadge>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* GitHub PR Link */}
+      {task.pullRequestUrl && (
+        <div className="bg-bg-elevated/50 border-border-muted flex items-center justify-between rounded-lg border p-4">
+          <div className="flex items-center gap-3">
+            <GitHubLogoIcon className="h-5 w-5 opacity-70" />
+            <div className="flex flex-col gap-0.5">
+              <span className="font-mono text-[10px] tracking-widest uppercase opacity-50">
+                PULL REQUEST
+              </span>
+              <span className="text-text-primary text-sm font-medium">Automated Contribution</span>
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5"
+            onClick={() => window.open(task.pullRequestUrl!, '_blank')}
+          >
+            VIEW ON GITHUB
+            <ExternalLink className="h-3.5 w-3.5" />
+          </Button>
         </div>
       )}
 

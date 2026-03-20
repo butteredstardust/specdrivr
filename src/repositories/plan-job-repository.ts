@@ -1,10 +1,6 @@
 import { db } from '@/db';
-import {
-  planJobs,
-  type PlanJobInsert,
-  type PlanJobSelect as PlanJob,
-} from '@/db/schema';
-import { eq, and, desc, lt } from 'drizzle-orm';
+import { planJobs, type PlanJobInsert, type PlanJobSelect as PlanJob } from '@/db/schema';
+import { eq, and, desc, lt, inArray } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError } from '@/lib/errors';
 
@@ -76,6 +72,18 @@ export class PlanJobRepository extends BaseRepository {
         .select()
         .from(planJobs)
         .where(and(eq(planJobs.projectId, projectId), eq(planJobs.status, 'pending')))
+        .orderBy(desc(planJobs.createdAt));
+    });
+  }
+
+  async getActiveByProject(projectId: number): Promise<PlanJob[]> {
+    return await this.executeQuery(async () => {
+      return await db
+        .select()
+        .from(planJobs)
+        .where(
+          and(eq(planJobs.projectId, projectId), inArray(planJobs.status, ['pending', 'running']))
+        )
         .orderBy(desc(planJobs.createdAt));
     });
   }

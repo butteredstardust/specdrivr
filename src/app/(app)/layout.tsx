@@ -11,6 +11,8 @@ import { TaskDrawerProvider } from '@/components/shell/task-drawer-context';
 import { TaskDrawer } from '@/components/tasks/task-drawer';
 import { KeyboardShortcutsModal } from '@/components/ui/keyboard-shortcuts-modal';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PlanJobStatusIndicator } from '@/components/jobs/plan-job-status-indicator';
+import { useShell } from '@/components/shell/shell-context';
 
 async function AuthenticatedApp({ children }: { children: React.ReactNode }) {
   const session = await authInstance.api.getSession({
@@ -53,7 +55,10 @@ async function AuthenticatedApp({ children }: { children: React.ReactNode }) {
           <Sidebar projects={projects} />
           <div className="flex flex-1 flex-col overflow-hidden">
             <TopBar />
-            <main className="flex-1 overflow-y-auto p-6">{children}</main>
+            <main className="relative flex-1 overflow-y-auto p-6">
+              {children}
+              <ActiveJobsOverlay />
+            </main>
           </div>
         </div>
         {showOnboarding && <OnboardingWizard user={shellUser} />}
@@ -61,6 +66,18 @@ async function AuthenticatedApp({ children }: { children: React.ReactNode }) {
         <KeyboardShortcutsModal />
       </TaskDrawerProvider>
     </ShellProvider>
+  );
+}
+
+function ActiveJobsOverlay() {
+  const { activeProject } = useShell();
+  if (!activeProject) return null;
+  return (
+    <div className="pointer-events-none fixed right-8 bottom-8 z-30">
+      <div className="pointer-events-auto">
+        <PlanJobStatusIndicator projectId={activeProject.id} />
+      </div>
+    </div>
   );
 }
 

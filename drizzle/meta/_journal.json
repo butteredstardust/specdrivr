@@ -71,6 +71,13 @@
       "when": 1774038298349,
       "tag": "0009_warm_tyger_tiger",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1774038835577,
+      "tag": "0010_broken_tony_stark",
+      "breakpoints": true
     }
   ]
 }

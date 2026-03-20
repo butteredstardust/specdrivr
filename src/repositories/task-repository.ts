@@ -284,7 +284,34 @@ export class TaskRepository extends BaseRepository {
   async claimNextTaskForProject(projectId: number, sessionId: number): Promise<Task | null> {
     return await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
-        // 1. Find next task that is 'todo' AND has all dependencies met
+        // 1. Fetch session to check maxConcurrentTasks
+        const [session] = await tx
+          .select({ maxConcurrentTasks: agentSessions.maxConcurrentTasks })
+          .from(agentSessions)
+          .where(eq(agentSessions.id, sessionId))
+          .limit(1)
+          .for('share'); // Shared lock during check
+
+        if (!session) return null;
+
+        // 2. Count current in_progress tasks for this session
+        const [activeCountResult] = await tx
+          .select({ count: sql<number>`count(*)` })
+          .from(tasks)
+          .innerJoin(taskAttempts, eq(tasks.id, taskAttempts.taskId))
+          .where(and(eq(taskAttempts.sessionId, sessionId), eq(tasks.status, 'in_progress')));
+
+        const activeCount = Number(activeCountResult?.count ?? 0);
+
+        if (activeCount >= session.maxConcurrentTasks) {
+          logger.info(
+            { sessionId, activeCount, max: session.maxConcurrentTasks },
+            'Session reached max concurrent tasks limit'
+          );
+          return null;
+        }
+
+        // 3. Find next task that is 'todo' AND has all dependencies met
         const [nextTask] = await tx
           .select({ task: tasks })
           .from(tasks)
@@ -310,7 +337,7 @@ export class TaskRepository extends BaseRepository {
 
         if (!nextTask) return null;
 
-        // 2. Mark as in_progress
+        // 4. Mark as in_progress
         const [updatedTask] = await tx
           .update(tasks)
           .set({
@@ -321,7 +348,7 @@ export class TaskRepository extends BaseRepository {
           .where(eq(tasks.id, nextTask.task.id))
           .returning();
 
-        // 3. Update agent session with current task ID
+        // 5. Update agent session with current task ID
         await tx
           .update(agentSessions)
           .set({ currentTaskId: updatedTask.id })
