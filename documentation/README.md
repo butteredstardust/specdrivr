@@ -10,6 +10,18 @@ Global system architecture, technical constraints, and development guidelines.
 - **[Architecture](./infrastructure/ARCHITECTURE.md)**: System overview, tech stack, and security.
 - **[Database](./infrastructure/DATABASE.md)**: Schema, data models, and enums.
 - **[API](./infrastructure/API.md)**: Complete REST API reference.
+- **[AI Protocols](./infrastructure/AI_PROTOCOLS.md)**: AI prompts and JSON schemas.
+- **[Billing & Usage](./infrastructure/BILLING_ALGORITHM.md)**: Cost calculation logic.
+- **[Webhook Schemas](./infrastructure/WEBHOOK_SCHEMAS.md)**: Outgoing integration payloads.
+- **[State Machines](./infrastructure/STATE_MACHINES.md)**: Status enums and transition rules.
+- **[Core Flow Diagrams](./infrastructure/FLOW_DIAGRAMS.md)**: Mermaid sequence diagrams for async flows.
+- **[Error Registry](./infrastructure/ERROR_REGISTRY.md)**: Standardized error codes and envelopes.
+- **[Coding Patterns](./infrastructure/CODING_PATTERNS.md)**: Copy-pasteable "Golden Path" snippets.
+- **[Directory Map](./infrastructure/DIRECTORY_MAP.md)**: Strict folder responsibilities and rules.
+- **[Troubleshooting](./infrastructure/TROUBLESHOOTING.md)**: Decision tree for agent-led healing.
+- **[Workflows & Recipes](./infrastructure/WORKFLOWS.md)**: Checklists for common technical tasks.
+- **[Scripts Reference](./infrastructure/SCRIPTS_REFERENCE.md)**: Documentation for automation utilities.
+- **[Environment Variables](./infrastructure/ENVIRONMENT_VARIABLES.md)**: Registry of all Zod-validated vars.
 - **[Design System](./infrastructure/DESIGN_SYSTEM.md)**: UI tokens, mascot, and app shell patterns.
 - **[Development](./infrastructure/DEVELOPMENT.md)**: Setup, Git workflow, and testing.
 - **[Authentication & RBAC](./infrastructure/AUTHENTICATION.md)**: Technical auth specs (Legacy - see Module/Auth).
@@ -18,10 +30,12 @@ Global system architecture, technical constraints, and development guidelines.
 ## 📦 Feature Modules
 Vertical slices of the application combining UI, flows, and business logic.
 
+- **[Product Map & Status](./PRODUCT_MAP.md)**: High-level dashboard of implemented features.
 - **[Authentication & Access](./modules/auth.md)**: Login, RBAC, Onboarding, and Team management.
 - **[Project Management](./modules/projects.md)**: Project lifecycle, switching, and general settings.
 - **[Specifications & Planning](./modules/specifications.md)**: Spec Editor, Plan generation, and Approval workflow.
-- **[Execution & Agent Sessions](./modules/execution.md)**: Mission Control, Task Drawer, and Agent protocol.
+- **[Tasks & Intervention](./modules/tasks.md)**: Task list, Drawer, Unblocking, and Dependency rules.
+- **[Execution & Agent Sessions](./modules/execution.md)**: Mission Control, Session Browser, and Agent protocol.
 - **[Settings & Admin](./modules/settings.md)**: Profile, Security, Audit Log, and Usage.
 
 ## 🔮 Future Vision

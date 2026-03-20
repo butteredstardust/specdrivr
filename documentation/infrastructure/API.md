@@ -69,12 +69,30 @@ Authentication is managed by BetterAuth under `/api/auth/[...auth]`.
 | **POST**   | /api/v1/sessions/:id/log       | **Agent Endpoint**: Append a log line to the session. |
 | **POST**   | /api/v1/sessions/:id/cancel    | Mark a session as cancelled.                          |
 
+### **Heartbeat Response Schema**
+```json
+{
+  "status": "ok",
+  "command": "continue" | "pause" | "stop",
+  "config": {
+    "maxConcurrentTasks": 3,
+    "logLevel": "info"
+  }
+}
+```
+
 ## **6.7 Agent Internal**
 
 | **Method** | **Path**                     | **Description**                                       |
 | ---------- | ---------------------------- | ----------------------------------------------------- |
 | **GET**    | /api/v1/agent/tasks/next     | **Atomic claim** of the next available task via HTTP. |
 | **GET**    | /api/v1/verify-repo          | **Admin**: Verify repository integration and health.  |
+
+### **Task Claiming Logic**
+The `GET /api/v1/agent/tasks/next` endpoint MUST enforce the following before returning a task:
+1. **Concurrency Check**: Verify that `activeTaskCount < maxConcurrentTasks` for the current session.
+2. **Atomic Claim**: Use `SELECT ... FOR UPDATE SKIP LOCKED` to prevent multiple agents from claiming the same task.
+
 
 ## **6.8 API Standards**
 

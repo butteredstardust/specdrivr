@@ -24,7 +24,9 @@ Specdrivr is built on a modern, high-performance stack optimized for AI-native d
 
 Orientation for agents navigating the codebase:
 
-- **`documentation/`**: Canonical docs (DESIGN_SYSTEM.md, USER_INTERFACE.md, DEVELOPMENT.md).
+- **`documentation/`**: Canonical docs.
+    - **One-Shot Success**: `infrastructure/CODING_PATTERNS.md` & `infrastructure/DIRECTORY_MAP.md`.
+    - **Self-Healing**: `infrastructure/TROUBLESHOOTING.md`.
 - **`src/repositories/`**: Single source of truth for all database access.
 - **`src/actions/`**: Server Actions for UI-driven mutations (requires `auth()` checks).
 - **`src/lib/`**: Core utilities, engine logic, RBAC, and environment validation.

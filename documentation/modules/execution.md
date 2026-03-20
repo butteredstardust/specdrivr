@@ -17,18 +17,12 @@ The primary dashboard for active work:
 - **Live Execution Panel**: Shows the current session ID, elapsed timer, progress bar, and active task.
 - **Terminal UI**: Real-time log tailing using `xterm.js`.
 - **Event Log**: A feed of the last 30 agent events (pushed via WebSockets/Server-Sent Events).
-- **Needs Attention**: An amber banner that appears only if tasks are blocked.
+- **Needs Attention**: An amber banner that appears only if tasks are blocked (Links to [tasks.md](./tasks.md)).
 
 ### 2.2 Sessions Browser (`/sessions`)
 - **Route**: `/sessions`
 - **Contents**: A timeline list of historical and active sessions grouped by date.
 - **Action**: Click a row to expand the per-task event log and live terminal tail.
-
-### 2.3 Task Drawer (Overlay)
-A detailed view of a single task, accessible from Mission Control or Spec Detail:
-- **OVERVIEW**: Task description, dependencies, and blocking context.
-- **ATTEMPTS**: History of execution attempts with full ANSI logs.
-- **CHANGES**: Shiki-powered diff viewer for code authored during the task.
 
 ## 3. Interaction Flows
 
@@ -36,13 +30,6 @@ A detailed view of a single task, accessible from Mission Control or Spec Detail
 - **Pause**: User clicks `[PAUSE]`. System sets session status to `paused`. The agent receives `shouldStop: true` on its next heartbeat and stops execution after the current task.
 - **Resume**: User clicks `[RESUME]`. Status returns to `running`. The agent resumes polling for the next task.
 - **Cancel**: User clicks `[CANCEL]`. Status set to `cancelled`. All in-progress tasks are marked `failed`.
-
-### 3.2 Unblocking a Task
-1. Task is marked `blocked` by the agent (e.g., missing dependency, ambiguous spec).
-2. User opens the **Task Drawer**.
-3. User provides the required info in the "Human Context" textarea.
-4. User clicks `[RETRY WITH CONTEXT]`.
-5. Task status resets to `todo`, and the context is appended to the next agent prompt.
 
 ## 4. DAEMON Agent Protocol
 
@@ -75,3 +62,17 @@ The agent is a standalone process that polls the API using an `AGENT_TOKEN`.
 ### 6.3 Common Pitfalls
 - **Zombie Sessions**: Sessions where the agent has crashed but status is still `running`. Handled by the 60s heartbeat timeout.
 - **Log Overflow**: Ensure log lines are capped or paginated to prevent memory issues in the browser.
+
+## 7. Automated Recovery
+
+### 7.1 Ghost Task Reset
+If a session is marked `failed` or `cancelled`, the following must occur for any tasks currently in the `in_progress` state for that session:
+1. **Reset Status**: Revert task status to `todo`.
+2. **Increment Attempt**: Increase the `attempt_count` by 1.
+3. **Log Event**: Write a "GHOST_TASK_RESET" entry to the activity log.
+
+### 7.2 Heartbeat Timeout
+The API must monitor the `lastHeartbeatAt` timestamp for all `running` sessions.
+- **Threshold**: 60 seconds.
+- **Action**: If `now() - lastHeartbeatAt > 60s`, mark the session as `failed` and trigger the **Ghost Task Reset**.
+

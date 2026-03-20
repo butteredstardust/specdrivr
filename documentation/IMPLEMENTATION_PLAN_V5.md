@@ -1,83 +1,137 @@
-# **Specdrivr Implementation Plan — Ground Truth Alignment**
+# **Specdrivr Implementation Plan — Master Vision Roadmap (v6)**
 
-This document serves as the corrected, deterministic execution roadmap for Specdrivr, synchronized with the actual system state as of March 2026.
+[Status: GROUND TRUTH]
 
-## **Phase 1 — Core Infrastructure & Security**
+This document serves as the definitive execution roadmap for Specdrivr, incorporating all refined specifications, architectural improvements, and long-term vision.
 
-### **1.1 Database Schema & ORM (Completed)**
+## **Phase 1 — Core Infrastructure & Security (Completed)**
+
+### **1.1 Database Schema & ORM**
 - [x] Implement the 17 core tables in `src/db/schema.ts`.
 - [x] Use Drizzle ORM for type-safe queries.
 - [x] Standardize on `pnpm db:generate` and `pnpm db:migrate`.
 
-### **1.2 Authentication (Completed)**
+### **1.2 Authentication**
 - [x] Set up **BetterAuth** with PostgreSQL (Drizzle adapter).
 - [x] Extend user schema with RBAC roles (`viewer`, `member`, `admin`, `owner`).
 - [x] Implement API tokens for agents with prefix-based Bcrypt verification.
 
-### **1.3 Environment & Config (Completed)**
+### **1.3 Environment & Config**
 - [x] Centralize all configuration in `src/lib/env-core.ts` with Zod validation.
 - [x] Enforce `server-only` imports for sensitive libraries.
 
 ---
 
-## **Phase 2 — Autonomous Pipeline Implementation**
+## **Phase 2 — Autonomous Pipeline (Completed)**
 
-### **2.1 Specification Management (Completed)**
+### **2.1 Specification Management**
 - [x] Implement `SpecificationRepository` with versioning.
 - [x] Auto-abandon plans when a new spec version is created.
 
-### **2.2 Plan Generation (Ground Truth Alignment)**
+### **2.2 Plan Generation**
 - [x] Implement `generatePlan` and `generateTasks` using **Gemini 2.0 Flash**.
-- [x] **Correction**: Plan generation is currently fire-and-forget async in Route Handlers. 
-- [ ] **PLANNED**: Migrate to a dedicated background worker (Node.js process polling a `plan_jobs` table) to improve reliability and visibility.
+- [x] **Ground Truth**: Currently implemented as fire-and-forget async in Route Handlers. (Migration planned in Phase 6).
 
-### **2.3 Agent Worker Loop (Ground Truth Alignment)**
-- [x] Implement `scripts/agent.ts` with API polling.
-- [x] Implement atomic task claiming via `SELECT ... FOR UPDATE SKIP LOCKED` in `TaskRepository`.
+### **2.3 Agent Worker Loop**
+- [x] Implement `scripts/agent.ts` with API polling and heartbeat.
+- [x] Implement atomic task claiming via `SELECT ... FOR UPDATE SKIP LOCKED`.
 - [x] Support for multi-backend execution (Gemini/Claude).
 
 ---
 
-## **Phase 3 — UI & Developer Experience**
+## **Phase 3 — UI & Developer Experience (In Progress)**
 
-### **3.1 Mission Control Dashboard (Completed)**
-- [x] Real-time session status monitoring.
+### **3.1 Mission Control Dashboard**
+- [x] Real-time session status monitoring and progress tracking.
 - [x] Live log streaming from agent to UI via session-scoped logs.
 
-### **3.2 Spec Editor (Completed)**
-- [x] Markdown editor with live preview.
-- [x] Mandatory XSS sanitization via `isomorphic-dompurify`.
+### **3.2 Spec Editor**
+- [x] Markdown editor with live preview and XSS sanitization.
 
-### **3.3 Task Detail Drawer (In Progress)**
+### **3.3 Task Detail Drawer**
 - [x] Implementation of `Vaul` drawer for task details.
-- [ ] **PLANNED**: Full integration of `Shiki` for diff rendering in the task view.
+- [ ] **PLANNED**: Integration of `Shiki` for server-side diff rendering.
 
 ---
 
-## **Phase 4 — Operations & Monitoring**
+## **Phase 4 — Operations & Monitoring (In Progress)**
 
-### **4.1 Audit Logging (Completed)**
+### **4.1 Audit Logging**
 - [x] Comprehensive audit trail for all project actions (`audit_log`).
-- [x] Webhook delivery tracking.
+- [x] Webhook delivery tracking table.
 
-### **4.2 Notifications (In Progress)**
-- [x] In-app notification system.
-- [ ] **PLANNED**: Integration with Resend for email notifications on task failures.
-
-### **4.3 Integration & Webhooks (In Progress)**
-- [x] GitHub webhook handling for repository synchronization.
-- [ ] **PLANNED**: Automated PR creation on task completion via Octokit.
+### **4.2 Notifications**
+- [x] In-app notification system with real-time updates.
+- [ ] **PLANNED**: Integration with Resend for email alerts.
 
 ---
 
-## **Phase 5 — Quality & Performance**
+## **Phase 6 — Reliability & Orchestration**
+*Focus: Resilience and state-tracked execution.*
 
-### **5.1 Testing Strategy**
-- [x] Vitest for core repository and library logic.
-- [ ] Playwright for E2E flows (Login -> Spec -> Plan -> Execution).
-- [x] Husky hooks for pre-commit linting and typechecking.
+### 6.1 Asynchronous Background Worker
+- [ ] Implement a dedicated `PlanWorker` process to handle Gemini/Claude plan generation.
+- [ ] Create a `plan_jobs` table to track job state and provide better UI feedback.
 
-### **5.2 Performance Optimization**
-- [ ] Database query indexing audit.
-- [ ] Redis caching for frequent API lookups (e.g., project memberships).
-- [ ] Bundle size optimization for heavy client-side libraries (xterm, monaco).
+### 6.2 Ghost Task Recovery ("Ghost Buster")
+- [ ] Implement the automated recovery logic for tasks in sessions that miss heartbeats.
+- [ ] Create a recurring Cron job to revert `in_progress` tasks to `todo` after timeout.
+
+### 6.3 Atomic Concurrency Enforcement
+- [ ] Update the task-claiming API to strictly enforce `maxConcurrentTasks` per session.
+
+---
+
+## **Phase 7 — Security & Governance**
+*Focus: Hardening system boundaries.*
+
+### 7.1 Blocking Security Hooks
+- [ ] Convert non-blocking pre-push checks (XSS, Secrets, Migrations) into blocking failures.
+
+### 7.2 Agent Sandbox & Jail
+- [ ] Implement virtual root/directory restriction in the DAEMON agent runtime.
+
+### 7.3 Audit Log Integrity
+- [ ] Implement HMAC-SHA256 signing for `audit_logs` to ensure non-repudiation.
+
+---
+
+## **Phase 8 — Integration & Scaling**
+*Focus: Reliability and cost management.*
+
+### 8.1 Advanced Integration Service
+- [ ] Centralize outgoing webhooks with exponential backoff and Dead Letter Queues (DLQ).
+
+### 8.2 Versioned Pricing & Billing
+- [ ] Implement the `PricingService` for historical cost accuracy.
+
+### 8.3 Distributed Rate Limiting
+- [ ] Migrate all high-concurrency endpoints to Redis-backed `Upstash Ratelimit`.
+
+---
+
+## **Phase 9 — Advanced UX & Analytics**
+*Focus: Polishing and visibility.*
+
+### 9.1 Shiki Diff Integration
+- [ ] Implement server-side Shiki syntax highlighting for task and spec diffs.
+
+### 9.2 Full Notification Suite
+- [ ] Complete Email (Resend) and Slack (Block Kit) integrations for all events.
+
+### 9.3 Usage Dashboards
+- [ ] Implement daily cost analytics and token usage charts in Settings.
+
+---
+
+## **Phase 10 — Enterprise Quality & Ops**
+*Focus: Scale and automation.*
+
+### 10.1 Playwright E2E Testing
+- [ ] Automate the full Spec -> Plan -> Execute lifecycle testing.
+
+### 10.2 GitHub PR Automation
+- [ ] Implement automated PR creation via Octokit upon spec completion.
+
+### 10.3 Self-Hosted Docker Deployment
+- [ ] Provide official Docker Compose configurations for the full stack.

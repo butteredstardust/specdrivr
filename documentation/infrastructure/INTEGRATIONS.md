@@ -35,22 +35,24 @@ _Spec-driven autonomous code execution for engineering teams_
 
 ## **13.4 DAEMON Agent Protocol**
 
-The DAEMON agent is a separate process that communicates with the Specdrivr API. It does not access the database directly.
+The DAEMON agent is a standalone process that polls the Specdrivr API. It authenticates via an `AGENT_TOKEN` and operates in a pull-based model.
 
-| **Agent action**      | **API call**                                                                                  |
-| --------------------- | --------------------------------------------------------------------------------------------- |
-| Poll for next task    | GET /api/v1/sessions/{id} - checks currentTaskId and shouldStop                               |
-| Heartbeat (every 15s) | POST /api/v1/sessions/{id}/heartbeat - server returns { shouldStop: bool }                    |
-| Write task log line   | PATCH /api/v1/tasks/{id} with { logLine: { level, message } }                                 |
-| Mark task in-progress | PATCH /api/v1/tasks/{id} with { status: "in_progress" }                                       |
-| Mark task done        | PATCH /api/v1/tasks/{id} with { status: "done", verificationPassed: true }                    |
-| Mark task blocked     | PATCH /api/v1/tasks/{id} with { status: "blocked", blockedReason }                            |
-| Submit file change    | POST /api/v1/tasks/{id}/changes with { filePath, changeType, diff, linesAdded, linesRemoved } |
-| Mark session complete | POST /api/v1/sessions/{id}/complete                                                           |
+| **Agent action**      | **API call**                                                                                  | **Notes** |
+| --------------------- | --------------------------------------------------------------------------------------------- | --------- |
+| **Heartbeat**         | `POST /api/v1/sessions/{id}/heartbeat`                                                        | Every 15s. Returns `{ shouldStop: bool }`. |
+| **Poll for next task**| `GET /api/v1/agent/tasks/next?sessionId={id}`                                                 | Atomic claim via `FOR UPDATE SKIP LOCKED`. |
+| **Write log line**    | `POST /api/v1/sessions/{id}/log`                                                              | Buffers locally; flushes every 100ms. |
+| **Complete task**     | `POST /api/v1/tasks/{id}/complete`                                                            | Reports `{ status: "done" | "failed" }`. |
+| **Update task (Cost)**| `PATCH /api/v1/tasks/{id}`                                                                    | Used for reporting `totalCostUsd` from LLM output. |
 
-Session health: if lastHeartbeatAt is > 60 seconds old, the web application shows a "Session may have lost connection" banner. If > 5 minutes old, the session is automatically marked failed and a notification is sent.
+### **Agent Exit Rules**
+1. **Heartbeat Stop**: If `/heartbeat` returns `shouldStop: true`, the agent stops after finishing the current task.
+2. **Consecutive Errors**: If the agent fails to communicate with the API for **5 consecutive attempts**, it stops to prevent infinite retry loops.
+3. **Session Health**: If `lastHeartbeatAt` is > 60 seconds old, the server marks the session as `failed` (Zombie Session).
 
-# **26\. Cost & Usage Tracking**
+---
+
+# **26. Cost & Usage Tracking**
 
 Token usage and associated LLM costs are a first-class concern for engineering teams using Specdrivr. The cost data collected at the task and session level feeds the Usage section in Settings.
 
@@ -89,23 +91,3 @@ Total: \$0.0878
 Model: claude-sonnet-4-6
 
 This panel is hidden in normal mode. It is intended for developers debugging expensive tasks, not for end-user-facing cost visibility.
-
-## **26.4 Budget Alerts (Future - Not v1)**
-
-Specify the data structure now so the schema is ready when budget alerts are implemented:
-
-\-- budget_alerts (create now, implement UI later)
-
-id TEXT PRIMARY KEY
-
-projectId TEXT REFERENCES projects(id) ON DELETE CASCADE
-
-threshold NUMERIC(10,4) -- USD amount
-
-period TEXT -- "daily" | "monthly"
-
-alertType TEXT -- "email" | "webhook" | "both"
-
-triggeredAt TIMESTAMPTZ -- last time this alert fired
-
-createdAt TIMESTAMPTZ DEFAULT NOW()
