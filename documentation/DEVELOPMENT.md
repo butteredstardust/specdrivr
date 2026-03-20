@@ -1,5 +1,7 @@
 # DEVELOPMENT.md | Human Developer Guide
 
+[Status: GROUND TRUTH]
+
 Development standards and best practices for Specdrivr, an AI-native orchestration platform.
 
 > **Cross-reference**: For AI agent operations, see `AGENTS.md`. For AI constraints, see `CLAUDE.md`.

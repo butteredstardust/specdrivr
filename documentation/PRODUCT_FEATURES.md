@@ -8,6 +8,8 @@ Spec-driven autonomous code execution for engineering teams
 
 ---
 
+[Status: GROUND TRUTH]
+
 ## Table of Contents
 
 **Part 1 — Authentication & Authorization**
@@ -358,19 +360,9 @@ Notes are stored in `plan_reviews` with `action: 'approved'`. Shown in Review Hi
 
 ---
 
-## 3.2 Audit Trail
+## 3.2 Audit Trail [Status: Implementation Pending - See FUTURE_SPECIFICATIONS.md]
 
-At the bottom of the PLAN tab (below the plan content, always visible regardless of state): a `REVIEW HISTORY` collapsible section.
-
-Each review entry (newest first):
-
-```
-✓ Approved       Admin User · Jan 12 14:32
-⚠ Changes req.  Admin User · Jan 11 09:14   "Add error handling to auth tasks"
-✕ Rejected       Admin User · Jan 10 16:48   "Architecture decisions conflict with our patterns"
-```
-
-Monospace, color-coded icons, muted text. Clicking a row expands the full note text inline.
+Audit trail for plan reviews is planned for a future update.
 
 ---
 

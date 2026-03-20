@@ -1,5 +1,7 @@
 # Database Entity Relationship Diagram
 
+[Status: GROUND TRUTH]
+
 This diagram represents the canonical PostgreSQL database schema defined in `src/db/schema.ts`. It includes core domain entities, Better Auth authentication tables, and the orchestration engine metadata.
 
 ```mermaid

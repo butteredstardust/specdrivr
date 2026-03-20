@@ -6,6 +6,10 @@ Version 1.0 · Confidential
 
 _Spec-driven autonomous code execution for engineering teams_
 
+---
+
+[Status: GROUND TRUTH]
+
 # **13\. Integrations**
 
 ## **13.1 GitHub Integration**

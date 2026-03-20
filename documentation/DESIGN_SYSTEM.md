@@ -6,6 +6,10 @@ Version 1.0 · Confidential
 
 _Spec-driven autonomous code execution for engineering teams_
 
+---
+
+[Status: GROUND TRUTH]
+
 # **8\. Design System**
 
 ## **8.1 Design Philosophy**
@@ -479,8 +483,3 @@ The app shell is a fixed layout - sidebar and top bar never unmount during navig
 - Bell badge: amber background, white text, max displayed "9+". Updates via 3-second poll on GET /api/v1/notifications?unread=true&count=true.
 - Click notification row: marks as read (PATCH /api/v1/notifications/{id}) + navigates to linkUrl. Single action, no separate mark-read step.
 - \[Mark all read\]: POST /api/v1/notifications/read-all. Badge clears immediately (optimistic).
-
-## Development Gaps & Technical Debt
-
-- **UI Components:** App shell, navigation, and core feature pages (Projects, Specs, Sessions) are currently stubbed or missing, though base `shadcn/ui` components are present.
-- **Mascot Integration:** DAEMON Mascot component exists but is not wired into the global state across pages.

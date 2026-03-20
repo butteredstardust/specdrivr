@@ -6,6 +6,10 @@ Version 1.0 · Confidential
 
 _Spec-driven autonomous code execution for engineering teams_
 
+---
+
+[Status: GROUND TRUTH]
+
 # **17\. Non-Functional Requirements**
 
 ## **17.1 Performance**

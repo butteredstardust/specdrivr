@@ -8,6 +8,8 @@ _Spec-driven autonomous code execution for engineering teams_
 
 ---
 
+[Status: GROUND TRUTH]
+
 This specification has been split into the following purpose-specific files:
 
 ## Product Specification
@@ -93,6 +95,12 @@ This specification has been split into the following purpose-specific files:
 - **[OPERATIONS.md](OPERATIONS.md)** - Non-functional requirements and compliance
   - Non-Functional Requirements
   - Document Control
+
+- **[FUTURE_SPECIFICATIONS.md](FUTURE_SPECIFICATIONS.md)** - Central repository for planned but not implemented features
+  - Future Product & UI Vision
+  - Technical Architecture (Future)
+  - Integrations & Billing
+  - Advanced Operations
 
 ---
 
