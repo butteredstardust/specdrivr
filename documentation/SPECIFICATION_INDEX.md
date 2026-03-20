@@ -40,6 +40,7 @@ This index maps features to their new "Vertical Slice" module documentation.
 | Redis Registry     | [infrastructure/REDIS_REGISTRY.md](./infrastructure/REDIS_REGISTRY.md)               |
 | Testing Handbook   | [infrastructure/TESTING_HANDBOOK.md](./infrastructure/TESTING_HANDBOOK.md)           |
 | Coding Patterns    | [infrastructure/CODING_PATTERNS.md](./infrastructure/CODING_PATTERNS.md)             |
+| Symbol Registry    | [infrastructure/SYMBOL_REGISTRY.md](./infrastructure/SYMBOL_REGISTRY.md)             |
 | Directory Map      | [infrastructure/DIRECTORY_MAP.md](./infrastructure/DIRECTORY_MAP.md)                 |
 | Troubleshooting    | [infrastructure/TROUBLESHOOTING.md](./infrastructure/TROUBLESHOOTING.md)             |
 | Workflows/Recipes  | [infrastructure/WORKFLOWS.md](./infrastructure/WORKFLOWS.md)                         |

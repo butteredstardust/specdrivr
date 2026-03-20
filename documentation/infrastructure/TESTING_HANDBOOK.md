@@ -60,7 +60,33 @@ Always use ARIA labels to ensure accessibility and resilient tests.
 - **Good**: `page.getByRole('button', { name: 'Approve' })`
 - **Bad**: `page.locator('.btn-primary')`
 
-### 4.2 Auth State
+### 4.2 Agent-First Selectors (data-testid)
+
+When ARIA labels are insufficient or the element is a complex agent-facing surface, use `data-testid` to provide a stable hook for both Playwright and AI Agents.
+
+| **Target Element**    | **Recommended data-testid** |
+| --------------------- | --------------------------- |
+| Main Page Header      | `page-header`               |
+| Primary Action Button | `action-primary`            |
+| Task Detail Drawer    | `task-drawer`               |
+| Agent Log Container   | `agent-logs`                |
+| Session Status Badge  | `session-status`            |
+| Spec Editor Container | `spec-editor`               |
+| Project Switcher      | `project-switcher`          |
+
+**Usage Example:**
+
+```tsx
+// In the component
+<button data-testid="action-primary" ...>
+  Execute Spec
+</button>
+
+// In the test
+await page.getByTestId('action-primary').click();
+```
+
+### 4.3 Auth State
 
 Use the `auth.setup.ts` pattern to preserve login state across tests, avoiding repeated login flows.
 

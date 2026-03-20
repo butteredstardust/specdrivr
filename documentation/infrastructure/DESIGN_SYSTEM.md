@@ -40,6 +40,23 @@ Simple by default, powerful on demand: default views hide complexity behind prog
 | \--terminal-bg        | #0d0d0a | xterm.js container background.                         |
 | \--terminal-green     | #39ff14 | Success lines in terminal output.                      |
 
+## **8.2.1 Visual Intent Mapping (Tailwind 4 / CSS Variables)**
+
+| **Visual Intent**        | **CSS Variable Token**  | **Tailwind 4 Utility Example** |
+| ------------------------ | ----------------------- | ------------------------------ |
+| Primary Text             | `var(--text-primary)`   | `text-[--text-primary]`        |
+| Secondary/Muted Text     | `var(--text-secondary)` | `text-[--text-secondary]`      |
+| Disabled/Caption Text    | `var(--text-muted)`     | `text-[--text-muted]`          |
+| Success Status           | `var(--status-emerald)` | `text-[--status-emerald]`      |
+| Error/Failure Status     | `var(--status-red)`     | `bg-[--status-red]`            |
+| Warning/Blocked Status   | `var(--phosphor-amber)` | `text-[--phosphor-amber]`      |
+| Standard Border          | `var(--border-default)` | `border-[--border-default]`    |
+| Soft/Internal Border     | `var(--border-muted)`   | `border-[--border-muted]`      |
+| Page Background          | `var(--bg-base)`        | `bg-[--bg-base]`               |
+| Panel/Surface Background | `var(--bg-surface)`     | `bg-[--bg-surface]`            |
+| Primary Action Button    | `var(--accent-violet)`  | `bg-[--accent-violet]`         |
+| Hover/Elevated Surface   | `var(--bg-elevated)`    | `bg-[--bg-elevated]`           |
+
 ## **8.3 Typography**
 
 | **Usage**                               | **Font**                                | **Size**      | **Weight**                  |
