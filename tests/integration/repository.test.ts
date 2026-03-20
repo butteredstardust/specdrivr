@@ -36,48 +36,69 @@ describe('Repository Integration Tests', () => {
 
       // 1. Create a stale session
       const staleHeartbeat = new Date(Date.now() - 10 * 60 * 1000); // 10m ago
-      const [staleSession] = await testDb.insert(schema.agentSessions).values({
-        projectId: project.id,
-        planId: plan.id,
-        status: 'running',
-        lastHeartbeatAt: staleHeartbeat,
-      }).returning();
+      const [staleSession] = await testDb
+        .insert(schema.agentSessions)
+        .values({
+          projectId: project.id,
+          planId: plan.id,
+          status: 'running',
+          lastHeartbeatAt: staleHeartbeat,
+        })
+        .returning();
 
       // 2. Create an in_progress task for it
-      const [task] = await testDb.insert(schema.tasks).values({
-        planId: plan.id,
-        specId: spec.id,
-        externalId: 'T-1',
-        title: 'Task 1',
-        status: 'in_progress',
-      }).returning();
+      const [task] = await testDb
+        .insert(schema.tasks)
+        .values({
+          planId: plan.id,
+          specId: spec.id,
+          externalId: 'T-1',
+          title: 'Task 1',
+          status: 'in_progress',
+        })
+        .returning();
 
-      await testDb.update(schema.agentSessions).set({ currentTaskId: task.id }).where(eq(schema.agentSessions.id, staleSession.id));
+      await testDb
+        .update(schema.agentSessions)
+        .set({ currentTaskId: task.id })
+        .where(eq(schema.agentSessions.id, staleSession.id));
 
       // 3. Create a fresh session (should NOT be recovered)
       const freshHeartbeat = new Date();
-      const [freshSession] = await testDb.insert(schema.agentSessions).values({
-        projectId: project.id,
-        planId: plan.id,
-        status: 'running',
-        lastHeartbeatAt: freshHeartbeat,
-      }).returning();
+      const [freshSession] = await testDb
+        .insert(schema.agentSessions)
+        .values({
+          projectId: project.id,
+          planId: plan.id,
+          status: 'running',
+          lastHeartbeatAt: freshHeartbeat,
+        })
+        .returning();
 
       // 4. Run recovery
       const recoveredCount = await agentSessionRepository.recoverGhostSessions(5); // 5m threshold
       expect(recoveredCount).toBe(1);
 
       // 5. Verify stale session is failed
-      const [recoveredSession] = await testDb.select().from(schema.agentSessions).where(eq(schema.agentSessions.id, staleSession.id));
+      const [recoveredSession] = await testDb
+        .select()
+        .from(schema.agentSessions)
+        .where(eq(schema.agentSessions.id, staleSession.id));
       expect(recoveredSession.status).toBe('failed');
       expect(recoveredSession.errorMessage).toContain('Session timed out');
 
       // 6. Verify fresh session is still running
-      const [stillRunningSession] = await testDb.select().from(schema.agentSessions).where(eq(schema.agentSessions.id, freshSession.id));
-      expect(freshSession.status).toBe('running');
+      const [stillRunningSession] = await testDb
+        .select()
+        .from(schema.agentSessions)
+        .where(eq(schema.agentSessions.id, freshSession.id));
+      expect(stillRunningSession.status).toBe('running');
 
       // 7. Verify task is back to todo
-      const [updatedTask] = await testDb.select().from(schema.tasks).where(eq(schema.tasks.id, task.id));
+      const [updatedTask] = await testDb
+        .select()
+        .from(schema.tasks)
+        .where(eq(schema.tasks.id, task.id));
       expect(updatedTask.status).toBe('todo');
     });
   });
@@ -233,11 +254,14 @@ describe('Repository Integration Tests', () => {
         })
         .returning();
 
-      const [session] = await testDb.insert(schema.agentSessions).values({
-        projectId: project.id,
-        planId: plan.id,
-        status: 'running',
-      }).returning();
+      const [session] = await testDb
+        .insert(schema.agentSessions)
+        .values({
+          projectId: project.id,
+          planId: plan.id,
+          status: 'running',
+        })
+        .returning();
 
       // Task 1 (no dependencies)
       await testDb.insert(schema.tasks).values({
@@ -266,7 +290,10 @@ describe('Repository Integration Tests', () => {
       expect(claimed1?.status).toBe('in_progress');
 
       // Verify session currentTaskId was updated
-      const [updatedSession] = await testDb.select().from(schema.agentSessions).where(eq(schema.agentSessions.id, session.id));
+      const [updatedSession] = await testDb
+        .select()
+        .from(schema.agentSessions)
+        .where(eq(schema.agentSessions.id, session.id));
       expect(updatedSession.currentTaskId).toBe(claimed1?.id);
 
       // Try to claim next task (should be null because T-2 depends on T-1 which is in_progress)
@@ -388,16 +415,14 @@ describe('Repository Integration Tests', () => {
           executionOrder: 1,
         })
         .returning();
-      await testDb
-        .insert(schema.tasks)
-        .values({
-          planId: plan.id,
-          specId: spec.id,
-          externalId: 'T-B',
-          title: 'Task B',
-          status: 'todo',
-          executionOrder: 2,
-        });
+      await testDb.insert(schema.tasks).values({
+        planId: plan.id,
+        specId: spec.id,
+        externalId: 'T-B',
+        title: 'Task B',
+        status: 'todo',
+        executionOrder: 2,
+      });
 
       await taskRepository.completeTaskAttempt(taskA.id, {
         status: 'failed',
