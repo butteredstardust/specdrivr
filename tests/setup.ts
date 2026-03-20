@@ -1,14 +1,13 @@
-import { expect, vi } from 'vitest';
+import { expect, vi, beforeAll } from 'vitest';
 import * as matchers from '@testing-library/jest-dom/matchers';
 import { config } from 'dotenv';
 import path from 'path';
+import postgres from 'postgres';
 
 // Mock server-only to allow importing server-side modules in tests
 vi.mock('server-only', () => ({}));
 
 // Node 25+ ships a native localStorage that lacks the full Storage API
-// (e.g., .clear() is missing). Replace it with a proper in-memory mock
-// so React component tests can use localStorage as expected in jsdom.
 const createLocalStorageMock = () => {
   const store: Record<string, string> = {};
   return {
@@ -31,8 +30,37 @@ const createLocalStorageMock = () => {
 vi.stubGlobal('localStorage', createLocalStorageMock());
 
 // Load environment variables for tests
-// Use override: false (default) to ensure shell/CI env variables take precedence
 config({ path: path.resolve(process.cwd(), '.env') });
 config({ path: path.resolve(process.cwd(), '.env.local') });
+
+// --- Dynamic Worker Database Setup ---
+const workerId = process.env.VITEST_POOL_ID || '1';
+const dbName = `specdrivr_test_${workerId}`;
+const baseDbUrl =
+  process.env.DATABASE_URL || 'postgresql://specdrivr:specdrivr_password@localhost:5432/specdrivr';
+
+const workerUrl = new URL(baseDbUrl);
+workerUrl.pathname = `/${dbName}`;
+process.env.DATABASE_URL = workerUrl.toString();
+
+beforeAll(async () => {
+  const adminUrl = new URL(baseDbUrl);
+  adminUrl.pathname = '/postgres';
+  const sql = postgres(adminUrl.toString(), { max: 1 });
+
+  try {
+    const dbs = await sql`SELECT datname FROM pg_database WHERE datname = ${dbName}`;
+    if (dbs.length === 0) {
+      await sql.unsafe(`CREATE DATABASE "${dbName}" TEMPLATE specdrivr_test_template`);
+    }
+  } catch (e) {
+    process.stderr.write(`[test setup] Failed to create worker db ${dbName}: ${String(e)}\n`);
+    // Re-throw so the worker fails loudly rather than silently continuing
+    throw e;
+  } finally {
+    await sql.end();
+  }
+});
+// -------------------------------------
 
 expect.extend(matchers);

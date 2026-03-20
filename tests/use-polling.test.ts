@@ -44,23 +44,25 @@ describe('usePolling', () => {
     const { result } = renderHook(() =>
       usePolling({ url: '/api/v1/test', interval: 100, onError })
     );
-    // Advance through 5 errors (initial + 4 interval ticks)
+    // Advance through 5 errors. Backoffs will be approx 200, 400, 800, 1600ms + jitter.
     for (let i = 0; i < 5; i++) {
-      await act(() => vi.advanceTimersByTimeAsync(200));
+      await act(() => vi.advanceTimersByTimeAsync(2000));
     }
     // onError fires on every error; polling stops after 5 consecutive
     expect(onError).toHaveBeenCalledTimes(5);
     expect(result.current.error).not.toBeNull();
   });
 
-  test('uses clearInterval for cleanup (not clearTimeout)', () => {
-    const clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval');
+  test('uses clearTimeout for cleanup', async () => {
+    const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response(JSON.stringify({ data: {} }), { status: 200 })
     );
     const { unmount } = renderHook(() => usePolling({ url: '/api/v1/test', interval: 1000 }));
+    // Wait for initial fetch to resolve and schedule the timeout
+    await act(() => vi.advanceTimersByTimeAsync(1));
     unmount();
-    expect(clearIntervalSpy).toHaveBeenCalled();
+    expect(clearTimeoutSpy).toHaveBeenCalled();
   });
 
   test('stopWhen stops polling when predicate returns true', async () => {

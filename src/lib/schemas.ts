@@ -57,12 +57,11 @@ export const createTaskSchema = z.object({
 
   planId: z
     .number({
+      required_error: 'Plan ID is required',
       invalid_type_error: 'Plan ID must be a number',
     })
     .int('Plan ID must be an integer')
-    .positive('Plan ID must be a positive number')
-    .optional()
-    .nullable(),
+    .positive('Plan ID must be a positive number'),
 
   status: taskStatusSchema.optional().default('todo'),
 
@@ -514,3 +513,31 @@ export const updateProjectSchema = z
     },
     { message: 'At least one field to update is required' }
   );
+
+/**
+ * Schema for user login
+ */
+export const loginSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(1, 'Password is required'),
+});
+
+/**
+ * Schema for forgot password request
+ */
+export const forgotPasswordSchema = z.object({
+  email: z.string().email('Invalid email address'),
+});
+
+/**
+ * Schema for password reset
+ */
+export const resetPasswordSchema = z
+  .object({
+    password: z.string().min(8, 'Password must be at least 8 characters'),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  });

@@ -1114,6 +1114,26 @@ async function main() {
           language: 'typescript',
           linesAdded: 42,
           linesRemoved: 8,
+          diff: `diff --git a/src/components/index.ts b/src/components/index.ts
+index 8234fed..9234fed 100644
+--- a/src/components/index.ts
++++ b/src/components/index.ts
+@@ -1,8 +1,42 @@
+-export * from './button';
+-export * from './input';
+-export * from './card';
+export { Button } from './ui/button';
+export { Input } from './ui/input';
+export { Card, CardHeader, CardTitle, CardContent } from './ui/card';
+export { Badge } from './ui/badge';
+export { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs';
+export { Dialog, DialogContent, DialogTrigger } from './ui/dialog';
+
+// New speculative components
+export * from './agent/daemon-status';
+export * from './agent/task-inspector';
+export * from './audit/audit-list';
+export * from './audit/audit-detail-view';`,
         },
         {
           taskId: 101,
@@ -1122,6 +1142,21 @@ async function main() {
           language: 'markdown',
           linesAdded: 127,
           linesRemoved: 0,
+          diff: `diff --git a/src/components/audit-report.md b/src/components/audit-report.md
+new file mode 100644
+index 0000000..8877665
+--- /dev/null
++++ b/src/components/audit-report.md
+@@ -0,0 +1,127 @@
+# Specdrivr Audit Report
+
+## Overview
+This report details the findings of the architectural audit.
+
+### Key Findings
+1. **Modular Enforcement**: Standardized component paths.
+2. **Type Safety**: Enforced Zod schemas at boundaries.
+3. **Security**: Mandatory auth checks.`,
         },
         // T-201: CSS tokens
         {
@@ -1131,6 +1166,24 @@ async function main() {
           language: 'css',
           linesAdded: 89,
           linesRemoved: 0,
+          diff: `diff --git a/src/styles/tokens.css b/src/styles/tokens.css
+new file mode 100644
+index 0000000..aabbcc1
+--- /dev/null
++++ b/src/styles/tokens.css
+@@ -0,0 +1,89 @@
+:root {
+  --bg-base: 0 0% 100%;
+  --bg-elevated: 0 0% 98%;
+  --text-primary: 0 0% 9%;
+  --accent-violet: 262 83% 58%;
+}
+
+.dark {
+  --bg-base: 240 10% 4%;
+  --bg-elevated: 240 10% 6%;
+  --text-primary: 0 0% 98%;
+}`,
         },
         {
           taskId: 201,
@@ -1139,6 +1192,20 @@ async function main() {
           language: 'typescript',
           linesAdded: 34,
           linesRemoved: 12,
+          diff: `diff --git a/tailwind.config.ts b/tailwind.config.ts
+index 5566778..6677889 100644
+--- a/tailwind.config.ts
++++ b/tailwind.config.ts
+@@ -12,4 +12,34 @@
+     extend: {
+       colors: {
+         base: 'hsl(var(--bg-base))',
+        elevated: 'hsl(var(--bg-elevated))',
+        violet: 'hsl(var(--accent-violet))',
+       }
+     }
+   }
+ }`,
         },
         // T-301: OAuth provider configuration
         {
@@ -1149,6 +1216,20 @@ async function main() {
           language: 'typescript',
           linesAdded: 89,
           linesRemoved: 0,
+          diff: `diff --git a/src/lib/oauth-config.ts b/src/lib/oauth-config.ts
+new file mode 100644
+index 0000000..9988776
+--- /dev/null
++++ b/src/lib/oauth-config.ts
+@@ -0,0 +1,89 @@
+export const oauthConfig = {
+  providers: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }
+  }
+};`,
         },
         {
           taskId: 301,
@@ -1158,6 +1239,14 @@ async function main() {
           language: 'text',
           linesAdded: 5,
           linesRemoved: 0,
+          diff: `diff --git a/.env.example b/.env.example
+index 1122334..2233445 100644
+--- a/.env.example
++++ b/.env.example
+@@ -5,3 +5,8 @@
+ NEXT_PUBLIC_APP_URL=http://localhost:3000
+GOOGLE_CLIENT_ID=your_client_id
+GOOGLE_CLIENT_SECRET=your_client_secret`,
         },
         // T-302: OAuth callback
         {
@@ -1173,82 +1262,82 @@ index 0000000..1234567
 --- /dev/null
 +++ b/src/app/api/auth/callback/route.ts
 @@ -0,0 +1,76 @@
-+'use server';
-+
-+import { NextRequest, NextResponse } from 'next/server';
-+import crypto from 'crypto';
-+
-+// OAuth callback handler for authorization code exchange
-+export async function GET(request: NextRequest) {
-+  const searchParams = request.nextUrl.searchParams;
-+  const code = searchParams.get('code');
-+  const state = searchParams.get('state');
-+  const error = searchParams.get('error');
-+  const errorDescription = searchParams.get('error_description');
-+
-+  // Handle OAuth errors
-+  if (error) {
-+    console.error(\`OAuth error: \${error} - \${errorDescription}\`);
-+    return NextResponse.redirect(new URL(\`/auth/error?error=\${error}\`, request.url));
-+  }
-+
-+  // Validate state parameter to prevent CSRF
-+  const sessionState = request.cookies.get('oauth_state')?.value;
-+  if (!state || state !== sessionState) {
-+    console.error('State mismatch - potential CSRF attack');
-+    return NextResponse.redirect(new URL('/auth/error?error=invalid_state', request.url));
-+  }
-+
-+  if (!code) {
-+    return NextResponse.redirect(new URL('/auth/error?error=missing_code', request.url));
-+  }
-+
-+  try {
-+    // Exchange authorization code for access token
-+    const provider = request.cookies.get('oauth_provider')?.value || 'google';
-+    const tokenResponse = await exchangeCodeForToken(code, provider);
-+
-+    if (!tokenResponse.access_token) {
-+      throw new Error('No access token in response');
-+    }
-+
-+    // Fetch user profile from OAuth provider
-+    const userProfile = await fetchUserProfile(tokenResponse.access_token, provider);
-+
-+    // Create or update user in database
-+    const user = await createOrUpdateUser(userProfile, provider);
-+
-+    // Create session
-+    const session = await createSession(user.id);
-+
-+    // Clear OAuth temp cookies
-+    const response = NextResponse.redirect(new URL('/dashboard', request.url));
-+    response.cookies.delete('oauth_state');
-+    response.cookies.delete('oauth_provider');
-+    response.cookies.set('session', session.token, {
-+      httpOnly: true,
-+      secure: true,
-+      sameSite: 'lax',
-+      maxAge: 86400 * 7,
-+    });
-+
-+    return response;
-+  } catch (error) {
-+    console.error('OAuth callback error:', error);
-+    return NextResponse.redirect(new URL('/auth/error?error=callback_failed', request.url));
-+  }
-+}
-+
-+async function exchangeCodeForToken(code: string, provider: string) {
-+  // Implementation for token exchange
-+  // Varies by OAuth provider
-+  return {};
-+}
-+
-+async function fetchUserProfile(token: string, provider: string) {
-+  // Implementation for fetching user profile
-+  return {};
-+}`,
+'use server';
+
+import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
+
+// OAuth callback handler for authorization code exchange
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const code = searchParams.get('code');
+  const state = searchParams.get('state');
+  const error = searchParams.get('error');
+  const errorDescription = searchParams.get('error_description');
+
+  // Handle OAuth errors
+  if (error) {
+    console.error(\`OAuth error: \${error} - \${errorDescription}\`);
+    return NextResponse.redirect(new URL(\`/auth/error?error=\${error}\`, request.url));
+  }
+
+  // Validate state parameter to prevent CSRF
+  const sessionState = request.cookies.get('oauth_state')?.value;
+  if (!state || state !== sessionState) {
+    console.error('State mismatch - potential CSRF attack');
+    return NextResponse.redirect(new URL('/auth/error?error=invalid_state', request.url));
+  }
+
+  if (!code) {
+    return NextResponse.redirect(new URL('/auth/error?error=missing_code', request.url));
+  }
+
+  try {
+    // Exchange authorization code for access token
+    const provider = request.cookies.get('oauth_provider')?.value || 'google';
+    const tokenResponse = await exchangeCodeForToken(code, provider);
+
+    if (!tokenResponse.access_token) {
+      throw new Error('No access token in response');
+    }
+
+    // Fetch user profile from OAuth provider
+    const userProfile = await fetchUserProfile(tokenResponse.access_token, provider);
+
+    // Create or update user in database
+    const user = await createOrUpdateUser(userProfile, provider);
+
+    // Create session
+    const session = await createSession(user.id);
+
+    // Clear OAuth temp cookies
+    const response = NextResponse.redirect(new URL('/dashboard', request.url));
+    response.cookies.delete('oauth_state');
+    response.cookies.delete('oauth_provider');
+    response.cookies.set('session', session.token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      maxAge: 86400 * 7,
+    });
+
+    return response;
+  } catch (error) {
+    console.error('OAuth callback error:', error);
+    return NextResponse.redirect(new URL('/auth/error?error=callback_failed', request.url));
+  }
+}
+
+async function exchangeCodeForToken(code: string, provider: string) {
+  // Implementation for token exchange
+  // Varies by OAuth provider
+  return {};
+}
+
+async function fetchUserProfile(token: string, provider: string) {
+  // Implementation for fetching user profile
+  return {};
+}`,
         },
         // T-501: job queue
         {
@@ -1264,90 +1353,90 @@ index 0000000..2345678
 --- /dev/null
 +++ b/src/lib/queue.ts
 @@ -0,0 +1,143 @@
-+import Bull from 'bull';
-+import { redis } from './redis';
-+
-+// Job queue for async task processing
-+export const jobQueue = new Bull('jobs', {
-+  redis: {
-+    host: process.env.REDIS_HOST,
-+    port: parseInt(process.env.REDIS_PORT || '6379'),
-+  },
-+});
-+
-+export interface JobData {
-+  type: string;
-+  payload: Record<string, unknown>;
-+  retryCount?: number;
-+  maxRetries?: number;
-+}
-+
-+// Process jobs with error handling and retry logic
-+jobQueue.process(async (job) => {
-+  const { type, payload, retryCount = 0, maxRetries = 3 } = job.data as JobData;
-+
-+  try {
-+    switch (type) {
-+      case 'send_email':
-+        return await sendEmailJob(payload);
-+      case 'generate_report':
-+        return await generateReportJob(payload);
-+      case 'sync_external_data':
-+        return await syncExternalDataJob(payload);
-+      default:
-+        throw new Error(\`Unknown job type: \${type}\`);
-+    }
-+  } catch (error) {
-+    if (retryCount < maxRetries) {
-+      throw error; // Bull will retry
-+    }
-+    // Max retries exceeded
-+    console.error(\`Job \${job.id} failed after \${retryCount} retries\`, error);
-+    throw error;
-+  }
-+});
-+
-+// Job completion and failure handlers
-+jobQueue.on('completed', (job) => {
-+  console.log(\`Job \${job.id} completed\`, job.data);
-+});
-+
-+jobQueue.on('failed', (job, error) => {
-+  console.error(\`Job \${job.id} failed\`, error);
-+});
-+
-+// Queue job for processing
-+export async function enqueueJob(type: string, payload: Record<string, unknown>) {
-+  return await jobQueue.add({ type, payload }, {
-+    attempts: 3,
-+    backoff: {
-+      type: 'exponential',
-+      delay: 2000,
-+    },
-+    removeOnComplete: true,
-+  });
-+}
-+
-+// Implementation for email sending job
-+async function sendEmailJob(payload: Record<string, unknown>) {
-+  const { to, subject, body } = payload;
-+  // Send email implementation
-+  return { sent: true };
-+}
-+
-+// Implementation for report generation job
-+async function generateReportJob(payload: Record<string, unknown>) {
-+  const { reportId, format } = payload;
-+  // Generate report implementation
-+  return { reportId, format };
-+}
-+
-+// Implementation for external data sync job
-+async function syncExternalDataJob(payload: Record<string, unknown>) {
-+  const { source, destination } = payload;
-+  // Sync data implementation
-+  return { synced: true };
-+}`,
+import Bull from 'bull';
+import { redis } from './redis';
+
+// Job queue for async task processing
+export const jobQueue = new Bull('jobs', {
+  redis: {
+    host: process.env.REDIS_HOST,
+    port: parseInt(process.env.REDIS_PORT || '6379'),
+  },
+});
+
+export interface JobData {
+  type: string;
+  payload: Record<string, unknown>;
+  retryCount?: number;
+  maxRetries?: number;
+}
+
+// Process jobs with error handling and retry logic
+jobQueue.process(async (job) => {
+  const { type, payload, retryCount = 0, maxRetries = 3 } = job.data as JobData;
+
+  try {
+    switch (type) {
+      case 'send_email':
+        return await sendEmailJob(payload);
+      case 'generate_report':
+        return await generateReportJob(payload);
+      case 'sync_external_data':
+        return await syncExternalDataJob(payload);
+      default:
+        throw new Error(\`Unknown job type: \${type}\`);
+    }
+  } catch (error) {
+    if (retryCount < maxRetries) {
+      throw error; // Bull will retry
+    }
+    // Max retries exceeded
+    console.error(\`Job \${job.id} failed after \${retryCount} retries\`, error);
+    throw error;
+  }
+});
+
+// Job completion and failure handlers
+jobQueue.on('completed', (job) => {
+  console.log(\`Job \${job.id} completed\`, job.data);
+});
+
+jobQueue.on('failed', (job, error) => {
+  console.error(\`Job \${job.id} failed\`, error);
+});
+
+// Queue job for processing
+export async function enqueueJob(type: string, payload: Record<string, unknown>) {
+  return await jobQueue.add({ type, payload }, {
+    attempts: 3,
+    backoff: {
+      type: 'exponential',
+      delay: 2000,
+    },
+    removeOnComplete: true,
+  });
+}
+
+// Implementation for email sending job
+async function sendEmailJob(payload: Record<string, unknown>) {
+  const { to, subject, body } = payload;
+  // Send email implementation
+  return { sent: true };
+}
+
+// Implementation for report generation job
+async function generateReportJob(payload: Record<string, unknown>) {
+  const { reportId, format } = payload;
+  // Generate report implementation
+  return { reportId, format };
+}
+
+// Implementation for external data sync job
+async function syncExternalDataJob(payload: Record<string, unknown>) {
+  const { source, destination } = payload;
+  // Sync data implementation
+  return { synced: true };
+}`,
         },
         {
           taskId: 501,
@@ -1356,13 +1445,30 @@ index 0000000..2345678
           language: 'yaml',
           linesAdded: 18,
           linesRemoved: 2,
+          diff: `diff --git a/docker-compose.yml b/docker-compose.yml
+index 4433221..5544332 100644
+--- a/docker-compose.yml
++++ b/docker-compose.yml
+@@ -10,6 +10,18 @@
+       - POSTGRES_PASSWORD=specdrivr_password
+       - POSTGRES_DB=specdrivr
+ 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  db_data:
+  redis_data:`,
         },
       ];
 
       for (const fc of fileChangesData) {
         await tx.insert(fileChanges).values(fc).onConflictDoNothing();
       }
-
       // -------------------------------------------------------------------------
       // 14. Agent Sessions
       // -------------------------------------------------------------------------

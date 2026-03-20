@@ -16,6 +16,7 @@ import {
   CheckCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { clientLogger } from '@/lib/logger-client';
 
 function formatRelativeTime(iso: string): string {
   const date = new Date(iso);
@@ -82,19 +83,23 @@ export default function NotificationsPage() {
     try {
       const res = await fetch(`/api/v1/notifications/read-all?projectId=${activeProjectId}`, {
         method: 'POST',
+        credentials: 'include',
       });
       if (res.ok) restart();
     } catch (error) {
-      console.error('Failed to mark all as read:', error);
+      clientLogger.error('Failed to mark all notifications as read', { error });
     }
   };
 
   const handleMarkRead = async (id: number) => {
     try {
-      const res = await fetch(`/api/v1/notifications/${id}/read`, { method: 'POST' });
+      const res = await fetch(`/api/v1/notifications/${id}/read`, {
+        method: 'POST',
+        credentials: 'include',
+      });
       if (res.ok) restart();
     } catch (error) {
-      console.error('Failed to mark read:', error);
+      clientLogger.error('Failed to mark notification as read', { error, notificationId: id });
     }
   };
 

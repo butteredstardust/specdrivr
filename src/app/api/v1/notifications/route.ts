@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { notificationRepository } from '@/repositories/notification-repository';
 import { handleApiError } from '@/lib/error-handler';
 import { z } from 'zod';
+import { parseUrlParams } from '@/lib/api-utils';
 
 const NotificationQuerySchema = z.object({
   projectId: z.coerce.number().int().positive().optional(),
@@ -22,8 +23,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const { searchParams } = new URL(request.url);
-    const query = NotificationQuerySchema.parse(Object.fromEntries(searchParams.entries()));
+    const query = parseUrlParams(request, NotificationQuerySchema);
 
     const { notifications, total, unreadCount } = await notificationRepository.getByUserId(
       session.user.id,
