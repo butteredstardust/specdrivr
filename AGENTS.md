@@ -25,17 +25,32 @@ Specdrivr is built on a modern, high-performance stack optimized for AI-native d
 Orientation for agents navigating the codebase:
 
 - **`documentation/`**: Canonical docs.
+    - **Product Status**: `PRODUCT_MAP.md` (Check this first).
     - **One-Shot Success**: `infrastructure/CODING_PATTERNS.md` & `infrastructure/DIRECTORY_MAP.md`.
     - **Self-Healing**: `infrastructure/TROUBLESHOOTING.md`.
 - **`src/repositories/`**: Single source of truth for all database access.
-- **`src/actions/`**: Server Actions for UI-driven mutations (requires `auth()` checks).
-- **`src/lib/`**: Core utilities, engine logic, RBAC, and environment validation.
-- **`src/app/`**: Route segments, page layouts, and the `globals.css` token system.
-- **`src/components/ui/`**: Local implementation of shadcn components.
-- **`tests/`**: Unit (Vitest) and E2E (Playwright) suites.
-- **`.husky/`**: Pre-commit/Pre-push quality gates.
+- **`src/actions/`**: Server Actions for mutations.
+- **`src/queries/`**: Shared read-only logic.
 
-## 4. Design System Summary
+## 4. Agentic Tool Strategies
+
+To maximize efficiency and minimize context window usage:
+
+- **Grep-First Research**: Use `grep_search` with `include_pattern` (e.g., `src/repositories/**`) to find implementation examples before reading entire files.
+- **Vertical Research**: When working on a feature, read its corresponding `documentation/modules/*.md` file first. It contains the logic, UI, and "Agent Handbook" for that slice.
+- **Surgical Modifications**: Always use `replace` for targeted edits. Avoid `write_file` for large existing files to prevent accidental regression.
+
+## 5. Closing Rituals (Task Completion)
+
+Every task must end with these steps:
+
+1.  **Verification**: Run `pnpm test` and `pnpm lint`.
+2.  **Branch Documentation**:
+    -   Update/Create `documentation/branches/{branch}/BRANCH_CHANGES.md`.
+    -   Update/Create `documentation/branches/{branch}/BRANCH_CODE_REVIEW.md`.
+3.  **Final Summary**: Provide an Executive Summary, Completion Statement, and a checklist of deliverables.
+
+## 6. Design System Summary
 
 _See `DESIGN_SYSTEM.md` for full specifications._
 
