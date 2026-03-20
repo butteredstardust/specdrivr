@@ -32,6 +32,9 @@ See `SUBAGENTS-SUMMARY.md` and `TECH-STACK-AGENTS-SUMMARY.md` for the full list 
 
 ## 1. Architectural Mandates
 
+- **Ground Truth First**: Before any Directive, verify feature implementation status in `documentation/PRODUCT_MAP.md`.
+- **One-Shot Success**: ALWAYS consult `infrastructure/CODING_PATTERNS.md` and `infrastructure/DIRECTORY_MAP.md` before writing code.
+- **Troubleshooting**: If a build fails, follow the `infrastructure/TROUBLESHOOTING.md` decision tree before retrying.
 - **Repository Pattern**: Never import `db` in UI components. Use `src/repositories/`. Always use `executeQuery`.
 - **Server Actions**: Always call `await auth()` first. Return structured objects.
 - **RSC Enforcement**: Default to Server Components. Maintain strict Client/Server boundaries.
