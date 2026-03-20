@@ -483,3 +483,56 @@ The app shell is a fixed layout - sidebar and top bar never unmount during navig
 - Bell badge: amber background, white text, max displayed "9+". Updates via 3-second poll on GET /api/v1/notifications?unread=true&count=true.
 - Click notification row: marks as read (PATCH /api/v1/notifications/{id}) + navigates to linkUrl. Single action, no separate mark-read step.
 - \[Mark all read\]: POST /api/v1/notifications/read-all. Badge clears immediately (optimistic).
+
+---
+
+# **16. Navigation Flow Diagram**
+
+```
+[Sidebar: Mission Control] ──────────────────────────────► P1 Mission Control
+                                                               │
+                                                               ├─ View all → ──────────────► P6 Sessions
+                                                               └─ Blocked pill → ──────────► Task Drawer (overlay)
+
+[Sidebar: Specifications] ────────────────────────────────► P3 Specifications
+                                                               │
+                                                               ├─ Row click ──────────────► P5 Spec Detail
+                                                               │                               │
+                                                               │                               ├─ Edit ──────────► P4 Spec Editor
+                                                               │                               ├─ Generate Plan ─► (stays, PLAN tab)
+                                                               │                               ├─ Approve ───────► (dialog → executing)
+                                                               │                               ├─ Task row ──────► Task Drawer (overlay)
+                                                               │                               ├─ Session link ──► P6 Sessions
+                                                               │                               └─ Breadcrumb ────► P3 Specifications
+                                                               │
+                                                               └─ + New Spec ─────────────► P4 Spec Editor (new)
+                                                                                               │
+                                                                                               ├─ Save Draft ────► P5 Spec Detail (SPEC tab)
+                                                                                               └─ Save & Plan ───► P5 Spec Detail (PLAN tab)
+
+[Sidebar: Sessions] ─────────────────────────────────────► P6 Sessions
+                                                               └─ Spec name link ─────────► P5 Spec Detail (ACTIVITY tab)
+
+[Sidebar: Settings] ─────────────────────────────────────► P7 Settings
+                                                               └─ Delete Project ─────────► P2 Projects
+
+[Project Switcher (sidebar)] ─────────────────────────────► P2 Projects
+
+[Cmd+K anywhere] ─────────────────────────────────────────► Command Palette (overlay)
+                                                               └─ Any nav item ───────────► Respective page
+```
+
+# **17. Shared Component Inventory**
+
+| Component                         | Used on                                                                |
+| --------------------------------- | ---------------------------------------------------------------------- |
+| DAEMON sprite (all expressions)   | Sidebar, all empty states, all toasts, Task Drawer header, all dialogs |
+| Task row (collapsed + expanded)   | P5 TASKS tab, P1 Mission Control blocked pills                         |
+| Event log row (mono, color-coded) | P1 Event feed, P5 ACTIVITY tab, P6 Sessions expanded                   |
+| xterm.js terminal panel           | P1 live log, P5-OVERLAY ATTEMPTS tab, P6 inline expand                 |
+| Shiki diff viewer                 | P5 CHANGES tab, P5-OVERLAY CHANGES tab                                 |
+| ASCII progress bar (`▓▒`)         | P3 Specifications table, P5 header summary                             |
+| Session row                       | P6 Sessions, P1 (compact version)                                      |
+| Status indicator (retro char)     | All task rows, all spec rows, all session rows                         |
+| Amber ID badge (mono)             | All task IDs (T-042), spec IDs (SPEC-003), session IDs (SES-0091)      |
+
