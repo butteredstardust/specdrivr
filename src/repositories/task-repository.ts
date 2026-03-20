@@ -9,6 +9,13 @@ import {
   type TaskStatus,
 } from '@/db/schema';
 import * as schema from '@/db/schema';
+import {
+  planRepository,
+  specificationRepository,
+  agentSessionRepository,
+  agentConfigRepository,
+} from '@/repositories';
+import { getGitHubConfig, createPullRequest } from '@/lib/github';
 import { eq, desc, sql, and, asc, getTableColumns, inArray } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, ValidationError, DatabaseError } from '@/lib/errors';
@@ -701,6 +708,9 @@ export class TaskRepository extends BaseRepository {
       output?: string;
       exitCode?: number;
       errorMessage?: string;
+      gitBranch?: string;
+      gitCommitHash?: string;
+      totalCostUsd?: number;
     }
   ): Promise<{ sessionId: number | null }> {
     const task = await this.getById(taskId);
@@ -721,6 +731,9 @@ export class TaskRepository extends BaseRepository {
           .set({
             status: finalStatus,
             completedAt: finalStatus === 'done' ? new Date() : null,
+            gitBranch: data.gitBranch || task.gitBranch,
+            gitCommitHash: data.gitCommitHash || task.gitCommitHash,
+            totalCostUsd: data.totalCostUsd || task.totalCostUsd,
             updatedAt: new Date(),
           })
           .where(eq(tasks.id, taskId));
@@ -815,6 +828,11 @@ export class TaskRepository extends BaseRepository {
                 data: planCompleted ? { planCompleted: true } : {},
               }
             );
+
+            // Handle GitHub PR Automation
+            if (finalStatus === 'done') {
+              void this.triggerPullRequestAutomation(task.id, planCompleted);
+            }
           }
         } catch (err) {
           logger.error(
@@ -826,6 +844,70 @@ export class TaskRepository extends BaseRepository {
     }
 
     return { sessionId: activeSessionId };
+  }
+
+  /**
+   * Triggers GitHub PR creation if configured for the project.
+   */
+  private async triggerPullRequestAutomation(taskId: number, planCompleted: boolean): Promise<void> {
+    try {
+      const task = await this.getById(taskId);
+      if (!task || !task.specId) return;
+
+      const spec = await specificationRepository.getById(task.specId);
+      if (!spec) return;
+
+      const config = await agentConfigRepository.getByProjectId(spec.projectId);
+      if (!config || !config.prAutoCreate) return;
+
+      // Only create PR if task has a git branch
+      if (!task.gitBranch) {
+        logger.info({ taskId }, 'Skipping PR automation: Task has no gitBranch');
+        return;
+      }
+
+      // Check if PR already exists for this task
+      if (task.pullRequestUrl) {
+        logger.info({ taskId, url: task.pullRequestUrl }, 'PR already exists for task');
+        return;
+      }
+
+      const ghConfig = await getGitHubConfig(spec.projectId);
+      if (!ghConfig) return;
+
+      logger.info({ taskId, repo: ghConfig.repo }, 'Triggering automated PR creation');
+
+      const pr = await createPullRequest({
+        token: ghConfig.token,
+        repo: ghConfig.repo,
+        title: `feat(${task.externalId}): ${task.title}`,
+        head: task.gitBranch,
+        base: config.prTargetBranch || ghConfig.branch || 'main',
+        body: `### Task Detail\n${task.description}\n\n**Done Criteria**:\n${task.doneCriteria}\n\n---\n*Automated PR created by Specdrivr DAEMON*`,
+      });
+
+      if (pr?.html_url) {
+        await db.update(tasks).set({ pullRequestUrl: pr.html_url }).where(eq(tasks.id, taskId));
+        logger.info({ taskId, prUrl: pr.html_url }, 'Successfully created automated PR');
+
+        // If plan is completed, also update the session
+        const [session] = await db
+          .select({ id: agentSessions.id })
+          .from(agentSessions)
+          .where(eq(agentSessions.planId, task.planId))
+          .orderBy(desc(agentSessions.startedAt))
+          .limit(1);
+
+        if (session && planCompleted) {
+          await db
+            .update(agentSessions)
+            .set({ pullRequestUrl: pr.html_url })
+            .where(eq(agentSessions.id, session.id));
+        }
+      }
+    } catch (err) {
+      logger.error({ err, taskId }, 'Failed to execute PR automation');
+    }
   }
 }
 

@@ -10,6 +10,9 @@ const CompleteTaskSchema = z.object({
   status: z.enum(['done', 'failed']),
   exitCode: z.number().int().optional(),
   errorMessage: z.string().optional(),
+  gitBranch: z.string().optional(),
+  gitCommitHash: z.string().optional(),
+  totalCostUsd: z.number().optional(),
 });
 
 interface RouteParams {
