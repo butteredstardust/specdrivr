@@ -1,0 +1,1 @@
+CREATE INDEX "plan_job_project_status_idx" ON "plan_jobs" USING btree ("project_id","status");

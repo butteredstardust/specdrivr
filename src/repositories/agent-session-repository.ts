@@ -4,13 +4,14 @@ import {
   agentEvents,
   auditLog,
   tasks,
+  planJobs,
   type AgentSessionSelect as AgentSession,
   type AgentEventInsert,
   type AgentEventSelect,
   projects,
   specifications,
 } from '@/db/schema';
-import { eq, desc, inArray, asc, lt, and } from 'drizzle-orm';
+import { eq, desc, inArray, asc, lt, and, sql } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, DatabaseError } from '@/lib/errors';
 import { dispatchWebhookEvent, type WebhookEventType } from '@/lib/webhooks';
@@ -329,6 +330,53 @@ export class AgentSessionRepository extends BaseRepository {
       // Never throw from notification helper
       logger.error({ err }, 'Failed to send session Slack notification');
     }
+  }
+
+  /**
+   * Returns the combined project activity feed (agent events + failed plan jobs),
+   * ordered by recency. Corresponds to the /projects/:id/activity API route.
+   */
+  async getProjectActivity(projectId: number, limit = 20): Promise<Record<string, unknown>[]> {
+    return await this.executeQuery(async () => {
+      const events = await db
+        .select({
+          id: agentEvents.id,
+          type: sql<string>`'event'`,
+          eventType: agentEvents.eventType,
+          message: agentEvents.message,
+          metadata: agentEvents.metadata,
+          createdAt: agentEvents.createdAt,
+          sessionId: agentEvents.sessionId,
+          specId: agentEvents.specId,
+        })
+        .from(agentEvents)
+        .innerJoin(agentSessions, eq(agentEvents.sessionId, agentSessions.id))
+        .where(eq(agentSessions.projectId, projectId))
+        .orderBy(desc(agentEvents.createdAt))
+        .limit(limit);
+
+      const failedJobs = await db
+        .select({
+          id: planJobs.id,
+          type: sql<string>`'job'`,
+          eventType: sql<string>`'JOB_FAILED'`,
+          message: sql<string>`'Background ' || ${planJobs.type} || ' failed'`,
+          metadata: sql<
+            Record<string, unknown>
+          >`json_build_object('error', ${planJobs.error}, 'jobType', ${planJobs.type})`,
+          createdAt: planJobs.updatedAt,
+          sessionId: sql<number | null>`null`,
+          specId: planJobs.specId,
+        })
+        .from(planJobs)
+        .where(and(eq(planJobs.projectId, projectId), eq(planJobs.status, 'failed')))
+        .orderBy(desc(planJobs.updatedAt))
+        .limit(10);
+
+      return [...events, ...failedJobs]
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, limit) as Record<string, unknown>[];
+    });
   }
 
   async getEvents(sessionId: number, limit: number): Promise<AgentEventSelect[]> {

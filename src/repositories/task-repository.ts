@@ -143,7 +143,10 @@ export class TaskRepository extends BaseRepository {
       description: data.description.trim(),
       externalId: data.externalId,
       title: data.title,
-      planId: data.planId as number, // Required by DB
+      planId: (() => {
+        if (!data.planId) throw new ValidationError('planId is required to create a task');
+        return data.planId;
+      })(),
       specId: data.specId ?? null,
       status: data.status ?? ('todo' as const),
       dependsOn: data.dependsOn ?? [],
@@ -222,41 +225,13 @@ export class TaskRepository extends BaseRepository {
 
     // Trigger task.blocked or task.done webhook
     if (data.status === 'blocked' || data.status === 'done') {
-      (async () => {
-        try {
-          const [plan] = await db.select().from(plans).where(eq(plans.id, t.planId)).limit(1);
-          const [spec] = await db
-            .select({ pid: specifications.projectId })
-            .from(specifications)
-            .where(eq(specifications.id, plan.specId))
-            .limit(1);
-          const [session] = await db
-            .select({ id: agentSessions.id })
-            .from(agentSessions)
-            .where(eq(agentSessions.planId, plan.id))
-            .orderBy(desc(agentSessions.startedAt))
-            .limit(1);
-
-          if (spec) {
-            void dispatchWebhookEvent(
-              spec.pid,
-              data.status === 'blocked' ? 'task.blocked' : 'task.done',
-              {
-                taskId: t.id,
-                specId: plan.specId,
-                sessionId: session?.id,
-                data: data.status === 'blocked' ? { blockedReason: t.blockedReason } : {},
-              }
-            );
-
-            if (data.status === 'blocked') {
-              void this.notifySlackTaskBlocked(t.id);
-            }
-          }
-        } catch (err) {
-          logger.error({ err }, `Failed to dispatch task.${data.status} webhook`);
-        }
-      })();
+      void this.dispatchTaskWebhookAsync(
+        t.id,
+        t.planId,
+        data.status === 'blocked' ? 'task.blocked' : 'task.done',
+        data.status === 'blocked' ? { blockedReason: t.blockedReason } : {}
+      );
+      if (data.status === 'blocked') void this.notifySlackTaskBlocked(t.id);
     }
 
     return t;
@@ -372,65 +347,14 @@ export class TaskRepository extends BaseRepository {
       });
     }).then((updatedTask) => {
       if (!updatedTask) return updatedTask;
-
       const t = updatedTask;
-
-      // Trigger task.blocked if status is blocked
       if (t.status === 'blocked') {
-        (async () => {
-          try {
-            const [plan] = await db.select().from(plans).where(eq(plans.id, t.planId)).limit(1);
-            const [spec] = await db
-              .select({ pid: specifications.projectId })
-              .from(specifications)
-              .where(eq(specifications.id, plan.specId))
-              .limit(1);
-            const [session] = await db
-              .select({ id: agentSessions.id })
-              .from(agentSessions)
-              .where(eq(agentSessions.planId, plan.id))
-              .orderBy(desc(agentSessions.startedAt))
-              .limit(1);
-            if (spec) {
-              void dispatchWebhookEvent(spec.pid, 'task.blocked', {
-                taskId: t.id,
-                specId: plan.specId,
-                sessionId: session?.id,
-                data: { blockedReason: t.blockedReason },
-              });
-              void this.notifySlackTaskBlocked(t.id);
-            }
-          } catch (err) {
-            logger.error({ err }, 'Failed to dispatch task.blocked webhook');
-          }
-        })();
+        void this.dispatchTaskWebhookAsync(t.id, t.planId, 'task.blocked', {
+          blockedReason: t.blockedReason,
+        });
+        void this.notifySlackTaskBlocked(t.id);
       } else if (t.status === 'done') {
-        (async () => {
-          try {
-            const [plan] = await db.select().from(plans).where(eq(plans.id, t.planId)).limit(1);
-            const [spec] = await db
-              .select({ pid: specifications.projectId })
-              .from(specifications)
-              .where(eq(specifications.id, plan.specId))
-              .limit(1);
-            const [session] = await db
-              .select({ id: agentSessions.id })
-              .from(agentSessions)
-              .where(eq(agentSessions.planId, plan.id))
-              .orderBy(desc(agentSessions.startedAt))
-              .limit(1);
-            if (spec) {
-              void dispatchWebhookEvent(spec.pid, 'task.done', {
-                taskId: t.id,
-                specId: plan.specId,
-                sessionId: session?.id,
-                data: {},
-              });
-            }
-          } catch (err) {
-            logger.error({ err }, 'Failed to dispatch task.done webhook');
-          }
-        })();
+        void this.dispatchTaskWebhookAsync(t.id, t.planId, 'task.done', {});
       }
       return t;
     });
@@ -476,30 +400,9 @@ export class TaskRepository extends BaseRepository {
         return updatedTask as Task;
       });
     }).then((updatedTask) => {
-      // Trigger task.retried webhook after transaction commits
-      (async () => {
-        try {
-          const plan = (
-            await db.select().from(plans).where(eq(plans.id, updatedTask.planId)).limit(1)
-          )[0];
-          const spec = (
-            await db
-              .select({ pid: specifications.projectId })
-              .from(specifications)
-              .where(eq(specifications.id, plan.specId))
-              .limit(1)
-          )[0];
-          if (spec) {
-            void dispatchWebhookEvent(spec.pid, 'task.retried', {
-              taskId: updatedTask.id,
-              specId: plan.specId,
-              data: { attemptCount: updatedTask.attemptCount },
-            });
-          }
-        } catch (err) {
-          logger.error({ err }, 'Failed to dispatch task.retried webhook');
-        }
-      })();
+      void this.dispatchTaskWebhookAsync(updatedTask.id, updatedTask.planId, 'task.retried', {
+        attemptCount: updatedTask.attemptCount,
+      });
       return updatedTask;
     });
   }
@@ -546,30 +449,9 @@ export class TaskRepository extends BaseRepository {
         return updatedTask as Task;
       });
     }).then((updatedTask) => {
-      // Trigger task.unblocked webhook after transaction commits
-      (async () => {
-        try {
-          const plan = (
-            await db.select().from(plans).where(eq(plans.id, updatedTask.planId)).limit(1)
-          )[0];
-          const spec = (
-            await db
-              .select({ pid: specifications.projectId })
-              .from(specifications)
-              .where(eq(specifications.id, plan.specId))
-              .limit(1)
-          )[0];
-          if (spec) {
-            void dispatchWebhookEvent(spec.pid, 'task.unblocked', {
-              taskId: updatedTask.id,
-              specId: plan.specId,
-              data: { humanContext },
-            });
-          }
-        } catch (err) {
-          logger.error({ err }, 'Failed to dispatch task.unblocked webhook');
-        }
-      })();
+      void this.dispatchTaskWebhookAsync(updatedTask.id, updatedTask.planId, 'task.unblocked', {
+        humanContext,
+      });
       return updatedTask;
     });
   }
@@ -620,49 +502,20 @@ export class TaskRepository extends BaseRepository {
         return updatedTask as Task;
       });
     }).then((updatedTask) => {
-      // Trigger appropriate task webhook after transaction commits
-      (async () => {
-        try {
-          const [plan] = await db
-            .select()
-            .from(plans)
-            .where(eq(plans.id, updatedTask.planId))
-            .limit(1);
-          const [spec] = await db
-            .select({ pid: specifications.projectId })
-            .from(specifications)
-            .where(eq(specifications.id, plan.specId))
-            .limit(1);
-          const [session] = await db
-            .select({ id: agentSessions.id })
-            .from(agentSessions)
-            .where(eq(agentSessions.planId, plan.id))
-            .orderBy(desc(agentSessions.startedAt))
-            .limit(1);
-
-          if (spec) {
-            // Mapping for standard events, fallback to generic task.done or task.blocked if applicable
-            let event: WebhookEventType | null = null;
-            if (updatedTask.status === 'blocked') event = 'task.blocked';
-            else if (updatedTask.status === 'done') event = 'task.done';
-
-            if (event) {
-              void dispatchWebhookEvent(spec.pid, event, {
-                taskId: updatedTask.id,
-                specId: plan.specId,
-                sessionId: session?.id,
-                data: { from: task.status, to: updatedTask.status, notes },
-              });
-
-              if (updatedTask.status === 'blocked') {
-                void this.notifySlackTaskBlocked(updatedTask.id);
-              }
-            }
-          }
-        } catch (err) {
-          logger.error({ err }, 'Failed to dispatch task webhook in overrideStatus');
-        }
-      })();
+      if (updatedTask.status === 'blocked') {
+        void this.dispatchTaskWebhookAsync(updatedTask.id, updatedTask.planId, 'task.blocked', {
+          from: task.status,
+          to: updatedTask.status,
+          notes,
+        });
+        void this.notifySlackTaskBlocked(updatedTask.id);
+      } else if (updatedTask.status === 'done') {
+        void this.dispatchTaskWebhookAsync(updatedTask.id, updatedTask.planId, 'task.done', {
+          from: task.status,
+          to: updatedTask.status,
+          notes,
+        });
+      }
       return updatedTask;
     });
   }
@@ -698,6 +551,43 @@ export class TaskRepository extends BaseRepository {
         .where(eq(tasks.specId, specId))
         .orderBy(asc(schema.fileChanges.createdAt))
     );
+  }
+
+  /**
+   * Fetches the plan/spec/session context for a task and dispatches a webhook event asynchronously.
+   * Centralises the repeated fire-and-forget pattern used after every task status mutation.
+   */
+  private async dispatchTaskWebhookAsync(
+    taskId: number,
+    planId: number,
+    event: WebhookEventType,
+    data: Record<string, unknown>
+  ): Promise<void> {
+    try {
+      const [plan] = await db.select().from(plans).where(eq(plans.id, planId)).limit(1);
+      if (!plan) return;
+      const [spec] = await db
+        .select({ pid: specifications.projectId })
+        .from(specifications)
+        .where(eq(specifications.id, plan.specId))
+        .limit(1);
+      const [session] = await db
+        .select({ id: agentSessions.id })
+        .from(agentSessions)
+        .where(eq(agentSessions.planId, plan.id))
+        .orderBy(desc(agentSessions.startedAt))
+        .limit(1);
+      if (spec) {
+        void dispatchWebhookEvent(spec.pid, event, {
+          taskId,
+          specId: plan.specId,
+          sessionId: session?.id,
+          data,
+        });
+      }
+    } catch (err) {
+      logger.error({ err }, `Failed to dispatch ${event} webhook`);
+    }
   }
 
   /**
@@ -839,74 +729,50 @@ export class TaskRepository extends BaseRepository {
 
     // Post-commit: fire webhooks and log outside the transaction
     if (finalStatus === 'done' || finalStatus === 'failed') {
-      (async () => {
+      void this.dispatchTaskWebhookAsync(
+        task.id,
+        task.planId,
+        finalStatus === 'done' ? 'task.done' : 'task.failed',
+        planCompleted ? { planCompleted: true } : {}
+      );
+
+      // Log granular task events + SSE notification
+      void (async () => {
         try {
           const [plan] = await db.select().from(plans).where(eq(plans.id, task.planId)).limit(1);
-          const [spec] = await db
-            .select({ pid: specifications.projectId })
-            .from(specifications)
-            .where(eq(specifications.id, plan.specId))
-            .limit(1);
           const [session] = await db
             .select({ id: agentSessions.id })
             .from(agentSessions)
             .where(eq(agentSessions.planId, plan.id))
             .orderBy(desc(agentSessions.startedAt))
             .limit(1);
-
-          if (spec) {
-            void dispatchWebhookEvent(
-              spec.pid,
-              finalStatus === 'done' ? 'task.done' : 'task.failed',
-              {
-                taskId: task.id,
-                specId: plan.specId,
-                sessionId: session?.id,
-                data: planCompleted ? { planCompleted: true } : {},
-              }
-            );
-
-            // Trigger GitHub PR Automation
-            if (finalStatus === 'done') {
-              void this.triggerPullRequestAutomation(task.id, planCompleted);
-            }
-
-            // Log granular task events
-            void (async () => {
-              try {
-                const sId = session?.id || 0;
-                const eventData = {
-                  sessionId: sId,
-                  specId: plan.specId,
-                  taskId: task.id,
-                  eventType: finalStatus === 'done' ? 'TASK_DONE' : 'TASK_FAILED',
-                  message:
-                    finalStatus === 'done'
-                      ? `Task completed: ${task.externalId}`
-                      : `Task failed: ${task.externalId}`,
-                  metadata: {
-                    externalId: task.externalId,
-                    exitCode: data.exitCode,
-                    error: data.errorMessage,
-                  },
-                };
-                await db.insert(agentEvents).values(eventData);
-                if (sId) {
-                  void this.publishToSession(sId, 'events', eventData);
-                  void this.publishToSession(sId, 'updates', { type: 'update' });
-                }
-              } catch (err) {
-                logger.warn({ err, taskId: task.id }, 'Failed to log task completion event');
-              }
-            })();
+          const sId = session?.id || 0;
+          const eventData = {
+            sessionId: sId,
+            specId: plan.specId,
+            taskId: task.id,
+            eventType: finalStatus === 'done' ? 'TASK_DONE' : 'TASK_FAILED',
+            message:
+              finalStatus === 'done'
+                ? `Task completed: ${task.externalId}`
+                : `Task failed: ${task.externalId}`,
+            metadata: {
+              externalId: task.externalId,
+              exitCode: data.exitCode,
+              error: data.errorMessage,
+            },
+          };
+          await db.insert(agentEvents).values(eventData);
+          if (sId) {
+            void this.publishToSession(sId, 'events', eventData);
+            void this.publishToSession(sId, 'updates', { type: 'update' });
           }
         } catch (err) {
-          logger.error(
-            { err },
-            `Failed to dispatch task.${finalStatus} webhook after completeTaskAttempt`
-          );
+          logger.warn({ err, taskId: task.id }, 'Failed to log task completion event');
         }
       })();
+
+      if (finalStatus === 'done') void this.triggerPullRequestAutomation(task.id, planCompleted);
     }
 
     return { sessionId: activeSessionId };

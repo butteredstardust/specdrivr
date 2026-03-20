@@ -615,21 +615,28 @@ export const notificationPreferences = pgTable(
 // Plan Jobs (background tasks for plan/task generation)
 // ---------------------------------------------------------------------------
 
-export const planJobs = pgTable('plan_jobs', {
-  id: serial('id').primaryKey(),
-  projectId: integer('project_id')
-    .notNull()
-    .references(() => projects.id, { onDelete: 'cascade' }),
-  specId: integer('spec_id').references(() => specifications.id, { onDelete: 'cascade' }),
-  planId: integer('plan_id').references(() => plans.id, { onDelete: 'cascade' }),
-  status: planJobStatusEnum('status').notNull().default('pending'),
-  type: planJobTypeEnum('type').notNull(),
-  error: text('error'),
-  startedAt: timestamp('started_at', { withTimezone: true }),
-  completedAt: timestamp('completed_at', { withTimezone: true }),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-});
+export const planJobs = pgTable(
+  'plan_jobs',
+  {
+    id: serial('id').primaryKey(),
+    projectId: integer('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    specId: integer('spec_id').references(() => specifications.id, { onDelete: 'cascade' }),
+    planId: integer('plan_id').references(() => plans.id, { onDelete: 'cascade' }),
+    status: planJobStatusEnum('status').notNull().default('pending'),
+    type: planJobTypeEnum('type').notNull(),
+    error: text('error'),
+    startedAt: timestamp('started_at', { withTimezone: true }),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => ({
+    // I-7: Allow efficient lookups by project + status (used by getActiveByProject / getPendingByProject)
+    projectStatusIdx: index('plan_job_project_status_idx').on(table.projectId, table.status),
+  })
+);
 
 // ---------------------------------------------------------------------------
 // Webhooks
