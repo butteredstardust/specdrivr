@@ -38,30 +38,42 @@ It's not a template. It's the orchestration layer that makes spec-driven develop
 
 ---
 
-## Screenshots
+## Screenshots (Light Mode)
 
 ### Mission Control
+*Overview of active sessions and project health.*
 ![Mission Control](./public/screenshots/dashboard.png)
 
 ### Projects 
+*Manage multiple AI-augmented codebases.*
 ![Projects](./public/screenshots/projects.png)
 
 ### Specifications
+*Version-controlled Markdown specs for feature implementation.*
 ![Specification View](./public/screenshots/spec-view.png)
 
-### Tasks
-![Tasks](./public/screenshots/tasks.png)
+### Spec Detail - Plan
+*System-generated execution plan for the current spec.*
+![Plan](./public/screenshots/spec-plan.png)
 
-### Plan
-![Plan](./public/screenshots/plan-changes.png)
+### Spec Detail - Tasks
+*Atomic tasks decomposed from the high-level plan.*
+![Tasks](./public/screenshots/spec-tasks.png)
 
-### Project Activity Log
-![Project Activity](./public/screenshots/project-activity.png)
+### Sessions
+*Execution history and real-time agent tracking.*
+![Sessions](./public/screenshots/sessions.png)
+
+### Session Detail
+*Real-time terminal logs and step-by-step agent reasoning.*
+![Session Detail](./public/screenshots/session-detail.png)
 
 ### System-wide Audit Log
+*Full transparency into all platform and agent actions.*
 ![Activity](./public/screenshots/activity.png)
 
 ### Settings
+*Configure agents, models, and notifications.*
 ![Settings Interface](./public/screenshots/settings.png)
 
 ---
