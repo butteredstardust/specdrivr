@@ -3,12 +3,13 @@
 import { useState, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
-import { RefreshCw, MessageSquareQuote } from 'lucide-react';
+import { RefreshCw, MessageSquareQuote, ExternalLink } from 'lucide-react';
 import { clientLogger } from '@/lib/logger-client';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { PixelBadge } from '@/components/ui/pixel-badge';
+import { GitHubLogoIcon } from '@radix-ui/react-icons';
 import type { Task } from './task-drawer';
 
 interface TaskDrawerOverviewProps {
@@ -63,7 +64,7 @@ export function TaskDrawerOverview({ task, onRetry, onTaskUpdated }: TaskDrawerO
       {/* Dependencies */}
       {task.dependsOn.length > 0 && (
         <div className="space-y-3">
-          <span className="text-text-muted font-mono text-xs tracking-widest uppercase">
+          <span className="text-text-muted font-mono text-[11px] tracking-[0.08em] uppercase">
             Dependencies
           </span>
           <div className="flex flex-wrap gap-2">
@@ -76,12 +77,36 @@ export function TaskDrawerOverview({ task, onRetry, onTaskUpdated }: TaskDrawerO
         </div>
       )}
 
+      {/* GitHub PR Link */}
+      {task.pullRequestUrl && (
+        <div className="bg-bg-elevated/50 border-border-muted flex items-center justify-between rounded-md border p-4">
+          <div className="flex items-center gap-3">
+            <GitHubLogoIcon className="h-5 w-5 opacity-70" />
+            <div className="flex flex-col gap-0.5">
+              <span className="text-text-muted font-mono text-[10px] tracking-[0.08em] uppercase">
+                PULL REQUEST
+              </span>
+              <span className="text-text-primary text-sm font-medium">Automated Contribution</span>
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5"
+            onClick={() => window.open(task.pullRequestUrl!, '_blank')}
+          >
+            VIEW ON GITHUB
+            <ExternalLink className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      )}
+
       {/* Blocked state panel */}
       {task.status === 'blocked' && (
-        <div className="bg-phosphor-amber/5 border-phosphor-amber/30 space-y-4 rounded-lg border p-5">
+        <div className="bg-phosphor-amber/5 border-phosphor-amber/30 space-y-4 rounded-md border p-5">
           <div className="flex items-center gap-2.5">
             <DaemonMascot size={24} expression="blocked" />
-            <span className="text-phosphor-amber font-mono text-xs font-semibold tracking-widest uppercase">
+            <span className="text-phosphor-amber font-mono text-[11px] font-semibold tracking-[0.08em] uppercase">
               BLOCKED
             </span>
           </div>
@@ -112,10 +137,10 @@ export function TaskDrawerOverview({ task, onRetry, onTaskUpdated }: TaskDrawerO
 
       {/* Failed state panel */}
       {task.status === 'failed' && (
-        <div className="bg-status-red/5 border-status-red/30 space-y-4 rounded-lg border p-5">
+        <div className="bg-status-red/5 border-status-red/30 space-y-4 rounded-md border p-5">
           <div className="flex items-center gap-2.5">
             <DaemonMascot size={24} expression="error" />
-            <span className="text-status-red font-mono text-xs font-semibold tracking-widest uppercase">
+            <span className="text-status-red font-mono text-[11px] font-semibold tracking-[0.08em] uppercase">
               FAILED
             </span>
           </div>

@@ -28,7 +28,7 @@ function ShortcutRow({ keys, action }: ShortcutRowProps) {
 
 function SectionHeader({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-text-muted mt-4 mb-1 font-mono text-xs tracking-widest uppercase first:mt-0">
+    <p className="text-text-muted mt-4 mb-1 font-mono text-[11px] tracking-[0.08em] uppercase first:mt-0">
       {children}
     </p>
   );
@@ -41,7 +41,7 @@ export function KeyboardShortcutsModal() {
     <Dialog open={shortcutsOpen} onOpenChange={setShortcutsOpen}>
       <DialogContent className="border-border-default bg-bg-surface max-w-lg">
         <DialogHeader>
-          <DialogTitle className="text-text-muted flex items-center gap-2 font-mono text-sm tracking-widest uppercase">
+          <DialogTitle className="text-text-muted flex items-center gap-2 font-mono text-[11px] tracking-[0.08em] uppercase">
             <Command className="h-4 w-4" />
             KEYBOARD SHORTCUTS
           </DialogTitle>

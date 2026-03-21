@@ -62,6 +62,15 @@ export function DaemonMascot({
   const isAnimatedAntenna = expression === 'idle' || expression === 'working';
   const gradientId = `daemon-gradient-${expression}`;
 
+  const mascotAnimation =
+    expression === 'working'
+      ? 'animate-daemon-think'
+      : expression === 'idle'
+        ? 'animate-daemon-float'
+        : expression === 'blocked'
+          ? 'animate-daemon-bounce'
+          : undefined;
+
   const renderTier = (): React.ReactNode => {
     if (size <= 16) {
       return (
@@ -123,7 +132,7 @@ export function DaemonMascot({
       viewBox="0 0 34 40"
       width={size}
       height={size * (40 / 34)}
-      className={cn('shrink-0 drop-shadow-sm', className)}
+      className={cn('shrink-0 drop-shadow-sm', mascotAnimation, className)}
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
     >

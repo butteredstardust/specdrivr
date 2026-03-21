@@ -28,6 +28,7 @@ interface TaskRowProps {
     description?: string | null;
     errorMessage?: string | null;
     orderIndex: number;
+    totalCostUsd?: number | null;
   };
   externalId?: string;
   dependsOn?: string[];
@@ -77,7 +78,7 @@ export function TaskRow({
   onOpenDrawer,
   className,
 }: TaskRowProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(task.status === 'failed');
   const canUnblock = hasRole(userRole, 'member');
   const canOverride = hasRole(userRole, 'admin');
 
@@ -85,7 +86,7 @@ export function TaskRow({
     task.status === 'in_progress'
       ? 'border-l-2 border-accent-violet bg-accent-violet/5'
       : task.status === 'blocked'
-        ? 'border-l-2 border-status-red'
+        ? 'border-l-2 border-phosphor-amber bg-phosphor-amber/5'
         : 'border-l-2 border-transparent';
 
   return (
@@ -99,7 +100,9 @@ export function TaskRow({
                 dot={task.status === 'in_progress'}
                 className="w-16 justify-center"
               >
-                {STATUS_CHAR[task.status]}
+                <span className={cn(task.status === 'in_progress' && 'animate-blink')}>
+                  {STATUS_CHAR[task.status]}
+                </span>
                 {task.status.replace('_', ' ')}
               </PixelBadge>
               <span className="bg-phosphor-amber/10 text-phosphor-amber shrink-0 rounded-sm px-1.5 py-0.5 font-mono text-xs">
@@ -120,6 +123,11 @@ export function TaskRow({
                     </span>
                   ))}
                 </div>
+              )}
+              {task.totalCostUsd && task.totalCostUsd > 0 && (
+                <span className="text-text-muted shrink-0 font-mono text-[10px]">
+                  ${Number(task.totalCostUsd).toFixed(4)}
+                </span>
               )}
               {task.status === 'blocked' && task.errorMessage && (
                 <span className="text-phosphor-amber max-w-48 truncate text-xs">

@@ -4,12 +4,160 @@ import { projectRepository } from '@/repositories/project-repository';
 import { specificationRepository } from '@/repositories/specification-repository';
 import { planRepository } from '@/repositories/plan-repository';
 import { taskRepository } from '@/repositories/task-repository';
+import { agentSessionRepository } from '@/repositories/agent-session-repository';
+import { planJobRepository } from '@/repositories/plan-job-repository';
 import * as schema from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 describe('Repository Integration Tests', () => {
   beforeEach(async () => {
     await cleanDatabase();
+  });
+
+  describe('AgentSessionRepository.recoverGhostSessions', () => {
+    it('recovers sessions with stale heartbeats', async () => {
+      const user = await createTestUser('user_1', 'test@example.com');
+      const project = await createTestProject('Test Project', user.id);
+
+      const spec = await specificationRepository.createWithVersion({
+        projectId: project.id,
+        name: 'Auth Spec',
+        markdownContent: '# Initial version',
+        createdBy: user.id,
+      });
+
+      const [plan] = await testDb
+        .insert(schema.plans)
+        .values({
+          specId: spec.id,
+          status: 'executing',
+          specVersionId: spec.currentVersionId,
+        })
+        .returning();
+
+      // 1. Create a stale session
+      const staleHeartbeat = new Date(Date.now() - 10 * 60 * 1000); // 10m ago
+      const [staleSession] = await testDb
+        .insert(schema.agentSessions)
+        .values({
+          projectId: project.id,
+          planId: plan.id,
+          status: 'running',
+          lastHeartbeatAt: staleHeartbeat,
+        })
+        .returning();
+
+      // 2. Create an in_progress task for it
+      const [task] = await testDb
+        .insert(schema.tasks)
+        .values({
+          planId: plan.id,
+          specId: spec.id,
+          externalId: 'T-1',
+          title: 'Task 1',
+          status: 'in_progress',
+        })
+        .returning();
+
+      await testDb
+        .update(schema.agentSessions)
+        .set({ currentTaskId: task.id })
+        .where(eq(schema.agentSessions.id, staleSession.id));
+
+      // 3. Create a fresh session (should NOT be recovered)
+      const freshHeartbeat = new Date();
+      const [freshSession] = await testDb
+        .insert(schema.agentSessions)
+        .values({
+          projectId: project.id,
+          planId: plan.id,
+          status: 'running',
+          lastHeartbeatAt: freshHeartbeat,
+        })
+        .returning();
+
+      // 4. Run recovery
+      const recoveredCount = await agentSessionRepository.recoverGhostSessions(5); // 5m threshold
+      expect(recoveredCount).toBe(1);
+
+      // 5. Verify stale session is failed
+      const [recoveredSession] = await testDb
+        .select()
+        .from(schema.agentSessions)
+        .where(eq(schema.agentSessions.id, staleSession.id));
+      expect(recoveredSession.status).toBe('failed');
+      expect(recoveredSession.errorMessage).toContain('Session timed out');
+
+      // 6. Verify fresh session is still running
+      const [stillRunningSession] = await testDb
+        .select()
+        .from(schema.agentSessions)
+        .where(eq(schema.agentSessions.id, freshSession.id));
+      expect(stillRunningSession.status).toBe('running');
+
+      // 7. Verify task is back to todo
+      const [updatedTask] = await testDb
+        .select()
+        .from(schema.tasks)
+        .where(eq(schema.tasks.id, task.id));
+      expect(updatedTask.status).toBe('todo');
+    });
+  });
+
+  describe('PlanJobRepository', () => {
+    it('claims pending jobs atomically', async () => {
+      const user = await createTestUser('user_1', 'test@example.com');
+      const project = await createTestProject('Test Project', user.id);
+
+      await planJobRepository.create({
+        projectId: project.id,
+        type: 'generate_plan',
+        status: 'pending',
+      });
+
+      await planJobRepository.create({
+        projectId: project.id,
+        type: 'generate_tasks',
+        status: 'pending',
+      });
+
+      const claimed1 = await planJobRepository.claimNext();
+      expect(claimed1).not.toBeNull();
+      expect(claimed1?.status).toBe('running');
+
+      const claimed2 = await planJobRepository.claimNext();
+      expect(claimed2).not.toBeNull();
+      expect(claimed2?.id).not.toBe(claimed1?.id);
+
+      const claimed3 = await planJobRepository.claimNext();
+      expect(claimed3).toBeNull();
+    });
+
+    it('recovers stuck jobs', async () => {
+      const user = await createTestUser('user_1', 'test@example.com');
+      const project = await createTestProject('Test Project', user.id);
+
+      const staleDate = new Date(Date.now() - 20 * 60 * 1000); // 20m ago
+      const [stuckJob] = await testDb
+        .insert(schema.planJobs)
+        .values({
+          projectId: project.id,
+          type: 'generate_plan',
+          status: 'running',
+          startedAt: staleDate,
+        })
+        .returning();
+
+      const recoveredCount = await planJobRepository.recoverStuckJobs(15);
+      expect(recoveredCount).toBe(1);
+
+      const [updatedJob] = await testDb
+        .select()
+        .from(schema.planJobs)
+        .where(eq(schema.planJobs.id, stuckJob.id));
+      expect(updatedJob.status).toBe('failed');
+      expect(updatedJob.error).toContain('Job timed out');
+    });
   });
 
   describe('ProjectRepository.create', () => {
@@ -163,11 +311,14 @@ describe('Repository Integration Tests', () => {
         })
         .returning();
 
-      await testDb.insert(schema.agentSessions).values({
-        projectId: project.id,
-        planId: plan.id,
-        status: 'running',
-      });
+      const [session] = await testDb
+        .insert(schema.agentSessions)
+        .values({
+          projectId: project.id,
+          planId: plan.id,
+          status: 'running',
+        })
+        .returning();
 
       // Task 1 (no dependencies)
       await testDb.insert(schema.tasks).values({
@@ -191,12 +342,19 @@ describe('Repository Integration Tests', () => {
       });
 
       // Claim first task
-      const claimed1 = await taskRepository.claimNextTaskForProject(project.id);
+      const claimed1 = await taskRepository.claimNextTaskForProject(project.id, session.id);
       expect(claimed1?.externalId).toBe('T-1');
       expect(claimed1?.status).toBe('in_progress');
 
+      // Verify session currentTaskId was updated
+      const [updatedSession] = await testDb
+        .select()
+        .from(schema.agentSessions)
+        .where(eq(schema.agentSessions.id, session.id));
+      expect(updatedSession.currentTaskId).toBe(claimed1?.id);
+
       // Try to claim next task (should be null because T-2 depends on T-1 which is in_progress)
-      const claimed2 = await taskRepository.claimNextTaskForProject(project.id);
+      const claimed2 = await taskRepository.claimNextTaskForProject(project.id, session.id);
       expect(claimed2).toBeNull();
 
       // Mark T-1 as done
@@ -206,7 +364,7 @@ describe('Repository Integration Tests', () => {
         .where(eq(schema.tasks.externalId, 'T-1'));
 
       // Now claim T-2
-      const claimed3 = await taskRepository.claimNextTaskForProject(project.id);
+      const claimed3 = await taskRepository.claimNextTaskForProject(project.id, session.id);
       expect(claimed3?.externalId).toBe('T-2');
     });
   });
@@ -314,16 +472,14 @@ describe('Repository Integration Tests', () => {
           executionOrder: 1,
         })
         .returning();
-      await testDb
-        .insert(schema.tasks)
-        .values({
-          planId: plan.id,
-          specId: spec.id,
-          externalId: 'T-B',
-          title: 'Task B',
-          status: 'todo',
-          executionOrder: 2,
-        });
+      await testDb.insert(schema.tasks).values({
+        planId: plan.id,
+        specId: spec.id,
+        externalId: 'T-B',
+        title: 'Task B',
+        status: 'todo',
+        executionOrder: 2,
+      });
 
       await taskRepository.completeTaskAttempt(taskA.id, {
         status: 'failed',

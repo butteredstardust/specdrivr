@@ -105,7 +105,10 @@ export default function LoginPage() {
           className="space-y-4"
         >
           <div className="space-y-1.5">
-            <Label htmlFor="email" className="text-text-secondary font-mono text-xs uppercase">
+            <Label
+              htmlFor="email"
+              className="text-text-muted font-mono text-[11px] tracking-[0.08em] uppercase"
+            >
               Email
             </Label>
             <Input
@@ -119,7 +122,10 @@ export default function LoginPage() {
             {errors.email && <p className="text-status-red text-[10px]">{errors.email.message}</p>}
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="password" className="text-text-secondary font-mono text-xs uppercase">
+            <Label
+              htmlFor="password"
+              className="text-text-muted font-mono text-[11px] tracking-[0.08em] uppercase"
+            >
               Password
             </Label>
             <Input

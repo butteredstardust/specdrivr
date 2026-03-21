@@ -16,12 +16,30 @@ export async function GET(request: NextRequest) {
   try {
     if (!agentToken.projectId) {
       return NextResponse.json(
-        { error: { code: 'INTERNAL_ERROR', message: 'Token not associated with a project' } },
-        { status: 500 }
+        { error: { code: 'BAD_TOKEN', message: 'Token is not associated with a project' } },
+        { status: 400 }
       );
     }
 
-    const nextTask = await taskRepository.claimNextTaskForProject(agentToken.projectId);
+    const { searchParams } = new URL(request.url);
+    const sessionIdStr = searchParams.get('sessionId');
+
+    if (!sessionIdStr) {
+      return NextResponse.json(
+        { error: { code: 'VALIDATION_ERROR', message: 'sessionId is required' } },
+        { status: 400 }
+      );
+    }
+
+    const sessionId = parseInt(sessionIdStr, 10);
+    if (isNaN(sessionId)) {
+      return NextResponse.json(
+        { error: { code: 'VALIDATION_ERROR', message: 'sessionId must be a valid integer' } },
+        { status: 400 }
+      );
+    }
+
+    const nextTask = await taskRepository.claimNextTaskForProject(agentToken.projectId, sessionId);
 
     if (!nextTask) {
       return NextResponse.json({ data: null });
@@ -55,11 +73,11 @@ export async function GET(request: NextRequest) {
       data: {
         ...nextTask,
         githubConfig,
+        // C-2: API keys are intentionally omitted from this response.
+        // Agents should read LLM credentials from their own environment variables.
         agentConfig: agentConfig
           ? {
               backend: agentConfig.backend,
-              geminiApiKey: agentConfig.geminiApiKey,
-              claudeApiKey: agentConfig.claudeApiKey,
             }
           : null,
       },

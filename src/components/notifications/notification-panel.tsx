@@ -61,11 +61,16 @@ export function NotificationPanel() {
     <div className="flex flex-col">
       {/* Header */}
       <div className="border-border-default flex items-center justify-between border-b px-4 py-3">
-        <span className="text-text-muted font-mono text-xs font-semibold tracking-widest uppercase">
-          NOTIFICATIONS
+        <span className="text-text-muted font-mono text-[11px] tracking-[0.08em] uppercase">
+          Notifications
         </span>
         {hasUnread && (
-          <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={handleMarkAllRead}>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="text-accent-violet hover:text-accent-violet-dim h-6 font-mono text-[10px] tracking-[0.08em] uppercase transition-colors"
+            onClick={handleMarkAllRead}
+          >
             Mark all read
           </Button>
         )}

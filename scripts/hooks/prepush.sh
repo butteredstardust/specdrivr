@@ -34,15 +34,29 @@ if [ ${#RANGES[@]} -eq 0 ]; then
 fi
 
 # ─── 1. Orchestration ────────────────────────────────────────────────────────
-info "Running modular pre-push checks (NON-BLOCKING)..."
+info "Running modular pre-push checks..."
 
 # Check for pnpm as it's the project mandate
 if ! (check_tool "pnpm"); then
-    warn "pnpm check failed, but continuing (NON-BLOCKING)"
+    warn "pnpm check failed, but continuing"
 fi
+
+# Configuration: Which checks are mandatory (BLOCKING)?
+BLOCKING_CHECKS=(
+    "artifacts"
+    "secrets"
+    "env-protection"
+    "migrations"
+    "conflicts"
+    "xss"
+    "server-actions" # Missing await auth() = unauthenticated endpoint (security)
+    "client-repos"   # Repository imports in client components = architectural violation / data leak
+    "suite"          # Typecheck is mandatory for type safety
+)
 
 # Track failures
 FAILED_CHECKS=()
+CRITICAL_FAILED=0
 
 # Export ranges for child scripts
 export PUSH_RANGES="${RANGES[*]}"
@@ -51,12 +65,30 @@ export PUSH_RANGES="${RANGES[*]}"
 run_check() {
     local name="$1"
     local script="${CHECK_DIR}/${name}.sh"
+    local is_blocking=0
+    
+    # Check if this is a blocking check
+    for b in "${BLOCKING_CHECKS[@]}"; do
+        if [[ "$b" == "$name" ]]; then
+            is_blocking=1
+            break
+        fi
+    done
     
     if [ -f "$script" ]; then
-        info "Running $name check..."
-        # We don't use || die here because we want it to be non-blocking
+        if [[ $is_blocking -eq 1 ]]; then
+            info "Running $name check (BLOCKING)..."
+        else
+            info "Running $name check (NON-BLOCKING)..."
+        fi
+
         if ! bash "$script"; then
-            error "$name check failed (NON-BLOCKING)."
+            if [[ $is_blocking -eq 1 ]]; then
+                error "$name check failed (CRITICAL)."
+                CRITICAL_FAILED=1
+            else
+                warn "$name check failed (NON-BLOCKING)."
+            fi
             FAILED_CHECKS+=("$name")
         fi
     else
@@ -64,7 +96,7 @@ run_check() {
     fi
 }
 
-# Run core checks
+# Run core checks in priority order
 run_check "branch"
 run_check "artifacts"
 run_check "secrets"
@@ -83,13 +115,24 @@ run_check "suite"
 
 if [ ${#FAILED_CHECKS[@]} -eq 0 ]; then
     success "All pre-push checks passed!"
+    exit 0
+fi
+
+if [[ $CRITICAL_FAILED -eq 1 ]]; then
+    echo ""
+    error "------------------------------------------------------------"
+    error "PRE-PUSH FAILED: Critical security or stability violations."
+    error "Failed checks: ${FAILED_CHECKS[*]}"
+    error "You must fix these issues before pushing."
+    error "------------------------------------------------------------"
+    echo ""
+    exit 1
 else
     echo ""
     warn "------------------------------------------------------------"
-    warn "Pre-push checks FAILED for: ${FAILED_CHECKS[*]}"
-    warn "This is NON-BLOCKING, but please review the errors above."
+    warn "Pre-push warnings detected for: ${FAILED_CHECKS[*]}"
+    warn "These are currently NON-BLOCKING, but should be addressed."
     warn "------------------------------------------------------------"
     echo ""
+    exit 0
 fi
-
-exit 0

@@ -29,6 +29,7 @@ export { inviteRepository, InviteRepository } from './invite-repository';
 export { sessionRepository, SessionRepository } from './session-repository';
 export { agentConfigRepository, AgentConfigRepository } from './agent-config-repository';
 export { agentLogRepository, AgentLogRepository } from './agent-log-repository';
+export { planJobRepository, PlanJobRepository } from './plan-job-repository';
 export { BaseRepository } from './base-repository';
 
 /**

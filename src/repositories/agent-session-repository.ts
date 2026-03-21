@@ -3,13 +3,15 @@ import {
   agentSessions,
   agentEvents,
   auditLog,
+  tasks,
+  planJobs,
   type AgentSessionSelect as AgentSession,
   type AgentEventInsert,
   type AgentEventSelect,
   projects,
   specifications,
 } from '@/db/schema';
-import { eq, desc, inArray, asc } from 'drizzle-orm';
+import { eq, desc, inArray, asc, lt, and, sql } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, DatabaseError } from '@/lib/errors';
 import { dispatchWebhookEvent, type WebhookEventType } from '@/lib/webhooks';
@@ -20,6 +22,78 @@ import { logger } from '@/lib/logger';
 export { type AgentSessionSelect as AgentSession } from '@/db/schema';
 
 export class AgentSessionRepository extends BaseRepository {
+  /**
+   * Identifies "Ghost Sessions" (running sessions that haven't updated their heartbeat)
+   * and reverts their current tasks to 'todo'.
+   */
+  async recoverGhostSessions(thresholdMinutes = 5): Promise<number> {
+    return await this.executeQuery(async () => {
+      const thresholdDate = new Date(Date.now() - thresholdMinutes * 60 * 1000);
+
+      return await db.transaction(async (tx) => {
+        // 1. Find sessions that are running but haven't pulsed a heartbeat since threshold
+        const staleSessions = await tx
+          .select()
+          .from(agentSessions)
+          .where(
+            and(
+              eq(agentSessions.status, 'running'),
+              lt(agentSessions.lastHeartbeatAt, thresholdDate)
+            )
+          );
+
+        if (staleSessions.length === 0) return 0;
+
+        const sessionIds = staleSessions.map((s) => s.id);
+        const currentTaskIds = staleSessions
+          .map((s) => s.currentTaskId)
+          .filter((id): id is number => id !== null);
+
+        // 2. Revert tasks to 'todo'
+        if (currentTaskIds.length > 0) {
+          await tx
+            .update(tasks)
+            .set({ status: 'todo', updatedAt: new Date() })
+            .where(and(eq(tasks.status, 'in_progress'), inArray(tasks.id, currentTaskIds)));
+        }
+
+        // 3. Mark sessions as failed
+        await tx
+          .update(agentSessions)
+          .set({
+            status: 'failed',
+            errorMessage: `Session timed out (no heartbeat for >${thresholdMinutes}m)`,
+            endedAt: new Date(),
+          })
+          .where(inArray(agentSessions.id, sessionIds));
+
+        // 4. Log events for each recovered session
+        for (const session of staleSessions) {
+          await tx.insert(agentEvents).values({
+            sessionId: session.id,
+            specId: session.specId || null,
+            taskId: session.currentTaskId || null,
+            eventType: 'SESSION_FAILED',
+            message: `Ghost Buster: Recovered session after heartbeat timeout`,
+            metadata: { thresholdMinutes, lastHeartbeatAt: session.lastHeartbeatAt },
+          });
+
+          // Trigger session.failed webhook
+          void dispatchWebhookEvent(session.projectId, 'session.failed', {
+            sessionId: session.id,
+            specId: session.specId || undefined,
+            data: { reason: 'heartbeat_timeout' },
+          });
+
+          // Trigger Slack notification
+          void this.notifySlack(session.id, 'session_failed');
+        }
+
+        return sessionIds.length;
+      });
+    });
+  }
+
   async getAll(limit = 50, offset = 0): Promise<AgentSession[]> {
     return await this.executeQuery(() =>
       db
@@ -93,31 +167,32 @@ export class AgentSessionRepository extends BaseRepository {
     }
 
     // 1. Log Session Started event
-    await this.executeQuery(() =>
-      db.insert(agentEvents).values({
-        sessionId: session.id,
-        specId: session.specId || null,
-        eventType: 'SESSION_STARTED',
-        message: `Agent session SESS-${String(session.id).padStart(3, '0')} started`,
-        metadata: {
-          projectId: session.projectId,
-          planId: session.planId,
-          startedBy: session.startedBy,
-        },
-      })
-    );
+    const startEvent = {
+      sessionId: session.id,
+      specId: session.specId || null,
+      eventType: 'SESSION_STARTED',
+      message: `Agent session SESS-${String(session.id).padStart(3, '0')} started`,
+      metadata: {
+        projectId: session.projectId,
+        planId: session.planId,
+        startedBy: session.startedBy,
+      },
+    };
+
+    await this.executeQuery(() => db.insert(agentEvents).values(startEvent));
+    void this.publishToSession(session.id, 'events', startEvent);
 
     // 2. Log Plan Approved event if this session is linked to a plan
     if (session.planId) {
-      await this.executeQuery(() =>
-        db.insert(agentEvents).values({
-          sessionId: session.id,
-          specId: session.specId || null,
-          eventType: 'PLAN_APPROVED',
-          message: `Plan #${session.planId} approved and execution started`,
-          metadata: { planId: session.planId },
-        })
-      );
+      const planEvent = {
+        sessionId: session.id,
+        specId: session.specId || null,
+        eventType: 'PLAN_APPROVED',
+        message: `Plan #${session.planId} approved and execution started`,
+        metadata: { planId: session.planId },
+      };
+      await this.executeQuery(() => db.insert(agentEvents).values(planEvent));
+      void this.publishToSession(session.id, 'events', planEvent);
     }
 
     // Trigger session.started webhook
@@ -160,6 +235,33 @@ export class AgentSessionRepository extends BaseRepository {
             detail: data,
           });
         }
+
+        // Log lifecycle events
+        if (data.status) {
+          const eventTypeMap: Record<string, string> = {
+            running: 'SESSION_RESUMED',
+            paused: 'SESSION_PAUSED',
+            cancelled: 'SESSION_CANCELLED',
+            completed: 'SESSION_COMPLETED',
+            failed: 'SESSION_FAILED',
+          };
+
+          const eventType = eventTypeMap[data.status];
+          if (eventType) {
+            const eventData = {
+              sessionId: id,
+              specId: updatedSession.specId,
+              eventType,
+              message: `Session status changed to ${data.status}`,
+              metadata: { actorId },
+            };
+            await tx.insert(agentEvents).values(eventData);
+            void this.publishToSession(id, 'events', eventData);
+          }
+        }
+
+        // 5. Trigger session update channel
+        void this.publishToSession(id, 'updates', { type: 'update', status: data.status });
 
         return updatedSession;
       });
@@ -228,6 +330,53 @@ export class AgentSessionRepository extends BaseRepository {
       // Never throw from notification helper
       logger.error({ err }, 'Failed to send session Slack notification');
     }
+  }
+
+  /**
+   * Returns the combined project activity feed (agent events + failed plan jobs),
+   * ordered by recency. Corresponds to the /projects/:id/activity API route.
+   */
+  async getProjectActivity(projectId: number, limit = 20): Promise<Record<string, unknown>[]> {
+    return await this.executeQuery(async () => {
+      const events = await db
+        .select({
+          id: agentEvents.id,
+          type: sql<string>`'event'`,
+          eventType: agentEvents.eventType,
+          message: agentEvents.message,
+          metadata: agentEvents.metadata,
+          createdAt: agentEvents.createdAt,
+          sessionId: agentEvents.sessionId,
+          specId: agentEvents.specId,
+        })
+        .from(agentEvents)
+        .innerJoin(agentSessions, eq(agentEvents.sessionId, agentSessions.id))
+        .where(eq(agentSessions.projectId, projectId))
+        .orderBy(desc(agentEvents.createdAt))
+        .limit(limit);
+
+      const failedJobs = await db
+        .select({
+          id: planJobs.id,
+          type: sql<string>`'job'`,
+          eventType: sql<string>`'JOB_FAILED'`,
+          message: sql<string>`'Background ' || ${planJobs.type} || ' failed'`,
+          metadata: sql<
+            Record<string, unknown>
+          >`json_build_object('error', ${planJobs.error}, 'jobType', ${planJobs.type})`,
+          createdAt: planJobs.updatedAt,
+          sessionId: sql<number | null>`null`,
+          specId: planJobs.specId,
+        })
+        .from(planJobs)
+        .where(and(eq(planJobs.projectId, projectId), eq(planJobs.status, 'failed')))
+        .orderBy(desc(planJobs.updatedAt))
+        .limit(10);
+
+      return [...events, ...failedJobs]
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, limit) as Record<string, unknown>[];
+    });
   }
 
   async getEvents(sessionId: number, limit: number): Promise<AgentEventSelect[]> {

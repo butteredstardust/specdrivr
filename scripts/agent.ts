@@ -28,11 +28,20 @@ interface Task {
   doneCriteria: string;
   verifyCommand?: string;
   recommendedModel?: string;
+  projectId?: number;
+  specId?: number;
   projectName?: string;
   specName?: string;
   filesInvolved?: string[];
   dependencies?: { title: string; doneCriteria: string }[];
   humanContext?: string;
+  githubConfig?: {
+    token: string;
+    repo: string;
+    branch: string; // base branch
+    branchName: string; // feature branch
+    commitMessage: string;
+  };
   agentConfig?: {
     backend?: string;
     geminiApiKey?: string;
@@ -53,85 +62,15 @@ async function api(method: string, path: string, body?: unknown) {
   return res.json();
 }
 
-// Buffer lines and flush every 100ms to avoid hammering the API
-const logBuffer: { line: string; taskId?: number; level: string }[] = [];
-let flushTimeout: ReturnType<typeof setTimeout> | null = null;
-
-async function streamLog(line: string, taskId?: number, level = 'info') {
-  // Echo to local console too
-  if (level === 'error') {
-    console.error(line);
-  } else if (level === 'warn') {
-    console.warn(line);
-  } else {
-    console.log(line);
+/**
+ * Executes a git command and returns output.
+ */
+function git(args: string[]): string {
+  try {
+    return execSync(`git ${args.join(' ')}`, { encoding: 'utf-8' }).trim();
+  } catch (err) {
+    throw new Error(`Git command failed: git ${args.join(' ')} - ${String(err)}`);
   }
-
-  logBuffer.push({ line, taskId, level });
-
-  if (!flushTimeout) {
-    flushTimeout = setTimeout(async () => {
-      const lines = logBuffer.splice(0);
-      flushTimeout = null;
-
-      // Send all buffered lines in parallel
-      await Promise.allSettled(
-        lines.map((payload) => api('POST', `/api/v1/sessions/${SESSION_ID}/log`, payload))
-      );
-    }, 100);
-  }
-}
-
-function buildTaskPrompt(task: Task, backend: AgentBackend): string {
-  const deps = task.dependencies?.length
-    ? `\nCompleted prerequisite tasks:\n${task.dependencies.map((d) => `- ${d.title}: ${d.doneCriteria}`).join('\n')}`
-    : '';
-
-  const basePrompt = `You are an AI coding agent executing a specific task.
-
-Project: ${task.projectName || 'Specdrivr'}
-Spec: ${task.specName || 'Unknown'}
-
-TASK: ${task.title}
-${task.description}
-
-Files to create or modify:
-${task.filesInvolved?.map((f) => `- ${f}`).join('\n') || '(determine from context)'}
-
-Done when:
-${task.doneCriteria}
-${task.verifyCommand ? `\nVerify with: ${task.verifyCommand}` : ''}
-${deps}
-${task.humanContext ? `\nAdditional context from team:\n${task.humanContext}` : ''}
-
-Execute this task. Make all necessary file changes. Be thorough and complete.`;
-
-  if (backend === 'claude') {
-    let repoContext = '';
-    try {
-      const isWin = process.platform === 'win32';
-      const cmd = isWin
-        ? 'Get-ChildItem -Path src -Filter *.ts* -Recurse | Select-Object -First 60 -ExpandProperty FullName'
-        : 'find src -type f -name "*.ts" -o -name "*.tsx" | head -60';
-
-      repoContext = execSync(cmd, {
-        encoding: 'utf-8',
-        timeout: 5000,
-      });
-    } catch {
-      /* ignore */
-    }
-
-    return `${basePrompt}
-
-Repository file structure (relevant files):
-${repoContext}
-
-Important: You are operating in the project root. Make all file changes directly.
-Use TypeScript. Follow the existing code patterns you observe in the repo.`;
-  }
-
-  return basePrompt;
 }
 
 async function executeTask(task: Task): Promise<void> {
@@ -153,6 +92,27 @@ async function executeTask(task: Task): Promise<void> {
     return;
   }
 
+  // Git Setup: Create/Switch to feature branch
+  if (task.githubConfig) {
+    try {
+      const { branchName, branch: baseBranch } = task.githubConfig;
+      await streamLog(`⚙ Git: Preparing branch ${branchName} (from ${baseBranch})...`, task.id);
+
+      // 1. Ensure we are on base branch and up to date
+      git(['checkout', baseBranch]);
+      // git(['pull', 'origin', baseBranch]); // Risky in some envs, maybe skip
+
+      // 2. Create or switch to feature branch
+      try {
+        git(['checkout', '-b', branchName]);
+      } catch {
+        git(['checkout', branchName]);
+      }
+    } catch (err) {
+      await streamLog(`⚠ Git setup warning: ${String(err)}`, task.id, 'warn');
+    }
+  }
+
   await streamLog(`\n▶ Executing T-${task.externalId} [${backend}]: ${task.title}`, task.id);
 
   const prompt = buildTaskPrompt(task, backend);
@@ -167,7 +127,7 @@ async function executeTask(task: Task): Promise<void> {
   const env = { ...process.env };
   if (task.agentConfig?.geminiApiKey) {
     env.GEMINI_API_KEY = task.agentConfig.geminiApiKey;
-    env.GOOGLE_API_KEY = task.agentConfig.geminiApiKey; // Some CLIs use this
+    env.GOOGLE_API_KEY = task.agentConfig.geminiApiKey;
   }
   if (task.agentConfig?.claudeApiKey) {
     env.ANTHROPIC_API_KEY = task.agentConfig.claudeApiKey;
@@ -215,29 +175,64 @@ async function executeTask(task: Task): Promise<void> {
   }
 
   let logOutput: string = fullOutput;
+  let totalCostUsd: number | undefined;
 
   if (backend === 'claude') {
     try {
-      // Find the last JSON block in the output if any, or assume the whole output is JSON
       const jsonMatch = fullOutput.match(/\{[\s\S]*\}/g);
       const lastJson = jsonMatch ? jsonMatch[jsonMatch.length - 1] : fullOutput;
       const parsed = JSON.parse(lastJson);
       logOutput = parsed.result ?? fullOutput;
-
-      if (parsed.cost_usd) {
-        await api('PATCH', `/api/v1/tasks/${task.id}`, {
-          totalCostUsd: parsed.cost_usd,
-        });
-      }
+      totalCostUsd = parsed.cost_usd;
     } catch {
       logOutput = fullOutput;
     }
   }
 
+  // Git Commit & Push
+  let commitHash: string | undefined;
+  if (task.githubConfig) {
+    try {
+      const { branchName, commitMessage, repo, token } = task.githubConfig;
+      await streamLog(`⚙ Git: Committing changes to ${branchName}...`, task.id);
+
+      git(['add', '-A']);
+      
+      // Ensure git user is configured
+      try {
+        git(['config', 'user.name', 'Specdrivr DAEMON']);
+        git(['config', 'user.email', 'daemon@specdrivr.ai']);
+      } catch {
+        // ignore errors if already set
+      }
+
+      // Check if there are actually changes to commit
+      const status = git(['status', '--porcelain']);
+      if (status) {
+        git(['commit', '-m', commitMessage]);
+        commitHash = git(['rev-parse', 'HEAD']);
+
+        await streamLog(`⚙ Git: Pushing to origin/${branchName}...`, task.id);
+        
+        // Push using token for auth
+        const remoteUrl = `https://x-access-token:${token}@github.com/${repo}.git`;
+        git(['push', '-u', remoteUrl, branchName, '--force']);
+      } else {
+        await streamLog('⚙ Git: No changes detected.', task.id);
+      }
+    } catch (err) {
+      await streamLog(`⚠ Git automation failed: ${String(err)}`, task.id, 'warn');
+    }
+  }
+
+  // Finalize Task
   await api('POST', `/api/v1/tasks/${task.id}/complete`, {
     output: logOutput.slice(0, 50000),
     status: 'done',
     exitCode: 0,
+    gitBranch: task.githubConfig?.branchName,
+    gitCommitHash: commitHash,
+    totalCostUsd,
   });
 
   await streamLog(`✓ T-${task.externalId} complete`, task.id);

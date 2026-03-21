@@ -5,6 +5,7 @@ import {
   agentSessions,
   planReviews,
   auditLog,
+  agentEvents,
   type PlanSelect as Plan,
 } from '@/db/schema';
 import { eq } from 'drizzle-orm';
@@ -187,6 +188,17 @@ export class PlanRepository extends BaseRepository {
           detail: { sessionId: session.id },
         });
 
+        // 6. Log PLAN_APPROVED event
+        const approveEvent = {
+          sessionId: session.id,
+          specId: plan.specId,
+          eventType: 'PLAN_APPROVED',
+          message: `Plan approved by ${data.userId}`,
+          metadata: { planId: plan.id, userId: data.userId },
+        };
+        await tx.insert(agentEvents).values(approveEvent);
+        void this.publishToSession(session.id, 'events', approveEvent);
+
         return { plan: updatedPlan, sessionId: session.id };
       });
     }).then((result) => {
@@ -260,6 +272,17 @@ export class PlanRepository extends BaseRepository {
           detail: { notes: data.notes },
         });
 
+        // Log the decision to agent_events
+        const decisionEvent = {
+          sessionId: null,
+          specId: plan.specId,
+          eventType: updatedPlan.status === 'rejected' ? 'PLAN_REJECTED' : 'CHANGES_REQUESTED',
+          message: `Plan ${updatedPlan.status === 'rejected' ? 'rejected' : 'changes requested'} by ${data.userId}`,
+          metadata: { planId: plan.id, userId: data.userId, notes: data.notes },
+        };
+        await tx.insert(agentEvents).values(decisionEvent);
+        // Rejections aren't currently tied to an active session, so we don't publish to session:id:events here
+
         return updatedPlan;
       });
     }).then((updatedPlan) => {
@@ -332,6 +355,17 @@ export class PlanRepository extends BaseRepository {
           targetId: String(data.planId),
           detail: { notes: data.notes },
         });
+
+        // Log the decision to agent_events
+        const decisionEvent = {
+          sessionId: null,
+          specId: plan.specId,
+          eventType: updatedPlan.status === 'rejected' ? 'PLAN_REJECTED' : 'CHANGES_REQUESTED',
+          message: `Plan ${updatedPlan.status === 'rejected' ? 'rejected' : 'changes requested'} by ${data.userId}`,
+          metadata: { planId: plan.id, userId: data.userId, notes: data.notes },
+        };
+        await tx.insert(agentEvents).values(decisionEvent);
+        // Rejections aren't currently tied to an active session, so we don't publish to session:id:events here
 
         return updatedPlan;
       });

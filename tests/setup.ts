@@ -49,10 +49,12 @@ beforeAll(async () => {
   const sql = postgres(adminUrl.toString(), { max: 1 });
 
   try {
-    const dbs = await sql`SELECT datname FROM pg_database WHERE datname = ${dbName}`;
-    if (dbs.length === 0) {
-      await sql.unsafe(`CREATE DATABASE "${dbName}" TEMPLATE specdrivr_test_template`);
-    }
+    // Drop and recreate from template every time to ensure schema matches latest migration
+    await sql.unsafe(
+      `SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '${dbName}' AND pid <> pg_backend_pid()`
+    );
+    await sql.unsafe(`DROP DATABASE IF EXISTS "${dbName}"`);
+    await sql.unsafe(`CREATE DATABASE "${dbName}" TEMPLATE specdrivr_test_template`);
   } catch (e) {
     process.stderr.write(`[test setup] Failed to create worker db ${dbName}: ${String(e)}\n`);
     // Re-throw so the worker fails loudly rather than silently continuing

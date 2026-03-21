@@ -46,9 +46,8 @@ function StatusBadge({ status }: { status: SpecStatus }) {
     case 'drafting':
       return <PixelBadge variant="muted">Draft</PixelBadge>;
     case 'pending_plan':
-      return <PixelBadge variant="amber">Pending</PixelBadge>;
     case 'pending_approval':
-      return <PixelBadge variant="amber">Review</PixelBadge>;
+      return <PixelBadge variant="amber">Pending</PixelBadge>;
     case 'executing':
       return (
         <PixelBadge variant="violet" dot>
@@ -173,16 +172,16 @@ export default function SpecDetailPage(): React.ReactElement {
           </div>
         ) : (
           <div className="flex min-w-0 flex-col gap-1">
-            <div className="text-text-secondary mb-1 font-mono text-xs tracking-[0.2em] uppercase">
+            <div className="text-text-muted mb-1 font-mono text-[11px] tracking-[0.08em] uppercase">
               Project Spec
             </div>
             <div className="flex min-w-0 items-center gap-3">
               <h1 className="text-foreground truncate text-xl font-semibold">
                 {displayedSpec?.name ?? '…'}
               </h1>
-              <code className="bg-phosphor-amber/10 text-phosphor-amber shrink-0 rounded px-1.5 py-0.5 font-mono text-xs">
+              <PixelBadge variant="amber" className="shrink-0">
                 SPEC-{String(specId).padStart(3, '0')}
-              </code>
+              </PixelBadge>
               {displayedSpec && <StatusBadge status={displayedSpec.status} />}
             </div>
           </div>
