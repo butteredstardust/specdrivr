@@ -17,7 +17,7 @@ interface TerminalLogProps {
 function getLineClass(line: string): string {
   if (line.includes('ERROR')) return 'text-status-red';
   if (line.includes('WARN')) return 'text-phosphor-amber';
-  return 'text-text-secondary';
+  return 'text-terminal-text';
 }
 
 export function TerminalLog({
