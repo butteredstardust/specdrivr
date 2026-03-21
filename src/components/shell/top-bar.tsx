@@ -51,12 +51,12 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
   const router = useRouter();
   const { user, setShortcutsOpen, pageLabel } = useShell();
 
-  const { data: notifData } = usePolling<NotificationData>({
-    url: '/api/v1/notifications?unread=true&limit=1',
+  const { data: notifData } = usePolling<{ unreadCount: number }>({
+    url: '/api/v1/notifications?unreadOnly=true&limit=1',
     interval: 30_000,
   });
 
-  const unreadCount = notifData?.meta?.total ?? 0;
+  const unreadCount = notifData?.unreadCount ?? 0;
 
   const segments = pathname.split('/').filter(Boolean);
   const autoCrumbs = segments.map((seg, i) => {
