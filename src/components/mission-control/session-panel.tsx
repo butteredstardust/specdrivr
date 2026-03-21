@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Pause, Play, XCircle, RefreshCw, ChevronRight, ExternalLink } from 'lucide-react';
 import { GitHubLogoIcon } from '@radix-ui/react-icons';
+import { cn } from '@/lib/utils';
 import type { UserRole } from '@/db/schema';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { Button } from '@/components/ui/button';
@@ -161,14 +162,19 @@ export function SessionPanel({
 
     return (
       <TooltipProvider>
-        <div className="flex flex-col gap-3">
+        <div
+          className={cn(
+            'scanline-overlay flex flex-col gap-3 rounded-lg border p-3 transition-all',
+            panelState === 'running' ? 'cyber-glow-active border-accent-violet/30' : 'border-border'
+          )}
+        >
           {/* Header row: session ID badge + status + timer */}
           <div className="flex items-center gap-2">
-            <span className="bg-bg-elevated text-text-muted rounded px-1.5 py-0.5 font-mono text-[10px]">
+            <span className="bg-bg-elevated text-text-muted rounded px-1.5 py-0.5 font-mono text-[10px] shadow-sm">
               SES-{session!.id}
             </span>
             {session?.backend && (
-              <span className="bg-bg-elevated text-text-secondary rounded px-1.5 py-0.5 font-mono text-[10px]">
+              <span className="bg-bg-elevated text-text-secondary rounded px-1.5 py-0.5 font-mono text-[10px] shadow-sm">
                 {session.backend === 'claude' ? '🤖 Claude' : '✨ Gemini'}
               </span>
             )}
@@ -179,41 +185,45 @@ export function SessionPanel({
             ) : (
               <PixelBadge variant="amber">PAUSED</PixelBadge>
             )}
-            <span className="text-text-muted ml-auto font-mono text-xs">
+            <span className="text-text-muted ml-auto font-mono text-xs tracking-tighter tabular-nums">
               {mm}:{ss}
             </span>
           </div>
 
           {/* Spec name */}
           {session?.specName && (
-            <p className="text-text-secondary truncate font-mono text-xs">{session.specName}</p>
+            <p className="text-text-secondary truncate font-mono text-xs tracking-tight">
+              {session.specName}
+            </p>
           )}
 
           {/* Progress bar */}
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <span className="text-text-muted font-mono text-[10px]">
-                {succeeded}/{totalTasks > 0 ? totalTasks : '?'} tasks · {progressPct}%
+              <span className="text-text-muted font-mono text-[10px] tracking-wider uppercase">
+                Progress: {succeeded}/{totalTasks > 0 ? totalTasks : '?'} · {progressPct}%
               </span>
               <ASCIIProgress
                 value={succeeded}
                 max={totalTasks > 0 ? totalTasks : 100}
-                length={15}
+                length={12}
                 className="text-status-emerald"
               />
             </div>
-            <Progress value={progressPct} className="h-1" />
+            <Progress value={progressPct} className="h-1 shadow-inner" />
           </div>
 
           {/* Current task pill */}
           {session?.currentTaskExternalId && (
-            <div className="border-phosphor-amber/40 bg-phosphor-amber/5 flex items-center gap-1.5 rounded border px-2 py-1">
-              <ChevronRight className="text-phosphor-amber h-3 w-3 shrink-0" />
-              <span className="text-phosphor-amber font-mono text-[10px] font-semibold">
+            <div className="border-phosphor-amber/30 bg-phosphor-amber/5 flex items-center gap-2 rounded border px-2 py-1.5 shadow-sm transition-all">
+              <div className="bg-phosphor-amber/20 flex h-4 w-4 shrink-0 items-center justify-center rounded-[2px]">
+                <ChevronRight className="text-phosphor-amber h-3 w-3" />
+              </div>
+              <span className="text-phosphor-amber font-mono text-[10px] font-bold">
                 {session.currentTaskExternalId}
               </span>
               {session.currentTaskTitle && (
-                <span className="text-text-secondary truncate font-mono text-[10px]">
+                <span className="text-text-secondary truncate font-mono text-[10px] tracking-tight">
                   {session.currentTaskTitle}
                 </span>
               )}
@@ -221,33 +231,33 @@ export function SessionPanel({
           )}
 
           {/* Controls */}
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2 pt-1">
             {panelState === 'running' ? (
               <ControlButton
                 canControl={canControl}
                 onClick={onPause}
-                icon={<Pause className="mr-1.5 h-3 w-3" />}
-                label="Pause"
+                icon={<Pause className="mr-2 h-3 w-3" />}
+                label="Pause Session"
                 variant="outline"
-                className="border-phosphor-amber/50 text-phosphor-amber hover:bg-phosphor-amber/10"
+                className="border-phosphor-amber/40 text-phosphor-amber hover:bg-phosphor-amber/10 h-8 flex-1"
               />
             ) : (
               <ControlButton
                 canControl={canControl}
                 onClick={onResume}
-                icon={<Play className="mr-1.5 h-3 w-3" />}
-                label="Resume"
+                icon={<Play className="mr-2 h-3 w-3" />}
+                label="Resume Session"
                 variant="outline"
-                className="border-status-emerald/50 text-status-emerald hover:bg-status-emerald/10"
+                className="border-status-emerald/40 text-status-emerald hover:bg-status-emerald/10 h-8 flex-1"
               />
             )}
             <ControlButton
               canControl={canControl}
               onClick={onCancel}
-              icon={<XCircle className="mr-1.5 h-3 w-3" />}
-              label="Cancel"
+              icon={<XCircle className="mr-2 h-3 w-3" />}
+              label="Abort"
               variant="outline"
-              className="border-status-red/50 text-status-red hover:bg-status-red/10"
+              className="border-status-red/40 text-status-red hover:bg-status-red/10 h-8 px-3"
             />
           </div>
         </div>

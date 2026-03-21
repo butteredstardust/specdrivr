@@ -98,7 +98,7 @@ export function TaskRow({
               <PixelBadge
                 variant={STATUS_VARIANT[task.status]}
                 dot={task.status === 'in_progress'}
-                className="w-16 justify-center"
+                className="w-20 shrink-0 justify-center"
               >
                 <span className={cn(task.status === 'in_progress' && 'animate-blink')}>
                   {STATUS_CHAR[task.status]}

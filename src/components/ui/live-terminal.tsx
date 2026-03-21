@@ -37,9 +37,8 @@ export function LiveTerminal({
 
     // Resolve theme colors from CSS variables
     const styles = getComputedStyle(document.documentElement);
-    const terminalBg = styles.getPropertyValue('--terminal-bg').trim() || 'rgb(13, 13, 10)';
-    const textSecondary =
-      styles.getPropertyValue('--text-secondary').trim() || 'rgb(161, 161, 170)';
+    const terminalBg = styles.getPropertyValue('--terminal-bg').trim() || 'transparent';
+    const terminalText = styles.getPropertyValue('--terminal-text').trim() || 'rgb(161, 161, 170)';
     const accentViolet = styles.getPropertyValue('--accent-violet').trim() || 'rgb(124, 92, 252)';
     const statusEmerald = styles.getPropertyValue('--status-emerald').trim() || 'rgb(5, 150, 105)';
     const statusRed = styles.getPropertyValue('--status-red').trim() || 'rgb(220, 38, 38)';
@@ -49,7 +48,7 @@ export function LiveTerminal({
     const terminal = new Terminal({
       theme: {
         background: terminalBg,
-        foreground: textSecondary,
+        foreground: terminalText,
         cursor: accentViolet,
         selectionBackground: `${accentViolet}40`,
         black: 'rgb(10, 10, 11)',

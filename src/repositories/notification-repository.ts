@@ -5,7 +5,7 @@ import {
   type NotificationSelect as Notification,
   type NotificationInsert,
 } from '@/db/schema';
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { eq, and, desc, sql, isNull, count } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { DatabaseError } from '@/lib/errors';
 
@@ -24,37 +24,37 @@ export class NotificationRepository extends BaseRepository {
   ): Promise<{ notifications: Notification[]; total: number; unreadCount: number }> {
     const where = [eq(notifications.userId, userId)];
     if (options.projectId) where.push(eq(notifications.projectId, options.projectId));
-    if (options.unreadOnly) where.push(sql`${notifications.readAt} IS NULL`);
+    if (options.unreadOnly) where.push(isNull(notifications.readAt));
     if (options.type) where.push(eq(notifications.type, options.type));
 
-    const query = db
-      .select()
-      .from(notifications)
-      .where(and(...where))
-      .orderBy(desc(notifications.createdAt));
-
-    const paginatedQuery = query.limit(options.limit ?? 50).offset(options.offset ?? 0);
-
     const [list, totalResult, unreadResult] = await Promise.all([
-      this.executeQuery(() => paginatedQuery),
       this.executeQuery(() =>
         db
-          .select({ count: sql<number>`count(*)` })
+          .select()
+          .from(notifications)
+          .where(and(...where))
+          .orderBy(desc(notifications.createdAt))
+          .limit(options.limit ?? 50)
+          .offset(options.offset ?? 0)
+      ),
+      this.executeQuery(() =>
+        db
+          .select({ value: count() })
           .from(notifications)
           .where(and(...where))
       ),
       this.executeQuery(() =>
         db
-          .select({ count: sql<number>`count(*)` })
+          .select({ value: count() })
           .from(notifications)
-          .where(and(eq(notifications.userId, userId), sql`${notifications.readAt} IS NULL`))
+          .where(and(eq(notifications.userId, userId), isNull(notifications.readAt)))
       ),
     ]);
 
     return {
       notifications: list,
-      total: Number(totalResult[0]?.count ?? 0),
-      unreadCount: Number(unreadResult[0]?.count ?? 0),
+      total: totalResult[0]?.value ?? 0,
+      unreadCount: unreadResult[0]?.value ?? 0,
     };
   }
 

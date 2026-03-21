@@ -38,30 +38,42 @@ It's not a template. It's the orchestration layer that makes spec-driven develop
 
 ---
 
-## Screenshots
+## Screenshots (Light Mode)
 
 ### Mission Control
+*Overview of active sessions and project health.*
 ![Mission Control](./public/screenshots/dashboard.png)
 
 ### Projects 
+*Manage multiple AI-augmented codebases.*
 ![Projects](./public/screenshots/projects.png)
 
 ### Specifications
+*Version-controlled Markdown specs for feature implementation.*
 ![Specification View](./public/screenshots/spec-view.png)
 
-### Tasks
-![Tasks](./public/screenshots/tasks.png)
+### Spec Detail - Plan
+*System-generated execution plan for the current spec.*
+![Plan](./public/screenshots/spec-plan.png)
 
-### Plan
-![Plan](./public/screenshots/plan-changes.png)
+### Spec Detail - Tasks
+*Atomic tasks decomposed from the high-level plan.*
+![Tasks](./public/screenshots/spec-tasks.png)
 
-### Project Activity Log
-![Project Activity](./public/screenshots/project-activity.png)
+### Sessions
+*Execution history and real-time agent tracking.*
+![Sessions](./public/screenshots/sessions.png)
+
+### Session Detail
+*Real-time terminal logs and step-by-step agent reasoning.*
+![Session Detail](./public/screenshots/session-detail.png)
 
 ### System-wide Audit Log
+*Full transparency into all platform and agent actions.*
 ![Activity](./public/screenshots/activity.png)
 
 ### Settings
+*Configure agents, models, and notifications.*
 ![Settings Interface](./public/screenshots/settings.png)
 
 ---
@@ -163,6 +175,36 @@ pnpm tsc --noEmit     # Type check
 pnpm db:generate      # Generate migrations from schema
 pnpm db:migrate       # Apply pending migrations
 ```
+
+---
+
+## Running the Autonomous Pipeline
+
+To complete the full lifecycle from **Spec → Plan → Execute**, you must run the background workers alongside the web application.
+
+### 1. Start the Plan Worker
+This worker handles AI-powered plan generation and task decomposition using Gemini.
+```bash
+# In a new terminal
+npx tsx scripts/plan-worker.ts
+```
+
+### 2. Start the Agent (DAEMON)
+The agent worker claims and executes tasks against your codebase. 
+
+**Example: Running with Claude**
+If you have the `claude` CLI installed and configured:
+```bash
+# In a new terminal
+export AGENT_TOKEN="your_project_agent_token"
+export SESSION_ID="active_session_id"
+export AGENT_BACKEND="claude"
+npx tsx scripts/agent.ts
+```
+
+*Note: You can find your `AGENT_TOKEN` in Project Settings and the `SESSION_ID` in the Mission Control URL when a session is active.*
+
+---
 
 For projects _being built inside Specdrivr_: **No `db:push`.** Ever. Migrations are code. They're reviewed. They're applied. This is how production stays safe.
 
