@@ -43,9 +43,6 @@ It's not a template. It's the orchestration layer that makes spec-driven develop
 ### Mission Control
 ![Mission Control](./public/screenshots/dashboard.png)
 
-#### Pause Orchestration Demo
-![Pause Demo](./public/screenshots/pause-demo.webp)
-
 ### Projects 
 ![Projects](./public/screenshots/projects.png)
 
