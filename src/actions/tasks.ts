@@ -193,3 +193,73 @@ export async function overrideTaskStatusAction(formData: FormData) {
     };
   }
 }
+
+import { fileChangeRepository } from '@/repositories/file-change-repository';
+import { proposeTaskChangesSchema } from '@/lib/schemas';
+
+export async function submitTaskFileChangesAction(formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: { code: 'UNAUTHORIZED', message: 'Please sign in' } };
+  }
+
+  const rawData = Object.fromEntries(formData.entries());
+  let changes = [];
+  if (rawData.changes && typeof rawData.changes === 'string') {
+    try {
+      changes = JSON.parse(rawData.changes);
+    } catch {}
+  }
+
+  const payload = {
+    taskId: Number(rawData.taskId),
+    attemptId: rawData.attemptId ? Number(rawData.attemptId) : null,
+    changes,
+  };
+
+  const result = proposeTaskChangesSchema.safeParse(payload);
+  if (!result.success) {
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+  }
+
+  const task = await taskRepository.getById(result.data.taskId);
+  if (!task) return { success: false, error: { code: 'NOT_FOUND', message: 'Task not found' } };
+
+  const plan = await planRepository.getById(task.planId);
+  if (!plan) return { success: false, error: { code: 'NOT_FOUND', message: 'Plan not found' } };
+
+  const spec = await specificationRepository.getById(plan.specId);
+  if (!spec)
+    return { success: false, error: { code: 'NOT_FOUND', message: 'Specification not found' } };
+
+  const { allowed } = await requireAdmin(session.user.id, spec.projectId);
+  if (!allowed) {
+    return { success: false, error: { code: 'FORBIDDEN', message: 'Require admin permission' } };
+  }
+
+  try {
+    const formattedChanges = result.data.changes.map((c) => ({
+      ...c,
+      taskId: result.data.taskId,
+      attemptId: result.data.attemptId || null,
+    }));
+
+    const created = await fileChangeRepository.createMany(
+      formattedChanges as import('@/db/schema').FileChangeInsert[]
+    );
+    return { success: true, data: created };
+  } catch (error: unknown) {
+    logger.error(
+      {
+        error: error instanceof Error ? error.message : String(error),
+        userId: session.user.id,
+        taskId: result.data.taskId,
+      },
+      'Failed to submit task file changes'
+    );
+    return {
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' },
+    };
+  }
+}
