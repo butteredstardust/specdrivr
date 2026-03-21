@@ -29,10 +29,6 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 
-interface NotificationData {
-  meta: { total: number };
-}
-
 interface TopBarProps {
   breadcrumbs?: Array<{ label: string; href?: string }>;
 }
