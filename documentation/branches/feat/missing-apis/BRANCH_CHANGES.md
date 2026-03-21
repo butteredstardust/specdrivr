@@ -35,5 +35,23 @@
 | `src/actions/plans.ts` | Added retry and cancel mutations | Missing queue management | Enables job queue orchestration | 10/10 | Not deleted |
 | `src/actions/webhooks.ts` | Added redeliver action skeleton | Missing debugging mechanism | Supports robust event streams | 10/10 | Not deleted |
 | `tests/integration/v2-actions.test.ts` | [NEW] Integration tests for V2 mutations | Required QA validation | Secures new mutations with mocks | 10/10 | Not deleted |
+| `src/queries/webhooks-query.ts` | Added `getWebhookDeliveryList` using RBAC checking. | Surface deliveries natively to the Next.js UI. | High Server Security | 9/10 | Not deleted |
+| `src/actions/webhooks.ts` | Added `redeliverWebhookAction` mutation bounds. | Expose standard mutation for webhook replay. | Medium | 8/10 | Not deleted |
+| `tests/integration/v2-actions.test.ts`| Created full e2e integration mocks for the action boundaries. | Ensures stability and verifies Next-Auth session context matching. | High Test Coverage | 9/10 | Not deleted |
+
+### Phase 3 additions:
+| File Name | Summary of Changes | Summary Reason for Change | Expected Impact | Best Practice Evaluation Score | Reason for Deletion |
+| --- | --- | --- | --- | --- | --- |
+| `src/lib/schemas.ts` | Appended Zod schemas for Git Commits, API Logs, File Changes. | Formal payload bounding. | High | 9/10 | Not deleted |
+| `src/repositories/git-commit-repository.ts` | Created Git Commit tracking repository. | Allow agents to log successful pushes. | Medium | 9/10 | Not deleted |
+| `src/repositories/api-request-log-repository.ts` | Created API Logging repository. | Allow admin visibility into Agent API traffic. | Medium | 9/10 | Not deleted |
+| `src/repositories/file-change-repository.ts` | Added `createMany` batch operation. | Allow performant Diff ingestion. | High Core | 9/10 | Not deleted |
+| `src/actions/tasks.ts` | Added `submitTaskFileChangesAction`. | Secure AI ingestion route. | High Security | 9/10 | Not deleted |
+| `src/actions/git-commits.ts` | Added `recordGitCommitAction`. | Secure push tracking route. | Medium Security | 9/10 | Not deleted |
+| `src/actions/settings.ts` | Added `updateAgentConfigAction`. | Migration from REST endpoints to Server Actions | High Architecture Compliance | 10/10 | Not deleted |
+| `src/components/settings/agent-config-form.tsx` | Swapped `fetch` with `updateAgentConfigAction`. | Native standard RSC mutation compliance. | High DX | 10/10 | Not deleted |
+| `tests/integration/v3-actions.test.ts` | Implemented end-to-end tests for V3 actions. | Validate RBAC boundaries on the final schemas. | High Resiliency | 9/10 | Not deleted |
+
+In both phases, we uncovered a **Vitest Postgres Deadlock issue** regarding truncations on `cleanDatabase()`. To prevent deadlocking, `--no-file-parallelism` or isolating target files is required during test execution.
 
 **CI/CD Notes**: The local `vitest` suite exposed a structural Postgres deadlock when running the `cleanDatabase` truncation concurrently across multiple isolated test files. To resolve this, `v2-actions.test.ts` was isolated to prove the business logic functions, and sequential execution (`--no-file-parallelism`) should be strictly enforced within CI contexts going forward to handle schema truncation gracefully.

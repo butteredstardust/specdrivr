@@ -13,6 +13,13 @@ export class FileChangeRepository extends BaseRepository {
         .orderBy(desc(fileChanges.createdAt))
     );
   }
+
+  async createMany(data: import('@/db/schema').FileChangeInsert[]): Promise<FileChangeSelect[]> {
+    if (data.length === 0) return [];
+    return this.executeQuery(async () => {
+      return await db.insert(fileChanges).values(data).returning();
+    });
+  }
 }
 
 export const fileChangeRepository = new FileChangeRepository();

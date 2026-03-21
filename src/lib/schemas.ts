@@ -636,3 +636,53 @@ export const webhookDeliveryQuerySchema = z.object({
   limit: z.coerce.number().positive().max(100).optional().default(50),
   offset: z.coerce.number().nonnegative().optional().default(0),
 });
+
+/**
+ * Phase 3 V3 Schemas (Git Commits, API Logs, File Changes)
+ */
+
+export const gitCommitsQuerySchema = z.object({
+  projectId: z.coerce.number().positive(),
+  branch: z.string().optional(),
+  limit: z.coerce.number().positive().max(100).optional().default(50),
+  offset: z.coerce.number().nonnegative().optional().default(0),
+});
+
+export const insertGitCommitSchema = z.object({
+  projectId: z.coerce.number().positive(),
+  taskId: z.coerce.number().positive().optional().nullable(),
+  commitSha: z.string().min(1, 'SHA is required'),
+  message: z.string().min(1, 'Commit message is required'),
+  branch: z.string().min(1, 'Branch name is required'),
+  author: z.string().optional().nullable(),
+  metadata: z.record(z.unknown()).optional().nullable(),
+});
+
+export const apiLogsQuerySchema = z.object({
+  projectId: z.coerce.number().positive(),
+  endpoint: z.string().optional(),
+  statusCode: z.coerce.number().optional(),
+  limit: z.coerce.number().positive().max(1000).optional().default(100),
+  offset: z.coerce.number().nonnegative().optional().default(0),
+});
+
+export const proposeTaskChangesSchema = z.object({
+  taskId: z.coerce.number().positive(),
+  attemptId: z.coerce.number().positive().optional().nullable(),
+  changes: z
+    .array(
+      z.object({
+        filePath: z.string().min(1),
+        changeType: z.enum(['added', 'modified', 'deleted']),
+        diff: z.string().optional().nullable(),
+        isBinary: z.boolean().optional().default(false),
+        language: z.string().optional().nullable(),
+        sizeBytes: z.coerce.number().optional().nullable(),
+        linesAdded: z.coerce.number().optional().default(0),
+        linesRemoved: z.coerce.number().optional().default(0),
+        previousHash: z.string().optional().nullable(),
+        newHash: z.string().optional().nullable(),
+      })
+    )
+    .min(1, 'At least one file change must be proposed'),
+});
