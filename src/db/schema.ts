@@ -65,6 +65,15 @@ export const taskAttemptStatusEnum = pgEnum('task_attempt_status', [
   'failed',
 ]);
 
+export const planJobStatusEnum = pgEnum('plan_job_status', [
+  'pending',
+  'running',
+  'completed',
+  'failed',
+]);
+
+export const planJobTypeEnum = pgEnum('plan_job_type', ['generate_plan', 'generate_tasks']);
+
 // ---------------------------------------------------------------------------
 // Users
 // ---------------------------------------------------------------------------
@@ -348,6 +357,7 @@ export const tasks = pgTable(
     completionTokensUsed: integer('completion_tokens_used'),
     totalCostUsd: doublePrecision('total_cost_usd'),
     recommendedModel: text('recommended_model').default('sonnet'),
+    pullRequestUrl: text('pull_request_url'),
     startedAt: timestamp('started_at', { withTimezone: true }),
     completedAt: timestamp('completed_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -440,11 +450,13 @@ export const agentSessions = pgTable(
     totalPromptTokens: integer('total_prompt_tokens').default(0),
     totalCompletionTokens: integer('total_completion_tokens').default(0),
     totalCostUsd: doublePrecision('total_cost_usd').default(0),
+    maxConcurrentTasks: integer('max_concurrent_tasks').notNull().default(1),
     pauseCount: integer('pause_count').notNull().default(0),
     agentVersion: text('agent_version'),
     gitBaseBranch: text('git_base_branch'),
     gitBaseCommit: text('git_base_commit'),
     gitHeadCommit: text('git_head_commit'),
+    pullRequestUrl: text('pull_request_url'),
     errorMessage: text('error_message'),
     startedBy: text('started_by').references(() => users.id, { onDelete: 'set null' }),
     startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
@@ -464,9 +476,9 @@ export const agentEvents = pgTable(
   'agent_events',
   {
     id: serial('id').primaryKey(),
-    sessionId: integer('session_id')
-      .notNull()
-      .references(() => agentSessions.id, { onDelete: 'cascade' }),
+    sessionId: integer('session_id').references(() => agentSessions.id, {
+      onDelete: 'cascade',
+    }),
     specId: integer('spec_id').references(() => specifications.id, { onDelete: 'set null' }),
     taskId: integer('task_id').references(() => tasks.id, { onDelete: 'set null' }),
     userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
@@ -596,6 +608,33 @@ export const notificationPreferences = pgTable(
   },
   (table) => ({
     uniqueUserEvent: uniqueIndex('notif_pref_user_event_idx').on(table.userId, table.eventType),
+  })
+);
+
+// ---------------------------------------------------------------------------
+// Plan Jobs (background tasks for plan/task generation)
+// ---------------------------------------------------------------------------
+
+export const planJobs = pgTable(
+  'plan_jobs',
+  {
+    id: serial('id').primaryKey(),
+    projectId: integer('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    specId: integer('spec_id').references(() => specifications.id, { onDelete: 'cascade' }),
+    planId: integer('plan_id').references(() => plans.id, { onDelete: 'cascade' }),
+    status: planJobStatusEnum('status').notNull().default('pending'),
+    type: planJobTypeEnum('type').notNull(),
+    error: text('error'),
+    startedAt: timestamp('started_at', { withTimezone: true }),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => ({
+    // I-7: Allow efficient lookups by project + status (used by getActiveByProject / getPendingByProject)
+    projectStatusIdx: index('plan_job_project_status_idx').on(table.projectId, table.status),
   })
 );
 
@@ -892,6 +931,21 @@ export const auditLogRelations = relations(auditLog, ({ one }) => ({
   }),
 }));
 
+export const planJobsRelations = relations(planJobs, ({ one }) => ({
+  project: one(projects, {
+    fields: [planJobs.projectId],
+    references: [projects.id],
+  }),
+  specification: one(specifications, {
+    fields: [planJobs.specId],
+    references: [specifications.id],
+  }),
+  plan: one(plans, {
+    fields: [planJobs.planId],
+    references: [plans.id],
+  }),
+}));
+
 // ---------------------------------------------------------------------------
 // Inferred types
 // ---------------------------------------------------------------------------
@@ -914,6 +968,8 @@ export type PlanInsert = typeof plans.$inferInsert;
 export type PlanSelect = typeof plans.$inferSelect;
 export type PlanReviewInsert = typeof planReviews.$inferInsert;
 export type PlanReviewSelect = typeof planReviews.$inferSelect;
+export type PlanJobInsert = typeof planJobs.$inferInsert;
+export type PlanJobSelect = typeof planJobs.$inferSelect;
 export type TaskInsert = typeof tasks.$inferInsert;
 export type TaskSelect = typeof tasks.$inferSelect;
 export type TaskAttemptInsert = typeof taskAttempts.$inferInsert;
@@ -965,3 +1021,5 @@ export type ProjectStatus = (typeof projectStatusEnum.enumValues)[number];
 export type LogLevel = (typeof logLevelEnum.enumValues)[number];
 export type UserRole = (typeof userRoleEnum.enumValues)[number];
 export type TaskAttemptStatus = (typeof taskAttemptStatusEnum.enumValues)[number];
+export type PlanJobStatus = (typeof planJobStatusEnum.enumValues)[number];
+export type PlanJobType = (typeof planJobTypeEnum.enumValues)[number];

@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Drawer } from 'vaul';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { X, ChevronRight, RefreshCw, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { XCircle, RefreshCw, AlertCircle, CheckCircle2, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -52,6 +52,7 @@ export interface Task {
   promptTokensUsed: number | null;
   completionTokensUsed: number | null;
   totalCostUsd: number | null;
+  pullRequestUrl?: string | null;
 }
 
 const TASK_STATUS_CONFIG: Record<
@@ -269,10 +270,10 @@ export function TaskDrawer() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-text-muted hover:text-text-primary h-8 w-8 shrink-0 rounded-full"
+                    className="text-text-muted hover:text-text-primary h-8 w-8 shrink-0 rounded-md"
                     onClick={closeDrawer}
                   >
-                    <X className="h-4 w-4" />
+                    <XCircle className="h-4 w-4" />
                   </Button>
                 </div>
 
@@ -283,7 +284,7 @@ export function TaskDrawer() {
                       <TabsTrigger
                         key={tab}
                         value={tab}
-                        className="data-[state=active]:border-accent-violet data-[state=active]:text-text-primary data-[state=inactive]:text-text-muted hover:text-text-secondary rounded-none bg-transparent px-1 py-2.5 font-mono text-xs tracking-widest uppercase shadow-none transition-colors data-[state=active]:border-b-2 data-[state=inactive]:border-transparent"
+                        className="data-[state=active]:border-accent-violet data-[state=active]:text-text-primary data-[state=inactive]:text-text-muted hover:text-text-secondary rounded-none bg-transparent px-1 py-2.5 font-mono text-xs tracking-[0.08em] uppercase shadow-none transition-colors data-[state=active]:border-b-2 data-[state=inactive]:border-transparent"
                       >
                         {tab}
                       </TabsTrigger>
@@ -441,18 +442,24 @@ function DrawerFooter({
         </TooltipProvider>
       </div>
 
-      {(devMode || jsonOpen) && (
+      {(devMode || jsonOpen || (task.totalCostUsd && task.totalCostUsd > 0)) && (
         <div className="space-y-3">
-          {devMode && (
-            <div className="text-text-muted flex items-center gap-4 font-mono text-[10px] tracking-wider uppercase">
-              <span>Prompt: {task.promptTokensUsed?.toLocaleString() ?? '---'}</span>
-              <span>Completion: {task.completionTokensUsed?.toLocaleString() ?? '---'}</span>
-              <span>Cost: ${task.totalCostUsd != null ? task.totalCostUsd.toFixed(4) : '---'}</span>
+          {(devMode || (task.totalCostUsd && task.totalCostUsd > 0)) && (
+            <div className="text-text-muted flex items-center gap-4 font-mono text-[10px] tracking-[0.08em] uppercase">
+              {devMode && (
+                <>
+                  <span>Prompt: {task.promptTokensUsed?.toLocaleString() ?? '---'}</span>
+                  <span>Completion: {task.completionTokensUsed?.toLocaleString() ?? '---'}</span>
+                </>
+              )}
+              {task.totalCostUsd != null && task.totalCostUsd > 0 && (
+                <span>Cost: ${task.totalCostUsd.toFixed(4)}</span>
+              )}
             </div>
           )}
           {devMode && (
             <Collapsible open={jsonOpen} onOpenChange={setJsonOpen}>
-              <CollapsibleTrigger className="text-text-muted hover:text-text-secondary flex cursor-pointer items-center gap-1.5 font-mono text-[10px] tracking-widest uppercase select-none">
+              <CollapsibleTrigger className="text-text-muted hover:text-text-secondary flex cursor-pointer items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] uppercase select-none">
                 {jsonOpen ? 'Hide JSON' : 'Inspect JSON'}
                 <ChevronRight
                   className={cn('h-3 w-3 transition-transform', jsonOpen && 'rotate-90')}

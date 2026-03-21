@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 
 interface EventLogProps {
   sessionId: number | null;
+  onUpdate?: () => void;
   className?: string;
 }
 
@@ -15,9 +16,10 @@ interface LogEntry {
   line: string;
   level: string;
   timestamp: string;
+  type?: 'log' | 'event';
 }
 
-export function EventLog({ sessionId, className }: EventLogProps) {
+export function EventLog({ sessionId, onUpdate, className }: EventLogProps) {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [showErrorsOnly, setShowErrorsOnly] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
@@ -34,17 +36,21 @@ export function EventLog({ sessionId, className }: EventLogProps) {
       withCredentials: true,
     });
 
+    const formatTimestamp = (ts?: number | string | Date) => {
+      const date = new Date(ts || Date.now());
+      return date.toLocaleTimeString('en-US', {
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      });
+    };
+
     const handleLog = (event: MessageEvent) => {
       try {
         const data = JSON.parse(event.data);
         if (data.line !== undefined) {
-          const date = new Date(data.ts || Date.now());
-          const timeStr = date.toLocaleTimeString('en-US', {
-            hour12: false,
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-          });
+          const timeStr = formatTimestamp(data.ts);
           const formattedLine = `[${timeStr}] ${data.line}`;
 
           const entry: LogEntry = {
@@ -52,6 +58,7 @@ export function EventLog({ sessionId, className }: EventLogProps) {
             line: formattedLine,
             level: data.level || 'info',
             timestamp: timeStr,
+            type: 'log',
           };
 
           if (data.level === 'error') {
@@ -61,7 +68,6 @@ export function EventLog({ sessionId, className }: EventLogProps) {
           }
 
           setLogs((prev) => {
-            // Prevent duplicates by checking ID
             if (prev.some((p) => p.id === entry.id)) return prev;
             return [...prev, entry];
           });
@@ -71,12 +77,38 @@ export function EventLog({ sessionId, className }: EventLogProps) {
       }
     };
 
+    const handleEvent = (event: MessageEvent) => {
+      try {
+        const data = JSON.parse(event.data);
+        const timeStr = formatTimestamp(data.createdAt);
+
+        const entry: LogEntry = {
+          id: `event-${data.id || Date.now()}-${Math.random()}`,
+          line: `[${timeStr}] ✨ EVENT: ${data.message}`,
+          level: 'info',
+          timestamp: timeStr,
+          type: 'event',
+        };
+
+        setLogs((prev) => [...prev, entry]);
+        onUpdate?.(); // Events often mean state changed
+      } catch (err) {
+        console.error('Failed to parse agent event:', err);
+      }
+    };
+
+    const handleUpdate = () => {
+      onUpdate?.();
+    };
+
     const handleConnected = () => {
       setIsConnected(true);
       setError(null);
     };
 
     es.addEventListener('log', handleLog as (event: Event) => void);
+    es.addEventListener('event', handleEvent as (event: Event) => void);
+    es.addEventListener('update', handleUpdate as (event: Event) => void);
     es.addEventListener('connected', handleConnected as (event: Event) => void);
     es.addEventListener('history_end', (() => {
       // Optional: mark history as finished
@@ -94,10 +126,12 @@ export function EventLog({ sessionId, className }: EventLogProps) {
 
     return () => {
       es.removeEventListener('log', handleLog as (event: Event) => void);
+      es.removeEventListener('event', handleEvent as (event: Event) => void);
+      es.removeEventListener('update', handleUpdate as (event: Event) => void);
       es.removeEventListener('connected', handleConnected as (event: Event) => void);
       es.close();
     };
-  }, [sessionId]);
+  }, [sessionId, onUpdate]);
 
   const filteredLogs = showErrorsOnly ? logs.filter((l) => l.level === 'error') : logs;
   const logLines = filteredLogs.map((l) => l.line);
@@ -105,13 +139,13 @@ export function EventLog({ sessionId, className }: EventLogProps) {
   return (
     <div className={className}>
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-muted-foreground font-mono text-[10px] tracking-[0.15em] uppercase">
+        <p className="text-text-muted font-mono text-[11px] tracking-[0.08em] uppercase">
           Session Log
         </p>
         <Button
           variant="ghost"
           size="sm"
-          className={`h-6 px-2 font-mono text-[10px] ${showErrorsOnly ? 'bg-bg-elevated' : ''}`}
+          className={`h-6 px-2 font-mono text-[10px] tracking-[0.08em] uppercase ${showErrorsOnly ? 'bg-bg-elevated' : ''}`}
           onClick={() => setShowErrorsOnly(!showErrorsOnly)}
         >
           <Filter className="mr-1 h-3 w-3" />

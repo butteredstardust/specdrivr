@@ -24,13 +24,13 @@ fi
 
 info "Starting Build & Test Suite..."
 
-# info "Running TypeScript check..."
-# pnpm typecheck || die "TypeScript errors found. Run 'pnpm typecheck' for details."
+info "Running TypeScript check..."
+pnpm typecheck || die "TypeScript errors found. Run 'pnpm typecheck' for details."
 
-# info "Running ESLint..."
-# pnpm lint || die "Linting failed. Run 'pnpm lint' for details."
+# Lint is intentionally omitted here — it runs in the pre-commit hook.
+# pnpm lint
 
-# info "Running tests..."
-# pnpm test:unit || die "Unit tests failed. Run 'pnpm test:unit' for details."
+# Integration tests require a live DB and are run in CI, not locally on every push.
+# pnpm test:unit
 
 success "Build suite passed."

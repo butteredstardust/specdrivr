@@ -5,12 +5,16 @@ import { formatDistanceToNow } from 'date-fns';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { PixelBadge } from '@/components/ui/pixel-badge';
 import { Button } from '@/components/ui/button';
+import { ASCIIProgress } from '@/components/ui/progress';
 
 interface RecentSession {
   id: number;
   status: 'running' | 'paused' | 'completed' | 'failed' | 'cancelled';
   startedAt: string;
   tasksExecuted: number;
+  tasksSucceeded?: number;
+  tasksFailed?: number;
+  totalTasks?: number | null;
   specTitle?: string | null;
   specName?: string | null;
   backend?: string;
@@ -41,7 +45,7 @@ export function RecentSessions({ sessions }: RecentSessionsProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="text-text-muted font-mono text-xs tracking-widest uppercase">
+      <h2 className="text-text-muted font-mono text-[11px] tracking-[0.08em] uppercase">
         Recent Activity
       </h2>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -89,12 +93,29 @@ export function RecentSessions({ sessions }: RecentSessionsProps) {
                 <p className="text-text-primary truncate font-mono text-sm">
                   {session.specTitle || session.specName || `Session #${session.id}`}
                 </p>
-                <div className="text-text-muted mt-2 flex items-center gap-3 font-mono text-xs">
-                  <span>{session.tasksExecuted ?? 0} tasks</span>
+                <div className="text-text-muted mt-2 flex flex-col gap-1.5 font-mono text-xs">
+                  <div className="flex items-center justify-between">
+                    <span>{session.tasksExecuted ?? 0} tasks executed</span>
+                    {session.totalTasks && session.totalTasks > 0 && (
+                      <span>
+                        {Math.round(((session.tasksSucceeded ?? 0) / session.totalTasks) * 100)}%
+                      </span>
+                    )}
+                  </div>
+                  {session.totalTasks && session.totalTasks > 0 && (
+                    <ASCIIProgress
+                      value={session.tasksSucceeded ?? 0}
+                      max={session.totalTasks}
+                      length={20}
+                      className="text-status-emerald"
+                    />
+                  )}
                   {session.backend && (
-                    <span className="bg-bg-elevated rounded px-1.5 py-0.5 text-[9px]">
-                      {session.backend === 'claude' ? '🤖 Claude' : '✨ Gemini'}
-                    </span>
+                    <div className="mt-1.5">
+                      <span className="bg-bg-elevated rounded px-1.5 py-0.5 text-[9px]">
+                        {session.backend === 'claude' ? '🤖 Claude' : '✨ Gemini'}
+                      </span>
+                    </div>
                   )}
                 </div>
               </div>

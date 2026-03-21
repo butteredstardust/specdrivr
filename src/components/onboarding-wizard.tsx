@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { Progress } from '@/components/ui/progress';
+import { ASCIIProgress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
@@ -104,9 +104,14 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
       <DialogContent
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
-        className="sm:max-w-md"
+        className="border-border-default bg-bg-surface sm:max-w-md"
       >
-        <Progress value={((step - 1) / 3) * 100} className="mb-2" />
+        <div className="flex flex-col items-center gap-1">
+          <div className="text-text-muted font-mono text-[10px] tracking-[0.08em] uppercase">
+            Setup Progress
+          </div>
+          <ASCIIProgress value={step - 1} max={3} length={20} className="text-accent-violet mb-4" />
+        </div>
 
         {step === 1 && (
           <>
@@ -114,11 +119,17 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
               <div className="mb-3 flex justify-center">
                 <DaemonMascot size={64} expression="idle" />
               </div>
-              <DialogTitle>Welcome to Specdrivr, {user.name}!</DialogTitle>
-              <DialogDescription>Let&apos;s get you set up in a few quick steps.</DialogDescription>
+              <DialogTitle className="text-text-primary font-mono text-lg tracking-tight uppercase">
+                Welcome to Specdrivr
+              </DialogTitle>
+              <DialogDescription className="text-text-secondary">
+                Let&apos;s get you set up in a few quick steps.
+              </DialogDescription>
             </DialogHeader>
-            <div className="mt-2 flex justify-center">
-              <Button onClick={() => setStep(2)}>Get Started</Button>
+            <div className="mt-4 flex justify-center">
+              <Button variant="violet" onClick={() => setStep(2)} className="w-full">
+                Get Started
+              </Button>
             </div>
           </>
         )}
@@ -126,27 +137,37 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
         {step === 2 && (
           <>
             <DialogHeader>
-              <DialogTitle>Set your display name</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-text-primary font-mono text-lg tracking-tight uppercase">
+                Identify Yourself
+              </DialogTitle>
+              <DialogDescription className="text-text-secondary">
                 This is how you&apos;ll appear to others on the platform.
               </DialogDescription>
             </DialogHeader>
-            <div className="mt-2">
+            <div className="mt-4 space-y-4">
               <Input
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 placeholder="Display name"
                 disabled={isSubmitting}
+                className="bg-bg-base border-border-default font-mono"
               />
               {!displayName.trim() && !nameError && (
-                <p className="text-muted-foreground mt-1 font-mono text-xs">
+                <p className="text-text-muted font-mono text-[10px] uppercase">
                   Name cannot be empty.
                 </p>
               )}
-              {nameError && <p className="text-status-red mt-1 font-mono text-xs">{nameError}</p>}
+              {nameError && (
+                <p className="text-status-red font-mono text-[10px] uppercase">{nameError}</p>
+              )}
             </div>
-            <div className="mt-2 flex justify-end">
-              <Button onClick={handleSetName} disabled={isSubmitting || !displayName.trim()}>
+            <div className="mt-6 flex justify-end">
+              <Button
+                variant="violet"
+                onClick={handleSetName}
+                disabled={isSubmitting || !displayName.trim()}
+                className="w-full"
+              >
                 {isSubmitting ? 'Saving…' : 'Continue'}
               </Button>
             </div>
@@ -156,22 +177,32 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
         {step === 3 && (
           <>
             <DialogHeader>
-              <DialogTitle>Create your first project</DialogTitle>
-              <DialogDescription>Give your first project a name to get started.</DialogDescription>
+              <DialogTitle className="text-text-primary font-mono text-lg tracking-tight uppercase">
+                Initialize Project
+              </DialogTitle>
+              <DialogDescription className="text-text-secondary">
+                Give your first project a name to get started.
+              </DialogDescription>
             </DialogHeader>
-            <div className="mt-2">
+            <div className="mt-4 space-y-4">
               <Input
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
                 placeholder="Project name"
                 disabled={isSubmitting}
+                className="bg-bg-base border-border-default font-mono"
               />
               {projectError && (
-                <p className="text-status-red mt-1 font-mono text-xs">{projectError}</p>
+                <p className="text-status-red font-mono text-[10px] uppercase">{projectError}</p>
               )}
             </div>
-            <div className="mt-2 flex justify-end">
-              <Button onClick={handleCreateProject} disabled={isSubmitting || !projectName.trim()}>
+            <div className="mt-6 flex justify-end">
+              <Button
+                variant="violet"
+                onClick={handleCreateProject}
+                disabled={isSubmitting || !projectName.trim()}
+                className="w-full"
+              >
                 {isSubmitting ? 'Creating…' : 'Create Project'}
               </Button>
             </div>

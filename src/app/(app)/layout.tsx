@@ -11,6 +11,7 @@ import { TaskDrawerProvider } from '@/components/shell/task-drawer-context';
 import { TaskDrawer } from '@/components/tasks/task-drawer';
 import { KeyboardShortcutsModal } from '@/components/ui/keyboard-shortcuts-modal';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ActiveJobsOverlay } from '@/components/shell/active-jobs-overlay';
 
 async function AuthenticatedApp({ children }: { children: React.ReactNode }) {
   const session = await authInstance.api.getSession({
@@ -53,7 +54,10 @@ async function AuthenticatedApp({ children }: { children: React.ReactNode }) {
           <Sidebar projects={projects} />
           <div className="flex flex-1 flex-col overflow-hidden">
             <TopBar />
-            <main className="flex-1 overflow-y-auto p-6">{children}</main>
+            <main className="relative flex-1 overflow-y-auto p-6">
+              {children}
+              <ActiveJobsOverlay />
+            </main>
           </div>
         </div>
         {showOnboarding && <OnboardingWizard user={shellUser} />}

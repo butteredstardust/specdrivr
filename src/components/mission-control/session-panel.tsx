@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Pause, Play, XCircle, RefreshCw, ChevronRight } from 'lucide-react';
+import { Pause, Play, XCircle, RefreshCw, ChevronRight, ExternalLink } from 'lucide-react';
+import { GitHubLogoIcon } from '@radix-ui/react-icons';
 import type { UserRole } from '@/db/schema';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
+import { Progress, ASCIIProgress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PixelBadge } from '@/components/ui/pixel-badge';
 
@@ -27,6 +28,8 @@ interface AgentSession {
   currentTaskTitle?: string | null;
   totalTasks?: number | null;
   backend?: 'gemini' | 'claude';
+  pullRequestUrl?: string | null;
+  totalCostUsd?: number | null;
 }
 
 interface SessionPanelProps {
@@ -187,11 +190,19 @@ export function SessionPanel({
           )}
 
           {/* Progress bar */}
-          <div className="flex flex-col gap-1">
-            <Progress value={progressPct} className="h-1.5" />
-            <span className="text-text-muted font-mono text-[10px]">
-              {succeeded}/{totalTasks > 0 ? totalTasks : '?'} tasks · {progressPct}%
-            </span>
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-text-muted font-mono text-[10px]">
+                {succeeded}/{totalTasks > 0 ? totalTasks : '?'} tasks · {progressPct}%
+              </span>
+              <ASCIIProgress
+                value={succeeded}
+                max={totalTasks > 0 ? totalTasks : 100}
+                length={15}
+                className="text-status-emerald"
+              />
+            </div>
+            <Progress value={progressPct} className="h-1" />
           </div>
 
           {/* Current task pill */}
@@ -250,19 +261,43 @@ export function SessionPanel({
         <DaemonMascot size={48} expression="success" />
         <PixelBadge variant="emerald">EXECUTION COMPLETE</PixelBadge>
         {session && (
-          <div className="text-text-secondary flex gap-4 font-mono text-xs">
-            <span>Executed: {session.tasksExecuted}</span>
-            <span className="text-status-emerald">OK: {session.tasksSucceeded}</span>
-            <span className="text-status-red">Failed: {session.tasksFailed}</span>
+          <div className="flex flex-col items-center gap-1.5 font-mono text-xs">
+            <div className="text-text-secondary flex gap-4">
+              <span>Executed: {session.tasksExecuted}</span>
+              <span className="text-status-emerald">OK: {session.tasksSucceeded}</span>
+              <span className="text-status-red">Failed: {session.tasksFailed}</span>
+            </div>
+            {session.totalCostUsd != null && session.totalCostUsd > 0 && (
+              <span className="text-text-muted">
+                TOTAL COST: ${session.totalCostUsd.toFixed(4)}
+              </span>
+            )}
           </div>
         )}
         {session?.specId && (
-          <Link
-            href={`/specs/${session.specId}?tab=changes`}
-            className="text-phosphor-amber text-sm underline-offset-2 hover:underline"
-          >
-            View Changes →
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href={`/specs/${session.specId}?tab=changes`}
+              className="text-phosphor-amber text-sm underline-offset-2 hover:underline"
+            >
+              View Changes →
+            </Link>
+            {session.pullRequestUrl && (
+              <>
+                <span className="text-border-default">|</span>
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="text-text-secondary hover:text-text-primary h-auto p-0 text-sm font-normal"
+                  onClick={() => window.open(session.pullRequestUrl!, '_blank')}
+                >
+                  <GitHubLogoIcon className="mr-1.5 h-3.5 w-3.5" />
+                  View PR
+                  <ExternalLink className="ml-1 h-3 w-3 opacity-50" />
+                </Button>
+              </>
+            )}
+          </div>
         )}
       </div>
     );
@@ -274,6 +309,11 @@ export function SessionPanel({
         <div className="flex flex-col items-center gap-3 py-4 text-center">
           <DaemonMascot size={48} expression="error" />
           <PixelBadge variant="red">EXECUTION FAILED</PixelBadge>
+          {session?.totalCostUsd != null && session.totalCostUsd > 0 && (
+            <span className="text-text-muted font-mono text-[10px]">
+              EST. COST: ${session.totalCostUsd.toFixed(4)}
+            </span>
+          )}
           {session?.errorMessage && (
             <Alert variant="destructive" className="text-left">
               <AlertDescription>{session.errorMessage}</AlertDescription>

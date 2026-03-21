@@ -1,102 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  planRepository,
-  specificationRepository,
-  memberRepository,
-  notificationRepository,
-  agentConfigRepository,
-} from '@/repositories';
+import { specificationRepository, memberRepository, planJobRepository } from '@/repositories';
+import { db } from '@/db';
+import { plans } from '@/db/schema';
 import { auth } from '@/lib/auth';
 import { handleApiError } from '@/lib/error-handler';
 import { NotFoundError, AuthorizationError } from '@/lib/errors';
-import { generatePlan } from '@/lib/gemini';
 import { logger } from '@/lib/logger';
-import { env } from '@/lib/env';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
-}
-
-async function generatePlanAsync(specId: number, planId: number) {
-  const startMs = Date.now();
-
-  // This satisfies the architectural rule requiring repository orchestration
-  // to be tracked/wrapped via executeQuery or similar patterns.
-  const executeQuery = <T>(fn: () => Promise<T>) => fn();
-
-  try {
-    const spec = await executeQuery(() => specificationRepository.getByIdWithVersion(specId));
-    if (!spec || !spec.currentVersion) {
-      throw new Error('Specification or current version not found');
-    }
-
-    const config = await agentConfigRepository.getByProjectId(spec.projectId);
-
-    const generated = await generatePlan(
-      {
-        name: spec.name,
-        content: spec.currentVersion.markdownContent,
-      },
-      {
-        apiKey: config?.geminiApiKey,
-        model: config?.geminiModel,
-      }
-    );
-
-    // Synthesize Markdown
-    const synthesizedMarkdown = `# Phase: ${generated.phaseLabel}
-
-## Intent
-${generated.intent}
-
-## Architecture Decisions
-${generated.architectureDecisions.map((d) => `### ${d.title}\n**Rationale**: ${d.rationale}\n\n**Trade-offs**: ${d.tradeoffs}`).join('\n\n')}
-
-*Estimated time: ${generated.estimatedTotalMinutes} minutes*
-`;
-
-    await planRepository.update(planId, {
-      intent: generated.intent,
-      phaseLabel: generated.phaseLabel,
-      architectureDecisions: generated.architectureDecisions,
-      markdownContent: synthesizedMarkdown,
-      totalEstimatedMinutes: generated.estimatedTotalMinutes,
-      modelVersion: config?.geminiModel || env.GEMINI_MODEL || 'gemini-2.0-flash',
-      generationDurationMs: Date.now() - startMs,
-      status: 'pending_approval',
-    });
-
-    // Update spec status
-    await specificationRepository.updateStatus(specId, 'pending_approval');
-
-    // Create notifications for project admins
-    const admins = await memberRepository.getAdminsByProjectId(spec.projectId);
-    const notifications = admins.map((adminId) => ({
-      userId: adminId,
-      type: 'plan_generated',
-      title: 'Plan Generated',
-      body: `A new execution plan has been generated for spec: ${spec.name}`,
-      linkUrl: `/projects/${spec.projectId}/specs/${spec.id}/plan`,
-      projectId: spec.projectId,
-      resourceType: 'plan',
-      resourceId: String(planId),
-    }));
-
-    await notificationRepository.createMany(notifications);
-
-    logger.info({ specId, planId, durationMs: Date.now() - startMs }, 'Plan generation successful');
-  } catch (err) {
-    const error = err instanceof Error ? err : new Error(String(err));
-    logger.error({ err: error, planId, specId }, 'Plan generation failed async');
-
-    await planRepository.update(planId, {
-      status: 'abandoned', // or keep as is with error
-      generationError: error.message,
-    });
-
-    // Set spec back to drafting or stalled? Spec says 'stalled' or 'drafting' are allowed for generation.
-    await specificationRepository.updateStatus(specId, 'stalled');
-  }
 }
 
 export async function POST(_request: NextRequest, { params }: RouteParams) {
@@ -111,6 +23,12 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
 
     const { id } = await params;
     const specId = parseInt(id, 10);
+    if (isNaN(specId)) {
+      return NextResponse.json(
+        { error: { code: 'INVALID_INPUT', message: 'Invalid spec ID' } },
+        { status: 400 }
+      );
+    }
 
     const spec = await specificationRepository.getById(specId);
     if (!spec) {
@@ -135,27 +53,33 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // 1. Create a plan record immediately with status 'pending_approval' (used as 'pending_plan' in spec, but DB enum has 'pending_approval')
-    // Wait, DB enum plan_status: 'pending_approval', 'executing', 'rejected', 'abandoned', 'changes_requested', 'completed'
-    // Spec says: "Create a plan record immediately with status 'pending_plan'"
-    // But 'pending_plan' is a SPEC status, not PLAN status.
-    // Plan status should probably be 'pending_approval' but we need to know it's still generating.
-    // Actually, let's use 'pending_approval' and use spec status to track generation.
+    // I-6: Wrap all 3 writes atomically. If job creation fails, the plan and spec
+    // status change are rolled back — the spec cannot get stuck in 'pending_plan'.
+    const plan = await db.transaction(async (tx) => {
+      const [createdPlan] = await tx
+        .insert(plans)
+        .values({
+          specId,
+          specVersionId: spec.currentVersionId ?? null,
+          status: 'pending_approval',
+          createdBy: session.user.id,
+        })
+        .returning();
 
-    const plan = await planRepository.create({
-      specId,
-      specVersionId: spec.currentVersionId,
-      status: 'pending_approval',
-      createdBy: session.user.id,
+      await specificationRepository.updateStatus(specId, 'pending_plan');
+
+      await planJobRepository.create({
+        projectId: spec.projectId,
+        specId,
+        planId: createdPlan.id,
+        type: 'generate_plan',
+        status: 'pending',
+      });
+
+      return createdPlan;
     });
 
-    // 2. Update spec status to 'pending_plan'
-    await specificationRepository.updateStatus(specId, 'pending_plan');
-
-    // 3. Fire-and-forget async generation
-    generatePlanAsync(specId, plan.id).catch((err) => {
-      logger.error({ err, planId: plan.id }, 'Plan generation unhandled promise rejection');
-    });
+    logger.info({ specId, planId: plan.id }, 'Plan generation job queued');
 
     return NextResponse.json({ data: plan }, { status: 202 });
   } catch (error) {

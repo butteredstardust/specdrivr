@@ -23,3 +23,29 @@ const Progress = React.forwardRef<
 Progress.displayName = ProgressPrimitive.Root.displayName;
 
 export { Progress };
+
+export function ASCIIProgress({
+  value = 0,
+  max = 100,
+  length = 10,
+  className,
+}: {
+  value?: number;
+  max?: number;
+  length?: number;
+  className?: string;
+}) {
+  const percentage = Math.min(Math.max(value / max, 0), 1);
+  const filledLength = Math.round(percentage * length);
+  const emptyLength = length - filledLength;
+
+  const filled = '▓'.repeat(filledLength);
+  const empty = '▒'.repeat(emptyLength);
+
+  return (
+    <span className={cn('font-mono text-[10px] tracking-tight whitespace-nowrap', className)}>
+      {filled}
+      {empty}
+    </span>
+  );
+}

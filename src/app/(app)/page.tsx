@@ -50,10 +50,9 @@ export default async function MissionControlPage() {
       {/* Header */}
       <div className="border-border-default flex items-center justify-between border-b px-6 py-4">
         <div>
-          <div className="text-text-secondary mb-1 font-mono text-xs tracking-[0.2em] uppercase">
+          <div className="text-text-muted font-mono text-[11px] tracking-[0.08em] uppercase">
             Mission Control
           </div>
-          <h1 className="text-foreground text-xl font-semibold">Dashboard</h1>
         </div>
       </div>
 
