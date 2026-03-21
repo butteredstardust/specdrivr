@@ -50,12 +50,12 @@ async function AuthenticatedApp({ children }: { children: React.ReactNode }) {
   return (
     <ShellProvider user={shellUser} initialId={validatedProjectId}>
       <TaskDrawerProvider>
-        <div className="relative flex h-screen overflow-hidden">
+        <div className="bg-bg-base relative flex h-screen overflow-hidden">
           <Sidebar projects={projects} />
           <div className="flex flex-1 flex-col overflow-hidden">
             <TopBar />
-            <main className="relative flex-1 overflow-y-auto p-6">
-              {children}
+            <main className="relative flex-1 overflow-y-auto px-8 py-8 md:px-10">
+              <div className="mx-auto max-w-[1600px]">{children}</div>
               <ActiveJobsOverlay />
             </main>
           </div>
@@ -70,24 +70,32 @@ async function AuthenticatedApp({ children }: { children: React.ReactNode }) {
 
 function LayoutSkeleton() {
   return (
-    <div className="relative flex h-screen overflow-hidden">
-      <div className="border-border-default bg-bg-surface w-56 space-y-4 border-r p-4">
-        <Skeleton className="h-8 w-3/4" />
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-5/6" />
+    <div className="bg-bg-base relative flex h-screen overflow-hidden">
+      <div className="border-border-default bg-bg-surface w-64 space-y-6 border-r p-6">
+        <Skeleton className="h-10 w-3/4 rounded-md" />
+        <div className="space-y-3">
+          <Skeleton className="h-9 w-full rounded-md" />
+          <Skeleton className="h-9 w-full rounded-md" />
+          <Skeleton className="h-9 w-full rounded-md" />
+          <Skeleton className="h-9 w-5/6 rounded-md" />
+        </div>
       </div>
       <div className="flex flex-1 flex-col overflow-hidden">
-        <div className="border-border-default flex h-14 items-center justify-between border-b p-4">
-          <Skeleton className="h-6 w-32" />
-          <Skeleton className="h-8 w-8 rounded-full" />
+        <div className="border-border-default bg-bg-surface flex h-16 items-center justify-between border-b px-8">
+          <Skeleton className="h-6 w-48 rounded" />
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-9 w-9 rounded-full" />
+            <Skeleton className="h-9 w-9 rounded-full" />
+          </div>
         </div>
-        <main className="flex-1 overflow-y-auto p-6">
-          <div className="space-y-4">
-            <Skeleton className="h-8 w-1/4" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-3/4" />
+        <main className="flex-1 overflow-y-auto p-8 md:p-10">
+          <div className="mx-auto max-w-[1600px] space-y-6">
+            <Skeleton className="h-10 w-1/4 rounded" />
+            <div className="space-y-4">
+              <Skeleton className="h-4 w-full rounded" />
+              <Skeleton className="h-4 w-full rounded" />
+              <Skeleton className="h-4 w-3/4 rounded" />
+            </div>
           </div>
         </main>
       </div>

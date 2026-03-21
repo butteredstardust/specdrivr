@@ -83,17 +83,17 @@ function SystemIcon({
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div className="flex cursor-default flex-col items-center gap-0.5">
-          <div className="relative">
+        <div className="group flex cursor-default flex-col items-center gap-1">
+          <div className="relative transition-transform duration-200 group-hover:scale-110">
             <DaemonMascot size={32} expression={healthToExpr(state)} />
             <span
               className={cn(
-                'border-bg-surface absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full border',
+                'border-bg-surface absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full border shadow-sm',
                 healthDot(state)
               )}
             />
           </div>
-          <span className="text-text-muted mt-0.5 font-mono text-[8px] tracking-wider">
+          <span className="text-text-muted group-hover:text-text-secondary mt-0.5 font-mono text-[8px] tracking-[0.12em] uppercase transition-colors">
             {label}
           </span>
         </div>
@@ -154,20 +154,20 @@ function SidebarBottom({ collapsed }: { collapsed: boolean }) {
 
   if (collapsed) {
     return (
-      <div className="border-border-default flex flex-col items-center gap-2 border-t py-3">
+      <div className="border-border-muted flex flex-col items-center gap-3 border-t py-4">
         <DaemonMascot size={20} expression={overallExpr} />
       </div>
     );
   }
 
   return (
-    <div className="border-border-default border-t">
+    <div className="border-border-muted border-t">
       {/* Systems icons */}
-      <div className="px-3 pt-3 pb-1">
-        <span className="text-text-muted mb-2 block px-1 font-mono text-[11px] tracking-[0.08em] uppercase">
+      <div className="px-4 pt-4 pb-2">
+        <span className="text-text-muted mb-3 block px-1 font-mono text-[10px] tracking-[0.15em] uppercase opacity-70">
           Systems
         </span>
-        <div className="flex items-end justify-around">
+        <div className="flex items-end justify-between px-1">
           <SystemIcon label="GIT" state={health.git} tooltip={gitTooltip} />
           <SystemIcon label="API" state={health.api} tooltip={apiTooltip} />
           <SystemIcon label="AGT" state={health.agt} tooltip={agtTooltip} />
@@ -176,15 +176,15 @@ function SidebarBottom({ collapsed }: { collapsed: boolean }) {
       </div>
 
       {/* Daemon status footer */}
-      <div className="px-3 pt-1 pb-3">
-        <div className="flex items-center gap-1.5">
+      <div className="px-4 pt-2 pb-4">
+        <div className="flex items-center gap-2">
           <DaemonMascot size={20} expression={overallExpr} />
-          <span className={cn('font-mono text-[11px] tracking-[0.08em] uppercase', statusClass)}>
+          <span className={cn('font-mono text-[10px] tracking-[0.1em] uppercase', statusClass)}>
             DAEMON · {statusText}
           </span>
         </div>
-        <div className="mt-1 px-0.5">
-          <span className="text-text-muted/50 font-mono text-[9px]">v0.1.0</span>
+        <div className="mt-1.5 px-0.5">
+          <span className="text-text-muted/40 font-mono text-[9px] tracking-wider">v0.1.0</span>
         </div>
       </div>
     </div>
@@ -229,12 +229,12 @@ export function Sidebar({ projects }: SidebarProps) {
     <TooltipProvider delayDuration={300}>
       <aside
         className={cn(
-          'border-border-default bg-bg-surface flex h-full flex-shrink-0 flex-col border-r transition-all duration-200',
-          isCollapsed ? 'w-14' : 'w-56'
+          'border-border-default bg-bg-surface flex h-full flex-shrink-0 flex-col border-r transition-all duration-300 ease-in-out',
+          isCollapsed ? 'w-16' : 'w-64'
         )}
       >
         {/* Logo */}
-        <div className="flex items-center gap-3 px-4 py-4">
+        <div className="flex items-center gap-3 px-4 py-6">
           {isCollapsed ? (
             <div className="flex w-full justify-center">
               <PlayfulDaemon size={32} />
@@ -242,16 +242,21 @@ export function Sidebar({ projects }: SidebarProps) {
           ) : (
             <>
               <PlayfulDaemon size={32} />
-              <PlayfulLogo />
-              {devMode && (
-                <PixelBadge variant="amber" className="font-mono text-[10px]">
-                  DEV
-                </PixelBadge>
-              )}
+              <div className="flex flex-col">
+                <PlayfulLogo />
+                {devMode && (
+                  <PixelBadge
+                    variant="amber"
+                    className="mt-0.5 w-fit origin-left scale-90 font-mono text-[9px]"
+                  >
+                    DEV MODE
+                  </PixelBadge>
+                )}
+              </div>
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-text-muted hover:text-text-primary h-6 w-6 shrink-0"
+                className="text-text-muted hover:text-text-primary ml-auto h-7 w-7 shrink-0 transition-colors"
                 onClick={toggleCollapsed}
                 aria-label="Collapse sidebar"
               >
@@ -263,11 +268,11 @@ export function Sidebar({ projects }: SidebarProps) {
 
         {/* Expand button when collapsed */}
         {isCollapsed && (
-          <div className="flex justify-center py-1.5">
+          <div className="flex justify-center py-2">
             <Button
               variant="ghost"
               size="icon"
-              className="text-text-muted hover:text-text-primary h-6 w-6"
+              className="text-text-muted hover:text-text-primary h-8 w-8 transition-colors"
               onClick={toggleCollapsed}
               aria-label="Expand sidebar"
             >
@@ -278,16 +283,12 @@ export function Sidebar({ projects }: SidebarProps) {
 
         {/* Project switcher */}
         {!isCollapsed && (
-          <div className="px-3 pb-3">
+          <div className="px-4 pb-5">
             <Select
               value={activeProjectId ? String(activeProjectId) : ''}
               onValueChange={(v) => {
                 const newId = parseInt(v, 10);
                 setActiveProjectId(newId);
-
-                // Stay on the same page but refresh data,
-                // UNLESS we are on a detail page for a specific spec or session.
-                // Since those belong to a specific project, we should redirect to their lists.
                 if (pathname.startsWith('/specs/') && pathname !== '/specs/new') {
                   router.push('/specs');
                 } else if (pathname.startsWith('/sessions/')) {
@@ -297,9 +298,16 @@ export function Sidebar({ projects }: SidebarProps) {
                 }
               }}
             >
-              <SelectTrigger className="border-border-default bg-bg-elevated h-auto w-full border px-2.5 py-1.5 text-xs [&>svg:last-child]:hidden">
-                <span className="text-text-muted flex-1 truncate font-mono">{projectPath}</span>
-                <ChevronDown className="text-text-muted ml-1 h-3 w-3 shrink-0" />
+              <SelectTrigger className="border-border-muted bg-bg-elevated/50 hover:bg-bg-elevated h-auto w-full border px-3 py-2 text-xs transition-colors [&>svg:last-child]:hidden">
+                <div className="flex flex-1 flex-col items-start overflow-hidden text-left">
+                  <span className="text-text-muted mb-0.5 font-mono text-[9px] tracking-widest uppercase opacity-60">
+                    Active Project
+                  </span>
+                  <span className="text-text-secondary w-full truncate font-mono font-medium">
+                    {projectPath}
+                  </span>
+                </div>
+                <ChevronDown className="text-text-muted ml-1 h-3.5 w-3.5 shrink-0" />
               </SelectTrigger>
               <SelectContent>
                 {projects.map((p) => (
@@ -313,7 +321,7 @@ export function Sidebar({ projects }: SidebarProps) {
         )}
 
         {/* Nav */}
-        <nav className="flex-1 space-y-0.5 px-3">
+        <nav className="flex-1 space-y-1 px-3">
           {NAV_ITEMS.map(({ href, label, icon: Icon, exact }) => {
             const active = isActive(href, exact);
             const isNotifications = label === 'Notifications';
@@ -325,19 +333,24 @@ export function Sidebar({ projects }: SidebarProps) {
                 key={href}
                 href={href}
                 className={cn(
-                  'flex items-center gap-2.5 rounded px-2.5 py-2 text-sm transition-colors',
+                  'group flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-200',
                   isCollapsed && 'relative justify-center px-2',
                   active
-                    ? 'bg-bg-elevated text-text-primary'
-                    : 'text-text-secondary hover:bg-bg-elevated/60 hover:text-text-primary'
+                    ? 'bg-bg-elevated text-text-primary shadow-sm'
+                    : 'text-text-secondary hover:bg-bg-elevated/40 hover:text-text-primary'
                 )}
               >
-                <Icon className="h-4 w-4 shrink-0" />
-                {!isCollapsed && label}
+                <Icon
+                  className={cn(
+                    'h-[18px] w-[18px] shrink-0 transition-transform duration-200 group-hover:scale-110',
+                    active ? 'text-accent-violet' : 'text-text-secondary'
+                  )}
+                />
+                {!isCollapsed && <span>{label}</span>}
                 {!isCollapsed && showBadge && (
                   <PixelBadge
                     variant="violet"
-                    className="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full p-0 text-[9px] shadow-sm"
+                    className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full p-0 text-[10px] shadow-sm"
                   >
                     {badgeText}
                   </PixelBadge>
@@ -345,7 +358,7 @@ export function Sidebar({ projects }: SidebarProps) {
                 {isCollapsed && showBadge && (
                   <PixelBadge
                     variant="violet"
-                    className="absolute top-2 right-2 flex h-3.5 min-w-3.5 items-center justify-center rounded-full p-0 text-[8px] shadow-sm"
+                    className="absolute top-2 right-2 flex h-4 min-w-4 items-center justify-center rounded-full p-0 text-[9px] shadow-sm"
                   >
                     {badgeText}
                   </PixelBadge>
@@ -357,7 +370,9 @@ export function Sidebar({ projects }: SidebarProps) {
               return (
                 <Tooltip key={href}>
                   <TooltipTrigger asChild>{linkEl}</TooltipTrigger>
-                  <TooltipContent side="right">{label}</TooltipContent>
+                  <TooltipContent side="right" sideOffset={10}>
+                    {label}
+                  </TooltipContent>
                 </Tooltip>
               );
             }

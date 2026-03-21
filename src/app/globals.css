@@ -30,70 +30,78 @@
     --radius: 0.375rem;
 
     /* Custom Specdrivr Tokens — Light Mode */
-    --bg-base: #f4f4f5;
+    --bg-base: #f8f8f9;
     --bg-surface: #ffffff;
-    --bg-elevated: #e4e4e7;
-    --border-default: #d4d4d8;
-    --border-muted: #e4e4e7;
-    --text-primary: #18181b;
-    --text-secondary: #3f3f46;
+    --bg-elevated: #f1f1f4;
+    --border-default: #e2e2e5;
+    --border-muted: #f1f1f4;
+    --text-primary: #09090b;
+    --text-secondary: #4b5563;
     --text-muted: #71717a;
-    --accent-violet: #6d28d9;
-    --accent-violet-dim: #5b21b6;
-    --phosphor-amber: #b45309;
-    --phosphor-amber-dim: #92400e;
+    --accent-violet: #7c3aed;
+    --accent-violet-dim: #6d28d9;
+    --phosphor-amber: #d97706;
+    --phosphor-amber-dim: #b45309;
     --status-emerald: #059669;
     --status-red: #dc2626;
     --status-orange: #d97706;
-    --bg-diff-added: rgba(5, 150, 105, 0.1);
-    --bg-diff-deleted: rgba(220, 38, 38, 0.1);
+    --bg-diff-added: rgba(5, 150, 105, 0.05);
+    --bg-diff-deleted: rgba(220, 38, 38, 0.05);
     --terminal-bg: #18181b;
     --terminal-green: #16a34a;
+
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    --shadow-glow: 0 0 0 0 transparent;
   }
 
   .dark {
-    --background: 240 6% 6%;
-    --foreground: 240 5% 90%;
-    --card: 240 5% 8%;
-    --card-foreground: 240 5% 90%;
-    --popover: 240 5% 8%;
-    --popover-foreground: 240 5% 90%;
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
     --primary: 256 97% 67%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 240 4% 14%;
-    --secondary-foreground: 240 5% 90%;
-    --muted: 240 4% 14%;
-    --muted-foreground: 240 4% 40%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
     --accent: 256 97% 67%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 240 4% 16%;
-    --input: 240 4% 16%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
     --ring: 256 97% 67%;
     --radius: 0.375rem;
 
     /* Custom Specdrivr Tokens — Dark Mode */
-    --bg-base: #0e0e10;
-    --bg-surface: #111113;
-    --bg-elevated: #1c1c1f;
-    --border-default: #272729;
-    --border-muted: #2e2e32;
-    --text-primary: #e4e4e7;
+    --bg-base: #09090b;
+    --bg-surface: #0c0c0e;
+    --bg-elevated: #141417;
+    --border-default: #1d1d20;
+    --border-muted: #27272a;
+    --text-primary: #fafafa;
     --text-secondary: #a1a1aa;
-    --text-muted: #636369;
-    --accent-violet: #7c5cfc;
-    --accent-violet-dim: #5b3fd4;
-    --phosphor-amber: #ffa500;
-    --phosphor-amber-dim: #b45309;
-    --status-emerald: #22a16e;
-    --status-red: #e03232;
-    --status-orange: #d97706;
-    --bg-diff-added: rgba(34, 161, 110, 0.1);
-    --bg-diff-deleted: rgba(224, 50, 50, 0.1);
-    --terminal-bg: #0d0d0a;
-    --terminal-green: #39ff14;
+    --text-muted: #52525b;
+    --accent-violet: #8b5cf6;
+    --accent-violet-dim: #7c3aed;
+    --phosphor-amber: #f59e0b;
+    --phosphor-amber-dim: #d97706;
+    --status-emerald: #10b981;
+    --status-red: #ef4444;
+    --status-orange: #f59e0b;
+    --bg-diff-added: rgba(16, 185, 129, 0.08);
+    --bg-diff-deleted: rgba(239, 68, 68, 0.08);
+    --terminal-bg: #050505;
+    --terminal-green: #22c55e;
     color-scheme: dark;
+
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+    --shadow-glow: 0 0 15px -3px var(--accent-violet-dim), 0 0 6px -2px var(--accent-violet-dim);
   }
 }
 
@@ -145,35 +153,130 @@
 
   --color-terminal-bg: var(--terminal-bg);
   --color-terminal-green: var(--terminal-green);
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-glow: var(--shadow-glow);
 }
 
 body {
   background: var(--bg-base);
   color: var(--text-primary);
   font-family: var(--font-sans, 'Inter', system-ui, -apple-system, sans-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .font-mono,
 [class*='font-mono'] {
   font-family: var(--font-mono, 'JetBrains Mono', 'Fira Code', 'Courier New', monospace);
+  letter-spacing: -0.01em;
+}
+
+.font-mono.uppercase,
+[class*='font-mono'].uppercase {
+  letter-spacing: 0.05em;
 }
 
 .terminal-surface {
   position: relative;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.4);
 }
 .terminal-surface::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 3px,
-    rgba(0, 0, 0, 0.15) 3px,
-    rgba(0, 0, 0, 0.15) 4px
-  );
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%),
+    repeating-linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  background-size: 100% 3px, 3px 100%;
   pointer-events: none;
   z-index: 1;
+}
+
+.dark .terminal-surface::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.2) 100%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.scanline-overlay {
+  position: relative;
+  overflow: hidden;
+}
+
+.scanline-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 50%, rgba(139, 92, 246, 0.02) 50%);
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.dark .scanline-overlay::after {
+  background: linear-gradient(to bottom, transparent 50%, rgba(139, 92, 246, 0.04) 50%);
+  background-size: 100% 4px;
+}
+
+.cyber-glow {
+  box-shadow: var(--shadow-glow);
+  border-color: var(--accent-violet-dim);
+}
+
+.cyber-glow-active {
+  box-shadow: 0 0 20px -2px var(--accent-violet), 0 0 8px -2px var(--accent-violet);
+  border-color: var(--accent-violet);
+}
+
+.surface-raised {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+
+.dark .surface-raised {
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.03);
+  border-color: var(--border-default);
+}
+
+.surface-dual-border {
+  border: 1px solid var(--border-default);
+  box-shadow: inset 0 0 0 1px var(--border-muted);
+}
+
+.dark .surface-dual-border {
+  border-color: var(--border-default);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  background-color: var(--bg-surface);
+}
+
+.glass-overlay {
+  @apply backdrop-blur-md bg-white/70 dark:bg-black/40 border border-white/20 dark:border-white/10 shadow-xl;
+}
+
+.phosphor-focus {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.phosphor-focus:focus-within,
+.phosphor-focus:focus {
+  border-color: var(--accent-violet);
+  box-shadow: 0 0 0 1px var(--accent-violet), 0 0 12px -2px var(--accent-violet-dim),
+    inset 0 1px 2px rgba(0, 0, 0, 0.2);
+  outline: none;
+}
+
+.inner-shadow-sm {
+  box-shadow: inset 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.dark .inner-shadow-sm {
+  box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.3);
 }
 
 @keyframes blink {
@@ -187,6 +290,36 @@ body {
 }
 .animate-blink {
   animation: blink 1s step-end infinite;
+}
+
+/* New Motion Utilities */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-entrance {
+  animation: fade-in-up 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.stagger-1 { animation-delay: 50ms; }
+.stagger-2 { animation-delay: 100ms; }
+.stagger-3 { animation-delay: 150ms; }
+.stagger-4 { animation-delay: 200ms; }
+.stagger-5 { animation-delay: 250ms; }
+
+.hover-snappy {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.interactive-card {
+  @apply transition-all duration-200 active:scale-[0.98] hover:shadow-md hover:border-border-default;
 }
 
 /* Mascot Animations */
@@ -204,6 +337,23 @@ body {
   75% {
     transform: translateY(2px) translateX(1px);
   }
+}
+
+@keyframes daemon-breath {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.02); opacity: 0.9; }
+}
+
+@keyframes terminal-flicker {
+  0% { opacity: 0.1; }
+  5% { opacity: 0.7; }
+  10% { opacity: 0.3; }
+  15% { opacity: 0.8; }
+  20% { opacity: 0.5; }
+  25% { opacity: 1; }
+}
+.animate-terminal-flicker {
+  animation: terminal-flicker 0.3s ease-out both;
 }
 
 @keyframes daemon-jump {
@@ -328,6 +478,9 @@ body {
 
 .animate-daemon-float {
   animation: daemon-float 6s ease-in-out infinite;
+}
+.animate-daemon-breath {
+  animation: daemon-breath 4s ease-in-out infinite;
 }
 .animate-daemon-jump {
   animation: daemon-jump 0.8s cubic-bezier(0.4, 0, 0.2, 1);
@@ -503,26 +656,45 @@ body {
 @layer utilities {
   /* Custom Scrollbar Styling */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
 
   ::-webkit-scrollbar-track {
-    background: var(--background);
+    background: transparent;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: var(--border-default);
-    border-radius: 4px;
+    background: var(--accent-violet-dim);
+    border-radius: 10px;
+    opacity: 0.5;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: var(--accent-violet-dim);
+    opacity: 0.3;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--text-muted);
+    background: var(--accent-violet);
+  }
+
+  /* Theme-specific thumbs */
+  .theme-amber ::-webkit-scrollbar-thumb {
+    background: var(--phosphor-amber-dim);
+  }
+  .theme-amber ::-webkit-scrollbar-thumb:hover {
+    background: var(--phosphor-amber);
   }
 
   /* Firefox support */
   * {
     scrollbar-width: thin;
-    scrollbar-color: var(--border-default) var(--background);
+    scrollbar-color: var(--accent-violet-dim) transparent;
+  }
+
+  .bg-bg-elevated {
+    @apply border border-border-default shadow-sm;
   }
 }
+
