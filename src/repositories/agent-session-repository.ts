@@ -143,6 +143,45 @@ export class AgentSessionRepository extends BaseRepository {
     );
   }
 
+  async getFilteredByProject(
+    projectId: number,
+    options: { status?: string },
+    limit: number,
+    offset: number
+  ): Promise<AgentSession[]> {
+    return await this.executeQuery(() => {
+      const conditions = [eq(agentSessions.projectId, projectId)];
+      if (options.status) {
+        conditions.push(
+          eq(agentSessions.status, options.status as import('@/db/schema').SessionStatus)
+        );
+      }
+      return db
+        .select()
+        .from(agentSessions)
+        .where(and(...conditions))
+        .limit(limit)
+        .offset(offset)
+        .orderBy(desc(agentSessions.startedAt));
+    });
+  }
+
+  async countFilteredByProject(projectId: number, options: { status?: string }): Promise<number> {
+    return await this.executeQuery(async () => {
+      const conditions = [eq(agentSessions.projectId, projectId)];
+      if (options.status) {
+        conditions.push(
+          eq(agentSessions.status, options.status as import('@/db/schema').SessionStatus)
+        );
+      }
+      const [result] = await db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(agentSessions)
+        .where(and(...conditions));
+      return result?.count ?? 0;
+    });
+  }
+
   async create(data: {
     projectId: number;
     specId?: number;

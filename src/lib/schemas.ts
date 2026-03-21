@@ -595,3 +595,44 @@ export const usageSnapshotsQuerySchema = z.object({
   page: z.coerce.number().positive().optional().default(1),
   limit: z.coerce.number().positive().max(100).optional().default(50),
 });
+
+/**
+ * Orchestration & Observability V2 Schemas
+ */
+export const agentSessionQuerySchema = z.object({
+  projectId: z.coerce.number().positive(),
+  status: z.enum(['running', 'paused', 'completed', 'failed', 'cancelled']).optional(),
+  limit: z.coerce.number().positive().max(100).optional().default(50),
+  offset: z.coerce.number().nonnegative().optional().default(0),
+});
+
+export const agentLogQuerySchema = z.object({
+  sessionId: z.coerce.number().positive().optional(),
+  taskId: z.coerce.number().positive().optional(),
+  level: z.enum(['debug', 'info', 'warn', 'error']).optional(),
+  limit: z.coerce.number().positive().max(1000).optional().default(100),
+  offset: z.coerce.number().nonnegative().optional().default(0),
+});
+
+export const fileChangesQuerySchema = z.object({
+  taskId: z.coerce.number().positive('Task ID is required'),
+});
+
+export const planJobQuerySchema = z.object({
+  projectId: z.coerce.number().positive(),
+  status: z.enum(['pending', 'running', 'completed', 'failed']).optional(),
+  limit: z.coerce.number().positive().max(100).optional().default(50),
+  offset: z.coerce.number().nonnegative().optional().default(0),
+});
+
+export const testResultUploadSchema = z.object({
+  taskId: z.coerce.number().positive('Task ID is required'),
+  success: z.boolean(),
+  logs: z.string().optional(),
+});
+
+export const webhookDeliveryQuerySchema = z.object({
+  webhookId: z.coerce.number().positive('Webhook ID is required'),
+  limit: z.coerce.number().positive().max(100).optional().default(50),
+  offset: z.coerce.number().nonnegative().optional().default(0),
+});
