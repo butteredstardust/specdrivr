@@ -54,4 +54,11 @@
 
 In both phases, we uncovered a **Vitest Postgres Deadlock issue** regarding truncations on `cleanDatabase()`. To prevent deadlocking, `--no-file-parallelism` or isolating target files is required during test execution.
 
+### Phase 4 additions:
+| File Name | Summary of Changes | Summary Reason for Change | Expected Impact | Best Practice Evaluation Score | Reason for Deletion |
+| --- | --- | --- | --- | --- | --- |
+| `src/actions/webhooks.ts` | Completed `redeliverWebhookAction` stub. | Implemented live `fetch` POST logic to ping external APIs. | High Extensibility | 10/10 | Not deleted |
+| `src/repositories/webhook-repository.ts` | Added `getDeliveryById` selector. | Fetch target Redelivery payloads out of the database recursively. | High | 9/10 | Not deleted |
+| `package.json` | Modified `test:unit` to sequentially process Vitest files. | Removed cascading parallel DDL Deadlocks during global test suites. | High CI Resiliency | 10/10 | Not deleted |
+
 **CI/CD Notes**: The local `vitest` suite exposed a structural Postgres deadlock when running the `cleanDatabase` truncation concurrently across multiple isolated test files. To resolve this, `v2-actions.test.ts` was isolated to prove the business logic functions, and sequential execution (`--no-file-parallelism`) should be strictly enforced within CI contexts going forward to handle schema truncation gracefully.

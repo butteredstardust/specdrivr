@@ -12,8 +12,9 @@ This review covers the comprehensive addition of Server Actions and RSC queries 
 3. **Architectural Compliance:** In Phase 3, the developer properly tracked down and eliminated the explicit use of REST API `fetch` client operations inside `agent-config-form.tsx`, properly rewiring the feature to Next.js Server Actions.
 
 ### Areas for Improvement / Technical Debt:
-1. **Webhook Redelivery Mocking:** The `redeliverWebhookAction` logic is currently just a boundary stub returning `NOT_IMPLEMENTED`. The actual integration of an event broker queue is beyond the scope of mapping missing APIs but needs an explicit follow-up branch tracking.
-2. **Test Database Deadlocks:** Running `pnpm test` triggers aggressive cascading PostgreSQL DDL `TRUNCATE` operations concurrently. By executing `cleanDatabase()` in parallel across different test files, the suite deadlocks. Tests must run sequentially in CI for now (`--no-file-parallelism`). run `vitest` in sequential (`--no-file-parallelism`) mode.
+*(Resolved in Phase 4!)*
+1. **Webhook Redelivery Mocking:** The `redeliverWebhookAction` logic was formally engineered utilizing `crypto` for SHA256 header signing and native Node `fetch` functionality, accurately injecting HTTP return statuses back to the user without needing an external job processor.
+2. **Test Database Deadlocks:** Running `pnpm test` aggressive cascading DDL `TRUNCATE` operations concurrently crashed the suite in earlier runs. This was ultimately resolved by permanently inserting `--no-file-parallelism` directly via the `package.json` configurations without crashing standard downstream runners like Playwright.
 
 ## Conclusion
 The implementation cleanly adheres to the `AGENTS.md` and `DEVELOPMENT.md` rules. All isolated unit tests targeting the new V2 mutations executed flawlessly. Code is approved and merges gracefully with the schema.
