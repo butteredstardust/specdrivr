@@ -10,3 +10,11 @@
 | [public/screenshots/plan-changes.png](file:///Users/tuxgeek/Dev/specdrivr/public/screenshots/plan-changes.png) | [NEW] Captured plan changes screenshot. | Provide visual asset for README. | Visual representation of proposed changes. | 10/10 | Not deleted |
 | [public/screenshots/project-activity.png](file:///Users/tuxgeek/Dev/specdrivr/public/screenshots/project-activity.png) | [NEW] Captured project activity screenshot. | Provide visual asset for README. | Visual representation of project-level events. | 10/10 | Not deleted |
 | [public/screenshots/pause-demo.webp](file:///Users/tuxgeek/Dev/specdrivr/public/screenshots/pause-demo.webp) | [NEW] Captured Mission Control pause demo. | Provide visual asset for README. | Animated demonstration of agent control. | 10/10 | Not deleted |
+| `src/lib/schemas.ts` | Added Zod schemas for notifications, agent tokens, audit, and usage | Core schemas were missing | Type-safe API validation boundaries | 10/10 - Follows strict single-source of truth rules | Not deleted |
+| `src/actions/notifications.ts` | Added Server Actions | Missing mutations for Phase 8.2 | Surfaces app-wide notification UI interactions | 9/10 - Follows auth/RBAC | Not deleted |
+| `src/queries/notifications-query.ts` | Added wrapper for notificationRepository | Exposes data fetching to RSCs | RSCs can display notification badge | 9/10 - Clean separation of concerns | Not deleted |
+| `src/actions/tokens.ts` | Added token hasher, insertion, and revocation actions | Core feature from Phase 1.2 lacking API | Secures API token issuance | 10/10 - Secure node crypto usage & admin check | Not deleted |
+| `src/queries/tokens-query.ts` | Added wrapper for listing user tokens | Exposes token view | Users can see generated tokens | 9/10 | Not deleted |
+| `src/queries/audit-query.ts` | Added wrapper for project audit logs | Exposes log history to admin UI | Supports compliance page | 10/10 - Enforces requireAdmin wrapper | Not deleted |
+| `src/queries/usage-query.ts` | Added wrapper for snapshot history | Exposes cost analytics to admin UI | Supports billing page | 10/10 - Enforces requireAdmin wrapper | Not deleted |
+| `tests/integration/tokens.test.ts` | Added integration tests manually for token logic | Validates Auth+Zod bindings | Prevents regression | 10/10 - Handles testing scenarios directly | Not deleted |

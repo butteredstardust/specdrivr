@@ -541,3 +541,57 @@ export const resetPasswordSchema = z
     message: "Passwords don't match",
     path: ['confirmPassword'],
   });
+
+/**
+ * Notifications & Preferences Schemas
+ */
+export const updateNotificationPreferencesSchema = z.object({
+  preferences: z.array(
+    z.object({
+      eventType: z.string().min(1),
+      emailEnabled: z.boolean(),
+      inAppEnabled: z.boolean(),
+    })
+  ),
+});
+
+export const notificationQuerySchema = z.object({
+  projectId: z.coerce.number().positive().optional(),
+  unreadOnly: z.coerce.boolean().optional(),
+  type: z.string().optional(),
+  limit: z.coerce.number().positive().max(100).optional().default(50),
+  offset: z.coerce.number().nonnegative().optional().default(0),
+});
+
+/**
+ * Agent Token Schemas
+ */
+export const createAgentTokenSchema = z.object({
+  projectId: z.number().int().positive('Project ID is required'),
+  name: z.string().min(1, 'Token name is required').max(100, 'Token name too long'),
+});
+
+export const revokeAgentTokenSchema = z.object({
+  id: z.number().int().positive('Token ID is required'),
+});
+
+/**
+ * Audit Log & Usage Snapshots Query Schemas
+ */
+export const auditLogQuerySchema = z.object({
+  projectId: z.coerce.number().positive('Project ID is required'),
+  search: z.string().optional(),
+  actor: z.string().optional(),
+  action: z.string().optional(),
+  from: z.string().datetime().optional(),
+  to: z.string().datetime().optional(),
+  limit: z.coerce.number().positive().max(100).optional().default(50),
+  offset: z.coerce.number().nonnegative().optional().default(0),
+});
+
+export const usageSnapshotsQuerySchema = z.object({
+  projectId: z.coerce.number().positive('Project ID is required'),
+  days: z.coerce.number().positive().max(365).optional().default(30),
+  page: z.coerce.number().positive().optional().default(1),
+  limit: z.coerce.number().positive().max(100).optional().default(50),
+});
