@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { NotificationPanel } from '@/components/notifications/notification-panel';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -142,6 +143,9 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
             <NotificationPanel />
           </PopoverContent>
         </Popover>
+
+        {/* Theme toggle */}
+        <ThemeToggle />
 
         {/* Shortcuts chip */}
         <Button

@@ -8,30 +8,50 @@
   }
 
   :root {
-    --background: 0 0% 4%;
-    --foreground: 240 5% 96%;
-    --card: 240 4% 7%;
-    --card-foreground: 240 5% 96%;
-    --popover: 240 3% 10%;
-    --popover-foreground: 240 5% 96%;
-    --primary: 255 96% 67%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 240 3% 10%;
-    --secondary-foreground: 240 4% 63%;
-    --muted: 240 3% 10%;
-    --muted-foreground: 240 4% 33%;
-    --accent: 240 3% 10%;
-    --accent-foreground: 240 5% 96%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 240 3% 13%;
-    --input: 240 3% 13%;
-    --ring: 255 96% 67%;
+    --background: 240 5% 96%;
+    --foreground: 240 10% 4%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 4%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 4%;
+    --primary: 262 83% 50%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 6% 10%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 46%;
+    --accent: 240 5% 96%;
+    --accent-foreground: 240 6% 10%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 240 5% 84%;
+    --input: 240 5% 84%;
+    --ring: 262 83% 50%;
     --radius: 0.375rem;
+
+    /* Custom Specdrivr Tokens — Light Mode */
+    --bg-base: #f4f4f5;
+    --bg-surface: #ffffff;
+    --bg-elevated: #e4e4e7;
+    --border-default: #d4d4d8;
+    --border-muted: #e4e4e7;
+    --text-primary: #18181b;
+    --text-secondary: #3f3f46;
+    --text-muted: #71717a;
+    --accent-violet: #6d28d9;
+    --accent-violet-dim: #5b21b6;
+    --phosphor-amber: #b45309;
+    --phosphor-amber-dim: #92400e;
+    --status-emerald: #059669;
+    --status-red: #dc2626;
+    --status-orange: #d97706;
+    --bg-diff-added: rgba(5, 150, 105, 0.1);
+    --bg-diff-deleted: rgba(220, 38, 38, 0.1);
+    --terminal-bg: #18181b;
+    --terminal-green: #16a34a;
   }
 
   .dark {
-    /* Aligned with Loveable reference dark mode */
     --background: 240 6% 6%;
     --foreground: 240 5% 90%;
     --card: 240 5% 8%;
@@ -52,6 +72,28 @@
     --input: 240 4% 16%;
     --ring: 256 97% 67%;
     --radius: 0.375rem;
+
+    /* Custom Specdrivr Tokens — Dark Mode */
+    --bg-base: #0e0e10;
+    --bg-surface: #111113;
+    --bg-elevated: #1c1c1f;
+    --border-default: #272729;
+    --border-muted: #2e2e32;
+    --text-primary: #e4e4e7;
+    --text-secondary: #a1a1aa;
+    --text-muted: #636369;
+    --accent-violet: #7c5cfc;
+    --accent-violet-dim: #5b3fd4;
+    --phosphor-amber: #ffa500;
+    --phosphor-amber-dim: #b45309;
+    --status-emerald: #22a16e;
+    --status-red: #e03232;
+    --status-orange: #d97706;
+    --bg-diff-added: rgba(34, 161, 110, 0.1);
+    --bg-diff-deleted: rgba(224, 50, 50, 0.1);
+    --terminal-bg: #0d0d0a;
+    --terminal-green: #39ff14;
+    color-scheme: dark;
   }
 }
 
@@ -105,32 +147,6 @@
   --color-terminal-green: var(--terminal-green);
 }
 
-:root {
-  /* Custom tokens — light fallback */
-  --bg-base: #0e0e10;
-  --bg-surface: #111113;
-  --bg-elevated: #1c1c1f;
-  --border-default: #272729;
-  --border-muted: #2e2e32;
-  --text-primary: #e4e4e7;
-  --text-secondary: #a1a1aa;
-  --text-muted: #636369;
-  --accent-violet: #7c5cfc;
-  --accent-violet-dim: #5b3fd4;
-  --phosphor-amber: #ffa500;
-  --phosphor-amber-dim: #b45309;
-  --status-emerald: #22a16e;
-  --status-red: #e03232;
-  --status-orange: #d97706;
-  --bg-diff-added: rgba(34, 161, 110, 0.1);
-  --bg-diff-deleted: rgba(224, 50, 50, 0.1);
-  --terminal-bg: #0d0d0a;
-  --terminal-green: #39ff14;
-}
-
-html {
-  color-scheme: dark;
-}
 body {
   background: var(--bg-base);
   color: var(--text-primary);
