@@ -199,11 +199,11 @@ export function Sidebar({ projects }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  const { data: notifData } = usePolling<{ meta: { total: number } }>({
-    url: '/api/v1/notifications?unread=true&limit=1',
+  const { data: notifData } = usePolling<{ unreadCount: number }>({
+    url: '/api/v1/notifications?unreadOnly=true&limit=1',
     interval: 30_000,
   });
-  const unreadCount = notifData?.meta?.total ?? 0;
+  const unreadCount = notifData?.unreadCount ?? 0;
 
   useEffect(() => {
     const stored = localStorage.getItem(COLLAPSED_KEY);
