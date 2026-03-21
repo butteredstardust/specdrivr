@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { usePolling } from '@/hooks/use-polling';
 import {
@@ -195,6 +195,7 @@ export function Sidebar({ projects }: SidebarProps) {
   const pathname = usePathname();
 
   const { activeProjectId, setActiveProjectId, devMode } = useShell();
+  const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -281,7 +282,19 @@ export function Sidebar({ projects }: SidebarProps) {
             <Select
               value={activeProjectId ? String(activeProjectId) : ''}
               onValueChange={(v) => {
-                setActiveProjectId(parseInt(v, 10));
+                const newId = parseInt(v, 10);
+                setActiveProjectId(newId);
+
+                // Stay on the same page but refresh data,
+                // UNLESS we are on a detail page for a specific spec or session.
+                // Since those belong to a specific project, we should redirect to their lists.
+                if (pathname.startsWith('/specs/') && pathname !== '/specs/new') {
+                  router.push('/specs');
+                } else if (pathname.startsWith('/sessions/')) {
+                  router.push('/sessions');
+                } else {
+                  router.refresh();
+                }
               }}
             >
               <SelectTrigger className="border-border-default bg-bg-elevated h-auto w-full border px-2.5 py-1.5 text-xs [&>svg:last-child]:hidden">

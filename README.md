@@ -164,6 +164,36 @@ pnpm db:generate      # Generate migrations from schema
 pnpm db:migrate       # Apply pending migrations
 ```
 
+---
+
+## Running the Autonomous Pipeline
+
+To complete the full lifecycle from **Spec → Plan → Execute**, you must run the background workers alongside the web application.
+
+### 1. Start the Plan Worker
+This worker handles AI-powered plan generation and task decomposition using Gemini.
+```bash
+# In a new terminal
+npx tsx scripts/plan-worker.ts
+```
+
+### 2. Start the Agent (DAEMON)
+The agent worker claims and executes tasks against your codebase. 
+
+**Example: Running with Claude**
+If you have the `claude` CLI installed and configured:
+```bash
+# In a new terminal
+export AGENT_TOKEN="your_project_agent_token"
+export SESSION_ID="active_session_id"
+export AGENT_BACKEND="claude"
+npx tsx scripts/agent.ts
+```
+
+*Note: You can find your `AGENT_TOKEN` in Project Settings and the `SESSION_ID` in the Mission Control URL when a session is active.*
+
+---
+
 For projects _being built inside Specdrivr_: **No `db:push`.** Ever. Migrations are code. They're reviewed. They're applied. This is how production stays safe.
 
 ---
