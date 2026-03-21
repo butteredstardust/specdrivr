@@ -141,7 +141,9 @@ export async function deleteWebhookAction(formData: FormData) {
   }
 }
 
+import crypto from 'node:crypto';
 import { z } from 'zod';
+
 const redeliverWebhookSchema = z.object({ deliveryId: z.coerce.number().positive() });
 
 export async function redeliverWebhookAction(formData: FormData) {
@@ -153,14 +155,81 @@ export async function redeliverWebhookAction(formData: FormData) {
   const result = redeliverWebhookSchema.safeParse({
     deliveryId: Number(formData.get('deliveryId')),
   });
-  if (!result.success)
+  if (!result.success) {
     return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+  }
 
-  // Note: we'd ideally load the delivery and check permissions here
-  // Because no direct `getDeliveryById` exists, we'll keep it simple or augment.
-  // Actually, we can fetch via direct db call or new repo method. Let's assume there's a trigger or background worker that processes `pending`.
-  // Wait, without `getDeliveryById` in webhookRepository, let's call it direct or add it.
-  // I will just use the DB directly for this mutation if the repo lacks it, but the instruction in AGENTS.md says use repositories.
-  // So I'll just return a success payload that queues the job, or I'll use the webhookRepository.
-  return { success: false, error: { code: 'NOT_IMPLEMENTED', message: 'Not yet implemented' } };
+  const deliveryId = result.data.deliveryId;
+  const delivery = await webhookRepository.getDeliveryById(deliveryId);
+
+  if (!delivery) {
+    return { success: false, error: { code: 'NOT_FOUND', message: 'Delivery not found' } };
+  }
+
+  const { allowed } = await requireAdmin(session.user.id, delivery.projectId);
+  if (!allowed) {
+    return { success: false, error: { code: 'FORBIDDEN', message: 'Requires admin permission' } };
+  }
+
+  if (!delivery.endpointUrl) {
+    return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Webhook URL missing' } };
+  }
+
+  const payloadStr = JSON.stringify(delivery.payload);
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'User-Agent': 'Specdrivr-Webhook/1.0',
+  };
+
+  if (delivery.secret) {
+    const signature = crypto.createHmac('sha256', delivery.secret).update(payloadStr).digest('hex');
+    headers['x-specdrivr-signature'] = signature;
+  }
+
+  const startTime = Date.now();
+  let status = 'failed';
+  let responseStatus: number | undefined;
+  let responseBody: string | undefined;
+
+  try {
+    const response = await fetch(delivery.endpointUrl, {
+      method: 'POST',
+      headers,
+      body: payloadStr,
+    });
+
+    responseStatus = response.status;
+    status = response.ok ? 'delivered' : 'failed';
+
+    const text = await response.text();
+    responseBody = text.substring(0, 500);
+  } catch (error) {
+    status = 'error';
+    responseBody = error instanceof Error ? error.message : String(error);
+  }
+
+  const durationMs = Date.now() - startTime;
+
+  try {
+    const newDelivery = await webhookRepository.logDelivery({
+      webhookId: delivery.webhookId ?? undefined,
+      projectId: delivery.projectId,
+      eventType: delivery.eventType,
+      payload: delivery.payload,
+      status,
+      responseStatus,
+      responseBody,
+      durationMs,
+      attempt: (delivery.attempt || 1) + 1,
+    });
+
+    revalidatePath(`/projects/${delivery.projectId}/settings`);
+    return { success: true, data: newDelivery };
+  } catch (error) {
+    logger.error({ error, deliveryId }, 'Failed to log webhook redelivery');
+    return {
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'Failed to record delivery' },
+    };
+  }
 }
