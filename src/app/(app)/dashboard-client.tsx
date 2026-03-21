@@ -171,7 +171,7 @@ export function DashboardClient({ initialSessions, initialTasks }: DashboardClie
 
           {activeSession ? (
             <div className="flex flex-col gap-6">
-              <div className="divide-border-default border-border-default grid grid-cols-1 border-b pb-6 lg:grid-cols-[1fr_1.2fr] lg:divide-x">
+              <div className="animate-entrance stagger-1 divide-border-default border-border-default grid grid-cols-1 border-b pb-6 lg:grid-cols-[1fr_1.2fr] lg:divide-x">
                 <div className="pb-6 lg:pr-6 lg:pb-0">
                   <SessionPanel
                     session={activeSession}
@@ -187,7 +187,7 @@ export function DashboardClient({ initialSessions, initialTasks }: DashboardClie
                   <EventLog sessionId={activeSession.id} onUpdate={mutate} />
                 </div>
               </div>
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.2fr_1fr]">
+              <div className="animate-entrance stagger-2 grid grid-cols-1 gap-6 lg:grid-cols-[1.2fr_1fr]">
                 <div>
                   <h2 className="text-text-secondary mb-2 font-mono text-xs tracking-widest uppercase">
                     Live Terminal
@@ -213,8 +213,10 @@ export function DashboardClient({ initialSessions, initialTasks }: DashboardClie
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.5fr_1fr]">
-              <RecentSessions sessions={recentSessions} />
-              <div className="bg-bg-surface border-border-default h-fit rounded-xl border p-6">
+              <div className="animate-entrance stagger-1">
+                <RecentSessions sessions={recentSessions} />
+              </div>
+              <div className="animate-entrance stagger-2 bg-bg-surface border-border-default h-fit rounded-xl border p-6">
                 {activeProjectId && <ProjectActivityFeed projectId={activeProjectId} />}
               </div>
             </div>

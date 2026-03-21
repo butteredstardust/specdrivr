@@ -119,7 +119,7 @@ export default function NotificationsPage() {
   };
 
   return (
-    <div className="-mx-6 -mt-6 flex min-h-full flex-col">
+    <div className="animate-entrance -mx-6 -mt-6 flex min-h-full flex-col">
       <PageHeader
         category="System"
         title="Notifications"

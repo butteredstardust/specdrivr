@@ -76,12 +76,12 @@ function SessionsContent() {
   const specs = specsData ?? [];
 
   return (
-    <div className="-mx-6 -mt-6 flex min-h-full flex-col">
+    <div className="animate-entrance -mx-6 -mt-6 flex min-h-full flex-col">
       <PageHeader category="Executor" title="Sessions" />
 
       <SessionsFilterBar specs={specs} />
 
-      <div className="flex-1">
+      <div className="surface-dual-border scanline-overlay flex-1">
         <SessionsTable
           sessions={sessions}
           isLoading={isLoading}

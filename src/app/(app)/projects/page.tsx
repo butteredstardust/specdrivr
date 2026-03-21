@@ -60,7 +60,7 @@ export default function ProjectsPage() {
 
   return (
     <TooltipProvider>
-      <div className="-mx-6 -mt-6 flex min-h-full flex-col">
+      <div className="animate-entrance -mx-6 -mt-6 flex min-h-full flex-col">
         <PageHeader
           category="Projects"
           title="All Projects"
@@ -99,7 +99,7 @@ export default function ProjectsPage() {
         </div>
 
         {/* Content */}
-        <div className="flex-1">
+        <div className="surface-dual-border scanline-overlay flex-1">
           {isLoading && allProjects.length === 0 ? (
             <div className="text-muted-foreground py-16 text-center font-mono text-xs">
               Loading projects…

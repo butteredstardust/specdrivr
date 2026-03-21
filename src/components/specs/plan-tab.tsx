@@ -322,7 +322,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
           </span>
           <span className="text-muted-foreground font-mono text-xs">{timeAgo(plan.updatedAt)}</span>
         </div>
-        <div className="border-border-default bg-bg-elevated rounded-md border p-4">
+        <div className="border-border-default bg-bg-elevated surface-dual-border scanline-overlay rounded-md border p-4">
           <div className="prose prose-invert max-w-none">
             <ReactMarkdown>{plan.markdownContent}</ReactMarkdown>
           </div>
@@ -371,7 +371,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
             <p className="text-text-secondary mt-1 text-sm">{plan.reviewerFeedback}</p>
           </blockquote>
         )}
-        <div className="border-border-default bg-bg-elevated rounded-md border p-4">
+        <div className="border-border-default bg-bg-elevated surface-dual-border scanline-overlay rounded-md border p-4">
           <div className="prose prose-invert max-w-none">
             <ReactMarkdown>{plan.markdownContent}</ReactMarkdown>
           </div>
@@ -548,7 +548,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
               </div>
             )}
           </div>
-          <div className="border-border-default bg-bg-elevated rounded-md border p-4">
+          <div className="border-border-default bg-bg-elevated surface-dual-border scanline-overlay rounded-md border p-4">
             {isEditing ? (
               <CodeMirror
                 value={editContent}

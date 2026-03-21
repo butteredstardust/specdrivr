@@ -93,8 +93,53 @@ export function SpecTab({ spec, userRole }: SpecTabProps): React.ReactElement {
             <Skeleton className="h-4 w-3/5" />
           </div>
         ) : content ? (
-          <div className="prose prose-invert max-w-none">
-            <ReactMarkdown>{content}</ReactMarkdown>
+          <div className="prose prose-invert animate-entrance max-w-none">
+            <ReactMarkdown
+              components={{
+                code({
+                  _node,
+                  inline,
+                  className,
+                  children,
+                  ...props
+                }: {
+                  _node?: unknown;
+                  inline?: boolean;
+                  className?: string;
+                  children?: React.ReactNode;
+                }) {
+                  const match = /language-(\w+)/.exec(className || '');
+                  return !inline ? (
+                    <div className="bg-bg-elevated border-border-default my-6 overflow-hidden rounded-lg border shadow-sm">
+                      {match && (
+                        <div className="border-border-default bg-bg-surface flex items-center justify-between border-b px-4 py-1.5">
+                          <span className="text-text-muted font-mono text-[10px] tracking-widest uppercase">
+                            {match[1]}
+                          </span>
+                        </div>
+                      )}
+                      <pre className="m-0 overflow-x-auto p-4 font-mono text-sm leading-relaxed">
+                        <code className={cn('text-text-primary', className)} {...props}>
+                          {children}
+                        </code>
+                      </pre>
+                    </div>
+                  ) : (
+                    <code
+                      className={cn(
+                        'bg-bg-elevated border-border-default text-accent-violet rounded border px-1.5 py-0.5 font-mono text-[0.9em]',
+                        className
+                      )}
+                      {...props}
+                    >
+                      {children}
+                    </code>
+                  );
+                },
+              }}
+            >
+              {content}
+            </ReactMarkdown>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-3 py-16">
