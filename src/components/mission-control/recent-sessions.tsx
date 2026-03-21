@@ -45,7 +45,7 @@ export function RecentSessions({ sessions }: RecentSessionsProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="text-text-muted font-mono text-[11px] tracking-[0.08em] uppercase">
+      <h2 className="text-text-muted font-mono text-[10px] tracking-[0.15em] uppercase opacity-70">
         Recent Activity
       </h2>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -76,7 +76,7 @@ export function RecentSessions({ sessions }: RecentSessionsProps) {
             <Link
               key={session.id}
               href={`/sessions/${session.id}`}
-              className="border-border-default bg-bg-surface hover:border-border-hover flex flex-col gap-3 rounded-lg border p-4 transition-colors"
+              className="surface-raised group bg-bg-surface dark:hover:shadow-glow flex flex-col gap-4 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2">
@@ -84,20 +84,20 @@ export function RecentSessions({ sessions }: RecentSessionsProps) {
                     {label}
                   </PixelBadge>
                 </div>
-                <span className="text-text-muted font-mono text-[10px]">
+                <span className="text-text-muted font-mono text-[9px] tracking-wider uppercase opacity-60">
                   {formatDistanceToNow(new Date(session.startedAt), { addSuffix: true })}
                 </span>
               </div>
 
-              <div>
-                <p className="text-text-primary truncate font-mono text-sm">
+              <div className="flex flex-col gap-3">
+                <p className="text-text-primary group-hover:text-accent-violet truncate font-mono font-medium transition-colors">
                   {session.specTitle || session.specName || `Session #${session.id}`}
                 </p>
-                <div className="text-text-muted mt-2 flex flex-col gap-1.5 font-mono text-xs">
+                <div className="text-text-muted flex flex-col gap-2 font-mono text-[10px] tracking-wider uppercase opacity-70">
                   <div className="flex items-center justify-between">
                     <span>{session.tasksExecuted ?? 0} tasks executed</span>
                     {session.totalTasks && session.totalTasks > 0 && (
-                      <span>
+                      <span className="text-status-emerald">
                         {Math.round(((session.tasksSucceeded ?? 0) / session.totalTasks) * 100)}%
                       </span>
                     )}
@@ -106,14 +106,14 @@ export function RecentSessions({ sessions }: RecentSessionsProps) {
                     <ASCIIProgress
                       value={session.tasksSucceeded ?? 0}
                       max={session.totalTasks}
-                      length={20}
-                      className="text-status-emerald"
+                      length={24}
+                      className="text-status-emerald origin-left scale-x-105"
                     />
                   )}
                   {session.backend && (
-                    <div className="mt-1.5">
-                      <span className="bg-bg-elevated rounded px-1.5 py-0.5 text-[9px]">
-                        {session.backend === 'claude' ? '🤖 Claude' : '✨ Gemini'}
+                    <div className="mt-1">
+                      <span className="bg-bg-elevated border-border-muted group-hover:bg-bg-elevated/80 rounded border px-2 py-0.5 text-[9px] tracking-widest transition-colors">
+                        {session.backend === 'claude' ? '🤖 CLAUDE' : '✨ GEMINI'}
                       </span>
                     </div>
                   )}

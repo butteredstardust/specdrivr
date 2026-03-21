@@ -66,7 +66,7 @@ export function DaemonMascot({
     expression === 'working'
       ? 'animate-daemon-think'
       : expression === 'idle'
-        ? 'animate-daemon-float'
+        ? 'animate-daemon-float animate-daemon-breath'
         : expression === 'blocked'
           ? 'animate-daemon-bounce'
           : undefined;

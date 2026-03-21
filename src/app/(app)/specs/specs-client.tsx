@@ -155,7 +155,7 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
   return (
     <TooltipProvider>
       {/* Escape the layout's p-6 so sections are full-bleed with border separators */}
-      <div className="-mx-6 -mt-6 flex min-h-full flex-col">
+      <div className="animate-entrance -mx-6 -mt-6 flex min-h-full flex-col">
         <PageHeader
           category="SPECIFICATIONS"
           title="Specs"
@@ -226,7 +226,7 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
           </div>
         </div>
 
-        <div className="flex-1">
+        <div className="surface-dual-border scanline-overlay flex-1">
           {effectiveProjectId === null ? (
             <div className="flex flex-col items-center gap-3 py-16">
               <DaemonMascot size={48} expression="idle" />

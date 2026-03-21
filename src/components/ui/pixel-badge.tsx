@@ -3,17 +3,21 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const pixelBadgeVariants = cva(
-  'font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded inline-flex items-center gap-1.5',
+  'font-mono text-[9px] uppercase tracking-[0.12em] px-2 py-0.5 rounded-sm inline-flex items-center gap-1.5 border transition-all duration-200',
   {
     variants: {
       variant: {
-        default: 'bg-secondary text-muted-foreground',
-        amber: 'bg-phosphor-amber/10 text-phosphor-amber',
-        primary: 'bg-primary/10 text-primary',
-        emerald: 'bg-status-emerald/10 text-status-emerald',
-        red: 'bg-status-red/10 text-status-red',
-        violet: 'bg-accent-violet/10 text-accent-violet',
-        muted: 'bg-secondary text-muted-foreground opacity-60',
+        default: 'bg-secondary text-muted-foreground border-border-default shadow-sm',
+        amber:
+          'bg-phosphor-amber/10 text-phosphor-amber border-phosphor-amber/30 shadow-[0_0_8px_rgba(245,158,11,0.1)]',
+        primary:
+          'bg-primary/10 text-primary border-primary/30 shadow-[0_0_8px_rgba(139,92,246,0.1)]',
+        emerald:
+          'bg-status-emerald/10 text-status-emerald border-status-emerald/30 shadow-[0_0_8px_rgba(16,185,129,0.1)]',
+        red: 'bg-status-red/10 text-status-red border-status-red/30 shadow-[0_0_8px_rgba(239,68,68,0.1)]',
+        violet:
+          'bg-accent-violet/10 text-accent-violet border-accent-violet/30 shadow-[0_0_8px_rgba(139,92,246,0.1)]',
+        muted: 'bg-secondary/50 text-text-muted border-border-muted opacity-80',
       },
     },
     defaultVariants: {
