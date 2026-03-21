@@ -1,10 +1,11 @@
-# Branch Changes: main
-
 | File Name | Summary of Changes | Summary Reason for Change | Expected Impact | Best Practice Evaluation Score | Reason for Deletion |
-|-----------|--------------------|---------------------------|-----------------|-------------------------------|---------------------|
-| `package.json` | Added `@uiw/codemirror-themes` and `@lezer/highlight` | Fix missing dependencies required by `src/lib/editor-theme.ts` | Resolves typecheck errors on `main` | 10/10 - Standard dependency fix | N/A |
-| `pnpm-lock.yaml` | Updated dependencies | Lockfile update after adding packages | Consistent builds | 10/10 | N/A |
-
-## CI & Test Changes
-- No changes to CI config or test files.
-- Verified `pnpm test`, `pnpm lint`, and `pnpm typecheck` all pass.
+| --------- | ------------------ | ------------------------- | --------------- | ----------------------------- | ------------------ |
+| [README.md](file:///Users/tuxgeek/Dev/specdrivr/README.md) | Added Screenshots section with 3 embedded images. | Improve project documentation and visual appeal. | Better user onboarding and project overview. | 10/10 | Not deleted |
+| [public/screenshots/dashboard.png](file:///Users/tuxgeek/Dev/specdrivr/public/screenshots/dashboard.png) | [NEW] Captured dashboard screenshot. | Provide visual asset for README. | Visual representation of Mission Control. | 10/10 | Not deleted |
+| [public/screenshots/spec-view.png](file:///Users/tuxgeek/Dev/specdrivr/public/screenshots/spec-view.png) | [NEW] Captured spec view screenshot. | Provide visual asset for README. | Visual representation of Specification details. | 10/10 | Not deleted |
+| [public/screenshots/settings.png](file:///Users/tuxgeek/Dev/specdrivr/public/screenshots/settings.png) | [NEW] Captured settings screenshot. | Provide visual asset for README. | Visual representation of User Settings. | 10/10 | Not deleted |
+| [public/screenshots/projects.png](file:///Users/tuxgeek/Dev/specdrivr/public/screenshots/projects.png) | [NEW] Captured projects list screenshot. | Provide visual asset for README. | Visual representation of Project portfolio. | 10/10 | Not deleted |
+| [public/screenshots/tasks.png](file:///Users/tuxgeek/Dev/specdrivr/public/screenshots/tasks.png) | [NEW] Captured tasks view screenshot. | Provide visual asset for README. | Visual representation of Task orchestration. | 10/10 | Not deleted |
+| [public/screenshots/activity.png](file:///Users/tuxgeek/Dev/specdrivr/public/screenshots/activity.png) | [NEW] Captured activity log screenshot. | Provide visual asset for README. | Visual representation of Audit Log/Activity. | 10/10 | Not deleted |
+| [public/screenshots/plan-changes.png](file:///Users/tuxgeek/Dev/specdrivr/public/screenshots/plan-changes.png) | [NEW] Captured plan changes screenshot. | Provide visual asset for README. | Visual representation of proposed changes. | 10/10 | Not deleted |
+| [public/screenshots/project-activity.png](file:///Users/tuxgeek/Dev/specdrivr/public/screenshots/project-activity.png) | [NEW] Captured project activity screenshot. | Provide visual asset for README. | Visual representation of project-level events. | 10/10 | Not deleted |

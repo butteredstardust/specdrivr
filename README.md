@@ -36,6 +36,36 @@ Specdrivr is a platform that manages the spec-to-execution pipeline for AI-augme
 
 It's not a template. It's the orchestration layer that makes spec-driven development _actually work with AI_.
 
+---
+
+## Screenshots
+
+### Mission Control
+![Mission Control](./public/screenshots/dashboard.png)
+
+### Projects 
+![Projects](./public/screenshots/projects.png)
+
+### Specifications
+![Specification View](./public/screenshots/spec-view.png)
+
+### Tasks
+![Tasks](./public/screenshots/tasks.png)
+
+### Plan
+![Plan](./public/screenshots/plan-changes.png)
+
+### Project Activity Log
+![Project Activity](./public/screenshots/project-activity.png)
+
+### System-wide Audit Log
+![Activity](./public/screenshots/activity.png)
+
+### Settings
+![Settings Interface](./public/screenshots/settings.png)
+
+---
+
 ### The Stack
 
 | Layer          | Technology               | Why                                                              |
