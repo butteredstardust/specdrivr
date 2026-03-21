@@ -14,6 +14,9 @@ Comprehensive review of the backend features and extensive foundational UI refin
     - **Micro-interactions**: Refined `phosphor-focus` states, "glide and fade" tab transitions, and CRT-style terminal power-up effects.
     - **Adaptive Terminal**: Refined terminal components (`TerminalLog`, `LiveTerminal`) to adapt to light mode with a "Paper" aesthetic and high-contrast charcoal text, eliminating visual clash.
     - **Task Legibility**: Corrected layout issues in `TaskRow` where 'IN PROGRESS' status badges were being squashed by ensuring minimum widths and preventing flex-shrink.
+- **Testing & Quality**: 
+    - Added `tests/integration/notifications.test.ts` to verify the refactored `NotificationRepository` and ensure correct unread count logic.
+    - Verified full test suite (65 unit tests, 31 integration tests) passing without regressions.
 - **Documentation**: 
     - Branch-specific documentation initialized and maintained.
     - `README.md` updated with critical execution instructions for background workers (`plan-worker.ts` and `agent.ts`).
