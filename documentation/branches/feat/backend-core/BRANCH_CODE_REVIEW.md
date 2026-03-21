@@ -10,7 +10,7 @@ Comprehensive review of the backend features and extensive foundational UI refin
 - **Theme Architecture**: Successfully migrated from a forced dark mode to a dynamic light/dark/system theme architecture with a dedicated "Specdrivr Light" palette.
 - **Advanced UI Aesthetics**: Executed a multi-pass deep-dive UI polish. 
     - **Materiality**: Added `scanline-overlay`, noise textures, and dual-tone borders.
-    - **Motion**: Implemented staggered entrance animations and "breathing" idle states for the mascot.
+    - **Motion**: Implemented staggered entrance animations across all major pages (Dashboard, Projects, Specs, Sessions, Settings, and Notifications) and "breathing" idle states for the mascot.
     - **Micro-interactions**: Refined `phosphor-focus` states, "glide and fade" tab transitions, and CRT-style terminal power-up effects.
     - **Adaptive Terminal**: Refined terminal components (`TerminalLog`, `LiveTerminal`) to adapt to light mode with a "Paper" aesthetic and high-contrast charcoal text, eliminating visual clash.
     - **Task Legibility**: Corrected layout issues in `TaskRow` where 'IN PROGRESS' status badges were being squashed by ensuring minimum widths and preventing flex-shrink.
