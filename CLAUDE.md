@@ -28,7 +28,7 @@ The project includes a suite of specialized Claude Code subagents in `.claude/ag
 - **Utility**: `agent-installer.md`
 - **Product Manager**: `product-manager.md`
 
-See `SUBAGENTS-SUMMARY.md` and `TECH-STACK-AGENTS-SUMMARY.md` for the full list of 24 auditor/builder agents.
+You must use specialized Claude Code subagents in `.claude/agents/` for complex tasks.
 
 ## 1. Architectural Mandates
 
