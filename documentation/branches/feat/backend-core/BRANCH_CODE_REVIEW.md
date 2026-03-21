@@ -11,6 +11,7 @@ Comprehensive review of the backend features and extensive foundational UI refin
     - **Materiality**: Added `scanline-overlay`, noise textures, and dual-tone borders.
     - **Motion**: Implemented staggered entrance animations and "breathing" idle states for the mascot.
     - **Micro-interactions**: Refined `phosphor-focus` states, "glide and fade" tab transitions, and CRT-style terminal power-up effects.
+    - **Adaptive Terminal**: Refined terminal components (`TerminalLog`, `LiveTerminal`) to adapt to light mode with a "Paper" aesthetic and high-contrast charcoal text, eliminating visual clash.
 - **Documentation**: 
     - Branch-specific documentation initialized and maintained.
     - `README.md` updated with critical execution instructions for background workers (`plan-worker.ts` and `agent.ts`).
