@@ -1,12 +1,12 @@
+# Branch Changes: feat/backend-core
+
 | File Name | Summary of Changes | Summary Reason for Change | Expected Impact | Best Practice Evaluation Score | Reason for Deletion |
-| --------- | ------------------ | ------------------------- | --------------- | ----------------------------- | ------------------ |
-| [src/app/layout.tsx](file:///Users/tuxgeek/Dev/specdrivr/src/app/layout.tsx) | Removed `forcedTheme="dark"` and enabled system theme. | Allow light/dark mode switching. | Dynamic theme support. | 10/10 | Not deleted |
-| [src/app/globals.css](file:///Users/tuxgeek/Dev/specdrivr/src/app/globals.css) | Added `scanline-overlay`, `phosphor-focus`, custom scrollbars, noise textures, and adaptive terminal tokens. | Deeper "Cyberdeck" aesthetics with premium depth and materiality. | Improved terminal integration in light mode and premium "alive" feel. | 10/10 | Not deleted |
-| [src/components/ui/task-row.tsx](file:///Users/tuxgeek/Dev/specdrivr/src/components/ui/task-row.tsx) | Increased PixelBadge width and added `shrink-0`. | Fix squashed 'IN PROGRESS' status text. | Improved legibility of task statuses. | 10/10 | Not deleted |
-| [src/components/shell/*.tsx](file:///Users/tuxgeek/Dev/specdrivr/src/components/shell/) | Integrated ThemeToggle, polished UI, and fixed notification polling parameters. | Better navigation, theme access, and resolved 500 errors in TopBar/Sidebar. | Smoother workflows and stable shell data. | 10/10 | Not deleted |
-| [src/db/index.ts](file:///Users/tuxgeek/Dev/specdrivr/src/db/index.ts) | Implemented global client persistence and `idle_timeout`. | Prevent database connection leaks during Fast Refresh. | Resolved 500 errors caused by connection pool exhaustion. | 10/10 | Not deleted |
-| [src/components/mission-control/*.tsx](file:///Users/tuxgeek/Dev/specdrivr/src/components/mission-control/) | Refined SessionPanel with staggered animations and balanced layouts. | Dashboard elements feel more polished and "active". | Improved clarity and visual interest. | 10/10 | Not deleted |
-| [src/app/(app)/settings/layout.tsx](file:///Users/tuxgeek/Dev/specdrivr/src/app/(app)/settings/layout.tsx) | Added `animate-entrance` to settings layout. | Consistent entrance motion for all settings pages. | Smoother UX transition. | 10/10 | Not deleted |
-| [src/app/(app)/notifications/page.tsx](file:///Users/tuxgeek/Dev/specdrivr/src/app/(app)/notifications/page.tsx) | Added `animate-entrance` to notifications page. | Consistent entrance motion for notifications. | Smoother UX transition. | 10/10 | Not deleted |
-| [tests/integration/notifications.test.ts](file:///Users/tuxgeek/Dev/specdrivr/tests/integration/notifications.test.ts) | [NEW] Added integration tests for notification logic. | Verify refactored repository and correct counts. | High-quality data integrity. | 10/10 | Not deleted |
-| [README.md](file:///Users/tuxgeek/Dev/specdrivr/README.md) | Added 'Running the Autonomous Pipeline' section and updated screenshots. | Document execution and showcase Light Mode UI. | Clearer setup and visual representation. | 10/10 | Not deleted |
+| --- | --- | --- | --- | --- | --- |
+| [globals.css](file:///Users/tuxgeek/Dev/specdrivr/src/app/globals.css) | Refined `--terminal-bg` and `--terminal-text` for Light Mode. | Fixed color clash in Light Mode where terminal was black. | Consistent Light Mode UI. | 10/10 | Not deleted |
+| [live-terminal.tsx](file:///Users/tuxgeek/Dev/specdrivr/src/components/ui/live-terminal.tsx) | Updated fallback background to `transparent`. | Prevent hardcoded dark backgrounds during initialization. | Seamless theme transitions. | 9/10 | Not deleted |
+| [README.md](file:///Users/tuxgeek/Dev/specdrivr/README.md) | References to screenshots remain same, but assets updated. | Visual documentation parity with new UI. | Professional documentation. | 10/10 | Not deleted |
+| [public/screenshots/*.png](file:///Users/tuxgeek/Dev/specdrivr/public/screenshots/) | Replaced 14 legacy screenshots with 9 fresh Light Mode captures. | Documentation update as requested by user. | Accurate visual guides. | 10/10 | 14 files replaced with 9 |
+
+## CI & Testing
+- Updated the production build to pick up tailwind v4 changes.
+- Verified system integrity with `pnpm lint` and `pnpm test:unit`.

@@ -47,9 +47,9 @@
     --status-orange: #d97706;
     --bg-diff-added: rgba(5, 150, 105, 0.05);
     --bg-diff-deleted: rgba(220, 38, 38, 0.05);
-    --terminal-bg: #f1f1f4;
-    --terminal-text: #18181b;
-    --terminal-green: #10b981;
+    --terminal-bg: var(--bg-elevated);
+    --terminal-text: var(--text-primary);
+    --terminal-green: #059669;
 
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
@@ -194,7 +194,7 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.05) 50%);
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.03) 50%);
   background-size: 100% 3px;
   pointer-events: none;
   z-index: 1;
