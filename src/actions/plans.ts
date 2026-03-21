@@ -243,3 +243,63 @@ export async function abandonPlanAction(formData: FormData) {
     };
   }
 }
+
+import { z } from 'zod';
+import { planJobRepository } from '@/repositories/plan-job-repository';
+
+const planJobActionSchema = z.object({ jobId: z.coerce.number().positive() });
+
+export async function retryPlanJobAction(formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: { code: 'UNAUTHORIZED', message: 'Please sign in' } };
+  }
+
+  const result = planJobActionSchema.safeParse({ jobId: Number(formData.get('jobId')) });
+  if (!result.success)
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+
+  const job = await planJobRepository.getById(result.data.jobId);
+  if (!job) return { success: false, error: { code: 'NOT_FOUND', message: 'Job not found' } };
+
+  const { allowed } = await requireAdmin(session.user.id, job.projectId);
+  if (!allowed) return { success: false, error: { code: 'FORBIDDEN', message: 'Requires admin' } };
+
+  try {
+    const updated = await planJobRepository.update(job.id, { status: 'pending', error: null });
+    revalidatePath(`/projects/${job.projectId}`);
+    return { success: true, data: updated };
+  } catch (error: unknown) {
+    logger.error({ error, userId: session.user.id, jobId: job.id }, 'Failed to retry plan job');
+    return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to retry job' } };
+  }
+}
+
+export async function cancelPlanJobAction(formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: { code: 'UNAUTHORIZED', message: 'Please sign in' } };
+  }
+
+  const result = planJobActionSchema.safeParse({ jobId: Number(formData.get('jobId')) });
+  if (!result.success)
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+
+  const job = await planJobRepository.getById(result.data.jobId);
+  if (!job) return { success: false, error: { code: 'NOT_FOUND', message: 'Job not found' } };
+
+  const { allowed } = await requireAdmin(session.user.id, job.projectId);
+  if (!allowed) return { success: false, error: { code: 'FORBIDDEN', message: 'Requires admin' } };
+
+  try {
+    const updated = await planJobRepository.update(job.id, {
+      status: 'failed',
+      error: 'Cancelled by user',
+    });
+    revalidatePath(`/projects/${job.projectId}`);
+    return { success: true, data: updated };
+  } catch (error: unknown) {
+    logger.error({ error, userId: session.user.id, jobId: job.id }, 'Failed to cancel plan job');
+    return { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to cancel job' } };
+  }
+}

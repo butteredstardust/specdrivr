@@ -118,7 +118,11 @@ export class WebhookRepository extends BaseRepository {
     return delivery;
   }
 
-  async getDeliveriesByWebhookId(webhookId: number, limit = 50): Promise<WebhookDelivery[]> {
+  async getDeliveriesByWebhookId(
+    webhookId: number,
+    limit = 50,
+    offset = 0
+  ): Promise<WebhookDelivery[]> {
     return await this.executeQuery(() =>
       db
         .select()
@@ -126,6 +130,7 @@ export class WebhookRepository extends BaseRepository {
         .where(eq(webhookDeliveries.webhookId, webhookId))
         .orderBy(desc(webhookDeliveries.createdAt))
         .limit(limit)
+        .offset(offset)
     );
   }
 
