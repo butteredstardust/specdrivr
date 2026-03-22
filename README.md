@@ -40,41 +40,20 @@ It's not a template. It's the orchestration layer that makes spec-driven develop
 
 ## Screenshots (Light Mode)
 
-### Mission Control
-*Overview of active sessions and project health.*
-![Mission Control](./public/screenshots/dashboard.png)
+| Mission Control | Projects | Specifications |
+|:---:|:---:|:---:|
+| ![Mission Control](./public/screenshots/dashboard-2026-03-22.png) | ![Projects](./public/screenshots/projects-2026-03-22.png) | ![Specification View](./public/screenshots/spec-view-2026-03-22.png) |
+| *Overview of active sessions and project health.* | *Manage multiple AI-augmented codebases.* | *Version-controlled Markdown specs.* |
 
-### Projects 
-*Manage multiple AI-augmented codebases.*
-![Projects](./public/screenshots/projects.png)
+| Spec Detail - Plan | Spec Detail - Tasks | Sessions |
+|:---:|:---:|:---:|
+| ![Plan](./public/screenshots/spec-plan-2026-03-22.png) | ![Tasks](./public/screenshots/spec-tasks-2026-03-22.png) | ![Sessions](./public/screenshots/sessions-2026-03-22.png) |
+| *System-generated execution plan.* | *Atomic tasks decomposed from plan.* | *Execution history and agent tracking.* |
 
-### Specifications
-*Version-controlled Markdown specs for feature implementation.*
-![Specification View](./public/screenshots/spec-view.png)
-
-### Spec Detail - Plan
-*System-generated execution plan for the current spec.*
-![Plan](./public/screenshots/spec-plan.png)
-
-### Spec Detail - Tasks
-*Atomic tasks decomposed from the high-level plan.*
-![Tasks](./public/screenshots/spec-tasks.png)
-
-### Sessions
-*Execution history and real-time agent tracking.*
-![Sessions](./public/screenshots/sessions.png)
-
-### Session Detail
-*Real-time terminal logs and step-by-step agent reasoning.*
-![Session Detail](./public/screenshots/session-detail.png)
-
-### System-wide Audit Log
-*Full transparency into all platform and agent actions.*
-![Activity](./public/screenshots/activity.png)
-
-### Settings
-*Configure agents, models, and notifications.*
-![Settings Interface](./public/screenshots/settings.png)
+| Session Detail | System-wide Audit Log | Settings |
+|:---:|:---:|:---:|
+| ![Session Detail](./public/screenshots/session-detail-2026-03-22.png) | ![Activity](./public/screenshots/activity-2026-03-22.png) | ![Settings Interface](./public/screenshots/settings-2026-03-22.png) |
+| *Real-time terminal logs and reasoning.* | *Full transparency into all actions.* | *Configure agents, models, etc.* |
 
 ---
 
