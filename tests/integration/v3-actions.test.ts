@@ -33,7 +33,7 @@ describe('V3 Server Actions (Missing Entities)', () => {
       vi.mocked(auth).mockResolvedValue({
         user: { id: owner.id, email: owner.email, name: owner.name },
         expires: '',
-      } as any);
+      } as unknown as Awaited<ReturnType<typeof auth>>);
 
       const formData = new FormData();
       formData.append('projectId', String(project.id));
@@ -68,7 +68,7 @@ describe('V3 Server Actions (Missing Entities)', () => {
       vi.mocked(auth).mockResolvedValue({
         user: { id: viewer.id, email: viewer.email, name: viewer.name },
         expires: '',
-      } as any);
+      } as unknown as Awaited<ReturnType<typeof auth>>);
 
       const formData = new FormData();
       formData.append('projectId', String(project.id));
@@ -103,7 +103,7 @@ describe('V3 Server Actions (Missing Entities)', () => {
       vi.mocked(auth).mockResolvedValue({
         user: { id: owner.id, email: owner.email, name: owner.name },
         expires: '',
-      } as any);
+      } as unknown as Awaited<ReturnType<typeof auth>>);
 
       const formData = new FormData();
       formData.append('taskId', String(task.id));
@@ -134,7 +134,7 @@ describe('V3 Server Actions (Missing Entities)', () => {
       vi.mocked(auth).mockResolvedValue({
         user: { id: owner.id, email: owner.email, name: owner.name },
         expires: '',
-      } as any);
+      } as unknown as Awaited<ReturnType<typeof auth>>);
 
       const formData = new FormData();
       formData.append('projectId', String(project.id));
