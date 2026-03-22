@@ -36,6 +36,10 @@ export async function updateAgentConfigAction(formData: FormData) {
     testCommand: formData.get('testCommand'),
     lintCommand: formData.get('lintCommand'),
     setupCommand: formData.get('setupCommand'),
+    geminiApiKey: formData.get('geminiApiKey'),
+    claudeApiKey: formData.get('claudeApiKey'),
+    geminiModel: formData.get('geminiModel'),
+    backend: formData.get('backend'),
   };
 
   const result = updateAgentConfigSchema.safeParse(rawData);

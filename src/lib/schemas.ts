@@ -541,3 +541,148 @@ export const resetPasswordSchema = z
     message: "Passwords don't match",
     path: ['confirmPassword'],
   });
+
+/**
+ * Notifications & Preferences Schemas
+ */
+export const updateNotificationPreferencesSchema = z.object({
+  preferences: z.array(
+    z.object({
+      eventType: z.string().min(1),
+      emailEnabled: z.boolean(),
+      inAppEnabled: z.boolean(),
+    })
+  ),
+});
+
+export const notificationQuerySchema = z.object({
+  projectId: z.coerce.number().positive().optional(),
+  unreadOnly: z.coerce.boolean().optional(),
+  type: z.string().optional(),
+  limit: z.coerce.number().positive().max(100).optional().default(50),
+  offset: z.coerce.number().nonnegative().optional().default(0),
+});
+
+/**
+ * Agent Token Schemas
+ */
+export const createAgentTokenSchema = z.object({
+  projectId: z.number().int().positive('Project ID is required'),
+  name: z.string().min(1, 'Token name is required').max(100, 'Token name too long'),
+});
+
+export const revokeAgentTokenSchema = z.object({
+  id: z.number().int().positive('Token ID is required'),
+});
+
+/**
+ * Audit Log & Usage Snapshots Query Schemas
+ */
+export const auditLogQuerySchema = z.object({
+  projectId: z.coerce.number().positive('Project ID is required'),
+  search: z.string().optional(),
+  actor: z.string().optional(),
+  action: z.string().optional(),
+  from: z.string().datetime().optional(),
+  to: z.string().datetime().optional(),
+  limit: z.coerce.number().positive().max(100).optional().default(50),
+  offset: z.coerce.number().nonnegative().optional().default(0),
+});
+
+export const usageSnapshotsQuerySchema = z.object({
+  projectId: z.coerce.number().positive('Project ID is required'),
+  days: z.coerce.number().positive().max(365).optional().default(30),
+  page: z.coerce.number().positive().optional().default(1),
+  limit: z.coerce.number().positive().max(100).optional().default(50),
+});
+
+/**
+ * Orchestration & Observability V2 Schemas
+ */
+export const agentSessionQuerySchema = z.object({
+  projectId: z.coerce.number().positive(),
+  status: z.enum(['running', 'paused', 'completed', 'failed', 'cancelled']).optional(),
+  limit: z.coerce.number().positive().max(100).optional().default(50),
+  offset: z.coerce.number().nonnegative().optional().default(0),
+});
+
+export const agentLogQuerySchema = z.object({
+  sessionId: z.coerce.number().positive().optional(),
+  taskId: z.coerce.number().positive().optional(),
+  level: z.enum(['debug', 'info', 'warn', 'error']).optional(),
+  limit: z.coerce.number().positive().max(1000).optional().default(100),
+  offset: z.coerce.number().nonnegative().optional().default(0),
+});
+
+export const fileChangesQuerySchema = z.object({
+  taskId: z.coerce.number().positive('Task ID is required'),
+});
+
+export const planJobQuerySchema = z.object({
+  projectId: z.coerce.number().positive(),
+  status: z.enum(['pending', 'running', 'completed', 'failed']).optional(),
+  limit: z.coerce.number().positive().max(100).optional().default(50),
+  offset: z.coerce.number().nonnegative().optional().default(0),
+});
+
+export const testResultUploadSchema = z.object({
+  taskId: z.coerce.number().positive('Task ID is required'),
+  success: z.boolean(),
+  logs: z.string().optional(),
+});
+
+export const webhookDeliveryQuerySchema = z.object({
+  webhookId: z.coerce.number().positive('Webhook ID is required'),
+  limit: z.coerce.number().positive().max(100).optional().default(50),
+  offset: z.coerce.number().nonnegative().optional().default(0),
+});
+
+/**
+ * Phase 3 V3 Schemas (Git Commits, API Logs, File Changes)
+ */
+
+export const gitCommitsQuerySchema = z.object({
+  projectId: z.coerce.number().positive(),
+  branch: z.string().optional(),
+  limit: z.coerce.number().positive().max(100).optional().default(50),
+  offset: z.coerce.number().nonnegative().optional().default(0),
+});
+
+export const insertGitCommitSchema = z.object({
+  projectId: z.coerce.number().positive(),
+  taskId: z.coerce.number().positive().optional().nullable(),
+  commitSha: z.string().min(1, 'SHA is required'),
+  message: z.string().min(1, 'Commit message is required'),
+  branch: z.string().min(1, 'Branch name is required'),
+  author: z.string().optional().nullable(),
+  metadata: z.record(z.unknown()).optional().nullable(),
+});
+
+export const apiLogsQuerySchema = z.object({
+  projectId: z.coerce.number().positive(),
+  endpoint: z.string().optional(),
+  statusCode: z.coerce.number().optional(),
+  limit: z.coerce.number().positive().max(1000).optional().default(100),
+  offset: z.coerce.number().nonnegative().optional().default(0),
+});
+
+export const proposeTaskChangesSchema = z.object({
+  taskId: z.coerce.number().positive(),
+  attemptId: z.coerce.number().positive().optional().nullable(),
+  changes: z
+    .array(
+      z.object({
+        filePath: z.string().min(1),
+        changeType: z.enum(['added', 'modified', 'deleted']),
+        diff: z.string().optional().nullable(),
+        isBinary: z.boolean().optional().default(false),
+        language: z.string().optional().nullable(),
+        sizeBytes: z.coerce.number().optional().nullable(),
+        linesAdded: z.coerce.number().optional().default(0),
+        linesRemoved: z.coerce.number().optional().default(0),
+        previousHash: z.string().optional().nullable(),
+        newHash: z.string().optional().nullable(),
+      })
+    )
+    .min(1, 'At least one file change must be proposed'),
+});

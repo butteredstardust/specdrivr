@@ -17,7 +17,7 @@
     "db:seed": "tsx db/seed.ts",
     "db:aggregate": "tsx src/lib/jobs/aggregate-usage.ts",
     "setup": "pnpm db:migrate && pnpm db:seed",
-    "test:unit": "vitest run",
+    "test:unit": "vitest run --no-file-parallelism",
     "test:unit:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",

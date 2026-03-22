@@ -1,6 +1,6 @@
 import { db } from '@/db';
 import { planJobs, type PlanJobInsert, type PlanJobSelect as PlanJob } from '@/db/schema';
-import { eq, and, asc, desc, lt, inArray } from 'drizzle-orm';
+import { eq, and, asc, desc, lt, inArray, sql } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError } from '@/lib/errors';
 
@@ -85,6 +85,44 @@ export class PlanJobRepository extends BaseRepository {
           and(eq(planJobs.projectId, projectId), inArray(planJobs.status, ['pending', 'running']))
         )
         .orderBy(desc(planJobs.createdAt));
+    });
+  }
+
+  async getFilteredByProject(
+    projectId: number,
+    options: { status?: 'pending' | 'running' | 'completed' | 'failed' | null },
+    limit = 50,
+    offset = 0
+  ): Promise<PlanJob[]> {
+    return this.executeQuery(() => {
+      const conditions = [eq(planJobs.projectId, projectId)];
+      if (options.status) {
+        conditions.push(eq(planJobs.status, options.status));
+      }
+      return db
+        .select()
+        .from(planJobs)
+        .where(and(...conditions))
+        .orderBy(desc(planJobs.createdAt))
+        .limit(limit)
+        .offset(offset);
+    });
+  }
+
+  async countFilteredByProject(
+    projectId: number,
+    options: { status?: 'pending' | 'running' | 'completed' | 'failed' | null }
+  ): Promise<number> {
+    return this.executeQuery(async () => {
+      const conditions = [eq(planJobs.projectId, projectId)];
+      if (options.status) {
+        conditions.push(eq(planJobs.status, options.status));
+      }
+      const [result] = await db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(planJobs)
+        .where(and(...conditions));
+      return result?.count ?? 0;
     });
   }
 
