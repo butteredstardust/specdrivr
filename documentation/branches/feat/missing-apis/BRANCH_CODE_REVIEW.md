@@ -18,3 +18,8 @@ This review covers the comprehensive addition of Server Actions and RSC queries 
 
 ## Conclusion
 The implementation cleanly adheres to the `AGENTS.md` and `DEVELOPMENT.md` rules. All isolated unit tests targeting the new V2 mutations executed flawlessly. Code is approved and merges gracefully with the schema.
+
+### Phase 5 Code Review Additions (Final Review):
+1. **Agent Configuration Payload:** Fixed a critical bug in `updateAgentConfigAction` that caused LLM API keys (`geminiApiKey`, `claudeApiKey`) and selections to be silently dropped during `FormData` extraction, failing to persist user preferences.
+2. **Persistent Vitest Deadlocks:** It was discovered that `--no-file-parallelism` was still triggering `RowShareLock` overlaps against the `cleanDatabase()` TRUNCATE logic because idle connections from previous workers were not releasing cleanly. This was resolved natively by implementing an exponential backoff `try/catch` loop explicitly catching PostgreSQL's `40P01` deadlock error directly within `tests/helpers.ts`.
+3. **Strict ESLint Verification:** Four integration tests violating `AGENTS.md` regarding strict explicit TypeScript boundaries with `as any` casting were converted to safe `Awaited<ReturnType<typeof auth>>`.
