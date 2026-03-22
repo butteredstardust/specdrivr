@@ -118,7 +118,11 @@ export class WebhookRepository extends BaseRepository {
     return delivery;
   }
 
-  async getDeliveriesByWebhookId(webhookId: number, limit = 50): Promise<WebhookDelivery[]> {
+  async getDeliveriesByWebhookId(
+    webhookId: number,
+    limit = 50,
+    offset = 0
+  ): Promise<WebhookDelivery[]> {
     return await this.executeQuery(() =>
       db
         .select()
@@ -126,7 +130,26 @@ export class WebhookRepository extends BaseRepository {
         .where(eq(webhookDeliveries.webhookId, webhookId))
         .orderBy(desc(webhookDeliveries.createdAt))
         .limit(limit)
+        .offset(offset)
     );
+  }
+
+  async getDeliveryById(
+    id: number
+  ): Promise<(WebhookDelivery & { endpointUrl: string | null; secret: string | null }) | null> {
+    const result = await this.executeQuery(() =>
+      db
+        .select({
+          ...getTableColumns(webhookDeliveries),
+          endpointUrl: webhooks.url,
+          secret: webhooks.secret,
+        })
+        .from(webhookDeliveries)
+        .leftJoin(webhooks, eq(webhooks.id, webhookDeliveries.webhookId))
+        .where(eq(webhookDeliveries.id, id))
+        .limit(1)
+    );
+    return result[0] || null;
   }
 
   async getActiveWebhooksForEvent(projectId: number, event: string): Promise<Webhook[]> {

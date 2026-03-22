@@ -46,7 +46,24 @@ export async function cleanDatabase() {
   ];
 
   const query = `TRUNCATE TABLE ${tables.map((t) => `"${t}"`).join(', ')} RESTART IDENTITY CASCADE`;
-  await testDb.execute(sql.raw(query));
+
+  let retries = 5;
+  while (retries > 0) {
+    try {
+      await testDb.execute(sql.raw(query));
+      break;
+    } catch (error) {
+      const pgError = error as { code?: string };
+      if (pgError.code === '40P01' || pgError.code === '55P03') {
+        // Deadlock or lock_not_available
+        retries--;
+        if (retries === 0) throw error;
+        await new Promise((res) => setTimeout(res, 200));
+      } else {
+        throw error;
+      }
+    }
+  }
 }
 
 /**

@@ -33,7 +33,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { agentConfigFormSchema, type AgentConfigFormData } from '@/lib/schemas';
-
+import { updateAgentConfigAction } from '@/actions/settings';
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -269,23 +269,25 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
     if (!editable) return;
 
     try {
-      const res = await fetch(`/api/v1/projects/${projectId}/agent-config`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...data,
-          testCommand: data.testCommand?.trim() || null,
-          lintCommand: data.lintCommand?.trim() || null,
-          setupCommand: data.setupCommand?.trim() || null,
-        }),
+      const formData = new FormData();
+      formData.append('projectId', String(projectId));
+
+      Object.entries(data).forEach(([key, val]) => {
+        if (Array.isArray(val)) {
+          val.forEach((v) => formData.append(key, String(v)));
+        } else if (val !== null && val !== undefined) {
+          if (key === 'testCommand' || key === 'lintCommand' || key === 'setupCommand') {
+            formData.append(key, String(val).trim());
+          } else {
+            formData.append(key, String(val));
+          }
+        }
       });
 
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(
-          (errData as { error?: { message?: string } })?.error?.message ?? `HTTP ${res.status}`
-        );
+      const res = await updateAgentConfigAction(formData);
+
+      if (!res.success) {
+        throw new Error(res.error?.message ?? 'Failed to update agent config');
       }
 
       toast.success('Agent configuration saved.');
