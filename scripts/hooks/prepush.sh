@@ -4,6 +4,9 @@
 
 set -euo pipefail
 
+# Ensure Homebrew tools (pnpm, etc.) are available in git hook context
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+
 HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CHECK_DIR="${HOOK_DIR}/checks"
 # shellcheck source=scripts/hooks/utils.sh
