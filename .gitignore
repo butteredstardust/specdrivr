@@ -64,8 +64,8 @@ yarn-error.log*
 # ==============================
 # Secrets & Environments
 # ==============================
-#.env
-#.env*.local
+.env
+.env*.local
 .env.development
 .env.test
 .env.production
