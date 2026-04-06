@@ -128,3 +128,4 @@ migrate-*.ts     # One-time migration scripts (unless in drizzle/)
 # MCP Data
 .mcp-memory.jsonl
 .worktrees/
+.grepai/
