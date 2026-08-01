@@ -91,8 +91,9 @@ Thumbs.db
 # Vercel
 .vercel/
 
-# Gemini AI files
-#.gemini/
+# Gemini AI files — machine-specific MCP paths, keep local.
+# The portable, checked-in equivalent is .mcp.json
+.gemini/
 
 # Claude system files
 #.mcp.json
