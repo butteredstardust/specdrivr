@@ -14,13 +14,12 @@ This document describes the Claude Code automations actually configured for this
 | **Hooks**        | Pre-commit / pre-push                    | `.husky/pre-commit`, `.husky/pre-push` → `scripts/hooks/` |
 | **Subagents**    | 29 subagents                             | `.claude/agents/*.md`                   |
 
-> **Note:** `.claude/claude.json` also exists in this repo and defines a different, larger set of
-> MCP servers (`postgres`, `memory`, `playwright`, `shadcn`, `docker`, `next-devtools`, `vitest`,
-> `context7`) — some overlapping `.mcp.json` with different arguments (e.g. a different `postgres`
-> connection string). It's unclear which of the two files is actually loaded by a given Claude
-> Code client; `.mcp.json` is the standard project-level MCP config location, so treat it as
-> authoritative unless you've confirmed otherwise for your setup. This divergence is a config
-> issue, not a docs issue — flagged here rather than silently resolved.
+> **Note:** this repo previously also carried `.claude/claude.json`, declaring eight MCP servers
+> (`postgres`, `memory`, `playwright`, `shadcn`, `docker`, `next-devtools`, `vitest`, `context7`).
+> Claude Code loads project MCP config from `.mcp.json`, not that path, so those servers were never
+> actually running. The file has been removed to leave one source of truth. To enable any of them,
+> add the entry to `.mcp.json` — the connection string for `postgres` must match the credentials in
+> `infra/compose/docker-compose.yml`.
 
 ---
 

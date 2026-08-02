@@ -65,7 +65,7 @@ Required variables (see `.env.example` and `documentation/infrastructure/ENVIRON
 
 ```bash
 # Database (PostgreSQL)
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/specdrivr"
+DATABASE_URL="postgresql://specdrivr:specdrivr_password@localhost:5432/specdrivr"
 ```
 
 Initial setup:
@@ -80,7 +80,7 @@ pnpm dev
 
 `.mcp.json` configures 4 MCP servers: `filesystem`, `git`, `memory`, and `postgres`. No configuration action is needed — they're available automatically.
 
-> **Known inconsistency:** `.claude/claude.json` also exists and declares a different, larger MCP set (`postgres`, `memory`, `playwright`, `shadcn`, `docker`, `next-devtools`, `vitest`, `context7`) with a different `postgres` connection string. Which file actually loads depends on the client. Treat `.mcp.json` as authoritative; reconciling the two is an open config task. See `.claude/AUTOMATIONS.md`.
+`.mcp.json` is the single source of truth. A second, unused `.claude/claude.json` declaring eight servers was removed — Claude Code does not load that path, so those servers were never active. If you want any of them (`playwright`, `vitest`, `context7`, `shadcn`, `docker`, `next-devtools`), add them to `.mcp.json`. See `.claude/AUTOMATIONS.md`.
 
 ## Additional Claude-only Notes
 
