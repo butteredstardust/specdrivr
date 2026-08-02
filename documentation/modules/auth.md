@@ -76,10 +76,10 @@ Roles are per-project. A user can be Admin on Project A and Member on Project B.
 
 ### 4.1 Key Files
 
-- **Logic**: `src/lib/auth.ts` (BetterAuth config), `src/lib/rbac.ts` (Permission checks).
-- **Database**: `src/db/schema/auth.ts` (Users, Sessions, Accounts).
-- **UI Components**: `src/components/auth/login-form.tsx`, `src/components/auth/reset-password-form.tsx`.
-- **Routes**: `src/app/api/auth/[...auth]/route.ts`.
+- **Logic**: `src/lib/auth.ts` (BetterAuth config), `src/lib/rbac.ts` (Permission checks), `src/lib/auth-client.ts` (client hooks).
+- **Database**: `src/db/schema.ts` (`users`, `sessions`, `accounts`, `verifications` tables).
+- **UI**: `src/app/(auth)/login/page.tsx`, `src/app/(auth)/reset-password/page.tsx`, `src/app/(auth)/forgot-password/page.tsx`, `src/app/(auth)/invite/page.tsx`.
+- **Routes**: `src/app/api/auth/[...all]/route.ts`.
 
 ### 4.2 Critical Paths
 

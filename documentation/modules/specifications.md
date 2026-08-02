@@ -87,9 +87,9 @@ Five-tab interface for managing the spec lifecycle:
 
 ### 5.1 Key Files
 
-- **Logic**: `src/lib/gemini.ts` (Plan generation), `src/actions/specs.ts`.
-- **Database**: `src/db/schema/specs.ts`, `src/db/schema/plans.ts`.
-- **UI Components**: `src/components/specs/spec-editor.tsx`, `src/components/specs/plan-viewer.tsx`.
+- **Logic**: `src/lib/gemini.ts` (Plan generation), `src/actions/specifications.ts`.
+- **Database**: `src/db/schema.ts` (`specifications`, `specVersions`, `plans`, `planJobs`, `planReviews` tables).
+- **UI Components**: `src/components/specs/spec-editor.tsx`, `src/components/specs/plan-tab.tsx`, `src/components/specs/changes-tab.tsx`.
 
 ### 5.2 Critical Paths
 

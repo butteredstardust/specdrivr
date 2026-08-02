@@ -1,77 +1,30 @@
 # CLAUDE.md | Claude-Specific Instructions
 
-This document provides specialized operational anchors for Claude when working on Specdrivr. It supplements the canonical `AGENTS.md`.
+> **This is a short supplement, not a restatement.** `AGENTS.md` is the canonical, shared ruleset
+> — read it first. This file only covers what's specific to Claude Code on this project.
 
 ## Role Identity
 
 You are a Senior AI Architecture Engineer. Your primary directive is maintaining the integrity of the project's Repository Pattern and Type Safety.
 
-## Project Skills & Expertise
+## Project Skills
 
-The project has a modular expertise library in `.agents/skills/`. You MUST refer to these when conducting complex tasks:
+The project has a modular expertise library in `.claude/skills/<name>/SKILL.md`. Refer to these when conducting complex tasks:
 
-- **Architecture**: `.agents/skills/senior-architect.md`
-- **Frontend**: `.agents/skills/senior-frontend.md`
-- **Backend**: `.agents/skills/senior-backend.md`
-- **QA & Testing**: `.agents/skills/senior-qa.md`
-- **Database**: `.agents/skills/database-designer.md`
-- **Stack Auditing**: `.agents/skills/tech-stack-evaluator.md`
-- **Project Planning**: `.agents/skills/senior-pm.md`
-- **Roadmapping**: `.agents/skills/roadmap-communicator.md`
+- **Architecture**: `.claude/skills/senior-architect/SKILL.md`
+- **Frontend**: `.claude/skills/senior-frontend/SKILL.md`
+- **Backend**: `.claude/skills/senior-backend/SKILL.md`
+- **QA & Testing**: `.claude/skills/senior-qa/SKILL.md`
+- **Database**: `.claude/skills/database-designer/SKILL.md`
+- **Stack Auditing**: `.claude/skills/tech-stack-evaluator/SKILL.md`
+- **Project Planning**: `.claude/skills/senior-pm/SKILL.md`
+- **Roadmapping**: `.claude/skills/roadmap-communicator/SKILL.md`
+- **Migrations**: `.claude/skills/create-migration/SKILL.md`
+- **Hook fixes**: `.claude/skills/hook-violation-fixer/SKILL.md`
+- **Test generation**: `.claude/skills/gen-test/SKILL.md`
+- **New components**: `.claude/skills/new-component/SKILL.md`
 
-## Claude Code Subagents
-
-The project includes a suite of specialized Claude Code subagents in `.claude/agents/`:
-
-- **Fullstack**: `fullstack-developer.md`
-- **DevOps**: `devops-engineer.md`
-- **Utility**: `agent-installer.md`
-- **Product Manager**: `product-manager.md`
-
-You must use specialized Claude Code subagents in `.claude/agents/` for complex tasks.
-
-## 1. Architectural Mandates
-
-- **Ground Truth First**: Before any Directive, verify feature implementation status in `documentation/PRODUCT_MAP.md`.
-- **One-Shot Success**: ALWAYS consult `infrastructure/CODING_PATTERNS.md` and `infrastructure/DIRECTORY_MAP.md` before writing code.
-- **Troubleshooting**: If a build fails, follow the `infrastructure/TROUBLESHOOTING.md` decision tree before retrying.
-- **Repository Pattern**: Never import `db` in UI components. Use `src/repositories/`. Always use `executeQuery`.
-- **Server Actions**: Always call `await auth()` first. Return structured objects.
-- **RSC Enforcement**: Default to Server Components. Maintain strict Client/Server boundaries.
-
-## 2. Git Hooks & Integrity
-
-- **No Bypassing**: Respect `.husky/pre-commit` and `.husky/pre-push`.
-- **RCA Requirement**: If a bypass is requested, perform a Root Cause Analysis (RCA) to confirm it is not masking a regression.
-- **Verification**: See `AGENTS.md` §5 (Bypass Protocol) for emergency procedures.
-
-## 3. Quick Commands
-
-Essential workflows for development:
-
-```bash
-pnpm dev                # Start Next.js dev server (http://localhost:3000)
-pnpm lint              # Run ESLint + Prettier check
-pnpm format            # Auto-fix lint/format violations
-pnpm test              # Run all tests (unit + E2E)
-pnpm test:unit         # Run Vitest unit tests only
-pnpm test:e2e          # Run Playwright E2E tests only
-pnpm typecheck         # TypeScript strict mode check
-pnpm db:generate       # Generate Drizzle migrations from schema
-pnpm db:migrate        # Apply pending migrations
-pnpm db:seed           # Seed database with demo data
-```
-
-## 4. Workflow & Verification
-
-- **Key Files**: See `AGENTS.md` §3 (Project Files & Directories) for file structure guide.
-- **Small Commits**: One logical change per commit.
-- **Pre-Push Checks**: Run `pnpm lint` and `pnpm test` locally.
-- **Branch Reports**: Always generate `BRANCH_CHANGES.md` and `BRANCH_CODE_REVIEW.md`.
-
-## 5. Project Skills
-
-Use these specialized workflows to prevent common errors:
+Two skills are wired to slash commands:
 
 ### `/create-migration`
 
@@ -85,77 +38,51 @@ Use these specialized workflows to prevent common errors:
 
 **When to use:** After pre-push hook rejection
 
-- Provides fix patterns for all 15 hook checks
+- Provides fix patterns for the modular checks in `scripts/hooks/checks/`
 - Covers: useEffect→RSC, process.env→env wrapper, missing auth checks, etc.
 - Copy-paste ready BEFORE/AFTER examples
 
-## 6. Security & Logging
+## Claude Code Subagents
 
-- **Auth First**: Verify authentication before any data access.
-- **Pino Logging**: Use `logger` (server) or `clientLogger` (client). No `console.log`.
-- **Sanitization**: Use `DOMPurify.sanitize()` for all HTML rendering.
+The project includes 29 specialized Claude Code subagents in `.claude/agents/`, covering areas such as architecture drift, RBAC, Drizzle ORM, security review, and Next.js/React best-practice audits. Prefer an existing subagent over ad-hoc analysis when a task matches one. See `.claude/agents/*.md` for the full list — a few examples:
 
-## 7. Environment & Setup
+- **Fullstack**: `.claude/agents/fullstack-developer.md`
+- **DevOps**: `.claude/agents/devops-engineer.md`
+- **Product Manager**: `.claude/agents/product-manager.md`
+- **Security review**: `.claude/agents/security-reviewer.md`
 
-**Required Variables:**
+## Architectural Mandates (Claude-specific emphasis)
+
+All rules live in `AGENTS.md`. Claude should additionally:
+
+- **Ground Truth First**: Before any directive, verify feature implementation status in `documentation/PRODUCT_MAP.md`.
+- **One-Shot Success**: ALWAYS consult `documentation/infrastructure/CODING_PATTERNS.md` and `documentation/infrastructure/DIRECTORY_MAP.md` before writing code.
+- **Troubleshooting**: If a build fails, follow the `documentation/infrastructure/TROUBLESHOOTING.md` decision tree before retrying.
+
+## Environment & Setup
+
+Required variables (see `.env.example` and `documentation/infrastructure/ENVIRONMENT_VARIABLES.md` for the full list):
 
 ```bash
-# Database (PostgreSQL on Docker)
-DATABASE_URL="postgresql://specdrivr:specdrivr_password@localhost:5432/specdrivr"
+# Database (PostgreSQL)
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/specdrivr"
 ```
 
-**Initial Setup:**
+Initial setup:
 
 ```bash
-pnpm install           # Install dependencies
-pnpm db:migrate        # Apply migrations
-pnpm db:seed          # Seed with demo data
-pnpm dev              # Start dev server
+pnpm install
+pnpm setup    # runs db:migrate then db:seed
+pnpm dev
 ```
 
-## 8. Architectural Patterns & Gotchas
+## MCP Servers
 
-**Server Action Pattern:**
+`.mcp.json` configures 4 MCP servers: `filesystem`, `git`, `memory`, and `postgres`. No configuration action is needed — they're available automatically.
 
-- Always call `await auth()` as the first line (before any data access)
-- Return structured objects (not raw DB results)
-- Never call server actions from client components directly—use form actions
+> **Known inconsistency:** `.claude/claude.json` also exists and declares a different, larger MCP set (`postgres`, `memory`, `playwright`, `shadcn`, `docker`, `next-devtools`, `vitest`, `context7`) with a different `postgres` connection string. Which file actually loads depends on the client. Treat `.mcp.json` as authoritative; reconciling the two is an open config task. See `.claude/AUTOMATIONS.md`.
 
-**Repository Pattern Enforcement:**
+## Additional Claude-only Notes
 
-- `src/repositories/` is the single source of DB access
-- Direct `db` imports in components = pre-push hook rejection
-- If you need data in a component, create a repository method + server action
-
-**RSC vs Client Components:**
-
-- Default to Server Components
-- Import client components only if you need state/events
-- Never import a Server Component into a Client Component
-
-## 9. Automation & Hooks
-
-**RTK Token Optimization** (Global)
-
-- All Bash commands are rewritten through RTK for token savings (60-90% reduction)
-- Transparent—no action needed
-
-**MCP Servers** (7 configured)
-
-- `context7`: Live documentation lookup
-- `playwright`: Browser automation for E2E tests
-- `postgres`: Direct database queries via MCP
-- `vitest`: Test discovery and execution
-- Plus 3 others (see `.claude/claude.json`)
-
-**See:** `.claude/AUTOMATIONS.md` for full automation status and agent list.
-
-## 10. Prohibited Patterns
-
-- NO `npm` or `yarn`.
-- NO `useEffect` for data fetching.
-- **NO Custom UI if standard exists**: Use `shadcn/ui` equivalents when available.
-- **NO Manual Icons**: Use `lucide-react` or standard icons.
-- NO `pnpm db:push` for schema changes.
-- **Secrets**: Use `@/lib/env`. Never use `process[dot]env`.
-- NO bypassing Husky hooks without RCA and user confirmation.
+- **Auto-format hook**: `.claude/settings.json` runs `pnpm lint --fix` automatically after every Edit/Write.
+- **Branch reports**: Always generate `BRANCH_CHANGES.md` and `BRANCH_CODE_REVIEW.md` per `AGENTS.md` §18 before submitting a PR.

@@ -2,69 +2,19 @@
 
 Utility and automation scripts for development, testing, and deployment.
 
-## Development Scripts
+**Canonical reference:** [`documentation/infrastructure/SCRIPTS_REFERENCE.md`](../documentation/infrastructure/SCRIPTS_REFERENCE.md) documents every script here (and every `package.json` script) with its invocation and purpose. This file just gets you running quickly.
 
-### `bootstrap.sh`
-
-**Purpose:** Fresh Ubuntu container setup
-
-Installs Node Version Manager (nvm) and Node.js version from `.nvmrc`.
+## Quick Start
 
 ```bash
-./scripts/bootstrap.sh
+./scripts/bootstrap.sh          # first-time setup on a clean Ubuntu environment
+./scripts/start-dev-server.sh   # one-command Docker Compose dev environment
+./scripts/codebase-audit.sh     # run before pushing, to catch policy violations
 ```
-
-**Use case:** First-time setup on a clean Ubuntu environment or container
-
----
-
-### `snapshot.sh`
-
-**Purpose:** Environment snapshot initialization
-
-Ensures dependencies are installed, database is ready, and schema is up-to-date. Can be used as a Docker ENTRYPOINT or container postStart hook.
-
-```bash
-./scripts/snapshot.sh
-```
-
-**Use case:** Fast container initialization and development startup
-
----
-
-### `start-dev-server.sh`
-
-**Purpose:** Docker Compose dev environment startup
-
-Builds and starts all services (postgres, redis, app) with health checks.
-
-```bash
-./scripts/start-dev-server.sh
-```
-
-**Use case:** One-command local development environment setup
-
----
-
-## CI/Verification Scripts
-
-### `ci-verify-hooks.sh`
-
-Verifies Husky hooks are correctly configured
-
-### `codebase-audit.sh`
-
-Comprehensive codebase audit and linting
-
-### `simulate-ci.sh`
-
-Simulates CI environment locally for testing
-
----
 
 ## Running Scripts
 
-All scripts are executable. Run from project root:
+All shell scripts are executable. Run from the project root:
 
 ```bash
 bash scripts/<script-name>.sh
@@ -72,8 +22,4 @@ bash scripts/<script-name>.sh
 ./scripts/<script-name>.sh
 ```
 
-Some scripts may require:
-
-- `docker` / `docker-compose` installed
-- `node` / `pnpm` available
-- Proper environment variables (see `.env.example`)
+Some scripts require `docker`/`docker-compose`, `node`/`pnpm`, and the environment variables in `.env.example`.

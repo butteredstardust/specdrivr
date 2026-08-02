@@ -1,58 +1,59 @@
 # Claude Code Automations for Specdrivr
 
-This document describes all Claude Code automations configured for the project.
-
-**Last Updated:** 2026-03-14
+This document describes the Claude Code automations actually configured for this project: MCP servers, skills, hooks, and subagents.
 
 ---
 
 ## Quick Reference
 
-| Category        | Name                 | Status        | Invocation                                |
-| --------------- | -------------------- | ------------- | ----------------------------------------- |
-| **MCP Servers** | context7             | ✅ Configured | Auto (no action needed)                   |
-| **MCP Servers** | Playwright           | ✅ Configured | Auto (no action needed)                   |
-| **Skills**      | create-migration     | ✅ Ready      | User-only: `/create-migration`            |
-| **Skills**      | hook-violation-fixer | ✅ Ready      | Both: `/hook-violation-fixer`             |
-| **Hooks**       | Auto-format on edit  | ✅ Active     | Auto (PostToolUse on Edit/Write)          |
-| **Hooks**       | Block .env edits     | ✅ Active     | Auto (PreToolUse on Edit)                 |
-| **Agents**      | code-reviewer        | ✅ Ready      | User: `claude agent code-reviewer "..."`  |
-| **Agents**      | api-documenter       | ✅ Ready      | User: `claude agent api-documenter "..."` |
+| Category        | Name                                    | Where it lives                        |
+| ---------------- | ----------------------------------------- | ----------------------------------------- |
+| **MCP Servers**  | `filesystem`, `git`, `memory`, `postgres` | `.mcp.json` (4 servers)                 |
+| **Skills**       | 12 skills (see below)                    | `.claude/skills/<name>/SKILL.md`        |
+| **Hooks**        | Auto-format on edit                      | `.claude/settings.json` → `PostToolUse` |
+| **Hooks**        | Pre-commit / pre-push                    | `.husky/pre-commit`, `.husky/pre-push` → `scripts/hooks/` |
+| **Subagents**    | 29 subagents                             | `.claude/agents/*.md`                   |
+
+> **Note:** `.claude/claude.json` also exists in this repo and defines a different, larger set of
+> MCP servers (`postgres`, `memory`, `playwright`, `shadcn`, `docker`, `next-devtools`, `vitest`,
+> `context7`) — some overlapping `.mcp.json` with different arguments (e.g. a different `postgres`
+> connection string). It's unclear which of the two files is actually loaded by a given Claude
+> Code client; `.mcp.json` is the standard project-level MCP config location, so treat it as
+> authoritative unless you've confirmed otherwise for your setup. This divergence is a config
+> issue, not a docs issue — flagged here rather than silently resolved.
 
 ---
 
-## 🔌 MCP Servers
+## 🔌 MCP Servers (`.mcp.json`)
 
-### context7
+### `filesystem`
 
-**What it does:** Live documentation lookup for your stack libraries
-**Why it's here:** Your stack uses Next.js 16, React 19, Drizzle, Zod, better-auth
-**How to use:** When fixing code, Claude can fetch authoritative docs inline
-**Configuration:** `.claude/claude.json` → `mcpServers.context7`
+Read/write access to the project directory and its parent, via `@modelcontextprotocol/server-filesystem`.
 
-**Example Use Case:**
+### `git`
 
-```
-You: "Fix the useEffect violation in notification-bell"
-Claude: [Uses context7 to fetch Next.js 16 RSC patterns]
-Claude: "RSC recommends removing useEffect and using Server Components..."
-```
+Git operations via `mcp-server-git`, scoped to this repository.
 
-### Playwright (Already Configured)
+### `memory`
 
-**What it does:** Browser automation and testing
-**Why it's here:** Verify UI behavior in real browser without manual testing
-**How to use:** Claude can test pages, forms, and flows directly
-**Configuration:** `.claude/claude.json` → `mcpServers.playwright`
+Persistent key-value memory via `@modelcontextprotocol/server-memory`, backed by `.mcp-memory.jsonl`.
+
+### `postgres`
+
+Direct read access to the Postgres database via `@modelcontextprotocol/server-postgres`, using the connection string embedded in `.mcp.json`.
 
 ---
 
-## 🎯 Skills
+## 🎯 Skills (`.claude/skills/`)
 
-### create-migration
+All 12 skills: `create-migration`, `database-designer`, `gen-test`, `hook-violation-fixer`, `new-component`, `roadmap-communicator`, `senior-architect`, `senior-backend`, `senior-frontend`, `senior-pm`, `senior-qa`, `tech-stack-evaluator`.
 
-**What it does:** Guides Drizzle ORM migration workflow with validation
-**Why it's here:** Your migrations are critical; prevent enum mismatches and data issues
+Two are wired to slash commands and documented in `CLAUDE.md`:
+
+### `/create-migration`
+
+**What it does:** Guides the Drizzle ORM migration workflow with validation.
+**Why it's here:** Migrations are critical; this prevents enum mismatches and data issues.
 **How to use:**
 
 ```bash
@@ -60,356 +61,76 @@ Claude: "RSC recommends removing useEffect and using Server Components..."
 /create-migration
 ```
 
-**Includes:**
-
-- ✓ Pre-generation schema review checklist
-- ✓ SQL validation steps
-- ✓ Common mistakes reference
-- ✓ Testing workflow
-- ✓ CI integration notes
-
 **Location:** `.claude/skills/create-migration/SKILL.md`
 
-### hook-violation-fixer
+### `/hook-violation-fixer`
 
-**What it does:** Structured remediation for all 15 pre-push hook violations
-**Why it's here:** Your 15-check hook system is strict; this skill provides exact fix patterns
+**What it does:** Structured remediation for pre-push hook violations.
+**Why it's here:** The pre-push hook system is strict; this skill provides exact fix patterns.
 **How to use:**
 
 ```bash
 # When a hook violation is caught
 /hook-violation-fixer
-
-# Then follow the section for your violation type
-# Copy the exact pattern from BEFORE/AFTER examples
 ```
 
-**Covers:**
-
-- ✓ useEffect for data fetching → Server Components
-- ✓ process.env access → @/lib/env wrapper
-- ✓ Server Actions missing 'use server' → add directive
-- ✓ Server Actions missing auth() → add auth check
-- ✓ Client components importing repositories → refactor to Server Actions
-- ✓ Hardcoded colors → CSS variable tokens
-- ✓ XSS unsafe dangerouslySetInnerHTML → DOMPurify.sanitize()
-- ✓ Unoptimized images → next/image
-- ✓ Forms without Zod/React Hook Form → add validation
-- ✓ 5 other checks with fix patterns
-
 **Location:** `.claude/skills/hook-violation-fixer/SKILL.md`
+
+The remaining 10 skills are reference material — Claude can read them directly (e.g. `.claude/skills/senior-architect/SKILL.md`) when working in that domain; see `CLAUDE.md` for the full list.
 
 ---
 
 ## ⚡ Hooks
 
-### AutoFormat on Edit
+### Auto-format on edit
 
-**What it does:** Automatically runs prettier + eslint --fix after every file edit
-**Why it's here:** Eliminate "fix linting errors" round-trips; keep code clean
-**How it works:**
-
-```
-Edit file → pnpm format && pnpm lint --fix → Done
-```
-
-**Configuration:** `.claude/settings.json` → `hooks.postToolUse`
-
-### Block .env Edits
-
-**What it does:** Prevents Claude from editing `.env` files (security)
-**Why it's here:** Your pre-push hook already blocks commits; this adds CLI protection
-**How it works:**
-
-```
-Attempt to edit .env → Hook blocks → Error message
-```
-
-**Configuration:** `.claude/settings.json` → `hooks.preToolUse`
-
----
-
-## 🤖 Agents
-
-### code-reviewer
-
-**What it does:** Reviews staged changes against your 15 architectural rules
-**Why it's here:** Catch violations BEFORE pre-push hooks; faster feedback loop
-**How to use:**
-
-```bash
-# After staging changes
-git add src/components/my-component.tsx src/actions/my-action.ts
-
-# Run review
-claude agent code-reviewer "Review staged changes"
-
-# Output shows violations + fix suggestions from hook-violation-fixer skill
-```
-
-**Checks:**
-
-- ✓ Server actions have 'use server' + auth()
-- ✓ Client components don't import repositories
-- ✓ Forms use Zod + React Hook Form
-- ✓ No hardcoded hex colors
-- ✓ No raw <img> tags
-- ✓ dangerouslySetInnerHTML is sanitized
-- ✓ process.env usage is correct
-- ✓ And 8 more rules from AGENTS.md
-
-**Location:** `.claude/agents/code-reviewer.md`
-
-### api-documenter
-
-**What it does:** Generates OpenAPI 3.1 spec from your 44+ API routes
-**Why it's here:** Keep API documentation in sync without manual maintenance
-**How to use:**
-
-```bash
-# After adding new API route
-touch src/app/api/v1/my-endpoint/route.ts
-# ... implement handler ...
-
-# Generate docs
-claude agent api-documenter "Add my-endpoint to OpenAPI spec"
-
-# Verify
-cat openapi.json | grep "my-endpoint"
-
-# Commit
-git add openapi.json
-```
-
-**Output:**
-
-- `openapi.json` — Swagger/Redoc compatible
-- Supports Swagger UI, API portals, client SDK generation
-- Auto-inferred from code + JSDoc comments
-
-**Location:** `.claude/agents/api-documenter.md`
-
----
-
-## Configuration Files
-
-### `.claude/claude.json`
-
-Added MCP server:
-
-```json
-{
-  "mcpServers": {
-    "context7": {
-      "command": "npx",
-      "args": ["-y", "@context7/mcp-server"]
-    }
-    // ... other servers ...
-  }
-}
-```
-
-### `.claude/settings.json` (NEW)
-
-Created with hooks and permissions:
+**What it does:** Runs `pnpm lint --fix` after every Edit/Write tool call.
+**Configuration:** `.claude/settings.json` → `hooks.PostToolUse`.
 
 ```json
 {
   "hooks": {
-    "postToolUse": {
-      "Edit": "pnpm format && pnpm lint --fix",
-      "Write": "pnpm format && pnpm lint --fix"
-    },
-    "preToolUse": {
-      "Edit": {
-        "description": "Block edits to .env files",
-        "condition": "if echo '{file}' | grep -qE '\\.env(\\..*)?$' && ! echo '{file}' | grep -q '\\.env\\.example$'; then exit 1; fi"
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [{ "type": "command", "command": "pnpm lint --fix", "ignoreError": true }]
       }
-    }
+    ]
   }
 }
 ```
 
-### `.claude/skills/` (NEW)
+### Git hooks (Husky)
 
-Added two skills:
-
-- `create-migration/SKILL.md`
-- `hook-violation-fixer/SKILL.md`
-
-### `.claude/agents/` (UPDATED)
-
-Added two agents:
-
-- `code-reviewer.md`
-- `api-documenter.md`
+`.husky/pre-commit` runs `pnpm lint` and `pnpm typecheck`. `.husky/pre-push` hands off to the modular orchestrator at `scripts/hooks/prepush.sh`, which runs the checks under `scripts/hooks/checks/` (including the full test suite) and verifies hook checksums via `.husky/hooks-checksum.txt`. See `AGENTS.md` §6 for the bypass protocol.
 
 ---
 
-## Recommended Workflows
+## 🤖 Subagents (`.claude/agents/`)
 
-### 1. Daily Development
-
-```bash
-# Make changes
-vim src/components/new-feature.tsx
-
-# Stage
-git add .
-
-# Pre-push review (catches issues early)
-claude agent code-reviewer "Review before push"
-
-# Fix any issues
-vim src/components/new-feature.tsx
-
-# Format & commit
-git commit -m "feat: add new feature"
-
-# Push (hooks will pass)
-git push
-```
-
-### 2. Database Schema Changes
-
-```bash
-# Modify schema
-vim src/db/schema.ts
-
-# Generate migration with validation
-/create-migration
-
-# Review SQL
-cat drizzle/migrations/[timestamp]_*.sql
-
-# Apply locally
-pnpm db:migrate
-
-# Commit
-git add drizzle/migrations/
-git commit -m "migration: [description]"
-```
-
-### 3. API Endpoint Addition
-
-```bash
-# Create route
-touch src/app/api/v1/new-endpoint/route.ts
-# ... implement ...
-
-# Generate documentation
-claude agent api-documenter "Add new-endpoint"
-
-# Commit both
-git add src/app/api/v1/new-endpoint/ openapi.json
-git commit -m "api: add new-endpoint with docs"
-```
-
-### 4. Fixing Hook Violations
-
-```bash
-# Hit pre-push error
-git push
-# ❌ Error: useEffect for data fetching detected
-
-# Use fixer skill
-/hook-violation-fixer
-
-# Follow the pattern
-# (e.g., convert to Server Component)
-
-# Commit fix
-git add src/components/fixed-component.tsx
-git commit -m "fix: replace useEffect with Server Component"
-
-# Re-push
-git push
-# ✅ Success
-```
+29 specialized subagents are defined as markdown files under `.claude/agents/`, covering areas such as architecture drift detection, RBAC auditing, Drizzle ORM auditing, security review, Next.js 16 / React 19 best practices, and more. Each file's frontmatter documents when it should be invoked. Browse `.claude/agents/*.md` for the full list, or see the examples called out in `CLAUDE.md`.
 
 ---
 
 ## Troubleshooting
 
-### Hooks Not Running
+### Hooks not running
 
-Check if `pnpm format` and `pnpm lint` are working:
+Check `pnpm format` and `pnpm lint` work standalone first — if they fail locally, the hooks that shell out to them will fail too.
 
-```bash
-pnpm format
-pnpm lint --fix
-```
+### MCP server not responding
 
-If they fail locally, hooks won't work either.
+Restart your Claude Code client; MCP servers are spawned per-session from `.mcp.json`.
 
-### MCP Server Not Found
+### Skill not showing up in `/` autocomplete
 
-If context7 fails to load:
-
-```bash
-npx -y @context7/mcp-server --help
-```
-
-If that fails, restart Claude Code.
-
-### Agent Not Responding
-
-Agents are independent processes. If one fails:
-
-```bash
-# Check logs
-claude agent code-reviewer "Test agent"
-
-# Restart
-# Quit Claude Code and restart
-```
-
-### Skills Not Showing Up
-
-Skills in `.claude/skills/*/SKILL.md` should appear in `/` autocomplete:
-
-```bash
-# Type: /
-# Should see: create-migration, hook-violation-fixer
-```
-
-If not visible, restart Claude Code.
-
----
-
-## Next Steps
-
-1. **Enable the automations:**
-   - `context7` — Already configured in `claude.json`
-   - Hooks — Already configured in `settings.json`
-   - Skills — Already available in `.claude/skills/`
-   - Agents — Already available in `.claude/agents/`
-
-2. **Test them:**
-   - Try `/hook-violation-fixer` to see the skill in action
-   - Run `claude agent code-reviewer "test"` to verify agent setup
-   - Try creating a migration to test `/create-migration`
-
-3. **Integrate into team workflow:**
-   - Update `DEVELOPMENT.md` to mention these automations
-   - Add pre-push checklist to PR template
-   - Share agent commands with team
-
-4. **Monitor and improve:**
-   - Track which violations are most common
-   - Refine hook checks if needed
-   - Add more agents as patterns emerge
+Confirm the skill has a `.claude/skills/<name>/SKILL.md` file with valid frontmatter, then restart Claude Code.
 
 ---
 
 ## Related Documentation
 
-- **AGENTS.md** — Architectural rules (source of all hook checks)
-- **CLAUDE.md** — AI-specific constraints
-- **documentation/DEVELOPMENT.md** — Local setup guide
-- `.claude/settings.json` — Hook configuration
-- `.husky/pre-push` → `scripts/hooks/prepush.sh` — Hook orchestration
-
----
-
-**All automations are ready to use. Start with `/hook-violation-fixer` to explore!**
+- **`AGENTS.md`** — canonical architectural rules (source of all hook checks).
+- **`CLAUDE.md`** — Claude-specific supplement, including the skills/subagents lists.
+- **`documentation/infrastructure/DEVELOPMENT.md`** — local setup guide.
+- **`.claude/settings.json`** — hook configuration.

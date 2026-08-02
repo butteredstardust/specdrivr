@@ -64,8 +64,8 @@ The central hub for task-level detail, accessible from any task row:
 ### 5.1 Key Files
 
 - **Logic**: `src/repositories/task-repository.ts`, `src/actions/tasks.ts`.
-- **Database**: `src/db/schema/tasks.ts`, `src/db/schema/task-attempts.ts`, `src/db/schema/task-changes.ts`.
-- **UI Components**: `src/components/tasks/task-list.tsx`, `src/components/tasks/task-drawer.tsx`, `src/components/tasks/task-status-badge.tsx`.
+- **Database**: `src/db/schema.ts` (`tasks`, `taskAttempts`, `fileChanges` tables).
+- **UI Components**: `src/components/tasks/task-drawer.tsx`, `src/components/tasks/task-drawer-attempts.tsx`, `src/components/tasks/task-drawer-changes.tsx`, `src/components/tasks/task-drawer-overview.tsx`.
 
 ### 5.2 Critical Paths
 

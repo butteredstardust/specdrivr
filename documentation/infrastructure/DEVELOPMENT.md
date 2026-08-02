@@ -442,7 +442,7 @@ if (lockAcquired) {
 }
 ```
 
-### Sanitization (`src/lib/sanitizer.ts`)
+### Sanitization (`src/lib/sanitize.ts`)
 
 Uses `isomorphic-dompurify`. Mandatory for all Markdown and Spec content rendering in the UI to prevent XSS. Always sanitize before using `dangerouslySetInnerHTML`.
 

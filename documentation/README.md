@@ -30,6 +30,13 @@ Global system architecture, technical constraints, and development guidelines.
 - **[Development](./infrastructure/DEVELOPMENT.md)**: Setup, Git workflow, and testing.
 - **[Authentication & RBAC](./modules/auth.md)**: Technical auth specs and RBAC rules.
 - **[Integrations](./infrastructure/INTEGRATIONS.md)**: External services and webhooks.
+- **[Database ER Diagram](./infrastructure/DATABASE_DIAGRAM.md)**: Entity-relationship diagram companion to [Database](./infrastructure/DATABASE.md).
+
+## 🗂️ Specification Index
+
+- **[Specification Index](./SPECIFICATION_INDEX.md)**: Feature-area → documentation module → audience mapping. Use this to find which module doc owns a given feature.
+- **[Master Product Specification](./PRODUCT.md)**: Product-level spec.
+- **[Implementation Plan](./IMPLEMENTATION_PLAN_V5.md)**: Master vision roadmap.
 
 ## 📦 Feature Modules
 

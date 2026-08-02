@@ -65,9 +65,9 @@ destructive actions found in `/settings/general` (bottom):
 
 ### 4.1 Key Files
 
-- **Logic**: `src/lib/projects.ts`, `src/actions/projects.ts`.
-- **Database**: `src/db/schema/projects.ts`.
-- **UI Components**: `src/components/projects/project-list.tsx`, `src/components/projects/create-project-dialog.tsx`.
+- **Logic**: `src/repositories/project-repository.ts`, `src/actions/projects.ts`.
+- **Database**: `src/db/schema.ts` (`projects`, `projectMembers` tables).
+- **UI Components**: `src/components/projects/create-project-dialog.tsx`.
 - **Routes**: `src/app/(app)/projects/page.tsx`, `src/app/api/v1/projects/route.ts`.
 
 ### 4.2 Critical Paths

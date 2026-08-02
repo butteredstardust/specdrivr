@@ -165,5 +165,5 @@ If migration fails in CI, your pre-push hook will catch it before merge.
 ## See Also
 
 - [Drizzle ORM Migrations](https://orm.drizzle.team/docs/migrations)
-- [AGENTS.md Section 8](../../AGENTS.md#8-database-access-rules) - Database Rules
+- [AGENTS.md Section 8](../../../AGENTS.md#8-database-access-rules) - Database Rules
 - [schema.ts](src/db/schema.ts) - Current schema definition

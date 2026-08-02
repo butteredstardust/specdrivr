@@ -511,7 +511,7 @@ For violations in these categories, refer to:
 | Check           | File                                  | Reference                                            |
 | --------------- | ------------------------------------- | ---------------------------------------------------- |
 | **Artifacts**   | `scripts/hooks/checks/artifacts.sh`   | Don't commit `*.exp`, `*_output.txt`, `migrate-*.ts` |
-| **Secrets**     | `scripts/hooks/checks/secrets.sh`     | AGENTS.md §10 - Never commit secrets in code         |
+| **Secrets**     | `scripts/hooks/checks/secrets.sh`     | AGENTS.md §13 - Never commit secrets in code         |
 | **Large Files** | `scripts/hooks/checks/large-files.sh` | Keep files <5MB; use Git LFS for media               |
 | **Migrations**  | `scripts/hooks/checks/migrations.sh`  | Use `create-migration` skill workflow                |
 | **Conflicts**   | `scripts/hooks/checks/conflicts.sh`   | Resolve merge conflicts before push                  |
@@ -533,10 +533,10 @@ For violations in these categories, refer to:
 
 ## Need Help?
 
-- **Architectural questions:** See `AGENTS.md` §4–14
+- **Architectural questions:** See `AGENTS.md` §4–17
 - **Type safety:** See `CLAUDE.md` Section 1 (Architectural Mandates)
 - **Database changes:** Use the `create-migration` skill
-- **Server Actions pattern:** See `AGENTS.md` §9 (Server Actions Pattern)
+- **Server Actions pattern:** See `AGENTS.md` §10 (API & Server Action Patterns)
 
 ---
 

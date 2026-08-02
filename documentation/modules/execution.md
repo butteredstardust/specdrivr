@@ -56,9 +56,9 @@ The agent is a standalone process that polls the API using an `AGENT_TOKEN`.
 
 ### 6.1 Key Files
 
-- **Logic**: `src/lib/agent-protocol.ts`, `scripts/agent.ts` (The actual agent code).
-- **Database**: `src/db/schema/sessions.ts`, `src/db/schema/tasks.ts`, `src/db/schema/logs.ts`.
-- **UI Components**: `src/components/terminal/xterm-viewer.tsx`, `src/components/execution/session-progress.tsx`.
+- **Logic**: `src/lib/agent-models.ts`, `src/lib/agent-auth.ts`, `scripts/agent.ts` (the actual agent process), `scripts/plan-worker.ts`.
+- **Database**: `src/db/schema.ts` (`agentSessions`, `agentEvents`, `agentLogs`, `tasks` tables).
+- **UI Components**: `src/components/ui/live-terminal.tsx`, `src/components/mission-control/session-panel.tsx`, `src/components/mission-control/activity-feed.tsx`, `src/components/mission-control/event-log.tsx`, `src/components/sessions/task-timeline.tsx`.
 
 ### 6.2 Critical Paths
 

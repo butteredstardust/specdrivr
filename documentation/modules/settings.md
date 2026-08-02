@@ -64,9 +64,9 @@ This module covers user profile management, security configurations, notificatio
 
 ### 4.1 Key Files
 
-- **Logic**: `src/lib/integrations/`, `src/actions/settings.ts`.
-- **Database**: `src/db/schema/integrations.ts`, `src/db/schema/audit-logs.ts`.
-- **UI Components**: `src/components/settings/`, `src/components/integrations/`.
+- **Logic**: `src/actions/settings.ts`.
+- **Database**: `src/db/schema.ts` (`webhooks`, `webhookDeliveries`, `auditLog` tables).
+- **UI Components**: `src/components/settings/` (e.g. `integrations-section.tsx`, `webhook-log-section.tsx`, `audit-log-section.tsx`, `members-section.tsx`).
 
 ### 4.2 Critical Paths
 
