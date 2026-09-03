@@ -50,7 +50,7 @@ function StatusBadge({ status }: { status: SpecStatus }) {
       return <PixelBadge variant="amber">Pending</PixelBadge>;
     case 'executing':
       return (
-        <PixelBadge variant="violet" dot>
+        <PixelBadge variant="blue" dot>
           Running
         </PixelBadge>
       );
@@ -226,7 +226,7 @@ export default function SpecDetailPage(): React.ReactElement {
               <TabsTrigger
                 key={tab.id}
                 value={tab.id}
-                className="data-[state=active]:border-accent-violet data-[state=active]:text-foreground text-muted-foreground hover:text-foreground rounded-none border-b-2 border-transparent bg-transparent px-1 py-3 font-mono text-xs tracking-widest shadow-none transition-colors"
+                className="data-[state=active]:border-accent-blue data-[state=active]:text-foreground text-muted-foreground hover:text-foreground rounded-none border-b-2 border-transparent bg-transparent px-1 py-3 font-mono text-xs tracking-widest shadow-none transition-colors"
               >
                 {tab.label}
               </TabsTrigger>

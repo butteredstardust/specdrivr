@@ -75,7 +75,7 @@ export function DaemonMascot({
     if (size <= 16) {
       return (
         <g data-tier="silhouette">
-          <rect x="4" y="8" width="26" height="30" rx="6" fill="var(--accent-violet)" />
+          <rect x="4" y="8" width="26" height="30" rx="6" fill="var(--accent-blue)" />
         </g>
       );
     }
@@ -83,7 +83,7 @@ export function DaemonMascot({
     if (size <= 24) {
       return (
         <g data-tier="simplified">
-          <rect x="4" y="12" width="26" height="22" rx="8" fill="var(--accent-violet)" />
+          <rect x="4" y="12" width="26" height="22" rx="8" fill="var(--accent-blue)" />
           <circle cx="12" cy="22" r="2.5" fill="var(--phosphor-amber)" />
           <circle cx="22" cy="22" r="2.5" fill="var(--phosphor-amber)" />
         </g>
@@ -94,14 +94,14 @@ export function DaemonMascot({
       <g data-tier="full">
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--accent-violet)" />
-            <stop offset="50%" stopColor="var(--accent-violet)" />
-            <stop offset="100%" stopColor="var(--accent-violet-dim)" />
+            <stop offset="0%" stopColor="var(--accent-blue)" />
+            <stop offset="50%" stopColor="var(--accent-blue)" />
+            <stop offset="100%" stopColor="var(--accent-blue-dim)" />
           </linearGradient>
         </defs>
 
         {/* Antenna wire */}
-        <line x1="17" y1="12" x2="17" y2="7" stroke="var(--accent-violet)" strokeWidth="2" />
+        <line x1="17" y1="12" x2="17" y2="7" stroke="var(--accent-blue)" strokeWidth="2" />
         {/* Antenna dot */}
         <circle
           cx="17"
@@ -121,8 +121,8 @@ export function DaemonMascot({
         {renderEyes(expression)}
 
         {/* Feet */}
-        <rect x="8" y="33" width="7" height="5" rx="2.5" fill="var(--accent-violet-dim)" />
-        <rect x="19" y="33" width="7" height="5" rx="2.5" fill="var(--accent-violet-dim)" />
+        <rect x="8" y="33" width="7" height="5" rx="2.5" fill="var(--accent-blue-dim)" />
+        <rect x="19" y="33" width="7" height="5" rx="2.5" fill="var(--accent-blue-dim)" />
       </g>
     );
   };

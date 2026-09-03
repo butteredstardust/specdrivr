@@ -71,7 +71,7 @@ function StatusBadge({ status }: { status?: AgentSession['status'] }) {
   switch (status) {
     case 'running':
       return (
-        <PixelBadge variant="violet" dot>
+        <PixelBadge variant="blue" dot>
           Running
         </PixelBadge>
       );
@@ -150,7 +150,7 @@ export default function SessionDetailPage({ params }: PageProps) {
               <Button
                 variant="outline"
                 size="sm"
-                className="h-7 gap-1.5 border-border-default bg-bg-elevated/50 px-2 py-0"
+                className="border-border-default bg-bg-elevated/50 h-7 gap-1.5 px-2 py-0"
                 onClick={() => window.open(session.pullRequestUrl!, '_blank')}
               >
                 <GitHubLogoIcon className="h-3.5 w-3.5" />

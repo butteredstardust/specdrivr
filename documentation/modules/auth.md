@@ -67,7 +67,7 @@ Roles are per-project. A user can be Admin on Project A and Member on Project B.
 
 - **Trigger**: `onboardingComplete = false` on user record after first login.
 - **Steps**:
-  1. **Welcome**: Introduction to DAEMON.
+  1. **Welcome**: Specdrivr brand introduction.
   2. **The Flow**: Visual diagram of Spec → Plan → Approve → Build.
   3. **First Project**: Inline form to create the initial project.
 - **Persistence**: Modal overlay that prevents interaction until complete.

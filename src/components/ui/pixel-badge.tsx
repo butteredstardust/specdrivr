@@ -10,13 +10,11 @@ const pixelBadgeVariants = cva(
         default: 'bg-secondary text-muted-foreground border-border-default shadow-sm',
         amber:
           'bg-phosphor-amber/10 text-phosphor-amber border-phosphor-amber/30 shadow-[0_0_8px_rgba(245,158,11,0.1)]',
-        primary:
-          'bg-primary/10 text-primary border-primary/30 shadow-[0_0_8px_rgba(139,92,246,0.1)]',
+        primary: 'bg-primary/10 text-primary border-primary/30 shadow-sm',
         emerald:
           'bg-status-emerald/10 text-status-emerald border-status-emerald/30 shadow-[0_0_8px_rgba(16,185,129,0.1)]',
         red: 'bg-status-red/10 text-status-red border-status-red/30 shadow-[0_0_8px_rgba(239,68,68,0.1)]',
-        violet:
-          'bg-accent-violet/10 text-accent-violet border-accent-violet/30 shadow-[0_0_8px_rgba(139,92,246,0.1)]',
+        blue: 'bg-accent-blue/10 text-accent-blue border-accent-blue/30 shadow-sm',
         muted: 'bg-secondary/50 text-text-muted border-border-muted opacity-80',
       },
     },
@@ -46,7 +44,7 @@ export function PixelBadge({
         <span
           className={cn(
             'h-1.5 w-1.5 shrink-0 rounded-full',
-            variant === 'violet' && 'bg-accent-violet animate-pulse',
+            variant === 'blue' && 'bg-accent-blue animate-pulse',
             variant === 'amber' && 'bg-phosphor-amber',
             variant === 'emerald' && 'bg-status-emerald',
             variant === 'red' && 'bg-status-red',

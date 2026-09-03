@@ -132,7 +132,7 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
               <Bell className="h-[18px] w-[18px]" />
               {unreadCount > 0 && (
                 <PixelBadge
-                  variant="violet"
+                  variant="blue"
                   className="border-bg-surface absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full border-2 p-0 text-[8px] shadow-sm"
                 >
                   {unreadCount > 9 ? '9+' : unreadCount}
@@ -174,7 +174,7 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
               suppressHydrationWarning
             >
               <Avatar className="border-border-default h-8 w-8 border shadow-sm">
-                <AvatarFallback className="bg-accent-violet/10 text-accent-violet text-xs font-semibold">
+                <AvatarFallback className="bg-accent-blue/10 text-accent-blue text-xs font-semibold">
                   {initials}
                 </AvatarFallback>
               </Avatar>
@@ -187,7 +187,7 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
               <p className="text-text-muted truncate text-xs">{user?.email}</p>
               {user?.role && (
                 <div className="mt-2">
-                  <PixelBadge variant="violet" className="font-mono text-[9px] tracking-[0.1em]">
+                  <PixelBadge variant="blue" className="font-mono text-[9px] tracking-[0.1em]">
                     {user.role}
                   </PixelBadge>
                 </div>

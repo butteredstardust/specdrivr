@@ -60,7 +60,7 @@ const TASK_STATUS_CONFIG: Record<
   { label: string; char: string; variant: PixelBadgeProps['variant'] }
 > = {
   todo: { label: 'TODO', char: '○', variant: 'muted' },
-  in_progress: { label: 'RUNNING', char: '▶', variant: 'violet' },
+  in_progress: { label: 'RUNNING', char: '▶', variant: 'blue' },
   blocked: { label: 'BLOCKED', char: '⚠', variant: 'amber' },
   done: { label: 'DONE', char: '✓', variant: 'emerald' },
   failed: { label: 'FAILED', char: '✕', variant: 'red' },
@@ -284,7 +284,7 @@ export function TaskDrawer() {
                       <TabsTrigger
                         key={tab}
                         value={tab}
-                        className="data-[state=active]:border-accent-violet data-[state=active]:text-text-primary data-[state=inactive]:text-text-muted hover:text-text-secondary rounded-none bg-transparent px-1 py-2.5 font-mono text-xs tracking-[0.08em] uppercase shadow-none transition-colors data-[state=active]:border-b-2 data-[state=inactive]:border-transparent"
+                        className="data-[state=active]:border-accent-blue data-[state=active]:text-text-primary data-[state=inactive]:text-text-muted hover:text-text-secondary rounded-none bg-transparent px-1 py-2.5 font-mono text-xs tracking-[0.08em] uppercase shadow-none transition-colors data-[state=active]:border-b-2 data-[state=inactive]:border-transparent"
                       >
                         {tab}
                       </TabsTrigger>
@@ -371,7 +371,7 @@ function DrawerFooter({
     <div className="bg-bg-elevated/50 border-border-default shrink-0 space-y-4 border-t px-6 py-5">
       <div className="flex items-center gap-3">
         {showRerun && (
-          <Button variant="violet" size="sm" onClick={onRetry} className="h-8 gap-1.5">
+          <Button variant="blue" size="sm" onClick={onRetry} className="h-8 gap-1.5">
             <RefreshCw className="h-3.5 w-3.5" />
             RE-RUN
           </Button>

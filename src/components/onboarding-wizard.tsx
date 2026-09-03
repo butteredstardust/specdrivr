@@ -12,7 +12,7 @@ import {
 import { ASCIIProgress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { BrandMark } from '@/components/ui/brand-mark';
 import { clientLogger } from '@/lib/logger-client';
 
 interface OnboardingWizardProps {
@@ -110,14 +110,14 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
           <div className="text-text-muted font-mono text-[10px] tracking-[0.08em] uppercase">
             Setup Progress
           </div>
-          <ASCIIProgress value={step - 1} max={3} length={20} className="text-accent-violet mb-4" />
+          <ASCIIProgress value={step - 1} max={3} length={20} className="text-accent-blue mb-4" />
         </div>
 
         {step === 1 && (
           <>
             <DialogHeader className="items-center text-center">
               <div className="mb-3 flex justify-center">
-                <DaemonMascot size={64} expression="idle" />
+                <BrandMark size={64} />
               </div>
               <DialogTitle className="text-text-primary font-mono text-lg tracking-tight uppercase">
                 Welcome to Specdrivr
@@ -127,7 +127,7 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
               </DialogDescription>
             </DialogHeader>
             <div className="mt-4 flex justify-center">
-              <Button variant="violet" onClick={() => setStep(2)} className="w-full">
+              <Button variant="blue" onClick={() => setStep(2)} className="w-full">
                 Get Started
               </Button>
             </div>
@@ -163,7 +163,7 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
             </div>
             <div className="mt-6 flex justify-end">
               <Button
-                variant="violet"
+                variant="blue"
                 onClick={handleSetName}
                 disabled={isSubmitting || !displayName.trim()}
                 className="w-full"
@@ -198,7 +198,7 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
             </div>
             <div className="mt-6 flex justify-end">
               <Button
-                variant="violet"
+                variant="blue"
                 onClick={handleCreateProject}
                 disabled={isSubmitting || !projectName.trim()}
                 className="w-full"

@@ -53,7 +53,7 @@ function StatusBadge({ status }: { status: SpecStatus }) {
       return <PixelBadge variant="amber">Pending</PixelBadge>;
     case 'executing':
       return (
-        <PixelBadge variant="violet" dot>
+        <PixelBadge variant="blue" dot>
           Running
         </PixelBadge>
       );
@@ -182,7 +182,7 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
             <Search className="text-text-muted absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
             <Input
               placeholder="SEARCH SPECS..."
-              className="bg-bg-elevated focus:ring-accent-violet/30 h-8 pl-8 font-mono text-[10px] tracking-[0.08em] uppercase transition-all focus:ring-1"
+              className="bg-bg-elevated focus:ring-accent-blue/30 h-8 pl-8 font-mono text-[10px] tracking-[0.08em] uppercase transition-all focus:ring-1"
               value={search}
               onChange={(e) => setSearch(e.target.value || null)}
             />
@@ -214,7 +214,7 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
                   className={cn(
                     'h-7 px-3 font-mono text-[10px] tracking-[0.08em] uppercase transition-all',
                     isActive
-                      ? 'bg-accent-violet text-white shadow-sm'
+                      ? 'bg-accent-blue text-white shadow-sm'
                       : 'text-text-muted hover:bg-bg-elevated hover:text-text-primary'
                   )}
                 >

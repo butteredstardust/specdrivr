@@ -18,27 +18,41 @@ The aesthetic is developer-native: precision, information density, and honest in
 
 Simple by default, powerful on demand: default views hide complexity behind progressive disclosure. Power users unlock depth via keyboard shortcuts, not navigation changes.
 
+## **8.1.1 Brand Identity**
+
+The Specdrivr mark is an isometric pair of interlocking pipeline/spec layers. Its exact source
+colours are navy #12131C, blue #2C7ED4, and cyan #A7FFFF. Use the full rounded-square mark for
+application icons and the BrandMark component in product chrome. Cyan is a planar highlight,
+not body text on light backgrounds.
+
+The brand mark and DAEMON have separate jobs: the mark identifies the product; DAEMON
+communicates agent and system state. DAEMON must not replace the product mark in the sidebar,
+authentication, onboarding, metadata, or error-page branding.
+
 ## **8.2 Colour Tokens**
 
-| **Token**             | **Hex** | **Usage**                                              |
-| --------------------- | ------- | ------------------------------------------------------ |
-| \--bg-base            | #0a0a0b | Page background. Never use pure black.                 |
-| \--bg-surface         | #111113 | Cards, panels, sidebar, dialogs.                       |
-| \--bg-elevated        | #18181b | Hover states, dropdowns, tooltips.                     |
-| \--border-default     | #1e1e21 | All borders in layout chrome.                          |
-| \--border-muted       | #27272a | Separator lines within surfaces.                       |
-| \--text-primary       | #f4f4f5 | Primary text.                                          |
-| \--text-secondary     | #a1a1aa | Secondary labels, descriptions.                        |
-| \--text-muted         | #52525b | Timestamps, IDs when dev mode off, captions.           |
-| \--accent-violet      | #7c5cfc | Primary action, current nav item, running sessions.    |
-| \--accent-violet-dim  | #5b3fd4 | Hover state of violet elements.                        |
-| \--phosphor-amber     | #ffb300 | Terminal surfaces, retro IDs, blocked state, warnings. |
-| \--phosphor-amber-dim | #b45309 | Text on amber surfaces.                                |
-| \--status-emerald     | #059669 | Success, done, complete states.                        |
-| \--status-red         | #dc2626 | Error, failed, rejected, danger zone.                  |
-| \--status-orange      | #d97706 | Failed task attempts, degraded state.                  |
-| \--terminal-bg        | #0d0d0a | xterm.js container background.                         |
-| \--terminal-green     | #39ff14 | Success lines in terminal output.                      |
+| **Token**             | **Dark Hex** | **Usage**                                              |
+| --------------------- | ------------ | ------------------------------------------------------ |
+| \--brand-navy         | #12131C      | Exact icon field and branded dark surfaces.            |
+| \--brand-blue         | #2C7ED4      | Exact icon depth planes; decorative brand graphics.    |
+| \--brand-cyan         | #A7FFFF      | Exact icon top planes; dark-background highlights.     |
+| \--bg-base            | #0C0D13      | Page background. Never use pure black.                 |
+| \--bg-surface         | #12131C      | Cards, panels, sidebar, dialogs.                       |
+| \--bg-elevated        | #191C28      | Hover states, dropdowns, tooltips.                     |
+| \--border-default     | #252A3A      | All borders in layout chrome.                          |
+| \--border-muted       | #30364A      | Separator lines within surfaces.                       |
+| \--text-primary       | #F4F8FB      | Primary text.                                          |
+| \--text-secondary     | #A7B2C3      | Secondary labels, descriptions.                        |
+| \--text-muted         | #6F7C91      | Timestamps, IDs when dev mode off, captions.           |
+| \--accent-blue        | #5CAFFF      | Accessible action, navigation, and running-state text. |
+| \--accent-blue-dim    | #2C7ED4      | Hover state and branded depth accent.                  |
+| \--phosphor-amber     | #F59E0B      | Terminal surfaces, retro IDs, blocked state, warnings. |
+| \--phosphor-amber-dim | #D97706      | Text on amber surfaces.                                |
+| \--status-emerald     | #10B981      | Success, done, complete states.                        |
+| \--status-red         | #EF4444      | Error, failed, rejected, danger zone.                  |
+| \--status-orange      | #F59E0B      | Failed task attempts, degraded state.                  |
+| \--terminal-bg        | #090B12      | xterm.js container background.                         |
+| \--terminal-green     | #22C55E      | Success lines in terminal output.                      |
 
 ## **8.2.1 Visual Intent Mapping (Tailwind 4 / CSS Variables)**
 
@@ -54,7 +68,7 @@ Simple by default, powerful on demand: default views hide complexity behind prog
 | Soft/Internal Border     | `var(--border-muted)`   | `border-[--border-muted]`      |
 | Page Background          | `var(--bg-base)`        | `bg-[--bg-base]`               |
 | Panel/Surface Background | `var(--bg-surface)`     | `bg-[--bg-surface]`            |
-| Primary Action Button    | `var(--accent-violet)`  | `bg-[--accent-violet]`         |
+| Primary Action Button    | `var(--accent-blue)`    | `bg-[--accent-blue]`           |
 | Hover/Elevated Surface   | `var(--bg-elevated)`    | `bg-[--bg-elevated]`           |
 
 ## **8.3 Typography**
@@ -81,7 +95,7 @@ Retro elements are applied selectively. The layout chrome (sidebar, top bar, pag
 
 ## **8.5 Component Rules**
 
-- Buttons: rounded-md everywhere. Never rounded-full. Primary = violet fill. Outline = transparent with border. Destructive = red fill.
+- Buttons: rounded-md everywhere. Never rounded-full. Primary = blue fill. Outline = transparent with border. Destructive = red fill.
 - Lists: dense table rows, not card grids. Row height: 36px for task rows, 40px for session rows, 48px for notification rows.
 - Loading states: shadcn Skeleton rows. Never spinners on page-level. Button-level operations use button spinner only.
 - Toasts: Sonner, bottom-right, max 3 simultaneous. Success auto-close 3s. Error auto-close 6s. Destructive: persist until dismissed.
@@ -92,20 +106,22 @@ Retro elements are applied selectively. The layout chrome (sidebar, top bar, pag
 
 ## **9.1 Identity**
 
-DAEMON (Data-Autonomous Execution Machine - Operational Node) is the app's agent mascot. A small, friendly retro robot rendered as an SVG component. It communicates agent state visually at every level: sidebar (16px), toast (16px), drawers (20-24px), dialogs and empty states (32-64px).
+DAEMON (Data-Autonomous Execution Machine - Operational Node) is the app's agent-state mascot.
+A small, friendly retro robot rendered as an SVG component, it appears only where agent or system
+state is being communicated: status areas, task/session feedback, and agent-facing empty states.
 
 Design lineage: inspired by CRT-era robot aesthetics applied to modern flat SVG style. No outlines - fill only. Amber eyes are the primary emotional indicator. Antenna is the secondary state indicator visible even at 16px.
 
 ## **9.2 Physical Design (viewBox: 0 0 34 40)**
 
-| **Part**    | **Specification**                                                                      |
-| ----------- | -------------------------------------------------------------------------------------- |
-| Body        | Rounded-rect, violet gradient #9b7ffd → #5b3fd4. Slight vertical taper (wider at top). |
-| Head/screen | Inset dark panel #1a1025 → #0d0a1a with subtle radial glow from centre.                |
-| Eyes        | Amber #ffb300 ellipses. The only warm colour - all emotional focus here.               |
-| Antenna     | Thin violet wire from top of body + amber dot tip. Primary 16px state indicator.       |
-| Feet        | Two small rounded rects at base of body. Same violet as body.                          |
-| Mouth       | Simple arc or flat line. Visible at 32px+. Hidden at 16px.                             |
+| **Part**    | **Specification**                                                              |
+| ----------- | ------------------------------------------------------------------------------ |
+| Body        | Rounded-rect using the accessible blue accent tokens.                          |
+| Head/screen | Inset page-background panel with no ornamental glow.                           |
+| Eyes        | Amber #ffb300 ellipses. The only warm colour - all emotional focus here.       |
+| Antenna     | Thin blue wire from top of body + amber dot tip. Primary 16px state indicator. |
+| Feet        | Two small rounded rects at base of body. Same blue as body.                    |
+| Mouth       | Simple arc or flat line. Visible at 32px+. Hidden at 16px.                     |
 
 ## **9.3 Expressions**
 
@@ -125,7 +141,7 @@ Design lineage: inspired by CRT-era robot aesthetics applied to modern flat SVG 
 | 20-24px  | Plan review banner, blocked banner | Body + eyes (simplified) + antenna    |
 | 32px     | Dialog headers, plan states        | Full design - all expressions legible |
 | 48-64px  | Empty states, Mission Control idle | Full design with animation            |
-| 120px+   | Onboarding, 404 page               | Full design with full animation       |
+| 120px+   | Reserved agent illustrations       | Full design with full animation       |
 
 ## **9.5 Microcopy Voice**
 
@@ -149,10 +165,10 @@ The app shell is a fixed layout - sidebar and top bar never unmount during navig
 
 ### **Left Sidebar (240px fixed width)**
 
-- Top: DAEMON sprite (24px) + "SPECDRIVR" wordmark in monospace - logo area.
+- Top: Specdrivr brand mark (32px) + lowercase specdrivr wordmark in monospace.
 - Below logo: Project switcher dropdown. Displays current project as org/repo. Clicking opens a popover listing all projects. Switching sets activeProjectId in session and triggers re-fetch of all scoped data.
 - Nav links (icon + label, in order): Mission Control · Specifications · Sessions · Settings.
-- Active nav item: violet left border + violet text. Inactive: muted text, no border.
+- Active nav item: blue left border + blue text. Inactive: muted text, no border.
 - Bottom section: DAEMON status bar (16px animated sprite + status text). See priority table in Section 12. Clicking when state is "N BLOCKED" navigates to Mission Control.
 - Below status: version tag (v0.1.0, muted, tiny). Dev Mode badge \[DEV\] in amber monospace when active.
 
@@ -203,8 +219,8 @@ The app shell is a fixed layout - sidebar and top bar never unmount during navig
 ### **Login (/login)**
 
 - Shell: none. Full-page centered layout on #0a0a0b background.
-- Card: 400px wide, bg-surface, border, rounded-xl, p-8. Contains: DAEMON idle (48px) + SPECDRIVR wordmark + tagline.
-- Fields: EMAIL (text, autofocus) · PASSWORD (password type) · \[Sign In\] (primary violet, full width) · Forgot password? link.
+- Card: 400px wide, bg-surface, border, rounded-xl, p-8. Contains: brand mark (48px) + SPECDRIVR wordmark + tagline.
+- Fields: EMAIL (text, autofocus) · PASSWORD (password type) · \[Sign In\] (primary blue, full width) · Forgot password? link.
 - \[Sign In\] disabled only while request in-flight. Never disabled due to empty fields - server validates.
 - Error state: red banner below button ("Invalid email or password."). Never field-level errors - security principle.
 - Demo bar (dev only): below card, dashed border, \[Sign in as Admin\] and \[Sign in as Member\] buttons.
@@ -213,17 +229,17 @@ The app shell is a fixed layout - sidebar and top bar never unmount during navig
 ### **Forgot Password (/forgot-password)**
 
 - Single email field. \[Send Reset Link\] button.
-- Always shows success state regardless of whether email exists: DAEMON success + "Check your email."
+- Always shows success state regardless of whether email exists: brand mark + "Check your email."
 
 ### **Reset Password (/reset-password?token={token})**
 
-- Token validated on page load. Invalid/expired token: DAEMON error + "This link has expired." + \[Request a new link\].
+- Token validated on page load. Invalid/expired token: brand mark + "This link has expired." + \[Request a new link\].
 - Two password fields + 4-segment strength indicator (colour only, no text labels).
 - Passwords must match. Minimum 12 characters.
 
 ### **Accept Invite (/invite?token={token})**
 
-- Token validated on page load. Invalid token: DAEMON error + "This invite link has expired."
+- Token validated on page load. Invalid token: brand mark + "This invite link has expired."
 - Valid token: email pre-filled (read-only). Fields: Name + Password + Confirm. \[Accept Invite & Sign In\].
 - On success: user created, auto-signed in, redirected to / with onboarding overlay (if first time).
 
@@ -237,7 +253,7 @@ The app shell is a fixed layout - sidebar and top bar never unmount during navig
 
 ### **Live Execution Panel (left 60%)**
 
-- Session running: header with ● LIVE badge (pulsing violet) + Session ID (mono amber) + elapsed timer. Progress bar: N / N tasks. Current task line: ▶ T-019 · Scaffold auth middleware (blinking ▶). xterm.js log tail (200px height, last ~20 lines, ANSI colours, scanline overlay, auto-scroll). Footer: \[PAUSE\] · \[CANCEL\] buttons.
+- Session running: header with ● LIVE badge (pulsing blue) + Session ID (mono amber) + elapsed timer. Progress bar: N / N tasks. Current task line: ▶ T-019 · Scaffold auth middleware (blinking ▶). xterm.js log tail (200px height, last ~20 lines, ANSI colours, scanline overlay, auto-scroll). Footer: \[PAUSE\] · \[CANCEL\] buttons.
 - Session paused: same layout but timer frozen, \[RESUME\] instead of \[PAUSE\], amber ⏸ PAUSED indicator, terminal shows > SESSION PAUSED line.
 - Session just completed (< 60s): DAEMON success (48px) + "Execution complete." + "N/N tasks succeeded." + \[View Changes →\] link. Auto-clears to idle after 60 seconds.
 - No active session: DAEMON idle (48px, centred) + "SYSTEM READY" (mono, muted) + "No active session." + link to /specs.
@@ -247,7 +263,7 @@ The app shell is a fixed layout - sidebar and top bar never unmount during navig
 
 - Header: EVENT LOG (mono, muted, uppercase, small). Last 30 agent events.
 - Row format: timestamp (mono) · \[EVENT_TYPE\] (colour-coded) · entity ID · description.
-- Colour coding: \[TASK*DONE\] emerald · \[BLOCKED\] amber · \[ERROR\] red · \[PLAN*\*\] violet.
+- Colour coding: \[TASK*DONE\] emerald · \[BLOCKED\] amber · \[ERROR\] red · \[PLAN*\*\] blue.
 - Newest row has pulsing dot if session active. View all → link to /sessions.
 
 ## **11.3 Projects (/projects)**
@@ -260,7 +276,7 @@ The app shell is a fixed layout - sidebar and top bar never unmount during navig
 ## **11.4 Specifications (/specs)**
 
 - Table columns: ID (mono amber) · Name · Status badge · Version (mono, muted) · Tasks (ASCII progress bar ▓▒) · Plan badge · Last Run · ⋯ menu.
-- Status badges: DRAFT (muted) · GENERATING (violet, pulsing) · REVIEW (amber) · RUNNING (violet, pulsing) · STALLED (red) · DONE (emerald).
+- Status badges: DRAFT (muted) · GENERATING (blue, pulsing) · REVIEW (amber) · RUNNING (blue, pulsing) · STALLED (red) · DONE (emerald).
 - \+ New Spec → navigates to /specs/new (not a dialog).
 - Empty state: DAEMON idle + "No specifications." + "Write what you want to build. I'll figure out the how." + \[Write First Spec\].
 
@@ -280,9 +296,9 @@ The app shell is a fixed layout - sidebar and top bar never unmount during navig
 
 - SPEC-003 badge (mono amber) above spec name h1. Status indicator + plan status badge.
 - Contextual action button (right):
-  - drafting / stalled → \[Generate Plan →\] (primary violet)
+  - drafting / stalled → \[Generate Plan →\] (primary blue)
   - pending_approval → \[Review Plan →\] (amber outline) - scrolls to PLAN tab
-  - executing → \[▶ SES-0091\] (violet link) + \[PAUSE\] (outline)
+  - executing → \[▶ SES-0091\] (blue link) + \[PAUSE\] (outline)
   - complete → \[Re-run\] + \[Edit\] (both outline)
 - ⋯ menu: Edit · Duplicate · Delete (contextual based on status).
 
@@ -303,7 +319,7 @@ The app shell is a fixed layout - sidebar and top bar never unmount during navig
 
 - \[Request Changes\] (amber outline): slide-down panel with required textarea. On submit: plan → changes_requested, spec author notified.
 - \[Reject Plan\] (red outline): slide-down panel with required reason textarea + warning text. On confirm: plan → rejected, spec → drafting.
-- \[Approve & Execute\] (primary violet): opens Approval Confirmation Dialog. Admin/Owner only. Member sees disabled button with Tooltip.
+- \[Approve & Execute\] (primary blue): opens Approval Confirmation Dialog. Admin/Owner only. Member sees disabled button with Tooltip.
 - Approval Confirmation Dialog: DAEMON working (32px) + repo/branch + task count + optional notes field. \[CANCEL\] · \[CONFIRM EXECUTION\].
 
 ### **Tab: TASKS**
@@ -332,7 +348,7 @@ The app shell is a fixed layout - sidebar and top bar never unmount during navig
 ### **Tab: OVERVIEW**
 
 - Description (Markdown rendered). Dependencies (↳ linked pills - click navigates to that task's drawer). Architecture decisions referencing this task.
-- Blocked state: red surface panel · DAEMON blocked (24px) · blockedReason text · Context textarea ("Provide context for DAEMON") · \[RETRY WITH CONTEXT\] button (violet, disabled until textarea non-empty).
+- Blocked state: red surface panel · DAEMON blocked (24px) · blockedReason text · Context textarea ("Provide context for DAEMON") · \[RETRY WITH CONTEXT\] button (blue, disabled until textarea non-empty).
 - Failed state: orange panel · last error message · \[RETRY\] button.
 
 ### **Tab: ATTEMPTS**
@@ -353,7 +369,7 @@ The app shell is a fixed layout - sidebar and top bar never unmount during navig
 
 - Filter bar: search · status filter · spec dropdown · date range.
 - Timeline grouped by date: TODAY / YESTERDAY / THIS WEEK (mono uppercase group headers).
-- Session row (40px): status dot (pulsing violet if running) · session ID (mono amber) · spec name (linked) · time range · task count + status char · ⋯ menu.
+- Session row (40px): status dot (pulsing blue if running) · session ID (mono amber) · spec name (linked) · time range · task count + status char · ⋯ menu.
 - Click row: inline expand with per-task event log (mono, colour-coded). Running session: mini xterm.js panel (120px) at bottom of expanded row.
 
 ## **11.9 Notifications (/notifications)**
@@ -448,7 +464,7 @@ The app shell is a fixed layout - sidebar and top bar never unmount during navig
 | **Status**  | **Character** | **Colour** | **Can transition to**               |
 | ----------- | ------------- | ---------- | ----------------------------------- |
 | todo        | ○             | Muted      | in_progress                         |
-| in_progress | ▶ (blink)     | Violet     | done, failed, blocked               |
+| in_progress | ▶ (blink)     | Blue       | done, failed, blocked               |
 | blocked     | ⚠             | Amber      | in_progress (on retry with context) |
 | done        | ✓             | Emerald    | todo (on re-run, manual override)   |
 | failed      | ✕             | Red        | todo (on retry)                     |
@@ -457,7 +473,7 @@ The app shell is a fixed layout - sidebar and top bar never unmount during navig
 
 | **Status** | **Panel state on Mission Control**                       | **DAEMON sidebar**                             |
 | ---------- | -------------------------------------------------------- | ---------------------------------------------- |
-| running    | Live panel with log stream, timer, progress              | working · T-{taskId} (violet)                  |
+| running    | Live panel with log stream, timer, progress              | working · T-{taskId} (blue)                    |
 | paused     | Same panel, timer frozen, \[RESUME\] button, ⏸ indicator | idle · PAUSED (amber)                          |
 | completed  | DAEMON success + summary (auto-clears after 60s)         | success · COMPLETE (brief), then READY         |
 | failed     | DAEMON error + \[View Session →\] + \[Retry →\]          | error · SESSION FAILED (red, highest priority) |
@@ -469,7 +485,7 @@ The app shell is a fixed layout - sidebar and top bar never unmount during navig
 | ------------ | --------------------- | -------------- | ------------------------------ | ---------- |
 | 1 (highest)  | Any session failed    | error          | DAEMON · SESSION FAILED        | Red        |
 | 2            | Any task blocked      | blocked        | DAEMON · N BLOCKED (clickable) | Amber      |
-| 3            | Any session running   | working        | DAEMON · T-{taskId}            | Violet     |
+| 3            | Any session running   | working        | DAEMON · T-{taskId}            | Blue       |
 | 4            | Any session paused    | idle           | DAEMON · PAUSED                | Amber      |
 | 5            | Plan pending approval | idle           | DAEMON · PLAN READY            | Amber      |
 | 6 (lowest)   | None of above         | idle           | DAEMON · READY                 | Muted      |
@@ -541,14 +557,15 @@ The app shell is a fixed layout - sidebar and top bar never unmount during navig
 
 # **17. Shared Component Inventory**
 
-| Component                         | Used on                                                                |
-| --------------------------------- | ---------------------------------------------------------------------- |
-| DAEMON sprite (all expressions)   | Sidebar, all empty states, all toasts, Task Drawer header, all dialogs |
-| Task row (collapsed + expanded)   | P5 TASKS tab, P1 Mission Control blocked pills                         |
-| Event log row (mono, color-coded) | P1 Event feed, P5 ACTIVITY tab, P6 Sessions expanded                   |
-| xterm.js terminal panel           | P1 live log, P5-OVERLAY ATTEMPTS tab, P6 inline expand                 |
-| Shiki diff viewer                 | P5 CHANGES tab, P5-OVERLAY CHANGES tab                                 |
-| ASCII progress bar (`▓▒`)         | P3 Specifications table, P5 header summary                             |
-| Session row                       | P6 Sessions, P1 (compact version)                                      |
-| Status indicator (retro char)     | All task rows, all spec rows, all session rows                         |
-| Amber ID badge (mono)             | All task IDs (T-042), spec IDs (SPEC-003), session IDs (SES-0091)      |
+| Component                         | Used on                                                             |
+| --------------------------------- | ------------------------------------------------------------------- |
+| Brand mark                        | Sidebar identity, auth, onboarding, metadata, application errors    |
+| DAEMON sprite (all expressions)   | Agent/system status, agent empty states, toasts, Task Drawer header |
+| Task row (collapsed + expanded)   | P5 TASKS tab, P1 Mission Control blocked pills                      |
+| Event log row (mono, color-coded) | P1 Event feed, P5 ACTIVITY tab, P6 Sessions expanded                |
+| xterm.js terminal panel           | P1 live log, P5-OVERLAY ATTEMPTS tab, P6 inline expand              |
+| Shiki diff viewer                 | P5 CHANGES tab, P5-OVERLAY CHANGES tab                              |
+| ASCII progress bar (`▓▒`)         | P3 Specifications table, P5 header summary                          |
+| Session row                       | P6 Sessions, P1 (compact version)                                   |
+| Status indicator (retro char)     | All task rows, all spec rows, all session rows                      |
+| Amber ID badge (mono)             | All task IDs (T-042), spec IDs (SPEC-003), session IDs (SES-0091)   |

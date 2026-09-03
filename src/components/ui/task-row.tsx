@@ -51,10 +51,10 @@ const STATUS_CHAR: Record<TaskStatus, string> = {
 
 const STATUS_VARIANT: Record<
   TaskStatus,
-  'default' | 'violet' | 'amber' | 'emerald' | 'red' | 'muted'
+  'default' | 'blue' | 'amber' | 'emerald' | 'red' | 'muted'
 > = {
   todo: 'muted',
-  in_progress: 'violet',
+  in_progress: 'blue',
   blocked: 'amber',
   done: 'emerald',
   failed: 'red',
@@ -84,7 +84,7 @@ export function TaskRow({
 
   const rowBorderClass =
     task.status === 'in_progress'
-      ? 'border-l-2 border-accent-violet bg-accent-violet/5'
+      ? 'border-l-2 border-accent-blue bg-accent-blue/5'
       : task.status === 'blocked'
         ? 'border-l-2 border-phosphor-amber bg-phosphor-amber/5'
         : 'border-l-2 border-transparent';

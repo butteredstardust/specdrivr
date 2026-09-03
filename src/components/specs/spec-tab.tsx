@@ -127,7 +127,7 @@ export function SpecTab({ spec, userRole }: SpecTabProps): React.ReactElement {
                   ) : (
                     <code
                       className={cn(
-                        'bg-bg-elevated border-border-default text-accent-violet rounded border px-1.5 py-0.5 font-mono text-[0.9em]',
+                        'bg-bg-elevated border-border-default text-accent-blue rounded border px-1.5 py-0.5 font-mono text-[0.9em]',
                         className
                       )}
                       {...props}

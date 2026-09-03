@@ -42,6 +42,9 @@ import { GET as getAttempts } from '@/app/api/v1/tasks/[id]/attempts/route';
 import { POST as cancelSession } from '@/app/api/v1/sessions/[id]/cancel/route';
 import { POST as heartbeatSession } from '@/app/api/v1/sessions/[id]/heartbeat/route';
 import { PATCH as updateMemberRole } from '@/app/api/v1/projects/[id]/members/[userId]/route';
+import { GET as getProjects } from '@/app/api/v1/projects/route';
+import { POST as pauseSession } from '@/app/api/v1/sessions/[id]/pause/route';
+import { POST as resumeSession } from '@/app/api/v1/sessions/[id]/resume/route';
 
 describe('API Route Integration Tests', () => {
   beforeEach(async () => {
@@ -55,6 +58,23 @@ describe('API Route Integration Tests', () => {
       expires: '',
     });
   }
+
+  describe('GET /api/v1/projects', () => {
+    it('cannot enumerate another user projects through query parameters', async () => {
+      const firstUser = await createTestUser('u1', 'u1@example.com');
+      const secondUser = await createTestUser('u2', 'u2@example.com');
+      const firstProject = await createTestProject('First Project', firstUser.id);
+      await createTestProject('Second Project', secondUser.id);
+      await mockSession(firstUser.id, firstUser.email);
+
+      const request = new NextRequest(`http://localhost/api/v1/projects?userId=${secondUser.id}`);
+      const response = await getProjects(request);
+      const body = (await response.json()) as { data: Array<{ id: number }> };
+
+      expect(response.status).toBe(200);
+      expect(body.data.map((project) => project.id)).toEqual([firstProject.id]);
+    });
+  });
 
   describe('POST /api/v1/projects/:projectId/specs', () => {
     it('creates a spec with 201', async () => {
@@ -404,6 +424,36 @@ describe('API Route Integration Tests', () => {
       });
       const res = await cancelSession(req, { params: Promise.resolve({ id: String(session.id) }) });
       expect(res.status).toBe(200);
+    });
+
+    it.each([
+      ['pause', pauseSession],
+      ['resume', resumeSession],
+      ['cancel', cancelSession],
+    ] as const)('rejects a project member attempting to %s a session', async (_, handler) => {
+      const owner = await createTestUser('owner', 'owner@example.com', 'owner');
+      const member = await createTestUser('member', 'member@example.com', 'member');
+      const project = await createTestProject('P1', owner.id);
+      await testDb.insert(schema.projectMembers).values({
+        projectId: project.id,
+        userId: member.id,
+        role: 'member',
+      });
+      await mockSession(member.id, member.email);
+
+      const [session] = await testDb
+        .insert(schema.agentSessions)
+        .values({ projectId: project.id, status: 'running' })
+        .returning();
+      const request = new NextRequest(`http://localhost/api/v1/sessions/${session.id}`, {
+        method: 'POST',
+      });
+
+      const response = await handler(request, {
+        params: Promise.resolve({ id: String(session.id) }),
+      });
+
+      expect(response.status).toBe(403);
     });
   });
 

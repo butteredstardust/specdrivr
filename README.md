@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="./public/brand/icon.svg" alt="Specdrivr icon" width="112" height="112">
+
 # Specdrivr
 
 **Spec-driven development for AI-augmented teams. Write the spec, the platform makes the tasks, your agent ships them.**
@@ -13,7 +15,7 @@
 
 <br>
 
-![Mission Control](./public/screenshots/dashboard-2026-03-22.png)
+![Mission Control](./public/screenshots/dashboard-2026-09-03.png)
 
 </div>
 
@@ -70,12 +72,12 @@ pnpm agent                        # claims and executes tasks
 
 | Projects | Specifications | Tasks |
 |:---:|:---:|:---:|
-| ![Projects](./public/screenshots/projects-2026-03-22.png) | ![Specification View](./public/screenshots/spec-view-2026-03-22.png) | ![Tasks](./public/screenshots/spec-tasks-2026-03-22.png) |
+| ![Projects](./public/screenshots/projects-2026-09-03.png) | ![Specification View](./public/screenshots/spec-view-2026-09-03.png) | ![Tasks](./public/screenshots/spec-tasks-2026-09-03.png) |
 | *Multiple AI-augmented codebases.* | *Version-controlled Markdown specs.* | *Atomic tasks decomposed from the plan.* |
 
 | Sessions | Session Detail | Audit Log |
 |:---:|:---:|:---:|
-| ![Sessions](./public/screenshots/sessions-2026-03-22.png) | ![Session Detail](./public/screenshots/session-detail-2026-03-22.png) | ![Activity](./public/screenshots/activity-2026-03-22.png) |
+| ![Sessions](./public/screenshots/sessions-2026-09-03.png) | ![Session Detail](./public/screenshots/session-detail-2026-09-03.png) | ![Activity](./public/screenshots/activity-2026-09-03.png) |
 | *Execution history and agent tracking.* | *Real-time terminal logs and reasoning.* | *Full transparency into all actions.* |
 
 ---

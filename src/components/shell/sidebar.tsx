@@ -16,8 +16,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { DaemonMascot } from '@/components/ui/daemon-mascot';
-import { PlayfulDaemon } from '@/components/ui/playful-daemon';
-import { PlayfulLogo } from '@/components/ui/playful-logo';
+import { BrandLockup, BrandMark } from '@/components/ui/brand-mark';
 import { useSystemHealth } from '@/components/layout/systems-bar';
 import { useShell } from '@/components/shell/shell-context';
 import { PixelBadge } from '@/components/ui/pixel-badge';
@@ -237,13 +236,12 @@ export function Sidebar({ projects }: SidebarProps) {
         <div className="flex items-center gap-3 px-4 py-6">
           {isCollapsed ? (
             <div className="flex w-full justify-center">
-              <PlayfulDaemon size={32} />
+              <BrandMark size={32} />
             </div>
           ) : (
             <>
-              <PlayfulDaemon size={32} />
-              <div className="flex flex-col">
-                <PlayfulLogo />
+              <div className="flex flex-1 flex-col gap-1">
+                <BrandLockup size={32} />
                 {devMode && (
                   <PixelBadge
                     variant="amber"
@@ -343,13 +341,13 @@ export function Sidebar({ projects }: SidebarProps) {
                 <Icon
                   className={cn(
                     'h-[18px] w-[18px] shrink-0 transition-transform duration-200 group-hover:scale-110',
-                    active ? 'text-accent-violet' : 'text-text-secondary'
+                    active ? 'text-accent-blue' : 'text-text-secondary'
                   )}
                 />
                 {!isCollapsed && <span>{label}</span>}
                 {!isCollapsed && showBadge && (
                   <PixelBadge
-                    variant="violet"
+                    variant="blue"
                     className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full p-0 text-[10px] shadow-sm"
                   >
                     {badgeText}
@@ -357,7 +355,7 @@ export function Sidebar({ projects }: SidebarProps) {
                 )}
                 {isCollapsed && showBadge && (
                   <PixelBadge
-                    variant="violet"
+                    variant="blue"
                     className="absolute top-2 right-2 flex h-4 min-w-4 items-center justify-center rounded-full p-0 text-[9px] shadow-sm"
                   >
                     {badgeText}

@@ -304,9 +304,9 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
   if (plan.status === 'approved' || plan.status === 'executing' || plan.status === 'completed') {
     const isExecuting = plan.status === 'executing';
     const bannerBorder = isExecuting
-      ? 'border-accent-violet/30 bg-accent-violet/5'
+      ? 'border-accent-blue/30 bg-accent-blue/5'
       : 'border-status-emerald/30 bg-status-emerald/5';
-    const bannerText = isExecuting ? 'text-accent-violet' : 'text-status-emerald';
+    const bannerText = isExecuting ? 'text-accent-blue' : 'text-status-emerald';
     const bannerLabel = isExecuting
       ? 'EXECUTING'
       : plan.status === 'approved'

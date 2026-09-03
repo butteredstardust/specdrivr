@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const localChromePath = process.env.PLAYWRIGHT_CHROME_PATH;
+
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
@@ -14,7 +16,10 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        launchOptions: localChromePath ? { executablePath: localChromePath } : undefined,
+      },
     },
   ],
   webServer: {

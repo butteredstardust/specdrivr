@@ -21,7 +21,7 @@ interface ActivityTabProps {
 
 function eventTypeBadgeClass(eventType: string): string {
   if (eventType.startsWith('PLAN_')) return 'text-phosphor-amber';
-  if (eventType.startsWith('TASK_')) return 'text-accent-violet';
+  if (eventType.startsWith('TASK_')) return 'text-accent-blue';
   if (eventType.startsWith('SESSION_')) return 'text-text-secondary';
   return 'text-text-muted';
 }

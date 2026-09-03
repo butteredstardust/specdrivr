@@ -9,7 +9,8 @@ import { z } from 'zod';
 import { loginSchema } from '@/lib/schemas';
 import { authClient } from '@/lib/auth-client';
 import { clientLogger } from '@/lib/logger-client';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { getSafeInternalPath } from '@/lib/redirects';
+import { BrandMark } from '@/components/ui/brand-mark';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,13 +21,12 @@ type LoginValues = z.infer<typeof loginSchema>;
 
 type LoginState = {
   error: string | null;
-  expression: 'idle' | 'working' | 'error';
 };
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get('next') ?? '/';
+  const next = getSafeInternalPath(searchParams.get('next'));
   const formRef = useRef<HTMLFormElement>(null);
 
   const {
@@ -55,27 +55,24 @@ export default function LoginPage() {
 
     if (signInError) {
       clientLogger.error('Login failed', signInError);
-      return { error: 'Invalid email or password.', expression: 'error' };
+      return { error: 'Invalid email or password.' };
     }
 
     if (data) {
       router.push(next);
     }
 
-    return { error: null, expression: 'working' };
+    return { error: null };
   };
 
   const [state, formAction, isPending] = useActionState(loginAction, {
     error: null,
-    expression: 'idle',
   });
 
   const [isDev, setIsDev] = useState(false);
   useEffect(() => {
     setIsDev(window.location.hostname === 'localhost');
   }, []);
-
-  const expression = isPending ? 'working' : state.expression;
 
   const onValid = () => {
     const form = formRef.current;
@@ -89,7 +86,7 @@ export default function LoginPage() {
   return (
     <Card className="border-border-default bg-bg-surface w-full max-w-sm">
       <CardHeader className="items-center gap-2 pb-2">
-        <DaemonMascot size={48} expression={expression} />
+        <BrandMark size={48} className={isPending ? 'animate-pulse' : undefined} />
         <div className="text-center">
           <p className="text-text-primary font-mono text-sm font-bold tracking-widest">SPECDRIVR</p>
           <p className="text-text-secondary font-mono text-xs tracking-tight uppercase">
@@ -151,7 +148,7 @@ export default function LoginPage() {
           <Button
             type="submit"
             disabled={isPending}
-            className="bg-accent-violet hover:bg-accent-violet-dim w-full font-mono text-sm tracking-wider uppercase transition-colors"
+            className="bg-accent-blue hover:bg-accent-blue-dim w-full font-mono text-sm tracking-wider uppercase transition-colors"
           >
             {isPending ? 'Signing in…' : 'Sign In'}
           </Button>
@@ -178,7 +175,7 @@ export default function LoginPage() {
                 type="button"
                 variant="outline"
                 size="sm"
-                className="hover:bg-accent-violet/5 hover:text-accent-violet w-full font-mono text-xs transition-colors"
+                className="hover:bg-accent-blue/5 hover:text-accent-blue w-full font-mono text-xs transition-colors"
                 onClick={() => {
                   setValue('email', quickEmail);
                   setValue('password', 'Password123!');

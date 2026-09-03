@@ -144,7 +144,7 @@ export function SpecEditor(props: SpecEditorProps) {
           </Button>
           <Button
             size="sm"
-            variant="violet"
+            variant="blue"
             onClick={handleSaveAndGenerate}
             disabled={isSaving || !title.trim() || content.length < 50}
             className="h-8 gap-1.5"

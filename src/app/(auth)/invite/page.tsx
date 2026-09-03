@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { clientLogger } from '@/lib/logger-client';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { BrandMark } from '@/components/ui/brand-mark';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -77,7 +77,7 @@ export default function InvitePage() {
     return (
       <Card className="border-border-default bg-bg-surface w-full max-w-sm">
         <CardContent className="flex justify-center pt-6">
-          <DaemonMascot size={48} expression="working" />
+          <BrandMark size={48} className="animate-pulse" />
         </CardContent>
       </Card>
     );
@@ -87,7 +87,7 @@ export default function InvitePage() {
     return (
       <Card className="border-border-default bg-bg-surface w-full max-w-sm">
         <CardContent className="space-y-3 pt-6 text-center">
-          <DaemonMascot size={48} expression="error" />
+          <BrandMark size={48} />
           <p className="text-text-primary text-sm">This invite link has expired.</p>
           <p className="text-text-muted text-xs">Ask your admin to send a new invitation.</p>
         </CardContent>
@@ -98,7 +98,7 @@ export default function InvitePage() {
   return (
     <Card className="border-border-default bg-bg-surface w-full max-w-sm">
       <CardHeader className="items-center gap-2 pb-2">
-        <DaemonMascot size={48} expression="idle" />
+        <BrandMark size={48} />
         <div className="text-center">
           <p className="font-mono text-sm font-bold tracking-widest">SPECDRIVR</p>
           {invite && (
@@ -143,7 +143,7 @@ export default function InvitePage() {
           <Button
             type="submit"
             disabled={loading}
-            className="bg-accent-violet hover:bg-accent-violet-dim w-full"
+            className="bg-accent-blue hover:bg-accent-blue-dim w-full"
           >
             {loading ? 'Joining…' : 'Accept Invitation'}
           </Button>

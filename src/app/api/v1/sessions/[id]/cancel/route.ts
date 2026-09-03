@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { agentSessionRepository } from '@/repositories/agent-session-repository';
 import { handleApiError } from '@/lib/error-handler';
-import { requireMember } from '@/lib/rbac';
+import { requireAdmin } from '@/lib/rbac';
 import { NotFoundError } from '@/lib/errors';
 
 interface RouteParams {
@@ -34,10 +34,10 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
       throw new NotFoundError(`Agent session with ID ${sessionId} not found`);
     }
 
-    const { allowed } = await requireMember(session.user.id, agentSession.projectId);
+    const { allowed } = await requireAdmin(session.user.id, agentSession.projectId);
     if (!allowed) {
       return NextResponse.json(
-        { error: { code: 'FORBIDDEN', message: 'You do not have access to this project' } },
+        { error: { code: 'FORBIDDEN', message: 'Project admin access is required' } },
         { status: 403 }
       );
     }

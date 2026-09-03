@@ -73,7 +73,7 @@ export default function ProjectsPage() {
             <Search className="text-text-muted absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
             <Input
               placeholder="SEARCH PROJECTS..."
-              className="bg-bg-elevated focus:ring-accent-violet/30 h-8 pl-8 font-mono text-[10px] tracking-widest uppercase transition-all focus:ring-1"
+              className="bg-bg-elevated focus:ring-accent-blue/30 h-8 pl-8 font-mono text-[10px] tracking-widest uppercase transition-all focus:ring-1"
               value={search}
               onChange={(e) => setSearch(e.target.value || null)}
             />

@@ -148,7 +148,7 @@ export function TaskDrawerOverview({ task, onRetry, onTaskUpdated }: TaskDrawerO
             <p className="text-text-secondary text-sm leading-relaxed">{task.blockedReason}</p>
           )}
           <div className="pt-2">
-            <Button variant="violet" size="sm" onClick={onRetry} className="h-8 w-full gap-1.5">
+            <Button variant="blue" size="sm" onClick={onRetry} className="h-8 w-full gap-1.5">
               <RefreshCw className="h-3.5 w-3.5" />
               RETRY TASK
             </Button>
