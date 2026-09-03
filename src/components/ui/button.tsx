@@ -19,8 +19,7 @@ const buttonVariants = cva(
         link: 'text-primary underline-offset-4 hover:underline',
         phosphor:
           'border-phosphor-amber/30 bg-phosphor-amber/10 text-phosphor-amber hover:bg-phosphor-amber/20 hover:text-phosphor-amber border font-mono text-[10px] tracking-widest uppercase shadow-sm hover:shadow-md hover:border-phosphor-amber/50',
-        violet:
-          'border-accent-violet/30 bg-accent-violet/10 text-accent-violet hover:bg-accent-violet/20 hover:text-accent-violet border font-mono text-[10px] tracking-widest uppercase shadow-sm hover:shadow-md hover:border-accent-violet/50',
+        blue: 'border-accent-blue/30 bg-accent-blue/10 text-accent-blue hover:bg-accent-blue/20 hover:text-accent-blue border font-mono text-[10px] tracking-widest uppercase shadow-sm hover:shadow-md hover:border-accent-blue/50',
       },
       size: {
         default: 'h-10 px-4 py-2',

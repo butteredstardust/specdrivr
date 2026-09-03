@@ -118,7 +118,7 @@ export function DiffViewer({ files, className }: DiffViewerProps) {
               className={cn(
                 'flex h-auto w-full items-center justify-start gap-1.5 truncate rounded-none px-3 py-2 text-left font-mono text-xs',
                 selectedFile === file.filename
-                  ? 'bg-accent-violet/10 text-accent-violet hover:bg-accent-violet/15'
+                  ? 'bg-accent-blue/10 text-accent-blue hover:bg-accent-blue/15'
                   : 'text-text-secondary hover:bg-bg-elevated'
               )}
             >

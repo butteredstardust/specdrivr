@@ -68,7 +68,7 @@ export function NotificationPanel() {
           <Button
             size="sm"
             variant="ghost"
-            className="text-accent-violet hover:text-accent-violet-dim h-6 font-mono text-[10px] tracking-[0.08em] uppercase transition-colors"
+            className="text-accent-blue hover:text-accent-blue-dim h-6 font-mono text-[10px] tracking-[0.08em] uppercase transition-colors"
             onClick={handleMarkAllRead}
           >
             Mark all read
@@ -92,7 +92,7 @@ export function NotificationPanel() {
             key={n.id}
             className={cn(
               'border-border-default flex items-center gap-3 border-b px-4 py-3 transition-colors last:border-0',
-              !n.readAt ? 'bg-accent-violet/5' : 'hover:bg-bg-elevated/50'
+              !n.readAt ? 'bg-accent-blue/5' : 'hover:bg-bg-elevated/50'
             )}
           >
             <div className="min-w-0 flex-1">
@@ -108,7 +108,7 @@ export function NotificationPanel() {
             <span className="text-text-muted shrink-0 font-mono text-[10px]">
               {formatRelativeTime(n.createdAt)}
             </span>
-            {!n.readAt && <div className="bg-accent-violet h-1.5 w-1.5 shrink-0 rounded-full" />}
+            {!n.readAt && <div className="bg-accent-blue h-1.5 w-1.5 shrink-0 rounded-full" />}
           </div>
         ))}
       </div>
@@ -117,7 +117,7 @@ export function NotificationPanel() {
       <div className="border-border-default border-t px-4 py-2.5">
         <Link
           href="/notifications"
-          className="text-accent-violet hover:text-accent-violet-dim font-mono text-xs transition-colors hover:underline"
+          className="text-accent-blue hover:text-accent-blue-dim font-mono text-xs transition-colors hover:underline"
         >
           View all notifications &rarr;
         </Link>

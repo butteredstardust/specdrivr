@@ -106,7 +106,7 @@ export function TasksTab({ specId, userRole }: TasksTabProps): React.ReactElemen
         <span className="font-mono text-xs text-emerald-400">Done: {done}</span>
         {failed > 0 && <span className="text-status-red font-mono text-xs">Failed: {failed}</span>}
         {inProgress > 0 && (
-          <span className="text-accent-violet font-mono text-xs">In Progress: {inProgress}</span>
+          <span className="text-accent-blue font-mono text-xs">In Progress: {inProgress}</span>
         )}
       </div>
 

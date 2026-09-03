@@ -78,7 +78,7 @@ function ActivityRow({ item }: { item: ActivityItem }) {
           <span>{formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}</span>
           {item.sessionId && (
             <span className="text-text-muted/40 font-mono tracking-normal">
-              · <span className="text-accent-violet/60">SES-{item.sessionId}</span>
+              · <span className="text-accent-blue/60">SES-{item.sessionId}</span>
             </span>
           )}
           {item.specId && (
@@ -123,6 +123,6 @@ function getIconColor(type: string) {
   if (type.includes('FAILED') || type.includes('ERROR')) return 'text-status-red';
   if (type.includes('DONE') || type.includes('COMPLETED')) return 'text-status-emerald';
   if (type.includes('BLOCKED')) return 'text-phosphor-amber';
-  if (type.includes('START') || type.includes('APPROVED')) return 'text-accent-violet';
+  if (type.includes('START') || type.includes('APPROVED')) return 'text-accent-blue';
   return 'text-text-secondary';
 }

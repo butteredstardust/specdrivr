@@ -6,7 +6,6 @@ import { z } from 'zod';
 import { parseUrlParams } from '@/lib/api-utils';
 
 const ProjectQuerySchema = z.object({
-  userId: z.string().optional(),
   status: z.enum(['active', 'archived']).optional(),
   limit: z.coerce.number().int().positive().default(50),
   offset: z.coerce.number().int().nonnegative().default(0),
@@ -36,14 +35,7 @@ export async function GET(request: NextRequest) {
 
     const query = parseUrlParams(request, ProjectQuerySchema);
 
-    let projects;
-
-    if (query.userId) {
-      // In a real app, we'd check if session.user is a global admin if they query another user
-      projects = await projectRepository.getByUserId(query.userId, query.limit, query.offset);
-    } else {
-      projects = await projectRepository.getByUserId(session.user.id, query.limit, query.offset);
-    }
+    let projects = await projectRepository.getByUserId(session.user.id, query.limit, query.offset);
 
     if (query.status) {
       projects = projects.filter((p) => p.status === query.status);

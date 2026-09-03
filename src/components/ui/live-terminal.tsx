@@ -39,7 +39,7 @@ export function LiveTerminal({
     const styles = getComputedStyle(document.documentElement);
     const terminalBg = styles.getPropertyValue('--terminal-bg').trim() || 'transparent';
     const terminalText = styles.getPropertyValue('--terminal-text').trim() || 'rgb(161, 161, 170)';
-    const accentViolet = styles.getPropertyValue('--accent-violet').trim() || 'rgb(124, 92, 252)';
+    const accentBlue = styles.getPropertyValue('--accent-blue').trim() || 'rgb(92, 175, 255)';
     const statusEmerald = styles.getPropertyValue('--status-emerald').trim() || 'rgb(5, 150, 105)';
     const statusRed = styles.getPropertyValue('--status-red').trim() || 'rgb(220, 38, 38)';
     const phosphorAmber = styles.getPropertyValue('--phosphor-amber').trim() || 'rgb(255, 179, 0)';
@@ -49,16 +49,16 @@ export function LiveTerminal({
       theme: {
         background: terminalBg,
         foreground: terminalText,
-        cursor: accentViolet,
-        selectionBackground: `${accentViolet}40`,
+        cursor: accentBlue,
+        selectionBackground: `${accentBlue}40`,
         black: 'rgb(10, 10, 11)',
         green: statusEmerald,
         yellow: phosphorAmber,
-        blue: accentViolet,
+        blue: accentBlue,
         red: statusRed,
         brightGreen: terminalGreen,
         brightYellow: phosphorAmber,
-        brightBlue: accentViolet,
+        brightBlue: accentBlue,
       },
 
       fontFamily: '"Berkeley Mono", "Fira Code", "Courier New", monospace',

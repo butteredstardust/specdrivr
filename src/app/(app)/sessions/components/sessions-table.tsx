@@ -41,7 +41,7 @@ function StatusBadge({ status }: { status: Session['status'] }) {
   switch (status) {
     case 'running':
       return (
-        <PixelBadge variant="violet" dot>
+        <PixelBadge variant="blue" dot>
           Running
         </PixelBadge>
       );

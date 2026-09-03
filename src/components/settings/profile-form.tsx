@@ -68,7 +68,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
     <section className="flex flex-col gap-6">
       {/* Avatar */}
       <div className="flex items-center gap-4">
-        <div className="bg-accent-violet flex h-14 w-14 shrink-0 items-center justify-center rounded-full">
+        <div className="bg-accent-blue flex h-14 w-14 shrink-0 items-center justify-center rounded-full">
           <span className="text-lg font-semibold text-white">{initials || '?'}</span>
         </div>
         <p className="text-text-muted text-sm">

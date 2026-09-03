@@ -76,7 +76,7 @@ export function SettingsNav({ userRole }: SettingsNavProps) {
                     className={cn(
                       'rounded px-2 py-1.5 text-sm transition-colors',
                       active
-                        ? 'bg-accent-violet/10 text-accent-violet font-medium'
+                        ? 'bg-accent-blue/10 text-accent-blue font-medium'
                         : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
                     )}
                   >

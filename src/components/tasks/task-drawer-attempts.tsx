@@ -31,7 +31,7 @@ interface TaskDrawerAttemptsProps {
 }
 
 const statusBadgeClass: Record<Attempt['status'], string> = {
-  running: 'bg-accent-violet/10 text-accent-violet',
+  running: 'bg-accent-blue/10 text-accent-blue',
   completed: 'bg-emerald-500/10 text-emerald-400',
   failed: 'bg-status-red/10 text-status-red',
 };

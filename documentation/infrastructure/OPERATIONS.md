@@ -36,7 +36,7 @@ _Spec-driven autonomous code execution for engineering teams_
 ## **17.3 Accessibility**
 
 - WCAG 2.1 AA compliance target.
-- All interactive elements: keyboard focusable with visible focus ring (violet 2px outline).
+- All interactive elements: keyboard focusable with a visible 2px blue focus ring.
 - ARIA attributes on all custom components (Radix primitives handle most automatically).
 - Colour is never the sole indicator of state - always paired with a text label or icon.
 - DAEMON sprite: role="img" with aria-label describing current expression and meaning.

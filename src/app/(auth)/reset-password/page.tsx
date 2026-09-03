@@ -10,7 +10,7 @@ import { resetPasswordSchema } from '@/lib/schemas';
 import { toast } from 'sonner';
 import { authClient } from '@/lib/auth-client';
 import { clientLogger } from '@/lib/logger-client';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { BrandMark } from '@/components/ui/brand-mark';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -85,9 +85,9 @@ export default function ResetPasswordPage() {
     return (
       <Card className="border-border-default bg-bg-surface w-full max-w-sm">
         <CardContent className="space-y-3 pt-6 text-center">
-          <DaemonMascot size={48} expression="error" />
+          <BrandMark size={48} />
           <p className="text-text-primary text-sm">This link has expired.</p>
-          <Link href="/forgot-password" className="text-accent-violet text-xs hover:underline">
+          <Link href="/forgot-password" className="text-accent-blue text-xs hover:underline">
             Request a new link
           </Link>
         </CardContent>
@@ -100,7 +100,7 @@ export default function ResetPasswordPage() {
   return (
     <Card className="border-border-default bg-bg-surface w-full max-w-sm">
       <CardHeader className="items-center gap-2 pb-2">
-        <DaemonMascot size={48} expression="idle" />
+        <BrandMark size={48} />
         <p className="font-mono text-sm font-bold tracking-widest">SPECDRIVR</p>
       </CardHeader>
       <CardContent>
@@ -150,7 +150,7 @@ export default function ResetPasswordPage() {
           <Button
             type="submit"
             disabled={isPending}
-            className="bg-accent-violet hover:bg-accent-violet-dim w-full"
+            className="bg-accent-blue hover:bg-accent-blue-dim w-full"
           >
             {isPending ? 'Updating…' : 'Reset Password'}
           </Button>

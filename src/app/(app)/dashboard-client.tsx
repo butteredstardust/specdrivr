@@ -98,46 +98,42 @@ export function DashboardClient({ initialSessions, initialTasks }: DashboardClie
     setDismissed(false);
   }
 
-  async function handleSessionPatch(sessionId: number, status: string) {
+  async function handleSessionAction(sessionId: number, action: 'pause' | 'resume' | 'cancel') {
     try {
-      const response = await fetch(`/api/v1/sessions/${sessionId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch(`/api/v1/sessions/${sessionId}/${action}`, {
+        method: 'POST',
         credentials: 'include',
-        body: JSON.stringify({ status }),
       });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
     } catch (err) {
-      clientLogger.error('Failed to update session status', { sessionId, status, err });
+      clientLogger.error('Failed to update session status', { sessionId, action, err });
       toast.error('Failed to update session');
     }
   }
 
   const handlePause = async () => {
     if (!activeSession) return;
-    await handleSessionPatch(activeSession.id, 'paused');
+    await handleSessionAction(activeSession.id, 'pause');
   };
 
   const handleResume = async () => {
     if (!activeSession) return;
-    await handleSessionPatch(activeSession.id, 'running');
+    await handleSessionAction(activeSession.id, 'resume');
   };
 
   const handleCancel = async () => {
     if (!activeSession) return;
-    await handleSessionPatch(activeSession.id, 'cancelled');
+    await handleSessionAction(activeSession.id, 'cancel');
   };
 
   const handleRetry = async () => {
     if (!activeSession) return;
     try {
-      const response = await fetch(`/api/v1/sessions/${activeSession.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch(`/api/v1/sessions/${activeSession.id}/cancel`, {
+        method: 'POST',
         credentials: 'include',
-        body: JSON.stringify({ status: 'cancelled' }),
       });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
@@ -201,7 +197,7 @@ export function DashboardClient({ initialSessions, initialTasks }: DashboardClie
                     {activeSession.status === 'paused' && (
                       <div className="bg-terminal-bg pointer-events-none absolute inset-0 flex items-center justify-center">
                         <MatrixScreensaver className="absolute inset-0" />
-                        <div className="text-accent-violet border-accent-violet/30 z-10 rounded border bg-black/80 px-4 py-2 font-mono text-xs tracking-widest uppercase shadow-[0_0_15px_rgba(124,92,252,0.2)] backdrop-blur-sm">
+                        <div className="text-brand-cyan border-brand-blue/30 bg-brand-navy/90 z-10 rounded border px-4 py-2 font-mono text-xs tracking-widest uppercase shadow-sm backdrop-blur-sm">
                           System Idle
                         </div>
                       </div>

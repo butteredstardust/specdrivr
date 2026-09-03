@@ -18,8 +18,18 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Specdrivr',
+  title: {
+    default: 'Specdrivr',
+    template: '%s · Specdrivr',
+  },
   description: 'AI-native orchestration platform',
+  applicationName: 'Specdrivr',
+  manifest: '/manifest.webmanifest',
+  icons: {
+    icon: [{ url: '/brand/icon.svg', type: 'image/svg+xml' }],
+    shortcut: '/brand/icon.svg',
+    apple: '/brand/icon.svg',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

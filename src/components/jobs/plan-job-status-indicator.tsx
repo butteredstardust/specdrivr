@@ -34,7 +34,7 @@ export function PlanJobStatusIndicator({ projectId, className }: PlanJobStatusIn
       <div className="relative">
         <DaemonMascot size={24} expression="working" />
         <div className="absolute -top-1 -right-1">
-          <Loader2 className="text-accent-violet h-3 w-3 animate-spin" />
+          <Loader2 className="text-accent-blue h-3 w-3 animate-spin" />
         </div>
       </div>
       <div className="flex flex-col gap-0.5">
@@ -45,7 +45,7 @@ export function PlanJobStatusIndicator({ projectId, className }: PlanJobStatusIn
           {isGeneratingTasks ? 'Architecting tasks...' : 'Generating execution plan...'}
         </span>
       </div>
-      <PixelBadge variant="violet" className="ml-2 h-5 px-2 text-[9px]">
+      <PixelBadge variant="blue" className="ml-2 h-5 px-2 text-[9px]">
         {job.status.toUpperCase()}
       </PixelBadge>
     </div>

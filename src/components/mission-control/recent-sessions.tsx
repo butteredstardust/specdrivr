@@ -50,7 +50,7 @@ export function RecentSessions({ sessions }: RecentSessionsProps) {
       </h2>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {sessions.map((session) => {
-          let variant: 'violet' | 'emerald' | 'red' | 'muted' | 'amber' = 'violet';
+          let variant: 'blue' | 'emerald' | 'red' | 'muted' | 'amber' = 'blue';
           let label: string = session.status;
 
           switch (session.status) {
@@ -68,7 +68,7 @@ export function RecentSessions({ sessions }: RecentSessionsProps) {
               variant = 'amber';
               break;
             case 'running':
-              variant = 'violet';
+              variant = 'blue';
               break;
           }
 
@@ -90,7 +90,7 @@ export function RecentSessions({ sessions }: RecentSessionsProps) {
               </div>
 
               <div className="flex flex-col gap-3">
-                <p className="text-text-primary group-hover:text-accent-violet truncate font-mono font-medium transition-colors">
+                <p className="text-text-primary group-hover:text-accent-blue truncate font-mono font-medium transition-colors">
                   {session.specTitle || session.specName || `Session #${session.id}`}
                 </p>
                 <div className="text-text-muted flex flex-col gap-2 font-mono text-[10px] tracking-wider uppercase opacity-70">

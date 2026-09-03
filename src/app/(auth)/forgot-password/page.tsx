@@ -9,7 +9,7 @@ import { forgotPasswordSchema } from '@/lib/schemas';
 import { toast } from 'sonner';
 import { authClient } from '@/lib/auth-client';
 import { clientLogger } from '@/lib/logger-client';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { BrandMark } from '@/components/ui/brand-mark';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -60,7 +60,7 @@ export default function ForgotPasswordPage() {
   return (
     <Card className="border-border-default bg-bg-surface w-full max-w-sm">
       <CardHeader className="items-center gap-2 pb-2">
-        <DaemonMascot size={48} expression={state === 'sent' ? 'success' : 'idle'} />
+        <BrandMark size={48} />
         <p className="font-mono text-sm font-bold tracking-widest">SPECDRIVR</p>
       </CardHeader>
       <CardContent>
@@ -70,7 +70,7 @@ export default function ForgotPasswordPage() {
             <p className="text-text-muted text-xs">
               If that address is registered, a reset link is on its way.
             </p>
-            <Link href="/login" className="text-accent-violet text-xs hover:underline">
+            <Link href="/login" className="text-accent-blue text-xs hover:underline">
               Back to login
             </Link>
           </div>
@@ -98,7 +98,7 @@ export default function ForgotPasswordPage() {
             <Button
               type="submit"
               disabled={isPending}
-              className="bg-accent-violet hover:bg-accent-violet-dim w-full"
+              className="bg-accent-blue hover:bg-accent-blue-dim w-full"
             >
               {isPending ? 'Sending…' : 'Send Reset Link'}
             </Button>

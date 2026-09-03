@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { BrandMark } from '@/components/ui/brand-mark';
 
 export default function NotFound() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[color:var(--bg-base)] px-6 text-center">
       <div className="mb-8">
-        <DaemonMascot size={64} expression="idle" />
+        <BrandMark size={64} />
       </div>
       <h1 className="text-text-primary mb-2 font-mono text-4xl font-bold tracking-tighter">
         404: SEGMENT_NOT_FOUND

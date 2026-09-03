@@ -112,7 +112,7 @@ export default function NotificationsPage() {
       case 'warning':
         return <AlertCircle className="text-phosphor-amber h-4 w-4" />;
       case 'mention':
-        return <Bell className="text-accent-violet h-4 w-4" />;
+        return <Bell className="text-accent-blue h-4 w-4" />;
       default:
         return <Info className="text-primary h-4 w-4" />;
     }
@@ -216,7 +216,7 @@ export default function NotificationsPage() {
                 className={cn(
                   'border-border-default/50 flex cursor-pointer items-center gap-4 border-b py-3 pr-6 transition-colors',
                   !n.readAt
-                    ? 'border-l-accent-violet bg-accent-violet/5 border-l-2 pl-[22px]'
+                    ? 'border-l-accent-blue bg-accent-blue/5 border-l-2 pl-[22px]'
                     : 'hover:bg-bg-elevated/50 border-l-2 border-l-transparent pl-[22px]'
                 )}
                 onClick={() => !n.readAt && handleMarkRead(n.id)}

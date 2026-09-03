@@ -165,7 +165,7 @@ export function SessionPanel({
         <div
           className={cn(
             'scanline-overlay flex flex-col gap-3 rounded-lg border p-3 transition-all',
-            panelState === 'running' ? 'cyber-glow-active border-accent-violet/30' : 'border-border'
+            panelState === 'running' ? 'cyber-glow-active border-accent-blue/30' : 'border-border'
           )}
         >
           {/* Header row: session ID badge + status + timer */}
@@ -179,7 +179,7 @@ export function SessionPanel({
               </span>
             )}
             {panelState === 'running' ? (
-              <PixelBadge variant="violet" dot>
+              <PixelBadge variant="blue" dot>
                 RUNNING
               </PixelBadge>
             ) : (
