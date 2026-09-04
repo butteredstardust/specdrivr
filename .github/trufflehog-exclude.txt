@@ -1,0 +1,35 @@
+# TruffleHog path exclusions for the Security workflow.
+#
+# One RE2 regex per line, matched against the repository-relative file path.
+# Blank lines and lines starting with `#` are ignored by TruffleHog.
+#
+# ONLY add a path here when the credential it matches is a placeholder or a
+# local-development-only value that grants no access to anything real. These
+# exclusions apply to the whole of git history, so a path listed here is a
+# blind spot forever after - prefer fixing the file over adding to this list.
+#
+# The Security workflow scans full history on its scheduled run, so rewriting
+# or deleting a file does NOT clear a finding: the old blob is still reachable
+# from old commits. That is why the paths below are matched rather than the
+# offending files simply being cleaned up.
+#
+# NOTE: do not paste example connection strings into this file. TruffleHog
+# scans it like any other file, and a credential-shaped comment here becomes a
+# permanent self-inflicted finding.
+
+# Local-only Docker Compose database credentials. These services bind to
+# localhost on a developer machine or an ephemeral CI runner and are never
+# reachable from anywhere else.
+# `infra/compose/` is the current home; the repo-root paths are where these
+# files lived before they were moved, and remain reachable in history.
+^docker-compose\.ya?ml$
+^docker-compose\.ci\.ya?ml$
+^infra/compose/docker-compose\.ya?ml$
+^infra/compose/docker-compose\.ci\.ya?ml$
+
+# Agent instruction docs. Both carry an illustrative placeholder database URL
+# (literal `user` / `pass` against a literal `host`) in the environment
+# variable examples. `claude.md` is the pre-rename path of `CLAUDE.md` and
+# survives in history.
+^AGENTS\.md$
+^[Cc][Ll][Aa][Uu][Dd][Ee]\.md$

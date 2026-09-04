@@ -1,0 +1,84 @@
+version: 2
+
+# The Security workflow's `pnpm audit --audit-level=high` gate is only
+# sustainable if the lockfile is kept current. Without automated updates it
+# drifts until a routine advisory turns the workflow permanently red and the
+# failure stops being read as signal. These schedules keep the drift small
+# enough that each red build points at something new.
+updates:
+  - package-ecosystem: npm
+    directory: '/'
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    versioning-strategy: increase-if-necessary
+    labels:
+      - dependencies
+    groups:
+      # One PR per ecosystem cluster instead of dozens of single-package PRs.
+      # Patch and minor bumps only - majors are opened individually so the
+      # breaking-change review is not buried in a batch.
+      react:
+        patterns:
+          - 'react'
+          - 'react-dom'
+          - '@types/react'
+          - '@types/react-dom'
+        update-types: ['minor', 'patch']
+      next:
+        patterns:
+          - 'next'
+          - '@next/*'
+          - 'eslint-config-next'
+        update-types: ['minor', 'patch']
+      radix:
+        patterns:
+          - '@radix-ui/*'
+        update-types: ['minor', 'patch']
+      testing:
+        patterns:
+          - 'vitest'
+          - '@vitest/*'
+          - 'vite'
+          - '@vitejs/*'
+          - '@playwright/test'
+          - '@testing-library/*'
+          - 'jsdom'
+          - '@faker-js/faker'
+        update-types: ['minor', 'patch']
+      linting:
+        patterns:
+          - 'eslint'
+          - '@eslint/*'
+          - 'eslint-plugin-*'
+          - 'typescript-eslint'
+          - 'prettier'
+          - 'prettier-plugin-*'
+          - 'knip'
+          - 'lint-staged'
+        update-types: ['minor', 'patch']
+      database:
+        patterns:
+          - 'drizzle-orm'
+          - 'drizzle-kit'
+          - 'pg'
+          - 'postgres'
+        update-types: ['minor', 'patch']
+      minor-and-patch:
+        patterns:
+          - '*'
+        update-types: ['minor', 'patch']
+
+  - package-ecosystem: github-actions
+    directory: '/'
+    schedule:
+      interval: weekly
+      day: monday
+    labels:
+      - dependencies
+      - ci
+    groups:
+      actions:
+        patterns:
+          - '*'
