@@ -161,13 +161,13 @@ export function ActiveSessionsSection() {
       {isLoading && (
         <div className="text-fg-muted flex items-center gap-2">
           <Loader2 className="size-3 animate-spin" />
-          <span className="font-mono text-xs">Loading sessions…</span>
+          <span className="text-xs">Loading sessions…</span>
         </div>
       )}
 
       {error && !isLoading && (
         <div className="flex items-center gap-2">
-          <span className="text-danger font-mono text-xs">Failed to load sessions.</span>
+          <span className="text-danger text-xs">Failed to load sessions.</span>
           <Button
             variant="ghost"
             size="sm"
@@ -233,7 +233,7 @@ export function ActiveSessionsSection() {
           )}
 
           {sessions.length === 0 && (
-            <p className="text-fg-muted font-mono text-xs">No active sessions found.</p>
+            <p className="text-fg-muted text-xs">No active sessions found.</p>
           )}
         </div>
       )}

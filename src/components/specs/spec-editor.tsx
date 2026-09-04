@@ -6,7 +6,7 @@ import Link from 'next/link';
 import CodeMirror from '@uiw/react-codemirror';
 import { markdown } from '@codemirror/lang-markdown';
 import ReactMarkdown from 'react-markdown';
-import { Loader2, Plus } from 'lucide-react';
+import { AlertTriangle, Loader2, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -173,14 +173,16 @@ export function SpecEditor(props: SpecEditorProps) {
 
       {/* Warning banners */}
       {specStatus === 'executing' && (
-        <Alert className="rounded-none border-x-0 border-t-0 border-amber-500/40 bg-amber-500/10 text-amber-300">
+        <Alert variant="warning" className="rounded-none border-x-0 border-t-0">
+          <AlertTriangle />
           <AlertDescription>
             This spec has an active execution session — edits may cause conflicts.
           </AlertDescription>
         </Alert>
       )}
       {specStatus === 'pending_approval' && (
-        <Alert className="rounded-none border-x-0 border-t-0 border-amber-500/40 bg-amber-500/10 text-amber-300">
+        <Alert variant="warning" className="rounded-none border-x-0 border-t-0">
+          <AlertTriangle />
           <AlertDescription>
             Plan changes have been requested — address feedback before editing.
           </AlertDescription>

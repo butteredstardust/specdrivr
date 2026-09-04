@@ -154,7 +154,7 @@ export default function LoginPage() {
 
         {isDev && (
           <div className="border-line-subtle mt-4 space-y-2 border-t border-dashed pt-4">
-            <p className="text-fg-secondary font-mono text-xs">Dev quick login</p>
+            <p className="text-fg-secondary text-xs">Dev quick login</p>
             {[
               { label: 'Owner', email: 'alex@specdrivr.dev' },
               { label: 'Admin', email: 'sam@specdrivr.dev' },

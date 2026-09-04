@@ -212,15 +212,15 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
           className="h-8 w-48 font-mono text-xs"
         />
         <Select value={action || '__all__'} onValueChange={handleActionChange}>
-          <SelectTrigger className="h-8 w-44 font-mono text-xs">
+          <SelectTrigger className="h-8 w-44 text-xs">
             <SelectValue placeholder="All actions" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="__all__" className="font-mono text-xs">
+            <SelectItem value="__all__" className="text-xs">
               All actions
             </SelectItem>
             {KNOWN_ACTIONS.map((a) => (
-              <SelectItem key={a} value={a} className="font-mono text-xs">
+              <SelectItem key={a} value={a} className="text-xs">
                 {a}
               </SelectItem>
             ))}
@@ -259,13 +259,13 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
       {isLoading && (
         <div className="text-fg-muted flex items-center gap-2">
           <Loader2 className="size-3 animate-spin" />
-          <span className="font-mono text-xs">Loading audit log…</span>
+          <span className="text-xs">Loading audit log…</span>
         </div>
       )}
 
       {error && !isLoading && (
         <div className="flex items-center gap-2">
-          <span className="text-danger font-mono text-xs">Failed to load audit log.</span>
+          <span className="text-danger text-xs">Failed to load audit log.</span>
           <Button
             variant="ghost"
             size="sm"
@@ -280,7 +280,7 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
       {!isLoading && !error && entries.length === 0 && (
         <div className="flex flex-col items-center justify-center gap-3 py-16">
           <StatusIcon size={24} status="idle" />
-          <p className="text-fg-muted font-mono text-sm">No audit entries.</p>
+          <p className="text-fg-muted text-sm">No audit entries.</p>
           <p className="text-fg-muted font-mono text-xs">
             Administrative actions will be logged here.
           </p>
@@ -293,12 +293,12 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
             <table className="w-full text-left">
               <thead>
                 <tr className="border-line bg-surface-raised border-b">
-                  <th className="text-fg-muted px-4 py-2 font-mono text-xs">Actor</th>
-                  <th className="text-fg-muted px-4 py-2 font-mono text-xs">Action</th>
-                  <th className="text-fg-muted px-4 py-2 font-mono text-xs">Resource</th>
-                  <th className="text-fg-muted px-4 py-2 font-mono text-xs">Resource ID</th>
-                  <th className="text-fg-muted px-4 py-2 font-mono text-xs">IP</th>
-                  <th className="text-fg-muted px-4 py-2 font-mono text-xs">Timestamp</th>
+                  <th className="text-fg-muted px-4 py-2 text-xs">Actor</th>
+                  <th className="text-fg-muted px-4 py-2 text-xs">Action</th>
+                  <th className="text-fg-muted px-4 py-2 text-xs">Resource</th>
+                  <th className="text-fg-muted px-4 py-2 text-xs">Resource ID</th>
+                  <th className="text-fg-muted px-4 py-2 text-xs">IP</th>
+                  <th className="text-fg-muted px-4 py-2 text-xs">Timestamp</th>
                 </tr>
               </thead>
               <tbody>

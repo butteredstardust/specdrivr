@@ -49,7 +49,7 @@ export function LimitsSection({ editable }: { editable: boolean }) {
       </FormField>
 
       <FormField
-        label="TASK TIMEOUT (SECONDS)"
+        label="Task timeout (seconds)"
         helper={`Tasks will be killed after ${Math.round(watch('taskTimeoutSeconds') / 60)} minutes`}
       >
         <Tooltip>
@@ -108,7 +108,7 @@ export function LimitsSection({ editable }: { editable: boolean }) {
                     onValueChange={(v) => field.onChange(parseInt(v, 10))}
                     disabled={!editable}
                   >
-                    <SelectTrigger className="font-mono text-sm">
+                    <SelectTrigger className="text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -126,7 +126,7 @@ export function LimitsSection({ editable }: { editable: boolean }) {
         </Tooltip>
       </FormField>
 
-      <FormField label="MAX DIFF SIZE (KB)">
+      <FormField label="Max diff size (KB)">
         <Tooltip>
           <TooltipTrigger asChild>
             <Input

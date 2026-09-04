@@ -152,7 +152,7 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
     return (
       <div className="flex flex-col items-center gap-4 py-16">
         <StatusIcon size={24} status="idle" />
-        <p className="text-fg-muted font-mono text-sm">Select a project to view sessions.</p>
+        <p className="text-fg-muted text-sm">Select a project to view sessions.</p>
       </div>
     );
   }
@@ -169,7 +169,7 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
     return (
       <div className="flex flex-col items-center gap-4 py-16">
         <StatusIcon size={24} status="idle" />
-        <p className="text-fg-muted font-mono text-sm">No sessions found matching your filters.</p>
+        <p className="text-fg-muted text-sm">No sessions found matching your filters.</p>
         <Button asChild variant="default" className="mt-2">
           <Link href="/specs">Review Specs</Link>
         </Button>

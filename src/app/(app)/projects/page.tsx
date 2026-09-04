@@ -79,7 +79,7 @@ export default function ProjectsPage() {
           <div className="relative w-full md:w-64">
             <Search className="text-fg-muted absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
             <Input
-              placeholder="SEARCH PROJECTS..."
+              placeholder="Search projects…"
               className="bg-surface-inset text-2xs h-8 pl-8 transition-all"
               value={search}
               onChange={(e) => setSearch(e.target.value || null)}

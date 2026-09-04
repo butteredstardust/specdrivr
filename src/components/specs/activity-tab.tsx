@@ -100,7 +100,7 @@ export function ActivityTab({ specId, specStatus }: ActivityTabProps): React.Rea
     return (
       <div className="flex flex-col items-center gap-3 py-16">
         <StatusIcon size={24} status="idle" />
-        <p className="text-fg-secondary font-mono text-sm">No activity yet.</p>
+        <p className="text-fg-secondary text-sm">No activity yet.</p>
         <p className="text-fg-muted font-mono text-xs italic">
           &quot;Events will be logged as the agent executes your plan.&quot;
         </p>

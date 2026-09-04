@@ -150,7 +150,7 @@ export function WebhookLogSection({ projectId }: WebhookLogSectionProps) {
     return (
       <div className="text-fg-muted flex items-center gap-2">
         <Loader2 className="size-3 animate-spin" />
-        <span className="font-mono text-xs">Loading webhook deliveries…</span>
+        <span className="text-xs">Loading webhook deliveries…</span>
       </div>
     );
   }
@@ -158,7 +158,7 @@ export function WebhookLogSection({ projectId }: WebhookLogSectionProps) {
   if (error && !isLoading) {
     return (
       <div className="flex items-center gap-2">
-        <span className="text-danger font-mono text-xs">Failed to load webhook deliveries.</span>
+        <span className="text-danger text-xs">Failed to load webhook deliveries.</span>
         <Button
           variant="ghost"
           size="sm"
@@ -175,7 +175,7 @@ export function WebhookLogSection({ projectId }: WebhookLogSectionProps) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-16">
         <StatusIcon size={24} status="idle" />
-        <p className="text-fg-muted font-mono text-sm">No webhook deliveries yet.</p>
+        <p className="text-fg-muted text-sm">No webhook deliveries yet.</p>
       </div>
     );
   }
@@ -187,12 +187,12 @@ export function WebhookLogSection({ projectId }: WebhookLogSectionProps) {
           <table className="w-full text-left">
             <thead>
               <tr className="border-line bg-surface-raised border-b">
-                <th className="text-fg-muted px-4 py-2 font-mono text-xs">Event</th>
-                <th className="text-fg-muted px-4 py-2 font-mono text-xs">Endpoint</th>
-                <th className="text-fg-muted px-4 py-2 font-mono text-xs">Status</th>
-                <th className="text-fg-muted px-4 py-2 font-mono text-xs">HTTP Code</th>
-                <th className="text-fg-muted px-4 py-2 font-mono text-xs">Timestamp</th>
-                <th className="text-fg-muted px-4 py-2 font-mono text-xs"></th>
+                <th className="text-fg-muted px-4 py-2 text-xs">Event</th>
+                <th className="text-fg-muted px-4 py-2 text-xs">Endpoint</th>
+                <th className="text-fg-muted px-4 py-2 text-xs">Status</th>
+                <th className="text-fg-muted px-4 py-2 text-xs">HTTP Code</th>
+                <th className="text-fg-muted px-4 py-2 text-xs">Timestamp</th>
+                <th className="text-fg-muted px-4 py-2 text-xs"></th>
               </tr>
             </thead>
             <tbody>

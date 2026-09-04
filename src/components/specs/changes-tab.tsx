@@ -70,7 +70,7 @@ export function ChangesTab({ specId }: ChangesTabProps): React.ReactElement {
     return (
       <div className="flex flex-col items-center gap-3 py-16">
         <StatusIcon size={24} status="idle" />
-        <p className="text-fg-secondary font-mono text-sm">No file changes yet.</p>
+        <p className="text-fg-secondary text-sm">No file changes yet.</p>
         <p className="text-fg-muted font-mono text-xs italic">
           &quot;Changes will appear here as DAEMON completes tasks.&quot;
         </p>
@@ -85,7 +85,7 @@ export function ChangesTab({ specId }: ChangesTabProps): React.ReactElement {
     <div className="space-y-3">
       <p className="text-fg-muted font-mono text-xs">
         {files.length} {files.length === 1 ? 'file' : 'files'} changed,{' '}
-        <span className="text-emerald-400">+{totalAdditions} insertions</span>,{' '}
+        <span className="text-success">+{totalAdditions} insertions</span>,{' '}
         <span className="text-danger">-{totalDeletions} deletions</span>
       </p>
       <div className="border-line min-h-96 overflow-hidden rounded-md border">

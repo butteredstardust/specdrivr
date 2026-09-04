@@ -143,9 +143,9 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
     <div>
       <p className="text-fg-muted text-2xs mb-6">Task Execution Timeline</p>
       {isLoading && tasks.length === 0 ? (
-        <p className="text-fg-muted font-mono text-xs">Loading tasks…</p>
+        <p className="text-fg-muted text-xs">Loading tasks…</p>
       ) : tasks.length === 0 ? (
-        <p className="text-fg-muted font-mono text-xs">No tasks found.</p>
+        <p className="text-fg-muted text-xs">No tasks found.</p>
       ) : (
         <div className="relative space-y-3">
           {tasks.map((task, idx) => {

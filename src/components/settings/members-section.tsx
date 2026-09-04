@@ -172,12 +172,12 @@ export function MembersSection({ projectId, userRole, initialMembers }: MembersS
                             onValueChange={(v) => handleRoleChange(member.userId, v as UserRole)}
                             disabled={!isAdmin}
                           >
-                            <SelectTrigger className="h-7 w-28 font-mono text-xs">
+                            <SelectTrigger className="h-7 w-28 text-xs">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
                               {ROLE_OPTIONS.map((r) => (
-                                <SelectItem key={r} value={r} className="font-mono text-xs">
+                                <SelectItem key={r} value={r} className="text-xs">
                                   {r}
                                 </SelectItem>
                               ))}
@@ -239,12 +239,12 @@ export function MembersSection({ projectId, userRole, initialMembers }: MembersS
                 onValueChange={(v) => setInviteRole(v as UserRole)}
                 disabled={!isAdmin}
               >
-                <SelectTrigger id="invite-role" className="h-10 w-28 font-mono text-xs">
+                <SelectTrigger id="invite-role" className="h-10 w-28 text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {ROLE_OPTIONS.map((r) => (
-                    <SelectItem key={r} value={r} className="font-mono text-xs">
+                    <SelectItem key={r} value={r} className="text-xs">
                       {r}
                     </SelectItem>
                   ))}

@@ -32,7 +32,7 @@ interface TaskDrawerAttemptsProps {
 
 const statusBadgeClass: Record<Attempt['status'], string> = {
   running: 'bg-accent-subtle text-accent',
-  completed: 'bg-emerald-500/10 text-emerald-400',
+  completed: 'bg-success-bg text-success',
   failed: 'bg-danger-bg text-danger',
 };
 
@@ -68,7 +68,7 @@ export function TaskDrawerAttempts({ taskId, taskStatus }: TaskDrawerAttemptsPro
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <span className="text-fg-muted font-mono text-xs">Loading attempts...</span>
+        <span className="text-fg-muted text-xs">Loading attempts...</span>
       </div>
     );
   }
@@ -77,7 +77,7 @@ export function TaskDrawerAttempts({ taskId, taskStatus }: TaskDrawerAttemptsPro
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-16">
         <StatusIcon size={24} status="idle" />
-        <span className="text-fg-secondary font-mono text-sm">No attempts yet.</span>
+        <span className="text-fg-secondary text-sm">No attempts yet.</span>
       </div>
     );
   }

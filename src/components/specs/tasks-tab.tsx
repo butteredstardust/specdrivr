@@ -84,7 +84,7 @@ export function TasksTab({ specId, userRole }: TasksTabProps): React.ReactElemen
     return (
       <div className="flex flex-col items-center gap-3 py-16">
         <StatusIcon size={24} status="idle" />
-        <p className="text-fg-secondary font-mono text-sm">No tasks yet.</p>
+        <p className="text-fg-secondary text-sm">No tasks yet.</p>
         <p className="text-fg-muted font-mono text-xs italic">
           &quot;Approve the plan to begin task execution.&quot;
         </p>
@@ -104,10 +104,10 @@ export function TasksTab({ specId, userRole }: TasksTabProps): React.ReactElemen
         <span className="text-fg-muted font-mono text-xs">
           Total: <span className="text-fg">{total}</span>
         </span>
-        <span className="font-mono text-xs text-emerald-400">Done: {done}</span>
+        <span className="text-success font-mono text-xs">Done: {done}</span>
         {failed > 0 && <span className="text-danger font-mono text-xs">Failed: {failed}</span>}
         {inProgress > 0 && (
-          <span className="text-accent font-mono text-xs">In Progress: {inProgress}</span>
+          <span className="text-accent font-mono text-xs">In progress: {inProgress}</span>
         )}
       </div>
 

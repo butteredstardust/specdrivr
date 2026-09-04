@@ -17,7 +17,7 @@ export default async function TeamPage() {
     return (
       <div className="flex max-w-2xl flex-col gap-8">
         <h2 className="text-fg-muted text-2xs">Team</h2>
-        <p className="text-fg-muted font-mono text-xs">No project found.</p>
+        <p className="text-fg-muted text-xs">No project found.</p>
       </div>
     );
   }

@@ -93,7 +93,7 @@ function WebhookDialog({ open, onClose, onSave, initial, isSaving }: WebhookDial
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <FormField label="ENDPOINT URL *" htmlFor="webhookUrl">
+          <FormField label="Endpoint URL *" htmlFor="webhookUrl">
             <Input
               id="webhookUrl"
               type="url"
@@ -105,7 +105,7 @@ function WebhookDialog({ open, onClose, onSave, initial, isSaving }: WebhookDial
             />
           </FormField>
 
-          <FormField label="HMAC SECRET (OPTIONAL)" htmlFor="webhookSecret">
+          <FormField label="HMAC secret (optional)" htmlFor="webhookSecret">
             <PasswordInput
               id="webhookSecret"
               value={form.secret}
@@ -302,7 +302,7 @@ export function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
 
           {/* Webhook list */}
           {isLoading ? (
-            <p className="text-fg-secondary font-mono text-xs">Loading webhooks…</p>
+            <p className="text-fg-secondary text-xs">Loading webhooks…</p>
           ) : webhooks.length === 0 ? (
             <p className="text-fg-secondary text-xs">No webhooks configured.</p>
           ) : (

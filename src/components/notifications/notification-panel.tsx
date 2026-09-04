@@ -79,7 +79,7 @@ export function NotificationPanel() {
         {list.length === 0 && !isLoading && (
           <div className="flex flex-col items-center gap-3 py-8">
             <StatusIcon size={20} status="idle" />
-            <span className="text-fg-muted font-mono text-xs">Nothing to report.</span>
+            <span className="text-fg-muted text-xs">Nothing to report.</span>
           </div>
         )}
         {isLoading && list.length === 0 && (

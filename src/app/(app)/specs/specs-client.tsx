@@ -180,7 +180,7 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
           <div className="relative w-64">
             <Search className="text-fg-muted absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
             <Input
-              placeholder="SEARCH SPECS..."
+              placeholder="Search specs…"
               className="bg-surface-inset text-2xs h-8 pl-8 transition-all"
               value={search}
               onChange={(e) => setSearch(e.target.value || null)}
@@ -229,7 +229,7 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
           {effectiveProjectId === null ? (
             <div className="flex flex-col items-center gap-3 py-16">
               <StatusIcon size={24} status="idle" />
-              <p className="text-fg-secondary font-mono text-sm">No project selected.</p>
+              <p className="text-fg-secondary text-sm">No project selected.</p>
               <p className="text-fg-muted font-mono text-xs italic">
                 &quot;Select a project from the sidebar to view specifications.&quot;
               </p>
@@ -239,7 +239,7 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
           ) : filteredSpecs.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-16">
               <StatusIcon size={24} status="idle" />
-              <p className="text-fg-secondary font-mono text-sm">No specs yet.</p>
+              <p className="text-fg-secondary text-sm">No specs yet.</p>
               <p className="text-fg-muted font-mono text-xs italic">
                 &quot;Create your first specification to begin building.&quot;
               </p>

@@ -158,9 +158,9 @@ export function EventLog({ sessionId, onUpdate, className }: EventLogProps) {
           </div>
         )}
         {!isConnected && logs.length === 0 && !error ? (
-          <p className="text-fg-muted px-3 py-2 font-mono text-xs">Connecting to stream…</p>
+          <p className="text-fg-muted px-3 py-2 text-xs">Connecting to stream…</p>
         ) : sessionId === null ? (
-          <p className="text-fg-muted px-3 py-2 font-mono text-xs">No active session.</p>
+          <p className="text-fg-muted px-3 py-2 text-xs">No active session.</p>
         ) : (
           <TerminalLog
             lines={logLines}

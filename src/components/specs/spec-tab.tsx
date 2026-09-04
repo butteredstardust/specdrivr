@@ -142,7 +142,7 @@ export function SpecTab({ spec, userRole }: SpecTabProps): React.ReactElement {
         ) : (
           <div className="flex flex-col items-center gap-3 py-16">
             <StatusIcon size={24} status="idle" />
-            <p className="text-fg-secondary font-mono text-sm">No content yet.</p>
+            <p className="text-fg-secondary text-sm">No content yet.</p>
             <p className="text-fg-muted mb-4 font-mono text-xs italic">
               &quot;Write a specification to begin plan generation.&quot;
             </p>

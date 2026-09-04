@@ -31,7 +31,7 @@ export function ProvidersSection({ editable }: { editable: boolean }) {
                 control={control}
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange} disabled={!editable}>
-                    <SelectTrigger className="font-mono text-sm">
+                    <SelectTrigger className="text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>

@@ -200,13 +200,13 @@ export function ApiTokensSection() {
       {isLoading && (
         <div className="text-fg-muted flex items-center gap-2">
           <Loader2 className="size-3 animate-spin" />
-          <span className="font-mono text-xs">Loading tokens…</span>
+          <span className="text-xs">Loading tokens…</span>
         </div>
       )}
 
       {error && !isLoading && (
         <div className="flex items-center gap-2">
-          <span className="text-danger font-mono text-xs">Failed to load tokens.</span>
+          <span className="text-danger text-xs">Failed to load tokens.</span>
           <Button
             variant="ghost"
             size="sm"
@@ -221,7 +221,7 @@ export function ApiTokensSection() {
       {!isLoading && !error && (
         <>
           {tokens.length === 0 ? (
-            <p className="text-fg-muted font-mono text-xs">No API tokens yet.</p>
+            <p className="text-fg-muted text-xs">No API tokens yet.</p>
           ) : (
             <div className="border-line flex flex-col gap-0 overflow-hidden rounded border">
               {/* Header row */}

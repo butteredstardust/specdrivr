@@ -83,7 +83,7 @@ export function SessionsFilterBar({ specs }: SessionsFilterBarProps) {
       <div className="relative w-64">
         <Search className="text-fg-muted absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
         <Input
-          placeholder="SEARCH SESSIONS..."
+          placeholder="Search sessions…"
           className="bg-surface-inset text-2xs h-8 pl-8 transition-all"
           value={search}
           onChange={(e) => setSearch(e.target.value || null)}
@@ -134,11 +134,11 @@ export function SessionsFilterBar({ specs }: SessionsFilterBarProps) {
               <SelectValue placeholder="All specs" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all" className="text-2xs font-mono">
+              <SelectItem value="all" className="text-2xs">
                 ALL SPECS
               </SelectItem>
               {specs.map((spec) => (
-                <SelectItem key={spec.id} value={String(spec.id)} className="text-2xs font-mono">
+                <SelectItem key={spec.id} value={String(spec.id)} className="text-2xs">
                   {spec.name.toUpperCase()}
                 </SelectItem>
               ))}

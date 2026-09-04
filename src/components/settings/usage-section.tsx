@@ -41,8 +41,8 @@ function formatDate(date: string | Date): string {
 function SummaryCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="border-line bg-surface-raised flex flex-col gap-1 rounded-lg border p-4">
-      <span className="text-fg-muted font-mono text-xs">{label}</span>
-      <span className="text-fg font-mono text-lg">{value}</span>
+      <span className="text-fg-muted text-xs font-medium">{label}</span>
+      <span className="text-fg font-mono text-lg tabular-nums">{value}</span>
     </div>
   );
 }
@@ -88,7 +88,7 @@ export function UsageSection({ projectId }: UsageSectionProps) {
     return (
       <div className="text-fg-muted flex items-center gap-2">
         <Loader2 className="size-3 animate-spin" />
-        <span className="font-mono text-xs">Loading usage data…</span>
+        <span className="text-sm">Loading usage data…</span>
       </div>
     );
   }
@@ -96,12 +96,12 @@ export function UsageSection({ projectId }: UsageSectionProps) {
   if (error && !isLoading) {
     return (
       <div className="flex items-center gap-2">
-        <span className="text-danger font-mono text-xs">Failed to load usage data.</span>
+        <span className="text-danger text-sm">Failed to load usage data.</span>
         <Button
           variant="ghost"
           size="sm"
           onClick={restart}
-          className="text-fg-muted hover:text-fg h-auto px-0 font-mono text-xs underline hover:bg-transparent"
+          className="text-fg-muted hover:text-fg h-auto px-0 text-sm underline hover:bg-transparent"
         >
           Retry
         </Button>
@@ -113,10 +113,8 @@ export function UsageSection({ projectId }: UsageSectionProps) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-16">
         <StatusIcon size={24} status="idle" />
-        <p className="text-fg-muted font-mono text-sm">No usage data yet.</p>
-        <p className="text-fg-muted font-mono text-xs">
-          Usage will appear here once execution begins.
-        </p>
+        <p className="text-fg-secondary text-sm">No usage data yet.</p>
+        <p className="text-fg-muted text-xs">Usage will appear here once execution begins.</p>
       </div>
     );
   }
@@ -125,20 +123,15 @@ export function UsageSection({ projectId }: UsageSectionProps) {
     <div className="flex flex-col gap-6">
       {/* Summary cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <SummaryCard label="Total Sessions" value={String(summary.totalSessions)} />
-        <SummaryCard label="Tasks Completed" value={String(summary.totalTasks)} />
-        <SummaryCard label="Tokens Used" value={formatTokens(summary.totalTokens)} />
-        <SummaryCard label="Est. Cost" value={`$${Number(summary.totalCostUsd).toFixed(2)}`} />
+        <SummaryCard label="Total sessions" value={String(summary.totalSessions)} />
+        <SummaryCard label="Tasks completed" value={String(summary.totalTasks)} />
+        <SummaryCard label="Tokens used" value={formatTokens(summary.totalTokens)} />
+        <SummaryCard label="Est. cost" value={`$${Number(summary.totalCostUsd).toFixed(2)}`} />
       </div>
 
       {/* Export button */}
       <div className="flex justify-end">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleExport}
-          className="gap-2 font-mono text-xs"
-        >
+        <Button variant="outline" size="sm" onClick={handleExport} className="gap-2">
           <Download className="size-3" />
           Export CSV
         </Button>
@@ -149,23 +142,29 @@ export function UsageSection({ projectId }: UsageSectionProps) {
         <table className="w-full text-left">
           <thead>
             <tr className="border-line bg-surface-raised border-b">
-              <th className="text-fg-muted px-4 py-2 font-mono text-xs">Date</th>
-              <th className="text-fg-muted px-4 py-2 font-mono text-xs">Sessions</th>
-              <th className="text-fg-muted px-4 py-2 font-mono text-xs">Tasks</th>
-              <th className="text-fg-muted px-4 py-2 font-mono text-xs">Tokens</th>
-              <th className="text-fg-muted px-4 py-2 font-mono text-xs">Cost</th>
+              <th className="text-fg-muted px-4 py-2 text-xs font-medium">Date</th>
+              <th className="text-fg-muted px-4 py-2 text-xs font-medium">Sessions</th>
+              <th className="text-fg-muted px-4 py-2 text-xs font-medium">Tasks</th>
+              <th className="text-fg-muted px-4 py-2 text-xs font-medium">Tokens</th>
+              <th className="text-fg-muted px-4 py-2 text-xs font-medium">Cost</th>
             </tr>
           </thead>
           <tbody>
             {snapshots.map((s) => (
               <tr key={s.id} className="border-line hover:bg-surface-inset border-b last:border-0">
-                <td className="text-fg px-4 py-2.5 font-mono text-xs">{formatDate(s.date)}</td>
-                <td className="text-fg px-4 py-2.5 font-mono text-xs">{s.sessionsRun}</td>
-                <td className="text-fg px-4 py-2.5 font-mono text-xs">{s.tasksExecuted}</td>
-                <td className="text-fg px-4 py-2.5 font-mono text-xs">
+                <td className="text-fg px-4 py-2.5 font-mono text-xs tabular-nums">
+                  {formatDate(s.date)}
+                </td>
+                <td className="text-fg px-4 py-2.5 font-mono text-xs tabular-nums">
+                  {s.sessionsRun}
+                </td>
+                <td className="text-fg px-4 py-2.5 font-mono text-xs tabular-nums">
+                  {s.tasksExecuted}
+                </td>
+                <td className="text-fg px-4 py-2.5 font-mono text-xs tabular-nums">
                   {formatTokens(s.promptTokens + s.completionTokens)}
                 </td>
-                <td className="text-fg px-4 py-2.5 font-mono text-xs">
+                <td className="text-fg px-4 py-2.5 font-mono text-xs tabular-nums">
                   ${Number(s.estimatedCostUsd).toFixed(4)}
                 </td>
               </tr>
