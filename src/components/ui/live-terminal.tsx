@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import type { Terminal } from '@xterm/xterm';
 import type { FitAddon } from '@xterm/addon-fit';
 import { cn } from '@/lib/utils';
@@ -23,9 +23,25 @@ export function LiveTerminal({
   const fitAddonRef = useRef<FitAddon | null>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
   const isAtBottomRef = useRef(true);
+  // xterm arrives through dynamic imports, so the terminal does not exist on
+  // the first commit. This has to be state rather than a ref: the SSE effect
+  // needs to re-run once the terminal is actually there, and a ref mutation
+  // does not schedule that.
+  const [isTerminalReady, setIsTerminalReady] = useState(false);
 
+  /**
+   * Builds the terminal but publishes nothing: the caller owns `terminalRef`
+   * and decides whether this instance is still wanted.
+   *
+   * The guard used to be `if (terminalRef.current) return`, checked before the
+   * dynamic imports are awaited. React mounts effects twice in development, and
+   * neither call had assigned the ref yet when the other checked it, so both
+   * proceeded and two terminals were opened into the same container — the one
+   * being written to was not necessarily the one on screen.
+   */
   const initTerminal = useCallback(async () => {
-    if (!containerRef.current || terminalRef.current) return;
+    const container = containerRef.current;
+    if (!container) return null;
 
     // Dynamic imports — never at module scope
     const { Terminal } = await import('@xterm/xterm');
@@ -89,7 +105,7 @@ export function LiveTerminal({
     terminal.loadAddon(fitAddon);
     terminal.loadAddon(webLinksAddon);
 
-    terminal.open(containerRef.current);
+    terminal.open(container);
     fitAddon.fit();
 
     // Track scroll position — only auto-scroll if already at bottom
@@ -98,14 +114,11 @@ export function LiveTerminal({
       isAtBottomRef.current = buffer.viewportY + terminal.rows >= buffer.length - 1;
     });
 
-    terminalRef.current = terminal;
-    fitAddonRef.current = fitAddon;
-
     // Resize observer
     const resizeObserver = new ResizeObserver(() => fitAddon.fit());
-    resizeObserver.observe(containerRef.current);
+    resizeObserver.observe(container);
 
-    return () => resizeObserver.disconnect();
+    return { terminal, fitAddon, dispose: () => resizeObserver.disconnect() };
   }, []);
 
   const connectSSE = useCallback(() => {
@@ -134,7 +147,10 @@ export function LiveTerminal({
         if (level === 'error') formatted = `\x1b[31m${line}\x1b[0m`;
         else if (level === 'warn') formatted = `\x1b[33m${line}\x1b[0m`;
 
-        terminal.write(formatted);
+        // One record is one line. Streamed agent output may carry its own
+        // trailing newline, but replayed `agent_logs` rows never do, so without
+        // this every historical line lands end-to-end on a single row.
+        terminal.write(formatted.endsWith('\n') ? formatted : `${formatted}\r\n`);
 
         if (isAtBottomRef.current) {
           terminal.scrollToBottom();
@@ -157,12 +173,29 @@ export function LiveTerminal({
 
   // Init terminal on mount
   useEffect(() => {
-    let cleanupFn: (() => void) | undefined;
-    initTerminal().then((c) => {
-      cleanupFn = c;
+    let cancelled = false;
+    let disposeObserver: (() => void) | undefined;
+
+    initTerminal().then((created) => {
+      if (!created) return;
+      // This mount was already torn down while the imports were in flight, so
+      // this instance is orphaned. Dispose it here or it stays in the container
+      // as a second, invisible terminal.
+      if (cancelled) {
+        created.dispose();
+        created.terminal.dispose();
+        return;
+      }
+      terminalRef.current = created.terminal;
+      fitAddonRef.current = created.fitAddon;
+      disposeObserver = created.dispose;
+      setIsTerminalReady(true);
     });
+
     return () => {
-      if (cleanupFn) cleanupFn();
+      cancelled = true;
+      setIsTerminalReady(false);
+      disposeObserver?.();
       terminalRef.current?.dispose();
       terminalRef.current = null;
       fitAddonRef.current = null;
@@ -171,14 +204,14 @@ export function LiveTerminal({
 
   // Connect SSE when active
   useEffect(() => {
-    if (active && terminalRef.current) {
+    if (active && isTerminalReady) {
       connectSSE();
     }
     return () => {
       eventSourceRef.current?.close();
       eventSourceRef.current = null;
     };
-  }, [active, connectSSE]);
+  }, [active, isTerminalReady, connectSSE]);
 
   // Pause rendering when not visible
   useEffect(() => {

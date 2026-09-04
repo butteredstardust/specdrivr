@@ -16,7 +16,7 @@ export type SystemHealth = {
   api: 'ok' | 'error' | 'unknown';
   agt: 'ok' | 'warn' | 'error' | 'unknown';
   pg: 'ok' | 'error' | 'unknown';
-  overall: 'ok' | 'degraded' | 'unknown';
+  overall: 'ok' | 'warn' | 'degraded' | 'unknown';
   agentLastSeen: string | null;
 };
 
@@ -41,12 +41,28 @@ export function useSystemHealth(): SystemHealth {
     ? (Date.now() - new Date(health.agentLastSeen).getTime()) / 60_000
     : Infinity;
 
+  const git = health.git ? 'ok' : 'warn';
+  const api = health.status === 'ok' ? 'ok' : 'error';
+  const agt = minsAgo < 5 ? 'ok' : minsAgo < 15 ? 'warn' : 'error';
+  const pg = health.db ? 'ok' : 'error';
+
+  const indicators = [git, api, agt, pg];
+
   return {
-    git: health.git ? 'ok' : 'warn',
-    api: health.status === 'ok' ? 'ok' : 'error',
-    agt: minsAgo < 5 ? 'ok' : minsAgo < 15 ? 'warn' : 'error',
-    pg: health.db ? 'ok' : 'error',
-    overall: health.status === 'ok' ? 'ok' : 'degraded',
+    git,
+    api,
+    agt,
+    pg,
+    // Summarises the four dots rather than mirroring `health.status`, which
+    // only covers db + redis — that made the sidebar claim "All systems
+    // operational" directly under a red agent dot. Warnings are kept separate
+    // from 'degraded' because the only one is "GitHub not configured", which
+    // is an unfinished setup step rather than an outage.
+    overall: indicators.includes('error')
+      ? 'degraded'
+      : indicators.includes('warn')
+        ? 'warn'
+        : 'ok',
     agentLastSeen: health.agentLastSeen,
   };
 }

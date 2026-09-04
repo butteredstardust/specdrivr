@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { formatElapsed } from '@/lib/utils';
 import {
   MoreHorizontal,
   ChevronRight,
@@ -66,10 +67,7 @@ function formatDuration(session: Session): string {
       : null;
   if (!end) return '—';
   const ms = end.getTime() - new Date(session.startedAt).getTime();
-  const secs = Math.floor(ms / 1000);
-  const mm = String(Math.floor(secs / 60)).padStart(2, '0');
-  const ss = String(secs % 60).padStart(2, '0');
-  return `${mm}:${ss}`;
+  return formatElapsed(ms / 1000);
 }
 
 function getGroupLabel(isoString: string): string {

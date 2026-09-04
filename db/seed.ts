@@ -57,15 +57,24 @@ async function scryptHash(password: string): Promise<string> {
   return `${salt}:${Buffer.from(key).toString('hex')}`;
 }
 
-// Reference date: 2026-03-15 (today in seed world)
+/**
+ * Reference date: whenever the seed runs. It used to be pinned to
+ * 2026-03-15, which meant a demo database aged badly — every activity row
+ * read "6 months ago" and the running sessions' `lastHeartbeatAt` was far
+ * outside the 15-minute window `useSystemHealth` allows, so the agent health
+ * dot was permanently red on an otherwise healthy demo.
+ */
+const SEED_NOW = new Date();
+
 const daysAgo = (n: number): Date => {
-  const d = new Date('2026-03-15T00:00:00Z');
-  d.setDate(d.getDate() - n);
+  const d = new Date(SEED_NOW);
+  d.setUTCHours(0, 0, 0, 0);
+  d.setUTCDate(d.getUTCDate() - n);
   return d;
 };
 
 const hoursAgo = (h: number): Date => {
-  return new Date(new Date('2026-03-15T12:00:00Z').getTime() - h * 60 * 60 * 1000);
+  return new Date(SEED_NOW.getTime() - h * 60 * 60 * 1000);
 };
 
 async function resetSequences() {

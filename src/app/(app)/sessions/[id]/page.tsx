@@ -2,6 +2,7 @@
 
 import { use, useState } from 'react';
 import { clientLogger } from '@/lib/logger-client';
+import { formatElapsed } from '@/lib/utils';
 import Link from 'next/link';
 import { useSSE } from '@/hooks/use-sse';
 import { Button } from '@/components/ui/button';
@@ -50,10 +51,7 @@ function formatDuration(session?: AgentSession | null): string {
       : null;
   if (!end) return '—';
   const ms = end.getTime() - new Date(session.startedAt).getTime();
-  const secs = Math.floor(ms / 1000);
-  const mm = String(Math.floor(secs / 60)).padStart(2, '0');
-  const ss = String(secs % 60).padStart(2, '0');
-  return `${mm}:${ss}`;
+  return formatElapsed(ms / 1000);
 }
 
 function StatBox({ label, value }: { label: string; value: string }) {
@@ -239,7 +237,8 @@ export default function SessionDetailPage({ params }: PageProps) {
         </div>
 
         <div className="flex min-h-[20rem] w-full flex-col overflow-y-auto p-4 md:min-h-0 md:w-1/2">
-          <p className="text-fg-secondary text-2xs mb-3">Session log</p>
+          {/* No "Session log" heading here: EventLog renders its own, next to
+              the log filter, and having both stacked the same label twice. */}
           <p className="text-fg-secondary mb-3 font-mono text-xs">
             $ specdrivr agent start --session {sessionLabel}
           </p>

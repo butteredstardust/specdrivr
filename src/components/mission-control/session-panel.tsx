@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Pause, Play, XCircle, RefreshCw, ChevronRight, ExternalLink, Github } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatElapsed } from '@/lib/utils';
 import type { UserRole } from '@/db/schema';
 import { StatusIcon } from '@/components/ui/status-icon';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,11 @@ import { Badge } from '@/components/ui/badge';
 import { EntityId } from '@/components/ui/entity-id';
 
 type SessionPanelState = 'idle' | 'running' | 'paused' | 'completed' | 'failed' | 'cancelled';
+
+function elapsedSeconds(startedAt?: string | null): number {
+  if (!startedAt) return 0;
+  return Math.max(0, Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000));
+}
 
 interface AgentSession {
   id: number;
@@ -111,16 +116,16 @@ export function SessionPanel({
 
   const canControl = userRole === 'admin' || userRole === 'owner';
 
-  const [elapsed, setElapsed] = useState(0);
+  // Seeded from `startedAt`, not 0: `prevStartedAt` is initialised to the same
+  // value it is compared against, so a session already present on the first
+  // render never triggered the sync below and the timer read 00:00 for a
+  // session that had been running for hours.
+  const [elapsed, setElapsed] = useState(() => elapsedSeconds(session?.startedAt));
   const [prevStartedAt, setPrevStartedAt] = useState(session?.startedAt);
 
   if (session?.startedAt !== prevStartedAt) {
     setPrevStartedAt(session?.startedAt);
-    setElapsed(
-      session?.startedAt
-        ? Math.floor((Date.now() - new Date(session.startedAt).getTime()) / 1000)
-        : 0
-    );
+    setElapsed(elapsedSeconds(session?.startedAt));
   }
 
   useEffect(() => {
@@ -136,8 +141,7 @@ export function SessionPanel({
     return () => clearTimeout(timeout);
   }, [panelState, onDismiss]);
 
-  const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
-  const ss = String(elapsed % 60).padStart(2, '0');
+  const elapsedLabel = formatElapsed(elapsed);
 
   if (panelState === 'idle') {
     return (
@@ -184,7 +188,7 @@ export function SessionPanel({
               <Badge variant="warning">Paused</Badge>
             )}
             <span className="text-fg-muted ml-auto font-mono text-xs tracking-tighter tabular-nums">
-              {mm}:{ss}
+              {elapsedLabel}
             </span>
           </div>
 

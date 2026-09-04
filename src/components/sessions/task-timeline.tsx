@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSSE } from '@/hooks/use-sse';
 import { TASK_STATUS } from '@/lib/ui-status';
+import { formatElapsed } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   CheckCircle2,
@@ -92,10 +93,7 @@ function LiveDuration({ startedAt }: { startedAt: string }) {
   useEffect(() => {
     const update = () => {
       const ms = Date.now() - new Date(startedAt).getTime();
-      const secs = Math.floor(ms / 1000);
-      const mm = String(Math.floor(secs / 60)).padStart(2, '0');
-      const ss = String(secs % 60).padStart(2, '0');
-      setElapsed(`${mm}:${ss}`);
+      setElapsed(formatElapsed(ms / 1000));
     };
     update();
     const id = setInterval(update, 1000);
@@ -110,12 +108,9 @@ function taskDuration(task: TaskItem): React.ReactNode {
     return <LiveDuration startedAt={task.startedAt} />;
   }
   if (task.actualDurationMs != null) {
-    const secs = Math.floor(task.actualDurationMs / 1000);
-    const mm = String(Math.floor(secs / 60)).padStart(2, '0');
-    const ss = String(secs % 60).padStart(2, '0');
     return (
       <span className="text-fg-muted text-2xs font-mono">
-        {mm}:{ss}
+        {formatElapsed(task.actualDurationMs / 1000)}
       </span>
     );
   }

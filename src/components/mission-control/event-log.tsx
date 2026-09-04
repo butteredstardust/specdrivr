@@ -157,10 +157,13 @@ export function EventLog({ sessionId, onUpdate, className }: EventLogProps) {
             {error}
           </div>
         )}
-        {!isConnected && logs.length === 0 && !error ? (
-          <p className="text-fg-muted px-3 py-2 text-xs">Connecting to stream…</p>
-        ) : sessionId === null ? (
+        {/* Order matters: with no session the effect returns before opening a
+            stream, so testing "not connected" first would leave this stuck on
+            "Connecting…" forever for a state that never connects by design. */}
+        {sessionId === null ? (
           <p className="text-fg-muted px-3 py-2 text-xs">No active session.</p>
+        ) : !isConnected && logs.length === 0 && !error ? (
+          <p className="text-fg-muted px-3 py-2 text-xs">Connecting to stream…</p>
         ) : (
           <TerminalLog
             lines={logLines}

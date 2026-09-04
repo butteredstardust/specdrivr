@@ -107,17 +107,23 @@ function SystemIcon({
 function SidebarBottom({ collapsed }: { collapsed: boolean }) {
   const health = useSystemHealth();
 
-  const overallExpr: DaemonExpr =
-    health.overall === 'ok' ? 'idle' : health.overall === 'degraded' ? 'error' : 'idle';
+  const overallExpr: DaemonExpr = health.overall === 'degraded' ? 'error' : 'idle';
 
   const statusText =
     health.overall === 'ok'
       ? 'All systems operational'
-      : health.overall === 'degraded'
-        ? 'Degraded'
-        : 'Connecting…';
+      : health.overall === 'warn'
+        ? 'Operational, setup incomplete'
+        : health.overall === 'degraded'
+          ? 'Degraded'
+          : 'Connecting…';
 
-  const statusClass = health.overall === 'degraded' ? 'text-danger' : 'text-fg-muted';
+  const statusClass =
+    health.overall === 'degraded'
+      ? 'text-danger'
+      : health.overall === 'warn'
+        ? 'text-warning'
+        : 'text-fg-muted';
 
   const gitTooltip =
     health.git === 'ok'
