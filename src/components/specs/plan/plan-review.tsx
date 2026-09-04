@@ -20,7 +20,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { GatedButton, timeAgo, type Plan } from './shared';
+import { GatedButton } from '@/components/ui/gated-button';
+import { timeAgo, type Plan } from './shared';
 import type { usePlan } from './use-plan';
 
 interface PlanReviewProps {
@@ -80,7 +81,7 @@ export function PlanReview({ plan, canAdmin, canMember, actions }: PlanReviewPro
         <div className="flex gap-2">
           <GatedButton
             allowed={canAdmin}
-            requires="Admin"
+            reason="Requires Admin role or higher"
             size="sm"
             variant="outline"
             onClick={() => togglePanel('changes')}
@@ -90,7 +91,7 @@ export function PlanReview({ plan, canAdmin, canMember, actions }: PlanReviewPro
           </GatedButton>
           <GatedButton
             allowed={canAdmin}
-            requires="Admin"
+            reason="Requires Admin role or higher"
             size="sm"
             variant="outline"
             className="text-danger hover:text-danger"
@@ -101,7 +102,7 @@ export function PlanReview({ plan, canAdmin, canMember, actions }: PlanReviewPro
           </GatedButton>
           <GatedButton
             allowed={canAdmin}
-            requires="Admin"
+            reason="Requires Admin role or higher"
             size="sm"
             variant="outline"
             className="border-success-border text-success hover:bg-success-bg gap-1.5"

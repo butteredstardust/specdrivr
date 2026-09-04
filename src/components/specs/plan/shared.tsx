@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import type { UserRole } from '@/db/schema';
 
 export type PlanStatus =
@@ -62,40 +60,6 @@ export function ElapsedTimer({ startedAt }: { startedAt: Date }): React.ReactEle
       {mins > 0 ? `${mins}m ` : ''}
       {secs}s
     </span>
-  );
-}
-
-interface GatedButtonProps extends React.ComponentProps<typeof Button> {
-  /** When false the button renders disabled inside a tooltip explaining why. */
-  allowed: boolean;
-  /** Role named in the tooltip, e.g. "Admin". */
-  requires: string;
-}
-
-/**
- * A button that explains its own disabled state.
- *
- * Every action on this tab was written twice — once enabled, once wrapped in a
- * tooltip with `disabled aria-disabled` — which is why the file was 682 lines.
- * A disabled button does not fire pointer events, so the tooltip needs a
- * focusable wrapper to hang off; that detail lives here now instead of at six
- * call sites.
- */
-export function GatedButton({ allowed, requires, children, ...props }: GatedButtonProps) {
-  if (allowed) {
-    return <Button {...props}>{children}</Button>;
-  }
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <span tabIndex={0}>
-          <Button {...props} disabled aria-disabled>
-            {children}
-          </Button>
-        </span>
-      </TooltipTrigger>
-      <TooltipContent>Requires {requires} role or higher</TooltipContent>
-    </Tooltip>
   );
 }
 

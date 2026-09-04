@@ -6,7 +6,8 @@ import { StatusIcon } from '@/components/ui/status-icon';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import type { SpecStatus } from '@/components/specs/spec-editor';
 import type { UserRole } from '@/db/schema';
-import { ElapsedTimer, GatedButton, PlanDocument, hasRole, timeAgo } from './plan/shared';
+import { GatedButton } from '@/components/ui/gated-button';
+import { ElapsedTimer, PlanDocument, hasRole, timeAgo } from './plan/shared';
 import { usePlan } from './plan/use-plan';
 import { PlanReview } from './plan/plan-review';
 
@@ -46,7 +47,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
   const regenerateButton = (
     <GatedButton
       allowed={canMember}
-      requires="Member"
+      reason="Requires Member role or higher"
       variant="default"
       size="sm"
       onClick={() => regenerate()}
