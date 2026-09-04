@@ -170,7 +170,7 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
       <div className="flex flex-col items-center gap-4 py-16">
         <StatusIcon size={24} status="idle" />
         <p className="text-fg-muted font-mono text-sm">No sessions found matching your filters.</p>
-        <Button asChild variant="warning" className="mt-2">
+        <Button asChild variant="default" className="mt-2">
           <Link href="/specs">Review Specs</Link>
         </Button>
       </div>

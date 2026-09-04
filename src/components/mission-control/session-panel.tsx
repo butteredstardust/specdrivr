@@ -145,7 +145,7 @@ export function SessionPanel({
         <StatusIcon size={24} status="idle" />
         <p className="text-fg-muted text-2xs font-medium">System ready</p>
         <p className="text-fg-secondary text-sm">No active session.</p>
-        <Button asChild variant="warning" size="sm" className="mt-1">
+        <Button asChild variant="default" size="sm" className="mt-1">
           <Link href="/specs/new">
             Start a new spec
             <ChevronRight className="ml-1 h-3 w-3" />
@@ -164,19 +164,17 @@ export function SessionPanel({
       <TooltipProvider>
         <div
           className={cn(
-            'flex flex-col gap-3 rounded-lg border p-3 transition-all',
+            'flex flex-col gap-3 rounded-lg border p-3',
             panelState === 'running' ? 'border-accent-border' : 'border-line'
           )}
         >
           {/* Header row: session ID badge + status + timer */}
           <div className="flex items-center gap-2">
-            <span className="bg-surface-inset text-fg-muted text-2xs rounded px-1.5 py-0.5 font-mono">
-              SES-{session!.id}
-            </span>
+            <EntityId chip>SES-{session!.id}</EntityId>
             {session?.backend && (
-              <span className="bg-surface-inset text-fg-secondary text-2xs rounded px-1.5 py-0.5 font-mono">
-                {session.backend === 'claude' ? '🤖 Claude' : '✨ Gemini'}
-              </span>
+              <Badge variant="neutral" className="capitalize">
+                {session.backend}
+              </Badge>
             )}
             {panelState === 'running' ? (
               <Badge variant="info" dot>
@@ -192,9 +190,7 @@ export function SessionPanel({
 
           {/* Spec name */}
           {session?.specName && (
-            <p className="text-fg-secondary truncate font-mono text-xs tracking-tight">
-              {session.specName}
-            </p>
+            <p className="text-fg-secondary truncate text-xs">{session.specName}</p>
           )}
 
           {/* Progress bar */}
@@ -210,9 +206,9 @@ export function SessionPanel({
 
           {/* Current task pill */}
           {session?.currentTaskExternalId && (
-            <div className="border-warning-border bg-warning-bg flex items-center gap-2 rounded border px-2 py-1.5">
-              <ChevronRight className="text-warning h-3.5 w-3.5 shrink-0" />
-              <EntityId className="text-warning">{session.currentTaskExternalId}</EntityId>
+            <div className="border-accent-border bg-accent-subtle flex items-center gap-2 rounded border px-2 py-1.5">
+              <ChevronRight className="text-accent h-3.5 w-3.5 shrink-0" />
+              <EntityId className="text-accent">{session.currentTaskExternalId}</EntityId>
               {session.currentTaskTitle && (
                 <span className="text-fg-secondary truncate text-xs">
                   {session.currentTaskTitle}
@@ -230,7 +226,7 @@ export function SessionPanel({
                 icon={<Pause className="mr-2 h-3 w-3" />}
                 label="Pause Session"
                 variant="outline"
-                className="border-warning-border text-warning hover:bg-warning-bg h-8 flex-1"
+                className="h-8 flex-1"
               />
             ) : (
               <ControlButton
@@ -239,7 +235,7 @@ export function SessionPanel({
                 icon={<Play className="mr-2 h-3 w-3" />}
                 label="Resume Session"
                 variant="outline"
-                className="border-success-border text-success hover:bg-success-bg h-8 flex-1"
+                className="h-8 flex-1"
               />
             )}
             <ControlButton
@@ -262,14 +258,14 @@ export function SessionPanel({
         <StatusIcon size={24} status="success" />
         <Badge variant="success">Execution complete</Badge>
         {session && (
-          <div className="flex flex-col items-center gap-1.5 font-mono text-xs">
+          <div className="flex flex-col items-center gap-1.5 text-xs">
             <div className="text-fg-secondary flex gap-4">
-              <span>Executed: {session.tasksExecuted}</span>
-              <span className="text-success">OK: {session.tasksSucceeded}</span>
-              <span className="text-danger">Failed: {session.tasksFailed}</span>
+              <span>Executed {session.tasksExecuted}</span>
+              <span className="text-success">Succeeded {session.tasksSucceeded}</span>
+              <span className="text-danger">Failed {session.tasksFailed}</span>
             </div>
             {session.totalCostUsd != null && session.totalCostUsd > 0 && (
-              <span className="text-fg-muted">TOTAL COST: ${session.totalCostUsd.toFixed(4)}</span>
+              <span className="text-fg-muted">Total cost ${session.totalCostUsd.toFixed(4)}</span>
             )}
           </div>
         )}
@@ -277,7 +273,7 @@ export function SessionPanel({
           <div className="flex items-center gap-3">
             <Link
               href={`/specs/${session.specId}?tab=changes`}
-              className="text-warning text-sm underline-offset-2 hover:underline"
+              className="text-accent text-sm underline-offset-2 hover:underline"
             >
               View Changes →
             </Link>
@@ -310,7 +306,7 @@ export function SessionPanel({
           <Badge variant="danger">Execution failed</Badge>
           {session?.totalCostUsd != null && session.totalCostUsd > 0 && (
             <span className="text-fg-muted text-2xs font-mono">
-              EST. COST: ${session.totalCostUsd.toFixed(4)}
+              Est. cost ${session.totalCostUsd.toFixed(4)}
             </span>
           )}
           {session?.errorMessage && (
@@ -346,7 +342,7 @@ export function SessionPanel({
     <div className="flex flex-col items-center gap-3 py-6 text-center">
       <StatusIcon size={24} status="idle" />
       <Badge variant="muted">Cancelled</Badge>
-      <Link href="/specs" className="text-warning text-sm underline-offset-2 hover:underline">
+      <Link href="/specs" className="text-accent text-sm underline-offset-2 hover:underline">
         Return to specs
       </Link>
     </div>

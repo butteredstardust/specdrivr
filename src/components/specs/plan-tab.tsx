@@ -334,7 +334,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
           <span className={`text-xs font-semibold ${bannerText}`}>{bannerLabel}</span>
           <span className="text-fg-muted font-mono text-xs">{timeAgo(plan.updatedAt)}</span>
         </div>
-        <div className="border-line bg-surface-inset border-line rounded-md border p-4">
+        <div className="border-line bg-surface-inset rounded-md border p-4">
           <div className="prose prose-invert max-w-none">
             <ReactMarkdown>{plan.markdownContent}</ReactMarkdown>
           </div>
@@ -353,14 +353,14 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
         </p>
         <TooltipProvider>
           {canMember ? (
-            <Button variant="warning" size="sm" onClick={handleRegenerate} disabled={isActioning}>
+            <Button variant="default" size="sm" onClick={handleRegenerate} disabled={isActioning}>
               Re-generate Plan
             </Button>
           ) : (
             <Tooltip>
               <TooltipTrigger asChild>
                 <span tabIndex={0}>
-                  <Button variant="warning" size="sm" disabled aria-disabled>
+                  <Button variant="default" size="sm" disabled aria-disabled>
                     Re-generate Plan
                   </Button>
                 </span>
@@ -383,21 +383,21 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
             <p className="text-fg-secondary mt-1 text-sm">{plan.reviewerFeedback}</p>
           </blockquote>
         )}
-        <div className="border-line bg-surface-inset border-line rounded-md border p-4">
+        <div className="border-line bg-surface-inset rounded-md border p-4">
           <div className="prose prose-invert max-w-none">
             <ReactMarkdown>{plan.markdownContent}</ReactMarkdown>
           </div>
         </div>
         <TooltipProvider>
           {canMember ? (
-            <Button variant="warning" size="sm" onClick={handleRegenerate} disabled={isActioning}>
+            <Button variant="default" size="sm" onClick={handleRegenerate} disabled={isActioning}>
               Re-generate Plan
             </Button>
           ) : (
             <Tooltip>
               <TooltipTrigger asChild>
                 <span tabIndex={0}>
-                  <Button variant="warning" size="sm" disabled aria-disabled>
+                  <Button variant="default" size="sm" disabled aria-disabled>
                     Re-generate Plan
                   </Button>
                 </span>
@@ -556,7 +556,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
               </div>
             )}
           </div>
-          <div className="border-line bg-surface-inset border-line rounded-md border p-4">
+          <div className="border-line bg-surface-inset rounded-md border p-4">
             {isEditing ? (
               <CodeMirror
                 value={editContent}
@@ -594,7 +594,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
             <div className="flex gap-2">
               <Button
                 size="sm"
-                variant="warning"
+                variant="default"
                 onClick={handleRequestChanges}
                 disabled={isActioning || !feedbackText.trim()}
                 className="text-2xs h-8"
