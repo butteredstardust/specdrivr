@@ -13,7 +13,10 @@ import { cn } from '@/lib/utils';
  * glyph, or use `dot` for live states, or rely on the label text itself.
  */
 const badgeVariants = cva(
-  'inline-flex items-center gap-1.5 rounded-sm border px-2 py-0.5 font-mono text-2xs uppercase tracking-[0.08em] whitespace-nowrap transition-colors',
+  // Sentence-case sans, not the uppercase mono chip: labels come from
+  // `ui-status.ts` already cased for reading, and uppercasing them in CSS was
+  // the last of the retro treatment (decision D1 in todo.md).
+  'inline-flex items-center gap-1.5 rounded-sm border px-2 py-0.5 text-2xs font-medium whitespace-nowrap transition-colors',
   {
     variants: {
       variant: {

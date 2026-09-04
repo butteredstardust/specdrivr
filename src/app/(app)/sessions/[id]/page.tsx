@@ -8,8 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { EventLog } from '@/components/mission-control/event-log';
 import { TaskTimeline } from '@/components/sessions/task-timeline';
-import { Play, Pause, XCircle, ExternalLink, AlertCircle } from 'lucide-react';
-import { GitHubLogoIcon } from '@radix-ui/react-icons';
+import { Play, Pause, XCircle, ExternalLink, AlertCircle, Github } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
@@ -155,7 +154,7 @@ export default function SessionDetailPage({ params }: PageProps) {
                 className="border-line bg-surface-inset/50 h-7 gap-1.5 px-2 py-0"
                 onClick={() => window.open(session.pullRequestUrl!, '_blank')}
               >
-                <GitHubLogoIcon className="h-3.5 w-3.5" />
+                <Github className="h-3.5 w-3.5" />
                 <span className="text-[10px] font-medium tracking-tight">VIEW PR</span>
                 <ExternalLink className="h-3 w-3 opacity-50" />
               </Button>

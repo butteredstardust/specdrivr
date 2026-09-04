@@ -157,7 +157,7 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
       {/* Escape the layout's p-6 so sections are full-bleed with border separators */}
       <div className="animate-fade-in-up -mx-6 -mt-6 flex min-h-full flex-col">
         <PageHeader
-          category="SPECIFICATIONS"
+          category="Specifications"
           title="Specs"
           action={
             canCreate ? (

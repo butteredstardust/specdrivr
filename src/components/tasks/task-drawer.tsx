@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Drawer } from 'vaul';
+import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from '@/components/ui/drawer';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { XCircle, RefreshCw, AlertCircle, CheckCircle2, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -198,120 +198,117 @@ export function TaskDrawer() {
 
   return (
     <>
-      <Drawer.Root open={!!activeTaskId} onOpenChange={handleOpenChange} direction="right">
-        <Drawer.Portal>
-          <Drawer.Overlay className="fixed inset-0 z-40 bg-black/60" />
-          <Drawer.Content className="border-line bg-surface-raised fixed top-0 right-0 bottom-0 z-50 flex w-full max-w-[640px] flex-col border-l outline-none">
-            <Drawer.Title className="sr-only">{task?.title ?? 'Task'}</Drawer.Title>
-            <Drawer.Description className="sr-only">
-              {task ? `${task.externalId} — ${task.status}` : 'Loading task'}
-            </Drawer.Description>
-            {task && (
-              <>
-                {/* Header */}
-                <div className="bg-surface-base border-line flex shrink-0 items-center gap-4 border-b px-6 py-5">
-                  <EntityId chip>{task.externalId}</EntityId>
-                  <span className="text-fg flex-1 truncate text-lg font-semibold tracking-tight">
-                    {task.title}
-                  </span>
-                  <StatusIcon size={20} status={statusToExpression(task.status)} />
-                  <TooltipProvider>
-                    {canManage ? (
-                      <Select value={task.status} onValueChange={handleStatusChange}>
-                        <SelectTrigger className="bg-surface-inset h-8 w-40 border-none px-2 shadow-none">
-                          <SelectValue>
-                            <Badge
-                              variant={TASK_STATUS_CONFIG[task.status].variant}
-                              dot={task.status === 'in_progress'}
-                              className="w-32 justify-center"
-                            >
-                              {TASK_STATUS_CONFIG[task.status].label}
-                            </Badge>
-                          </SelectValue>
-                        </SelectTrigger>
-                        <SelectContent className="bg-surface-raised border-line">
-                          {(Object.keys(TASK_STATUS_CONFIG) as Array<TaskStatus>)
-                            .filter((s) => s !== 'done')
-                            .map((s) => (
-                              <SelectItem key={s} value={s} className="focus:bg-surface-inset py-2">
-                                <Badge
-                                  variant={TASK_STATUS_CONFIG[s].variant}
-                                  dot={s === 'in_progress'}
-                                  className="w-32 justify-center"
-                                >
-                                  {TASK_STATUS_CONFIG[s].label}
-                                </Badge>
-                              </SelectItem>
-                            ))}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span>
-                            <Badge
-                              variant={TASK_STATUS_CONFIG[task.status].variant}
-                              dot={task.status === 'in_progress'}
-                              className="w-32 justify-center opacity-60"
-                            >
-                              {TASK_STATUS_CONFIG[task.status].label}
-                            </Badge>
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent>Requires Admin or Owner role</TooltipContent>
-                      </Tooltip>
-                    )}
-                  </TooltipProvider>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-fg-muted hover:text-fg h-8 w-8 shrink-0 rounded-md"
-                    onClick={closeDrawer}
-                  >
-                    <XCircle className="h-4 w-4" />
-                  </Button>
+      <Drawer open={!!activeTaskId} onOpenChange={handleOpenChange}>
+        <DrawerContent>
+          <DrawerTitle className="sr-only">{task?.title ?? 'Task'}</DrawerTitle>
+          <DrawerDescription className="sr-only">
+            {task ? `${task.externalId} — ${task.status}` : 'Loading task'}
+          </DrawerDescription>
+          {task && (
+            <>
+              {/* Header */}
+              <div className="bg-surface-base border-line flex shrink-0 items-center gap-4 border-b px-6 py-5">
+                <EntityId chip>{task.externalId}</EntityId>
+                <span className="text-fg flex-1 truncate text-lg font-semibold tracking-tight">
+                  {task.title}
+                </span>
+                <StatusIcon size={20} status={statusToExpression(task.status)} />
+                <TooltipProvider>
+                  {canManage ? (
+                    <Select value={task.status} onValueChange={handleStatusChange}>
+                      <SelectTrigger className="bg-surface-inset h-8 w-40 border-none px-2 shadow-none">
+                        <SelectValue>
+                          <Badge
+                            variant={TASK_STATUS_CONFIG[task.status].variant}
+                            dot={task.status === 'in_progress'}
+                            className="w-32 justify-center"
+                          >
+                            {TASK_STATUS_CONFIG[task.status].label}
+                          </Badge>
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent className="bg-surface-raised border-line">
+                        {(Object.keys(TASK_STATUS_CONFIG) as Array<TaskStatus>)
+                          .filter((s) => s !== 'done')
+                          .map((s) => (
+                            <SelectItem key={s} value={s} className="focus:bg-surface-inset py-2">
+                              <Badge
+                                variant={TASK_STATUS_CONFIG[s].variant}
+                                dot={s === 'in_progress'}
+                                className="w-32 justify-center"
+                              >
+                                {TASK_STATUS_CONFIG[s].label}
+                              </Badge>
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span>
+                          <Badge
+                            variant={TASK_STATUS_CONFIG[task.status].variant}
+                            dot={task.status === 'in_progress'}
+                            className="w-32 justify-center opacity-60"
+                          >
+                            {TASK_STATUS_CONFIG[task.status].label}
+                          </Badge>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>Requires Admin or Owner role</TooltipContent>
+                    </Tooltip>
+                  )}
+                </TooltipProvider>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-fg-muted hover:text-fg h-8 w-8 shrink-0 rounded-md"
+                  onClick={closeDrawer}
+                >
+                  <XCircle className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {/* Tabs */}
+              <Tabs defaultValue="overview" className="flex min-h-0 flex-1 flex-col">
+                <TabsList className="border-line mx-6 mt-4 mb-0 h-auto shrink-0 justify-start gap-4 rounded-none border-b bg-transparent p-0">
+                  {DRAWER_TABS.map((tab) => (
+                    <TabsTrigger
+                      key={tab}
+                      value={tab}
+                      className="data-[state=active]:border-accent data-[state=active]:text-fg data-[state=inactive]:text-fg-muted hover:text-fg-secondary rounded-none bg-transparent px-1 py-2.5 font-mono text-xs tracking-[0.08em] uppercase shadow-none transition-colors data-[state=active]:border-b-2 data-[state=inactive]:border-transparent"
+                    >
+                      {tab}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+                <div className="flex-1 overflow-y-auto">
+                  <TabsContent value="overview" className="mt-0 h-full">
+                    <TaskDrawerOverview task={task} onRetry={handleRetry} />
+                  </TabsContent>
+                  <TabsContent value="attempts" className="mt-0 h-full">
+                    <TaskDrawerAttempts taskId={task.id} taskStatus={task.status} />
+                  </TabsContent>
+                  <TabsContent value="changes" className="mt-0 h-full">
+                    <TaskDrawerChanges taskId={task.id} />
+                  </TabsContent>
                 </div>
+              </Tabs>
 
-                {/* Tabs */}
-                <Tabs defaultValue="overview" className="flex min-h-0 flex-1 flex-col">
-                  <TabsList className="border-line mx-6 mt-4 mb-0 h-auto shrink-0 justify-start gap-4 rounded-none border-b bg-transparent p-0">
-                    {DRAWER_TABS.map((tab) => (
-                      <TabsTrigger
-                        key={tab}
-                        value={tab}
-                        className="data-[state=active]:border-accent data-[state=active]:text-fg data-[state=inactive]:text-fg-muted hover:text-fg-secondary rounded-none bg-transparent px-1 py-2.5 font-mono text-xs tracking-[0.08em] uppercase shadow-none transition-colors data-[state=active]:border-b-2 data-[state=inactive]:border-transparent"
-                      >
-                        {tab}
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
-                  <div className="flex-1 overflow-y-auto">
-                    <TabsContent value="overview" className="mt-0 h-full">
-                      <TaskDrawerOverview task={task} onRetry={handleRetry} />
-                    </TabsContent>
-                    <TabsContent value="attempts" className="mt-0 h-full">
-                      <TaskDrawerAttempts taskId={task.id} taskStatus={task.status} />
-                    </TabsContent>
-                    <TabsContent value="changes" className="mt-0 h-full">
-                      <TaskDrawerChanges taskId={task.id} />
-                    </TabsContent>
-                  </div>
-                </Tabs>
-
-                {/* Footer */}
-                <DrawerFooter
-                  task={task}
-                  canManage={canManage}
-                  devMode={devMode}
-                  onRetry={handleRetry}
-                  onMarkBlocked={handleMarkBlocked}
-                  onMarkDone={() => handleMarkDone(false)}
-                />
-              </>
-            )}
-          </Drawer.Content>
-        </Drawer.Portal>
-      </Drawer.Root>
+              {/* Footer */}
+              <DrawerFooter
+                task={task}
+                canManage={canManage}
+                devMode={devMode}
+                onRetry={handleRetry}
+                onMarkBlocked={handleMarkBlocked}
+                onMarkDone={() => handleMarkDone(false)}
+              />
+            </>
+          )}
+        </DrawerContent>
+      </Drawer>
 
       <AlertDialog open={forceConfirmOpen} onOpenChange={setForceConfirmOpen}>
         <AlertDialogContent>

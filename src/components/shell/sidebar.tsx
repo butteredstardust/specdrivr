@@ -167,9 +167,9 @@ function SidebarBottom({ collapsed }: { collapsed: boolean }) {
           Systems
         </span>
         <div className="flex items-end justify-between px-1">
-          <SystemIcon label="GIT" state={health.git} tooltip={gitTooltip} />
+          <SystemIcon label="Git" state={health.git} tooltip={gitTooltip} />
           <SystemIcon label="API" state={health.api} tooltip={apiTooltip} />
-          <SystemIcon label="AGT" state={health.agt} tooltip={agtTooltip} />
+          <SystemIcon label="Agt" state={health.agt} tooltip={agtTooltip} />
           <SystemIcon label="PG" state={health.pg} tooltip={pgTooltip} />
         </div>
       </div>
@@ -247,7 +247,7 @@ export function Sidebar({ projects }: SidebarProps) {
                     variant="warning"
                     className="mt-0.5 w-fit origin-left scale-90 font-mono text-[10px]"
                   >
-                    DEV MODE
+                    Dev mode
                   </Badge>
                 )}
               </div>

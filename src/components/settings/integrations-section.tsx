@@ -320,7 +320,7 @@ function GitHubCard({ projectId, editable, initialData, onSaved }: GitHubCardPro
           <ConnectedBadge connected={connected} />
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <FormField label="GITHUB TOKEN" htmlFor="githubToken">
+          <FormField label="Github token" htmlFor="githubToken">
             {editable ? (
               <PasswordInput
                 id="githubToken"
@@ -347,7 +347,7 @@ function GitHubCard({ projectId, editable, initialData, onSaved }: GitHubCardPro
             )}
           </FormField>
 
-          <FormField label="REPOSITORY" htmlFor="githubRepo">
+          <FormField label="Repository" htmlFor="githubRepo">
             {editable ? (
               <Input
                 id="githubRepo"
@@ -376,7 +376,7 @@ function GitHubCard({ projectId, editable, initialData, onSaved }: GitHubCardPro
             )}
           </FormField>
 
-          <FormField label="BRANCH" htmlFor="githubBranch">
+          <FormField label="Branch" htmlFor="githubBranch">
             {editable ? (
               <Input
                 id="githubBranch"
@@ -405,7 +405,7 @@ function GitHubCard({ projectId, editable, initialData, onSaved }: GitHubCardPro
             )}
           </FormField>
 
-          <FormField label="WEBHOOK SECRET" htmlFor="githubWebhookSecret">
+          <FormField label="Webhook secret" htmlFor="githubWebhookSecret">
             {editable ? (
               <PasswordInput
                 id="githubWebhookSecret"
@@ -615,7 +615,7 @@ function SlackCard({ projectId, editable, initialData, onSaved }: SlackCardProps
           <ConnectedBadge connected={connected} />
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <FormField label="BOT TOKEN" htmlFor="slackBotToken">
+          <FormField label="Bot token" htmlFor="slackBotToken">
             {editable ? (
               <PasswordInput
                 id="slackBotToken"
@@ -642,7 +642,7 @@ function SlackCard({ projectId, editable, initialData, onSaved }: SlackCardProps
             )}
           </FormField>
 
-          <FormField label="CHANNEL ID" htmlFor="slackChannelId">
+          <FormField label="Channel ID" htmlFor="slackChannelId">
             {editable ? (
               <Input
                 id="slackChannelId"
@@ -810,7 +810,7 @@ function WebhookDialog({ open, onClose, onSave, initial, isSaving }: WebhookDial
           </FormField>
 
           <div className="flex flex-col gap-2">
-            <Label className="text-fg-secondary font-mono text-xs uppercase">EVENTS</Label>
+            <Label className="text-fg-muted text-2xs font-medium">Events</Label>
             <div className="flex flex-col gap-2">
               {WEBHOOK_EVENTS.map((ev) => (
                 <div key={ev.value} className="flex items-center gap-2">

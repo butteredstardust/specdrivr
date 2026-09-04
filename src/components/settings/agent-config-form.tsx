@@ -176,7 +176,7 @@ interface FormFieldProps {
 function FormField({ label, htmlFor, helper, children }: FormFieldProps) {
   return (
     <div className="flex flex-col gap-1.5">
-      <Label htmlFor={htmlFor} className="text-fg-secondary font-mono text-xs uppercase">
+      <Label htmlFor={htmlFor} className="text-fg-secondary text-xs font-medium">
         {label}
       </Label>
       {children}
@@ -190,7 +190,7 @@ function FormField({ label, htmlFor, helper, children }: FormFieldProps) {
 // ---------------------------------------------------------------------------
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
-  return <h2 className="text-fg-muted font-mono text-xs tracking-widest uppercase">{children}</h2>;
+  return <h2 className="text-fg text-sm font-semibold">{children}</h2>;
 }
 
 // ---------------------------------------------------------------------------
@@ -328,10 +328,10 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
         {/* AI PROVIDERS                                                         */}
         {/* ------------------------------------------------------------------ */}
         <section className="flex flex-col gap-4">
-          <SectionHeading>AI PROVIDERS</SectionHeading>
+          <SectionHeading>AI providers</SectionHeading>
 
           <FormField
-            label="EXECUTION BACKEND"
+            label="Execution backend"
             helper="Which AI agent executes your tasks. Both require the respective CLI installed on the agent machine."
           >
             <Tooltip>
@@ -370,7 +370,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
               </p>
 
               <FormField
-                label="GEMINI API KEY"
+                label="Gemini API key"
                 helper="Project-specific API key. Leave blank to use system default."
               >
                 <Tooltip>
@@ -388,7 +388,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
               </FormField>
 
               <FormField
-                label="GEMINI MODEL"
+                label="Gemini model"
                 helper="Model used for plan generation and Gemini execution"
               >
                 <Tooltip>
@@ -412,7 +412,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
               </p>
 
               <FormField
-                label="CLAUDE API KEY"
+                label="Claude API key"
                 helper="Project-specific API key. Leave blank to use system default."
               >
                 <Tooltip>
@@ -429,7 +429,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
                 </Tooltip>
               </FormField>
 
-              <FormField label="EXECUTION MODEL" helper="Execution model for tasks">
+              <FormField label="Execution model" helper="Execution model for tasks">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Input
@@ -443,7 +443,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
                 </Tooltip>
               </FormField>
 
-              <FormField label="PLAN MODEL" helper="Model used for plan generation">
+              <FormField label="Plan model" helper="Model used for plan generation">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Input
@@ -464,9 +464,9 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
         {/* EXECUTION LIMITS                                                     */}
         {/* ------------------------------------------------------------------ */}
         <section className="flex flex-col gap-4">
-          <SectionHeading>EXECUTION LIMITS</SectionHeading>
+          <SectionHeading>Execution limits</SectionHeading>
 
-          <FormField label="MAX CONCURRENT TASKS">
+          <FormField label="Max concurrent tasks">
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex items-center gap-4">
@@ -513,7 +513,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
             </Tooltip>
           </FormField>
 
-          <FormField label="MAX RETRIES">
+          <FormField label="Max retries">
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex items-center gap-4">
@@ -541,7 +541,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
             </Tooltip>
           </FormField>
 
-          <FormField label="RETRY DELAY">
+          <FormField label="Retry delay">
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="w-full">
@@ -592,9 +592,9 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
         {/* EXECUTION COMMANDS                                                   */}
         {/* ------------------------------------------------------------------ */}
         <section className="flex flex-col gap-4">
-          <SectionHeading>EXECUTION COMMANDS</SectionHeading>
+          <SectionHeading>Execution commands</SectionHeading>
 
-          <FormField label="TEST COMMAND">
+          <FormField label="Test command">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Input
@@ -608,7 +608,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
             </Tooltip>
           </FormField>
 
-          <FormField label="LINT COMMAND">
+          <FormField label="Lint command">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Input
@@ -622,7 +622,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
             </Tooltip>
           </FormField>
 
-          <FormField label="SETUP COMMAND">
+          <FormField label="Setup command">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Input
@@ -641,9 +641,9 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
         {/* GIT SETTINGS                                                         */}
         {/* ------------------------------------------------------------------ */}
         <section className="flex flex-col gap-4">
-          <SectionHeading>GIT SETTINGS</SectionHeading>
+          <SectionHeading>Git settings</SectionHeading>
 
-          <FormField label="BRANCH PREFIX">
+          <FormField label="Branch prefix">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Input
@@ -657,7 +657,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
             </Tooltip>
           </FormField>
 
-          <FormField label="COMMIT PREFIX">
+          <FormField label="Commit prefix">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Input
@@ -695,7 +695,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
             </Tooltip>
           </div>
 
-          <FormField label="PR TARGET BRANCH">
+          <FormField label="PR target branch">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Input
@@ -714,7 +714,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
         {/* PLANNING                                                             */}
         {/* ------------------------------------------------------------------ */}
         <section className="flex flex-col gap-4">
-          <SectionHeading>PLANNING</SectionHeading>
+          <SectionHeading>Planning</SectionHeading>
 
           <div className="flex items-center justify-between">
             <Label className="text-fg-secondary font-mono text-xs uppercase">
@@ -763,10 +763,10 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
         {/* FILE BOUNDARIES                                                      */}
         {/* ------------------------------------------------------------------ */}
         <section className="flex flex-col gap-4">
-          <SectionHeading>FILE BOUNDARIES</SectionHeading>
+          <SectionHeading>File boundaries</SectionHeading>
 
           <FormField
-            label="ALLOWED FILE GLOBS"
+            label="Allowed file globs"
             helper="Type a glob pattern and press Enter or comma to add. Leave empty to allow all files."
           >
             <Tooltip>
@@ -791,7 +791,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
           </FormField>
 
           <FormField
-            label="FORBIDDEN FILE GLOBS"
+            label="Forbidden file globs"
             helper="Files matching these patterns will never be touched by the agent."
           >
             <Tooltip>
@@ -820,10 +820,10 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
         {/* AGENT TOKEN                                                          */}
         {/* ------------------------------------------------------------------ */}
         <section className="flex flex-col gap-4">
-          <SectionHeading>AGENT TOKEN</SectionHeading>
+          <SectionHeading>Agent token</SectionHeading>
 
           <div className="border-line bg-surface-raised rounded-md border p-4">
-            <p className="text-fg-muted font-mono text-xs tracking-widest uppercase">AGENT TOKEN</p>
+            <p className="text-fg-muted text-2xs font-medium">Agent token</p>
             <p className="text-fg mt-2 font-mono text-sm">sdk_••••••••••••</p>
             <p className="text-fg-muted mt-1 text-xs">
               This token is set via environment variable. Rotate it in your infrastructure, then

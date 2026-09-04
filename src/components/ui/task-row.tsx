@@ -66,9 +66,9 @@ export function TaskRow({
 
   const rowBorderClass =
     task.status === 'in_progress'
-      ? 'border-l-2 border-accent bg-surface-inset/5'
+      ? 'border-accent bg-accent-subtle border-l-2'
       : task.status === 'blocked'
-        ? 'border-l-2 border-warning bg-warning-bg'
+        ? 'border-warning bg-warning-bg border-l-2'
         : 'border-l-2 border-transparent';
 
   return (
@@ -76,7 +76,23 @@ export function TaskRow({
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <div className={cn('rounded-sm', rowBorderClass, className)}>
           <CollapsibleTrigger asChild>
-            <div className="hover:bg-surface-inset flex h-9 cursor-pointer items-center gap-2 px-3 select-none">
+            {/* A div, not a button: the row contains its own buttons, and a
+                button may not nest one. Radix's Trigger only wires up click on
+                a non-button child, so the keyboard behaviour the shortcuts
+                dialog advertises is added by hand. */}
+            <div
+              role="button"
+              tabIndex={0}
+              aria-expanded={isOpen}
+              onKeyDown={(e) => {
+                if (e.target !== e.currentTarget) return;
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setIsOpen((open) => !open);
+                }
+              }}
+              className="hover:bg-surface-inset flex h-9 cursor-pointer items-center gap-2 px-3 select-none"
+            >
               <Badge
                 variant={TASK_STATUS[task.status].variant}
                 dot={task.status === 'in_progress'}
@@ -85,16 +101,14 @@ export function TaskRow({
                 {TASK_STATUS[task.status].label}
               </Badge>
               <EntityId chip>{externalId ?? `T-${String(task.id).padStart(3, '0')}`}</EntityId>
-              {devMode && (
-                <span className="text-fg-muted font-mono text-[10px]">[id:{task.id}]</span>
-              )}
+              {devMode && <span className="text-fg-muted text-2xs font-mono">[id:{task.id}]</span>}
               <span className="text-fg flex-1 truncate text-sm">{task.title}</span>
               {dependsOn && dependsOn.length > 0 && (
                 <div className="flex shrink-0 gap-1">
                   {dependsOn.slice(0, 3).map((dep) => (
                     <span
                       key={dep}
-                      className="text-fg-muted bg-surface-inset rounded px-1 font-mono text-[10px]"
+                      className="text-fg-muted bg-surface-inset text-2xs rounded px-1 font-mono"
                     >
                       +{dep}
                     </span>
@@ -102,7 +116,7 @@ export function TaskRow({
                 </div>
               )}
               {task.totalCostUsd && task.totalCostUsd > 0 && (
-                <span className="text-fg-muted shrink-0 font-mono text-[10px]">
+                <span className="text-fg-muted text-2xs shrink-0 font-mono">
                   ${Number(task.totalCostUsd).toFixed(4)}
                 </span>
               )}

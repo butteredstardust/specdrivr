@@ -27,11 +27,7 @@ function ShortcutRow({ keys, action }: ShortcutRowProps) {
 }
 
 function SectionHeader({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="text-fg-muted mt-4 mb-1 font-mono text-[11px] tracking-[0.08em] uppercase first:mt-0">
-      {children}
-    </p>
-  );
+  return <p className="text-fg-muted text-2xs mt-4 mb-1 font-medium first:mt-0">{children}</p>;
 }
 
 export function KeyboardShortcutsModal() {
@@ -41,15 +37,15 @@ export function KeyboardShortcutsModal() {
     <Dialog open={shortcutsOpen} onOpenChange={setShortcutsOpen}>
       <DialogContent className="border-line bg-surface-raised max-w-lg">
         <DialogHeader>
-          <DialogTitle className="text-fg-muted flex items-center gap-2 font-mono text-[11px] tracking-[0.08em] uppercase">
-            <Command className="h-4 w-4" />
-            KEYBOARD SHORTCUTS
+          <DialogTitle className="flex items-center gap-2">
+            <Command className="text-fg-muted h-4 w-4" />
+            Keyboard shortcuts
           </DialogTitle>
         </DialogHeader>
 
         <div className="divide-line-subtle divide-y">
           <div className="pb-3">
-            <SectionHeader>NAVIGATION</SectionHeader>
+            <SectionHeader>Navigation</SectionHeader>
             <ShortcutRow
               keys={
                 <>
@@ -80,7 +76,7 @@ export function KeyboardShortcutsModal() {
           </div>
 
           <div className="py-3">
-            <SectionHeader>ACTIONS</SectionHeader>
+            <SectionHeader>Actions</SectionHeader>
             <ShortcutRow keys={<Kbd>N</Kbd>} action="New specification" />
             <ShortcutRow
               keys={
@@ -94,7 +90,7 @@ export function KeyboardShortcutsModal() {
           </div>
 
           <div className="py-3">
-            <SectionHeader>TASK LIST</SectionHeader>
+            <SectionHeader>Task list</SectionHeader>
             <ShortcutRow
               keys={
                 <>
@@ -117,7 +113,7 @@ export function KeyboardShortcutsModal() {
           </div>
 
           <div className="pt-3">
-            <SectionHeader>SYSTEM</SectionHeader>
+            <SectionHeader>System</SectionHeader>
             <ShortcutRow
               keys={
                 <>

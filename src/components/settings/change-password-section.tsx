@@ -109,7 +109,7 @@ export function ChangePasswordSection() {
 
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="text-fg-muted font-mono text-xs tracking-widest uppercase">CHANGE PASSWORD</h2>
+      <h2 className="text-fg-muted text-2xs font-medium">Change password</h2>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <label className="text-fg-secondary font-mono text-xs" htmlFor="current-password">

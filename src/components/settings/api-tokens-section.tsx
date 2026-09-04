@@ -182,7 +182,7 @@ export function ApiTokensSection() {
   return (
     <section className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-fg-muted font-mono text-xs tracking-widest uppercase">API TOKENS</h2>
+        <h2 className="text-fg-muted text-2xs font-medium">API tokens</h2>
         <Button
           variant="outline"
           size="sm"

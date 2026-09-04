@@ -146,7 +146,7 @@ export function MembersSection({ projectId, userRole, initialMembers }: MembersS
   return (
     <TooltipProvider>
       <section className="flex flex-col gap-4">
-        <h2 className="text-fg-muted font-mono text-xs tracking-widest uppercase">MEMBERS</h2>
+        <h2 className="text-fg-muted text-2xs font-medium">Members</h2>
 
         <div className="overflow-x-auto">
           <table className="w-full text-xs">

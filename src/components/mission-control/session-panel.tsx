@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Pause, Play, XCircle, RefreshCw, ChevronRight, ExternalLink } from 'lucide-react';
-import { GitHubLogoIcon } from '@radix-ui/react-icons';
+import { Pause, Play, XCircle, RefreshCw, ChevronRight, ExternalLink, Github } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { UserRole } from '@/db/schema';
 import { StatusIcon } from '@/components/ui/status-icon';
@@ -144,7 +143,7 @@ export function SessionPanel({
     return (
       <div className="flex flex-col items-center gap-3 py-6 text-center">
         <StatusIcon size={24} status="idle" />
-        <p className="text-fg-muted font-mono text-xs tracking-widest uppercase">SYSTEM READY</p>
+        <p className="text-fg-muted text-2xs font-medium">System ready</p>
         <p className="text-fg-secondary text-sm">No active session.</p>
         <Button asChild variant="warning" size="sm" className="mt-1">
           <Link href="/specs/new">
@@ -181,10 +180,10 @@ export function SessionPanel({
             )}
             {panelState === 'running' ? (
               <Badge variant="info" dot>
-                RUNNING
+                Running
               </Badge>
             ) : (
-              <Badge variant="warning">PAUSED</Badge>
+              <Badge variant="warning">Paused</Badge>
             )}
             <span className="text-fg-muted ml-auto font-mono text-xs tracking-tighter tabular-nums">
               {mm}:{ss}
@@ -261,7 +260,7 @@ export function SessionPanel({
     return (
       <div className="flex flex-col items-center gap-3 py-4 text-center">
         <StatusIcon size={24} status="success" />
-        <Badge variant="success">EXECUTION COMPLETE</Badge>
+        <Badge variant="success">Execution complete</Badge>
         {session && (
           <div className="flex flex-col items-center gap-1.5 font-mono text-xs">
             <div className="text-fg-secondary flex gap-4">
@@ -291,7 +290,7 @@ export function SessionPanel({
                   className="text-fg-secondary hover:text-fg h-auto p-0 text-sm font-normal"
                   onClick={() => window.open(session.pullRequestUrl!, '_blank')}
                 >
-                  <GitHubLogoIcon className="mr-1.5 h-3.5 w-3.5" />
+                  <Github className="mr-1.5 h-3.5 w-3.5" />
                   View PR
                   <ExternalLink className="ml-1 h-3 w-3 opacity-50" />
                 </Button>
@@ -308,7 +307,7 @@ export function SessionPanel({
       <TooltipProvider>
         <div className="flex flex-col items-center gap-3 py-4 text-center">
           <StatusIcon size={24} status="error" />
-          <Badge variant="danger">EXECUTION FAILED</Badge>
+          <Badge variant="danger">Execution failed</Badge>
           {session?.totalCostUsd != null && session.totalCostUsd > 0 && (
             <span className="text-fg-muted font-mono text-[10px]">
               EST. COST: ${session.totalCostUsd.toFixed(4)}
@@ -346,7 +345,7 @@ export function SessionPanel({
   return (
     <div className="flex flex-col items-center gap-3 py-6 text-center">
       <StatusIcon size={24} status="idle" />
-      <Badge variant="muted">CANCELLED</Badge>
+      <Badge variant="muted">Cancelled</Badge>
       <Link href="/specs" className="text-warning text-sm underline-offset-2 hover:underline">
         Return to specs
       </Link>

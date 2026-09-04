@@ -100,25 +100,29 @@ export function DiffViewer({ files, className }: DiffViewerProps) {
     <div className={cn('flex h-full flex-col', className)}>
       {/* Header */}
       <div className="border-line flex items-center gap-3 border-b px-4 py-2">
-        <span className="text-fg-muted font-mono text-xs font-semibold tracking-widest uppercase">
-          FILE CHANGES
-        </span>
+        <span className="text-fg text-sm font-medium">File changes</span>
         <span className="text-success font-mono text-xs">+{totalAdditions}</span>
         <span className="text-danger font-mono text-xs">−{totalDeletions}</span>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
         {/* File tree */}
-        <div className="border-line w-56 shrink-0 overflow-y-auto border-r">
+        <div
+          className="border-line w-56 shrink-0 overflow-y-auto border-r"
+          role="tablist"
+          aria-label="Changed files"
+        >
           {files.map((file, i) => (
             <Button
               key={`${file.filename}-${i}`}
               variant="ghost"
+              role="tab"
+              aria-selected={selectedFile === file.filename}
               onClick={() => setSelectedFile(file.filename)}
               className={cn(
                 'flex h-auto w-full items-center justify-start gap-1.5 truncate rounded-none px-3 py-2 text-left font-mono text-xs',
                 selectedFile === file.filename
-                  ? 'bg-surface-inset/10 text-accent hover:bg-surface-inset/15'
+                  ? 'bg-accent-subtle text-accent'
                   : 'text-fg-secondary hover:bg-surface-inset'
               )}
             >
@@ -129,7 +133,11 @@ export function DiffViewer({ files, className }: DiffViewerProps) {
         </div>
 
         {/* Diff content */}
-        <div className="bg-surface-base flex-1 overflow-auto">
+        <div
+          className="bg-surface-base flex-1 overflow-auto"
+          role="tabpanel"
+          aria-label={selected ? `Diff for ${selected.filename}` : 'Diff'}
+        >
           {selected ? (
             <div>{renderDiffLines(selected.patch)}</div>
           ) : (
