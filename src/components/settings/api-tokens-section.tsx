@@ -190,7 +190,7 @@ export function ApiTokensSection() {
           onClick={() => setGenerateOpen(true)}
         >
           <Plus className="size-3" />
-          Generate Token
+          Generate token
         </Button>
       </div>
       <p className="text-fg-muted text-sm">

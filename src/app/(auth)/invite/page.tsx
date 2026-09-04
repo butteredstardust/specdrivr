@@ -121,7 +121,7 @@ export default function InvitePage() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="name">Full Name</Label>
+            <Label htmlFor="name">Full name</Label>
             <Input
               id="name"
               type="text"
@@ -131,7 +131,7 @@ export default function InvitePage() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="password">Create Password</Label>
+            <Label htmlFor="password">Create password</Label>
             <Input
               id="password"
               type="password"

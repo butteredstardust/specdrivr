@@ -171,7 +171,7 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
         <StatusIcon size={24} status="idle" />
         <p className="text-fg-muted text-sm">No sessions found matching your filters.</p>
         <Button asChild variant="default" className="mt-2">
-          <Link href="/specs">Review Specs</Link>
+          <Link href="/specs">Review specs</Link>
         </Button>
       </div>
     );

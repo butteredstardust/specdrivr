@@ -38,7 +38,7 @@ export function RecentSessions({ sessions }: RecentSessionsProps) {
           </p>
         </div>
         <Button asChild>
-          <Link href="/specs/new">Create Specification</Link>
+          <Link href="/specs/new">Create specification</Link>
         </Button>
       </div>
     );

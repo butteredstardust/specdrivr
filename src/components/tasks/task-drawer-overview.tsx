@@ -61,7 +61,7 @@ export function TaskDrawerOverview({ task, onRetry }: TaskDrawerOverviewProps) {
             <Github className="h-5 w-5 opacity-70" />
             <div className="flex flex-col gap-0.5">
               <span className="text-fg-muted text-2xs">PULL REQUEST</span>
-              <span className="text-fg text-sm font-medium">Automated Contribution</span>
+              <span className="text-fg text-sm font-medium">Automated contribution</span>
             </div>
           </div>
           <Button

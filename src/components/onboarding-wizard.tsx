@@ -129,7 +129,7 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
             </DialogHeader>
             <div className="mt-4 flex justify-center">
               <Button variant="default" onClick={() => setStep(2)} className="w-full">
-                Get Started
+                Get started
               </Button>
             </div>
           </>
@@ -139,7 +139,7 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
           <>
             <DialogHeader>
               <DialogTitle className="text-fg text-lg tracking-tight">
-                Identify Yourself
+                Identify yourself
               </DialogTitle>
               <DialogDescription className="text-fg-secondary">
                 This is how you&apos;ll appear to others on the platform.
@@ -175,7 +175,7 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
           <>
             <DialogHeader>
               <DialogTitle className="text-fg text-lg tracking-tight">
-                Initialize Project
+                Initialize project
               </DialogTitle>
               <DialogDescription className="text-fg-secondary">
                 Give your first project a name to get started.

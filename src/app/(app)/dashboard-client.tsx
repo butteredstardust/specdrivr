@@ -183,7 +183,7 @@ export function DashboardClient({ initialSessions, initialTasks }: DashboardClie
               </div>
               <div className="animate-fade-in-up grid grid-cols-1 gap-6 lg:grid-cols-[1.2fr_1fr]">
                 <div>
-                  <h2 className="text-fg-secondary mb-2 text-xs">Live Terminal</h2>
+                  <h2 className="text-fg-secondary mb-2 text-xs font-medium">Live terminal</h2>
                   <div className="relative overflow-hidden rounded-md">
                     <LiveTerminal
                       sessionId={activeSession.id}
@@ -192,7 +192,7 @@ export function DashboardClient({ initialSessions, initialTasks }: DashboardClie
                     />
                     {activeSession.status === 'paused' && (
                       <div className="bg-log-bg/80 pointer-events-none absolute inset-0 flex items-center justify-center backdrop-blur-[1px]">
-                        <div className="border-warning-border bg-warning-bg text-warning flex items-center gap-2 rounded-md border px-4 py-2 font-mono text-xs">
+                        <div className="border-warning-border bg-warning-bg text-warning flex items-center gap-2 rounded-md border px-4 py-2 text-xs font-medium">
                           <Pause className="size-3.5" />
                           Session paused
                         </div>
@@ -208,7 +208,7 @@ export function DashboardClient({ initialSessions, initialTasks }: DashboardClie
               <div className="animate-fade-in-up">
                 <RecentSessions sessions={recentSessions} />
               </div>
-              <div className="animate-fade-in-up bg-surface-raised border-line h-fit rounded-xl border p-6">
+              <div className="animate-fade-in-up bg-surface-raised border-line h-fit rounded-lg border p-6">
                 {activeProjectId && <ProjectActivityFeed projectId={activeProjectId} />}
               </div>
             </div>

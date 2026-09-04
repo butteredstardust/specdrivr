@@ -289,13 +289,13 @@ export function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
           {editable ? (
             <Button size="sm" variant="outline" onClick={openAdd} className="self-start">
               <Plus className="mr-1.5 h-3.5 w-3.5" />
-              Add Webhook
+              Add webhook
             </Button>
           ) : (
             <DisabledButtonWithTooltip tooltip="Requires Admin or Owner role">
               <Button size="sm" variant="outline" disabled className="self-start">
                 <Plus className="mr-1.5 h-3.5 w-3.5" />
-                Add Webhook
+                Add webhook
               </Button>
             </DisabledButtonWithTooltip>
           )}

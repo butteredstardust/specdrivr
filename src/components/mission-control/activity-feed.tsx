@@ -30,7 +30,7 @@ export function ProjectActivityFeed({ projectId, className }: ProjectActivityFee
   if (!activity || activity.length === 0) {
     return (
       <div className={cn('flex flex-col gap-4', className)}>
-        <h2 className="text-fg-muted text-2xs opacity-70">Activity Feed</h2>
+        <h2 className="text-fg-muted text-2xs font-medium">Activity feed</h2>
         <div className="bg-surface-inset border-line-subtle flex h-24 items-center justify-center rounded-lg border border-dashed px-4 py-8 text-center">
           <p className="text-fg-muted text-2xs opacity-50">Waiting for activity...</p>
         </div>
@@ -40,7 +40,7 @@ export function ProjectActivityFeed({ projectId, className }: ProjectActivityFee
 
   return (
     <div className={cn('flex flex-col gap-4', className)}>
-      <h2 className="text-fg-muted text-2xs opacity-70">Activity Feed</h2>
+      <h2 className="text-fg-muted text-2xs font-medium">Activity feed</h2>
       <div className="flex flex-col gap-1.5">
         {activity.map((item) => (
           <ActivityRow key={`${item.type}-${item.id}`} item={item} />

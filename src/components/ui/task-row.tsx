@@ -174,7 +174,7 @@ export function TaskRow({
                       <TooltipTrigger asChild>
                         <span>
                           <DropdownMenuSubTrigger disabled={!canOverride}>
-                            Override Status
+                            Override status
                           </DropdownMenuSubTrigger>
                         </span>
                       </TooltipTrigger>

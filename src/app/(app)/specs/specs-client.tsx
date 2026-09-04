@@ -148,7 +148,7 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
       className="gap-2"
     >
       <Plus className="h-3.5 w-3.5" />
-      New Specification
+      New specification
     </Button>
   );
 

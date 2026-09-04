@@ -106,7 +106,7 @@ export default function ResetPasswordPage() {
           className="space-y-4"
         >
           <div className="space-y-1.5">
-            <Label htmlFor="password">New Password</Label>
+            <Label htmlFor="password">New password</Label>
             <Input
               id="password"
               {...register('password', {
@@ -128,7 +128,7 @@ export default function ResetPasswordPage() {
             {errors.password && <p className="text-danger text-2xs">{errors.password.message}</p>}
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Label htmlFor="confirmPassword">Confirm password</Label>
             <Input
               id="confirmPassword"
               {...register('confirmPassword')}

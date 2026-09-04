@@ -79,7 +79,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <label className="text-fg-secondary font-mono text-xs" htmlFor="profile-name">
-            Display Name
+            Display name
           </label>
           <Input id="profile-name" autoComplete="name" {...register('name')} />
           {errors.name && <p className="text-danger font-mono text-xs">{errors.name.message}</p>}

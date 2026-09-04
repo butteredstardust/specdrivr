@@ -225,7 +225,7 @@ export default function SessionDetailPage({ params }: PageProps) {
         <div className="border-line border-b px-6 py-4">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Execution Failed</AlertTitle>
+            <AlertTitle>Execution failed</AlertTitle>
             <AlertDescription className="font-mono text-xs">
               {session.errorMessage}
             </AlertDescription>
@@ -239,7 +239,7 @@ export default function SessionDetailPage({ params }: PageProps) {
         </div>
 
         <div className="flex min-h-[20rem] w-full flex-col overflow-y-auto p-4 md:min-h-0 md:w-1/2">
-          <p className="text-fg-secondary text-2xs mb-3">Session Log</p>
+          <p className="text-fg-secondary text-2xs mb-3">Session log</p>
           <p className="text-fg-secondary mb-3 font-mono text-xs">
             $ specdrivr agent start --session {sessionLabel}
           </p>

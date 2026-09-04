@@ -139,7 +139,7 @@ export function EventLog({ sessionId, onUpdate, className }: EventLogProps) {
   return (
     <div className={className}>
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-fg-muted text-2xs">Session Log</p>
+        <p className="text-fg-muted text-2xs">Session log</p>
         <Button
           variant="ghost"
           size="sm"

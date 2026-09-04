@@ -108,12 +108,12 @@ export function CreateProjectDialog({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>New Project</DialogTitle>
+            <DialogTitle>New project</DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="project-name">Project Name</Label>
+              <Label htmlFor="project-name">Project name</Label>
               <Input
                 id="project-name"
                 value={name}

@@ -141,7 +141,7 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
 
   return (
     <div>
-      <p className="text-fg-muted text-2xs mb-6">Task Execution Timeline</p>
+      <p className="text-fg-muted text-2xs mb-6">Task execution timeline</p>
       {isLoading && tasks.length === 0 ? (
         <p className="text-fg-muted text-xs">Loading tasks…</p>
       ) : tasks.length === 0 ? (
@@ -227,7 +227,7 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
                         {task.blockedReason && (
                           <div>
                             <span className="text-danger text-2xs mb-0.5 block">
-                              Blocked Reason
+                              Blocked reason
                             </span>
                             <p className="text-danger text-2xs font-mono whitespace-pre-wrap">
                               {task.blockedReason}

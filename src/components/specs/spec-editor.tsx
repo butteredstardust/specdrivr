@@ -125,7 +125,7 @@ export function SpecEditor(props: SpecEditorProps) {
   const isReadOnly = specStatus === 'pending_plan';
 
   return (
-    <div className={`flex flex-col h-screen${className ? ` ${className}` : ''}`}>
+    <div className={`flex h-full flex-col${className ? ` ${className}` : ''}`}>
       {/* Top bar */}
       <div className="border-line-subtle flex shrink-0 flex-wrap items-center gap-3 border-b px-3 py-2 sm:px-4">
         <Input
@@ -133,7 +133,7 @@ export function SpecEditor(props: SpecEditorProps) {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Untitled spec"
-          className="text-fg placeholder:text-fg-muted min-w-0 flex-1 basis-full border-none bg-transparent font-mono text-sm shadow-none sm:basis-auto"
+          className="text-fg placeholder:text-fg-muted min-w-0 flex-1 basis-full border-none bg-transparent text-sm font-medium shadow-none sm:basis-auto"
         />
         {saveError && <p className="text-danger text-sm">{saveError}</p>}
         <div className="flex flex-1 gap-2 sm:flex-none">
@@ -144,7 +144,7 @@ export function SpecEditor(props: SpecEditorProps) {
             disabled={isSaving || !isDirty}
             className="text-2xs h-8 flex-1 sm:flex-none"
           >
-            {isSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Save Draft'}
+            {isSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Save draft'}
           </Button>
           <Button
             size="sm"
@@ -158,14 +158,14 @@ export function SpecEditor(props: SpecEditorProps) {
             ) : (
               <>
                 <Plus className="h-3.5 w-3.5" />
-                Save & Generate Plan
+                Save & generate plan
               </>
             )}
           </Button>
         </div>
         <Link
           href="/specs"
-          className="text-fg-muted hover:text-fg-secondary font-mono text-xs transition-colors sm:ml-2"
+          className="text-fg-muted hover:text-fg-secondary text-xs transition-colors sm:ml-2"
         >
           Back
         </Link>

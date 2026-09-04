@@ -224,7 +224,7 @@ export function SessionPanel({
                 canControl={canControl}
                 onClick={onPause}
                 icon={<Pause className="mr-2 h-3 w-3" />}
-                label="Pause Session"
+                label="Pause session"
                 variant="outline"
                 className="h-8 flex-1"
               />
@@ -233,7 +233,7 @@ export function SessionPanel({
                 canControl={canControl}
                 onClick={onResume}
                 icon={<Play className="mr-2 h-3 w-3" />}
-                label="Resume Session"
+                label="Resume session"
                 variant="outline"
                 className="h-8 flex-1"
               />

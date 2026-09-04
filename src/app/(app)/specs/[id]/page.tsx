@@ -172,7 +172,7 @@ export default function SpecDetailPage(): React.ReactElement {
           </div>
         ) : (
           <div className="flex min-w-0 flex-col gap-1">
-            <div className="text-fg-muted text-2xs mb-1">Project Spec</div>
+            <div className="text-fg-muted text-2xs mb-1">Project spec</div>
             <div className="flex min-w-0 items-center gap-3">
               <h1 className="text-fg truncate text-2xl leading-tight font-semibold tracking-[-0.015em]">
                 {displayedSpec?.name ?? '…'}
