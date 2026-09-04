@@ -13,6 +13,7 @@ interface Notification {
   title: string;
   body: string;
   type: string;
+  linkUrl: string;
   readAt: string | null;
   createdAt: string;
 }
@@ -86,11 +87,14 @@ export function NotificationPanel() {
           <div className="text-fg-muted py-6 text-center font-mono text-xs">Loading...</div>
         )}
         {list.slice(0, 5).map((n) => (
-          <div
+          // Linked to the thing the notification is about: these rows were
+          // inert divs, so the panel could only ever be read, never acted on.
+          <Link
+            href={n.linkUrl}
             key={n.id}
             className={cn(
               'border-line flex items-center gap-3 border-b px-4 py-3 transition-colors last:border-0',
-              !n.readAt ? 'bg-accent-subtle' : 'hover:bg-surface-inset'
+              !n.readAt ? 'bg-accent-subtle hover:bg-accent-subtle/70' : 'hover:bg-surface-inset'
             )}
           >
             <div className="min-w-0 flex-1">
@@ -106,8 +110,10 @@ export function NotificationPanel() {
             <span className="text-fg-muted text-2xs shrink-0 font-mono">
               {formatRelativeTime(n.createdAt)}
             </span>
-            {!n.readAt && <div className="bg-surface-inset h-1.5 w-1.5 shrink-0 rounded-full" />}
-          </div>
+            {/* bg-accent, not bg-surface-inset: the unread marker was painted
+                in a surface colour, so it was invisible against the row. */}
+            {!n.readAt && <div className="bg-accent h-1.5 w-1.5 shrink-0 rounded-full" />}
+          </Link>
         ))}
       </div>
 

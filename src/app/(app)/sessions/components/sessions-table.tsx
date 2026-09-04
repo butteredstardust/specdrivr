@@ -237,7 +237,7 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
                       <TableCell className="px-3 py-3">
                         <div className="flex flex-col">
                           <span className="text-fg text-sm font-medium">
-                            {session.specTitle || `Spec #${session.specId}`}
+                            {session.specName || `Spec #${session.specId}`}
                           </span>
                         </div>
                       </TableCell>

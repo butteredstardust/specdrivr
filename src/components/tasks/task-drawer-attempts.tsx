@@ -40,9 +40,11 @@ function formatDuration(ms: number): string {
   if (ms < 1000) return `${ms}ms`;
   const secs = Math.floor(ms / 1000);
   if (secs < 60) return `${secs}s`;
-  const mins = Math.floor(secs / 60);
+  const mins = Math.floor(secs / 60) % 60;
   const remSecs = secs % 60;
-  return `${mins}m ${remSecs}s`;
+  // Hours get their own unit; without one a two-hour attempt read "120m 5s".
+  const hrs = Math.floor(secs / 3600);
+  return hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m ${remSecs}s`;
 }
 
 export function TaskDrawerAttempts({ taskId, taskStatus }: TaskDrawerAttemptsProps) {

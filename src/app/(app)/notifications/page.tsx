@@ -1,9 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useShell } from '@/components/shell/shell-context';
+import Link from 'next/link';
 import { usePolling } from '@/hooks/use-polling';
-import { StatusIcon } from '@/components/ui/status-icon';
 import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
 import {
@@ -29,10 +28,15 @@ function formatRelativeTime(iso: string): string {
 
 interface Notification {
   id: number;
-  type: 'info' | 'success' | 'warning' | 'error' | 'mention';
+  /**
+   * The domain event that produced the notification. This used to be typed as
+   * `'info' | 'success' | 'warning' | 'error' | 'mention'`, none of which any
+   * writer ever emits, so every row fell through to the generic info icon.
+   */
+  type: string;
   title: string;
-  message: string;
-  isRead: boolean;
+  body: string;
+  linkUrl: string;
   createdAt: string;
   readAt: string | null;
 }
@@ -44,26 +48,28 @@ interface NotificationsResponse {
   pages: number;
 }
 
+// No "Mentions" tab: it filtered on `type=mention`, which nothing in the
+// application ever writes, so it was a permanently empty view.
 const STATUS_TABS = [
   { value: 'all', label: 'All' },
   { value: 'unread', label: 'Unread' },
-  { value: 'mentions', label: 'Mentions' },
 ] as const;
 
 type TabValue = (typeof STATUS_TABS)[number]['value'];
 
 export default function NotificationsPage() {
-  const { activeProjectId } = useShell();
   const [page, setPage] = useState(1);
   const [tab, setTab] = useState<TabValue>('all');
 
+  // Deliberately not scoped to the active project. Notifications are addressed
+  // to a user, the bell badge counts every unread one they have, and "mark all
+  // read" clears them all — scoping only this list to `activeProjectId` was why
+  // a badge reading 5 opened a page showing 2.
   const buildFetchUrl = () => {
     const params = new URLSearchParams();
-    if (activeProjectId) params.set('projectId', String(activeProjectId));
     params.set('page', String(page));
     params.set('limit', '50');
     if (tab === 'unread') params.set('unreadOnly', 'true');
-    if (tab === 'mentions') params.set('type', 'mention');
     return `/api/v1/notifications?${params.toString()}`;
   };
 
@@ -79,9 +85,11 @@ export default function NotificationsPage() {
   const totalPages = data?.pages ?? 1;
 
   const handleMarkAllRead = async () => {
-    if (!activeProjectId) return;
     try {
-      const res = await fetch(`/api/v1/notifications/read-all?projectId=${activeProjectId}`, {
+      // No projectId: the endpoint marks every notification for the user and
+      // has never read that parameter, so passing it only implied a narrower
+      // effect than the button actually has.
+      const res = await fetch('/api/v1/notifications/read-all', {
         method: 'POST',
         credentials: 'include',
       });
@@ -105,13 +113,17 @@ export default function NotificationsPage() {
 
   const getTypeIcon = (type: Notification['type']) => {
     switch (type) {
-      case 'success':
+      case 'session_complete':
+      case 'plan_approved':
         return <CheckCircle2 className="text-success h-4 w-4" />;
-      case 'error':
+      case 'session_failed':
+      case 'plan_rejected':
         return <AlertCircle className="text-danger h-4 w-4" />;
-      case 'warning':
+      case 'task_blocked':
+      case 'changes_requested':
         return <AlertCircle className="text-warning h-4 w-4" />;
-      case 'mention':
+      case 'member_invited':
+      case 'role_changed':
         return <Bell className="text-accent h-4 w-4" />;
       default:
         return <Info className="text-accent h-4 w-4" />;
@@ -194,12 +206,7 @@ export default function NotificationsPage() {
 
       {/* Content */}
       <div className="flex-1">
-        {activeProjectId === null ? (
-          <div className="flex flex-col items-center gap-4 py-16">
-            <StatusIcon size={24} status="idle" />
-            <p className="text-fg-secondary text-sm">Select a project to view notifications.</p>
-          </div>
-        ) : isLoading && !data ? (
+        {isLoading && !data ? (
           <div className="text-fg-secondary py-16 text-center font-mono text-xs">Loading…</div>
         ) : notifications.length === 0 ? (
           <div className="flex flex-col items-center gap-4 py-16">
@@ -212,25 +219,21 @@ export default function NotificationsPage() {
           <div className="flex flex-col">
             {notifications.map((n) => {
               const unread = !n.readAt;
-              // Only an unread row does anything on click, so only an unread row
-              // is a button. A read one was a cursor-pointer div that swallowed
-              // the click and was unreachable by keyboard.
-              const Row = unread ? 'button' : 'div';
+              // Every notification carries a `linkUrl` to the thing it is about,
+              // so the whole row is a link. It previously navigated nowhere: an
+              // unread row only marked itself read and a read one was inert.
               return (
-                <Row
+                <Link
                   key={n.id}
-                  {...(unread
-                    ? {
-                        type: 'button' as const,
-                        onClick: () => handleMarkRead(n.id),
-                        'aria-label': `Mark "${n.title}" as read`,
-                      }
-                    : {})}
+                  href={n.linkUrl}
+                  onClick={() => {
+                    if (unread) handleMarkRead(n.id);
+                  }}
                   className={cn(
                     'border-line-subtle flex w-full items-center gap-4 border-b py-3 pr-6 pl-[22px] text-left transition-colors',
                     unread
-                      ? 'border-l-accent bg-accent-subtle hover:bg-accent-subtle/70 cursor-pointer border-l-2'
-                      : 'border-l-2 border-l-transparent'
+                      ? 'border-l-accent bg-accent-subtle hover:bg-accent-subtle/70 border-l-2'
+                      : 'hover:bg-surface-inset border-l-2 border-l-transparent'
                   )}
                 >
                   <div className="shrink-0">{getTypeIcon(n.type)}</div>
@@ -243,12 +246,14 @@ export default function NotificationsPage() {
                     >
                       {n.title}
                     </p>
-                    <p className="text-fg-secondary mt-0.5 line-clamp-1 text-xs">{n.message}</p>
+                    {/* `body`, not `message` — the API has never returned a
+                        `message` field, so this line was always blank. */}
+                    <p className="text-fg-secondary mt-0.5 line-clamp-1 text-xs">{n.body}</p>
                     <p className="text-fg-muted mt-0.5 text-xs">
                       {formatRelativeTime(n.createdAt)}
                     </p>
                   </div>
-                </Row>
+                </Link>
               );
             })}
           </div>

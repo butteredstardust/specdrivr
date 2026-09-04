@@ -10,5 +10,8 @@ export interface Session {
   tasksSucceeded: number;
   tasksFailed: number;
   totalTasks?: number | null;
-  specTitle?: string;
+  /** `specName` is what /api/v1/sessions returns; the table used to read a
+   *  `specTitle` that no endpoint has ever sent, so every row fell back to
+   *  the "Spec #3" placeholder. */
+  specName?: string | null;
 }

@@ -16,7 +16,6 @@ interface RecentSession {
   tasksSucceeded?: number;
   tasksFailed?: number;
   totalTasks?: number | null;
-  specTitle?: string | null;
   specName?: string | null;
   backend?: string;
 }
@@ -77,7 +76,7 @@ export function RecentSessions({ sessions }: RecentSessionsProps) {
 
               <div className="flex flex-col gap-3">
                 <p className="text-fg group-hover:text-accent truncate font-medium transition-colors">
-                  {session.specTitle || session.specName || `Session #${session.id}`}
+                  {session.specName || `Session #${session.id}`}
                 </p>
                 <div className="text-fg-muted flex flex-col gap-2 text-xs">
                   <div className="flex items-center justify-between">
