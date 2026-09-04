@@ -83,7 +83,7 @@ export function TaskDrawerOverview({ task, onRetry }: TaskDrawerOverviewProps) {
 
       {/* Blocked state panel */}
       {task.status === 'blocked' && (
-        <div className="bg-warning/5 border-warning/30 space-y-4 rounded-md border p-5">
+        <div className="bg-warning-bg border-warning-border space-y-4 rounded-md border p-5">
           <div className="flex items-center gap-2.5">
             <StatusIcon size={18} status="blocked" />
             <span className="text-warning font-mono text-[11px] font-semibold tracking-[0.08em] uppercase">
@@ -98,7 +98,7 @@ export function TaskDrawerOverview({ task, onRetry }: TaskDrawerOverviewProps) {
               placeholder="Add context to unblock DAEMON (min 10 chars)..."
               value={humanContext}
               onChange={(e) => setHumanContext(e.target.value)}
-              className="bg-surface-base border-line focus:ring-warning/30 min-h-[100px] text-sm focus:ring-1"
+              className="bg-surface-base border-line min-h-[100px] text-sm"
               rows={3}
             />
             <Button
@@ -117,7 +117,7 @@ export function TaskDrawerOverview({ task, onRetry }: TaskDrawerOverviewProps) {
 
       {/* Failed state panel */}
       {task.status === 'failed' && (
-        <div className="bg-danger/5 border-danger/30 space-y-4 rounded-md border p-5">
+        <div className="bg-danger-bg border-danger-border space-y-4 rounded-md border p-5">
           <div className="flex items-center gap-2.5">
             <StatusIcon size={18} status="error" />
             <span className="text-danger font-mono text-[11px] font-semibold tracking-[0.08em] uppercase">

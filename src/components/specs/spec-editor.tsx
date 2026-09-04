@@ -133,7 +133,7 @@ export function SpecEditor(props: SpecEditorProps) {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Untitled spec"
-          className="text-fg placeholder:text-fg-muted min-w-0 flex-1 basis-full border-none bg-transparent font-mono text-sm shadow-none outline-none focus-visible:ring-0 sm:basis-auto"
+          className="text-fg placeholder:text-fg-muted min-w-0 flex-1 basis-full border-none bg-transparent font-mono text-sm shadow-none sm:basis-auto"
         />
         {saveError && <p className="text-danger text-sm">{saveError}</p>}
         <div className="flex flex-1 gap-2 sm:flex-none">

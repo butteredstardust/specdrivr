@@ -192,7 +192,7 @@ export default function SpecDetailPage(): React.ReactElement {
               {displayedSpec?.status === 'pending_approval' && (
                 <Button
                   size="sm"
-                  className="border-warning text-warning hover:bg-warning/10 border"
+                  className="border-warning text-warning hover:bg-warning-bg border"
                   onClick={() => router.push(`/specs/${specId}?tab=plan`)}
                 >
                   Review Plan →

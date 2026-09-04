@@ -84,7 +84,7 @@ export function SessionsFilterBar({ specs }: SessionsFilterBarProps) {
         <Search className="text-fg-muted absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
         <Input
           placeholder="SEARCH SESSIONS..."
-          className="bg-surface-inset focus:ring-accent/30 h-8 pl-8 font-mono text-[10px] tracking-widest uppercase transition-all focus:ring-1"
+          className="bg-surface-inset h-8 pl-8 font-mono text-[10px] tracking-widest uppercase transition-all"
           value={search}
           onChange={(e) => setSearch(e.target.value || null)}
         />

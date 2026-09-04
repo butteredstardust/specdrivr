@@ -202,14 +202,14 @@ export function ActiveSessionsSection() {
                   </span>
                 </div>
                 {isCurrent ? (
-                  <span className="border-warning/40 text-warning shrink-0 rounded border px-1.5 py-0.5 font-mono text-xs">
+                  <span className="border-warning-border text-warning shrink-0 rounded border px-1.5 py-0.5 font-mono text-xs">
                     this session
                   </span>
                 ) : (
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-danger hover:bg-danger/10 hover:text-danger shrink-0 font-mono text-xs"
+                    className="text-danger hover:bg-danger-bg hover:text-danger shrink-0 font-mono text-xs"
                     onClick={() => setRevokeTargetId(s.id)}
                   >
                     Revoke

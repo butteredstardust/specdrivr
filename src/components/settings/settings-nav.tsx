@@ -92,7 +92,7 @@ export function SettingsNav({ userRole }: SettingsNavProps) {
               className={cn(
                 'mt-3 block rounded px-2 py-1.5 font-mono text-xs tracking-wider uppercase transition-colors',
                 isDangerActive
-                  ? 'bg-danger/10 text-danger font-medium'
+                  ? 'bg-danger-bg text-danger font-medium'
                   : 'text-danger/70 hover:text-danger'
               )}
             >

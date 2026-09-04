@@ -254,7 +254,7 @@ export function ApiTokensSection() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-danger hover:bg-danger/10 hover:text-danger h-auto px-1.5 py-0.5 font-mono text-xs"
+                      className="text-danger hover:bg-danger-bg hover:text-danger h-auto px-1.5 py-0.5 font-mono text-xs"
                       onClick={() => setRevokeTargetId(t.id)}
                     >
                       Revoke

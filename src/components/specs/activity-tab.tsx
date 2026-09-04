@@ -119,7 +119,7 @@ export function ActivityTab({ specId, specStatus }: ActivityTabProps): React.Rea
             key={event.id}
             className={cn(
               'flex items-start gap-3 rounded-sm px-3 py-2',
-              idx === 0 ? 'bg-warning/5 border-warning/20 border' : 'hover:bg-surface-inset'
+              idx === 0 ? 'bg-warning-bg border-warning-border border' : 'hover:bg-surface-inset'
             )}
           >
             <span className="text-fg-muted shrink-0 font-mono text-xs tabular-nums">

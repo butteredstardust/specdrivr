@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
+import { EntityId } from '@/components/ui/entity-id';
 
 type SessionPanelState = 'idle' | 'running' | 'paused' | 'completed' | 'failed' | 'cancelled';
 
@@ -165,7 +166,7 @@ export function SessionPanel({
         <div
           className={cn(
             'flex flex-col gap-3 rounded-lg border p-3 transition-all',
-            panelState === 'running' ? 'border-accent/30' : 'border-line'
+            panelState === 'running' ? 'border-accent-border' : 'border-line'
           )}
         >
           {/* Header row: session ID badge + status + timer */}
@@ -210,15 +211,11 @@ export function SessionPanel({
 
           {/* Current task pill */}
           {session?.currentTaskExternalId && (
-            <div className="border-warning/30 bg-warning/5 flex items-center gap-2 rounded border px-2 py-1.5 transition-all">
-              <div className="bg-warning/20 flex h-4 w-4 shrink-0 items-center justify-center rounded-[2px]">
-                <ChevronRight className="text-warning h-3 w-3" />
-              </div>
-              <span className="text-warning font-mono text-[10px] font-bold">
-                {session.currentTaskExternalId}
-              </span>
+            <div className="border-warning-border bg-warning-bg flex items-center gap-2 rounded border px-2 py-1.5">
+              <ChevronRight className="text-warning h-3.5 w-3.5 shrink-0" />
+              <EntityId className="text-warning">{session.currentTaskExternalId}</EntityId>
               {session.currentTaskTitle && (
-                <span className="text-fg-secondary truncate font-mono text-[10px] tracking-tight">
+                <span className="text-fg-secondary truncate text-xs">
                   {session.currentTaskTitle}
                 </span>
               )}
@@ -234,7 +231,7 @@ export function SessionPanel({
                 icon={<Pause className="mr-2 h-3 w-3" />}
                 label="Pause Session"
                 variant="outline"
-                className="border-warning/40 text-warning hover:bg-warning/10 h-8 flex-1"
+                className="border-warning-border text-warning hover:bg-warning-bg h-8 flex-1"
               />
             ) : (
               <ControlButton
@@ -243,7 +240,7 @@ export function SessionPanel({
                 icon={<Play className="mr-2 h-3 w-3" />}
                 label="Resume Session"
                 variant="outline"
-                className="border-success/40 text-success hover:bg-success/10 h-8 flex-1"
+                className="border-success-border text-success hover:bg-success-bg h-8 flex-1"
               />
             )}
             <ControlButton
@@ -252,7 +249,7 @@ export function SessionPanel({
               icon={<XCircle className="mr-2 h-3 w-3" />}
               label="Abort"
               variant="outline"
-              className="border-danger/40 text-danger hover:bg-danger/10 h-8 px-3"
+              className="border-danger-border text-danger hover:bg-danger-bg h-8 px-3"
             />
           </div>
         </div>

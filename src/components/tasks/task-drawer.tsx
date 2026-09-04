@@ -218,7 +218,7 @@ export function TaskDrawer() {
                   <TooltipProvider>
                     {canManage ? (
                       <Select value={task.status} onValueChange={handleStatusChange}>
-                        <SelectTrigger className="bg-surface-inset h-8 w-40 border-none px-2 shadow-none focus:ring-0">
+                        <SelectTrigger className="bg-surface-inset h-8 w-40 border-none px-2 shadow-none">
                           <SelectValue>
                             <Badge
                               variant={TASK_STATUS_CONFIG[task.status].variant}
@@ -412,7 +412,7 @@ function DrawerFooter({
               variant="outline"
               size="sm"
               onClick={onMarkDone}
-              className="border-success/50 text-success hover:bg-success/10 h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase transition-colors"
+              className="border-success-border text-success hover:bg-success-bg h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase transition-colors"
               disabled={task.status === 'done'}
             >
               <CheckCircle2 className="h-3.5 w-3.5" />

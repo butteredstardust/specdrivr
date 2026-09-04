@@ -31,10 +31,10 @@ type DeliveryStatus = 'delivered' | 'failed' | 'pending' | 'exhausted';
 
 function StatusBadge({ status }: { status: DeliveryStatus }) {
   const classes: Record<string, string> = {
-    delivered: 'bg-success/10 text-success',
-    failed: 'bg-danger/10 text-danger',
-    pending: 'bg-warning/10 text-warning',
-    exhausted: 'bg-danger/10 text-danger',
+    delivered: 'bg-success-bg text-success',
+    failed: 'bg-danger-bg text-danger',
+    pending: 'bg-warning-bg text-warning',
+    exhausted: 'bg-danger-bg text-danger',
   };
 
   const cls = classes[status] ?? 'bg-surface-raised text-fg-muted';

@@ -320,8 +320,8 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
   if (plan.status === 'approved' || plan.status === 'executing' || plan.status === 'completed') {
     const isExecuting = plan.status === 'executing';
     const bannerBorder = isExecuting
-      ? 'border-accent/30 bg-surface-inset/5'
-      : 'border-success/30 bg-success/5';
+      ? 'border-accent-border bg-surface-inset/5'
+      : 'border-success-border bg-success-bg';
     const bannerText = isExecuting ? 'text-accent' : 'text-success';
     const bannerLabel = isExecuting
       ? 'EXECUTING'
@@ -382,7 +382,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
     return (
       <div className="space-y-4">
         {plan.reviewerFeedback && (
-          <blockquote className="border-warning bg-warning/5 border-l-2 py-2 pl-4">
+          <blockquote className="border-warning bg-warning-bg border-l-2 py-2 pl-4">
             <p className="text-warning font-mono text-xs">Reviewer feedback:</p>
             <p className="text-fg-secondary mt-1 text-sm">{plan.reviewerFeedback}</p>
           </blockquote>
@@ -419,7 +419,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
     <TooltipProvider>
       <div className="space-y-4">
         {/* Status banner ABOVE content */}
-        <div className="border-warning/20 bg-warning/5 flex items-center gap-3 rounded-md border px-3 py-2.5">
+        <div className="border-warning-border bg-warning-bg flex items-center gap-3 rounded-md border px-3 py-2.5">
           <StatusIcon size={16} status="working" />
           <div className="flex flex-1 flex-col gap-0.5">
             <span className="text-warning font-mono text-xs font-semibold tracking-widest uppercase">
@@ -490,7 +490,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
               <Button
                 size="sm"
                 variant="outline"
-                className="border-success/50 text-success hover:bg-success/10 h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase"
+                className="border-success-border text-success hover:bg-success-bg h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase"
                 onClick={() => setApproveOpen(true)}
                 disabled={isActioning}
               >
@@ -504,7 +504,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-success/50 text-success h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase opacity-50"
+                      className="border-success-border text-success h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase opacity-50"
                       disabled
                       aria-disabled
                     >
@@ -638,7 +638,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
               <Button
                 size="sm"
                 variant="outline"
-                className="bg-danger/10 border-danger/50 text-danger hover:bg-danger/20 h-8 font-mono text-[10px] tracking-widest uppercase"
+                className="bg-danger-bg border-danger-border text-danger h-8 font-mono text-[10px] tracking-widest uppercase"
                 onClick={handleReject}
                 disabled={isActioning || !rejectText.trim()}
               >

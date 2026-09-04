@@ -28,18 +28,12 @@ export function NeedsAttentionBanner({ blockedTasks, onDismiss }: NeedsAttention
   const quoteMessage = `"I need your help with ${n} task${n === 1 ? '' : 's'}"`;
 
   return (
-    <div className="border-warning/30 bg-warning/5 rounded-md border transition-all">
-      {/* Row 1: daemon icon + label + quoted message */}
-      <div className="flex items-center gap-2.5 px-3 pt-2.5 pb-1.5">
-        <div className="bg-warning/10 flex h-6 w-6 items-center justify-center rounded-sm">
-          <StatusIcon size={18} status="blocked" />
-        </div>
-        <span className="text-warning font-mono text-[10px] font-bold tracking-[0.2em] uppercase">
-          NEEDS ATTENTION
-        </span>
-        <span className="text-fg-secondary ml-1 font-mono text-[10px] italic opacity-80">
-          {quoteMessage}
-        </span>
+    <div className="border-warning-border bg-warning-bg rounded-md border transition-all">
+      {/* Row 1: status icon + label + summary */}
+      <div className="flex items-center gap-2 px-3 pt-2.5 pb-1.5">
+        <StatusIcon size={16} status="blocked" label={null} />
+        <span className="text-warning text-sm font-medium">Needs attention</span>
+        <span className="text-fg-secondary text-sm">{quoteMessage}</span>
       </div>
 
       {/* Row 2: task pills + dismiss */}
@@ -51,7 +45,7 @@ export function NeedsAttentionBanner({ blockedTasks, onDismiss }: NeedsAttention
               variant="ghost"
               size="sm"
               onClick={() => openDrawer(task.id)}
-              className="border-warning/20 bg-warning/10 text-warning hover:bg-warning/20 h-7 shrink-0 rounded-[2px] border px-2 font-mono text-[10px] transition-colors"
+              className="border-warning-border bg-warning-bg text-warning h-7 shrink-0 rounded-[2px] border px-2 font-mono text-[10px] transition-colors"
             >
               <TriangleAlert className="mr-1.5 h-3 w-3" aria-hidden="true" />
               <span className="font-bold">{task.externalId}</span>
@@ -67,7 +61,7 @@ export function NeedsAttentionBanner({ blockedTasks, onDismiss }: NeedsAttention
           size="icon"
           onClick={onDismiss}
           aria-label="Dismiss"
-          className="text-warning/50 hover:text-warning hover:bg-warning/10 h-7 w-7 shrink-0 transition-colors"
+          className="text-warning/50 hover:text-warning hover:bg-warning-bg h-7 w-7 shrink-0 transition-colors"
         >
           <X className="h-3.5 w-3.5" aria-hidden="true" />
         </Button>

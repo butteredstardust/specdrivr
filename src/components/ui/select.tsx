@@ -20,7 +20,7 @@ const SelectTrigger = React.forwardRef<
     ref={ref}
     suppressHydrationWarning
     className={cn(
-      'border-line ring-offset-surface-base data-[placeholder]:text-fg-muted flex h-9 w-full items-center justify-between rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap transition-all focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1',
+      'border-line data-[placeholder]:text-fg-muted flex h-9 w-full items-center justify-between rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1',
       className
     )}
     {...props}

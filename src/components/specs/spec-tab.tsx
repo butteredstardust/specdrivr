@@ -74,7 +74,7 @@ export function SpecTab({ spec, userRole }: SpecTabProps): React.ReactElement {
               className={cn(
                 'h-auto rounded px-2 py-0.5 font-mono text-xs',
                 selectedVersionIdx === i
-                  ? 'bg-warning/20 text-warning hover:bg-warning/30 hover:text-warning'
+                  ? 'bg-warning-bg text-warning hover:text-warning'
                   : 'bg-surface-inset text-fg-muted hover:text-fg'
               )}
             >

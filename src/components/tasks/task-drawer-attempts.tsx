@@ -33,7 +33,7 @@ interface TaskDrawerAttemptsProps {
 const statusBadgeClass: Record<Attempt['status'], string> = {
   running: 'bg-surface-inset/10 text-accent',
   completed: 'bg-emerald-500/10 text-emerald-400',
-  failed: 'bg-danger/10 text-danger',
+  failed: 'bg-danger-bg text-danger',
 };
 
 function formatDuration(ms: number): string {

@@ -144,7 +144,7 @@ export default function SessionDetailPage({ params }: PageProps) {
             <h1 className="text-fg truncate text-2xl leading-tight font-semibold tracking-[-0.015em]">
               Session
             </h1>
-            <code className="bg-warning/10 text-warning shrink-0 rounded px-1.5 py-0.5 font-mono text-xs">
+            <code className="bg-warning-bg text-warning shrink-0 rounded px-1.5 py-0.5 font-mono text-xs">
               {sessionLabel}
             </code>
             {session && <StatusBadge status={session.status} />}
@@ -167,7 +167,7 @@ export default function SessionDetailPage({ params }: PageProps) {
             <Button
               size="sm"
               variant="outline"
-              className="border-warning/50 text-warning hover:bg-warning/10"
+              className="border-warning-border text-warning hover:bg-warning-bg"
               onClick={() => handleAction('pause')}
               disabled={isUpdating}
             >
@@ -179,7 +179,7 @@ export default function SessionDetailPage({ params }: PageProps) {
             <Button
               size="sm"
               variant="outline"
-              className="border-success/50 text-success hover:bg-success/10"
+              className="border-success-border text-success hover:bg-success-bg"
               onClick={() => handleAction('resume')}
               disabled={isUpdating}
             >
@@ -191,7 +191,7 @@ export default function SessionDetailPage({ params }: PageProps) {
             <Button
               size="sm"
               variant="outline"
-              className="border-danger/50 text-danger hover:bg-danger/10 h-8 font-mono text-[10px] tracking-widest uppercase"
+              className="border-danger-border text-danger hover:bg-danger-bg h-8 font-mono text-[10px] tracking-widest uppercase"
               onClick={() => handleAction('cancel')}
               disabled={isUpdating}
             >

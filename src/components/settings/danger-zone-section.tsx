@@ -64,7 +64,7 @@ export function DangerZoneSection({ project, userRole }: DangerZoneSectionProps)
 
   return (
     <TooltipProvider>
-      <div className="border-danger/40 rounded border p-4">
+      <div className="border-danger-border rounded border p-4">
         <h3 className="text-danger mb-3 font-mono text-xs tracking-widest uppercase">
           Danger Zone
         </h3>

@@ -31,25 +31,25 @@ function statusColor(status: string): { bg: string; text: string; dot: string } 
   switch (status) {
     case 'in_progress':
       return {
-        bg: 'bg-warning/10',
+        bg: 'bg-warning-bg',
         text: 'text-warning',
         dot: 'bg-warning',
       };
     case 'done':
       return {
-        bg: 'bg-success/10',
+        bg: 'bg-success-bg',
         text: 'text-success',
         dot: 'bg-success',
       };
     case 'blocked':
       return {
-        bg: 'bg-danger/10',
+        bg: 'bg-danger-bg',
         text: 'text-danger',
         dot: 'bg-danger',
       };
     case 'failed':
       return {
-        bg: 'bg-danger/10',
+        bg: 'bg-danger-bg',
         text: 'text-danger',
         dot: 'bg-danger',
       };
@@ -175,7 +175,7 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
                     }`}
                   >
                     {task.status === 'in_progress' && (
-                      <div className="bg-warning/30 absolute inset-0 animate-pulse rounded-full" />
+                      <div className="bg-warning-bg absolute inset-0 animate-pulse rounded-full" />
                     )}
                   </div>
                 </div>

@@ -62,7 +62,7 @@ function Calendar({
           defaultClassNames.dropdowns
         ),
         dropdown_root: cn(
-          'has-focus:border-accent border-line shadow-xs has-focus:ring-accent/50 has-focus:ring-[3px] relative rounded-md border',
+          'has-focus:border-accent border-line shadow-xs relative rounded-md border',
           defaultClassNames.dropdown_root
         ),
         dropdown: cn('bg-surface-overlay absolute inset-0 opacity-0', defaultClassNames.dropdown),

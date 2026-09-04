@@ -9,7 +9,6 @@
     "scripts/health-check.js",
     "scripts/nuke-db.ts",
     "scripts/restore-spec-status.ts",
-    "src/components/ui/alert.tsx",
     "src/components/ui/form.tsx",
     "tests/generate-slack-json.js",
     "tests/manual-db-update.ts",

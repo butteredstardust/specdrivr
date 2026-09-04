@@ -182,7 +182,7 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
             <Search className="text-fg-muted absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
             <Input
               placeholder="SEARCH SPECS..."
-              className="bg-surface-inset focus:ring-accent/30 h-8 pl-8 font-mono text-[10px] tracking-[0.08em] uppercase transition-all focus:ring-1"
+              className="bg-surface-inset h-8 pl-8 font-mono text-[10px] tracking-[0.08em] uppercase transition-all"
               value={search}
               onChange={(e) => setSearch(e.target.value || null)}
             />

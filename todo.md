@@ -31,7 +31,7 @@ and would need `git revert`.
 
 ## Phase 0 — Baseline & safety net
 
-- [ ] Confirm branch `feat/ui-overhaul` off `main`
+- [x] Confirm branch `feat/ui-overhaul` off `main`
 - [ ] Record pre-overhaul baseline: `pnpm build` output size, route count, primitive count (37), feature LOC (9,719)
 - [ ] Capture "before" screenshots of the 8 highest-traffic routes for the PR writeup
 - [ ] Tag the pre-overhaul commit so the retro layer stays trivially recoverable
@@ -40,37 +40,37 @@ and would need `git revert`.
 
 This file is the root cause of most catalogued drift. Rewrite it before touching any component.
 
-- [ ] **Delete the shadcn HSL token set** (`--background` … `--ring`, both `:root` and `.dark`) and their 19 `@theme inline` `--color-*` bridges
-- [ ] **Fix the `.bg-bg-elevated` footgun** (`globals.css:524`) — a hand-written rule that shadows the Tailwind-generated `bg-bg-elevated` utility and silently injects `border` + `shadow-sm`. Delete it; make the border explicit at each call site
-- [ ] **Delete the CRT layer**: `.terminal-surface`, `.scanline-overlay`, `.cyber-glow`, `.cyber-glow-active`, `.phosphor-focus`, `@keyframes terminal-flicker`
-- [ ] **Delete the mascot animation layer**: `daemon-float`, `daemon-breath`, `daemon-bounce`, `daemon-think` keyframes + utilities
-- [ ] **Delete dead `.theme-amber` scrollbar rules** — no such theme exists
-- [ ] **Rebuild the color system** as one semantic scale with explicit light *and* dark values:
+- [x] **Delete the shadcn HSL token set** (`--background` … `--ring`, both `:root` and `.dark`) and their 19 `@theme inline` `--color-*` bridges
+- [x] **Fix the `.bg-bg-elevated` footgun** (`globals.css:524`) — a hand-written rule that shadows the Tailwind-generated `bg-bg-elevated` utility and silently injects `border` + `shadow-sm`. Delete it; make the border explicit at each call site
+- [x] **Delete the CRT layer**: `.terminal-surface`, `.scanline-overlay`, `.cyber-glow`, `.cyber-glow-active`, `.phosphor-focus`, `@keyframes terminal-flicker`
+- [x] **Delete the mascot animation layer**: `daemon-float`, `daemon-breath`, `daemon-bounce`, `daemon-think` keyframes + utilities
+- [x] **Delete dead `.theme-amber` scrollbar rules** — no such theme exists
+- [x] **Rebuild the color system** as one semantic scale with explicit light *and* dark values:
       surface (`base`/`surface`/`elevated`/`sunken`), border (`subtle`/`default`/`strong`),
       text (`primary`/`secondary`/`muted`/`inverse`), one accent + hover/active/subtle,
       status (`success`/`warning`/`danger`/`info`) each with fg/bg/border
 - [ ] **Establish a real spacing scale** and stop the ad-hoc `px-8 py-8 md:px-10` pattern
-- [ ] **Establish a type scale** with a hard 11px floor (audit found 133 arbitrary values, mostly `text-[9px]`/`text-[10px]`)
-- [ ] **Make `--radius` actually load-bearing** — currently declared and read by nothing
-- [ ] **Replace shadows with borders** as the primary elevation cue; keep at most two shadow steps for genuine overlays
-- [ ] **Motion tokens**: 2 durations, 2 easings, and keep the `prefers-reduced-motion` block
-- [ ] Verify light mode is fully specified, not derived — audit found the design doc only ever documented dark hex
+- [x] **Establish a type scale** with a hard 11px floor (audit found 133 arbitrary values, mostly `text-[9px]`/`text-[10px]`)
+- [x] **Make `--radius` actually load-bearing** — currently declared and read by nothing
+- [x] **Replace shadows with borders** as the primary elevation cue; keep at most two shadow steps for genuine overlays
+- [x] **Motion tokens**: 2 durations, 2 easings, and keep the `prefers-reduced-motion` block
+- [x] Verify light mode is fully specified, not derived — audit found the design doc only ever documented dark hex
 
 ## Phase 1.5 — Write the specification (gate for all implementation)
 
 Everything from Phase 2 onward is built against this document. It is written **before** the code.
 
-- [ ] **Rewrite `documentation/infrastructure/DESIGN_SYSTEM.md`** (currently 41KB, heavily drifted). Contents: philosophy, the single token vocabulary with light+dark values, type scale, spacing scale, elevation, motion, the primitive catalogue with props and variants, composition patterns, a11y requirements, explicit do/don't rules
+- [x] **Rewrite `documentation/infrastructure/DESIGN_SYSTEM.md`** (currently 41KB, heavily drifted). Contents: philosophy, the single token vocabulary with light+dark values, type scale, spacing scale, elevation, motion, the primitive catalogue with props and variants, composition patterns, a11y requirements, explicit do/don't rules
 - [ ] Ensure every token named in the doc exists in the Phase 1 `globals.css`, and vice versa — the doc and the stylesheet must be one-to-one
 
 ## Phase 2 — Retire the retro components
 
-- [ ] Delete `src/components/ui/matrix-screensaver.tsx` (undocumented "Concept #5" canvas rain) and unwire its trigger
-- [ ] Delete `src/components/ui/daemon-mascot.tsx` (5-expression CRT robot) and every call site
-- [ ] Replace `src/components/ui/pixel-badge.tsx` with a real `badge.tsx` (see Phase 3) and migrate all call sites
-- [ ] Rebuild `live-terminal.tsx` and `terminal-log.tsx` as neutral mono log surfaces — no scanlines, no vignette, no flicker; keep the streaming behaviour
-- [ ] Audit `brand-mark.tsx` — keep the isometric brand logo, strip any CRT treatment
-- [ ] Grep for orphaned imports of every deleted symbol before moving on
+- [x] Delete `src/components/ui/matrix-screensaver.tsx` (undocumented "Concept #5" canvas rain) and unwire its trigger
+- [x] Delete `src/components/ui/daemon-mascot.tsx` (5-expression CRT robot) and every call site
+- [x] Replace `src/components/ui/pixel-badge.tsx` with a real `badge.tsx` (see Phase 3) and migrate all call sites
+- [x] Rebuild `live-terminal.tsx` and `terminal-log.tsx` as neutral mono log surfaces — no scanlines, no vignette, no flicker; keep the streaming behaviour
+- [x] Audit `brand-mark.tsx` — keep the isometric brand logo, strip any CRT treatment
+- [x] Grep for orphaned imports of every deleted symbol before moving on
 
 ## Phase 3 — Primitive layer rebuild (`src/components/ui/`)
 
