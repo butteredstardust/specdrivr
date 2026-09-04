@@ -33,10 +33,18 @@ for file in $style_files; do
     # Hex values there are intentional — they ARE the design tokens. Skip it.
     if [[ "$file" == *"globals.css" ]]; then continue; fi
 
-    # Search for hex colors
-    # We ignore comments if possible, but static grep is limited.
-    # Note: We look for hex colors that are values (e.g., color: #fff or bg-[#fff])
-    violations=$(grep -nE "$HEX_PATTERN" "$file" | grep -vE "^//|^/\*|^\s*\*" || true)
+    # Search for hex colors.
+    # `grep -n` prefixes each hit with "NN:", so the comment filter has to skip
+    # that prefix — anchoring on ^// matched nothing and let commented-out hexes
+    # through.
+    # A canvas cannot consume a CSS custom property, so `live-terminal.tsx` reads
+    # tokens through getComputedStyle and passes a literal as the fallback for
+    # when the variable does not resolve. That call *is* the token system, so
+    # `token('--name', '#hex')` is exempt; a bare hex in the same file is not.
+    violations=$(grep -nE "$HEX_PATTERN" "$file" \
+        | grep -vE "^[0-9]+:[[:space:]]*(//|/\*|\*)" \
+        | grep -vE "token\([[:space:]]*['\"]--[a-zA-Z0-9-]+['\"],[[:space:]]*['\"]#[0-9a-fA-F]{3,6}['\"][[:space:]]*\)" \
+        || true)
     
     if [ -n "$violations" ]; then
         error "Hardcoded hex color detected in $file:"
