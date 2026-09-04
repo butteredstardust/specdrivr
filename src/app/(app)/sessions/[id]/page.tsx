@@ -141,7 +141,9 @@ export default function SessionDetailPage({ params }: PageProps) {
             Executor
           </div>
           <div className="flex min-w-0 items-center gap-3">
-            <h1 className="text-foreground truncate text-xl font-semibold">Session</h1>
+            <h1 className="text-foreground truncate text-2xl leading-tight font-semibold tracking-[-0.015em]">
+              Session
+            </h1>
             <code className="bg-phosphor-amber/10 text-phosphor-amber shrink-0 rounded px-1.5 py-0.5 font-mono text-xs">
               {sessionLabel}
             </code>

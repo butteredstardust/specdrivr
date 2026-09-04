@@ -84,6 +84,8 @@ jobs:
         run: pnpm test:coverage
       - name: Install Chromium
         run: pnpm exec playwright install --with-deps chromium
+      - name: Seed browser-test fixtures
+        run: pnpm db:seed
       - name: Run browser tests
         run: pnpm test:e2e
       - name: Upload test reports

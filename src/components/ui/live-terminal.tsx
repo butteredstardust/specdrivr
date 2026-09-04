@@ -60,7 +60,7 @@ export function LiveTerminal({
         brightBlue: accentBlue,
       },
 
-      fontFamily: '"Berkeley Mono", "Fira Code", "Courier New", monospace',
+      fontFamily: '"Fira Code", ui-monospace, "SFMono-Regular", monospace',
       fontSize: 13,
       lineHeight: 1.4,
       cursorBlink: true,

@@ -10,3 +10,15 @@ test.describe('Unauthenticated entry flow', () => {
     await expect(page.getByRole('button', { name: 'Sign In' })).toBeEnabled();
   });
 });
+
+test.describe('Authenticated application shell', () => {
+  test('renders one authoritative Mission Control heading', async ({ page }) => {
+    await page.goto('/login');
+    await page.getByLabel('Email').fill('alex@specdrivr.dev');
+    await page.getByLabel('Password').fill('Password123!');
+    await page.getByRole('button', { name: 'Sign In' }).click();
+
+    await expect(page).toHaveURL(/\/$/, { timeout: 15_000 });
+    await expect(page.getByRole('heading', { level: 1, name: 'Mission Control' })).toHaveCount(1);
+  });
+});

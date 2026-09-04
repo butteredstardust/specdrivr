@@ -176,7 +176,7 @@ export default function SpecDetailPage(): React.ReactElement {
               Project Spec
             </div>
             <div className="flex min-w-0 items-center gap-3">
-              <h1 className="text-foreground truncate text-xl font-semibold">
+              <h1 className="text-foreground truncate text-2xl leading-tight font-semibold tracking-[-0.015em]">
                 {displayedSpec?.name ?? '…'}
               </h1>
               <PixelBadge variant="amber" className="shrink-0">

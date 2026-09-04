@@ -25,6 +25,12 @@ tests pass with enforced coverage floors, the production build succeeds, and Pla
 6. Quality reporting is honest. An initial 80% hard floor failed against the measured 46.68% line
    baseline; the gate was changed to an upward-only baseline ratchet while preserving 80% as the
    stated business-logic/repository target.
+7. Typography now separates human interface content from machine-readable detail. Source Sans 3
+   improves prose and navigation readability, while Fira Code is limited to IDs, status metadata,
+   terminal output, and compact technical controls. Shared labels no longer fall below 10px.
+8. Page-heading ownership is explicit: content pages own their current title, while the top bar
+   renders only ancestor breadcrumbs. Mission Control is the sole exception because its title lives
+   in the top bar, eliminating the duplicate in-content heading.
 
 ## Problems found during final review and resolved
 
