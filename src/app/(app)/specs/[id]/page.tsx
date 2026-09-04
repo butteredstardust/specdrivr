@@ -18,7 +18,7 @@ import { TasksTab } from '@/components/specs/tasks-tab';
 import { ChangesTab } from '@/components/specs/changes-tab';
 import { ActivityTab } from '@/components/specs/activity-tab';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { PixelBadge } from '@/components/ui/pixel-badge';
+import { Badge } from '@/components/ui/badge';
 import type { SpecStatus } from '@/components/specs/spec-editor';
 import type { UserRole } from '@/db/schema';
 
@@ -34,34 +34,34 @@ interface Spec {
 type TabName = 'spec' | 'plan' | 'tasks' | 'changes' | 'activity';
 
 const TABS: { id: TabName; label: string }[] = [
-  { id: 'spec', label: 'SPEC' },
-  { id: 'plan', label: 'PLAN' },
-  { id: 'tasks', label: 'TASKS' },
-  { id: 'changes', label: 'CHANGES' },
-  { id: 'activity', label: 'ACTIVITY' },
+  { id: 'spec', label: 'Spec' },
+  { id: 'plan', label: 'Plan' },
+  { id: 'tasks', label: 'Tasks' },
+  { id: 'changes', label: 'Changes' },
+  { id: 'activity', label: 'Activity' },
 ];
 
 function StatusBadge({ status }: { status: SpecStatus }) {
   switch (status) {
     case 'drafting':
-      return <PixelBadge variant="muted">Draft</PixelBadge>;
+      return <Badge variant="muted">Draft</Badge>;
     case 'pending_plan':
     case 'pending_approval':
-      return <PixelBadge variant="amber">Pending</PixelBadge>;
+      return <Badge variant="warning">Pending</Badge>;
     case 'executing':
       return (
-        <PixelBadge variant="blue" dot>
+        <Badge variant="info" dot>
           Running
-        </PixelBadge>
+        </Badge>
       );
     case 'completed':
-      return <PixelBadge variant="emerald">Done</PixelBadge>;
+      return <Badge variant="success">Done</Badge>;
     case 'stalled':
-      return <PixelBadge variant="red">Stalled</PixelBadge>;
+      return <Badge variant="danger">Stalled</Badge>;
     case 'archived':
-      return <PixelBadge variant="muted">Archived</PixelBadge>;
+      return <Badge variant="muted">Archived</Badge>;
     default:
-      return <PixelBadge variant="muted">{status}</PixelBadge>;
+      return <Badge variant="muted">{status}</Badge>;
   }
 }
 
@@ -163,8 +163,8 @@ export default function SpecDetailPage(): React.ReactElement {
   );
 
   return (
-    <div className="-mx-6 -mt-6 flex min-h-full flex-col">
-      <div className="border-border-default flex items-center justify-between border-b px-6 py-4">
+    <div className="full-bleed flex min-h-full flex-col">
+      <div className="border-line flex items-center justify-between border-b px-6 py-4">
         {isLoading ? (
           <div className="flex flex-col gap-2">
             <Skeleton className="h-3.5 w-16" />
@@ -172,16 +172,14 @@ export default function SpecDetailPage(): React.ReactElement {
           </div>
         ) : (
           <div className="flex min-w-0 flex-col gap-1">
-            <div className="text-text-muted mb-1 font-mono text-[11px] tracking-[0.08em] uppercase">
-              Project Spec
-            </div>
+            <div className="text-fg-muted text-2xs mb-1">Project spec</div>
             <div className="flex min-w-0 items-center gap-3">
-              <h1 className="text-foreground truncate text-2xl leading-tight font-semibold tracking-[-0.015em]">
+              <h1 className="text-fg truncate text-2xl leading-tight font-semibold tracking-[-0.015em]">
                 {displayedSpec?.name ?? '…'}
               </h1>
-              <PixelBadge variant="amber" className="shrink-0">
+              <Badge variant="warning" className="shrink-0">
                 SPEC-{String(specId).padStart(3, '0')}
-              </PixelBadge>
+              </Badge>
               {displayedSpec && <StatusBadge status={displayedSpec.status} />}
             </div>
           </div>
@@ -192,7 +190,7 @@ export default function SpecDetailPage(): React.ReactElement {
               {displayedSpec?.status === 'pending_approval' && (
                 <Button
                   size="sm"
-                  className="border-phosphor-amber text-phosphor-amber hover:bg-phosphor-amber/10 border"
+                  className="border-warning text-warning hover:bg-warning-bg border"
                   onClick={() => router.push(`/specs/${specId}?tab=plan`)}
                 >
                   Review Plan →
@@ -221,12 +219,12 @@ export default function SpecDetailPage(): React.ReactElement {
           onValueChange={(v) => router.push(`/specs/${specId}?tab=${v}`)}
           className="w-full"
         >
-          <TabsList className="border-border-default h-auto w-full justify-start gap-4 rounded-none border-b bg-transparent p-0">
+          <TabsList className="border-line h-auto w-full justify-start gap-4 rounded-none border-b bg-transparent p-0">
             {TABS.map((tab) => (
               <TabsTrigger
                 key={tab.id}
                 value={tab.id}
-                className="data-[state=active]:border-accent-blue data-[state=active]:text-foreground text-muted-foreground hover:text-foreground rounded-none border-b-2 border-transparent bg-transparent px-1 py-3 font-mono text-xs tracking-widest shadow-none transition-colors"
+                className="data-[state=active]:border-accent data-[state=active]:text-fg text-fg-muted hover:text-fg rounded-none border-b-2 border-transparent bg-transparent px-1 py-3 text-xs shadow-none transition-colors"
               >
                 {tab.label}
               </TabsTrigger>

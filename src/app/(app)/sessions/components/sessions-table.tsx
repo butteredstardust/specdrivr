@@ -14,9 +14,9 @@ import {
 import { clientLogger } from '@/lib/logger-client';
 import { Session } from '../types';
 
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { StatusIcon } from '@/components/ui/status-icon';
 import { Button } from '@/components/ui/button';
-import { PixelBadge } from '@/components/ui/pixel-badge';
+import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -41,20 +41,20 @@ function StatusBadge({ status }: { status: Session['status'] }) {
   switch (status) {
     case 'running':
       return (
-        <PixelBadge variant="blue" dot>
+        <Badge variant="info" dot>
           Running
-        </PixelBadge>
+        </Badge>
       );
     case 'completed':
-      return <PixelBadge variant="emerald">Done</PixelBadge>;
+      return <Badge variant="success">Done</Badge>;
     case 'paused':
-      return <PixelBadge variant="amber">Paused</PixelBadge>;
+      return <Badge variant="warning">Paused</Badge>;
     case 'failed':
-      return <PixelBadge variant="red">Failed</PixelBadge>;
+      return <Badge variant="danger">Failed</Badge>;
     case 'cancelled':
-      return <PixelBadge variant="muted">Cancelled</PixelBadge>;
+      return <Badge variant="muted">Cancelled</Badge>;
     default:
-      return <PixelBadge>{status}</PixelBadge>;
+      return <Badge>{status}</Badge>;
   }
 }
 
@@ -151,10 +151,8 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
   if (!activeProjectId && !isLoading) {
     return (
       <div className="flex flex-col items-center gap-4 py-16">
-        <DaemonMascot size={48} expression="idle" />
-        <p className="text-muted-foreground font-mono text-sm">
-          Select a project to view sessions.
-        </p>
+        <StatusIcon size={24} status="idle" />
+        <p className="text-fg-muted text-sm">Select a project to view sessions.</p>
       </div>
     );
   }
@@ -162,7 +160,7 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
   if (isLoading && !sessions) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Loader2 className="text-muted-foreground h-6 w-6 animate-spin" />
+        <Loader2 className="text-fg-muted h-6 w-6 animate-spin" />
       </div>
     );
   }
@@ -170,12 +168,10 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
   if (!sessions || sessions.length === 0) {
     return (
       <div className="flex flex-col items-center gap-4 py-16">
-        <DaemonMascot size={48} expression="idle" />
-        <p className="text-muted-foreground font-mono text-sm">
-          No sessions found matching your filters.
-        </p>
-        <Button asChild variant="phosphor" className="mt-2">
-          <Link href="/specs">Review Specs</Link>
+        <StatusIcon size={24} status="idle" />
+        <p className="text-fg-muted text-sm">No sessions found matching your filters.</p>
+        <Button asChild variant="default" className="mt-2">
+          <Link href="/specs">Review specs</Link>
         </Button>
       </div>
     );
@@ -185,7 +181,7 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
     <TooltipProvider>
       <Table>
         <TableHeader>
-          <TableRow className="border-border-default text-text-secondary font-mono text-xs tracking-[0.15em] uppercase hover:bg-transparent">
+          <TableRow className="border-line text-fg-secondary text-xs hover:bg-transparent">
             <TableHead className="w-10 px-3"></TableHead>
             <TableHead className="w-36 px-6 font-medium">Session ID</TableHead>
             <TableHead className="w-36 px-3 font-medium">Status</TableHead>
@@ -201,23 +197,21 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
             <React.Fragment key={`group-${label}`}>
               <TableRow className="border-0 hover:bg-transparent">
                 <TableCell colSpan={8} className="px-6 pt-4 pb-1">
-                  <span className="text-muted-foreground font-mono text-[10px] font-semibold tracking-[0.2em] uppercase">
-                    {label}
-                  </span>
+                  <span className="text-fg-muted text-2xs font-semibold">{label}</span>
                 </TableCell>
               </TableRow>
               {groupSessions.map((session) => {
                 const isExpanded = expandedId === session.id;
                 return (
                   <React.Fragment key={session.id}>
-                    <TableRow className="border-border-default/50 hover:bg-bg-elevated/50 group">
+                    <TableRow className="border-line-subtle hover:bg-surface-inset group">
                       <TableCell className="px-3 py-3 text-center">
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="text-muted-foreground h-6 w-6"
+                              className="text-fg-muted h-6 w-6"
                               onClick={() => toggleExpand(session.id)}
                             >
                               {isExpanded ? (
@@ -234,9 +228,9 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
                       </TableCell>
                       <TableCell className="px-6 py-3">
                         <Link href={`/sessions/${session.id}`}>
-                          <PixelBadge variant="amber">
+                          <Badge variant="warning">
                             SESS-{String(session.id).padStart(3, '0')}
-                          </PixelBadge>
+                          </Badge>
                         </Link>
                       </TableCell>
                       <TableCell className="px-3 py-3">
@@ -244,22 +238,22 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
                       </TableCell>
                       <TableCell className="px-3 py-3">
                         <div className="flex flex-col">
-                          <span className="text-text-primary text-sm font-medium">
+                          <span className="text-fg text-sm font-medium">
                             {session.specTitle || `Spec #${session.specId}`}
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-muted-foreground px-3 py-3 font-mono text-[10px] uppercase">
+                      <TableCell className="text-fg-muted text-2xs px-3 py-3">
                         {new Date(session.startedAt).toLocaleTimeString([], {
                           hour: '2-digit',
                           minute: '2-digit',
                         })}
                       </TableCell>
-                      <TableCell className="text-muted-foreground px-3 py-3 font-mono text-[10px]">
+                      <TableCell className="text-fg-muted text-2xs px-3 py-3 font-mono">
                         {formatDuration(session)}
                       </TableCell>
                       <TableCell className="px-3 py-3">
-                        <span className="bg-secondary text-muted-foreground rounded px-1.5 py-0.5 font-mono text-[10px] whitespace-nowrap">
+                        <span className="bg-surface-inset text-fg-muted text-2xs rounded px-1.5 py-0.5 font-mono whitespace-nowrap">
                           {session.tasksSucceeded}/{session.totalTasks ?? session.tasksExecuted}{' '}
                           tasks
                         </span>
@@ -272,7 +266,7 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
                               size="sm"
                               disabled={cancellingIds.has(session.id)}
                               onClick={() => handleCancel(session.id)}
-                              className="h-6 px-2 font-mono text-[10px] tracking-wider uppercase transition-colors"
+                              className="text-2xs h-6 px-2 transition-colors"
                             >
                               <XCircle className="mr-1 h-3 w-3" />
                               {cancellingIds.has(session.id) ? 'Cancelling…' : 'Cancel'}
@@ -283,10 +277,13 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="text-muted-foreground h-6 w-6"
+                                className="text-fg-muted h-6 w-6"
                                 asChild
                               >
-                                <Link href={`/sessions/${session.id}`}>
+                                <Link
+                                  href={`/sessions/${session.id}`}
+                                  aria-label={`Open session ${session.id}`}
+                                >
                                   <MoreHorizontal className="h-3.5 w-3.5" />
                                 </Link>
                               </Button>
@@ -300,7 +297,7 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
                       <TableCell colSpan={8} className="p-0">
                         <Collapsible open={isExpanded}>
                           <CollapsibleContent>
-                            <div className="border-border-default border-b px-6 py-4">
+                            <div className="border-line border-b px-6 py-4">
                               <LazyEventLog sessionId={session.id} isExpanded={isExpanded} />
                             </div>
                           </CollapsibleContent>

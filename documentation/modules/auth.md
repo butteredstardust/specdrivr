@@ -50,7 +50,7 @@ Roles are per-project. A user can be Admin on Project A and Member on Project B.
 - **Route**: `/login` (No sidebar/topbar).
 - **Redirect**: Unauthenticated requests redirect here with `?next=`.
 - **Validation**: Email format check on blur; required password on submit.
-- **Error UI**: Sterile red banner below button: `"Invalid email or password."`
+- **Error UI**: Token-driven danger alert below the form: `"Invalid email or password."`
 
 ### 3.2 Forgot & Reset Password
 
@@ -65,7 +65,7 @@ Roles are per-project. A user can be Admin on Project A and Member on Project B.
 
 ### 3.4 Onboarding Flow
 
-- **Trigger**: `onboardingComplete = false` on user record after first login.
+- **Trigger**: `onboardingStep === 0` on the authenticated user.
 - **Steps**:
   1. **Welcome**: Specdrivr brand introduction.
   2. **The Flow**: Visual diagram of Spec → Plan → Approve → Build.

@@ -28,7 +28,12 @@ for file in $react_files; do
     
     # Search for <img and ensure it's not part of a comment or a documentation file
     # We look for <img but ignore lines that contain "next/image" just in case of weird comments
-    violations=$(grep -niE "<img\s+" "$file" || true)
+    # A quoted "<img …" is a string, not JSX — an XSS-escaping test has to carry
+    # the literal payload it expects the component to neutralise. JSX is never
+    # written with a quote directly before the tag, so this only excuses strings.
+    violations=$(grep -niE "<img\s+" "$file" \
+        | grep -vE "['\"\`]<img" \
+        || true)
     
     if [ -n "$violations" ]; then
         error "Unoptimized <img> tag detected in $file:"

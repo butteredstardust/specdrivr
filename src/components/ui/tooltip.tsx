@@ -20,7 +20,13 @@ const TooltipContent = React.forwardRef<
       ref={ref}
       sideOffset={sideOffset}
       className={cn(
-        'bg-primary text-primary-foreground animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-radix-tooltip-content-transform-origin z-50 overflow-hidden rounded-md px-3 py-1.5 font-mono text-[11px] tracking-[0.08em] uppercase shadow-md',
+        // A tooltip is a small popover, not a shouty terminal chip: sentence
+        // case, sans, no letter-spacing. The uppercase mono treatment went
+        // with the retro layer.
+        'bg-surface-overlay text-fg border-line shadow-popover z-50 overflow-hidden rounded-md border px-2.5 py-1.5 text-xs',
+        'animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95',
+        'data-[side=bottom]:slide-in-from-top-1 data-[side=left]:slide-in-from-right-1 data-[side=right]:slide-in-from-left-1 data-[side=top]:slide-in-from-bottom-1',
+        'origin-radix-tooltip-content-transform-origin',
         className
       )}
       {...props}

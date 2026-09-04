@@ -4,28 +4,42 @@ import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/lib/utils';
 
+/**
+ * Button
+ *
+ * Variants are semantic. The pre-overhaul `phosphor` (amber mono) and `blue`
+ * (cyan mono) variants are gone — they were a second and third accent wearing
+ * a terminal costume. Their call sites map to `warning` and `info`.
+ *
+ * Focus is deliberately NOT styled here: `:focus-visible` is set once globally
+ * in globals.css so every interactive element in the app matches.
+ */
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+  [
+    'inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md',
+    'text-sm font-medium transition-colors duration-[120ms]',
+    'disabled:pointer-events-none disabled:opacity-50',
+    'aria-disabled:pointer-events-none aria-disabled:opacity-50',
+    '[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+  ],
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground shadow hover:bg-primary/90 hover:shadow-md',
-        destructive:
-          'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 hover:shadow-md',
-        outline:
-          'border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground hover:border-accent',
-        secondary: 'bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80',
-        ghost: 'hover:bg-bg-elevated/60 hover:text-text-primary transition-colors',
-        link: 'text-primary underline-offset-4 hover:underline',
-        phosphor:
-          'border-phosphor-amber/30 bg-phosphor-amber/10 text-phosphor-amber hover:bg-phosphor-amber/20 hover:text-phosphor-amber border font-mono text-[11px] tracking-[0.08em] uppercase shadow-sm hover:shadow-md hover:border-phosphor-amber/50',
-        blue: 'border-accent-blue/30 bg-accent-blue/10 text-accent-blue hover:bg-accent-blue/20 hover:text-accent-blue border font-mono text-[11px] tracking-[0.08em] uppercase shadow-sm hover:shadow-md hover:border-accent-blue/50',
+        default: 'bg-accent text-accent-fg hover:bg-accent-hover active:bg-accent-active',
+        destructive: 'bg-danger text-fg-inverse hover:bg-danger/90',
+        outline: 'border-line bg-surface-raised text-fg hover:bg-surface-inset border',
+        secondary: 'bg-surface-inset text-fg hover:bg-surface-sunken',
+        ghost: 'text-fg-secondary hover:bg-surface-inset hover:text-fg',
+        link: 'text-accent underline-offset-4 hover:underline',
+        warning: 'border-warning-border bg-warning-bg text-warning hover:bg-warning-bg/70 border',
+        info: 'border-info-border bg-info-bg text-info hover:bg-info-bg/70 border',
       },
       size: {
-        default: 'h-10 px-4 py-2',
+        default: 'h-9 px-4 py-2',
         sm: 'h-8 rounded-md px-3 text-xs',
-        lg: 'h-11 rounded-md px-8',
-        icon: 'h-10 w-10',
+        lg: 'h-10 rounded-md px-6',
+        icon: 'size-9',
+        'icon-sm': 'size-8',
       },
     },
     defaultVariants: {
@@ -44,7 +58,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : 'button';
     return (
-      <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />
+      <Comp
+        data-slot="button"
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
     );
   }
 );

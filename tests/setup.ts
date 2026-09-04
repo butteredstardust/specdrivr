@@ -1,5 +1,6 @@
-import { expect, vi, beforeAll } from 'vitest';
+import { expect, vi, beforeAll, afterEach } from 'vitest';
 import * as matchers from '@testing-library/jest-dom/matchers';
+import { cleanup } from '@testing-library/react';
 import { config } from 'dotenv';
 import path from 'path';
 import postgres from 'postgres';
@@ -75,3 +76,11 @@ beforeAll(async () => {
 // -------------------------------------
 
 expect.extend(matchers);
+
+// Vitest does not run Testing Library's auto-cleanup for us (that only happens
+// under a globals-enabled config, and this project runs without it). Without
+// this, every render stays mounted in `document.body` for the rest of the file
+// and `screen` queries start finding duplicates from earlier tests.
+afterEach(() => {
+  cleanup();
+});

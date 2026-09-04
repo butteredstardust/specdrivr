@@ -11,16 +11,14 @@ interface PageHeaderProps {
 export function PageHeader({ category, title, action, className }: PageHeaderProps) {
   return (
     <div
-      className={cn(
-        'border-border-default flex items-center justify-between border-b px-6 py-4',
-        className
-      )}
+      className={cn('border-line flex items-center justify-between border-b px-6 py-4', className)}
     >
       <div>
-        <div className="text-muted-foreground mb-1 font-mono text-[11px] font-medium tracking-[0.12em] uppercase">
-          {category}
-        </div>
-        <h1 className="text-foreground text-2xl leading-tight font-semibold tracking-[-0.015em]">
+        {/* An eyebrow, not a terminal banner: sentence case, sans, no
+            letter-spacing. The uppercase mono treatment went with the retro
+            layer (DESIGN_SYSTEM.md §4). */}
+        <div className="text-fg-muted text-2xs mb-1 font-medium">{category}</div>
+        <h1 className="text-fg text-2xl leading-tight font-semibold tracking-[-0.015em]">
           {title}
         </h1>
       </div>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { StatusIcon } from '@/components/ui/status-icon';
 import { Button } from '@/components/ui/button';
 import type { Highlighter } from 'shiki';
 
@@ -47,12 +47,12 @@ interface DiffViewerProps {
 
 function renderDiffLines(patch: string): React.ReactNode[] {
   return patch.split('\n').map((line, i) => {
-    let className = 'text-text-secondary px-2';
+    let className = 'text-fg-secondary px-2';
     if (line.startsWith('+') && !line.startsWith('+++'))
-      className = 'bg-[var(--bg-diff-added)] text-status-emerald px-2';
+      className = 'bg-diff-added-bg text-success px-2';
     else if (line.startsWith('-') && !line.startsWith('---'))
-      className = 'bg-[var(--bg-diff-deleted)] text-status-red px-2';
-    else if (line.startsWith('@@')) className = 'text-text-muted px-2';
+      className = 'bg-diff-removed-bg text-danger px-2';
+    else if (line.startsWith('@@')) className = 'text-fg-muted px-2';
     return (
       <div key={i} className={`font-mono text-xs leading-5 whitespace-pre ${className}`}>
         {line || ' '}
@@ -69,10 +69,10 @@ const statusPrefix: Record<DiffFile['status'], string> = {
 };
 
 const statusColor: Record<DiffFile['status'], string> = {
-  added: 'text-status-emerald',
-  modified: 'text-phosphor-amber',
-  deleted: 'text-status-red',
-  renamed: 'text-phosphor-amber',
+  added: 'text-success',
+  modified: 'text-warning',
+  deleted: 'text-danger',
+  renamed: 'text-warning',
 };
 
 export function DiffViewer({ files, className }: DiffViewerProps) {
@@ -86,11 +86,11 @@ export function DiffViewer({ files, className }: DiffViewerProps) {
     return (
       <div
         className={cn(
-          'text-text-muted flex flex-col items-center justify-center gap-3 p-8',
+          'text-fg-muted flex flex-col items-center justify-center gap-3 p-8',
           className
         )}
       >
-        <DaemonMascot size={32} expression="idle" />
+        <StatusIcon size={20} status="idle" />
         <span className="text-sm">No file changes.</span>
       </div>
     );
@@ -99,27 +99,40 @@ export function DiffViewer({ files, className }: DiffViewerProps) {
   return (
     <div className={cn('flex h-full flex-col', className)}>
       {/* Header */}
-      <div className="border-border-default flex items-center gap-3 border-b px-4 py-2">
-        <span className="text-text-muted font-mono text-xs font-semibold tracking-widest uppercase">
-          FILE CHANGES
+      <div className="border-line flex items-center gap-3 border-b px-4 py-2">
+        <span className="text-fg text-sm font-medium">File changes</span>
+        <span className="text-success font-mono text-xs">
+          +{totalAdditions}
+          <span className="sr-only"> insertions</span>
         </span>
-        <span className="text-status-emerald font-mono text-xs">+{totalAdditions}</span>
-        <span className="text-status-red font-mono text-xs">−{totalDeletions}</span>
+        <span className="text-danger font-mono text-xs">
+          −{totalDeletions}
+          <span className="sr-only"> deletions</span>
+        </span>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
         {/* File tree */}
-        <div className="border-border-default w-56 shrink-0 overflow-y-auto border-r">
+        <div
+          className="border-line w-56 shrink-0 overflow-y-auto border-r"
+          role="tablist"
+          aria-label="Changed files"
+        >
           {files.map((file, i) => (
             <Button
               key={`${file.filename}-${i}`}
               variant="ghost"
+              role="tab"
+              id={`diff-tab-${i}`}
+              aria-controls="diff-panel"
+              aria-selected={selectedFile === file.filename}
+              tabIndex={selectedFile === file.filename ? 0 : -1}
               onClick={() => setSelectedFile(file.filename)}
               className={cn(
                 'flex h-auto w-full items-center justify-start gap-1.5 truncate rounded-none px-3 py-2 text-left font-mono text-xs',
                 selectedFile === file.filename
-                  ? 'bg-accent-blue/10 text-accent-blue hover:bg-accent-blue/15'
-                  : 'text-text-secondary hover:bg-bg-elevated'
+                  ? 'bg-accent-subtle text-accent'
+                  : 'text-fg-secondary hover:bg-surface-inset'
               )}
             >
               <span className={statusColor[file.status]}>{statusPrefix[file.status]}</span>
@@ -129,11 +142,17 @@ export function DiffViewer({ files, className }: DiffViewerProps) {
         </div>
 
         {/* Diff content */}
-        <div className="bg-bg-base flex-1 overflow-auto">
+        <div
+          className="bg-surface-base flex-1 overflow-auto"
+          role="tabpanel"
+          id="diff-panel"
+          tabIndex={0}
+          aria-label={selected ? `Diff for ${selected.filename}` : 'Diff'}
+        >
           {selected ? (
             <div>{renderDiffLines(selected.patch)}</div>
           ) : (
-            <div className="text-text-muted p-4 text-sm">Select a file to view changes.</div>
+            <div className="text-fg-muted p-4 text-sm">Select a file to view changes.</div>
           )}
         </div>
       </div>

@@ -5,17 +5,29 @@ import * as ProgressPrimitive from '@radix-ui/react-progress';
 
 import { cn } from '@/lib/utils';
 
+/**
+ * Progress
+ *
+ * The only progress affordance in the system. The retro `ASCIIProgress`
+ * (a ▓▒ bar rendered in mono) was removed in the 2026-09-04 overhaul — see
+ * UI_SPEC.md §13. Its three call sites now use this bar, which is legible at
+ * a glance, animates, and reports itself to assistive tech via Radix.
+ *
+ * `value` is a percentage (0–100), matching the Radix contract.
+ */
 const Progress = React.forwardRef<
   React.ElementRef<typeof ProgressPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root>
 >(({ className, value, ...props }, ref) => (
   <ProgressPrimitive.Root
     ref={ref}
-    className={cn('bg-primary/20 relative h-2 w-full overflow-hidden rounded-full', className)}
+    data-slot="progress"
+    className={cn('bg-surface-inset relative h-1.5 w-full overflow-hidden rounded-full', className)}
     {...props}
   >
     <ProgressPrimitive.Indicator
-      className="bg-primary h-full w-full flex-1 transition-all"
+      data-slot="progress-indicator"
+      className="bg-accent h-full w-full flex-1 transition-transform duration-[240ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
       style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
     />
   </ProgressPrimitive.Root>
@@ -23,29 +35,3 @@ const Progress = React.forwardRef<
 Progress.displayName = ProgressPrimitive.Root.displayName;
 
 export { Progress };
-
-export function ASCIIProgress({
-  value = 0,
-  max = 100,
-  length = 10,
-  className,
-}: {
-  value?: number;
-  max?: number;
-  length?: number;
-  className?: string;
-}) {
-  const percentage = Math.min(Math.max(value / max, 0), 1);
-  const filledLength = Math.round(percentage * length);
-  const emptyLength = length - filledLength;
-
-  const filled = '▓'.repeat(filledLength);
-  const empty = '▒'.repeat(emptyLength);
-
-  return (
-    <span className={cn('font-mono text-[10px] tracking-tight whitespace-nowrap', className)}>
-      {filled}
-      {empty}
-    </span>
-  );
-}

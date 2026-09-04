@@ -68,35 +68,29 @@ export function ProfileForm({ user }: ProfileFormProps) {
     <section className="flex flex-col gap-6">
       {/* Avatar */}
       <div className="flex items-center gap-4">
-        <div className="bg-accent-blue flex h-14 w-14 shrink-0 items-center justify-center rounded-full">
+        <div className="bg-surface-inset flex h-14 w-14 shrink-0 items-center justify-center rounded-full">
           <span className="text-lg font-semibold text-white">{initials || '?'}</span>
         </div>
-        <p className="text-text-muted text-sm">
+        <p className="text-fg-muted text-sm">
           Avatar is generated from your name. Custom avatars are not supported.
         </p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <label className="text-text-secondary font-mono text-xs" htmlFor="profile-name">
-            Display Name
+          <label className="text-fg-secondary font-mono text-xs" htmlFor="profile-name">
+            Display name
           </label>
           <Input id="profile-name" autoComplete="name" {...register('name')} />
-          {errors.name && (
-            <p className="text-status-red font-mono text-xs">{errors.name.message}</p>
-          )}
+          {errors.name && <p className="text-danger font-mono text-xs">{errors.name.message}</p>}
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="text-text-secondary font-mono text-xs" htmlFor="profile-email">
+          <label className="text-fg-secondary font-mono text-xs" htmlFor="profile-email">
             Email
           </label>
           <Input id="profile-email" type="email" autoComplete="email" {...register('email')} />
-          {errors.email && (
-            <p className="text-status-red font-mono text-xs">{errors.email.message}</p>
-          )}
-          <p className="text-text-muted text-xs">
-            To change your email, contact your administrator.
-          </p>
+          {errors.email && <p className="text-danger font-mono text-xs">{errors.email.message}</p>}
+          <p className="text-fg-muted text-xs">To change your email, contact your administrator.</p>
         </div>
         <div>
           <Button type="submit" disabled={isSubmitting} size="sm">

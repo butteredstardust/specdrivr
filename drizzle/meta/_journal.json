@@ -134,6 +134,20 @@
       "when": 1788496727780,
       "tag": "0018_curly_toxin",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1788538047436,
+      "tag": "0019_furry_la_nuit",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1788540397411,
+      "tag": "0020_equal_blade",
+      "breakpoints": true
     }
   ]
 }

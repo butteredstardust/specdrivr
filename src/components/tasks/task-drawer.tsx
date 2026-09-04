@@ -1,13 +1,11 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Drawer } from 'vaul';
+import { useCallback, useState } from 'react';
+import { XCircle } from 'lucide-react';
+import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from '@/components/ui/drawer';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { XCircle, RefreshCw, AlertCircle, CheckCircle2, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { overrideTaskStatusAction, retryTaskAction, unblockTaskAction } from '@/actions/tasks';
 import {
   Select,
   SelectContent,
@@ -26,17 +24,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
-import { PixelBadge, type PixelBadgeProps } from '@/components/ui/pixel-badge';
+import { StatusIcon, type Status } from '@/components/ui/status-icon';
+import { Badge } from '@/components/ui/badge';
+import { EntityId } from '@/components/ui/entity-id';
+import { TASK_STATUS } from '@/lib/ui-status';
 import { useTaskDrawer } from '@/components/shell/task-drawer-context';
 import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
-import { clientLogger } from '@/lib/logger-client';
-import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
 import { TaskDrawerOverview } from './task-drawer-overview';
 import { TaskDrawerAttempts } from './task-drawer-attempts';
 import { TaskDrawerChanges } from './task-drawer-changes';
+import { TaskDrawerFooter } from './task-drawer-footer';
+import { useTaskActions } from './use-task-actions';
 
 export type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'done' | 'failed' | 'skipped';
 
@@ -57,37 +56,14 @@ export interface Task {
   pullRequestUrl?: string | null;
 }
 
-const TASK_STATUS_CONFIG: Record<
-  TaskStatus,
-  { label: string; char: string; variant: PixelBadgeProps['variant'] }
-> = {
-  todo: { label: 'TODO', char: '○', variant: 'muted' },
-  in_progress: { label: 'RUNNING', char: '▶', variant: 'blue' },
-  blocked: { label: 'BLOCKED', char: '⚠', variant: 'amber' },
-  done: { label: 'DONE', char: '✓', variant: 'emerald' },
-  failed: { label: 'FAILED', char: '✕', variant: 'red' },
-  skipped: { label: 'SKIPPED', char: '-', variant: 'muted' },
-};
+const DRAWER_TABS = [
+  { value: 'overview', label: 'Overview' },
+  { value: 'attempts', label: 'Attempts' },
+  { value: 'changes', label: 'Changes' },
+] as const;
 
-type DaemonExpression = 'idle' | 'working' | 'success' | 'blocked' | 'error';
-
-function statusToExpression(status: TaskStatus): DaemonExpression {
-  switch (status) {
-    case 'todo':
-      return 'idle';
-    case 'in_progress':
-      return 'working';
-    case 'blocked':
-      return 'blocked';
-    case 'done':
-      return 'success';
-    case 'failed':
-      return 'error';
-    case 'skipped':
-      return 'idle';
-    default:
-      return 'idle';
-  }
+function statusToExpression(status: TaskStatus): Status {
+  return TASK_STATUS[status]?.status ?? 'idle';
 }
 
 export function TaskDrawer() {
@@ -98,9 +74,8 @@ export function TaskDrawer() {
   const [localTask, setLocalTask] = useState<Task | null>(null);
   const [forceConfirmOpen, setForceConfirmOpen] = useState(false);
   const [forceReason, setForceReason] = useState('');
-  const [isActioning, setIsActioning] = useState(false);
 
-  const { data: polledTask, isLoading: _isLoading } = usePolling<Task>({
+  const { data: polledTask } = usePolling<Task>({
     url: activeTaskId ? `/api/v1/tasks/${activeTaskId}` : null,
     interval: 3000,
     stopWhen: (t) => !['todo', 'in_progress'].includes(t.status),
@@ -109,105 +84,14 @@ export function TaskDrawer() {
 
   const task = localTask ?? polledTask;
 
-  const handleStatusChange = useCallback(
-    async (newStatus: string) => {
-      if (!task) return;
-      try {
-        const res = await fetch(`/api/v1/tasks/${task.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ status: newStatus }),
-        });
-        if (!res.ok) {
-          const errBody = await res.json().catch(() => ({}));
-          clientLogger.error('Failed to update task status', errBody);
-          toast.error('Failed to update status');
-          return;
-        }
-        const json = await res.json();
-        const updated = json.data !== undefined ? json.data : json;
-        setLocalTask(updated);
-        toast.success(`Task marked as ${newStatus}`);
-      } catch (err) {
-        clientLogger.error('Status change error', err);
-        toast.error('Failed to update status');
-      }
-    },
-    [task]
-  );
+  const { isActioning, changeStatus, forceMarkDone, retry } = useTaskActions(task, setLocalTask);
 
-  const handleMarkDone = useCallback(
-    async (force: boolean) => {
-      if (!task) return;
-      if (task.status === 'done') return;
-
-      if (!force) {
-        setForceConfirmOpen(true);
-        return;
-      }
-
-      if (!forceReason.trim()) {
-        toast.error('Add a reason for the manual completion.');
-        return;
-      }
-      setIsActioning(true);
-      try {
-        const formData = new FormData();
-        formData.set('id', String(task.id));
-        formData.set('status', 'done');
-        formData.set('notes', forceReason.trim());
-        const result = await overrideTaskStatusAction(formData);
-        if (!result.success || !result.data) {
-          throw new Error(result.error?.message ?? 'Manual completion failed');
-        }
-        toast.success('Task marked as done.');
-        setForceConfirmOpen(false);
-        setForceReason('');
-        setLocalTask(result.data as Task);
-      } catch (err) {
-        clientLogger.error('Mark done error', err);
-        toast.error('Failed to mark as done');
-      } finally {
-        setIsActioning(false);
-      }
-    },
-    [task, forceReason]
-  );
-
-  const handleRetry = useCallback(
-    async (humanContext?: string) => {
-      if (!task) return;
-      setIsActioning(true);
-      try {
-        const formData = new FormData();
-        formData.set('id', String(task.id));
-        const result =
-          task.status === 'blocked'
-            ? await (async () => {
-                formData.set('humanContext', humanContext ?? '');
-                return unblockTaskAction(formData);
-              })()
-            : await retryTaskAction(formData);
-        if (!result.success || !result.data) {
-          throw new Error(result.error?.message ?? 'Retry failed');
-        }
-        setLocalTask(result.data as Task);
-        toast.success('Task queued for retry.');
-      } catch (err) {
-        clientLogger.error('Retry failed', err);
-        toast.error('Failed to retry task');
-      } finally {
-        setIsActioning(false);
-      }
-    },
-    [task]
-  );
-
-  const handleMarkBlocked = useCallback(async () => {
-    if (!task) return;
-    await handleStatusChange('blocked');
-  }, [task, handleStatusChange]);
+  const handleForceMarkDone = useCallback(async () => {
+    if (await forceMarkDone(forceReason)) {
+      setForceConfirmOpen(false);
+      setForceReason('');
+    }
+  }, [forceMarkDone, forceReason]);
 
   const handleOpenChange = useCallback(
     (open: boolean) => {
@@ -219,132 +103,125 @@ export function TaskDrawer() {
     [closeDrawer]
   );
 
-  const DRAWER_TABS = ['overview', 'attempts', 'changes'] as const;
-
   return (
     <>
-      <Drawer.Root open={!!activeTaskId} onOpenChange={handleOpenChange} direction="right">
-        <Drawer.Portal>
-          <Drawer.Overlay className="fixed inset-0 z-40 bg-black/60" />
-          <Drawer.Content className="border-border-default bg-bg-surface fixed top-0 right-0 bottom-0 z-50 flex w-full max-w-[640px] flex-col border-l outline-none">
-            <Drawer.Title className="sr-only">{task?.title ?? 'Task'}</Drawer.Title>
-            <Drawer.Description className="sr-only">
-              {task ? `${task.externalId} — ${task.status}` : 'Loading task'}
-            </Drawer.Description>
-            {task && (
-              <>
-                {/* Header */}
-                <div className="bg-bg-base border-border-default flex shrink-0 items-center gap-4 border-b px-6 py-5">
-                  <PixelBadge variant="amber">{task.externalId}</PixelBadge>
-                  <span className="text-text-primary flex-1 truncate text-lg font-semibold tracking-tight">
-                    {task.title}
-                  </span>
-                  <DaemonMascot size={32} expression={statusToExpression(task.status)} />
-                  <TooltipProvider>
-                    {canManage ? (
-                      <Select value={task.status} onValueChange={handleStatusChange}>
-                        <SelectTrigger className="bg-bg-elevated h-8 w-40 border-none px-2 shadow-none focus:ring-0">
-                          <SelectValue>
-                            <PixelBadge
-                              variant={TASK_STATUS_CONFIG[task.status].variant}
-                              dot={task.status === 'in_progress'}
-                              className="w-32 justify-center"
-                            >
-                              {TASK_STATUS_CONFIG[task.status].char}
-                              {TASK_STATUS_CONFIG[task.status].label}
-                            </PixelBadge>
-                          </SelectValue>
-                        </SelectTrigger>
-                        <SelectContent className="bg-bg-surface border-border-default">
-                          {(Object.keys(TASK_STATUS_CONFIG) as Array<TaskStatus>)
-                            .filter((s) => s !== 'done')
-                            .map((s) => (
-                              <SelectItem key={s} value={s} className="focus:bg-bg-elevated py-2">
-                                <PixelBadge
-                                  variant={TASK_STATUS_CONFIG[s].variant}
-                                  dot={s === 'in_progress'}
-                                  className="w-32 justify-center"
-                                >
-                                  {TASK_STATUS_CONFIG[s].char}
-                                  {TASK_STATUS_CONFIG[s].label}
-                                </PixelBadge>
-                              </SelectItem>
-                            ))}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span>
-                            <PixelBadge
-                              variant={TASK_STATUS_CONFIG[task.status].variant}
-                              dot={task.status === 'in_progress'}
-                              className="w-32 justify-center opacity-60"
-                            >
-                              {TASK_STATUS_CONFIG[task.status].char}
-                              {TASK_STATUS_CONFIG[task.status].label}
-                            </PixelBadge>
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent>Requires Admin or Owner role</TooltipContent>
-                      </Tooltip>
-                    )}
-                  </TooltipProvider>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-text-muted hover:text-text-primary h-8 w-8 shrink-0 rounded-md"
-                    onClick={closeDrawer}
-                  >
-                    <XCircle className="h-4 w-4" />
-                  </Button>
+      <Drawer open={!!activeTaskId} onOpenChange={handleOpenChange}>
+        <DrawerContent>
+          <DrawerTitle className="sr-only">{task?.title ?? 'Task'}</DrawerTitle>
+          <DrawerDescription className="sr-only">
+            {task ? `${task.externalId} — ${task.status}` : 'Loading task'}
+          </DrawerDescription>
+          {task && (
+            <>
+              <div className="bg-surface-base border-line flex shrink-0 items-center gap-4 border-b px-6 py-5">
+                <EntityId chip>{task.externalId}</EntityId>
+                <span className="text-fg flex-1 truncate text-lg font-semibold tracking-tight">
+                  {task.title}
+                </span>
+                <StatusIcon size={20} status={statusToExpression(task.status)} />
+                <TooltipProvider>
+                  {canManage ? (
+                    <Select value={task.status} onValueChange={changeStatus}>
+                      <SelectTrigger className="bg-surface-inset h-8 w-40 border-none px-2 shadow-none">
+                        <SelectValue>
+                          <Badge
+                            variant={TASK_STATUS[task.status].variant}
+                            dot={task.status === 'in_progress'}
+                            className="w-32 justify-center"
+                          >
+                            {TASK_STATUS[task.status].label}
+                          </Badge>
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent className="bg-surface-raised border-line">
+                        {/* `done` is absent by design: manual completion needs a
+                            recorded reason, so it goes through the footer's
+                            confirmation rather than this menu. */}
+                        {(Object.keys(TASK_STATUS) as Array<TaskStatus>)
+                          .filter((s) => s !== 'done')
+                          .map((s) => (
+                            <SelectItem key={s} value={s} className="focus:bg-surface-inset py-2">
+                              <Badge
+                                variant={TASK_STATUS[s].variant}
+                                dot={s === 'in_progress'}
+                                className="w-32 justify-center"
+                              >
+                                {TASK_STATUS[s].label}
+                              </Badge>
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span tabIndex={0}>
+                          <Badge
+                            variant={TASK_STATUS[task.status].variant}
+                            dot={task.status === 'in_progress'}
+                            className="w-32 justify-center"
+                          >
+                            {TASK_STATUS[task.status].label}
+                          </Badge>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>Requires Admin or Owner role</TooltipContent>
+                    </Tooltip>
+                  )}
+                </TooltipProvider>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-fg-muted hover:text-fg h-8 w-8 shrink-0 rounded-md"
+                  onClick={closeDrawer}
+                  aria-label="Close task"
+                >
+                  <XCircle className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <Tabs defaultValue="overview" className="flex min-h-0 flex-1 flex-col">
+                <TabsList className="border-line mx-6 mt-4 mb-0 h-auto shrink-0 justify-start gap-4 rounded-none border-b bg-transparent p-0">
+                  {DRAWER_TABS.map((tab) => (
+                    <TabsTrigger
+                      key={tab.value}
+                      value={tab.value}
+                      className="data-[state=active]:border-accent data-[state=active]:text-fg data-[state=inactive]:text-fg-muted hover:text-fg-secondary rounded-none bg-transparent px-1 py-2.5 text-xs shadow-none transition-colors data-[state=active]:border-b-2 data-[state=inactive]:border-transparent"
+                    >
+                      {tab.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+                <div className="flex-1 overflow-y-auto">
+                  <TabsContent value="overview" className="mt-0 h-full">
+                    <TaskDrawerOverview task={task} onRetry={retry} />
+                  </TabsContent>
+                  <TabsContent value="attempts" className="mt-0 h-full">
+                    <TaskDrawerAttempts taskId={task.id} taskStatus={task.status} />
+                  </TabsContent>
+                  <TabsContent value="changes" className="mt-0 h-full">
+                    <TaskDrawerChanges taskId={task.id} />
+                  </TabsContent>
                 </div>
+              </Tabs>
 
-                {/* Tabs */}
-                <Tabs defaultValue="overview" className="flex min-h-0 flex-1 flex-col">
-                  <TabsList className="border-border-default mx-6 mt-4 mb-0 h-auto shrink-0 justify-start gap-4 rounded-none border-b bg-transparent p-0">
-                    {DRAWER_TABS.map((tab) => (
-                      <TabsTrigger
-                        key={tab}
-                        value={tab}
-                        className="data-[state=active]:border-accent-blue data-[state=active]:text-text-primary data-[state=inactive]:text-text-muted hover:text-text-secondary rounded-none bg-transparent px-1 py-2.5 font-mono text-xs tracking-[0.08em] uppercase shadow-none transition-colors data-[state=active]:border-b-2 data-[state=inactive]:border-transparent"
-                      >
-                        {tab}
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
-                  <div className="flex-1 overflow-y-auto">
-                    <TabsContent value="overview" className="mt-0 h-full">
-                      <TaskDrawerOverview task={task} onRetry={handleRetry} />
-                    </TabsContent>
-                    <TabsContent value="attempts" className="mt-0 h-full">
-                      <TaskDrawerAttempts taskId={task.id} taskStatus={task.status} />
-                    </TabsContent>
-                    <TabsContent value="changes" className="mt-0 h-full">
-                      <TaskDrawerChanges taskId={task.id} />
-                    </TabsContent>
-                  </div>
-                </Tabs>
-
-                {/* Footer */}
-                <DrawerFooter
-                  task={task}
-                  canManage={canManage}
-                  devMode={devMode}
-                  onRetry={handleRetry}
-                  onMarkBlocked={handleMarkBlocked}
-                  onMarkDone={() => handleMarkDone(false)}
-                />
-              </>
-            )}
-          </Drawer.Content>
-        </Drawer.Portal>
-      </Drawer.Root>
+              <TaskDrawerFooter
+                task={task}
+                canManage={canManage}
+                devMode={devMode}
+                onRetry={retry}
+                onMarkBlocked={() => changeStatus('blocked')}
+                onMarkDone={() => setForceConfirmOpen(true)}
+              />
+            </>
+          )}
+        </DrawerContent>
+      </Drawer>
 
       <AlertDialog open={forceConfirmOpen} onOpenChange={setForceConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Force Mark as Done?</AlertDialogTitle>
+            <AlertDialogTitle>Force mark as done?</AlertDialogTitle>
             <AlertDialogDescription>
               Manual completion bypasses the agent workflow. Record why this transition is safe for
               the audit trail.
@@ -359,146 +236,19 @@ export function TaskDrawer() {
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isActioning}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-status-red hover:bg-status-red/90"
-              onClick={() => handleMarkDone(true)}
+              className="bg-danger hover:bg-danger/90"
+              onClick={(event) => {
+                // Keep the dialog open on failure — the default action closes it.
+                event.preventDefault();
+                void handleForceMarkDone();
+              }}
               disabled={isActioning || !forceReason.trim()}
             >
-              Force Mark Done
+              Force mark done
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </>
-  );
-}
-
-interface DrawerFooterProps {
-  task: Task;
-  canManage: boolean;
-  devMode: boolean;
-  onRetry: (humanContext?: string) => Promise<void>;
-  onMarkBlocked: () => Promise<void>;
-  onMarkDone: () => Promise<void>;
-}
-
-function DrawerFooter({
-  task,
-  canManage,
-  devMode,
-  onRetry,
-  onMarkBlocked,
-  onMarkDone,
-}: DrawerFooterProps) {
-  const showRerun = ['failed', 'done'].includes(task.status);
-  const [jsonOpen, setJsonOpen] = useState(false);
-
-  return (
-    <div className="bg-bg-elevated/50 border-border-default shrink-0 space-y-4 border-t px-6 py-5">
-      <div className="flex items-center gap-3">
-        {showRerun && (
-          <Button variant="blue" size="sm" onClick={() => void onRetry()} className="h-8 gap-1.5">
-            <RefreshCw className="h-3.5 w-3.5" />
-            RE-RUN
-          </Button>
-        )}
-
-        <TooltipProvider>
-          {canManage ? (
-            <Button
-              variant="phosphor"
-              size="sm"
-              onClick={onMarkBlocked}
-              className="h-8 gap-1.5"
-              disabled={task.status === 'blocked'}
-            >
-              <AlertCircle className="h-3.5 w-3.5" />
-              MARK BLOCKED
-            </Button>
-          ) : (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
-                  <Button
-                    variant="phosphor"
-                    size="sm"
-                    disabled
-                    className="h-8 cursor-not-allowed gap-1.5"
-                  >
-                    <AlertCircle className="h-3.5 w-3.5" />
-                    MARK BLOCKED
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>Requires Admin or Owner role</TooltipContent>
-            </Tooltip>
-          )}
-        </TooltipProvider>
-
-        <TooltipProvider>
-          {canManage ? (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onMarkDone}
-              className="border-status-emerald/50 text-status-emerald hover:bg-status-emerald/10 h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase transition-colors"
-              disabled={task.status === 'done'}
-            >
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              MARK DONE
-            </Button>
-          ) : (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled
-                    className="h-8 cursor-not-allowed gap-1.5 font-mono text-[10px] tracking-widest uppercase opacity-50"
-                  >
-                    <CheckCircle2 className="h-3.5 w-3.5" />
-                    MARK DONE
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>Requires Admin or Owner role</TooltipContent>
-            </Tooltip>
-          )}
-        </TooltipProvider>
-      </div>
-
-      {(devMode || jsonOpen || (task.totalCostUsd && task.totalCostUsd > 0)) && (
-        <div className="space-y-3">
-          {(devMode || (task.totalCostUsd && task.totalCostUsd > 0)) && (
-            <div className="text-text-muted flex items-center gap-4 font-mono text-[10px] tracking-[0.08em] uppercase">
-              {devMode && (
-                <>
-                  <span>Prompt: {task.promptTokensUsed?.toLocaleString() ?? '---'}</span>
-                  <span>Completion: {task.completionTokensUsed?.toLocaleString() ?? '---'}</span>
-                </>
-              )}
-              {task.totalCostUsd != null && task.totalCostUsd > 0 && (
-                <span>Cost: ${task.totalCostUsd.toFixed(4)}</span>
-              )}
-            </div>
-          )}
-          {devMode && (
-            <Collapsible open={jsonOpen} onOpenChange={setJsonOpen}>
-              <CollapsibleTrigger className="text-text-muted hover:text-text-secondary flex cursor-pointer items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] uppercase select-none">
-                {jsonOpen ? 'Hide JSON' : 'Inspect JSON'}
-                <ChevronRight
-                  className={cn('h-3 w-3 transition-transform', jsonOpen && 'rotate-90')}
-                />
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <pre className="bg-terminal-bg text-terminal-green border-border-subtle mt-2 overflow-auto rounded border p-3 font-mono text-[10px]">
-                  {JSON.stringify(task, null, 2)}
-                </pre>
-              </CollapsibleContent>
-            </Collapsible>
-          )}
-        </div>
-      )}
-    </div>
   );
 }

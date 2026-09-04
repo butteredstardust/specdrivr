@@ -5,11 +5,10 @@ import { clientLogger } from '@/lib/logger-client';
 import Link from 'next/link';
 import { useSSE } from '@/hooks/use-sse';
 import { Button } from '@/components/ui/button';
-import { PixelBadge } from '@/components/ui/pixel-badge';
+import { Badge } from '@/components/ui/badge';
 import { EventLog } from '@/components/mission-control/event-log';
 import { TaskTimeline } from '@/components/sessions/task-timeline';
-import { Play, Pause, XCircle, ExternalLink, AlertCircle } from 'lucide-react';
-import { GitHubLogoIcon } from '@radix-ui/react-icons';
+import { Play, Pause, XCircle, ExternalLink, AlertCircle, Github } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
@@ -59,9 +58,9 @@ function formatDuration(session?: AgentSession | null): string {
 
 function StatBox({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-bg-elevated border-border-default flex flex-col justify-center rounded border px-3 py-2">
-      <p className="text-text-secondary font-mono text-[10px] tracking-widest uppercase">{label}</p>
-      <p className="text-text-primary mt-0.5 font-mono text-sm font-semibold">{value}</p>
+    <div className="bg-surface-inset border-line flex flex-col justify-center rounded border px-3 py-2">
+      <p className="text-fg-secondary text-2xs">{label}</p>
+      <p className="text-fg mt-0.5 font-mono text-sm font-semibold">{value}</p>
     </div>
   );
 }
@@ -71,20 +70,20 @@ function StatusBadge({ status }: { status?: AgentSession['status'] }) {
   switch (status) {
     case 'running':
       return (
-        <PixelBadge variant="blue" dot>
+        <Badge variant="info" dot>
           Running
-        </PixelBadge>
+        </Badge>
       );
     case 'paused':
-      return <PixelBadge variant="amber">Paused</PixelBadge>;
+      return <Badge variant="warning">Paused</Badge>;
     case 'completed':
-      return <PixelBadge variant="emerald">Done</PixelBadge>;
+      return <Badge variant="success">Done</Badge>;
     case 'failed':
-      return <PixelBadge variant="red">Failed</PixelBadge>;
+      return <Badge variant="danger">Failed</Badge>;
     case 'cancelled':
-      return <PixelBadge variant="muted">Cancelled</PixelBadge>;
+      return <Badge variant="muted">Cancelled</Badge>;
     default:
-      return <PixelBadge>{status}</PixelBadge>;
+      return <Badge>{status}</Badge>;
   }
 }
 
@@ -134,17 +133,15 @@ export default function SessionDetailPage({ params }: PageProps) {
   const progressPercent = totalTasks > 0 ? ((session?.tasksSucceeded || 0) / totalTasks) * 100 : 0;
 
   return (
-    <div className="-mx-6 -mt-6 flex min-h-full flex-col">
-      <div className="border-border-default flex items-center justify-between border-b px-6 py-4">
+    <div className="full-bleed flex min-h-full flex-col">
+      <div className="border-line flex items-center justify-between border-b px-6 py-4">
         <div className="flex min-w-0 flex-col gap-1">
-          <div className="text-text-secondary font-mono text-xs tracking-[0.2em] uppercase">
-            Executor
-          </div>
+          <div className="text-fg-secondary text-xs">Executor</div>
           <div className="flex min-w-0 items-center gap-3">
-            <h1 className="text-foreground truncate text-2xl leading-tight font-semibold tracking-[-0.015em]">
+            <h1 className="text-fg truncate text-2xl leading-tight font-semibold tracking-[-0.015em]">
               Session
             </h1>
-            <code className="bg-phosphor-amber/10 text-phosphor-amber shrink-0 rounded px-1.5 py-0.5 font-mono text-xs">
+            <code className="bg-warning-bg text-warning shrink-0 rounded px-1.5 py-0.5 font-mono text-xs">
               {sessionLabel}
             </code>
             {session && <StatusBadge status={session.status} />}
@@ -152,11 +149,11 @@ export default function SessionDetailPage({ params }: PageProps) {
               <Button
                 variant="outline"
                 size="sm"
-                className="border-border-default bg-bg-elevated/50 h-7 gap-1.5 px-2 py-0"
+                className="border-line bg-surface-inset h-7 gap-1.5 px-2 py-0"
                 onClick={() => window.open(session.pullRequestUrl!, '_blank')}
               >
-                <GitHubLogoIcon className="h-3.5 w-3.5" />
-                <span className="text-[10px] font-medium tracking-tight">VIEW PR</span>
+                <Github className="h-3.5 w-3.5" />
+                <span className="text-2xs font-medium tracking-tight">View PR</span>
                 <ExternalLink className="h-3 w-3 opacity-50" />
               </Button>
             )}
@@ -167,7 +164,7 @@ export default function SessionDetailPage({ params }: PageProps) {
             <Button
               size="sm"
               variant="outline"
-              className="border-phosphor-amber/50 text-phosphor-amber hover:bg-phosphor-amber/10"
+              className="border-warning-border text-warning hover:bg-warning-bg"
               onClick={() => handleAction('pause')}
               disabled={isUpdating}
             >
@@ -179,7 +176,7 @@ export default function SessionDetailPage({ params }: PageProps) {
             <Button
               size="sm"
               variant="outline"
-              className="border-status-emerald/50 text-status-emerald hover:bg-status-emerald/10"
+              className="border-success-border text-success hover:bg-success-bg"
               onClick={() => handleAction('resume')}
               disabled={isUpdating}
             >
@@ -191,7 +188,7 @@ export default function SessionDetailPage({ params }: PageProps) {
             <Button
               size="sm"
               variant="outline"
-              className="border-status-red/50 text-status-red hover:bg-status-red/10 h-8 font-mono text-[10px] tracking-widest uppercase"
+              className="border-danger-border text-danger hover:bg-danger-bg text-2xs h-8"
               onClick={() => handleAction('cancel')}
               disabled={isUpdating}
             >
@@ -208,15 +205,13 @@ export default function SessionDetailPage({ params }: PageProps) {
       </div>
 
       {(session || isLoading) && (
-        <div className="border-border-default grid grid-cols-2 gap-3 border-b px-4 py-4 md:grid-cols-5 md:gap-4 md:px-6">
+        <div className="border-line grid grid-cols-2 gap-3 border-b px-4 py-4 md:grid-cols-5 md:gap-4 md:px-6">
           <StatBox label="Started" value={timeAgo(session?.startedAt)} />
           <StatBox label="Duration" value={formatDuration(session)} />
-          <div className="bg-bg-elevated border-border-default col-span-2 flex flex-col justify-center rounded border px-3 py-2">
+          <div className="bg-surface-inset border-line col-span-2 flex flex-col justify-center rounded border px-3 py-2">
             <div className="mb-1.5 flex items-end justify-between">
-              <p className="text-text-secondary font-mono text-[10px] tracking-widest uppercase">
-                Progress
-              </p>
-              <p className="text-text-primary font-mono text-[10px] font-semibold">
+              <p className="text-fg-secondary text-2xs">Progress</p>
+              <p className="text-fg text-2xs font-mono font-semibold">
                 {session?.tasksSucceeded ?? 0} / {session?.tasksExecuted ?? 0}
               </p>
             </div>
@@ -227,10 +222,10 @@ export default function SessionDetailPage({ params }: PageProps) {
       )}
 
       {session?.status === 'failed' && session.errorMessage && (
-        <div className="border-border-default border-b px-6 py-4">
+        <div className="border-line border-b px-6 py-4">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Execution Failed</AlertTitle>
+            <AlertTitle>Execution failed</AlertTitle>
             <AlertDescription className="font-mono text-xs">
               {session.errorMessage}
             </AlertDescription>
@@ -238,16 +233,14 @@ export default function SessionDetailPage({ params }: PageProps) {
         </div>
       )}
 
-      <div className="divide-border-default flex min-h-0 flex-1 flex-col divide-y overflow-y-auto md:flex-row md:divide-x md:divide-y-0 md:overflow-hidden">
+      <div className="divide-line flex min-h-0 flex-1 flex-col divide-y overflow-y-auto md:flex-row md:divide-x md:divide-y-0 md:overflow-hidden">
         <div className="w-full overflow-y-auto p-4 md:w-1/2">
           <TaskTimeline sessionId={id} />
         </div>
 
         <div className="flex min-h-[20rem] w-full flex-col overflow-y-auto p-4 md:min-h-0 md:w-1/2">
-          <p className="text-text-secondary mb-3 font-mono text-[10px] tracking-widest uppercase">
-            Session Log
-          </p>
-          <p className="text-text-secondary mb-3 font-mono text-xs">
+          <p className="text-fg-secondary text-2xs mb-3">Session log</p>
+          <p className="text-fg-secondary mb-3 font-mono text-xs">
             $ specdrivr agent start --session {sessionLabel}
           </p>
           <EventLog sessionId={id} onUpdate={mutate} className="flex min-h-0 flex-1 flex-col" />

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Pause } from 'lucide-react';
 import { toast } from 'sonner';
 import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
@@ -12,16 +13,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import type { UserRole } from '@/db/schema';
 import dynamic from 'next/dynamic';
 import { RecentSessions } from '@/components/mission-control/recent-sessions';
-import { MatrixScreensaver } from '@/components/ui/matrix-screensaver';
 import { ProjectActivityFeed } from '@/components/mission-control/activity-feed';
 
 const LiveTerminal = dynamic(
   () => import('@/components/ui/live-terminal').then((m) => ({ default: m.LiveTerminal })),
   {
     ssr: false,
-    loading: () => (
-      <div className="h-[320px] w-full animate-pulse rounded bg-[var(--terminal-bg)]" />
-    ),
+    loading: () => <div className="bg-log-bg h-[320px] w-full animate-pulse rounded" />,
   }
 );
 
@@ -167,7 +165,7 @@ export function DashboardClient({ initialSessions, initialTasks }: DashboardClie
 
           {activeSession ? (
             <div className="flex flex-col gap-6">
-              <div className="animate-entrance stagger-1 divide-border-default border-border-default grid grid-cols-1 border-b pb-6 lg:grid-cols-[1fr_1.2fr] lg:divide-x">
+              <div className="animate-fade-in-up divide-line border-line grid grid-cols-1 border-b pb-6 lg:grid-cols-[1fr_1.2fr] lg:divide-x">
                 <div className="pb-6 lg:pr-6 lg:pb-0">
                   <SessionPanel
                     session={activeSession}
@@ -183,11 +181,9 @@ export function DashboardClient({ initialSessions, initialTasks }: DashboardClie
                   <EventLog sessionId={activeSession.id} onUpdate={mutate} />
                 </div>
               </div>
-              <div className="animate-entrance stagger-2 grid grid-cols-1 gap-6 lg:grid-cols-[1.2fr_1fr]">
+              <div className="animate-fade-in-up grid grid-cols-1 gap-6 lg:grid-cols-[1.2fr_1fr]">
                 <div>
-                  <h2 className="text-text-secondary mb-2 font-mono text-xs tracking-widest uppercase">
-                    Live Terminal
-                  </h2>
+                  <h2 className="text-fg-secondary mb-2 text-xs font-medium">Live terminal</h2>
                   <div className="relative overflow-hidden rounded-md">
                     <LiveTerminal
                       sessionId={activeSession.id}
@@ -195,10 +191,10 @@ export function DashboardClient({ initialSessions, initialTasks }: DashboardClie
                       active={activeSession.status === 'running'}
                     />
                     {activeSession.status === 'paused' && (
-                      <div className="bg-terminal-bg pointer-events-none absolute inset-0 flex items-center justify-center">
-                        <MatrixScreensaver className="absolute inset-0" />
-                        <div className="text-brand-cyan border-brand-blue/30 bg-brand-navy/90 z-10 rounded border px-4 py-2 font-mono text-xs tracking-widest uppercase shadow-sm backdrop-blur-sm">
-                          System Idle
+                      <div className="bg-log-bg/80 pointer-events-none absolute inset-0 flex items-center justify-center backdrop-blur-[1px]">
+                        <div className="border-warning-border bg-warning-bg text-warning flex items-center gap-2 rounded-md border px-4 py-2 text-xs font-medium">
+                          <Pause className="size-3.5" />
+                          Session paused
                         </div>
                       </div>
                     )}
@@ -209,10 +205,10 @@ export function DashboardClient({ initialSessions, initialTasks }: DashboardClie
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.5fr_1fr]">
-              <div className="animate-entrance stagger-1">
+              <div className="animate-fade-in-up">
                 <RecentSessions sessions={recentSessions} />
               </div>
-              <div className="animate-entrance stagger-2 bg-bg-surface border-border-default h-fit rounded-xl border p-6">
+              <div className="animate-fade-in-up bg-surface-raised border-line h-fit rounded-lg border p-6">
                 {activeProjectId && <ProjectActivityFeed projectId={activeProjectId} />}
               </div>
             </div>

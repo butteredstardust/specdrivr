@@ -27,12 +27,7 @@ function getStrength(password: string): number {
   return score;
 }
 
-const STRENGTH_COLORS = [
-  'bg-status-red',
-  'bg-status-orange',
-  'bg-phosphor-amber',
-  'bg-status-emerald',
-];
+const STRENGTH_COLORS = ['bg-danger', 'bg-warning', 'bg-warning', 'bg-success'];
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -83,11 +78,11 @@ export default function ResetPasswordPage() {
 
   if (!token) {
     return (
-      <Card className="border-border-default bg-bg-surface w-full max-w-sm">
+      <Card className="border-line bg-surface-raised w-full max-w-sm">
         <CardContent className="space-y-3 pt-6 text-center">
           <BrandMark size={48} />
-          <p className="text-text-primary text-sm">This link has expired.</p>
-          <Link href="/forgot-password" className="text-accent-blue text-xs hover:underline">
+          <p className="text-fg text-sm">This link has expired.</p>
+          <Link href="/forgot-password" className="text-accent text-xs hover:underline">
             Request a new link
           </Link>
         </CardContent>
@@ -98,10 +93,10 @@ export default function ResetPasswordPage() {
   const strength = getStrength(passwordValue);
 
   return (
-    <Card className="border-border-default bg-bg-surface w-full max-w-sm">
+    <Card className="border-line bg-surface-raised w-full max-w-sm">
       <CardHeader className="items-center gap-2 pb-2">
         <BrandMark size={48} />
-        <p className="font-mono text-sm font-bold tracking-widest">SPECDRIVR</p>
+        <p className="text-fg font-mono text-lg font-semibold tracking-[-0.04em]">specdrivr</p>
       </CardHeader>
       <CardContent>
         <form
@@ -111,46 +106,44 @@ export default function ResetPasswordPage() {
           className="space-y-4"
         >
           <div className="space-y-1.5">
-            <Label htmlFor="password">New Password</Label>
+            <Label htmlFor="password">New password</Label>
             <Input
               id="password"
               {...register('password', {
                 onChange: (e) => setPasswordValue(e.target.value),
               })}
               type="password"
-              className="border-border-default bg-bg-base"
+              className="border-line bg-surface-base"
             />
             {passwordValue && (
               <div className="mt-1 flex gap-1">
                 {[0, 1, 2, 3].map((i) => (
                   <div
                     key={i}
-                    className={`h-1 flex-1 rounded-full ${i < strength ? STRENGTH_COLORS[strength - 1] : 'bg-border-muted'}`}
+                    className={`h-1 flex-1 rounded-full ${i < strength ? STRENGTH_COLORS[strength - 1] : 'bg-line-subtle'}`}
                   />
                 ))}
               </div>
             )}
-            {errors.password && (
-              <p className="text-status-red text-[10px]">{errors.password.message}</p>
-            )}
+            {errors.password && <p className="text-danger text-2xs">{errors.password.message}</p>}
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Label htmlFor="confirmPassword">Confirm password</Label>
             <Input
               id="confirmPassword"
               {...register('confirmPassword')}
               type="password"
-              className="border-border-default bg-bg-base"
+              className="border-line bg-surface-base"
             />
             {errors.confirmPassword && (
-              <p className="text-status-red text-[10px]">{errors.confirmPassword.message}</p>
+              <p className="text-danger text-2xs">{errors.confirmPassword.message}</p>
             )}
           </div>
-          {error && <p className="text-status-red text-xs">{error}</p>}
+          {error && <p className="text-danger text-xs">{error}</p>}
           <Button
             type="submit"
             disabled={isPending}
-            className="bg-accent-blue hover:bg-accent-blue-dim w-full"
+            className="bg-surface-inset hover:bg-accent-hover w-full"
           >
             {isPending ? 'Updating…' : 'Reset Password'}
           </Button>

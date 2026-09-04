@@ -85,4 +85,4 @@ pnpm dev
 ## Additional Claude-only Notes
 
 - **Auto-format hook**: `.claude/settings.json` runs `pnpm lint --fix` automatically after every Edit/Write.
-- **Branch reports**: Always generate `BRANCH_CHANGES.md` and `BRANCH_CODE_REVIEW.md` per `AGENTS.md` §18 before submitting a PR.
+- **No branch reports**: `BRANCH_CHANGES.md` / `BRANCH_CODE_REVIEW.md` were retired on 2026-09-04. Put the change summary in the PR body instead.

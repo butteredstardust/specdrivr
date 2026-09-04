@@ -5,11 +5,11 @@ import { useRouter } from 'next/navigation';
 import { useQueryState, parseAsString } from 'nuqs';
 import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { StatusIcon } from '@/components/ui/status-icon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PageHeader } from '@/components/ui/page-header';
-import { PixelBadge } from '@/components/ui/pixel-badge';
+import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -47,24 +47,24 @@ const STATUS_TABS: Array<{ value: string; label: string; status?: SpecStatus }> 
 function StatusBadge({ status }: { status: SpecStatus }) {
   switch (status) {
     case 'drafting':
-      return <PixelBadge>Draft</PixelBadge>;
+      return <Badge>Draft</Badge>;
     case 'pending_plan':
     case 'pending_approval':
-      return <PixelBadge variant="amber">Pending</PixelBadge>;
+      return <Badge variant="warning">Pending</Badge>;
     case 'executing':
       return (
-        <PixelBadge variant="blue" dot>
+        <Badge variant="info" dot>
           Running
-        </PixelBadge>
+        </Badge>
       );
     case 'completed':
-      return <PixelBadge variant="emerald">Done</PixelBadge>;
+      return <Badge variant="success">Done</Badge>;
     case 'stalled':
-      return <PixelBadge variant="red">Stalled</PixelBadge>;
+      return <Badge variant="danger">Stalled</Badge>;
     case 'archived':
-      return <PixelBadge variant="muted">Archived</PixelBadge>;
+      return <Badge variant="muted">Archived</Badge>;
     default:
-      return <PixelBadge>{status}</PixelBadge>;
+      return <Badge>{status}</Badge>;
   }
 }
 
@@ -140,7 +140,7 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
 
   const newSpecButton = (
     <Button
-      variant="phosphor"
+      variant="warning"
       size="sm"
       disabled={!canCreate}
       onClick={canCreate ? () => router.push('/specs/new') : undefined}
@@ -148,16 +148,15 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
       className="gap-2"
     >
       <Plus className="h-3.5 w-3.5" />
-      New Specification
+      New specification
     </Button>
   );
 
   return (
     <TooltipProvider>
-      {/* Escape the layout's p-6 so sections are full-bleed with border separators */}
-      <div className="animate-entrance -mx-6 -mt-6 flex min-h-full flex-col">
+      <div className="animate-fade-in-up full-bleed flex min-h-full flex-col">
         <PageHeader
-          category="SPECIFICATIONS"
+          category="Specifications"
           title="Specs"
           action={
             canCreate ? (
@@ -176,13 +175,13 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
         />
 
         {/* Toolbar: Search + Filter tabs */}
-        <div className="border-border-default flex flex-wrap items-center gap-4 border-b px-6 py-3">
+        <div className="border-line flex flex-wrap items-center gap-4 border-b px-6 py-3">
           {/* Search */}
           <div className="relative w-64">
-            <Search className="text-text-muted absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
+            <Search className="text-fg-muted absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
             <Input
-              placeholder="SEARCH SPECS..."
-              className="bg-bg-elevated focus:ring-accent-blue/30 h-8 pl-8 font-mono text-[10px] tracking-[0.08em] uppercase transition-all focus:ring-1"
+              placeholder="Search specs…"
+              className="bg-surface-inset text-2xs h-8 pl-8 transition-all"
               value={search}
               onChange={(e) => setSearch(e.target.value || null)}
             />
@@ -191,14 +190,15 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
                 variant="ghost"
                 size="icon"
                 onClick={() => setSearch(null)}
-                className="text-text-muted hover:text-text-primary absolute top-1/2 right-1 h-6 w-6 -translate-y-1/2"
+                aria-label="Clear search"
+                className="text-fg-muted hover:text-fg absolute top-1/2 right-1 h-6 w-6 -translate-y-1/2"
               >
                 <X className="h-3 w-3" />
               </Button>
             )}
           </div>
 
-          <div className="bg-border-default/50 mx-1 h-4 w-px" />
+          <div className="bg-line/50 mx-1 h-4 w-px" />
 
           {/* Status Filter Tabs */}
           <div className="flex items-center gap-1.5">
@@ -212,10 +212,10 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
                   size="sm"
                   onClick={() => setActiveTab(value)}
                   className={cn(
-                    'h-7 px-3 font-mono text-[10px] tracking-[0.08em] uppercase transition-all',
+                    'text-2xs h-7 px-3 transition-all',
                     isActive
-                      ? 'bg-accent-blue text-white shadow-sm'
-                      : 'text-text-muted hover:bg-bg-elevated hover:text-text-primary'
+                      ? 'bg-surface-inset text-white'
+                      : 'text-fg-muted hover:bg-surface-inset hover:text-fg'
                   )}
                 >
                   {label}
@@ -226,29 +226,29 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
           </div>
         </div>
 
-        <div className="surface-dual-border scanline-overlay flex-1">
+        <div className="border-line flex-1 border">
           {effectiveProjectId === null ? (
             <div className="flex flex-col items-center gap-3 py-16">
-              <DaemonMascot size={48} expression="idle" />
-              <p className="text-text-secondary font-mono text-sm">No project selected.</p>
-              <p className="text-text-muted font-mono text-xs italic">
+              <StatusIcon size={24} status="idle" />
+              <p className="text-fg-secondary text-sm">No project selected.</p>
+              <p className="text-fg-muted font-mono text-xs italic">
                 &quot;Select a project from the sidebar to view specifications.&quot;
               </p>
             </div>
           ) : isLoading ? (
-            <div className="text-muted-foreground py-8 text-center font-mono text-xs">Loading…</div>
+            <div className="text-fg-muted py-8 text-center font-mono text-xs">Loading…</div>
           ) : filteredSpecs.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-16">
-              <DaemonMascot size={48} expression="idle" />
-              <p className="text-text-secondary font-mono text-sm">No specs yet.</p>
-              <p className="text-text-muted font-mono text-xs italic">
+              <StatusIcon size={24} status="idle" />
+              <p className="text-fg-secondary text-sm">No specs yet.</p>
+              <p className="text-fg-muted font-mono text-xs italic">
                 &quot;Create your first specification to begin building.&quot;
               </p>
             </div>
           ) : (
             <Table className="caption-bottom text-sm">
               <TableHeader>
-                <TableRow className="border-border-default text-text-muted font-mono text-[11px] tracking-[0.08em] uppercase hover:bg-transparent">
+                <TableRow className="border-line text-fg-muted text-2xs hover:bg-transparent">
                   <TableHead className="h-auto w-36 px-6 py-2.5 font-medium">ID</TableHead>
                   <TableHead className="h-auto px-3 py-2.5 font-medium">Name</TableHead>
                   <TableHead className="h-auto w-36 px-3 py-2.5 font-medium">Status</TableHead>
@@ -261,24 +261,20 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
                 {filteredSpecs.map((spec) => (
                   <TableRow
                     key={spec.id}
-                    className="border-border-default/50 hover:bg-bg-elevated/50 cursor-pointer"
+                    className="border-line-subtle hover:bg-surface-inset cursor-pointer"
                     onClick={() => router.push(`/specs/${spec.id}`)}
                   >
                     <TableCell className="px-6 py-3">
-                      <PixelBadge variant="amber">
-                        SPEC-{String(spec.id).padStart(3, '0')}
-                      </PixelBadge>
+                      <Badge variant="warning">SPEC-{String(spec.id).padStart(3, '0')}</Badge>
                     </TableCell>
-                    <TableCell className="text-text-primary px-3 py-3 text-sm">
-                      {spec.name}
-                    </TableCell>
+                    <TableCell className="text-fg px-3 py-3 text-sm">{spec.name}</TableCell>
                     <TableCell className="px-3 py-3">
                       <StatusBadge status={spec.status} />
                     </TableCell>
-                    <TableCell className="text-muted-foreground px-3 py-3 font-mono text-[10px]">
+                    <TableCell className="text-fg-muted text-2xs px-3 py-3 font-mono">
                       {spec.currentVersionNumber ? `v${spec.currentVersionNumber}` : '—'}
                     </TableCell>
-                    <TableCell className="text-muted-foreground px-3 py-3 font-mono text-[10px]">
+                    <TableCell className="text-fg-muted text-2xs px-3 py-3 font-mono">
                       {spec.taskCount != null ? `${spec.taskCount}` : '—'}
                     </TableCell>
                     <TableCell
@@ -290,10 +286,14 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="text-muted-foreground h-6 w-6"
+                            className="text-fg-muted h-6 w-6"
                             asChild
                           >
-                            <Link href={`/specs/${spec.id}`} onClick={(e) => e.stopPropagation()}>
+                            <Link
+                              href={`/specs/${spec.id}`}
+                              onClick={(e) => e.stopPropagation()}
+                              aria-label={`Open spec ${spec.name}`}
+                            >
                               <MoreHorizontal className="h-3.5 w-3.5" />
                             </Link>
                           </Button>

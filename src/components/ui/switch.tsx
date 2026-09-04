@@ -10,17 +10,27 @@ const Switch = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>
 >(({ className, ...props }, ref) => (
   <SwitchPrimitives.Root
+    data-slot="switch"
     className={cn(
-      'peer focus-visible:ring-ring focus-visible:ring-offset-background data-[state=checked]:bg-primary data-[state=unchecked]:bg-input inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-sm transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+      'peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2',
+      'transition-colors duration-[120ms]',
+      // On = accent, off = a plain inset track. The token migration had
+      // briefly collapsed both states onto the same fill, so the switch read
+      // as permanently off.
+      'data-[state=checked]:bg-accent data-[state=unchecked]:bg-surface-inset',
+      // The off track sits at ~1.05:1 against the page, so on its own it is not
+      // a visible control. The border carries the boundary; on, the accent fill
+      // already does, so the border gets out of the way.
+      'data-[state=unchecked]:border-line-control data-[state=checked]:border-transparent',
+      'disabled:cursor-not-allowed disabled:opacity-50',
       className
     )}
     {...props}
     ref={ref}
   >
     <SwitchPrimitives.Thumb
-      className={cn(
-        'bg-background pointer-events-none block h-4 w-4 rounded-full shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0'
-      )}
+      data-slot="switch-thumb"
+      className="bg-surface-raised shadow-popover pointer-events-none block h-4 w-4 rounded-full ring-0 transition-transform duration-[120ms] data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0"
     />
   </SwitchPrimitives.Root>
 ));

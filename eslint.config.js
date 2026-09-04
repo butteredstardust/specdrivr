@@ -94,7 +94,7 @@ const eslintConfig = [
         {
           selector: 'JSXOpeningElement[name.name=/^(button|input|select)$/]',
           message:
-            'Use design system components (PixelButton, etc.) from @pxlkit/ui-kit instead of raw HTML primitives.',
+            'Prefer the design system components in @/components/ui (Button, Input, Select) over raw HTML primitives.',
         },
       ],
     },

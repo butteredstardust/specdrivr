@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { clientLogger } from '@/lib/logger-client';
+import { changePasswordFormSchema, type ChangePasswordFormValues } from '@/lib/schemas';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -22,11 +24,11 @@ function getStrength(password: string): 0 | 1 | 2 | 3 | 4 {
 }
 
 const STRENGTH_COLORS: Record<number, string> = {
-  0: 'bg-bg-elevated',
-  1: 'bg-status-red',
-  2: 'bg-phosphor-amber',
-  3: 'bg-phosphor-amber',
-  4: 'bg-status-emerald',
+  0: 'bg-surface-inset',
+  1: 'bg-danger',
+  2: 'bg-warning',
+  3: 'bg-warning',
+  4: 'bg-success',
 };
 
 function StrengthIndicator({ password }: { password: string }) {
@@ -38,7 +40,7 @@ function StrengthIndicator({ password }: { password: string }) {
         <div
           key={seg}
           className={`h-1 flex-1 rounded-full transition-colors ${
-            password.length > 0 && seg <= level ? STRENGTH_COLORS[level] : 'bg-bg-elevated'
+            password.length > 0 && seg <= level ? STRENGTH_COLORS[level] : 'bg-surface-inset'
           }`}
         />
       ))}
@@ -47,39 +49,32 @@ function StrengthIndicator({ password }: { password: string }) {
 }
 
 export function ChangePasswordSection() {
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
-  const [currentPasswordError, setCurrentPasswordError] = useState('');
-  const [confirmError, setConfirmError] = useState('');
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setError,
+    watch,
+    formState: { isSubmitting, errors },
+  } = useForm<ChangePasswordFormValues>({
+    resolver: zodResolver(changePasswordFormSchema),
+    defaultValues: { currentPassword: '', newPassword: '', confirmPassword: '' },
+  });
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  // The strength meter has to react as the user types, so this field is read
+  // rather than left uncontrolled like the other two.
+  const newPassword = watch('newPassword');
 
-    // Reset inline errors
-    setCurrentPasswordError('');
-    setConfirmError('');
-
-    // Client-side validation
-    if (newPassword.length < 12) {
-      setConfirmError('New password must be at least 12 characters.');
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      setConfirmError('Passwords do not match.');
-      return;
-    }
-
-    setIsSaving(true);
-
+  const onSubmit = async (values: ChangePasswordFormValues) => {
     try {
       const res = await fetch('/api/v1/users/me/password', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ currentPassword, newPassword }),
+        body: JSON.stringify({
+          currentPassword: values.currentPassword,
+          newPassword: values.newPassword,
+        }),
       });
 
       const data = await res.json().catch(() => ({}));
@@ -87,82 +82,79 @@ export function ChangePasswordSection() {
       if (!res.ok) {
         const code = data?.error?.code ?? '';
         if (code === 'INVALID_PASSWORD') {
-          setCurrentPasswordError('Current password is incorrect.');
-          setIsSaving(false);
+          // Only the server can tell us this one, so it is surfaced as a field
+          // error rather than a toast — it is the user's next action.
+          setError('currentPassword', { message: 'Current password is incorrect.' });
           return;
         }
         throw new Error(data?.error?.message ?? `HTTP ${res.status}`);
       }
 
       toast.success('Password updated.');
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
+      reset();
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
       clientLogger.error('Failed to update password', error);
       toast.error('Failed to update password.');
-    } finally {
-      setIsSaving(false);
     }
   };
 
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="text-text-muted font-mono text-xs tracking-widest uppercase">
-        CHANGE PASSWORD
-      </h2>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <h2 className="text-fg-muted text-2xs font-medium">Change password</h2>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <label className="text-text-secondary font-mono text-xs" htmlFor="current-password">
-            CURRENT PASSWORD
+          <label className="text-fg-secondary text-xs" htmlFor="current-password">
+            Current password
           </label>
           <Input
             id="current-password"
             type="password"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
             autoComplete="current-password"
-            required
+            aria-invalid={Boolean(errors.currentPassword)}
+            {...register('currentPassword')}
           />
-          {currentPasswordError && (
-            <p className="text-status-red font-mono text-xs">{currentPasswordError}</p>
+          {errors.currentPassword && (
+            <p className="text-danger text-xs">{errors.currentPassword.message}</p>
           )}
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-text-secondary font-mono text-xs" htmlFor="new-password">
-            NEW PASSWORD
+          <label className="text-fg-secondary text-xs" htmlFor="new-password">
+            New password
           </label>
           <Input
             id="new-password"
             type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
             autoComplete="new-password"
-            required
+            aria-invalid={Boolean(errors.newPassword)}
+            {...register('newPassword')}
           />
           <StrengthIndicator password={newPassword} />
+          {errors.newPassword && (
+            <p className="text-danger text-xs">{errors.newPassword.message}</p>
+          )}
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-text-secondary font-mono text-xs" htmlFor="confirm-password">
-            CONFIRM NEW PASSWORD
+          <label className="text-fg-secondary text-xs" htmlFor="confirm-password">
+            Confirm new password
           </label>
           <Input
             id="confirm-password"
             type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
             autoComplete="new-password"
-            required
+            aria-invalid={Boolean(errors.confirmPassword)}
+            {...register('confirmPassword')}
           />
-          {confirmError && <p className="text-status-red font-mono text-xs">{confirmError}</p>}
+          {errors.confirmPassword && (
+            <p className="text-danger text-xs">{errors.confirmPassword.message}</p>
+          )}
         </div>
 
         <div>
-          <Button type="submit" disabled={isSaving} size="sm">
-            {isSaving ? 'Updating…' : 'Update Password'}
+          <Button type="submit" disabled={isSubmitting} size="sm">
+            {isSubmitting ? 'Updating…' : 'Update Password'}
           </Button>
         </div>
       </form>

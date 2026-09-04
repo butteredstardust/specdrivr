@@ -83,7 +83,11 @@ get_git_object_size() {
 get_pushed_files() {
     local filter="${1:-}"
     local files=""
-    for range in $PUSH_RANGES; do
+    # `prepush.sh` exports PUSH_RANGES before invoking each check, but a check
+    # run standalone (debugging a single rule) has no such export and, under
+    # `set -u`, died on an unbound variable instead of inspecting anything.
+    local ranges="${PUSH_RANGES:-HEAD~1..HEAD}"
+    for range in $ranges; do
         if [ -n "$filter" ]; then
             files="${files}\n$(git diff --name-only --diff-filter=d "$range" | grep -E "$filter" || true)"
         else

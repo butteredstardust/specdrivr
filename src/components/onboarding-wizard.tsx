@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { ASCIIProgress } from '@/components/ui/progress';
+import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { BrandMark } from '@/components/ui/brand-mark';
@@ -104,13 +104,14 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
       <DialogContent
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
-        className="border-border-default bg-bg-surface sm:max-w-md"
+        className="border-line bg-surface-raised sm:max-w-md"
       >
-        <div className="flex flex-col items-center gap-1">
-          <div className="text-text-muted font-mono text-[10px] tracking-[0.08em] uppercase">
-            Setup Progress
+        <div className="mb-4 flex flex-col gap-2">
+          <div className="text-fg-muted flex items-center justify-between text-xs">
+            <span>Setup</span>
+            <span className="tabular-nums">Step {step} of 4</span>
           </div>
-          <ASCIIProgress value={step - 1} max={3} length={20} className="text-accent-blue mb-4" />
+          <Progress value={((step - 1) / 3) * 100} aria-label="Setup progress" />
         </div>
 
         {step === 1 && (
@@ -119,16 +120,16 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
               <div className="mb-3 flex justify-center">
                 <BrandMark size={64} />
               </div>
-              <DialogTitle className="text-text-primary font-mono text-lg tracking-tight uppercase">
+              <DialogTitle className="text-fg text-lg tracking-tight">
                 Welcome to Specdrivr
               </DialogTitle>
-              <DialogDescription className="text-text-secondary">
+              <DialogDescription className="text-fg-secondary">
                 Let&apos;s get you set up in a few quick steps.
               </DialogDescription>
             </DialogHeader>
             <div className="mt-4 flex justify-center">
-              <Button variant="blue" onClick={() => setStep(2)} className="w-full">
-                Get Started
+              <Button variant="default" onClick={() => setStep(2)} className="w-full">
+                Get started
               </Button>
             </div>
           </>
@@ -137,10 +138,10 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
         {step === 2 && (
           <>
             <DialogHeader>
-              <DialogTitle className="text-text-primary font-mono text-lg tracking-tight uppercase">
-                Identify Yourself
+              <DialogTitle className="text-fg text-lg tracking-tight">
+                Identify yourself
               </DialogTitle>
-              <DialogDescription className="text-text-secondary">
+              <DialogDescription className="text-fg-secondary">
                 This is how you&apos;ll appear to others on the platform.
               </DialogDescription>
             </DialogHeader>
@@ -150,20 +151,16 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
                 onChange={(e) => setDisplayName(e.target.value)}
                 placeholder="Display name"
                 disabled={isSubmitting}
-                className="bg-bg-base border-border-default font-mono"
+                className="bg-surface-base border-line font-mono"
               />
               {!displayName.trim() && !nameError && (
-                <p className="text-text-muted font-mono text-[10px] uppercase">
-                  Name cannot be empty.
-                </p>
+                <p className="text-fg-muted text-2xs">Name cannot be empty.</p>
               )}
-              {nameError && (
-                <p className="text-status-red font-mono text-[10px] uppercase">{nameError}</p>
-              )}
+              {nameError && <p className="text-danger text-2xs">{nameError}</p>}
             </div>
             <div className="mt-6 flex justify-end">
               <Button
-                variant="blue"
+                variant="default"
                 onClick={handleSetName}
                 disabled={isSubmitting || !displayName.trim()}
                 className="w-full"
@@ -177,10 +174,10 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
         {step === 3 && (
           <>
             <DialogHeader>
-              <DialogTitle className="text-text-primary font-mono text-lg tracking-tight uppercase">
-                Initialize Project
+              <DialogTitle className="text-fg text-lg tracking-tight">
+                Initialize project
               </DialogTitle>
-              <DialogDescription className="text-text-secondary">
+              <DialogDescription className="text-fg-secondary">
                 Give your first project a name to get started.
               </DialogDescription>
             </DialogHeader>
@@ -190,15 +187,13 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
                 onChange={(e) => setProjectName(e.target.value)}
                 placeholder="Project name"
                 disabled={isSubmitting}
-                className="bg-bg-base border-border-default font-mono"
+                className="bg-surface-base border-line font-mono"
               />
-              {projectError && (
-                <p className="text-status-red font-mono text-[10px] uppercase">{projectError}</p>
-              )}
+              {projectError && <p className="text-danger text-2xs">{projectError}</p>}
             </div>
             <div className="mt-6 flex justify-end">
               <Button
-                variant="blue"
+                variant="default"
                 onClick={handleCreateProject}
                 disabled={isSubmitting || !projectName.trim()}
                 className="w-full"

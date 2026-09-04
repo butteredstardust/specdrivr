@@ -14,7 +14,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ChevronRight, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { PixelBadge } from '@/components/ui/pixel-badge';
+import { Badge } from '@/components/ui/badge';
+import { EntityId } from '@/components/ui/entity-id';
+import { StatusIcon } from '@/components/ui/status-icon';
+import { TASK_STATUS } from '@/lib/ui-status';
 import { cn } from '@/lib/utils';
 
 type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'done' | 'failed' | 'skipped';
@@ -40,27 +43,6 @@ interface TaskRowProps {
   className?: string;
 }
 
-const STATUS_CHAR: Record<TaskStatus, string> = {
-  todo: '○',
-  in_progress: '▶',
-  blocked: '⚠',
-  done: '✓',
-  failed: '✕',
-  skipped: '-',
-};
-
-const STATUS_VARIANT: Record<
-  TaskStatus,
-  'default' | 'blue' | 'amber' | 'emerald' | 'red' | 'muted'
-> = {
-  todo: 'muted',
-  in_progress: 'blue',
-  blocked: 'amber',
-  done: 'emerald',
-  failed: 'red',
-  skipped: 'muted',
-};
-
 const ROLE_RANK: Record<UserRole, number> = { viewer: 0, member: 1, admin: 2, owner: 3 };
 
 function hasRole(userRole: UserRole, required: UserRole): boolean {
@@ -84,9 +66,9 @@ export function TaskRow({
 
   const rowBorderClass =
     task.status === 'in_progress'
-      ? 'border-l-2 border-accent-blue bg-accent-blue/5'
+      ? 'border-accent bg-accent-subtle border-l-2'
       : task.status === 'blocked'
-        ? 'border-l-2 border-phosphor-amber bg-phosphor-amber/5'
+        ? 'border-warning bg-warning-bg border-l-2'
         : 'border-l-2 border-transparent';
 
   return (
@@ -94,30 +76,39 @@ export function TaskRow({
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <div className={cn('rounded-sm', rowBorderClass, className)}>
           <CollapsibleTrigger asChild>
-            <div className="hover:bg-bg-elevated flex h-9 cursor-pointer items-center gap-2 px-3 select-none">
-              <PixelBadge
-                variant={STATUS_VARIANT[task.status]}
+            {/* A div, not a button: the row contains its own buttons, and a
+                button may not nest one. Radix's Trigger only wires up click on
+                a non-button child, so the keyboard behaviour the shortcuts
+                dialog advertises is added by hand. */}
+            <div
+              role="button"
+              tabIndex={0}
+              aria-expanded={isOpen}
+              onKeyDown={(e) => {
+                if (e.target !== e.currentTarget) return;
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setIsOpen((open) => !open);
+                }
+              }}
+              className="hover:bg-surface-inset flex h-9 cursor-pointer items-center gap-2 px-3 select-none"
+            >
+              <Badge
+                variant={TASK_STATUS[task.status].variant}
                 dot={task.status === 'in_progress'}
                 className="w-20 shrink-0 justify-center"
               >
-                <span className={cn(task.status === 'in_progress' && 'animate-blink')}>
-                  {STATUS_CHAR[task.status]}
-                </span>
-                {task.status.replace('_', ' ')}
-              </PixelBadge>
-              <span className="bg-phosphor-amber/10 text-phosphor-amber shrink-0 rounded-sm px-1.5 py-0.5 font-mono text-xs">
-                {externalId ?? `T-${String(task.id).padStart(3, '0')}`}
-              </span>
-              {devMode && (
-                <span className="text-text-muted font-mono text-[10px]">[id:{task.id}]</span>
-              )}
-              <span className="text-text-primary flex-1 truncate text-sm">{task.title}</span>
+                {TASK_STATUS[task.status].label}
+              </Badge>
+              <EntityId chip>{externalId ?? `T-${String(task.id).padStart(3, '0')}`}</EntityId>
+              {devMode && <span className="text-fg-muted text-2xs font-mono">[id:{task.id}]</span>}
+              <span className="text-fg flex-1 truncate text-sm">{task.title}</span>
               {dependsOn && dependsOn.length > 0 && (
                 <div className="flex shrink-0 gap-1">
                   {dependsOn.slice(0, 3).map((dep) => (
                     <span
                       key={dep}
-                      className="text-text-muted bg-bg-elevated rounded px-1 font-mono text-[10px]"
+                      className="text-fg-muted bg-surface-inset text-2xs rounded px-1 font-mono"
                     >
                       +{dep}
                     </span>
@@ -125,12 +116,12 @@ export function TaskRow({
                 </div>
               )}
               {task.totalCostUsd && task.totalCostUsd > 0 && (
-                <span className="text-text-muted shrink-0 font-mono text-[10px]">
+                <span className="text-fg-muted text-2xs shrink-0 font-mono">
                   ${Number(task.totalCostUsd).toFixed(4)}
                 </span>
               )}
               {task.status === 'blocked' && task.errorMessage && (
-                <span className="text-phosphor-amber max-w-48 truncate text-xs">
+                <span className="text-warning max-w-48 truncate text-xs">
                   {task.errorMessage.slice(0, 60)}
                 </span>
               )}
@@ -183,7 +174,7 @@ export function TaskRow({
                       <TooltipTrigger asChild>
                         <span>
                           <DropdownMenuSubTrigger disabled={!canOverride}>
-                            Override Status
+                            Override status
                           </DropdownMenuSubTrigger>
                         </span>
                       </TooltipTrigger>
@@ -204,8 +195,8 @@ export function TaskRow({
                           ] as TaskStatus[]
                         ).map((s) => (
                           <DropdownMenuItem key={s} onClick={() => onOverride?.(task.id, s)}>
-                            {STATUS_CHAR[s]}
-                            {s.replace('_', ' ')}
+                            <StatusIcon status={TASK_STATUS[s].status} size={14} label={null} />
+                            {TASK_STATUS[s].label}
                           </DropdownMenuItem>
                         ))}
                       </DropdownMenuSubContent>
@@ -217,10 +208,10 @@ export function TaskRow({
           </CollapsibleTrigger>
 
           <CollapsibleContent>
-            <div className="text-text-secondary space-y-1 px-10 pb-3 text-sm">
+            <div className="text-fg-secondary space-y-1 px-10 pb-3 text-sm">
               {task.description && <p>{task.description}</p>}
               {task.errorMessage && (
-                <p className="text-status-red font-mono text-xs">{task.errorMessage}</p>
+                <p className="text-danger font-mono text-xs">{task.errorMessage}</p>
               )}
             </div>
           </CollapsibleContent>

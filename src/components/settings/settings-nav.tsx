@@ -34,15 +34,15 @@ const NAV_GROUPS: NavGroup[] = [
       { href: '/settings/agent', label: 'Agent' },
       { href: '/settings/integrations', label: 'Integrations' },
       { href: '/settings/usage', label: 'Usage' },
-      { href: '/settings/audit', label: 'Audit Log', hideForRoles: ['member', 'viewer'] },
+      { href: '/settings/audit', label: 'Audit log', hideForRoles: ['member', 'viewer'] },
     ],
     afterSlot: 'danger-zone',
   },
   {
     label: 'Developer',
     items: [
-      { href: '/settings/webhooks', label: 'Webhook Log' },
-      { href: '/settings/security', label: 'API Tokens' },
+      { href: '/settings/webhooks', label: 'Webhook log' },
+      { href: '/settings/security#api-tokens', label: 'API tokens' },
     ],
   },
 ];
@@ -61,14 +61,15 @@ export function SettingsNav({ userRole }: SettingsNavProps) {
     <nav className="flex flex-col gap-5">
       {NAV_GROUPS.map((group) => (
         <div key={group.label}>
-          <p className="text-text-secondary mb-1 px-2 font-mono text-xs tracking-[0.15em] uppercase">
-            {group.label}
-          </p>
+          <p className="text-fg-secondary mb-1 px-2 text-xs">{group.label}</p>
           <div className="flex flex-col gap-0.5">
             {group.items
               .filter((item) => !item.hideForRoles?.includes(userRole))
               .map((item) => {
-                const active = pathname === item.href || pathname.startsWith(item.href + '/');
+                const [itemPath] = item.href.split('#');
+                const active =
+                  !item.href.includes('#') &&
+                  (pathname === itemPath || pathname.startsWith(itemPath + '/'));
                 return (
                   <Link
                     key={item.href}
@@ -76,8 +77,8 @@ export function SettingsNav({ userRole }: SettingsNavProps) {
                     className={cn(
                       'rounded px-2 py-1.5 text-sm transition-colors',
                       active
-                        ? 'bg-accent-blue/10 text-accent-blue font-medium'
-                        : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                        ? 'bg-accent-subtle text-accent font-medium'
+                        : 'text-fg-muted hover:bg-surface-inset hover:text-fg'
                     )}
                   >
                     {item.label}
@@ -90,13 +91,13 @@ export function SettingsNav({ userRole }: SettingsNavProps) {
             <Link
               href="/settings/danger"
               className={cn(
-                'mt-3 block rounded px-2 py-1.5 font-mono text-xs tracking-wider uppercase transition-colors',
+                'mt-3 block rounded px-2 py-1.5 text-xs transition-colors',
                 isDangerActive
-                  ? 'bg-status-red/10 text-status-red font-medium'
-                  : 'text-status-red/70 hover:text-status-red'
+                  ? 'bg-danger-bg text-danger font-medium'
+                  : 'text-danger/70 hover:text-danger'
               )}
             >
-              Danger Zone
+              Danger zone
             </Link>
           )}
         </div>

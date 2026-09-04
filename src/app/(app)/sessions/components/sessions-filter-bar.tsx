@@ -78,13 +78,13 @@ export function SessionsFilterBar({ specs }: SessionsFilterBarProps) {
   };
 
   return (
-    <div className="border-border-default flex flex-wrap items-center gap-4 border-b px-6 py-3">
+    <div className="border-line flex flex-wrap items-center gap-4 border-b px-6 py-3">
       {/* Search */}
       <div className="relative w-64">
-        <Search className="text-text-muted absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
+        <Search className="text-fg-muted absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
         <Input
-          placeholder="SEARCH SESSIONS..."
-          className="bg-bg-elevated focus:ring-accent-blue/30 h-8 pl-8 font-mono text-[10px] tracking-widest uppercase transition-all focus:ring-1"
+          placeholder="Search sessions…"
+          className="bg-surface-inset text-2xs h-8 pl-8 transition-all"
           value={search}
           onChange={(e) => setSearch(e.target.value || null)}
         />
@@ -93,14 +93,15 @@ export function SessionsFilterBar({ specs }: SessionsFilterBarProps) {
             variant="ghost"
             size="icon"
             onClick={() => setSearch(null)}
-            className="text-text-muted hover:text-text-primary absolute top-1/2 right-1 h-6 w-6 -translate-y-1/2"
+            aria-label="Clear search"
+            className="text-fg-muted hover:text-fg absolute top-1/2 right-1 h-6 w-6 -translate-y-1/2"
           >
             <X className="h-3 w-3" />
           </Button>
         )}
       </div>
 
-      <div className="bg-border-default/50 mx-1 h-4 w-px" />
+      <div className="bg-line/50 mx-1 h-4 w-px" />
 
       {/* Status Filter */}
       <div className="flex items-center gap-1.5">
@@ -113,10 +114,10 @@ export function SessionsFilterBar({ specs }: SessionsFilterBarProps) {
               size="sm"
               onClick={() => setStatus(opt.value === 'all' ? null : opt.value)}
               className={cn(
-                'h-7 px-3 font-mono text-[10px] tracking-widest transition-all',
+                'text-2xs h-7 px-3 font-mono transition-all',
                 isActive
-                  ? 'bg-accent-blue text-white shadow-sm'
-                  : 'text-text-muted hover:bg-bg-elevated hover:text-text-primary'
+                  ? 'bg-surface-inset text-white'
+                  : 'text-fg-muted hover:bg-surface-inset hover:text-fg'
               )}
             >
               {opt.label}
@@ -128,17 +129,17 @@ export function SessionsFilterBar({ specs }: SessionsFilterBarProps) {
       <div className="ml-auto flex items-center gap-3">
         {/* Spec Select */}
         <div className="flex items-center gap-2">
-          <Hash className="text-text-muted h-3 w-3" />
+          <Hash className="text-fg-muted h-3 w-3" />
           <Select value={specId} onValueChange={(val) => setSpecId(val === 'all' ? null : val)}>
-            <SelectTrigger className="bg-bg-elevated h-8 w-44 font-mono text-[10px] tracking-widest uppercase">
-              <SelectValue placeholder="ALL SPECS" />
+            <SelectTrigger className="bg-surface-inset text-2xs h-8 w-44">
+              <SelectValue placeholder="All specs" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all" className="font-mono text-[10px]">
+              <SelectItem value="all" className="text-2xs">
                 ALL SPECS
               </SelectItem>
               {specs.map((spec) => (
-                <SelectItem key={spec.id} value={String(spec.id)} className="font-mono text-[10px]">
+                <SelectItem key={spec.id} value={String(spec.id)} className="text-2xs">
                   {spec.name.toUpperCase()}
                 </SelectItem>
               ))}
@@ -148,19 +149,19 @@ export function SessionsFilterBar({ specs }: SessionsFilterBarProps) {
 
         {/* Date Range */}
         <div className="flex items-center gap-2">
-          <CalendarIcon className="text-text-muted h-3 w-3" />
+          <CalendarIcon className="text-fg-muted h-3 w-3" />
           <div className="flex items-center">
             <DatePicker
               date={parseDateString(from)}
               setDate={(d) => setFrom(formatDateString(d) || null)}
-              placeholder="FROM"
-              className="h-8 w-28 rounded-r-none border-r-0 font-mono text-[9px] tracking-widest uppercase"
+              placeholder="From"
+              className="text-2xs h-8 w-28 rounded-r-none border-r-0"
             />
             <DatePicker
               date={parseDateString(to)}
               setDate={(d) => setTo(formatDateString(d) || null)}
-              placeholder="TO"
-              className="h-8 w-28 rounded-l-none font-mono text-[9px] tracking-widest uppercase"
+              placeholder="To"
+              className="text-2xs h-8 w-28 rounded-l-none"
             />
           </div>
         </div>
@@ -170,7 +171,7 @@ export function SessionsFilterBar({ specs }: SessionsFilterBarProps) {
             variant="ghost"
             size="sm"
             onClick={clearFilters}
-            className="text-text-muted hover:text-status-red h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase transition-colors"
+            className="text-fg-muted hover:text-danger text-2xs h-8 gap-1.5 transition-colors"
           >
             <X className="h-3.5 w-3.5" />
             CLEAR

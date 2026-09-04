@@ -15,11 +15,11 @@ import {
   PanelLeftOpen,
   ChevronDown,
 } from 'lucide-react';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { StatusIcon } from '@/components/ui/status-icon';
 import { BrandLockup, BrandMark } from '@/components/ui/brand-mark';
-import { useSystemHealth } from '@/components/layout/systems-bar';
+import { useSystemHealth } from '@/hooks/use-system-health';
 import { useShell } from '@/components/shell/shell-context';
-import { PixelBadge } from '@/components/ui/pixel-badge';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
@@ -60,13 +60,13 @@ function healthToExpr(state: HealthState): DaemonExpr {
 function healthDot(state: HealthState) {
   switch (state) {
     case 'ok':
-      return 'bg-status-emerald';
+      return 'bg-success';
     case 'warn':
-      return 'bg-phosphor-amber';
+      return 'bg-warning';
     case 'error':
-      return 'bg-status-red';
+      return 'bg-danger';
     default:
-      return 'bg-text-muted';
+      return 'bg-fg-muted';
   }
 }
 
@@ -83,16 +83,16 @@ function SystemIcon({
     <Tooltip>
       <TooltipTrigger asChild>
         <div className="group flex cursor-default flex-col items-center gap-1">
-          <div className="relative transition-transform duration-200 group-hover:scale-110">
-            <DaemonMascot size={32} expression={healthToExpr(state)} />
+          <div className="relative">
+            <StatusIcon size={20} status={healthToExpr(state)} />
             <span
               className={cn(
-                'border-bg-surface absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full border shadow-sm',
+                'border-surface-raised absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full border',
                 healthDot(state)
               )}
             />
           </div>
-          <span className="text-text-muted group-hover:text-text-secondary mt-0.5 font-mono text-[10px] tracking-[0.08em] uppercase transition-colors">
+          <span className="text-fg-muted group-hover:text-fg-secondary text-2xs mt-0.5 transition-colors">
             {label}
           </span>
         </div>
@@ -112,17 +112,12 @@ function SidebarBottom({ collapsed }: { collapsed: boolean }) {
 
   const statusText =
     health.overall === 'ok'
-      ? 'SYSTEM OK'
+      ? 'All systems operational'
       : health.overall === 'degraded'
-        ? 'DEGRADED'
-        : 'CONNECTING';
+        ? 'Degraded'
+        : 'Connecting…';
 
-  const statusClass =
-    health.overall === 'ok'
-      ? 'text-text-muted'
-      : health.overall === 'degraded'
-        ? 'text-status-red'
-        : 'text-text-muted';
+  const statusClass = health.overall === 'degraded' ? 'text-danger' : 'text-fg-muted';
 
   const gitTooltip =
     health.git === 'ok'
@@ -153,23 +148,21 @@ function SidebarBottom({ collapsed }: { collapsed: boolean }) {
 
   if (collapsed) {
     return (
-      <div className="border-border-muted flex flex-col items-center gap-3 border-t py-4">
-        <DaemonMascot size={20} expression={overallExpr} />
+      <div className="border-line-subtle flex flex-col items-center gap-3 border-t py-4">
+        <StatusIcon size={20} status={overallExpr} />
       </div>
     );
   }
 
   return (
-    <div className="border-border-muted border-t">
+    <div className="border-line-subtle border-t">
       {/* Systems icons */}
       <div className="px-4 pt-4 pb-2">
-        <span className="text-text-muted mb-3 block px-1 font-mono text-[11px] tracking-[0.1em] uppercase opacity-70">
-          Systems
-        </span>
+        <span className="text-fg-muted text-2xs mb-3 block px-1 font-medium">Systems</span>
         <div className="flex items-end justify-between px-1">
-          <SystemIcon label="GIT" state={health.git} tooltip={gitTooltip} />
+          <SystemIcon label="Git" state={health.git} tooltip={gitTooltip} />
           <SystemIcon label="API" state={health.api} tooltip={apiTooltip} />
-          <SystemIcon label="AGT" state={health.agt} tooltip={agtTooltip} />
+          <SystemIcon label="Agt" state={health.agt} tooltip={agtTooltip} />
           <SystemIcon label="PG" state={health.pg} tooltip={pgTooltip} />
         </div>
       </div>
@@ -177,13 +170,11 @@ function SidebarBottom({ collapsed }: { collapsed: boolean }) {
       {/* Daemon status footer */}
       <div className="px-4 pt-2 pb-4">
         <div className="flex items-center gap-2">
-          <DaemonMascot size={20} expression={overallExpr} />
-          <span className={cn('font-mono text-[11px] tracking-[0.08em] uppercase', statusClass)}>
-            DAEMON · {statusText}
-          </span>
+          <StatusIcon size={20} status={overallExpr} />
+          <span className={cn('text-2xs', statusClass)}>{statusText}</span>
         </div>
         <div className="mt-1.5 px-0.5">
-          <span className="text-text-muted/50 font-mono text-[10px] tracking-wide">v0.1.0</span>
+          <span className="text-fg-muted text-2xs">v0.1.0</span>
         </div>
       </div>
     </div>
@@ -204,9 +195,17 @@ export function Sidebar({ projects }: SidebarProps) {
   });
   const unreadCount = notifData?.unreadCount ?? 0;
 
+  // Breakpoint strategy: the sidebar is the only piece of chrome with a fixed
+  // width, so it is what has to give on narrow viewports. Below `lg` it starts
+  // collapsed to the icon rail unless the user has explicitly expanded it.
+  // Everything else in the app is fluid.
   useEffect(() => {
     const stored = localStorage.getItem(COLLAPSED_KEY);
-    if (stored === 'true') setCollapsed(true);
+    if (stored !== null) {
+      setCollapsed(stored === 'true');
+    } else {
+      setCollapsed(window.matchMedia('(max-width: 1023px)').matches);
+    }
     setMounted(true);
   }, []);
 
@@ -222,13 +221,14 @@ export function Sidebar({ projects }: SidebarProps) {
   const isCollapsed = mounted && collapsed;
 
   const activeProject = projects.find((p) => p.id === activeProjectId) ?? projects[0] ?? null;
-  const projectPath = activeProject ? `~/${activeProject.slug}` : '~/select-project';
+  const projectLabel = activeProject?.name ?? 'Select a project';
 
   return (
     <TooltipProvider delayDuration={300}>
       <aside
         className={cn(
-          'border-border-default bg-bg-surface flex h-full flex-shrink-0 flex-col border-r transition-all duration-300 ease-in-out',
+          'border-line bg-surface-raised flex h-full flex-shrink-0 flex-col border-r',
+          'transition-[width] duration-200 ease-out motion-reduce:transition-none',
           isCollapsed ? 'w-16' : 'w-64'
         )}
       >
@@ -243,18 +243,15 @@ export function Sidebar({ projects }: SidebarProps) {
               <div className="flex flex-1 flex-col gap-1">
                 <BrandLockup size={32} />
                 {devMode && (
-                  <PixelBadge
-                    variant="amber"
-                    className="mt-0.5 w-fit origin-left scale-90 font-mono text-[10px]"
-                  >
-                    DEV MODE
-                  </PixelBadge>
+                  <Badge variant="warning" className="mt-0.5 w-fit">
+                    Dev mode
+                  </Badge>
                 )}
               </div>
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-text-muted hover:text-text-primary ml-auto h-7 w-7 shrink-0 transition-colors"
+                className="text-fg-muted hover:text-fg ml-auto h-7 w-7 shrink-0 transition-colors"
                 onClick={toggleCollapsed}
                 aria-label="Collapse sidebar"
               >
@@ -270,7 +267,7 @@ export function Sidebar({ projects }: SidebarProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="text-text-muted hover:text-text-primary h-8 w-8 transition-colors"
+              className="text-fg-muted hover:text-fg h-8 w-8 transition-colors"
               onClick={toggleCollapsed}
               aria-label="Expand sidebar"
             >
@@ -296,21 +293,17 @@ export function Sidebar({ projects }: SidebarProps) {
                 }
               }}
             >
-              <SelectTrigger className="border-border-muted bg-bg-elevated/50 hover:bg-bg-elevated h-auto w-full border px-3 py-2 text-xs transition-colors [&>svg:last-child]:hidden">
+              <SelectTrigger className="border-line-subtle bg-surface-inset hover:border-line h-auto w-full border px-3 py-2 text-xs transition-colors [&>svg:last-child]:hidden">
                 <div className="flex flex-1 flex-col items-start overflow-hidden text-left">
-                  <span className="text-text-muted mb-0.5 font-mono text-[10px] tracking-[0.08em] uppercase opacity-70">
-                    Active Project
-                  </span>
-                  <span className="text-text-secondary w-full truncate font-mono font-medium">
-                    {projectPath}
-                  </span>
+                  <span className="text-fg-muted text-2xs mb-0.5">Project</span>
+                  <span className="text-fg w-full truncate font-medium">{projectLabel}</span>
                 </div>
-                <ChevronDown className="text-text-muted ml-1 h-3.5 w-3.5 shrink-0" />
+                <ChevronDown className="text-fg-muted ml-1 h-3.5 w-3.5 shrink-0" />
               </SelectTrigger>
               <SelectContent>
                 {projects.map((p) => (
-                  <SelectItem key={p.id} value={String(p.id)} className="font-mono text-xs">
-                    ~/{p.slug}
+                  <SelectItem key={p.id} value={String(p.id)} className="text-xs">
+                    {p.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -331,35 +324,32 @@ export function Sidebar({ projects }: SidebarProps) {
                 key={href}
                 href={href}
                 className={cn(
-                  'group flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-200',
+                  'group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-[120ms]',
                   isCollapsed && 'relative justify-center px-2',
                   active
-                    ? 'bg-bg-elevated text-text-primary shadow-sm'
-                    : 'text-text-secondary hover:bg-bg-elevated/40 hover:text-text-primary'
+                    ? 'bg-surface-inset text-fg'
+                    : 'text-fg-secondary hover:bg-surface-inset hover:text-fg'
                 )}
               >
                 <Icon
-                  className={cn(
-                    'h-[18px] w-[18px] shrink-0 transition-transform duration-200 group-hover:scale-110',
-                    active ? 'text-accent-blue' : 'text-text-secondary'
-                  )}
+                  className={cn('size-[18px] shrink-0', active ? 'text-accent' : 'text-fg-muted')}
                 />
                 {!isCollapsed && <span>{label}</span>}
                 {!isCollapsed && showBadge && (
-                  <PixelBadge
-                    variant="blue"
-                    className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full p-0 text-[10px] shadow-sm"
+                  <Badge
+                    variant="info"
+                    className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full p-0"
                   >
                     {badgeText}
-                  </PixelBadge>
+                  </Badge>
                 )}
                 {isCollapsed && showBadge && (
-                  <PixelBadge
-                    variant="blue"
-                    className="absolute top-2 right-2 flex h-4 min-w-4 items-center justify-center rounded-full p-0 text-[10px] shadow-sm"
+                  <Badge
+                    variant="info"
+                    className="absolute top-2 right-2 flex h-4 min-w-4 items-center justify-center rounded-full p-0"
                   >
                     {badgeText}
-                  </PixelBadge>
+                  </Badge>
                 )}
               </Link>
             );

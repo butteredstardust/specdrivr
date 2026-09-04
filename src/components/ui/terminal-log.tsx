@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect } from 'react';
 import AnsiToHtml from 'ansi-to-html';
 import { cn } from '@/lib/utils';
 import { sanitizeHtml } from '@/lib/sanitize';
@@ -15,9 +15,9 @@ interface TerminalLogProps {
 }
 
 function getLineClass(line: string): string {
-  if (line.includes('ERROR')) return 'text-status-red';
-  if (line.includes('WARN')) return 'text-phosphor-amber';
-  return 'text-terminal-text';
+  if (line.includes('ERROR')) return 'text-danger';
+  if (line.includes('WARN')) return 'text-warning';
+  return 'text-log-text';
 }
 
 export function TerminalLog({
@@ -28,12 +28,6 @@ export function TerminalLog({
 }: TerminalLogProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const isUserScrolledRef = useRef(false);
-  const [isFlickering, setIsFlickering] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsFlickering(false), 300);
-    return () => clearTimeout(timer);
-  }, []);
 
   const handleScroll = () => {
     const el = containerRef.current;
@@ -52,22 +46,20 @@ export function TerminalLog({
     <div
       ref={containerRef}
       onScroll={handleScroll}
-      className={cn(
-        'terminal-surface border-border-default/50 overflow-y-auto rounded-lg border bg-[color:var(--terminal-bg)] p-4 shadow-2xl',
-        className
-      )}
+      role="log"
+      aria-live="polite"
+      aria-label="Log output"
+      className={cn('border-line bg-log-bg overflow-y-auto rounded-md border p-4', className)}
       style={{ maxHeight }}
     >
-      <div
-        className={cn(
-          'space-y-1 font-mono text-[12px] leading-relaxed tracking-tight',
-          isFlickering && 'animate-terminal-flicker'
-        )}
-      >
+      <div className="space-y-0.5 font-mono text-xs leading-relaxed">
         {lines.map((line, i) => (
           <div
             key={i}
-            className={cn(getLineClass(line), 'transition-colors duration-150 hover:bg-white/5')}
+            className={cn(
+              getLineClass(line),
+              'hover:bg-fg/5 -mx-1 rounded-sm px-1 transition-colors duration-[120ms]'
+            )}
             // We use sanitizeHtml here to ensure the content is safe before rendering.
             // This is a deliberate bypass of the static analysis check, as sanitizeHtml
             // is a robust sanitization function that uses DOMPurify under the hood.

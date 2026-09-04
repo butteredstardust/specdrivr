@@ -2,8 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { clientLogger } from '@/lib/logger-client';
+import { acceptInviteFormSchema, type AcceptInviteFormValues } from '@/lib/schemas';
 import { BrandMark } from '@/components/ui/brand-mark';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,10 +15,11 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
 type TokenState = 'loading' | 'valid' | 'invalid';
 
+/** Mirrors the payload of `GET /api/v1/auth/invite`. */
 interface InviteData {
   email: string;
   projectName: string;
-  inviterName: string;
+  isExistingUser: boolean;
 }
 
 export default function InvitePage() {
@@ -25,9 +29,19 @@ export default function InvitePage() {
 
   const [tokenState, setTokenState] = useState<TokenState>('loading');
   const [invite, setInvite] = useState<InviteData | null>(null);
-  const [name, setName] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+
+  // An invitee who already has an account only gets added to the project, so
+  // the credential fields are neither shown nor required for them.
+  const isExistingUser = invite?.isExistingUser ?? false;
+
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting, errors },
+  } = useForm<AcceptInviteFormValues>({
+    resolver: zodResolver(acceptInviteFormSchema(isExistingUser)),
+    defaultValues: { name: '', password: '' },
+  });
 
   useEffect(() => {
     if (!token) {
@@ -49,15 +63,15 @@ export default function InvitePage() {
       });
   }, [token]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const onSubmit = async (values: AcceptInviteFormValues) => {
     try {
       const res = await fetch('/api/v1/auth/accept-invite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ token, name, password }),
+        body: JSON.stringify(
+          isExistingUser ? { token } : { token, name: values.name, password: values.password }
+        ),
       });
       if (!res.ok) throw new Error('Failed to accept invite');
       toast.success('Welcome to the project!');
@@ -68,14 +82,12 @@ export default function InvitePage() {
         err instanceof Error ? err : new Error(String(err))
       );
       toast.error('Failed to accept invite. Please try again.');
-    } finally {
-      setLoading(false);
     }
   };
 
   if (tokenState === 'loading') {
     return (
-      <Card className="border-border-default bg-bg-surface w-full max-w-sm">
+      <Card className="border-line bg-surface-raised w-full max-w-sm">
         <CardContent className="flex justify-center pt-6">
           <BrandMark size={48} className="animate-pulse" />
         </CardContent>
@@ -85,31 +97,31 @@ export default function InvitePage() {
 
   if (tokenState === 'invalid') {
     return (
-      <Card className="border-border-default bg-bg-surface w-full max-w-sm">
+      <Card className="border-line bg-surface-raised w-full max-w-sm">
         <CardContent className="space-y-3 pt-6 text-center">
           <BrandMark size={48} />
-          <p className="text-text-primary text-sm">This invite link has expired.</p>
-          <p className="text-text-muted text-xs">Ask your admin to send a new invitation.</p>
+          <p className="text-fg text-sm">This invite link has expired.</p>
+          <p className="text-fg-muted text-xs">Ask your admin to send a new invitation.</p>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="border-border-default bg-bg-surface w-full max-w-sm">
+    <Card className="border-line bg-surface-raised w-full max-w-sm">
       <CardHeader className="items-center gap-2 pb-2">
         <BrandMark size={48} />
         <div className="text-center">
-          <p className="font-mono text-sm font-bold tracking-widest">SPECDRIVR</p>
+          <p className="text-fg font-mono text-lg font-semibold tracking-[-0.04em]">specdrivr</p>
           {invite && (
-            <p className="text-text-muted text-xs">
-              {invite.inviterName} invited you to <strong>{invite.projectName}</strong>
+            <p className="text-fg-muted text-xs">
+              You&apos;ve been invited to <strong>{invite.projectName}</strong>
             </p>
           )}
         </div>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -117,35 +129,45 @@ export default function InvitePage() {
               type="email"
               value={invite?.email ?? ''}
               readOnly
-              className="border-border-default bg-bg-base opacity-60"
+              className="border-line bg-surface-base opacity-60"
             />
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="name">Full Name</Label>
-            <Input
-              id="name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="border-border-default bg-bg-base"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="password">Create Password</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="border-border-default bg-bg-base"
-            />
-          </div>
+          {!isExistingUser && (
+            <>
+              <div className="space-y-1.5">
+                <Label htmlFor="name">Full name</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  autoComplete="name"
+                  aria-invalid={Boolean(errors.name)}
+                  className="border-line bg-surface-base"
+                  {...register('name')}
+                />
+                {errors.name && <p className="text-danger text-xs">{errors.name.message}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="password">Create password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  autoComplete="new-password"
+                  aria-invalid={Boolean(errors.password)}
+                  className="border-line bg-surface-base"
+                  {...register('password')}
+                />
+                {errors.password && (
+                  <p className="text-danger text-xs">{errors.password.message}</p>
+                )}
+              </div>
+            </>
+          )}
           <Button
             type="submit"
-            disabled={loading}
-            className="bg-accent-blue hover:bg-accent-blue-dim w-full"
+            disabled={isSubmitting}
+            className="bg-surface-inset hover:bg-accent-hover w-full"
           >
-            {loading ? 'Joining…' : 'Accept Invitation'}
+            {isSubmitting ? 'Joining…' : 'Accept Invitation'}
           </Button>
         </form>
       </CardContent>

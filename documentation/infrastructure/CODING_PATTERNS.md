@@ -73,29 +73,101 @@ export class MyRepository extends BaseRepository {
 }
 ```
 
-## 4. Pattern: Status-Aware UI Component
+## 4. Pattern: Status-Aware UI
 
-Components should use the centralized token system.
+Use the centralized semantic map in `src/lib/ui-status.ts`; do not duplicate labels, badge
+variants, or colours in feature components. Status text is sentence-cased and uses the sans face.
 
 ```tsx
-import { StatusIndicator } from '@/components/ui/status-indicator';
-import { STATUS_TOKENS } from '@/infrastructure/DESIGN_SYSTEM';
+import { Badge } from '@/components/ui/badge';
+import { TASK_STATUS } from '@/lib/ui-status';
 import type { TaskStatus } from '@/db/schema';
 
-interface TaskRowProps {
-  status: TaskStatus;
-  title: string;
+export function TaskState({ status }: { status: TaskStatus }) {
+  const display = TASK_STATUS[status];
+  return <Badge variant={display.variant}>{display.label}</Badge>;
 }
+```
 
-export function TaskRow({ status, title }: TaskRowProps) {
-  const token = STATUS_TOKENS[status]; // Centralized styles
+## 5. Pattern: Large Form Context
 
-  return (
-    <div className="flex items-center gap-2 border-l-4" style={{ borderColor: token.color }}>
-      <StatusIndicator status={status} />
-      <span className="text-muted-foreground font-mono text-xs">{token.label}</span>
-      <h4 className="font-medium">{title}</h4>
-    </div>
-  );
+When a form is decomposed into several section components, create the form once and wrap the
+sections in `FormProvider`. Sections call `useFormContext<FormValues>()`; do not pass `register`,
+`control`, `errors`, and `watch` through every layer. `src/components/settings/agent-config-form.tsx`
+and `src/components/settings/agent-config/` are the reference implementation.
+
+```tsx
+const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues });
+
+return (
+  <FormProvider {...form}>
+    <form onSubmit={form.handleSubmit(onSubmit)}>
+      <PlanningSection />
+      <LimitsSection />
+    </form>
+  </FormProvider>
+);
+```
+
+```tsx
+function PlanningSection() {
+  const { register, formState: { errors } } = useFormContext<FormValues>();
+  // Render only this section's fields.
 }
+```
+
+## 6. Pattern: Explained Permission Gate
+
+Use `GatedButton` when an action is visible but unavailable because of role or lifecycle state.
+It keeps the disabled native button and puts the explanation on a focusable tooltip trigger. The
+component must be under `TooltipProvider`.
+
+```tsx
+<GatedButton allowed={canApprove} reason="Requires Admin or Owner role" onClick={approve}>
+  Approve plan
+</GatedButton>
+```
+
+Do not duplicate enabled and disabled button branches or attach a tooltip directly to a disabled
+button; disabled controls do not emit pointer events.
+
+## 7. Pattern: Lifecycle Router
+
+For a feature whose layout changes by lifecycle state, keep the route component small and route to
+state-specific renderers. `src/components/specs/plan-tab.tsx` chooses loading, generation,
+failure, empty, and review surfaces; `src/components/specs/plan/plan-review.tsx` owns only the review
+state. This keeps polling and actions out of markup branches and avoids one monolithic component.
+
+```tsx
+if (job?.status === 'pending' || job?.status === 'running') return <GeneratingState job={job} />;
+if (job?.status === 'failed') return <GenerationFailedState job={job} />;
+if (isLoading) return <LoadingState />;
+if (!plan) return <EmptyPlanState />;
+return <PlanReview plan={plan} actions={actions} />;
+```
+
+## 8. Pattern: Cohesive Fetch/Mutation Hook
+
+When a surface owns a resource fetch plus multiple mutations of that resource, move the whole
+operation set into one hook. The hook owns resource state, loading/error state, a shared busy flag,
+logging, toasts, refresh/refetch behavior, and authenticated fetch options. Mutations use one local
+`act` helper so success/failure behavior cannot drift. See `src/components/specs/plan/use-plan.ts`
+and `src/components/tasks/use-task-actions.ts`.
+
+```tsx
+const act = useCallback(async (path: string, init: RequestInit, messages: Messages) => {
+  setIsActioning(true);
+  try {
+    const response = await fetch(path, { credentials: 'include', ...init });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    toast.success(messages.success);
+    return true;
+  } catch (error) {
+    clientLogger.error(messages.failure, error);
+    toast.error(messages.failure);
+    return false;
+  } finally {
+    setIsActioning(false);
+  }
+}, []);
 ```

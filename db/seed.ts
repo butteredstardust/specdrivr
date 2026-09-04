@@ -186,6 +186,10 @@ async function main() {
             id: `acc_${u.id}`,
             accountId: u.id,
             providerId: 'credential',
+            // better-auth resolves the credential account by issuer as well as
+            // provider id; this is `createLocalAccountIssuer('credential')`.
+            // Seeded users cannot sign in without it.
+            issuer: 'local:credential',
             userId: u.id,
             password: passwordHash,
           })

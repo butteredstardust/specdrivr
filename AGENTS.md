@@ -46,15 +46,17 @@ To maximize efficiency and minimize context window usage:
 
 _See `documentation/infrastructure/DESIGN_SYSTEM.md` for full specifications._
 
-- **Visual Aesthetic**: "Linear" style—matte surfaces, subtle borders, high contrast, obsidian-tinted interactive states.
-- **Design Tokens**: Defined as CSS variables in `globals.css`. Never use hex codes.
+- **Visual Aesthetic**: D1 "Linear-clean"—matte surfaces, hairline structural borders, high-contrast controls, one blue accent, and restrained motion. No CRT chrome, scanlines, phosphor glow, pixel styling, or mascots.
+- **Design Tokens**: The single semantic vocabulary is defined in `src/app/globals.css` for light and dark themes. Components use its Tailwind bridges; never add a parallel shadcn token set or hardcoded palette values.
 - **Component Selection**:
   1. **shadcn/ui**: Standard interface controls (Button, Input). Prefer standard components.
   2. **Custom**: Only use custom components when absolutely necessary; must inherit from `documentation/infrastructure/DESIGN_SYSTEM.md`.
 - **Import Standard**:
   - Components: `import { Button } from '@/components/ui/button'`.
   - Icons: `import { Check } from 'lucide-react'` (or preferred icon set).
-- **Token names**: This project does not use the generic shadcn tokens `bg-background`, `text-foreground`, or `bg-destructive`. Use the project's own tokens instead — e.g. `bg-[--bg-base]`, `text-[--text-primary]`, `bg-[--status-red]`.
+- **Token names**: This project does not use generic shadcn tokens such as `bg-background`, `text-foreground`, or `bg-destructive`. Use semantic utilities such as `bg-surface-raised`, `text-fg`, `border-line`, and `bg-danger`.
+- **Typography and shape**: `text-2xs` (11px) is the floor. Mono is only for IDs, code, logs, timestamps, and numeric columns with `tabular-nums`; never prose, headings, table headers, badges, or controls. Use `rounded-lg` for containers/cards, `rounded-md` for controls, and `rounded-sm` for chips/badges. Labels and badges are sentence-cased.
+- **Focus**: The single global `:focus-visible` rule in `globals.css` owns focus rings. Per-component focus rings or outlines are forbidden.
 
 ## 6. Git Hooks & Integrity Protection
 
@@ -69,7 +71,7 @@ The project uses Husky to enforce quality at the local boundary.
 Bypassing hooks should be rarer than 1 in 100 operations.
 
 1. **Root Cause Analysis (RCA)**: Perform a deep audit to ensure the failure isn't masking a critical bug or architectural regression.
-2. **Justification**: If a bypass is necessary (e.g., environment-specific test flake during doc update), document the rationale in `BRANCH_CHANGES.md`.
+2. **Justification**: If a bypass is necessary (e.g., environment-specific test flake during doc update), state the rationale in the commit message and the PR body.
 3. **Execution**: Use `git push --no-verify` ONLY if the RCA confirms safety OR the user provides a direct order.
 
 ## 7. Core Engineering Rules
@@ -160,11 +162,14 @@ export async function createProject(formData: FormData) {
 - Never write a custom component when a `shadcn/ui` equivalent exists.
 - No hardcoded hex colors — use design tokens from `src/app/globals.css`.
 - No custom CSS files for minor tweaks — extend existing tokens, use Tailwind utility classes.
-- Never modify `shadcn/ui` source files under `@/components/ui/`; customize via CSS variables only.
+- Treat local files under `src/components/ui/` as maintained shadcn/Radix wrappers: reuse them first and change them deliberately for system-wide behavior; never patch vendored dependency source.
 - Before building a new screen, check the **Modular Specifications** (`documentation/modules/*.md`) for the planned flow and layout.
 - No visual decisions (color, spacing, typography, layout) without consulting `documentation/infrastructure/DESIGN_SYSTEM.md`.
 - Promote one-off inline style values that appear more than once to a design token.
 - All client-side `fetch` calls to authenticated routes must include `{ credentials: 'include' }`.
+- Use `GatedButton` for disabled role/lifecycle actions that need to explain the gate.
+- Use `.markdown` around rendered Markdown; `prose` classes are inert because the typography plugin is not installed.
+- Use the global `.full-bleed` utility for shell-gutter escape; never hardcode compensating negative margins.
 
 ## 13. Security Requirements
 
@@ -238,14 +243,14 @@ export async function createProject(formData: FormData) {
 Every task must end with these steps:
 
 1. **Verification**: Run `pnpm test` and `pnpm lint`.
-2. **Branch Documentation**: Before submitting any Pull Request:
-   - Create directory `documentation/branches/{branch-name}`.
-   - Create `BRANCH_CHANGES.md` with a markdown table:
-     `File Name | Summary of Changes | Summary Reason for Change | Expected Impact | Best Practice Evaluation Score (e.g., 8/10 because ...) | Reason for Deletion` (or 'not deleted').
-   - At the end of `BRANCH_CHANGES.md`, include a summary of any changes to CI config or test files and why.
-   - Create `BRANCH_CODE_REVIEW.md`: a thoughtful senior review of the changes, listing problems and improvements with reasoning.
-   - Commit these documentation files as part of the final pre-commit steps.
+2. **Pull Request**: Describe the change in the PR body — what changed, why, and
+   anything a reviewer should check by hand. The diff and the PR are the record.
 3. **Final Summary**: Provide an Executive Summary, Completion Statement, and a checklist of deliverables.
+
+> **Removed 2026-09-04.** This section used to mandate `BRANCH_CHANGES.md` and
+> `BRANCH_CODE_REVIEW.md` under `documentation/branches/{branch-name}`. They
+> duplicated the diff and the PR body, went stale immediately, and were never
+> read after merge. Do not reintroduce them.
 
 ## 19. Standard Commands Reference
 

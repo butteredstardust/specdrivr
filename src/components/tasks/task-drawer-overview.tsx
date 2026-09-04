@@ -3,13 +3,12 @@
 import { useState, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
-import { RefreshCw, MessageSquareQuote, ExternalLink } from 'lucide-react';
+import { RefreshCw, MessageSquareQuote, ExternalLink, Github } from 'lucide-react';
 import { clientLogger } from '@/lib/logger-client';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { StatusIcon } from '@/components/ui/status-icon';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { PixelBadge } from '@/components/ui/pixel-badge';
-import { GitHubLogoIcon } from '@radix-ui/react-icons';
+import { EntityId } from '@/components/ui/entity-id';
 import type { Task } from './task-drawer';
 
 interface TaskDrawerOverviewProps {
@@ -37,21 +36,19 @@ export function TaskDrawerOverview({ task, onRetry }: TaskDrawerOverviewProps) {
   return (
     <div className="space-y-8 p-6">
       {/* Description */}
-      <div className="prose prose-sm prose-invert max-w-none">
+      <div className="markdown">
         <ReactMarkdown>{task.description ?? ''}</ReactMarkdown>
       </div>
 
       {/* Dependencies */}
       {task.dependsOn.length > 0 && (
         <div className="space-y-3">
-          <span className="text-text-muted font-mono text-[11px] tracking-[0.08em] uppercase">
-            Dependencies
-          </span>
+          <span className="text-fg-muted text-2xs">Dependencies</span>
           <div className="flex flex-wrap gap-2">
             {task.dependsOn.map((extId) => (
-              <PixelBadge key={extId} variant="default">
+              <EntityId key={extId} chip>
                 {extId}
-              </PixelBadge>
+              </EntityId>
             ))}
           </div>
         </div>
@@ -59,14 +56,12 @@ export function TaskDrawerOverview({ task, onRetry }: TaskDrawerOverviewProps) {
 
       {/* GitHub PR Link */}
       {task.pullRequestUrl && (
-        <div className="bg-bg-elevated/50 border-border-muted flex items-center justify-between rounded-md border p-4">
+        <div className="bg-surface-inset border-line-subtle flex items-center justify-between rounded-md border p-4">
           <div className="flex items-center gap-3">
-            <GitHubLogoIcon className="h-5 w-5 opacity-70" />
+            <Github className="h-5 w-5 opacity-70" />
             <div className="flex flex-col gap-0.5">
-              <span className="text-text-muted font-mono text-[10px] tracking-[0.08em] uppercase">
-                PULL REQUEST
-              </span>
-              <span className="text-text-primary text-sm font-medium">Automated Contribution</span>
+              <span className="text-fg-muted text-2xs">PULL REQUEST</span>
+              <span className="text-fg text-sm font-medium">Automated contribution</span>
             </div>
           </div>
           <Button
@@ -83,26 +78,24 @@ export function TaskDrawerOverview({ task, onRetry }: TaskDrawerOverviewProps) {
 
       {/* Blocked state panel */}
       {task.status === 'blocked' && (
-        <div className="bg-phosphor-amber/5 border-phosphor-amber/30 space-y-4 rounded-md border p-5">
+        <div className="bg-warning-bg border-warning-border space-y-4 rounded-md border p-5">
           <div className="flex items-center gap-2.5">
-            <DaemonMascot size={24} expression="blocked" />
-            <span className="text-phosphor-amber font-mono text-[11px] font-semibold tracking-[0.08em] uppercase">
-              BLOCKED
-            </span>
+            <StatusIcon size={18} status="blocked" />
+            <span className="text-warning text-2xs font-semibold">BLOCKED</span>
           </div>
           {task.blockedReason && (
-            <p className="text-text-secondary text-sm leading-relaxed">{task.blockedReason}</p>
+            <p className="text-fg-secondary text-sm leading-relaxed">{task.blockedReason}</p>
           )}
           <div className="space-y-3 pt-2">
             <Textarea
               placeholder="Add context to unblock DAEMON (min 10 chars)..."
               value={humanContext}
               onChange={(e) => setHumanContext(e.target.value)}
-              className="bg-bg-base border-border-default focus:ring-phosphor-amber/30 min-h-[100px] text-sm focus:ring-1"
+              className="bg-surface-base border-line min-h-[100px] text-sm"
               rows={3}
             />
             <Button
-              variant="phosphor"
+              variant="warning"
               size="sm"
               disabled={humanContext.length < 10 || isSubmitting}
               onClick={handleRetryWithContext}
@@ -117,19 +110,17 @@ export function TaskDrawerOverview({ task, onRetry }: TaskDrawerOverviewProps) {
 
       {/* Failed state panel */}
       {task.status === 'failed' && (
-        <div className="bg-status-red/5 border-status-red/30 space-y-4 rounded-md border p-5">
+        <div className="bg-danger-bg border-danger-border space-y-4 rounded-md border p-5">
           <div className="flex items-center gap-2.5">
-            <DaemonMascot size={24} expression="error" />
-            <span className="text-status-red font-mono text-[11px] font-semibold tracking-[0.08em] uppercase">
-              FAILED
-            </span>
+            <StatusIcon size={18} status="error" />
+            <span className="text-danger text-2xs font-semibold">FAILED</span>
           </div>
           {task.blockedReason && (
-            <p className="text-text-secondary text-sm leading-relaxed">{task.blockedReason}</p>
+            <p className="text-fg-secondary text-sm leading-relaxed">{task.blockedReason}</p>
           )}
           <div className="pt-2">
             <Button
-              variant="blue"
+              variant="info"
               size="sm"
               onClick={() => void onRetry()}
               className="h-8 w-full gap-1.5"

@@ -21,6 +21,9 @@ const CreateProjectSchema = z.object({
     .max(1000, 'Description cannot exceed 1000 characters')
     .optional()
     .nullable(),
+  // The create dialog collects this as `githubRepo`; it lands in the same
+  // `repository_url` column the project settings form edits later.
+  githubRepo: z.string().max(255, 'Repository cannot exceed 255 characters').optional().nullable(),
 });
 
 export async function GET(request: NextRequest) {
@@ -76,6 +79,7 @@ export async function POST(request: NextRequest) {
     const project = await projectRepository.create({
       name: parsed.name,
       description: parsed.description ?? undefined,
+      repositoryUrl: parsed.githubRepo ?? null,
       createdBy: session.user.id,
     });
 

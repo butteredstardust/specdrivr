@@ -21,8 +21,8 @@ This module covers user profile management, security configurations, notificatio
 ### 2.2 Security Settings (`/settings/security`)
 
 - **Password**: Change password with current/new/confirm fields.
-- **Sessions**: Table showing active browser sessions with "Revoke" actions and "Revoke all others."
-- **API Tokens**: Management of `sdk_` tokens used by the DAEMON agent.
+- **Sessions**: Active browser sessions with **Revoke** actions and **Revoke all others**.
+- **API tokens**: An anchored section on the same route for `sdk_` tokens used by the DAEMON agent.
   - **Generation**: One-time reveal of the full token string.
   - **Expiry**: Options for 30, 90 days, 1 year, or Never.
 
@@ -38,6 +38,8 @@ This module covers user profile management, security configurations, notificatio
 - **GitHub**: OAuth-based connection. Reveals the webhook URL for the project.
 - **Slack**: OAuth-based connection. Allows selecting a channel for DAEMON status updates.
 - **Generic Webhooks**: Support for POSTing events to any HTTP endpoint with optional HMAC signing.
+- **Composition**: `integrations-section.tsx` composes provider cards from
+  `src/components/settings/integrations/` (`github-card`, `slack-card`, `webhooks-card`, `shared`).
 
 ### 3.2 Agent Configuration (`/settings/agent`)
 
@@ -48,6 +50,8 @@ This module covers user profile management, security configurations, notificatio
 - **Planning**:
   - `Require plan approval`: Global toggle for the approval gate.
   - `Auto-generate plan`: Triggers Gemini on spec save.
+- **Composition**: `agent-config-form.tsx` owns one `FormProvider`; the sections in
+  `src/components/settings/agent-config/` consume it with `useFormContext`.
 
 ### 3.3 Audit Log (`/settings/audit`)
 
@@ -66,7 +70,9 @@ This module covers user profile management, security configurations, notificatio
 
 - **Logic**: `src/actions/settings.ts`.
 - **Database**: `src/db/schema.ts` (`webhooks`, `webhookDeliveries`, `auditLog` tables).
-- **UI Components**: `src/components/settings/` (e.g. `integrations-section.tsx`, `webhook-log-section.tsx`, `audit-log-section.tsx`, `members-section.tsx`).
+- **UI Components**: `src/components/settings/`, including the decomposed `integrations/` and
+  `agent-config/` directories plus `webhook-log-section.tsx`, `audit-log-section.tsx`, and
+  `members-section.tsx`.
 
 ### 4.2 Critical Paths
 

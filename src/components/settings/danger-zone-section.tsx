@@ -64,18 +64,16 @@ export function DangerZoneSection({ project, userRole }: DangerZoneSectionProps)
 
   return (
     <TooltipProvider>
-      <div className="border-status-red/40 rounded border p-4">
-        <h3 className="text-status-red mb-3 font-mono text-xs tracking-widest uppercase">
-          Danger Zone
-        </h3>
+      <div className="border-danger-border rounded border p-4">
+        <h3 className="text-danger mb-3 text-xs">Danger zone</h3>
         <div className="flex items-center justify-between gap-4">
-          <p className="text-text-muted font-mono text-xs">
+          <p className="text-fg-muted font-mono text-xs">
             Permanently delete this project and all its data.
           </p>
           {deletable ? (
             <>
               <Button variant="destructive" size="sm" onClick={() => setDeleteOpen(true)}>
-                Delete Project
+                Delete project
               </Button>
               <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
                 <DialogContent>
@@ -112,7 +110,7 @@ export function DangerZoneSection({ project, userRole }: DangerZoneSectionProps)
               <TooltipTrigger asChild>
                 <span tabIndex={0}>
                   <Button variant="destructive" size="sm" disabled>
-                    Delete Project
+                    Delete project
                   </Button>
                 </span>
               </TooltipTrigger>

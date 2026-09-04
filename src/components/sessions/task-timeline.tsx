@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useSSE } from '@/hooks/use-sse';
+import { TASK_STATUS } from '@/lib/ui-status';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   CheckCircle2,
   AlertCircle,
@@ -31,39 +33,39 @@ function statusColor(status: string): { bg: string; text: string; dot: string } 
   switch (status) {
     case 'in_progress':
       return {
-        bg: 'bg-phosphor-amber/10',
-        text: 'text-phosphor-amber',
-        dot: 'bg-phosphor-amber',
+        bg: 'bg-warning-bg',
+        text: 'text-warning',
+        dot: 'bg-warning',
       };
     case 'done':
       return {
-        bg: 'bg-status-emerald/10',
-        text: 'text-status-emerald',
-        dot: 'bg-status-emerald',
+        bg: 'bg-success-bg',
+        text: 'text-success',
+        dot: 'bg-success',
       };
     case 'blocked':
       return {
-        bg: 'bg-status-red/10',
-        text: 'text-status-red',
-        dot: 'bg-status-red',
+        bg: 'bg-danger-bg',
+        text: 'text-danger',
+        dot: 'bg-danger',
       };
     case 'failed':
       return {
-        bg: 'bg-status-red/10',
-        text: 'text-status-red',
-        dot: 'bg-status-red',
+        bg: 'bg-danger-bg',
+        text: 'text-danger',
+        dot: 'bg-danger',
       };
     case 'skipped':
       return {
-        bg: 'bg-secondary',
-        text: 'text-muted-foreground',
-        dot: 'bg-muted-foreground',
+        bg: 'bg-surface-inset',
+        text: 'text-fg-muted',
+        dot: 'bg-fg-muted',
       };
     default:
       return {
-        bg: 'bg-secondary',
-        text: 'text-muted-foreground',
-        dot: 'bg-muted-foreground',
+        bg: 'bg-surface-inset',
+        text: 'text-fg-muted',
+        dot: 'bg-fg-muted',
       };
   }
 }
@@ -100,7 +102,7 @@ function LiveDuration({ startedAt }: { startedAt: string }) {
     return () => clearInterval(id);
   }, [startedAt]);
 
-  return <span className="text-muted-foreground font-mono text-[10px]">{elapsed}</span>;
+  return <span className="text-fg-muted text-2xs font-mono">{elapsed}</span>;
 }
 
 function taskDuration(task: TaskItem): React.ReactNode {
@@ -112,12 +114,12 @@ function taskDuration(task: TaskItem): React.ReactNode {
     const mm = String(Math.floor(secs / 60)).padStart(2, '0');
     const ss = String(secs % 60).padStart(2, '0');
     return (
-      <span className="text-muted-foreground font-mono text-[10px]">
+      <span className="text-fg-muted text-2xs font-mono">
         {mm}:{ss}
       </span>
     );
   }
-  return <span className="text-muted-foreground font-mono text-[10px]">—</span>;
+  return <span className="text-fg-muted text-2xs font-mono">—</span>;
 }
 
 interface TaskTimelineProps {
@@ -141,13 +143,11 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
 
   return (
     <div>
-      <p className="text-muted-foreground mb-6 font-mono text-[10px] tracking-[0.2em] uppercase">
-        Task Execution Timeline
-      </p>
+      <p className="text-fg-muted text-2xs mb-6">Task execution timeline</p>
       {isLoading && tasks.length === 0 ? (
-        <p className="text-text-muted font-mono text-xs">Loading tasks…</p>
+        <p className="text-fg-muted text-xs">Loading tasks…</p>
       ) : tasks.length === 0 ? (
-        <p className="text-text-muted font-mono text-xs">No tasks found.</p>
+        <p className="text-fg-muted text-xs">No tasks found.</p>
       ) : (
         <div className="relative space-y-3">
           {tasks.map((task, idx) => {
@@ -162,20 +162,20 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
                   {/* Vertical line (extends down from dot) */}
                   {!isLast && (
                     <div
-                      className={`bg-border-default/30 absolute top-6 left-1/2 w-0.5 -translate-x-1/2 ${isExpanded ? 'h-full' : 'h-12'}`}
+                      className={`bg-line/30 absolute top-6 left-1/2 w-0.5 -translate-x-1/2 ${isExpanded ? 'h-full' : 'h-12'}`}
                     />
                   )}
 
                   {/* Dot */}
                   <div
-                    className={`relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all ${colors.dot} border-bg-default ${
+                    className={`relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all ${colors.dot} border-surface-base ${
                       task.status === 'in_progress'
-                        ? 'ring-phosphor-amber shadow-lg ring-2 ring-offset-2'
+                        ? 'ring-warning shadow-popover ring-2 ring-offset-2'
                         : ''
                     }`}
                   >
                     {task.status === 'in_progress' && (
-                      <div className="bg-phosphor-amber/30 absolute inset-0 animate-pulse rounded-full" />
+                      <div className="bg-warning-bg absolute inset-0 animate-pulse rounded-full" />
                     )}
                   </div>
                 </div>
@@ -183,57 +183,62 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
                 {/* Right column: content card */}
                 <div className="flex-1 pt-0.5">
                   <div
-                    onClick={() => toggleTask(task.id)}
-                    className={`cursor-pointer rounded-lg border transition-all ${colors.bg} border-border-default/50 hover:border-border-default px-3 py-2.5`}
+                    className={`rounded-lg border transition-colors ${colors.bg} border-line-subtle hover:border-line px-3 py-2.5`}
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0 flex-1">
-                        <div className="mb-1 flex items-center gap-2">
-                          <span className="text-muted-foreground shrink-0 font-mono text-[10px] font-semibold tracking-wider uppercase">
-                            {task.externalId}
-                          </span>
-                          <div className={`flex items-center gap-1 ${colors.text}`}>
-                            <StatusIcon status={task.status} />
+                    {/* The whole card used to be a clickable div, which put the
+                        expanded panel inside the click target. Only the header
+                        toggles now, so the panel's contents stay reachable.
+                        Collapsible is the disclosure primitive: it owns the
+                        aria-expanded/aria-controls pairing and renders an
+                        unstyled trigger, which a Button variant would not. */}
+                    <Collapsible
+                      open={isExpanded}
+                      onOpenChange={() => toggleTask(task.id)}
+                      className="w-full"
+                    >
+                      <CollapsibleTrigger className="flex w-full cursor-pointer items-start justify-between gap-3 text-left">
+                        <div className="min-w-0 flex-1">
+                          <div className="mb-1 flex items-center gap-2">
+                            <span className="text-fg-muted text-2xs shrink-0 font-semibold">
+                              {task.externalId}
+                            </span>
+                            <div className={`flex items-center gap-1 ${colors.text}`}>
+                              <StatusIcon status={task.status} />
+                            </div>
                           </div>
+                          <p className="text-fg truncate text-xs">{task.title}</p>
                         </div>
-                        <p className="text-foreground truncate font-mono text-xs">{task.title}</p>
-                      </div>
-                      <div className="flex shrink-0 flex-col items-end gap-1">
-                        {taskDuration(task)}
-                        <span
-                          className={`flex items-center gap-1 rounded px-1.5 py-0.5 font-mono text-[9px] tracking-wider uppercase ${colors.bg} ${colors.text}`}
-                        >
-                          {task.status.replace(/_/g, ' ')}
-                          {isExpanded ? (
-                            <ChevronDown className="h-3 w-3" />
-                          ) : (
-                            <ChevronRight className="h-3 w-3" />
-                          )}
-                        </span>
-                      </div>
-                    </div>
+                        <div className="flex shrink-0 flex-col items-end gap-1">
+                          {taskDuration(task)}
+                          <span
+                            className={`text-2xs flex items-center gap-1 rounded px-1.5 py-0.5 ${colors.bg} ${colors.text}`}
+                          >
+                            {TASK_STATUS[task.status as keyof typeof TASK_STATUS]?.label ??
+                              task.status.replace(/_/g, ' ')}
+                            {isExpanded ? (
+                              <ChevronDown className="h-3 w-3" />
+                            ) : (
+                              <ChevronRight className="h-3 w-3" />
+                            )}
+                          </span>
+                        </div>
+                      </CollapsibleTrigger>
 
-                    {isExpanded && (
-                      <div
-                        className="border-border-default/50 mt-3 cursor-auto space-y-2 border-t pt-3"
-                        onClick={(e) => e.stopPropagation()}
-                      >
+                      <CollapsibleContent className="border-line-subtle mt-3 space-y-2 border-t pt-3">
                         {task.description && (
                           <div>
-                            <span className="text-muted-foreground mb-0.5 block font-mono text-[9px] tracking-wider uppercase">
-                              Description
-                            </span>
-                            <p className="text-foreground font-mono text-[10px] whitespace-pre-wrap">
+                            <span className="text-fg-muted text-2xs mb-0.5 block">Description</span>
+                            <p className="text-fg text-2xs font-mono whitespace-pre-wrap">
                               {task.description}
                             </p>
                           </div>
                         )}
                         {task.blockedReason && (
                           <div>
-                            <span className="text-status-red mb-0.5 block font-mono text-[9px] tracking-wider uppercase">
-                              Blocked Reason
+                            <span className="text-danger text-2xs mb-0.5 block">
+                              Blocked reason
                             </span>
-                            <p className="text-status-red font-mono text-[10px] whitespace-pre-wrap">
+                            <p className="text-danger text-2xs font-mono whitespace-pre-wrap">
                               {task.blockedReason}
                             </p>
                           </div>
@@ -241,30 +246,26 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
                         <div className="mt-2 flex gap-4">
                           {task.attemptCount !== undefined && task.attemptCount > 0 && (
                             <div>
-                              <span className="text-muted-foreground mb-0.5 block font-mono text-[9px] tracking-wider uppercase">
-                                Attempts
-                              </span>
-                              <p className="text-foreground font-mono text-[10px]">
-                                {task.attemptCount}
-                              </p>
+                              <span className="text-fg-muted text-2xs mb-0.5 block">Attempts</span>
+                              <p className="text-fg text-2xs font-mono">{task.attemptCount}</p>
                             </div>
                           )}
                           {task.verificationPassed !== undefined &&
                             task.verificationPassed !== null && (
                               <div>
-                                <span className="text-muted-foreground mb-0.5 block font-mono text-[9px] tracking-wider uppercase">
+                                <span className="text-fg-muted text-2xs mb-0.5 block">
                                   Verification
                                 </span>
                                 <p
-                                  className={`font-mono text-[10px] ${task.verificationPassed ? 'text-status-emerald' : 'text-status-red'}`}
+                                  className={`text-2xs font-mono ${task.verificationPassed ? 'text-success' : 'text-danger'}`}
                                 >
                                   {task.verificationPassed ? 'Passed' : 'Failed'}
                                 </p>
                               </div>
                             )}
                         </div>
-                      </div>
-                    )}
+                      </CollapsibleContent>
+                    </Collapsible>
                   </div>
                 </div>
               </div>
