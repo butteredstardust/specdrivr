@@ -59,6 +59,16 @@ describe('Repository Integration Tests', () => {
         })
         .returning();
 
+      const [attempt] = await testDb
+        .insert(schema.taskAttempts)
+        .values({ taskId: task.id, sessionId: staleSession.id, seq: 1, status: 'running' })
+        .returning();
+
+      await testDb
+        .update(schema.tasks)
+        .set({ currentAttemptId: attempt.id })
+        .where(eq(schema.tasks.id, task.id));
+
       await testDb
         .update(schema.agentSessions)
         .set({ currentTaskId: task.id })
@@ -362,6 +372,10 @@ describe('Repository Integration Tests', () => {
         .update(schema.tasks)
         .set({ status: 'done' })
         .where(eq(schema.tasks.externalId, 'T-1'));
+      await testDb
+        .update(schema.taskAttempts)
+        .set({ status: 'succeeded', endedAt: new Date() })
+        .where(eq(schema.taskAttempts.id, claimed1!.attemptId));
 
       // Now claim T-2
       const claimed3 = await taskRepository.claimNextTaskForProject(project.id, session.id);
@@ -403,7 +417,19 @@ describe('Repository Integration Tests', () => {
         })
         .returning();
 
-      const result = await taskRepository.completeTaskAttempt(task.id, {
+      const [attempt] = await testDb
+        .insert(schema.taskAttempts)
+        .values({ taskId: task.id, sessionId: session.id, seq: 1, status: 'running' })
+        .returning();
+      await testDb
+        .update(schema.tasks)
+        .set({ currentAttemptId: attempt.id })
+        .where(eq(schema.tasks.id, task.id));
+
+      const result = await taskRepository.completeTaskAttempt(task.id, project.id, {
+        attemptId: attempt.id,
+        sessionId: session.id,
+        completionKey: '11111111-1111-4111-8111-111111111111',
         status: 'done',
         output: 'All checks passed',
         exitCode: 0,
@@ -421,14 +447,14 @@ describe('Repository Integration Tests', () => {
       expect(updatedTask.completedAt).not.toBeNull();
 
       // 3. A taskAttempt record was created with correct values
-      const [attempt] = await testDb
+      const [completedAttempt] = await testDb
         .select()
         .from(schema.taskAttempts)
         .where(eq(schema.taskAttempts.taskId, task.id));
-      expect(attempt).toBeDefined();
-      expect(attempt.status).toBe('succeeded');
-      expect(attempt.sessionId).toBe(session.id);
-      expect(attempt.logLines).toContain('All checks passed');
+      expect(completedAttempt).toBeDefined();
+      expect(completedAttempt.status).toBe('succeeded');
+      expect(completedAttempt.sessionId).toBe(session.id);
+      expect(completedAttempt.logLines).toContain('All checks passed');
 
       // 4. Session was closed because all plan tasks are done
       const [updatedSession] = await testDb
@@ -472,6 +498,14 @@ describe('Repository Integration Tests', () => {
           executionOrder: 1,
         })
         .returning();
+      const [attemptA] = await testDb
+        .insert(schema.taskAttempts)
+        .values({ taskId: taskA.id, sessionId: session.id, seq: 1, status: 'running' })
+        .returning();
+      await testDb
+        .update(schema.tasks)
+        .set({ currentAttemptId: attemptA.id })
+        .where(eq(schema.tasks.id, taskA.id));
       await testDb.insert(schema.tasks).values({
         planId: plan.id,
         specId: spec.id,
@@ -481,7 +515,10 @@ describe('Repository Integration Tests', () => {
         executionOrder: 2,
       });
 
-      await taskRepository.completeTaskAttempt(taskA.id, {
+      await taskRepository.completeTaskAttempt(taskA.id, project.id, {
+        attemptId: attemptA.id,
+        sessionId: session.id,
+        completionKey: '22222222-2222-4222-8222-222222222222',
         status: 'failed',
         errorMessage: 'oops',
       });

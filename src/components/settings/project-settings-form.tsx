@@ -84,7 +84,8 @@ export function ProjectSettingsForm({
     }
     setVerifyStatus('checking');
     try {
-      const res = await fetch(`/api/v1/verify-repo?url=${encodeURIComponent(url)}`, {
+      const params = new URLSearchParams({ url, projectId: String(project.id) });
+      const res = await fetch(`/api/v1/verify-repo?${params.toString()}`, {
         credentials: 'include',
       });
       if (res.ok) {

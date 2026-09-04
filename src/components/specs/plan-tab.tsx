@@ -15,6 +15,16 @@ import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 import { languages } from '@codemirror/language-data';
 import { EditorView } from '@codemirror/view';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import type { SpecStatus } from '@/components/specs/spec-editor';
 import type { UserRole } from '@/db/schema';
 
@@ -40,6 +50,7 @@ interface Plan {
   createdAt: string | null;
   updatedAt: string | null;
   taskCount?: number | null;
+  executionTarget?: { repository: string; branch: string };
 }
 
 function timeAgo(dateStr: string | null | undefined): string {
@@ -96,6 +107,8 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
   const [editContent, setEditContent] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [isActioning, setIsActioning] = useState(false);
+  const [approveOpen, setApproveOpen] = useState(false);
+  const [approvalNotes, setApprovalNotes] = useState('');
 
   // Poll spec status when pending_plan
   const pollUrl = spec.status === 'pending_plan' ? `/api/v1/specs/${spec.id}` : null;
@@ -171,9 +184,12 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
       const res = await fetch(`/api/v1/plans/${plan.id}/approve`, {
         method: 'POST',
         credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notes: approvalNotes.trim() || null }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       toast.success('Plan approved.');
+      setApproveOpen(false);
       router.refresh();
     } catch (err) {
       clientLogger.error('PlanTab: approve failed', err);
@@ -232,7 +248,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
   const handleRegenerate = async () => {
     setIsActioning(true);
     try {
-      const res = await fetch(`/api/v1/specs/${spec.id}/regenerate-plan`, {
+      const res = await fetch(`/api/v1/specs/${spec.id}/plan/generate`, {
         method: 'POST',
         credentials: 'include',
       });
@@ -475,7 +491,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
                 size="sm"
                 variant="outline"
                 className="border-status-emerald/50 text-status-emerald hover:bg-status-emerald/10 h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase"
-                onClick={handleApprove}
+                onClick={() => setApproveOpen(true)}
                 disabled={isActioning}
               >
                 <CheckCircle2 className="h-3.5 w-3.5" />
@@ -642,6 +658,32 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
             </div>
           </div>
         )}
+        <AlertDialog open={approveOpen} onOpenChange={setApproveOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Approve and start execution?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Review the execution target before starting {plan.taskCount ?? 0} tasks.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="border-border-default bg-bg-elevated space-y-1 rounded border p-3 font-mono text-xs">
+              <p>Repository: {plan.executionTarget?.repository ?? 'Not configured'}</p>
+              <p>Branch: {plan.executionTarget?.branch ?? 'main'}</p>
+              <p>Tasks: {plan.taskCount ?? 0}</p>
+            </div>
+            <Textarea
+              value={approvalNotes}
+              onChange={(event) => setApprovalNotes(event.target.value)}
+              placeholder="Optional approval notes"
+            />
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isActioning}>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleApprove} disabled={isActioning}>
+                {isActioning ? 'Starting…' : 'Approve & Execute'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </TooltipProvider>
   );

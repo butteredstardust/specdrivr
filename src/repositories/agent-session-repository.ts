@@ -2,6 +2,7 @@ import { db } from '@/db';
 import {
   agentSessions,
   agentEvents,
+  taskAttempts,
   auditLog,
   tasks,
   planJobs,
@@ -11,7 +12,7 @@ import {
   projects,
   specifications,
 } from '@/db/schema';
-import { eq, desc, inArray, asc, lt, and, sql } from 'drizzle-orm';
+import { eq, desc, inArray, asc, lt, and, sql, or, isNull, isNotNull } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, DatabaseError } from '@/lib/errors';
 import { dispatchWebhookEvent, type WebhookEventType } from '@/lib/webhooks';
@@ -26,9 +27,9 @@ export class AgentSessionRepository extends BaseRepository {
    * Identifies "Ghost Sessions" (running sessions that haven't updated their heartbeat)
    * and reverts their current tasks to 'todo'.
    */
-  async recoverGhostSessions(thresholdMinutes = 5): Promise<number> {
+  async recoverGhostSessions(thresholdSeconds = 60): Promise<number> {
     return await this.executeQuery(async () => {
-      const thresholdDate = new Date(Date.now() - thresholdMinutes * 60 * 1000);
+      const thresholdDate = new Date(Date.now() - thresholdSeconds * 1000);
 
       return await db.transaction(async (tx) => {
         // 1. Find sessions that are running but haven't pulsed a heartbeat since threshold
@@ -38,23 +39,66 @@ export class AgentSessionRepository extends BaseRepository {
           .where(
             and(
               eq(agentSessions.status, 'running'),
-              lt(agentSessions.lastHeartbeatAt, thresholdDate)
+              or(
+                and(
+                  isNotNull(agentSessions.lastHeartbeatAt),
+                  lt(agentSessions.lastHeartbeatAt, thresholdDate)
+                ),
+                and(
+                  isNull(agentSessions.lastHeartbeatAt),
+                  lt(agentSessions.startedAt, thresholdDate)
+                )
+              )
             )
           );
 
         if (staleSessions.length === 0) return 0;
 
         const sessionIds = staleSessions.map((s) => s.id);
-        const currentTaskIds = staleSessions
-          .map((s) => s.currentTaskId)
-          .filter((id): id is number => id !== null);
+        const activeAttempts = await tx
+          .select({
+            id: taskAttempts.id,
+            taskId: taskAttempts.taskId,
+            sessionId: taskAttempts.sessionId,
+          })
+          .from(taskAttempts)
+          .where(
+            and(inArray(taskAttempts.sessionId, sessionIds), eq(taskAttempts.status, 'running'))
+          )
+          .for('update');
+        const leasedTaskIds = activeAttempts.map((attempt) => attempt.taskId);
 
-        // 2. Revert tasks to 'todo'
-        if (currentTaskIds.length > 0) {
+        if (activeAttempts.length > 0) {
+          await tx
+            .update(taskAttempts)
+            .set({
+              status: 'failed',
+              errorMessage: 'Lease recovered after session heartbeat timeout',
+              endedAt: new Date(),
+            })
+            .where(
+              inArray(
+                taskAttempts.id,
+                activeAttempts.map((attempt) => attempt.id)
+              )
+            );
+
           await tx
             .update(tasks)
-            .set({ status: 'todo', updatedAt: new Date() })
-            .where(and(eq(tasks.status, 'in_progress'), inArray(tasks.id, currentTaskIds)));
+            .set({ status: 'todo', currentAttemptId: null, startedAt: null, updatedAt: new Date() })
+            .where(and(eq(tasks.status, 'in_progress'), inArray(tasks.id, leasedTaskIds)));
+
+          for (const attempt of activeAttempts) {
+            const owner = staleSessions.find((session) => session.id === attempt.sessionId);
+            await tx.insert(agentEvents).values({
+              sessionId: attempt.sessionId,
+              specId: owner?.specId ?? null,
+              taskId: attempt.taskId,
+              eventType: 'GHOST_TASK_RESET',
+              message: 'Recovered task lease after heartbeat timeout',
+              metadata: { attemptId: attempt.id, thresholdSeconds },
+            });
+          }
         }
 
         // 3. Mark sessions as failed
@@ -62,7 +106,8 @@ export class AgentSessionRepository extends BaseRepository {
           .update(agentSessions)
           .set({
             status: 'failed',
-            errorMessage: `Session timed out (no heartbeat for >${thresholdMinutes}m)`,
+            currentTaskId: null,
+            errorMessage: `Session timed out (no heartbeat for >${thresholdSeconds}s)`,
             endedAt: new Date(),
           })
           .where(inArray(agentSessions.id, sessionIds));
@@ -75,7 +120,7 @@ export class AgentSessionRepository extends BaseRepository {
             taskId: session.currentTaskId || null,
             eventType: 'SESSION_FAILED',
             message: `Ghost Buster: Recovered session after heartbeat timeout`,
-            metadata: { thresholdMinutes, lastHeartbeatAt: session.lastHeartbeatAt },
+            metadata: { thresholdSeconds, lastHeartbeatAt: session.lastHeartbeatAt },
           });
 
           // Trigger session.failed webhook
@@ -92,6 +137,80 @@ export class AgentSessionRepository extends BaseRepository {
         return sessionIds.length;
       });
     });
+  }
+
+  async cancelWithLeaseRecovery(sessionId: number, actorId: string): Promise<AgentSession> {
+    return this.executeQuery(() =>
+      db.transaction(async (tx) => {
+        const [session] = await tx
+          .select()
+          .from(agentSessions)
+          .where(eq(agentSessions.id, sessionId))
+          .limit(1)
+          .for('update');
+        if (!session) throw new NotFoundError(`Agent session with ID ${sessionId} not found`);
+
+        const activeAttempts = await tx
+          .select({ id: taskAttempts.id, taskId: taskAttempts.taskId })
+          .from(taskAttempts)
+          .where(and(eq(taskAttempts.sessionId, sessionId), eq(taskAttempts.status, 'running')))
+          .for('update');
+
+        if (activeAttempts.length > 0) {
+          await tx
+            .update(taskAttempts)
+            .set({ status: 'failed', errorMessage: 'Session cancelled', endedAt: new Date() })
+            .where(
+              inArray(
+                taskAttempts.id,
+                activeAttempts.map((attempt) => attempt.id)
+              )
+            );
+          await tx
+            .update(tasks)
+            .set({ status: 'todo', currentAttemptId: null, startedAt: null, updatedAt: new Date() })
+            .where(
+              inArray(
+                tasks.id,
+                activeAttempts.map((attempt) => attempt.taskId)
+              )
+            );
+
+          for (const attempt of activeAttempts) {
+            await tx.insert(agentEvents).values({
+              sessionId,
+              specId: session.specId,
+              taskId: attempt.taskId,
+              eventType: 'GHOST_TASK_RESET',
+              message: 'Released task lease because the session was cancelled',
+              metadata: { attemptId: attempt.id, reason: 'session_cancelled' },
+            });
+          }
+        }
+
+        const [cancelled] = await tx
+          .update(agentSessions)
+          .set({ status: 'cancelled', currentTaskId: null, endedAt: new Date() })
+          .where(eq(agentSessions.id, sessionId))
+          .returning();
+        await tx.insert(auditLog).values({
+          projectId: session.projectId,
+          userId: actorId,
+          action: 'cancel_session',
+          targetType: 'agent_session',
+          targetId: String(sessionId),
+          detail: { recoveredTaskCount: activeAttempts.length },
+        });
+        await tx.insert(agentEvents).values({
+          sessionId,
+          specId: session.specId,
+          eventType: 'SESSION_CANCELLED',
+          message: 'Session cancelled by project administrator',
+          metadata: { actorId, recoveredTaskCount: activeAttempts.length },
+        });
+        return cancelled;
+      })
+    );
   }
 
   async getAll(limit = 50, offset = 0): Promise<AgentSession[]> {
@@ -111,6 +230,17 @@ export class AgentSessionRepository extends BaseRepository {
     );
 
     return result[0] || null;
+  }
+
+  async heartbeatForProject(id: number, projectId: number): Promise<boolean> {
+    const updated = await this.executeQuery(() =>
+      db
+        .update(agentSessions)
+        .set({ lastHeartbeatAt: new Date() })
+        .where(and(eq(agentSessions.id, id), eq(agentSessions.projectId, projectId)))
+        .returning({ id: agentSessions.id })
+    );
+    return updated.length === 1;
   }
 
   async getByProjectId(projectId: number, limit = 50, offset = 0): Promise<AgentSession[]> {
@@ -451,11 +581,12 @@ export class AgentSessionRepository extends BaseRepository {
 
   async complete(
     sessionId: number,
+    projectId: number,
     data: { totalPromptTokens: number; totalCompletionTokens: number }
   ): Promise<void> {
     await this.executeQuery(async () => {
       return await db.transaction(async (tx) => {
-        await tx
+        const [completedSession] = await tx
           .update(agentSessions)
           .set({
             status: 'completed',
@@ -463,7 +594,12 @@ export class AgentSessionRepository extends BaseRepository {
             totalPromptTokens: data.totalPromptTokens,
             totalCompletionTokens: data.totalCompletionTokens,
           })
-          .where(eq(agentSessions.id, sessionId));
+          .where(and(eq(agentSessions.id, sessionId), eq(agentSessions.projectId, projectId)))
+          .returning({ id: agentSessions.id });
+
+        if (!completedSession) {
+          throw new NotFoundError(`Agent session with ID ${sessionId} not found in project`);
+        }
 
         await tx.insert(agentEvents).values({
           sessionId,

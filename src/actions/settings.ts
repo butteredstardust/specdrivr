@@ -1,11 +1,12 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { projectRepository } from '@/repositories/project-repository';
+import { agentConfigRepository } from '@/repositories/agent-config-repository';
 import { auth } from '@/lib/auth';
 import { logger } from '@/lib/logger';
 import { updateAgentConfigSchema } from '@/lib/schemas';
 import { requireAdmin } from '@/lib/rbac';
+import { toPublicAgentConfig } from '@/lib/agent-config-public';
 
 export async function updateAgentConfigAction(formData: FormData) {
   const session = await auth();
@@ -56,15 +57,11 @@ export async function updateAgentConfigAction(formData: FormData) {
   }
 
   try {
-    const config = await projectRepository.updateAgentConfig(
-      projectId,
-      result.data,
-      session.user.id
-    );
+    const config = await agentConfigRepository.upsertByProjectId(projectId, result.data);
 
     revalidatePath(`/projects/${projectId}/settings`);
 
-    return { success: true, data: config };
+    return { success: true, data: toPublicAgentConfig(config) };
   } catch (error: unknown) {
     logger.error(
       {

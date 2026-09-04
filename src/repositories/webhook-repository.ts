@@ -10,6 +10,7 @@ import { eq, and, sql, ne, desc, getTableColumns } from 'drizzle-orm';
 export type { WebhookDeliverySelect as WebhookDelivery } from '@/db/schema';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, DatabaseError } from '@/lib/errors';
+import { encryptCredential } from '@/lib/credential-crypto';
 
 export class WebhookRepository extends BaseRepository {
   async getAll(): Promise<Webhook[]> {
@@ -41,7 +42,7 @@ export class WebhookRepository extends BaseRepository {
         .values({
           projectId: data.projectId,
           url: data.url,
-          secret: data.secret,
+          secret: encryptCredential(data.secret),
           events: data.events,
         })
         .returning()
@@ -58,8 +59,12 @@ export class WebhookRepository extends BaseRepository {
     id: number,
     data: Partial<{ url: string; secret: string | null; events: string[]; isActive: boolean }>
   ): Promise<Webhook> {
+    const updateData = {
+      ...data,
+      ...('secret' in data ? { secret: encryptCredential(data.secret) } : {}),
+    };
     const [updated] = await this.executeQuery(() =>
-      db.update(webhooks).set(data).where(eq(webhooks.id, id)).returning()
+      db.update(webhooks).set(updateData).where(eq(webhooks.id, id)).returning()
     );
 
     if (!updated) {

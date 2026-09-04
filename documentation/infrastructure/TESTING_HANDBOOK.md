@@ -10,6 +10,11 @@ Master Product Specification — Testing Handbook
 
 Specdrivr uses Vitest for unit/integration testing and Playwright for E2E testing. This handbook provides standardized patterns for mocking and data generation.
 
+CI runs `pnpm test:coverage` and rejects regressions below the measured repository baseline: 46%
+lines, 45% statements, 38% functions, and 33% branches. These floors are ratchets and should only
+move upward. The long-term target remains at least 80% coverage for business logic and repository
+code.
+
 ## 2. Mocking the Database
 
 Do NOT mock Drizzle directly. Use the **Test DB + Factory** pattern.

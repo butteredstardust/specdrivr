@@ -32,7 +32,6 @@ export function LiveTerminal({
     const { WebLinksAddon } = await import('@xterm/addon-web-links');
 
     // Import xterm CSS dynamically
-    // @ts-expect-error - CSS modules might not have declarations
     await import('@xterm/xterm/css/xterm.css');
 
     // Resolve theme colors from CSS variables

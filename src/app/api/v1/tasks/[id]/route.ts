@@ -19,6 +19,7 @@ const UpdateTaskSchema = z.object({
   estimateHours: z.number().nonnegative().optional(),
   recommendedModel: z.string().optional(),
   humanContext: z.string().max(5000).optional(),
+  notes: z.string().max(2000).optional().nullable(),
 });
 
 export async function GET(_request: NextRequest, { params }: RouteParams) {
@@ -94,7 +95,20 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const body = await request.json();
     const parsed = UpdateTaskSchema.parse(body);
 
-    const updatedTask = await taskRepository.update(taskId, parsed);
+    const { status, notes, ...taskUpdates } = parsed;
+    const hasTaskUpdates = Object.values(taskUpdates).some((value) => value !== undefined);
+    if (status && hasTaskUpdates) {
+      return NextResponse.json(
+        formatErrorResponse({
+          message: 'Status overrides must be submitted separately from task edits',
+        }),
+        { status: 400 }
+      );
+    }
+
+    const updatedTask = status
+      ? await taskRepository.overrideStatus(taskId, status, session.user.id, notes)
+      : await taskRepository.update(taskId, taskUpdates);
 
     return NextResponse.json({
       data: updatedTask,

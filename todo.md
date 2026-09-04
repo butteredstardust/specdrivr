@@ -4,6 +4,23 @@ Audit branch: `docs/codebase-audit-plan`
 Baseline: merged `main` at `97265f8`  
 Audit date: 2026-09-03
 
+## Implementation Outcome
+
+Implementation completed on 2026-09-04 in the prescribed A1 → D3 order. The branch now contains
+the application, database, worker, deployment, UI, and quality-gate remediations described below.
+
+| Gate | Status   | Delivered outcome                                                                                                                                                                                                                            |
+| ---- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A    | Complete | Deterministic PostgreSQL/Redis tests, pinned pnpm, scoped and revocable agent tokens, redacted encrypted credentials, constrained repository verification, and atomic plan-generation writes.                                                |
+| B    | Complete | Durable task-attempt leases, idempotent scoped completion, cancellation/ghost recovery, independent heartbeats and timeouts, version-fenced plan jobs, repaired plan UI flows, audited human overrides, and persisted bounded verification.  |
+| C    | Complete | Separate migration/web/plan/recovery/webhook processes, liveness/readiness probes, leased durable webhook delivery with bounded retries, request and agent rate limits, and correlation propagation from ingress into plan jobs and workers. |
+| D    | Complete | Correct project/session navigation, responsive core layouts, explicit plan-approval confirmation, real E2E coverage, enforced repository policy, and ratcheted coverage reporting.                                                           |
+
+The coverage gate starts at the measured repository baseline (46% lines, 45% statements, 38%
+functions, 33% branches) and may only move upward toward the 80% target. External APM dashboards
+and alert destinations remain deployment configuration; the application-side correlation IDs and
+structured telemetry needed to feed them are implemented here.
+
 ## Audit Method
 
 Five independent reviewers inspect non-overlapping areas. Every finding must cite concrete evidence,

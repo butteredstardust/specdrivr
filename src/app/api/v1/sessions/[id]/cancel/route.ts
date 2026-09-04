@@ -42,9 +42,8 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const updated = await agentSessionRepository.update(
+    const updated = await agentSessionRepository.cancelWithLeaseRecovery(
       sessionId,
-      { status: 'cancelled', endedAt: new Date() },
       session.user.id
     );
     return NextResponse.json({ data: updated });

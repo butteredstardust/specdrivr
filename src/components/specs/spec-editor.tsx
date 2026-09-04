@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import CodeMirror from '@uiw/react-codemirror';
 import { markdown } from '@codemirror/lang-markdown';
@@ -27,12 +28,16 @@ interface SpecEditorProps {
   initialTitle?: string;
   specId?: number;
   specStatus?: SpecStatus;
-  onSave: (title: string, content: string) => Promise<{ success: boolean; error?: string }>;
+  onSave: (
+    title: string,
+    content: string
+  ) => Promise<{ success: boolean; specId?: number; error?: string }>;
   onPublish?: () => void;
   className?: string;
 }
 
 export function SpecEditor(props: SpecEditorProps) {
+  const router = useRouter();
   const {
     initialContent,
     initialTitle,
@@ -75,11 +80,9 @@ export function SpecEditor(props: SpecEditorProps) {
         return;
       }
 
-      // 2. We need the spec ID to trigger generation.
-      // If it's a new spec, onSave should have handled the redirect or returned the ID.
-      // For now, let's assume we have specId if we're in edit mode.
-      if (_specId) {
-        const genRes = await fetch(`/api/v1/specs/${_specId}/plan/generate`, {
+      const savedSpecId = saveRes.specId ?? _specId;
+      if (savedSpecId) {
+        const genRes = await fetch(`/api/v1/specs/${savedSpecId}/plan/generate`, {
           method: 'POST',
           credentials: 'include',
         });
@@ -87,6 +90,7 @@ export function SpecEditor(props: SpecEditorProps) {
           toast.error('Spec saved, but plan generation failed to start.');
         } else {
           toast.success('Spec saved. Plan generation started.');
+          router.push(`/specs/${savedSpecId}?tab=plan`);
         }
       }
     } catch (err) {
@@ -95,7 +99,7 @@ export function SpecEditor(props: SpecEditorProps) {
     } finally {
       setIsSaving(false);
     }
-  }, [isSaving, onSave, title, content, _specId]);
+  }, [isSaving, onSave, title, content, _specId, router]);
 
   // Ctrl+Enter / Cmd+Enter shortcut
   useEffect(() => {
@@ -123,22 +127,22 @@ export function SpecEditor(props: SpecEditorProps) {
   return (
     <div className={`flex flex-col h-screen${className ? ` ${className}` : ''}`}>
       {/* Top bar */}
-      <div className="border-border-subtle flex shrink-0 items-center gap-3 border-b px-4 py-2">
+      <div className="border-border-subtle flex shrink-0 flex-wrap items-center gap-3 border-b px-3 py-2 sm:px-4">
         <Input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Untitled spec"
-          className="text-text-primary placeholder:text-text-muted flex-1 border-none bg-transparent font-mono text-sm shadow-none outline-none focus-visible:ring-0"
+          className="text-text-primary placeholder:text-text-muted min-w-0 flex-1 basis-full border-none bg-transparent font-mono text-sm shadow-none outline-none focus-visible:ring-0 sm:basis-auto"
         />
         {saveError && <p className="text-status-red text-sm">{saveError}</p>}
-        <div className="flex gap-2">
+        <div className="flex flex-1 gap-2 sm:flex-none">
           <Button
             size="sm"
             variant="outline"
             onClick={handleSave}
             disabled={isSaving || !isDirty}
-            className="h-8 font-mono text-[10px] tracking-widest uppercase"
+            className="h-8 flex-1 font-mono text-[10px] tracking-widest uppercase sm:flex-none"
           >
             {isSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Save Draft'}
           </Button>
@@ -147,7 +151,7 @@ export function SpecEditor(props: SpecEditorProps) {
             variant="blue"
             onClick={handleSaveAndGenerate}
             disabled={isSaving || !title.trim() || content.length < 50}
-            className="h-8 gap-1.5"
+            className="h-8 flex-1 gap-1.5 sm:flex-none"
           >
             {isSaving ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -161,7 +165,7 @@ export function SpecEditor(props: SpecEditorProps) {
         </div>
         <Link
           href="/specs"
-          className="text-text-muted hover:text-text-secondary ml-2 font-mono text-xs transition-colors"
+          className="text-text-muted hover:text-text-secondary font-mono text-xs transition-colors sm:ml-2"
         >
           Back
         </Link>
@@ -184,9 +188,9 @@ export function SpecEditor(props: SpecEditorProps) {
       )}
 
       {/* Split pane */}
-      <div className="grid flex-1 grid-cols-2 overflow-hidden">
+      <div className="grid flex-1 grid-cols-1 overflow-y-auto md:grid-cols-2 md:overflow-hidden">
         {/* Editor pane */}
-        <div className="border-border-subtle h-full overflow-hidden border-r">
+        <div className="border-border-subtle h-[50vh] overflow-hidden border-b md:h-full md:border-r md:border-b-0">
           <CodeMirror
             value={content}
             onChange={setContent}
@@ -199,7 +203,7 @@ export function SpecEditor(props: SpecEditorProps) {
         </div>
 
         {/* Preview pane */}
-        <div className="prose prose-invert prose-sm max-w-none overflow-y-auto p-4">
+        <div className="prose prose-invert prose-sm min-h-[40vh] max-w-none overflow-y-auto p-4 md:min-h-0">
           <ReactMarkdown>{content}</ReactMarkdown>
         </div>
       </div>

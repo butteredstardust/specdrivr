@@ -396,7 +396,9 @@ describe('API Route Integration Tests', () => {
         .values({ planId: plan.id, externalId: 'T-1', title: 'T1' })
         .returning();
 
-      await testDb.insert(schema.taskAttempts).values({ taskId: task.id, seq: 1 });
+      await testDb
+        .insert(schema.taskAttempts)
+        .values({ taskId: task.id, seq: 1, status: 'succeeded', endedAt: new Date() });
       await testDb.insert(schema.taskAttempts).values({ taskId: task.id, seq: 2 });
 
       const req = new NextRequest(`http://localhost/api/v1/tasks/${task.id}/attempts`);

@@ -33,9 +33,9 @@ if pnpm lint-staged; then
 else
     log_audit "pre-commit" "failed" "files:$staged_count"
     echo ""
-    warn "Pre-commit checks failed (NON-BLOCKING)"
+    error "Pre-commit checks failed"
     echo "------------------------------------------------------------"
     echo "Issues detected in staged files. Please fix before pushing."
     echo "------------------------------------------------------------"
-    exit 0
+    exit 1
 fi

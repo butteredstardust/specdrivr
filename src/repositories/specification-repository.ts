@@ -8,11 +8,12 @@ import {
   planJobs,
   type SpecificationSelect as Specification,
 } from '@/db/schema';
-import { eq, and, ne, desc, sql } from 'drizzle-orm';
+import { eq, and, ne, desc, sql, inArray } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, DatabaseError } from '@/lib/errors';
 import { dispatchWebhookEvent } from '@/lib/webhooks';
 import { logger } from '@/lib/logger';
+import { randomUUID } from 'node:crypto';
 
 export { type SpecificationSelect as Specification } from '@/db/schema';
 
@@ -220,6 +221,18 @@ export class SpecificationRepository extends BaseRepository {
 
         if (!version) throw new DatabaseError('Failed to create new specification version');
 
+        await tx
+          .update(planJobs)
+          .set({
+            status: 'cancelled',
+            error: 'Superseded by a newer specification version',
+            completedAt: new Date(),
+            updatedAt: new Date(),
+          })
+          .where(
+            and(eq(planJobs.specId, data.specId), inArray(planJobs.status, ['pending', 'running']))
+          );
+
         // 3. Abandon any non-complete plans for this specification
         // Non-complete = anything that isn't 'completed', 'rejected', or 'abandoned' already
         await tx
@@ -298,6 +311,8 @@ export class SpecificationRepository extends BaseRepository {
               projectId: updatedSpec.projectId,
               specId: updatedSpec.id,
               planId: plan.id,
+              specVersionId: updatedSpec.currentVersionId,
+              generationToken: randomUUID(),
               type: 'generate_plan',
               status: 'pending',
             });

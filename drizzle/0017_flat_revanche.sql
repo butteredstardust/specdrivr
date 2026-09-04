@@ -1,0 +1,1 @@
+ALTER TABLE "api_request_logs" ADD COLUMN "correlation_id" text;

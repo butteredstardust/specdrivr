@@ -5,6 +5,7 @@ import { handleApiError, formatErrorResponse } from '@/lib/error-handler';
 import { requireAdmin } from '@/lib/rbac';
 import { logger } from '@/lib/logger';
 import { z } from 'zod';
+import { randomUUID } from 'node:crypto';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -80,6 +81,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       projectId: spec.projectId,
       specId: spec.id,
       planId: updatedPlan.id,
+      specVersionId: updatedPlan.specVersionId,
+      generationToken: randomUUID(),
       type: 'generate_tasks',
       status: 'pending',
     });

@@ -5,12 +5,23 @@ import { handleApiError } from '@/lib/error-handler';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
+import { requireAdmin } from '@/lib/rbac';
 
-const createTokenSchema = z.object({
-  name: z.string().min(1),
-  projectId: z.number().optional(),
-  expiresAt: z.string().datetime().nullable().optional(),
-});
+const createTokenSchema = z
+  .object({
+    name: z.string().min(1),
+    projectId: z.number().int().positive(),
+    expiresAt: z.string().datetime().nullable().optional(),
+  })
+  .superRefine(({ expiresAt }, ctx) => {
+    if (expiresAt && new Date(expiresAt) <= new Date()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['expiresAt'],
+        message: 'Expiry must be in the future',
+      });
+    }
+  });
 
 export async function GET() {
   const session = await auth();
@@ -41,6 +52,14 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { name, projectId, expiresAt } = createTokenSchema.parse(body);
+
+    const { allowed } = await requireAdmin(session.user.id, projectId);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: { code: 'FORBIDDEN', message: 'Project admin access required' } },
+        { status: 403 }
+      );
+    }
 
     const token = `sdk_${randomBytes(24).toString('hex')}`;
     const prefix = token.slice(0, 10);

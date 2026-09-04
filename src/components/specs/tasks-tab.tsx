@@ -41,37 +41,38 @@ export function TasksTab({ specId, userRole }: TasksTabProps): React.ReactElemen
       list.every((t) => TERMINAL_STATUSES.includes(t.status)),
   });
 
-  const handleUnblock = useCallback(async (taskId: number) => {
-    try {
-      const res = await fetch(`/api/v1/tasks/${taskId}`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'todo' }),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      toast.success('Task unblocked.');
-    } catch (err) {
-      clientLogger.error('TasksTab: unblock failed', err);
-      toast.error('Failed to unblock task.');
-    }
-  }, []);
+  const handleUnblock = useCallback(
+    (taskId: number) => {
+      openDrawer(taskId);
+      toast.info('Add resolution context in the task details to unblock it.');
+    },
+    [openDrawer]
+  );
 
-  const handleOverride = useCallback(async (taskId: number, newStatus: TaskStatus) => {
-    try {
-      const res = await fetch(`/api/v1/tasks/${taskId}`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      toast.success(`Task status set to ${newStatus}.`);
-    } catch (err) {
-      clientLogger.error('TasksTab: override failed', err);
-      toast.error('Failed to override task status.');
-    }
-  }, []);
+  const handleOverride = useCallback(
+    async (taskId: number, newStatus: TaskStatus) => {
+      if (newStatus === 'done') {
+        openDrawer(taskId);
+        toast.info('Record a completion reason in the task details.');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/v1/tasks/${taskId}`, {
+          method: 'PATCH',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus, notes: 'Manual override from task list' }),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        toast.success(`Task status set to ${newStatus}.`);
+      } catch (err) {
+        clientLogger.error('TasksTab: override failed', err);
+        toast.error('Failed to override task status.');
+      }
+    },
+    [openDrawer]
+  );
 
   if (isLoading) {
     return <div className="text-text-muted py-8 text-center font-mono text-xs">Loading tasks…</div>;

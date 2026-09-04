@@ -1,7 +1,7 @@
 import 'server-only';
 import { Octokit } from '@octokit/rest';
 import crypto from 'crypto';
-import { projectRepository } from '@/repositories/project-repository';
+import { agentConfigRepository } from '@/repositories/agent-config-repository';
 import { logger } from './logger';
 
 /**
@@ -15,7 +15,7 @@ export async function getGitHubConfig(projectId: number): Promise<{
   webhookSecret: string | null;
 } | null> {
   try {
-    const config = await projectRepository.getAgentConfig(projectId);
+    const config = await agentConfigRepository.getByProjectId(projectId);
 
     if (!config || !config.githubToken || !config.githubRepo || !config.githubBranch) {
       logger.info(
@@ -43,19 +43,15 @@ export async function getGitHubConfig(projectId: number): Promise<{
 export async function setGitHubConfig(
   projectId: number,
   config: { token: string; repo: string; branch: string; webhookSecret?: string },
-  actorId: string
+  _actorId: string
 ): Promise<void> {
   try {
-    await projectRepository.updateAgentConfig(
-      projectId,
-      {
-        githubToken: config.token,
-        githubRepo: config.repo,
-        githubBranch: config.branch,
-        githubWebhookSecret: config.webhookSecret || null,
-      },
-      actorId
-    );
+    await agentConfigRepository.upsertByProjectId(projectId, {
+      githubToken: config.token,
+      githubRepo: config.repo,
+      githubBranch: config.branch,
+      githubWebhookSecret: config.webhookSecret || null,
+    });
 
     logger.info({ projectId, tokenConfigured: true }, 'GitHub config updated');
   } catch (error) {
@@ -67,18 +63,14 @@ export async function setGitHubConfig(
 /**
  * Remove GitHub config for a project (disconnect).
  */
-export async function removeGitHubConfig(projectId: number, actorId: string): Promise<void> {
+export async function removeGitHubConfig(projectId: number, _actorId: string): Promise<void> {
   try {
-    await projectRepository.updateAgentConfig(
-      projectId,
-      {
-        githubToken: null,
-        githubRepo: null,
-        githubBranch: 'main',
-        githubWebhookSecret: null,
-      },
-      actorId
-    );
+    await agentConfigRepository.upsertByProjectId(projectId, {
+      githubToken: null,
+      githubRepo: null,
+      githubBranch: 'main',
+      githubWebhookSecret: null,
+    });
 
     logger.info({ projectId }, 'GitHub config removed');
   } catch (error) {

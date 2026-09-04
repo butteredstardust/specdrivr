@@ -92,6 +92,48 @@
       "when": 1774046528751,
       "tag": "0012_sudden_electro",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1788466142979,
+      "tag": "0013_unusual_hellcat",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1788466349552,
+      "tag": "0014_glossy_post",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1788466558881,
+      "tag": "0015_wealthy_golden_guardian",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1788496305167,
+      "tag": "0016_high_hitman",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1788496545169,
+      "tag": "0017_flat_revanche",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1788496727780,
+      "tag": "0018_curly_toxin",
+      "breakpoints": true
     }
   ]
 }

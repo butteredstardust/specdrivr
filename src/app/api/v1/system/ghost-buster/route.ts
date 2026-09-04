@@ -28,11 +28,13 @@ export async function POST(request: NextRequest) {
   }
 
   const { searchParams } = new URL(request.url);
-  // I-5: Clamp threshold to a safe range (1–60 minutes) to prevent abuse
-  const threshold = Math.max(1, Math.min(60, parseInt(searchParams.get('threshold') || '5', 10)));
+  const threshold = Math.max(
+    60,
+    Math.min(3600, parseInt(searchParams.get('threshold') || '60', 10))
+  );
 
   try {
-    logger.info(`👻 System Ghost Buster starting (threshold: ${threshold}m)...`);
+    logger.info(`👻 System Ghost Buster starting (threshold: ${threshold}s)...`);
     const recoveredCount = await agentSessionRepository.recoverGhostSessions(threshold);
     lastRunAt = Date.now();
 

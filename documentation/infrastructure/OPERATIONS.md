@@ -55,7 +55,8 @@ _Spec-driven autonomous code execution for engineering teams_
 - Structured logging: Pino, JSON format, level-gated (info in prod, debug in dev). Correlation ID on every request.
 - Never log: passwords, tokens, session cookies, PII (email, name), spec content, or diff content.
 - Error tracking: Sentry or equivalent - capture unhandled exceptions with request context. PII scrubbed before submission.
-- Health endpoint: GET /api/health returns { status: "ok", db: bool, redis: bool } - used by load balancer.
+- Liveness: unauthenticated `GET /api/health/live`; readiness: unauthenticated
+  `GET /api/health`, which returns 503 unless PostgreSQL and Redis respond within two seconds.
 
 # **27\. Document Control**
 

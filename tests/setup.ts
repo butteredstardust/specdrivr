@@ -7,6 +7,15 @@ import postgres from 'postgres';
 // Mock server-only to allow importing server-side modules in tests
 vi.mock('server-only', () => ({}));
 
+// Repository methods intentionally dispatch webhooks outside their database
+// transactions. Unit/integration tests exercise persistence invariants, not
+// outbound delivery, so prevent those detached reads from leaking into the
+// next test's database reset. Webhook behavior has a dedicated test boundary.
+vi.mock('@/lib/webhooks', () => ({
+  dispatchWebhookEvent: vi.fn().mockResolvedValue(undefined),
+  webhookService: { dispatch: vi.fn().mockResolvedValue(undefined) },
+}));
+
 // Node 25+ ships a native localStorage that lacks the full Storage API
 const createLocalStorageMock = () => {
   const store: Record<string, string> = {};

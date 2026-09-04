@@ -70,6 +70,7 @@ export async function safeQuery<T>(
   try {
     return await withRetry(operation, options);
   } catch (error) {
+    logger.error({ error }, 'Database query failed');
     throw new DatabaseError('Database query failed', error instanceof Error ? error : undefined);
   }
 }

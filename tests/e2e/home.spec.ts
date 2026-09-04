@@ -1,14 +1,12 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Smoke Tests', () => {
-  test('homepage title is correct', async ({ page }) => {
+test.describe('Unauthenticated entry flow', () => {
+  test('redirects the protected homepage to a usable login form', async ({ page }) => {
     await page.goto('/');
-
-    // Verify the page title (this usually works even if JS is loading)
+    await expect(page).toHaveURL(/\/login\?next=%2F$/);
     await expect(page).toHaveTitle(/Specdrivr/);
-
-    // Verify that some text from the layout or basic structure is visible
-    // We use a more generic check to avoid issues with hydration/loading states
-    await expect(page.locator('body')).not.toBeEmpty();
+    await expect(page.getByLabel('Email')).toBeVisible();
+    await expect(page.getByLabel('Password')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Sign In' })).toBeEnabled();
   });
 });

@@ -78,6 +78,7 @@ export async function GET(request: NextRequest) {
         agentConfig: agentConfig
           ? {
               backend: agentConfig.backend,
+              taskTimeoutSeconds: agentConfig.taskTimeoutSeconds,
             }
           : null,
       },
