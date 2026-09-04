@@ -110,9 +110,7 @@ export function ActivityTab({ specId, specStatus }: ActivityTabProps): React.Rea
 
   return (
     <div>
-      <p className="text-fg-muted mb-3 font-mono text-[10px] tracking-[0.2em] uppercase">
-        Activity Log
-      </p>
+      <p className="text-fg-muted text-2xs mb-3">Activity Log</p>
       <div className="space-y-1">
         {sorted.map((event, idx) => (
           <div

@@ -183,9 +183,7 @@ export function DashboardClient({ initialSessions, initialTasks }: DashboardClie
               </div>
               <div className="animate-fade-in-up grid grid-cols-1 gap-6 lg:grid-cols-[1.2fr_1fr]">
                 <div>
-                  <h2 className="text-fg-secondary mb-2 font-mono text-xs tracking-widest uppercase">
-                    Live Terminal
-                  </h2>
+                  <h2 className="text-fg-secondary mb-2 text-xs">Live Terminal</h2>
                   <div className="relative overflow-hidden rounded-md">
                     <LiveTerminal
                       sessionId={activeSession.id}

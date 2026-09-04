@@ -100,7 +100,7 @@ function LiveDuration({ startedAt }: { startedAt: string }) {
     return () => clearInterval(id);
   }, [startedAt]);
 
-  return <span className="text-fg-muted font-mono text-[10px]">{elapsed}</span>;
+  return <span className="text-fg-muted text-2xs font-mono">{elapsed}</span>;
 }
 
 function taskDuration(task: TaskItem): React.ReactNode {
@@ -112,12 +112,12 @@ function taskDuration(task: TaskItem): React.ReactNode {
     const mm = String(Math.floor(secs / 60)).padStart(2, '0');
     const ss = String(secs % 60).padStart(2, '0');
     return (
-      <span className="text-fg-muted font-mono text-[10px]">
+      <span className="text-fg-muted text-2xs font-mono">
         {mm}:{ss}
       </span>
     );
   }
-  return <span className="text-fg-muted font-mono text-[10px]">—</span>;
+  return <span className="text-fg-muted text-2xs font-mono">—</span>;
 }
 
 interface TaskTimelineProps {
@@ -141,9 +141,7 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
 
   return (
     <div>
-      <p className="text-fg-muted mb-6 font-mono text-[10px] tracking-[0.2em] uppercase">
-        Task Execution Timeline
-      </p>
+      <p className="text-fg-muted text-2xs mb-6">Task Execution Timeline</p>
       {isLoading && tasks.length === 0 ? (
         <p className="text-fg-muted font-mono text-xs">Loading tasks…</p>
       ) : tasks.length === 0 ? (
@@ -189,7 +187,7 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
                         <div className="mb-1 flex items-center gap-2">
-                          <span className="text-fg-muted shrink-0 font-mono text-[10px] font-semibold tracking-wider uppercase">
+                          <span className="text-fg-muted text-2xs shrink-0 font-semibold">
                             {task.externalId}
                           </span>
                           <div className={`flex items-center gap-1 ${colors.text}`}>
@@ -201,7 +199,7 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
                       <div className="flex shrink-0 flex-col items-end gap-1">
                         {taskDuration(task)}
                         <span
-                          className={`flex items-center gap-1 rounded px-1.5 py-0.5 font-mono text-[9px] tracking-wider uppercase ${colors.bg} ${colors.text}`}
+                          className={`text-2xs flex items-center gap-1 rounded px-1.5 py-0.5 ${colors.bg} ${colors.text}`}
                         >
                           {task.status.replace(/_/g, ' ')}
                           {isExpanded ? (
@@ -220,20 +218,18 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
                       >
                         {task.description && (
                           <div>
-                            <span className="text-fg-muted mb-0.5 block font-mono text-[9px] tracking-wider uppercase">
-                              Description
-                            </span>
-                            <p className="text-fg font-mono text-[10px] whitespace-pre-wrap">
+                            <span className="text-fg-muted text-2xs mb-0.5 block">Description</span>
+                            <p className="text-fg text-2xs font-mono whitespace-pre-wrap">
                               {task.description}
                             </p>
                           </div>
                         )}
                         {task.blockedReason && (
                           <div>
-                            <span className="text-danger mb-0.5 block font-mono text-[9px] tracking-wider uppercase">
+                            <span className="text-danger text-2xs mb-0.5 block">
                               Blocked Reason
                             </span>
-                            <p className="text-danger font-mono text-[10px] whitespace-pre-wrap">
+                            <p className="text-danger text-2xs font-mono whitespace-pre-wrap">
                               {task.blockedReason}
                             </p>
                           </div>
@@ -241,20 +237,18 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
                         <div className="mt-2 flex gap-4">
                           {task.attemptCount !== undefined && task.attemptCount > 0 && (
                             <div>
-                              <span className="text-fg-muted mb-0.5 block font-mono text-[9px] tracking-wider uppercase">
-                                Attempts
-                              </span>
-                              <p className="text-fg font-mono text-[10px]">{task.attemptCount}</p>
+                              <span className="text-fg-muted text-2xs mb-0.5 block">Attempts</span>
+                              <p className="text-fg text-2xs font-mono">{task.attemptCount}</p>
                             </div>
                           )}
                           {task.verificationPassed !== undefined &&
                             task.verificationPassed !== null && (
                               <div>
-                                <span className="text-fg-muted mb-0.5 block font-mono text-[9px] tracking-wider uppercase">
+                                <span className="text-fg-muted text-2xs mb-0.5 block">
                                   Verification
                                 </span>
                                 <p
-                                  className={`font-mono text-[10px] ${task.verificationPassed ? 'text-success' : 'text-danger'}`}
+                                  className={`text-2xs font-mono ${task.verificationPassed ? 'text-success' : 'text-danger'}`}
                                 >
                                   {task.verificationPassed ? 'Passed' : 'Failed'}
                                 </p>

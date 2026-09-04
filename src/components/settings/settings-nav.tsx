@@ -61,9 +61,7 @@ export function SettingsNav({ userRole }: SettingsNavProps) {
     <nav className="flex flex-col gap-5">
       {NAV_GROUPS.map((group) => (
         <div key={group.label}>
-          <p className="text-fg-secondary mb-1 px-2 font-mono text-xs tracking-[0.15em] uppercase">
-            {group.label}
-          </p>
+          <p className="text-fg-secondary mb-1 px-2 text-xs">{group.label}</p>
           <div className="flex flex-col gap-0.5">
             {group.items
               .filter((item) => !item.hideForRoles?.includes(userRole))
@@ -90,7 +88,7 @@ export function SettingsNav({ userRole }: SettingsNavProps) {
             <Link
               href="/settings/danger"
               className={cn(
-                'mt-3 block rounded px-2 py-1.5 font-mono text-xs tracking-wider uppercase transition-colors',
+                'mt-3 block rounded px-2 py-1.5 text-xs transition-colors',
                 isDangerActive
                   ? 'bg-danger-bg text-danger font-medium'
                   : 'text-danger/70 hover:text-danger'

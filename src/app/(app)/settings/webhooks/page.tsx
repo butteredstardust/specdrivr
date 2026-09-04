@@ -12,9 +12,7 @@ export default async function WebhooksPage() {
 
   return (
     <div className="flex max-w-4xl flex-col gap-8">
-      <h2 className="text-fg-muted font-mono text-[10px] tracking-[0.2em] uppercase">
-        Webhook Delivery Log
-      </h2>
+      <h2 className="text-fg-muted text-2xs">Webhook Delivery Log</h2>
 
       {project ? (
         <WebhookLogSection projectId={project.id} />

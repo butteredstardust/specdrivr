@@ -87,12 +87,12 @@ Target: one consistent vintage across all primitives.
 
 ## Phase 4 — App shell
 
-- [ ] `src/app/layout.tsx` — theme provider, font wiring, Toaster styling off the new tokens
-- [ ] `src/components/shell/sidebar.tsx` (386 LOC) — rebuild nav; reconcile the **6 real nav items vs 4 documented**
-- [ ] `src/components/shell/top-bar.tsx` (233 LOC) — rebuild
-- [ ] `src/app/(app)/layout.tsx` — replace ad-hoc `px-8 py-8 md:px-10` with the Phase 1 spacing scale; keep the Suspense skeleton but rebuild it to match the new shell exactly
-- [ ] `src/components/layout/systems-bar.tsx` — keep or retire (decide against the clean direction)
-- [ ] Define and apply a real breakpoint strategy — audit found breakpoint use is thin and inconsistent
+- [x] `src/app/layout.tsx` — theme provider, font wiring, Toaster styling off the new tokens
+- [x] `src/components/shell/sidebar.tsx` (386 LOC) — rebuild nav; reconcile the **6 real nav items vs 4 documented**
+- [x] `src/components/shell/top-bar.tsx` (233 LOC) — rebuild
+- [x] `src/app/(app)/layout.tsx` — replace ad-hoc `px-8 py-8 md:px-10` with the Phase 1 spacing scale; keep the Suspense skeleton but rebuild it to match the new shell exactly
+- [x] `src/components/layout/systems-bar.tsx` — keep or retire (decide against the clean direction)
+- [x] Define and apply a real breakpoint strategy — audit found breakpoint use is thin and inconsistent
 
 ## Phase 5 — Feature surfaces
 

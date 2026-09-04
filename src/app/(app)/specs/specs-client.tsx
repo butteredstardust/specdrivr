@@ -182,7 +182,7 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
             <Search className="text-fg-muted absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
             <Input
               placeholder="SEARCH SPECS..."
-              className="bg-surface-inset h-8 pl-8 font-mono text-[10px] tracking-[0.08em] uppercase transition-all"
+              className="bg-surface-inset text-2xs h-8 pl-8 transition-all"
               value={search}
               onChange={(e) => setSearch(e.target.value || null)}
             />
@@ -212,7 +212,7 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
                   size="sm"
                   onClick={() => setActiveTab(value)}
                   className={cn(
-                    'h-7 px-3 font-mono text-[10px] tracking-[0.08em] uppercase transition-all',
+                    'text-2xs h-7 px-3 transition-all',
                     isActive
                       ? 'bg-surface-inset text-white'
                       : 'text-fg-muted hover:bg-surface-inset hover:text-fg'
@@ -248,7 +248,7 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
           ) : (
             <Table className="caption-bottom text-sm">
               <TableHeader>
-                <TableRow className="border-line text-fg-muted font-mono text-[11px] tracking-[0.08em] uppercase hover:bg-transparent">
+                <TableRow className="border-line text-fg-muted text-2xs hover:bg-transparent">
                   <TableHead className="h-auto w-36 px-6 py-2.5 font-medium">ID</TableHead>
                   <TableHead className="h-auto px-3 py-2.5 font-medium">Name</TableHead>
                   <TableHead className="h-auto w-36 px-3 py-2.5 font-medium">Status</TableHead>
@@ -271,10 +271,10 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
                     <TableCell className="px-3 py-3">
                       <StatusBadge status={spec.status} />
                     </TableCell>
-                    <TableCell className="text-fg-muted px-3 py-3 font-mono text-[10px]">
+                    <TableCell className="text-fg-muted text-2xs px-3 py-3 font-mono">
                       {spec.currentVersionNumber ? `v${spec.currentVersionNumber}` : '—'}
                     </TableCell>
-                    <TableCell className="text-fg-muted px-3 py-3 font-mono text-[10px]">
+                    <TableCell className="text-fg-muted text-2xs px-3 py-3 font-mono">
                       {spec.taskCount != null ? `${spec.taskCount}` : '—'}
                     </TableCell>
                     <TableCell

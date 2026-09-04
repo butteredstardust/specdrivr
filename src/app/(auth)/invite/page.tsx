@@ -100,7 +100,7 @@ export default function InvitePage() {
       <CardHeader className="items-center gap-2 pb-2">
         <BrandMark size={48} />
         <div className="text-center">
-          <p className="font-mono text-sm font-bold tracking-widest">SPECDRIVR</p>
+          <p className="text-fg font-mono text-lg font-semibold tracking-[-0.04em]">specdrivr</p>
           {invite && (
             <p className="text-fg-muted text-xs">
               {invite.inviterName} invited you to <strong>{invite.projectName}</strong>

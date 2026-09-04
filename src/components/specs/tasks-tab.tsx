@@ -113,9 +113,7 @@ export function TasksTab({ specId, userRole }: TasksTabProps): React.ReactElemen
 
       {list.every((t) => t.status === 'todo') && (
         <div className="border-line bg-surface-inset rounded border px-3 py-2">
-          <p className="text-fg-muted font-mono text-[10px] tracking-wider uppercase">
-            Tasks will begin executing after plan approval.
-          </p>
+          <p className="text-fg-muted text-2xs">Tasks will begin executing after plan approval.</p>
         </div>
       )}
 

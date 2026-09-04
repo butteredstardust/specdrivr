@@ -280,9 +280,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
         ) : (
           <>
             <StatusIcon size={24} status="working" />
-            <p className="text-fg-secondary font-mono text-sm tracking-widest uppercase">
-              GENERATING PLAN…
-            </p>
+            <p className="text-fg-secondary text-sm">GENERATING PLAN…</p>
             <ElapsedTimer startedAt={startedAt} />
             {isSlowWarning && (
               <p className="text-warning max-w-xs text-center font-mono text-xs">
@@ -333,9 +331,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
       <div className="space-y-4">
         <div className={`flex items-center gap-2.5 rounded border px-3 py-2.5 ${bannerBorder}`}>
           <StatusIcon size={16} status={isExecuting ? 'working' : 'idle'} />
-          <span className={`font-mono text-xs font-semibold tracking-widest ${bannerText}`}>
-            {bannerLabel}
-          </span>
+          <span className={`text-xs font-semibold ${bannerText}`}>{bannerLabel}</span>
           <span className="text-fg-muted font-mono text-xs">{timeAgo(plan.updatedAt)}</span>
         </div>
         <div className="border-line bg-surface-inset border-line rounded-md border p-4">
@@ -422,10 +418,8 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
         <div className="border-warning-border bg-warning-bg flex items-center gap-3 rounded-md border px-3 py-2.5">
           <StatusIcon size={16} status="working" />
           <div className="flex flex-1 flex-col gap-0.5">
-            <span className="text-warning font-mono text-xs font-semibold tracking-widest uppercase">
-              Plan Ready for Review
-            </span>
-            <span className="text-fg-muted font-mono text-[10px]">
+            <span className="text-warning text-xs font-semibold">Plan Ready for Review</span>
+            <span className="text-fg-muted text-2xs font-mono">
               {timeAgo(plan.createdAt)}
               {plan.taskCount != null ? ` · ${plan.taskCount} tasks` : ''}
             </span>
@@ -490,7 +484,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
               <Button
                 size="sm"
                 variant="outline"
-                className="border-success-border text-success hover:bg-success-bg h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase"
+                className="border-success-border text-success hover:bg-success-bg text-2xs h-8 gap-1.5"
                 onClick={() => setApproveOpen(true)}
                 disabled={isActioning}
               >
@@ -504,7 +498,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-success-border text-success h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase opacity-50"
+                      className="border-success-border text-success text-2xs h-8 gap-1.5 opacity-50"
                       disabled
                       aria-disabled
                     >
@@ -522,9 +516,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
         {/* Plan document (Editable when pending_approval) */}
         <div>
           <div className="mb-2 flex items-center justify-between">
-            <p className="text-fg-muted font-mono text-[10px] tracking-[0.2em] uppercase">
-              Plan Document
-            </p>
+            <p className="text-fg-muted text-2xs">Plan Document</p>
             {canMember && (
               <div className="flex gap-2">
                 {isEditing ? (
@@ -532,7 +524,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="h-6 text-[10px]"
+                      className="text-2xs h-6"
                       onClick={() => {
                         setEditContent(plan.markdownContent);
                         setIsEditing(false);
@@ -544,7 +536,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="h-6 text-[10px]"
+                      className="text-2xs h-6"
                       onClick={handleSaveEdit}
                       disabled={isActioning || editContent === plan.markdownContent}
                     >
@@ -555,7 +547,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="h-6 text-[10px]"
+                    className="text-2xs h-6"
                     onClick={() => setIsEditing(true)}
                   >
                     Edit Plan
@@ -605,14 +597,14 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
                 variant="warning"
                 onClick={handleRequestChanges}
                 disabled={isActioning || !feedbackText.trim()}
-                className="h-8 font-mono text-[10px] tracking-widest uppercase"
+                className="text-2xs h-8"
               >
                 Submit Feedback
               </Button>
               <Button
                 size="sm"
                 variant="ghost"
-                className="h-8 font-mono text-[10px] tracking-widest uppercase"
+                className="text-2xs h-8"
                 onClick={() => {
                   setChangesOpen(false);
                   setFeedbackText('');
@@ -638,7 +630,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
               <Button
                 size="sm"
                 variant="outline"
-                className="bg-danger-bg border-danger-border text-danger h-8 font-mono text-[10px] tracking-widest uppercase"
+                className="bg-danger-bg border-danger-border text-danger text-2xs h-8"
                 onClick={handleReject}
                 disabled={isActioning || !rejectText.trim()}
               >
@@ -647,7 +639,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
               <Button
                 size="sm"
                 variant="ghost"
-                className="h-8 font-mono text-[10px] tracking-widest uppercase"
+                className="text-2xs h-8"
                 onClick={() => {
                   setRejectOpen(false);
                   setRejectText('');

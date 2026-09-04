@@ -84,7 +84,7 @@ export function SessionsFilterBar({ specs }: SessionsFilterBarProps) {
         <Search className="text-fg-muted absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
         <Input
           placeholder="SEARCH SESSIONS..."
-          className="bg-surface-inset h-8 pl-8 font-mono text-[10px] tracking-widest uppercase transition-all"
+          className="bg-surface-inset text-2xs h-8 pl-8 transition-all"
           value={search}
           onChange={(e) => setSearch(e.target.value || null)}
         />
@@ -113,7 +113,7 @@ export function SessionsFilterBar({ specs }: SessionsFilterBarProps) {
               size="sm"
               onClick={() => setStatus(opt.value === 'all' ? null : opt.value)}
               className={cn(
-                'h-7 px-3 font-mono text-[10px] tracking-widest transition-all',
+                'text-2xs h-7 px-3 font-mono transition-all',
                 isActive
                   ? 'bg-surface-inset text-white'
                   : 'text-fg-muted hover:bg-surface-inset hover:text-fg'
@@ -130,15 +130,15 @@ export function SessionsFilterBar({ specs }: SessionsFilterBarProps) {
         <div className="flex items-center gap-2">
           <Hash className="text-fg-muted h-3 w-3" />
           <Select value={specId} onValueChange={(val) => setSpecId(val === 'all' ? null : val)}>
-            <SelectTrigger className="bg-surface-inset h-8 w-44 font-mono text-[10px] tracking-widest uppercase">
-              <SelectValue placeholder="ALL SPECS" />
+            <SelectTrigger className="bg-surface-inset text-2xs h-8 w-44">
+              <SelectValue placeholder="All specs" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all" className="font-mono text-[10px]">
+              <SelectItem value="all" className="text-2xs font-mono">
                 ALL SPECS
               </SelectItem>
               {specs.map((spec) => (
-                <SelectItem key={spec.id} value={String(spec.id)} className="font-mono text-[10px]">
+                <SelectItem key={spec.id} value={String(spec.id)} className="text-2xs font-mono">
                   {spec.name.toUpperCase()}
                 </SelectItem>
               ))}
@@ -153,14 +153,14 @@ export function SessionsFilterBar({ specs }: SessionsFilterBarProps) {
             <DatePicker
               date={parseDateString(from)}
               setDate={(d) => setFrom(formatDateString(d) || null)}
-              placeholder="FROM"
-              className="h-8 w-28 rounded-r-none border-r-0 font-mono text-[9px] tracking-widest uppercase"
+              placeholder="From"
+              className="text-2xs h-8 w-28 rounded-r-none border-r-0"
             />
             <DatePicker
               date={parseDateString(to)}
               setDate={(d) => setTo(formatDateString(d) || null)}
-              placeholder="TO"
-              className="h-8 w-28 rounded-l-none font-mono text-[9px] tracking-widest uppercase"
+              placeholder="To"
+              className="text-2xs h-8 w-28 rounded-l-none"
             />
           </div>
         </div>
@@ -170,7 +170,7 @@ export function SessionsFilterBar({ specs }: SessionsFilterBarProps) {
             variant="ghost"
             size="sm"
             onClick={clearFilters}
-            className="text-fg-muted hover:text-danger h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase transition-colors"
+            className="text-fg-muted hover:text-danger text-2xs h-8 gap-1.5 transition-colors"
           >
             <X className="h-3.5 w-3.5" />
             CLEAR

@@ -61,7 +61,7 @@ export default function ForgotPasswordPage() {
     <Card className="border-line bg-surface-raised w-full max-w-sm">
       <CardHeader className="items-center gap-2 pb-2">
         <BrandMark size={48} />
-        <p className="font-mono text-sm font-bold tracking-widest">SPECDRIVR</p>
+        <p className="text-fg font-mono text-lg font-semibold tracking-[-0.04em]">specdrivr</p>
       </CardHeader>
       <CardContent>
         {state === 'sent' ? (
@@ -91,7 +91,7 @@ export default function ForgotPasswordPage() {
                 placeholder="you@example.com"
                 className="border-line bg-surface-base"
               />
-              {errors.email && <p className="text-danger text-[10px]">{errors.email.message}</p>}
+              {errors.email && <p className="text-danger text-2xs">{errors.email.message}</p>}
             </div>
             <Button
               type="submit"

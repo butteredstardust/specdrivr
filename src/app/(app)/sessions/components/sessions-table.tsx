@@ -181,7 +181,7 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
     <TooltipProvider>
       <Table>
         <TableHeader>
-          <TableRow className="border-line text-fg-secondary font-mono text-xs tracking-[0.15em] uppercase hover:bg-transparent">
+          <TableRow className="border-line text-fg-secondary text-xs hover:bg-transparent">
             <TableHead className="w-10 px-3"></TableHead>
             <TableHead className="w-36 px-6 font-medium">Session ID</TableHead>
             <TableHead className="w-36 px-3 font-medium">Status</TableHead>
@@ -197,9 +197,7 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
             <React.Fragment key={`group-${label}`}>
               <TableRow className="border-0 hover:bg-transparent">
                 <TableCell colSpan={8} className="px-6 pt-4 pb-1">
-                  <span className="text-fg-muted font-mono text-[10px] font-semibold tracking-[0.2em] uppercase">
-                    {label}
-                  </span>
+                  <span className="text-fg-muted text-2xs font-semibold">{label}</span>
                 </TableCell>
               </TableRow>
               {groupSessions.map((session) => {
@@ -245,17 +243,17 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-fg-muted px-3 py-3 font-mono text-[10px] uppercase">
+                      <TableCell className="text-fg-muted text-2xs px-3 py-3">
                         {new Date(session.startedAt).toLocaleTimeString([], {
                           hour: '2-digit',
                           minute: '2-digit',
                         })}
                       </TableCell>
-                      <TableCell className="text-fg-muted px-3 py-3 font-mono text-[10px]">
+                      <TableCell className="text-fg-muted text-2xs px-3 py-3 font-mono">
                         {formatDuration(session)}
                       </TableCell>
                       <TableCell className="px-3 py-3">
-                        <span className="bg-surface-inset text-fg-muted rounded px-1.5 py-0.5 font-mono text-[10px] whitespace-nowrap">
+                        <span className="bg-surface-inset text-fg-muted text-2xs rounded px-1.5 py-0.5 font-mono whitespace-nowrap">
                           {session.tasksSucceeded}/{session.totalTasks ?? session.tasksExecuted}{' '}
                           tasks
                         </span>
@@ -268,7 +266,7 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
                               size="sm"
                               disabled={cancellingIds.has(session.id)}
                               onClick={() => handleCancel(session.id)}
-                              className="h-6 px-2 font-mono text-[10px] tracking-wider uppercase transition-colors"
+                              className="text-2xs h-6 px-2 transition-colors"
                             >
                               <XCircle className="mr-1 h-3 w-3" />
                               {cancellingIds.has(session.id) ? 'Cancelling…' : 'Cancel'}

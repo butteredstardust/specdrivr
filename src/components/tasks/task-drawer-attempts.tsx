@@ -100,10 +100,7 @@ export function TaskDrawerAttempts({ taskId, taskStatus }: TaskDrawerAttemptsPro
               />
               <span className="text-fg font-mono text-sm font-medium">Attempt #{attempt.seq}</span>
               <span
-                className={cn(
-                  'rounded-sm px-2 py-0.5 font-mono text-[10px] tracking-widest uppercase',
-                  statusBadgeClass[attempt.status]
-                )}
+                className={cn('text-2xs rounded-sm px-2 py-0.5', statusBadgeClass[attempt.status])}
               >
                 {attempt.status}
               </span>

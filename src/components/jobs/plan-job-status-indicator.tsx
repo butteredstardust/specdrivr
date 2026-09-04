@@ -38,14 +38,12 @@ export function PlanJobStatusIndicator({ projectId, className }: PlanJobStatusIn
         </div>
       </div>
       <div className="flex flex-col gap-0.5">
-        <span className="text-fg-muted font-mono text-[10px] tracking-[0.08em] uppercase">
-          AI AGENT WORKING
-        </span>
+        <span className="text-fg-muted text-2xs">AI AGENT WORKING</span>
         <span className="text-fg text-xs font-medium">
           {isGeneratingTasks ? 'Architecting tasks...' : 'Generating execution plan...'}
         </span>
       </div>
-      <Badge variant="info" className="ml-2 h-5 px-2 text-[9px]">
+      <Badge variant="info" className="text-2xs ml-2 h-5 px-2">
         {job.status.toUpperCase()}
       </Badge>
     </div>

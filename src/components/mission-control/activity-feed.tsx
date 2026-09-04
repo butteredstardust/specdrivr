@@ -30,13 +30,9 @@ export function ProjectActivityFeed({ projectId, className }: ProjectActivityFee
   if (!activity || activity.length === 0) {
     return (
       <div className={cn('flex flex-col gap-4', className)}>
-        <h2 className="text-fg-muted font-mono text-[10px] tracking-[0.15em] uppercase opacity-70">
-          Activity Feed
-        </h2>
+        <h2 className="text-fg-muted text-2xs opacity-70">Activity Feed</h2>
         <div className="bg-surface-inset/30 border-line-subtle flex h-24 items-center justify-center rounded-lg border border-dashed px-4 py-8 text-center">
-          <p className="text-fg-muted font-mono text-[10px] tracking-wider uppercase opacity-50">
-            Waiting for activity...
-          </p>
+          <p className="text-fg-muted text-2xs opacity-50">Waiting for activity...</p>
         </div>
       </div>
     );
@@ -44,9 +40,7 @@ export function ProjectActivityFeed({ projectId, className }: ProjectActivityFee
 
   return (
     <div className={cn('flex flex-col gap-4', className)}>
-      <h2 className="text-fg-muted font-mono text-[10px] tracking-[0.15em] uppercase opacity-70">
-        Activity Feed
-      </h2>
+      <h2 className="text-fg-muted text-2xs opacity-70">Activity Feed</h2>
       <div className="flex flex-col gap-1.5">
         {activity.map((item) => (
           <ActivityRow key={`${item.type}-${item.id}`} item={item} />
@@ -74,7 +68,7 @@ function ActivityRow({ item }: { item: ActivityItem }) {
         <p className="text-fg-secondary group-hover:text-fg text-xs leading-relaxed break-words transition-colors">
           {item.message}
         </p>
-        <div className="text-fg-muted flex items-center gap-2 font-mono text-[9px] tracking-wider uppercase opacity-70">
+        <div className="text-fg-muted text-2xs flex items-center gap-2 opacity-70">
           <span>{formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}</span>
           {item.sessionId && (
             <span className="text-fg-muted/40 font-mono tracking-normal">

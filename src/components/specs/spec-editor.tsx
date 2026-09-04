@@ -142,7 +142,7 @@ export function SpecEditor(props: SpecEditorProps) {
             variant="outline"
             onClick={handleSave}
             disabled={isSaving || !isDirty}
-            className="h-8 flex-1 font-mono text-[11px] tracking-[0.08em] uppercase sm:flex-none"
+            className="text-2xs h-8 flex-1 sm:flex-none"
           >
             {isSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Save Draft'}
           </Button>

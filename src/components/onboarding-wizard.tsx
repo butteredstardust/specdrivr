@@ -120,7 +120,7 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
               <div className="mb-3 flex justify-center">
                 <BrandMark size={64} />
               </div>
-              <DialogTitle className="text-fg font-mono text-lg tracking-tight uppercase">
+              <DialogTitle className="text-fg text-lg tracking-tight">
                 Welcome to Specdrivr
               </DialogTitle>
               <DialogDescription className="text-fg-secondary">
@@ -138,7 +138,7 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
         {step === 2 && (
           <>
             <DialogHeader>
-              <DialogTitle className="text-fg font-mono text-lg tracking-tight uppercase">
+              <DialogTitle className="text-fg text-lg tracking-tight">
                 Identify Yourself
               </DialogTitle>
               <DialogDescription className="text-fg-secondary">
@@ -154,13 +154,9 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
                 className="bg-surface-base border-line font-mono"
               />
               {!displayName.trim() && !nameError && (
-                <p className="text-fg-muted font-mono text-[10px] uppercase">
-                  Name cannot be empty.
-                </p>
+                <p className="text-fg-muted text-2xs">Name cannot be empty.</p>
               )}
-              {nameError && (
-                <p className="text-danger font-mono text-[10px] uppercase">{nameError}</p>
-              )}
+              {nameError && <p className="text-danger text-2xs">{nameError}</p>}
             </div>
             <div className="mt-6 flex justify-end">
               <Button
@@ -178,7 +174,7 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
         {step === 3 && (
           <>
             <DialogHeader>
-              <DialogTitle className="text-fg font-mono text-lg tracking-tight uppercase">
+              <DialogTitle className="text-fg text-lg tracking-tight">
                 Initialize Project
               </DialogTitle>
               <DialogDescription className="text-fg-secondary">
@@ -193,9 +189,7 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
                 disabled={isSubmitting}
                 className="bg-surface-base border-line font-mono"
               />
-              {projectError && (
-                <p className="text-danger font-mono text-[10px] uppercase">{projectError}</p>
-              )}
+              {projectError && <p className="text-danger text-2xs">{projectError}</p>}
             </div>
             <div className="mt-6 flex justify-end">
               <Button

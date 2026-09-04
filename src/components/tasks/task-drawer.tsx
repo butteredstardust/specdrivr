@@ -277,7 +277,7 @@ export function TaskDrawer() {
                     <TabsTrigger
                       key={tab}
                       value={tab}
-                      className="data-[state=active]:border-accent data-[state=active]:text-fg data-[state=inactive]:text-fg-muted hover:text-fg-secondary rounded-none bg-transparent px-1 py-2.5 font-mono text-xs tracking-[0.08em] uppercase shadow-none transition-colors data-[state=active]:border-b-2 data-[state=inactive]:border-transparent"
+                      className="data-[state=active]:border-accent data-[state=active]:text-fg data-[state=inactive]:text-fg-muted hover:text-fg-secondary rounded-none bg-transparent px-1 py-2.5 text-xs shadow-none transition-colors data-[state=active]:border-b-2 data-[state=inactive]:border-transparent"
                     >
                       {tab}
                     </TabsTrigger>
@@ -409,7 +409,7 @@ function DrawerFooter({
               variant="outline"
               size="sm"
               onClick={onMarkDone}
-              className="border-success-border text-success hover:bg-success-bg h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase transition-colors"
+              className="border-success-border text-success hover:bg-success-bg text-2xs h-8 gap-1.5 transition-colors"
               disabled={task.status === 'done'}
             >
               <CheckCircle2 className="h-3.5 w-3.5" />
@@ -423,7 +423,7 @@ function DrawerFooter({
                     variant="outline"
                     size="sm"
                     disabled
-                    className="h-8 cursor-not-allowed gap-1.5 font-mono text-[10px] tracking-widest uppercase opacity-50"
+                    className="text-2xs h-8 cursor-not-allowed gap-1.5 opacity-50"
                   >
                     <CheckCircle2 className="h-3.5 w-3.5" />
                     MARK DONE
@@ -439,7 +439,7 @@ function DrawerFooter({
       {(devMode || jsonOpen || (task.totalCostUsd && task.totalCostUsd > 0)) && (
         <div className="space-y-3">
           {(devMode || (task.totalCostUsd && task.totalCostUsd > 0)) && (
-            <div className="text-fg-muted flex items-center gap-4 font-mono text-[10px] tracking-[0.08em] uppercase">
+            <div className="text-fg-muted text-2xs flex items-center gap-4">
               {devMode && (
                 <>
                   <span>Prompt: {task.promptTokensUsed?.toLocaleString() ?? '---'}</span>
@@ -453,14 +453,14 @@ function DrawerFooter({
           )}
           {devMode && (
             <Collapsible open={jsonOpen} onOpenChange={setJsonOpen}>
-              <CollapsibleTrigger className="text-fg-muted hover:text-fg-secondary flex cursor-pointer items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] uppercase select-none">
+              <CollapsibleTrigger className="text-fg-muted hover:text-fg-secondary text-2xs flex cursor-pointer items-center gap-1.5 select-none">
                 {jsonOpen ? 'Hide JSON' : 'Inspect JSON'}
                 <ChevronRight
                   className={cn('h-3 w-3 transition-transform', jsonOpen && 'rotate-90')}
                 />
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <pre className="bg-log-bg text-success border-line-subtle mt-2 overflow-auto rounded border p-3 font-mono text-[10px]">
+                <pre className="bg-log-bg text-success border-line-subtle text-2xs mt-2 overflow-auto rounded border p-3 font-mono">
                   {JSON.stringify(task, null, 2)}
                 </pre>
               </CollapsibleContent>

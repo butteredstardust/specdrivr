@@ -103,11 +103,7 @@ export function ProjectSettingsForm({
   return (
     <TooltipProvider>
       <section className="flex flex-col gap-4">
-        {!dangerZoneOnly && (
-          <h2 className="text-fg-muted font-mono text-xs tracking-widest uppercase">
-            PROJECT SETTINGS
-          </h2>
-        )}
+        {!dangerZoneOnly && <h2 className="text-fg-muted text-xs">PROJECT SETTINGS</h2>}
         {!dangerZoneOnly && (
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">

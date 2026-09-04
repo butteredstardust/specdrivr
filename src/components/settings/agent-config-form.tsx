@@ -365,9 +365,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             {/* Gemini Group */}
             <div className="border-line bg-surface-raised flex flex-col gap-4 rounded-md border p-4">
-              <p className="text-fg-secondary font-mono text-xs tracking-widest uppercase">
-                Google Gemini
-              </p>
+              <p className="text-fg-secondary text-xs">Google Gemini</p>
 
               <FormField
                 label="Gemini API key"
@@ -407,9 +405,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
 
             {/* Claude Group */}
             <div className="border-line bg-surface-raised flex flex-col gap-4 rounded-md border p-4">
-              <p className="text-fg-secondary font-mono text-xs tracking-widest uppercase">
-                Anthropic Claude
-              </p>
+              <p className="text-fg-secondary text-xs">Anthropic Claude</p>
 
               <FormField
                 label="Claude API key"
@@ -672,9 +668,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
           </FormField>
 
           <div className="flex items-center justify-between">
-            <Label className="text-fg-secondary font-mono text-xs uppercase">
-              AUTO-CREATE PULL REQUESTS
-            </Label>
+            <Label className="text-fg-secondary text-xs">AUTO-CREATE PULL REQUESTS</Label>
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex items-center">
@@ -717,9 +711,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
           <SectionHeading>Planning</SectionHeading>
 
           <div className="flex items-center justify-between">
-            <Label className="text-fg-secondary font-mono text-xs uppercase">
-              REQUIRE PLAN APPROVAL
-            </Label>
+            <Label className="text-fg-secondary text-xs">REQUIRE PLAN APPROVAL</Label>
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex items-center">
@@ -735,9 +727,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
           </div>
 
           <div className="flex items-center justify-between">
-            <Label className="text-fg-secondary font-mono text-xs uppercase">
-              AUTO-GENERATE PLAN ON SPEC SAVE
-            </Label>
+            <Label className="text-fg-secondary text-xs">AUTO-GENERATE PLAN ON SPEC SAVE</Label>
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex items-center">

@@ -43,9 +43,7 @@ export function TaskDrawerOverview({ task, onRetry }: TaskDrawerOverviewProps) {
       {/* Dependencies */}
       {task.dependsOn.length > 0 && (
         <div className="space-y-3">
-          <span className="text-fg-muted font-mono text-[11px] tracking-[0.08em] uppercase">
-            Dependencies
-          </span>
+          <span className="text-fg-muted text-2xs">Dependencies</span>
           <div className="flex flex-wrap gap-2">
             {task.dependsOn.map((extId) => (
               <EntityId key={extId} chip>
@@ -62,9 +60,7 @@ export function TaskDrawerOverview({ task, onRetry }: TaskDrawerOverviewProps) {
           <div className="flex items-center gap-3">
             <Github className="h-5 w-5 opacity-70" />
             <div className="flex flex-col gap-0.5">
-              <span className="text-fg-muted font-mono text-[10px] tracking-[0.08em] uppercase">
-                PULL REQUEST
-              </span>
+              <span className="text-fg-muted text-2xs">PULL REQUEST</span>
               <span className="text-fg text-sm font-medium">Automated Contribution</span>
             </div>
           </div>
@@ -85,9 +81,7 @@ export function TaskDrawerOverview({ task, onRetry }: TaskDrawerOverviewProps) {
         <div className="bg-warning-bg border-warning-border space-y-4 rounded-md border p-5">
           <div className="flex items-center gap-2.5">
             <StatusIcon size={18} status="blocked" />
-            <span className="text-warning font-mono text-[11px] font-semibold tracking-[0.08em] uppercase">
-              BLOCKED
-            </span>
+            <span className="text-warning text-2xs font-semibold">BLOCKED</span>
           </div>
           {task.blockedReason && (
             <p className="text-fg-secondary text-sm leading-relaxed">{task.blockedReason}</p>
@@ -119,9 +113,7 @@ export function TaskDrawerOverview({ task, onRetry }: TaskDrawerOverviewProps) {
         <div className="bg-danger-bg border-danger-border space-y-4 rounded-md border p-5">
           <div className="flex items-center gap-2.5">
             <StatusIcon size={18} status="error" />
-            <span className="text-danger font-mono text-[11px] font-semibold tracking-[0.08em] uppercase">
-              FAILED
-            </span>
+            <span className="text-danger text-2xs font-semibold">FAILED</span>
           </div>
           {task.blockedReason && (
             <p className="text-fg-secondary text-sm leading-relaxed">{task.blockedReason}</p>

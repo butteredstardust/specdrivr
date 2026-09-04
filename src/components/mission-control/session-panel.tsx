@@ -170,11 +170,11 @@ export function SessionPanel({
         >
           {/* Header row: session ID badge + status + timer */}
           <div className="flex items-center gap-2">
-            <span className="bg-surface-inset text-fg-muted rounded px-1.5 py-0.5 font-mono text-[10px]">
+            <span className="bg-surface-inset text-fg-muted text-2xs rounded px-1.5 py-0.5 font-mono">
               SES-{session!.id}
             </span>
             {session?.backend && (
-              <span className="bg-surface-inset text-fg-secondary rounded px-1.5 py-0.5 font-mono text-[10px]">
+              <span className="bg-surface-inset text-fg-secondary text-2xs rounded px-1.5 py-0.5 font-mono">
                 {session.backend === 'claude' ? '🤖 Claude' : '✨ Gemini'}
               </span>
             )}
@@ -309,7 +309,7 @@ export function SessionPanel({
           <StatusIcon size={24} status="error" />
           <Badge variant="danger">Execution failed</Badge>
           {session?.totalCostUsd != null && session.totalCostUsd > 0 && (
-            <span className="text-fg-muted font-mono text-[10px]">
+            <span className="text-fg-muted text-2xs font-mono">
               EST. COST: ${session.totalCostUsd.toFixed(4)}
             </span>
           )}

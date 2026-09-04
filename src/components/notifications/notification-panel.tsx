@@ -61,14 +61,12 @@ export function NotificationPanel() {
     <div className="flex flex-col">
       {/* Header */}
       <div className="border-line flex items-center justify-between border-b px-4 py-3">
-        <span className="text-fg-muted font-mono text-[11px] tracking-[0.08em] uppercase">
-          Notifications
-        </span>
+        <span className="text-fg-muted text-2xs">Notifications</span>
         {hasUnread && (
           <Button
             size="sm"
             variant="ghost"
-            className="text-accent hover:text-accent-hover h-6 font-mono text-[10px] tracking-[0.08em] uppercase transition-colors"
+            className="text-accent hover:text-accent-hover text-2xs h-6 transition-colors"
             onClick={handleMarkAllRead}
           >
             Mark all read
@@ -105,7 +103,7 @@ export function NotificationPanel() {
                 {n.title}
               </p>
             </div>
-            <span className="text-fg-muted shrink-0 font-mono text-[10px]">
+            <span className="text-fg-muted text-2xs shrink-0 font-mono">
               {formatRelativeTime(n.createdAt)}
             </span>
             {!n.readAt && <div className="bg-surface-inset h-1.5 w-1.5 shrink-0 rounded-full" />}

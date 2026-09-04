@@ -59,7 +59,7 @@ function formatDuration(session?: AgentSession | null): string {
 function StatBox({ label, value }: { label: string; value: string }) {
   return (
     <div className="bg-surface-inset border-line flex flex-col justify-center rounded border px-3 py-2">
-      <p className="text-fg-secondary font-mono text-[10px] tracking-widest uppercase">{label}</p>
+      <p className="text-fg-secondary text-2xs">{label}</p>
       <p className="text-fg mt-0.5 font-mono text-sm font-semibold">{value}</p>
     </div>
   );
@@ -136,9 +136,7 @@ export default function SessionDetailPage({ params }: PageProps) {
     <div className="-mx-6 -mt-6 flex min-h-full flex-col">
       <div className="border-line flex items-center justify-between border-b px-6 py-4">
         <div className="flex min-w-0 flex-col gap-1">
-          <div className="text-fg-secondary font-mono text-xs tracking-[0.2em] uppercase">
-            Executor
-          </div>
+          <div className="text-fg-secondary text-xs">Executor</div>
           <div className="flex min-w-0 items-center gap-3">
             <h1 className="text-fg truncate text-2xl leading-tight font-semibold tracking-[-0.015em]">
               Session
@@ -155,7 +153,7 @@ export default function SessionDetailPage({ params }: PageProps) {
                 onClick={() => window.open(session.pullRequestUrl!, '_blank')}
               >
                 <Github className="h-3.5 w-3.5" />
-                <span className="text-[10px] font-medium tracking-tight">VIEW PR</span>
+                <span className="text-2xs font-medium tracking-tight">View PR</span>
                 <ExternalLink className="h-3 w-3 opacity-50" />
               </Button>
             )}
@@ -190,7 +188,7 @@ export default function SessionDetailPage({ params }: PageProps) {
             <Button
               size="sm"
               variant="outline"
-              className="border-danger-border text-danger hover:bg-danger-bg h-8 font-mono text-[10px] tracking-widest uppercase"
+              className="border-danger-border text-danger hover:bg-danger-bg text-2xs h-8"
               onClick={() => handleAction('cancel')}
               disabled={isUpdating}
             >
@@ -212,10 +210,8 @@ export default function SessionDetailPage({ params }: PageProps) {
           <StatBox label="Duration" value={formatDuration(session)} />
           <div className="bg-surface-inset border-line col-span-2 flex flex-col justify-center rounded border px-3 py-2">
             <div className="mb-1.5 flex items-end justify-between">
-              <p className="text-fg-secondary font-mono text-[10px] tracking-widest uppercase">
-                Progress
-              </p>
-              <p className="text-fg font-mono text-[10px] font-semibold">
+              <p className="text-fg-secondary text-2xs">Progress</p>
+              <p className="text-fg text-2xs font-mono font-semibold">
                 {session?.tasksSucceeded ?? 0} / {session?.tasksExecuted ?? 0}
               </p>
             </div>
@@ -243,9 +239,7 @@ export default function SessionDetailPage({ params }: PageProps) {
         </div>
 
         <div className="flex min-h-[20rem] w-full flex-col overflow-y-auto p-4 md:min-h-0 md:w-1/2">
-          <p className="text-fg-secondary mb-3 font-mono text-[10px] tracking-widest uppercase">
-            Session Log
-          </p>
+          <p className="text-fg-secondary text-2xs mb-3">Session Log</p>
           <p className="text-fg-secondary mb-3 font-mono text-xs">
             $ specdrivr agent start --session {sessionLabel}
           </p>

@@ -96,7 +96,7 @@ export default function ResetPasswordPage() {
     <Card className="border-line bg-surface-raised w-full max-w-sm">
       <CardHeader className="items-center gap-2 pb-2">
         <BrandMark size={48} />
-        <p className="font-mono text-sm font-bold tracking-widest">SPECDRIVR</p>
+        <p className="text-fg font-mono text-lg font-semibold tracking-[-0.04em]">specdrivr</p>
       </CardHeader>
       <CardContent>
         <form
@@ -125,9 +125,7 @@ export default function ResetPasswordPage() {
                 ))}
               </div>
             )}
-            {errors.password && (
-              <p className="text-danger text-[10px]">{errors.password.message}</p>
-            )}
+            {errors.password && <p className="text-danger text-2xs">{errors.password.message}</p>}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="confirmPassword">Confirm Password</Label>
@@ -138,7 +136,7 @@ export default function ResetPasswordPage() {
               className="border-line bg-surface-base"
             />
             {errors.confirmPassword && (
-              <p className="text-danger text-[10px]">{errors.confirmPassword.message}</p>
+              <p className="text-danger text-2xs">{errors.confirmPassword.message}</p>
             )}
           </div>
           {error && <p className="text-danger text-xs">{error}</p>}

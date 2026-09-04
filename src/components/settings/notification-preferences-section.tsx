@@ -177,13 +177,9 @@ export function NotificationPreferencesSection() {
 
       {/* Table header */}
       <div className="border-line-subtle grid grid-cols-[1fr_4rem_4rem] items-center gap-2 border-b pb-2">
-        <span className="text-fg-muted font-mono text-xs tracking-widest uppercase">Event</span>
-        <span className="text-fg-muted text-center font-mono text-xs tracking-widest uppercase">
-          Email
-        </span>
-        <span className="text-fg-muted text-center font-mono text-xs tracking-widest uppercase">
-          In-App
-        </span>
+        <span className="text-fg-muted text-xs">Event</span>
+        <span className="text-fg-muted text-center text-xs">Email</span>
+        <span className="text-fg-muted text-center text-xs">In-App</span>
       </div>
 
       {/* Rows */}

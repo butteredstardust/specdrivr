@@ -152,18 +152,10 @@ export function MembersSection({ projectId, userRole, initialMembers }: MembersS
           <table className="w-full text-xs">
             <thead>
               <tr className="border-line border-b text-left">
-                <th className="text-fg-muted pr-4 pb-2 font-mono font-normal tracking-widest uppercase">
-                  Name
-                </th>
-                <th className="text-fg-muted pr-4 pb-2 font-mono font-normal tracking-widest uppercase">
-                  Email
-                </th>
-                <th className="text-fg-muted pr-4 pb-2 font-mono font-normal tracking-widest uppercase">
-                  Role
-                </th>
-                <th className="text-fg-muted pb-2 font-mono font-normal tracking-widest uppercase">
-                  Actions
-                </th>
+                <th className="text-fg-muted pr-4 pb-2 font-normal">Name</th>
+                <th className="text-fg-muted pr-4 pb-2 font-normal">Email</th>
+                <th className="text-fg-muted pr-4 pb-2 font-normal">Role</th>
+                <th className="text-fg-muted pb-2 font-normal">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -222,9 +214,7 @@ export function MembersSection({ projectId, userRole, initialMembers }: MembersS
 
         {/* Invite form */}
         <div className="mt-2">
-          <p className="text-fg-muted mb-2 font-mono text-xs tracking-widest uppercase">
-            Invite member
-          </p>
+          <p className="text-fg-muted mb-2 text-xs">Invite member</p>
           <form onSubmit={handleInvite} className="flex flex-wrap items-end gap-2">
             <div className="flex flex-col gap-1">
               <label className="text-fg-secondary font-mono text-xs" htmlFor="invite-email">

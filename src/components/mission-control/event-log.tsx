@@ -139,13 +139,11 @@ export function EventLog({ sessionId, onUpdate, className }: EventLogProps) {
   return (
     <div className={className}>
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-fg-muted font-mono text-[11px] tracking-[0.08em] uppercase">
-          Session Log
-        </p>
+        <p className="text-fg-muted text-2xs">Session Log</p>
         <Button
           variant="ghost"
           size="sm"
-          className={`h-6 px-2 font-mono text-[10px] tracking-[0.08em] uppercase ${showErrorsOnly ? 'bg-surface-inset' : ''}`}
+          className={`text-2xs h-6 px-2 ${showErrorsOnly ? 'bg-surface-inset' : ''}`}
           onClick={() => setShowErrorsOnly(!showErrorsOnly)}
         >
           <Filter className="mr-1 h-3 w-3" />
@@ -155,7 +153,7 @@ export function EventLog({ sessionId, onUpdate, className }: EventLogProps) {
 
       <div className="bg-surface-inset border-line relative flex min-h-0 flex-1 flex-col overflow-hidden rounded border">
         {error && (
-          <div className="bg-danger-bg text-danger border-danger-border absolute top-0 right-0 left-0 z-10 border-b px-3 py-1 font-mono text-[10px]">
+          <div className="bg-danger-bg text-danger border-danger-border text-2xs absolute top-0 right-0 left-0 z-10 border-b px-3 py-1 font-mono">
             {error}
           </div>
         )}

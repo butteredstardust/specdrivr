@@ -113,9 +113,7 @@ export function SpecTab({ spec, userRole }: SpecTabProps): React.ReactElement {
                     <div className="bg-surface-inset border-line my-6 overflow-hidden rounded-lg border">
                       {match && (
                         <div className="border-line bg-surface-raised flex items-center justify-between border-b px-4 py-1.5">
-                          <span className="text-fg-muted font-mono text-[10px] tracking-widest uppercase">
-                            {match[1]}
-                          </span>
+                          <span className="text-fg-muted text-2xs">{match[1]}</span>
                         </div>
                       )}
                       <pre className="m-0 overflow-x-auto p-4 font-mono text-sm leading-relaxed">

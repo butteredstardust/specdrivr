@@ -157,7 +157,7 @@ interface FormFieldProps {
 function FormField({ label, htmlFor, children }: FormFieldProps) {
   return (
     <div className="flex flex-col gap-1.5">
-      <Label htmlFor={htmlFor} className="text-fg-secondary font-mono text-xs uppercase">
+      <Label htmlFor={htmlFor} className="text-fg-secondary text-xs">
         {label}
       </Label>
       {children}
@@ -171,7 +171,7 @@ function FormField({ label, htmlFor, children }: FormFieldProps) {
 
 function ConnectedBadge({ connected }: { connected: boolean }) {
   return (
-    <Badge variant={connected ? 'success' : 'muted'} className="font-mono text-[10px]">
+    <Badge variant={connected ? 'success' : 'muted'} className="text-2xs font-mono">
       {connected ? 'Connected' : 'Not connected'}
     </Badge>
   );
@@ -782,7 +782,7 @@ function WebhookDialog({ open, onClose, onSave, initial, isSaving }: WebhookDial
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-mono text-xs tracking-widest uppercase">
+          <DialogTitle className="text-xs">
             {initial?.url ? 'EDIT WEBHOOK' : 'ADD WEBHOOK'}
           </DialogTitle>
         </DialogHeader>
@@ -1008,7 +1008,7 @@ function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
                   </p>
                   <Badge
                     variant={wh.status === 'active' ? 'success' : 'danger'}
-                    className="font-mono text-[10px]"
+                    className="text-2xs font-mono"
                   >
                     {wh.status}
                   </Badge>

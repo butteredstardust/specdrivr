@@ -88,10 +88,8 @@ export default function LoginPage() {
       <CardHeader className="items-center gap-2 pb-2">
         <BrandMark size={48} className={isPending ? 'animate-pulse' : undefined} />
         <div className="text-center">
-          <p className="text-fg font-mono text-sm font-bold tracking-widest">SPECDRIVR</p>
-          <p className="text-fg-secondary font-mono text-xs tracking-tight uppercase">
-            Build what you spec.
-          </p>
+          <p className="text-fg font-mono text-lg font-semibold tracking-[-0.04em]">specdrivr</p>
+          <p className="text-fg-secondary text-xs tracking-tight">Build what you spec.</p>
         </div>
       </CardHeader>
       <CardContent>
@@ -102,10 +100,7 @@ export default function LoginPage() {
           className="space-y-4"
         >
           <div className="space-y-1.5">
-            <Label
-              htmlFor="email"
-              className="text-fg-muted font-mono text-[11px] tracking-[0.08em] uppercase"
-            >
+            <Label htmlFor="email" className="text-fg-muted text-2xs">
               Email
             </Label>
             <Input
@@ -116,13 +111,10 @@ export default function LoginPage() {
               placeholder="you@example.com"
               className="border-line bg-surface-base"
             />
-            {errors.email && <p className="text-danger text-[10px]">{errors.email.message}</p>}
+            {errors.email && <p className="text-danger text-2xs">{errors.email.message}</p>}
           </div>
           <div className="space-y-1.5">
-            <Label
-              htmlFor="password"
-              className="text-fg-muted font-mono text-[11px] tracking-[0.08em] uppercase"
-            >
+            <Label htmlFor="password" className="text-fg-muted text-2xs">
               Password
             </Label>
             <Input
@@ -132,9 +124,7 @@ export default function LoginPage() {
               placeholder="••••••••"
               className="border-line bg-surface-base"
             />
-            {errors.password && (
-              <p className="text-danger text-[10px]">{errors.password.message}</p>
-            )}
+            {errors.password && <p className="text-danger text-2xs">{errors.password.message}</p>}
           </div>
 
           {(state.error || errors.root) && (
@@ -148,14 +138,14 @@ export default function LoginPage() {
           <Button
             type="submit"
             disabled={isPending}
-            className="bg-surface-inset hover:bg-accent-hover w-full font-mono text-sm tracking-wider uppercase transition-colors"
+            className="bg-surface-inset hover:bg-accent-hover w-full text-sm transition-colors"
           >
             {isPending ? 'Signing in…' : 'Sign In'}
           </Button>
           <div className="text-right">
             <Link
               href="/forgot-password"
-              className="text-fg-muted hover:text-fg-secondary font-mono text-[10px] uppercase underline-offset-4 hover:underline"
+              className="text-fg-muted hover:text-fg-secondary text-2xs underline-offset-4 hover:underline"
             >
               Forgot password?
             </Link>
@@ -164,7 +154,7 @@ export default function LoginPage() {
 
         {isDev && (
           <div className="border-line-subtle mt-4 space-y-2 border-t border-dashed pt-4">
-            <p className="text-fg-secondary font-mono text-xs tracking-widest">DEV QUICK LOGIN</p>
+            <p className="text-fg-secondary font-mono text-xs">Dev quick login</p>
             {[
               { label: 'Owner', email: 'alex@specdrivr.dev' },
               { label: 'Admin', email: 'sam@specdrivr.dev' },

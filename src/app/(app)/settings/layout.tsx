@@ -20,9 +20,7 @@ export default async function SettingsLayout({ children }: { children: React.Rea
     <div className="animate-fade-in-up -mx-6 -mt-6 flex min-h-full flex-col">
       {/* Header */}
       <div className="border-line border-b px-6 py-4">
-        <div className="text-fg-secondary mb-1 font-mono text-[11px] font-medium tracking-[0.12em] uppercase">
-          Workspace
-        </div>
+        <div className="text-fg-secondary text-2xs mb-1 font-medium">Workspace</div>
         <h1 className="text-fg text-2xl leading-tight font-semibold tracking-[-0.015em]">
           Configuration
         </h1>

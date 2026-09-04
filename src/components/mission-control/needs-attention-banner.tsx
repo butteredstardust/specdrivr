@@ -45,7 +45,7 @@ export function NeedsAttentionBanner({ blockedTasks, onDismiss }: NeedsAttention
               variant="ghost"
               size="sm"
               onClick={() => openDrawer(task.id)}
-              className="border-warning-border bg-warning-bg text-warning h-7 shrink-0 rounded-[2px] border px-2 font-mono text-[10px] transition-colors"
+              className="border-warning-border bg-warning-bg text-warning text-2xs h-7 shrink-0 rounded-[2px] border px-2 font-mono transition-colors"
             >
               <TriangleAlert className="mr-1.5 h-3 w-3" aria-hidden="true" />
               <span className="font-bold">{task.externalId}</span>

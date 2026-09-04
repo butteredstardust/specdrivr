@@ -172,9 +172,7 @@ export default function SpecDetailPage(): React.ReactElement {
           </div>
         ) : (
           <div className="flex min-w-0 flex-col gap-1">
-            <div className="text-fg-muted mb-1 font-mono text-[11px] tracking-[0.08em] uppercase">
-              Project Spec
-            </div>
+            <div className="text-fg-muted text-2xs mb-1">Project Spec</div>
             <div className="flex min-w-0 items-center gap-3">
               <h1 className="text-fg truncate text-2xl leading-tight font-semibold tracking-[-0.015em]">
                 {displayedSpec?.name ?? '…'}
@@ -226,7 +224,7 @@ export default function SpecDetailPage(): React.ReactElement {
               <TabsTrigger
                 key={tab.id}
                 value={tab.id}
-                className="data-[state=active]:border-accent data-[state=active]:text-fg text-fg-muted hover:text-fg rounded-none border-b-2 border-transparent bg-transparent px-1 py-3 font-mono text-xs tracking-widest shadow-none transition-colors"
+                className="data-[state=active]:border-accent data-[state=active]:text-fg text-fg-muted hover:text-fg rounded-none border-b-2 border-transparent bg-transparent px-1 py-3 font-mono text-xs shadow-none transition-colors"
               >
                 {tab.label}
               </TabsTrigger>
