@@ -2,7 +2,7 @@
 
 <img src="./public/brand/icon.svg" alt="Specdrivr icon" width="112" height="112">
 
-# Specdrivr
+# specdrivr
 
 **Spec-driven development for AI-augmented teams. Write the spec, the platform makes the tasks, your agent ships them.**
 
