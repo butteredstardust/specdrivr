@@ -28,7 +28,7 @@ const buttonVariants = cva(
         default: 'bg-accent text-accent-fg hover:bg-accent-hover active:bg-accent-active',
         destructive: 'bg-danger text-fg-inverse hover:bg-danger/90',
         outline: 'border-line bg-surface-raised text-fg hover:bg-surface-inset border',
-        secondary: 'bg-surface-inset text-fg hover:bg-surface-inset/70',
+        secondary: 'bg-surface-inset text-fg hover:bg-surface-sunken',
         ghost: 'text-fg-secondary hover:bg-surface-inset hover:text-fg',
         link: 'text-accent underline-offset-4 hover:underline',
         warning: 'border-warning-border bg-warning-bg text-warning hover:bg-warning-bg/70 border',

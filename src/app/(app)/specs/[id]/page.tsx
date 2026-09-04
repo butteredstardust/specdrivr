@@ -163,7 +163,7 @@ export default function SpecDetailPage(): React.ReactElement {
   );
 
   return (
-    <div className="-mx-6 -mt-6 flex min-h-full flex-col">
+    <div className="full-bleed flex min-h-full flex-col">
       <div className="border-line flex items-center justify-between border-b px-6 py-4">
         {isLoading ? (
           <div className="flex flex-col gap-2">

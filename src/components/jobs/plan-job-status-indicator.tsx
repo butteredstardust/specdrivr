@@ -27,7 +27,7 @@ export function PlanJobStatusIndicator({ projectId, className }: PlanJobStatusIn
         isGeneratingTasks ? 'AI agent architecting tasks' : 'AI agent generating execution plan'
       }
       className={cn(
-        'bg-surface-inset/80 border-line-subtle animate-in fade-in slide-in-from-bottom-2 shadow-popover flex items-center gap-3 rounded-lg border px-4 py-2 backdrop-blur-sm',
+        'bg-surface-overlay border-line animate-in fade-in slide-in-from-bottom-2 shadow-popover flex items-center gap-3 rounded-lg border px-4 py-2 backdrop-blur-sm',
         className
       )}
     >

@@ -362,7 +362,7 @@ function DrawerFooter({
   const [jsonOpen, setJsonOpen] = useState(false);
 
   return (
-    <div className="bg-surface-inset/50 border-line shrink-0 space-y-4 border-t px-6 py-5">
+    <div className="bg-surface-inset border-line shrink-0 space-y-4 border-t px-6 py-5">
       <div className="flex items-center gap-3">
         {showRerun && (
           <Button variant="info" size="sm" onClick={() => void onRetry()} className="h-8 gap-1.5">

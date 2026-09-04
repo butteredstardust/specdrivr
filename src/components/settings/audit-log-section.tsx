@@ -58,7 +58,7 @@ function AuditRow({ entry }: { entry: AuditLogSelect }) {
   return (
     <>
       <tr
-        className="border-line hover:bg-surface-inset/50 cursor-pointer border-b last:border-0"
+        className="border-line hover:bg-surface-inset cursor-pointer border-b last:border-0"
         onClick={() => setExpanded((v) => !v)}
       >
         <td className="text-fg-muted px-4 py-2.5 font-mono text-xs">

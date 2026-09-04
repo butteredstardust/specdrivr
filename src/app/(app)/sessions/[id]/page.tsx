@@ -133,7 +133,7 @@ export default function SessionDetailPage({ params }: PageProps) {
   const progressPercent = totalTasks > 0 ? ((session?.tasksSucceeded || 0) / totalTasks) * 100 : 0;
 
   return (
-    <div className="-mx-6 -mt-6 flex min-h-full flex-col">
+    <div className="full-bleed flex min-h-full flex-col">
       <div className="border-line flex items-center justify-between border-b px-6 py-4">
         <div className="flex min-w-0 flex-col gap-1">
           <div className="text-fg-secondary text-xs">Executor</div>
@@ -149,7 +149,7 @@ export default function SessionDetailPage({ params }: PageProps) {
               <Button
                 variant="outline"
                 size="sm"
-                className="border-line bg-surface-inset/50 h-7 gap-1.5 px-2 py-0"
+                className="border-line bg-surface-inset h-7 gap-1.5 px-2 py-0"
                 onClick={() => window.open(session.pullRequestUrl!, '_blank')}
               >
                 <Github className="h-3.5 w-3.5" />

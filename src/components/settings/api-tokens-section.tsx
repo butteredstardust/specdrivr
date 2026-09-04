@@ -180,13 +180,13 @@ export function ApiTokensSection() {
   };
 
   return (
-    <section className="flex flex-col gap-4">
+    <section id="api-tokens" className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h2 className="text-fg-muted text-2xs font-medium">API tokens</h2>
         <Button
           variant="outline"
           size="sm"
-          className="gap-1.5 font-mono text-xs"
+          className="gap-1.5 text-xs"
           onClick={() => setGenerateOpen(true)}
         >
           <Plus className="size-3" />

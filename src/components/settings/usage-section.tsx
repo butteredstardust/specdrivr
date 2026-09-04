@@ -158,10 +158,7 @@ export function UsageSection({ projectId }: UsageSectionProps) {
           </thead>
           <tbody>
             {snapshots.map((s) => (
-              <tr
-                key={s.id}
-                className="border-line hover:bg-surface-inset/50 border-b last:border-0"
-              >
+              <tr key={s.id} className="border-line hover:bg-surface-inset border-b last:border-0">
                 <td className="text-fg px-4 py-2.5 font-mono text-xs">{formatDate(s.date)}</td>
                 <td className="text-fg px-4 py-2.5 font-mono text-xs">{s.sessionsRun}</td>
                 <td className="text-fg px-4 py-2.5 font-mono text-xs">{s.tasksExecuted}</td>

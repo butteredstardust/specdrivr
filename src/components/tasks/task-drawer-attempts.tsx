@@ -31,7 +31,7 @@ interface TaskDrawerAttemptsProps {
 }
 
 const statusBadgeClass: Record<Attempt['status'], string> = {
-  running: 'bg-surface-inset/10 text-accent',
+  running: 'bg-accent-subtle text-accent',
   completed: 'bg-emerald-500/10 text-emerald-400',
   failed: 'bg-danger-bg text-danger',
 };
@@ -94,7 +94,7 @@ export function TaskDrawerAttempts({ taskId, taskStatus }: TaskDrawerAttemptsPro
             open={isOpen}
             onOpenChange={() => toggleExpanded(attempt.id)}
           >
-            <CollapsibleTrigger className="border-line hover:bg-surface-inset data-[state=open]:bg-surface-inset/50 flex w-full items-center gap-4 rounded-md border px-4 py-3 transition-colors">
+            <CollapsibleTrigger className="border-line hover:bg-surface-inset data-[state=open]:bg-surface-inset flex w-full items-center gap-4 rounded-md border px-4 py-3 transition-colors">
               <ChevronRight
                 className={cn('text-fg-muted h-4 w-4 transition-transform', isOpen && 'rotate-90')}
               />

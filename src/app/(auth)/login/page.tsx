@@ -165,7 +165,7 @@ export default function LoginPage() {
                 type="button"
                 variant="outline"
                 size="sm"
-                className="hover:bg-surface-inset/5 hover:text-accent w-full font-mono text-xs transition-colors"
+                className="hover:bg-accent-subtle hover:text-accent w-full font-mono text-xs transition-colors"
                 onClick={() => {
                   setValue('email', quickEmail);
                   setValue('password', 'Password123!');

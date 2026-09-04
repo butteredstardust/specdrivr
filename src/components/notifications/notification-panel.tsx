@@ -90,7 +90,7 @@ export function NotificationPanel() {
             key={n.id}
             className={cn(
               'border-line flex items-center gap-3 border-b px-4 py-3 transition-colors last:border-0',
-              !n.readAt ? 'bg-surface-inset/5' : 'hover:bg-surface-inset/50'
+              !n.readAt ? 'bg-accent-subtle' : 'hover:bg-surface-inset'
             )}
           >
             <div className="min-w-0 flex-1">

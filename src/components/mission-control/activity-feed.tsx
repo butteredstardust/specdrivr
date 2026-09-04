@@ -31,7 +31,7 @@ export function ProjectActivityFeed({ projectId, className }: ProjectActivityFee
     return (
       <div className={cn('flex flex-col gap-4', className)}>
         <h2 className="text-fg-muted text-2xs opacity-70">Activity Feed</h2>
-        <div className="bg-surface-inset/30 border-line-subtle flex h-24 items-center justify-center rounded-lg border border-dashed px-4 py-8 text-center">
+        <div className="bg-surface-inset border-line-subtle flex h-24 items-center justify-center rounded-lg border border-dashed px-4 py-8 text-center">
           <p className="text-fg-muted text-2xs opacity-50">Waiting for activity...</p>
         </div>
       </div>
@@ -55,7 +55,7 @@ function ActivityRow({ item }: { item: ActivityItem }) {
   const colorClass = getIconColor(item.eventType);
 
   return (
-    <div className="hover:bg-surface-inset/40 group animate-in fade-in slide-in-from-left-1 flex items-start gap-4 rounded-lg p-2 transition-all duration-200">
+    <div className="hover:bg-surface-inset group animate-in fade-in slide-in-from-left-1 flex items-start gap-4 rounded-lg p-2 transition-all duration-200">
       <div
         className={cn(
           'bg-surface-inset border-line-subtle mt-0.5 shrink-0 rounded border p-2 transition-transform group-hover:scale-105',

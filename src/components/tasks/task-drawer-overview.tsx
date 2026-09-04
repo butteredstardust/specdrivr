@@ -56,7 +56,7 @@ export function TaskDrawerOverview({ task, onRetry }: TaskDrawerOverviewProps) {
 
       {/* GitHub PR Link */}
       {task.pullRequestUrl && (
-        <div className="bg-surface-inset/50 border-line-subtle flex items-center justify-between rounded-md border p-4">
+        <div className="bg-surface-inset border-line-subtle flex items-center justify-between rounded-md border p-4">
           <div className="flex items-center gap-3">
             <Github className="h-5 w-5 opacity-70" />
             <div className="flex flex-col gap-0.5">

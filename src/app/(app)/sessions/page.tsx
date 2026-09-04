@@ -76,7 +76,7 @@ function SessionsContent() {
   const specs = specsData ?? [];
 
   return (
-    <div className="animate-fade-in-up -mx-6 -mt-6 flex min-h-full flex-col">
+    <div className="animate-fade-in-up full-bleed flex min-h-full flex-col">
       <PageHeader category="Executor" title="Sessions" />
 
       <SessionsFilterBar specs={specs} />

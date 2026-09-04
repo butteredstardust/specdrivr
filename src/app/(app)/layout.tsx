@@ -54,7 +54,7 @@ async function AuthenticatedApp({ children }: { children: React.ReactNode }) {
           <Sidebar projects={projects} />
           <div className="flex flex-1 flex-col overflow-hidden">
             <TopBar />
-            <main className="relative flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8">
+            <main className="relative flex-1 overflow-y-auto px-4 py-6 [--shell-gutter-y:1.5rem] [--shell-gutter:1rem] md:px-8 md:py-8 md:[--shell-gutter-y:2rem] md:[--shell-gutter:2rem]">
               <div className="mx-auto max-w-[1600px]">{children}</div>
               <ActiveJobsOverlay />
             </main>

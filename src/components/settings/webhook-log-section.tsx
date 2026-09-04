@@ -58,7 +58,7 @@ function DeliveryRow({ entry }: { entry: DeliveryRow }) {
   return (
     <>
       <tr
-        className="border-line hover:bg-surface-inset/50 cursor-pointer border-b last:border-0"
+        className="border-line hover:bg-surface-inset cursor-pointer border-b last:border-0"
         onClick={() => setExpanded((v) => !v)}
       >
         <td className="text-fg px-4 py-2.5 font-mono text-xs">

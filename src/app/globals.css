@@ -311,10 +311,14 @@
    ========================================================================== */
 
 @layer utilities {
-  /* Uppercase mono needs positive tracking to stay legible. */
-  .font-mono.uppercase,
-  [class*='font-mono'].uppercase {
-    letter-spacing: 0.05em;
+  /* Pages that draw their own full-width header and section rules opt out of
+     the shell's main padding. Each one used to negate it by hand with
+     `-mx-6 -mt-6`, which hardcoded a guess at the layout's padding — and all
+     seven guessed wrong, because the layout has never used 6. The shell now
+     publishes its gutter and every page reads it. */
+  .full-bleed {
+    margin-inline: calc(var(--shell-gutter, 0px) * -1);
+    margin-top: calc(var(--shell-gutter-y, 0px) * -1);
   }
 
   .scrollbar-thin {

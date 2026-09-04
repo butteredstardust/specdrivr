@@ -154,8 +154,7 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
 
   return (
     <TooltipProvider>
-      {/* Escape the layout's p-6 so sections are full-bleed with border separators */}
-      <div className="animate-fade-in-up -mx-6 -mt-6 flex min-h-full flex-col">
+      <div className="animate-fade-in-up full-bleed flex min-h-full flex-col">
         <PageHeader
           category="Specifications"
           title="Specs"
@@ -261,7 +260,7 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
                 {filteredSpecs.map((spec) => (
                   <TableRow
                     key={spec.id}
-                    className="border-line/50 hover:bg-surface-inset/50 cursor-pointer"
+                    className="border-line-subtle hover:bg-surface-inset cursor-pointer"
                     onClick={() => router.push(`/specs/${spec.id}`)}
                   >
                     <TableCell className="px-6 py-3">

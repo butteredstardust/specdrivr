@@ -67,7 +67,7 @@ export default function ProjectsPage() {
 
   return (
     <TooltipProvider>
-      <div className="animate-fade-in-up -mx-6 -mt-6 flex min-h-full flex-col">
+      <div className="animate-fade-in-up full-bleed flex min-h-full flex-col">
         <PageHeader
           category="Projects"
           title="All Projects"
@@ -132,7 +132,7 @@ export default function ProjectsPage() {
               </TableHeader>
               <TableBody>
                 {filteredProjects.map((project) => (
-                  <TableRow key={project.id} className="border-line/50 hover:bg-surface-inset/50">
+                  <TableRow key={project.id} className="border-line-subtle hover:bg-surface-inset">
                     <TableCell className="px-6 py-3">
                       <Badge variant="warning">PROJ-{String(project.id).padStart(3, '0')}</Badge>
                     </TableCell>

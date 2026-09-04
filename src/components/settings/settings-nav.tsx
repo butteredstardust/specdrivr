@@ -34,15 +34,15 @@ const NAV_GROUPS: NavGroup[] = [
       { href: '/settings/agent', label: 'Agent' },
       { href: '/settings/integrations', label: 'Integrations' },
       { href: '/settings/usage', label: 'Usage' },
-      { href: '/settings/audit', label: 'Audit Log', hideForRoles: ['member', 'viewer'] },
+      { href: '/settings/audit', label: 'Audit log', hideForRoles: ['member', 'viewer'] },
     ],
     afterSlot: 'danger-zone',
   },
   {
     label: 'Developer',
     items: [
-      { href: '/settings/webhooks', label: 'Webhook Log' },
-      { href: '/settings/security', label: 'API Tokens' },
+      { href: '/settings/webhooks', label: 'Webhook log' },
+      { href: '/settings/security#api-tokens', label: 'API tokens' },
     ],
   },
 ];
@@ -66,7 +66,10 @@ export function SettingsNav({ userRole }: SettingsNavProps) {
             {group.items
               .filter((item) => !item.hideForRoles?.includes(userRole))
               .map((item) => {
-                const active = pathname === item.href || pathname.startsWith(item.href + '/');
+                const [itemPath] = item.href.split('#');
+                const active =
+                  !item.href.includes('#') &&
+                  (pathname === itemPath || pathname.startsWith(itemPath + '/'));
                 return (
                   <Link
                     key={item.href}
@@ -74,7 +77,7 @@ export function SettingsNav({ userRole }: SettingsNavProps) {
                     className={cn(
                       'rounded px-2 py-1.5 text-sm transition-colors',
                       active
-                        ? 'bg-surface-inset/10 text-accent font-medium'
+                        ? 'bg-accent-subtle text-accent font-medium'
                         : 'text-fg-muted hover:bg-surface-inset hover:text-fg'
                     )}
                   >
@@ -94,7 +97,7 @@ export function SettingsNav({ userRole }: SettingsNavProps) {
                   : 'text-danger/70 hover:text-danger'
               )}
             >
-              Danger Zone
+              Danger zone
             </Link>
           )}
         </div>

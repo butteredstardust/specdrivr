@@ -182,7 +182,7 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
                 <div className="flex-1 pt-0.5">
                   <div
                     onClick={() => toggleTask(task.id)}
-                    className={`cursor-pointer rounded-lg border transition-all ${colors.bg} border-line/50 hover:border-line px-3 py-2.5`}
+                    className={`cursor-pointer rounded-lg border transition-all ${colors.bg} border-line-subtle hover:border-line px-3 py-2.5`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
@@ -213,7 +213,7 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
 
                     {isExpanded && (
                       <div
-                        className="border-line/50 mt-3 cursor-auto space-y-2 border-t pt-3"
+                        className="border-line-subtle mt-3 cursor-auto space-y-2 border-t pt-3"
                         onClick={(e) => e.stopPropagation()}
                       >
                         {task.description && (

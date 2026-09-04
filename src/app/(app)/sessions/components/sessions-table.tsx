@@ -204,7 +204,7 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
                 const isExpanded = expandedId === session.id;
                 return (
                   <React.Fragment key={session.id}>
-                    <TableRow className="border-line/50 hover:bg-surface-inset/50 group">
+                    <TableRow className="border-line-subtle hover:bg-surface-inset group">
                       <TableCell className="px-3 py-3 text-center">
                         <Tooltip>
                           <TooltipTrigger asChild>

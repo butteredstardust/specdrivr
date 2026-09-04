@@ -119,7 +119,7 @@ export default function NotificationsPage() {
   };
 
   return (
-    <div className="animate-fade-in-up -mx-6 -mt-6 flex min-h-full flex-col">
+    <div className="animate-fade-in-up full-bleed flex min-h-full flex-col">
       <PageHeader
         category="System"
         title="Notifications"
@@ -152,7 +152,7 @@ export default function NotificationsPage() {
               }}
               className={cn(
                 'h-7 px-2.5 text-xs transition-all',
-                tab !== t.value && 'bg-surface-inset/50 text-fg-secondary hover:text-fg'
+                tab !== t.value && 'bg-surface-inset text-fg-secondary hover:text-fg'
               )}
             >
               {t.label}
@@ -214,10 +214,10 @@ export default function NotificationsPage() {
               <div
                 key={n.id}
                 className={cn(
-                  'border-line/50 flex cursor-pointer items-center gap-4 border-b py-3 pr-6 transition-colors',
+                  'border-line-subtle flex cursor-pointer items-center gap-4 border-b py-3 pr-6 transition-colors',
                   !n.readAt
-                    ? 'border-l-accent bg-surface-inset/5 border-l-2 pl-[22px]'
-                    : 'hover:bg-surface-inset/50 border-l-2 border-l-transparent pl-[22px]'
+                    ? 'border-l-accent bg-accent-subtle border-l-2 pl-[22px]'
+                    : 'hover:bg-surface-inset border-l-2 border-l-transparent pl-[22px]'
                 )}
                 onClick={() => !n.readAt && handleMarkRead(n.id)}
               >
