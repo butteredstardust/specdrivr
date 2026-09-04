@@ -9,7 +9,7 @@ import type { UserRole } from '@/db/schema';
 import { StatusIcon } from '@/components/ui/status-icon';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Progress, ASCIIProgress } from '@/components/ui/progress';
+import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
 
@@ -199,18 +199,13 @@ export function SessionPanel({
 
           {/* Progress bar */}
           <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <span className="text-fg-muted font-mono text-[10px] tracking-wider uppercase">
-                Progress: {succeeded}/{totalTasks > 0 ? totalTasks : '?'} · {progressPct}%
+            <div className="text-fg-muted flex items-center justify-between text-xs">
+              <span>
+                {succeeded}/{totalTasks > 0 ? totalTasks : '?'} tasks
               </span>
-              <ASCIIProgress
-                value={succeeded}
-                max={totalTasks > 0 ? totalTasks : 100}
-                length={12}
-                className="text-success"
-              />
+              <span className="text-fg-secondary tabular-nums">{progressPct}%</span>
             </div>
-            <Progress value={progressPct} className="h-1 shadow-inner" />
+            <Progress value={progressPct} aria-label="Session progress" />
           </div>
 
           {/* Current task pill */}

@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { ASCIIProgress } from '@/components/ui/progress';
+import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { BrandMark } from '@/components/ui/brand-mark';
@@ -106,11 +106,12 @@ export function OnboardingWizard({ user }: OnboardingWizardProps) {
         onEscapeKeyDown={(e) => e.preventDefault()}
         className="border-line bg-surface-raised sm:max-w-md"
       >
-        <div className="flex flex-col items-center gap-1">
-          <div className="text-fg-muted font-mono text-[10px] tracking-[0.08em] uppercase">
-            Setup Progress
+        <div className="mb-4 flex flex-col gap-2">
+          <div className="text-fg-muted flex items-center justify-between text-xs">
+            <span>Setup</span>
+            <span className="tabular-nums">Step {step} of 4</span>
           </div>
-          <ASCIIProgress value={step - 1} max={3} length={20} className="text-accent mb-4" />
+          <Progress value={((step - 1) / 3) * 100} aria-label="Setup progress" />
         </div>
 
         {step === 1 && (

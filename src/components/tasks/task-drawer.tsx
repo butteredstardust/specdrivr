@@ -463,7 +463,7 @@ function DrawerFooter({
                 />
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <pre className="bg-log-bg text-success border-border-subtle mt-2 overflow-auto rounded border p-3 font-mono text-[10px]">
+                <pre className="bg-log-bg text-success border-line-subtle mt-2 overflow-auto rounded border p-3 font-mono text-[10px]">
                   {JSON.stringify(task, null, 2)}
                 </pre>
               </CollapsibleContent>

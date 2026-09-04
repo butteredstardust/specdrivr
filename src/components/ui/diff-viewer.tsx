@@ -49,9 +49,9 @@ function renderDiffLines(patch: string): React.ReactNode[] {
   return patch.split('\n').map((line, i) => {
     let className = 'text-fg-secondary px-2';
     if (line.startsWith('+') && !line.startsWith('+++'))
-      className = 'bg-[var(--bg-diff-added)] text-success px-2';
+      className = 'bg-diff-added-bg text-success px-2';
     else if (line.startsWith('-') && !line.startsWith('---'))
-      className = 'bg-[var(--bg-diff-deleted)] text-danger px-2';
+      className = 'bg-diff-removed-bg text-danger px-2';
     else if (line.startsWith('@@')) className = 'text-fg-muted px-2';
     return (
       <div key={i} className={`font-mono text-xs leading-5 whitespace-pre ${className}`}>

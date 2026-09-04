@@ -127,7 +127,7 @@ export function SpecEditor(props: SpecEditorProps) {
   return (
     <div className={`flex flex-col h-screen${className ? ` ${className}` : ''}`}>
       {/* Top bar */}
-      <div className="border-border-subtle flex shrink-0 flex-wrap items-center gap-3 border-b px-3 py-2 sm:px-4">
+      <div className="border-line-subtle flex shrink-0 flex-wrap items-center gap-3 border-b px-3 py-2 sm:px-4">
         <Input
           type="text"
           value={title}
@@ -190,7 +190,7 @@ export function SpecEditor(props: SpecEditorProps) {
       {/* Split pane */}
       <div className="grid flex-1 grid-cols-1 overflow-y-auto md:grid-cols-2 md:overflow-hidden">
         {/* Editor pane */}
-        <div className="border-border-subtle h-[50vh] overflow-hidden border-b md:h-full md:border-r md:border-b-0">
+        <div className="border-line-subtle h-[50vh] overflow-hidden border-b md:h-full md:border-r md:border-b-0">
           <CodeMirror
             value={content}
             onChange={setContent}

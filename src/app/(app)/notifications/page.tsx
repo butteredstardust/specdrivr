@@ -216,7 +216,7 @@ export default function NotificationsPage() {
                 className={cn(
                   'border-line/50 flex cursor-pointer items-center gap-4 border-b py-3 pr-6 transition-colors',
                   !n.readAt
-                    ? 'border-l-accent-blue bg-surface-inset/5 border-l-2 pl-[22px]'
+                    ? 'border-l-accent bg-surface-inset/5 border-l-2 pl-[22px]'
                     : 'hover:bg-surface-inset/50 border-l-2 border-l-transparent pl-[22px]'
                 )}
                 onClick={() => !n.readAt && handleMarkRead(n.id)}

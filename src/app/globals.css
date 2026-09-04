@@ -12,6 +12,16 @@
    ========================================================================== */
 
 @layer base {
+  /* --- Brand ------------------------------------------------------------
+     Fixed brand asset colours for the logo mark. Deliberately outside the
+     themed blocks: the logo is the same artwork in light and dark, so these
+     must NOT be redefined per theme. Nothing but brand-mark.tsx uses them. */
+  :root {
+    --brand-navy: #12131c;
+    --brand-blue: #2c7ed4;
+    --brand-cyan: #a7ffff;
+  }
+
   :root {
     color-scheme: light;
 

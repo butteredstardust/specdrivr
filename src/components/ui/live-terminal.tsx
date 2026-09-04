@@ -3,6 +3,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import type { Terminal } from '@xterm/xterm';
 import type { FitAddon } from '@xterm/addon-fit';
+import { cn } from '@/lib/utils';
 
 interface LiveTerminalProps {
   sessionId: number;
@@ -34,36 +35,50 @@ export function LiveTerminal({
     // Import xterm CSS dynamically
     await import('@xterm/xterm/css/xterm.css');
 
-    // Resolve theme colors from CSS variables
+    /**
+     * xterm needs literal colours, so the design tokens are read off the
+     * document at init. `token()` keeps the fallbacks in one place; they only
+     * apply if globals.css failed to load, in which case any value is a guess.
+     *
+     * These are the neutral log tokens, not the old phosphor/terminal-green
+     * set — the log surface is now a dark mono panel, not a CRT.
+     */
     const styles = getComputedStyle(document.documentElement);
-    const terminalBg = styles.getPropertyValue('--terminal-bg').trim() || 'transparent';
-    const terminalText = styles.getPropertyValue('--terminal-text').trim() || 'rgb(161, 161, 170)';
-    const accentBlue = styles.getPropertyValue('--accent-blue').trim() || 'rgb(92, 175, 255)';
-    const statusEmerald = styles.getPropertyValue('--status-emerald').trim() || 'rgb(5, 150, 105)';
-    const statusRed = styles.getPropertyValue('--status-red').trim() || 'rgb(220, 38, 38)';
-    const phosphorAmber = styles.getPropertyValue('--phosphor-amber').trim() || 'rgb(255, 179, 0)';
-    const terminalGreen = styles.getPropertyValue('--terminal-green').trim() || 'rgb(57, 255, 20)';
+    const token = (name: string, fallback: string) =>
+      styles.getPropertyValue(name).trim() || fallback;
+
+    const logBg = token('--log-bg', '#0f1116');
+    const logText = token('--log-text', '#f2f4f7');
+    const logMuted = token('--log-muted', '#737d8c');
+    const accent = token('--accent', '#4d8dfa');
+    const success = token('--success', '#067647');
+    const warning = token('--warning', '#b54708');
+    const danger = token('--danger', '#b42318');
 
     const terminal = new Terminal({
       theme: {
-        background: terminalBg,
-        foreground: terminalText,
-        cursor: accentBlue,
-        selectionBackground: `${accentBlue}40`,
-        black: 'rgb(10, 10, 11)',
-        green: statusEmerald,
-        yellow: phosphorAmber,
-        blue: accentBlue,
-        red: statusRed,
-        brightGreen: terminalGreen,
-        brightYellow: phosphorAmber,
-        brightBlue: accentBlue,
+        background: logBg,
+        foreground: logText,
+        cursor: accent,
+        selectionBackground: `${accent}40`,
+        black: logBg,
+        brightBlack: logMuted,
+        green: success,
+        brightGreen: success,
+        yellow: warning,
+        brightYellow: warning,
+        red: danger,
+        brightRed: danger,
+        blue: accent,
+        brightBlue: accent,
       },
 
-      fontFamily: '"Fira Code", ui-monospace, "SFMono-Regular", monospace',
+      // Resolved, not `var(--font-mono)` — xterm builds a canvas font string,
+      // which does not evaluate custom properties.
+      fontFamily: token('--font-mono', '"Fira Code", ui-monospace, monospace'),
       fontSize: 13,
-      lineHeight: 1.4,
-      cursorBlink: true,
+      lineHeight: 1.5,
+      cursorBlink: false,
       scrollback: 5000,
       convertEol: true,
     });
@@ -102,7 +117,7 @@ export function LiveTerminal({
     });
 
     es.addEventListener('connected', () => {
-      terminal.write('\r\n\x1b[35m> DAEMON CONNECTED\x1b[0m\r\n');
+      terminal.write('\r\n\x1b[90mConnected.\x1b[0m\r\n');
     });
 
     es.addEventListener('history_end', () => {
@@ -174,13 +189,18 @@ export function LiveTerminal({
 
   return (
     <div
-      className={` ${className ?? ''}`}
-      style={{
-        height,
-        transform: 'translateZ(0)',
-        borderRadius: '0.375rem',
-        overflow: 'hidden',
-      }}
+      // aria-live so screen readers hear appended output. `polite` because a
+      // build log is informational and must not interrupt the current task.
+      role="log"
+      aria-live="polite"
+      aria-label="Session output"
+      className={cn(
+        'border-line bg-log-bg overflow-hidden rounded-md border p-2',
+        // Promotes to its own layer; xterm repaints constantly during a stream.
+        'transform-gpu',
+        className
+      )}
+      style={{ height }}
       ref={containerRef}
     />
   );

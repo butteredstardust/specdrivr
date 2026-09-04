@@ -62,7 +62,7 @@ function Calendar({
           defaultClassNames.dropdowns
         ),
         dropdown_root: cn(
-          'has-focus:border-ring border-line shadow-xs has-focus:ring-accent/50 has-focus:ring-[3px] relative rounded-md border',
+          'has-focus:border-accent border-line shadow-xs has-focus:ring-accent/50 has-focus:ring-[3px] relative rounded-md border',
           defaultClassNames.dropdown_root
         ),
         dropdown: cn('bg-surface-overlay absolute inset-0 opacity-0', defaultClassNames.dropdown),
@@ -159,7 +159,7 @@ function CalendarDayButton({
       data-range-end={modifiers.range_end}
       data-range-middle={modifiers.range_middle}
       className={cn(
-        'data-[selected-single=true]:bg-surface-inset data-[selected-single=true]:text-accent-fg data-[range-middle=true]:bg-surface-inset data-[range-middle=true]:text-fg data-[range-start=true]:bg-surface-inset data-[range-start=true]:text-accent-fg data-[range-end=true]:bg-surface-inset data-[range-end=true]:text-accent-fg group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-accent/50 flex aspect-square h-auto w-full min-w-[--cell-size] flex-col gap-1 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-[3px] data-[range-end=true]:rounded-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md [&>span]:text-xs [&>span]:opacity-70',
+        'data-[selected-single=true]:bg-accent data-[selected-single=true]:text-accent-fg data-[range-middle=true]:bg-surface-inset data-[range-middle=true]:text-fg data-[range-start=true]:bg-accent data-[range-start=true]:text-accent-fg data-[range-end=true]:bg-accent data-[range-end=true]:text-accent-fg group-data-[focused=true]/day:border-accent group-data-[focused=true]/day:ring-accent/50 flex aspect-square h-auto w-full min-w-[--cell-size] flex-col gap-1 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-[3px] data-[range-end=true]:rounded-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md [&>span]:text-xs [&>span]:opacity-70',
         defaultClassNames.day,
         className
       )}

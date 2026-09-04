@@ -6,7 +6,7 @@ import { StatusIcon } from '@/components/ui/status-icon';
 import { Badge } from '@/components/ui/badge';
 import { SESSION_STATUS } from '@/lib/ui-status';
 import { Button } from '@/components/ui/button';
-import { ASCIIProgress } from '@/components/ui/progress';
+import { Progress } from '@/components/ui/progress';
 
 interface RecentSession {
   id: number;
@@ -37,7 +37,7 @@ export function RecentSessions({ sessions }: RecentSessionsProps) {
             specification.
           </p>
         </div>
-        <Button asChild variant="warning">
+        <Button asChild>
           <Link href="/specs/new">Create Specification</Link>
         </Button>
       </div>
@@ -46,11 +46,15 @@ export function RecentSessions({ sessions }: RecentSessionsProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="text-fg-muted font-mono text-[10px] tracking-[0.15em] uppercase opacity-70">
-        Recent Activity
-      </h2>
+      <h2 className="text-fg-secondary text-sm font-medium">Recent activity</h2>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {sessions.map((session) => {
+          const total = session.totalTasks ?? 0;
+          const hasProgress = total > 0;
+          const percent = hasProgress
+            ? Math.round(((session.tasksSucceeded ?? 0) / total) * 100)
+            : 0;
+
           return (
             <Link
               key={session.id}
@@ -66,38 +70,25 @@ export function RecentSessions({ sessions }: RecentSessionsProps) {
                     {SESSION_STATUS[session.status].label}
                   </Badge>
                 </div>
-                <span className="text-fg-muted font-mono text-[9px] tracking-wider uppercase opacity-60">
+                <span className="text-fg-muted text-2xs">
                   {formatDistanceToNow(new Date(session.startedAt), { addSuffix: true })}
                 </span>
               </div>
 
               <div className="flex flex-col gap-3">
-                <p className="text-fg group-hover:text-accent truncate font-mono font-medium transition-colors">
+                <p className="text-fg group-hover:text-accent truncate font-medium transition-colors">
                   {session.specTitle || session.specName || `Session #${session.id}`}
                 </p>
-                <div className="text-fg-muted flex flex-col gap-2 font-mono text-[10px] tracking-wider uppercase opacity-70">
+                <div className="text-fg-muted flex flex-col gap-2 text-xs">
                   <div className="flex items-center justify-between">
                     <span>{session.tasksExecuted ?? 0} tasks executed</span>
-                    {session.totalTasks && session.totalTasks > 0 && (
-                      <span className="text-success">
-                        {Math.round(((session.tasksSucceeded ?? 0) / session.totalTasks) * 100)}%
-                      </span>
-                    )}
+                    {hasProgress && <span className="text-fg-secondary">{percent}%</span>}
                   </div>
-                  {session.totalTasks && session.totalTasks > 0 && (
-                    <ASCIIProgress
-                      value={session.tasksSucceeded ?? 0}
-                      max={session.totalTasks}
-                      length={24}
-                      className="text-success origin-left scale-x-105"
-                    />
-                  )}
+                  {hasProgress && <Progress value={percent} aria-label="Tasks succeeded" />}
                   {session.backend && (
-                    <div className="mt-1">
-                      <span className="bg-surface-inset border-line-subtle group-hover:bg-surface-inset/80 rounded border px-2 py-0.5 text-[9px] tracking-widest transition-colors">
-                        {session.backend === 'claude' ? '🤖 CLAUDE' : '✨ GEMINI'}
-                      </span>
-                    </div>
+                    <span className="text-fg-secondary bg-surface-inset border-line-subtle text-2xs mt-1 w-fit rounded border px-2 py-0.5 capitalize">
+                      {session.backend}
+                    </span>
                   )}
                 </div>
               </div>
