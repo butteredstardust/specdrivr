@@ -2,7 +2,7 @@
 
 import { usePolling } from '@/hooks/use-polling';
 import { DiffViewer } from '@/components/ui/diff-viewer';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { StatusIcon } from '@/components/ui/status-icon';
 
 interface FileChange {
   filename: string;
@@ -26,7 +26,7 @@ export function TaskDrawerChanges({ taskId }: TaskDrawerChangesProps) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <span className="text-text-muted font-mono text-xs">Loading changes...</span>
+        <span className="text-fg-muted font-mono text-xs">Loading changes...</span>
       </div>
     );
   }
@@ -34,8 +34,8 @@ export function TaskDrawerChanges({ taskId }: TaskDrawerChangesProps) {
   if (!changes || changes.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-16">
-        <DaemonMascot size={48} expression="idle" />
-        <span className="text-text-secondary font-mono text-sm">No file changes yet.</span>
+        <StatusIcon size={24} status="idle" />
+        <span className="text-fg-secondary font-mono text-sm">No file changes yet.</span>
       </div>
     );
   }

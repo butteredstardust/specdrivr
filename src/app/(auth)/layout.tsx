@@ -13,7 +13,7 @@ async function AuthCheck({ children }: { children: React.ReactNode }) {
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-bg-base flex min-h-screen items-center justify-center">
+    <div className="bg-surface-base flex min-h-screen items-center justify-center">
       <Suspense fallback={null}>
         <AuthCheck>{children}</AuthCheck>
       </Suspense>

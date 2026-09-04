@@ -171,26 +171,26 @@ export function NotificationPreferencesSection() {
 
   return (
     <section className="flex flex-col gap-6">
-      <p className="text-text-secondary text-sm">Choose when DAEMON notifies you.</p>
+      <p className="text-fg-secondary text-sm">Choose when DAEMON notifies you.</p>
 
-      {loadError && <p className="text-status-red font-mono text-xs">{loadError}</p>}
+      {loadError && <p className="text-danger font-mono text-xs">{loadError}</p>}
 
       {/* Table header */}
-      <div className="border-border-muted grid grid-cols-[1fr_4rem_4rem] items-center gap-2 border-b pb-2">
-        <span className="text-text-muted font-mono text-xs tracking-widest uppercase">Event</span>
-        <span className="text-text-muted text-center font-mono text-xs tracking-widest uppercase">
+      <div className="border-line-subtle grid grid-cols-[1fr_4rem_4rem] items-center gap-2 border-b pb-2">
+        <span className="text-fg-muted font-mono text-xs tracking-widest uppercase">Event</span>
+        <span className="text-fg-muted text-center font-mono text-xs tracking-widest uppercase">
           Email
         </span>
-        <span className="text-text-muted text-center font-mono text-xs tracking-widest uppercase">
+        <span className="text-fg-muted text-center font-mono text-xs tracking-widest uppercase">
           In-App
         </span>
       </div>
 
       {/* Rows */}
-      <div className="divide-border-muted flex flex-col gap-0 divide-y">
+      <div className="divide-line-subtle flex flex-col gap-0 divide-y">
         {ALL_EVENT_TYPES.map((et) => (
           <div key={et} className="grid grid-cols-[1fr_4rem_4rem] items-center gap-2 py-3">
-            <span className="text-text-primary text-sm">{EVENT_LABELS[et]}</span>
+            <span className="text-fg text-sm">{EVENT_LABELS[et]}</span>
 
             <div className="flex justify-center">
               <Switch
@@ -216,7 +216,7 @@ export function NotificationPreferencesSection() {
         <Button size="sm" disabled={!isDirty || isSaving} onClick={handleSave}>
           {isSaving ? 'Saving…' : 'Save Preferences'}
         </Button>
-        {isDirty && <span className="text-phosphor-amber text-xs">• Unsaved changes</span>}
+        {isDirty && <span className="text-warning text-xs">• Unsaved changes</span>}
       </div>
     </section>
   );

@@ -15,9 +15,9 @@ interface TerminalLogProps {
 }
 
 function getLineClass(line: string): string {
-  if (line.includes('ERROR')) return 'text-status-red';
-  if (line.includes('WARN')) return 'text-phosphor-amber';
-  return 'text-terminal-text';
+  if (line.includes('ERROR')) return 'text-danger';
+  if (line.includes('WARN')) return 'text-warning';
+  return 'text-log-text';
 }
 
 export function TerminalLog({
@@ -53,7 +53,7 @@ export function TerminalLog({
       ref={containerRef}
       onScroll={handleScroll}
       className={cn(
-        'terminal-surface border-border-default/50 overflow-y-auto rounded-lg border bg-[color:var(--terminal-bg)] p-4 shadow-2xl',
+        'border-line/50 shadow-overlay overflow-y-auto rounded-lg border bg-[color:var(--terminal-bg)] p-4',
         className
       )}
       style={{ maxHeight }}
@@ -61,7 +61,7 @@ export function TerminalLog({
       <div
         className={cn(
           'space-y-1 font-mono text-[12px] leading-relaxed tracking-tight',
-          isFlickering && 'animate-terminal-flicker'
+          isFlickering && ''
         )}
       >
         {lines.map((line, i) => (

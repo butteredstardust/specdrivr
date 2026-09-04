@@ -110,7 +110,7 @@ export default function EditSpecPage() {
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <Loader2 className="text-accent-blue h-8 w-8 animate-spin" />
+        <Loader2 className="text-accent h-8 w-8 animate-spin" />
       </div>
     );
   }

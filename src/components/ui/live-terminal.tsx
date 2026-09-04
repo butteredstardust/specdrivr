@@ -174,7 +174,7 @@ export function LiveTerminal({
 
   return (
     <div
-      className={`terminal-surface ${className ?? ''}`}
+      className={` ${className ?? ''}`}
       style={{
         height,
         transform: 'translateZ(0)',

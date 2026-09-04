@@ -18,13 +18,13 @@ export default async function IntegrationsPage() {
 
   return (
     <div className="flex max-w-4xl flex-col gap-8">
-      <h2 className="text-muted-foreground font-mono text-[10px] tracking-[0.2em] uppercase">
+      <h2 className="text-fg-muted font-mono text-[10px] tracking-[0.2em] uppercase">
         Integrations
       </h2>
       {project ? (
         <IntegrationsSection projectId={project.id} userRole={userRole} />
       ) : (
-        <p className="text-muted-foreground text-sm">No project found.</p>
+        <p className="text-fg-muted text-sm">No project found.</p>
       )}
     </div>
   );

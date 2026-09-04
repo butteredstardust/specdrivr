@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { clientLogger } from '@/lib/logger-client';
 import { usePolling } from '@/hooks/use-polling';
 import { cn } from '@/lib/utils';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { StatusIcon } from '@/components/ui/status-icon';
 import type { SpecStatus } from '@/components/specs/spec-editor';
 
 interface ActivityEvent {
@@ -20,10 +20,10 @@ interface ActivityTabProps {
 }
 
 function eventTypeBadgeClass(eventType: string): string {
-  if (eventType.startsWith('PLAN_')) return 'text-phosphor-amber';
-  if (eventType.startsWith('TASK_')) return 'text-accent-blue';
-  if (eventType.startsWith('SESSION_')) return 'text-text-secondary';
-  return 'text-text-muted';
+  if (eventType.startsWith('PLAN_')) return 'text-warning';
+  if (eventType.startsWith('TASK_')) return 'text-accent';
+  if (eventType.startsWith('SESSION_')) return 'text-fg-secondary';
+  return 'text-fg-muted';
 }
 
 function timeAgo(ts: string): string {
@@ -87,7 +87,7 @@ export function ActivityTab({ specId, specStatus }: ActivityTabProps): React.Rea
 
   if (loading) {
     return (
-      <div className="text-text-muted py-8 text-center font-mono text-xs">Loading activity…</div>
+      <div className="text-fg-muted py-8 text-center font-mono text-xs">Loading activity…</div>
     );
   }
 
@@ -99,9 +99,9 @@ export function ActivityTab({ specId, specStatus }: ActivityTabProps): React.Rea
   if (sorted.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 py-16">
-        <DaemonMascot size={48} expression="idle" />
-        <p className="text-text-secondary font-mono text-sm">No activity yet.</p>
-        <p className="text-text-muted font-mono text-xs italic">
+        <StatusIcon size={24} status="idle" />
+        <p className="text-fg-secondary font-mono text-sm">No activity yet.</p>
+        <p className="text-fg-muted font-mono text-xs italic">
           &quot;Events will be logged as the agent executes your plan.&quot;
         </p>
       </div>
@@ -110,7 +110,7 @@ export function ActivityTab({ specId, specStatus }: ActivityTabProps): React.Rea
 
   return (
     <div>
-      <p className="text-text-muted mb-3 font-mono text-[10px] tracking-[0.2em] uppercase">
+      <p className="text-fg-muted mb-3 font-mono text-[10px] tracking-[0.2em] uppercase">
         Activity Log
       </p>
       <div className="space-y-1">
@@ -119,20 +119,18 @@ export function ActivityTab({ specId, specStatus }: ActivityTabProps): React.Rea
             key={event.id}
             className={cn(
               'flex items-start gap-3 rounded-sm px-3 py-2',
-              idx === 0
-                ? 'bg-phosphor-amber/5 border-phosphor-amber/20 border'
-                : 'hover:bg-bg-elevated'
+              idx === 0 ? 'bg-warning/5 border-warning/20 border' : 'hover:bg-surface-inset'
             )}
           >
-            <span className="text-text-muted shrink-0 font-mono text-xs tabular-nums">
+            <span className="text-fg-muted shrink-0 font-mono text-xs tabular-nums">
               {timeAgo(event.timestamp)}
             </span>
             <span
-              className={`bg-bg-elevated shrink-0 rounded-sm px-1.5 py-0.5 font-mono text-xs ${eventTypeBadgeClass(event.type)}`}
+              className={`bg-surface-inset shrink-0 rounded-sm px-1.5 py-0.5 font-mono text-xs ${eventTypeBadgeClass(event.type)}`}
             >
               [{event.type}]
             </span>
-            <span className="text-text-secondary text-sm">{event.message}</span>
+            <span className="text-fg-secondary text-sm">{event.message}</span>
           </div>
         ))}
       </div>

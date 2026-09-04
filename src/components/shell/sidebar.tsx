@@ -15,11 +15,11 @@ import {
   PanelLeftOpen,
   ChevronDown,
 } from 'lucide-react';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { StatusIcon } from '@/components/ui/status-icon';
 import { BrandLockup, BrandMark } from '@/components/ui/brand-mark';
 import { useSystemHealth } from '@/components/layout/systems-bar';
 import { useShell } from '@/components/shell/shell-context';
-import { PixelBadge } from '@/components/ui/pixel-badge';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
@@ -60,13 +60,13 @@ function healthToExpr(state: HealthState): DaemonExpr {
 function healthDot(state: HealthState) {
   switch (state) {
     case 'ok':
-      return 'bg-status-emerald';
+      return 'bg-success';
     case 'warn':
-      return 'bg-phosphor-amber';
+      return 'bg-warning';
     case 'error':
-      return 'bg-status-red';
+      return 'bg-danger';
     default:
-      return 'bg-text-muted';
+      return 'bg-fg-muted';
   }
 }
 
@@ -84,15 +84,15 @@ function SystemIcon({
       <TooltipTrigger asChild>
         <div className="group flex cursor-default flex-col items-center gap-1">
           <div className="relative transition-transform duration-200 group-hover:scale-110">
-            <DaemonMascot size={32} expression={healthToExpr(state)} />
+            <StatusIcon size={20} status={healthToExpr(state)} />
             <span
               className={cn(
-                'border-bg-surface absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full border shadow-sm',
+                'border-surface-raised absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full border',
                 healthDot(state)
               )}
             />
           </div>
-          <span className="text-text-muted group-hover:text-text-secondary mt-0.5 font-mono text-[10px] tracking-[0.08em] uppercase transition-colors">
+          <span className="text-fg-muted group-hover:text-fg-secondary mt-0.5 font-mono text-[10px] tracking-[0.08em] uppercase transition-colors">
             {label}
           </span>
         </div>
@@ -119,10 +119,10 @@ function SidebarBottom({ collapsed }: { collapsed: boolean }) {
 
   const statusClass =
     health.overall === 'ok'
-      ? 'text-text-muted'
+      ? 'text-fg-muted'
       : health.overall === 'degraded'
-        ? 'text-status-red'
-        : 'text-text-muted';
+        ? 'text-danger'
+        : 'text-fg-muted';
 
   const gitTooltip =
     health.git === 'ok'
@@ -153,17 +153,17 @@ function SidebarBottom({ collapsed }: { collapsed: boolean }) {
 
   if (collapsed) {
     return (
-      <div className="border-border-muted flex flex-col items-center gap-3 border-t py-4">
-        <DaemonMascot size={20} expression={overallExpr} />
+      <div className="border-line-subtle flex flex-col items-center gap-3 border-t py-4">
+        <StatusIcon size={20} status={overallExpr} />
       </div>
     );
   }
 
   return (
-    <div className="border-border-muted border-t">
+    <div className="border-line-subtle border-t">
       {/* Systems icons */}
       <div className="px-4 pt-4 pb-2">
-        <span className="text-text-muted mb-3 block px-1 font-mono text-[11px] tracking-[0.1em] uppercase opacity-70">
+        <span className="text-fg-muted mb-3 block px-1 font-mono text-[11px] tracking-[0.1em] uppercase opacity-70">
           Systems
         </span>
         <div className="flex items-end justify-between px-1">
@@ -177,13 +177,13 @@ function SidebarBottom({ collapsed }: { collapsed: boolean }) {
       {/* Daemon status footer */}
       <div className="px-4 pt-2 pb-4">
         <div className="flex items-center gap-2">
-          <DaemonMascot size={20} expression={overallExpr} />
+          <StatusIcon size={20} status={overallExpr} />
           <span className={cn('font-mono text-[11px] tracking-[0.08em] uppercase', statusClass)}>
             DAEMON · {statusText}
           </span>
         </div>
         <div className="mt-1.5 px-0.5">
-          <span className="text-text-muted/50 font-mono text-[10px] tracking-wide">v0.1.0</span>
+          <span className="text-fg-muted/50 font-mono text-[10px] tracking-wide">v0.1.0</span>
         </div>
       </div>
     </div>
@@ -228,7 +228,7 @@ export function Sidebar({ projects }: SidebarProps) {
     <TooltipProvider delayDuration={300}>
       <aside
         className={cn(
-          'border-border-default bg-bg-surface flex h-full flex-shrink-0 flex-col border-r transition-all duration-300 ease-in-out',
+          'border-line bg-surface-raised flex h-full flex-shrink-0 flex-col border-r transition-all duration-300 ease-in-out',
           isCollapsed ? 'w-16' : 'w-64'
         )}
       >
@@ -243,18 +243,18 @@ export function Sidebar({ projects }: SidebarProps) {
               <div className="flex flex-1 flex-col gap-1">
                 <BrandLockup size={32} />
                 {devMode && (
-                  <PixelBadge
-                    variant="amber"
+                  <Badge
+                    variant="warning"
                     className="mt-0.5 w-fit origin-left scale-90 font-mono text-[10px]"
                   >
                     DEV MODE
-                  </PixelBadge>
+                  </Badge>
                 )}
               </div>
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-text-muted hover:text-text-primary ml-auto h-7 w-7 shrink-0 transition-colors"
+                className="text-fg-muted hover:text-fg ml-auto h-7 w-7 shrink-0 transition-colors"
                 onClick={toggleCollapsed}
                 aria-label="Collapse sidebar"
               >
@@ -270,7 +270,7 @@ export function Sidebar({ projects }: SidebarProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="text-text-muted hover:text-text-primary h-8 w-8 transition-colors"
+              className="text-fg-muted hover:text-fg h-8 w-8 transition-colors"
               onClick={toggleCollapsed}
               aria-label="Expand sidebar"
             >
@@ -296,16 +296,16 @@ export function Sidebar({ projects }: SidebarProps) {
                 }
               }}
             >
-              <SelectTrigger className="border-border-muted bg-bg-elevated/50 hover:bg-bg-elevated h-auto w-full border px-3 py-2 text-xs transition-colors [&>svg:last-child]:hidden">
+              <SelectTrigger className="border-line-subtle bg-surface-inset/50 hover:bg-surface-inset h-auto w-full border px-3 py-2 text-xs transition-colors [&>svg:last-child]:hidden">
                 <div className="flex flex-1 flex-col items-start overflow-hidden text-left">
-                  <span className="text-text-muted mb-0.5 font-mono text-[10px] tracking-[0.08em] uppercase opacity-70">
+                  <span className="text-fg-muted mb-0.5 font-mono text-[10px] tracking-[0.08em] uppercase opacity-70">
                     Active Project
                   </span>
-                  <span className="text-text-secondary w-full truncate font-mono font-medium">
+                  <span className="text-fg-secondary w-full truncate font-mono font-medium">
                     {projectPath}
                   </span>
                 </div>
-                <ChevronDown className="text-text-muted ml-1 h-3.5 w-3.5 shrink-0" />
+                <ChevronDown className="text-fg-muted ml-1 h-3.5 w-3.5 shrink-0" />
               </SelectTrigger>
               <SelectContent>
                 {projects.map((p) => (
@@ -334,32 +334,32 @@ export function Sidebar({ projects }: SidebarProps) {
                   'group flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-200',
                   isCollapsed && 'relative justify-center px-2',
                   active
-                    ? 'bg-bg-elevated text-text-primary shadow-sm'
-                    : 'text-text-secondary hover:bg-bg-elevated/40 hover:text-text-primary'
+                    ? 'bg-surface-inset text-fg'
+                    : 'text-fg-secondary hover:bg-surface-inset/40 hover:text-fg'
                 )}
               >
                 <Icon
                   className={cn(
                     'h-[18px] w-[18px] shrink-0 transition-transform duration-200 group-hover:scale-110',
-                    active ? 'text-accent-blue' : 'text-text-secondary'
+                    active ? 'text-accent' : 'text-fg-secondary'
                   )}
                 />
                 {!isCollapsed && <span>{label}</span>}
                 {!isCollapsed && showBadge && (
-                  <PixelBadge
-                    variant="blue"
-                    className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full p-0 text-[10px] shadow-sm"
+                  <Badge
+                    variant="info"
+                    className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full p-0 text-[10px]"
                   >
                     {badgeText}
-                  </PixelBadge>
+                  </Badge>
                 )}
                 {isCollapsed && showBadge && (
-                  <PixelBadge
-                    variant="blue"
-                    className="absolute top-2 right-2 flex h-4 min-w-4 items-center justify-center rounded-full p-0 text-[10px] shadow-sm"
+                  <Badge
+                    variant="info"
+                    className="absolute top-2 right-2 flex h-4 min-w-4 items-center justify-center rounded-full p-0 text-[10px]"
                   >
                     {badgeText}
-                  </PixelBadge>
+                  </Badge>
                 )}
               </Link>
             );

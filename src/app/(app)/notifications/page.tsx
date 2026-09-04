@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { StatusIcon } from '@/components/ui/status-icon';
 import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
 import {
@@ -106,20 +106,20 @@ export default function NotificationsPage() {
   const getTypeIcon = (type: Notification['type']) => {
     switch (type) {
       case 'success':
-        return <CheckCircle2 className="text-status-emerald h-4 w-4" />;
+        return <CheckCircle2 className="text-success h-4 w-4" />;
       case 'error':
-        return <AlertCircle className="text-status-red h-4 w-4" />;
+        return <AlertCircle className="text-danger h-4 w-4" />;
       case 'warning':
-        return <AlertCircle className="text-phosphor-amber h-4 w-4" />;
+        return <AlertCircle className="text-warning h-4 w-4" />;
       case 'mention':
-        return <Bell className="text-accent-blue h-4 w-4" />;
+        return <Bell className="text-accent h-4 w-4" />;
       default:
-        return <Info className="text-primary h-4 w-4" />;
+        return <Info className="text-accent h-4 w-4" />;
     }
   };
 
   return (
-    <div className="animate-entrance -mx-6 -mt-6 flex min-h-full flex-col">
+    <div className="animate-fade-in-up -mx-6 -mt-6 flex min-h-full flex-col">
       <PageHeader
         category="System"
         title="Notifications"
@@ -129,7 +129,7 @@ export default function NotificationsPage() {
               variant="ghost"
               size="sm"
               onClick={handleMarkAllRead}
-              className="text-text-muted hover:text-text-primary h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase transition-colors"
+              className="text-fg-muted hover:text-fg h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase transition-colors"
             >
               <CheckCheck className="h-3.5 w-3.5" />
               Mark all read
@@ -139,7 +139,7 @@ export default function NotificationsPage() {
       />
 
       {/* Tabs & Pagination Controls */}
-      <div className="border-border-default flex items-center justify-between border-b px-6 py-2.5">
+      <div className="border-line flex items-center justify-between border-b px-6 py-2.5">
         <div className="flex items-center gap-1">
           {STATUS_TABS.map((t) => (
             <Button
@@ -152,7 +152,7 @@ export default function NotificationsPage() {
               }}
               className={cn(
                 'h-7 px-2.5 font-mono text-xs tracking-wider uppercase transition-all',
-                tab !== t.value && 'bg-secondary/50 text-text-secondary hover:text-text-primary'
+                tab !== t.value && 'bg-surface-inset/50 text-fg-secondary hover:text-fg'
               )}
             >
               {t.label}
@@ -163,7 +163,7 @@ export default function NotificationsPage() {
 
         {totalPages > 1 && (
           <div className="flex items-center gap-2">
-            <span className="text-text-secondary font-mono text-xs uppercase">
+            <span className="text-fg-secondary font-mono text-xs uppercase">
               Page {page} of {totalPages}
             </span>
             <div className="flex items-center gap-1">
@@ -194,17 +194,17 @@ export default function NotificationsPage() {
       <div className="flex-1">
         {activeProjectId === null ? (
           <div className="flex flex-col items-center gap-4 py-16">
-            <DaemonMascot size={48} expression="idle" />
-            <p className="text-text-secondary font-mono text-sm">
+            <StatusIcon size={24} status="idle" />
+            <p className="text-fg-secondary font-mono text-sm">
               Select a project to view notifications.
             </p>
           </div>
         ) : isLoading && !data ? (
-          <div className="text-text-secondary py-16 text-center font-mono text-xs">Loading…</div>
+          <div className="text-fg-secondary py-16 text-center font-mono text-xs">Loading…</div>
         ) : notifications.length === 0 ? (
           <div className="flex flex-col items-center gap-4 py-16">
-            <Bell className="text-text-muted/20 h-12 w-12" />
-            <p className="text-text-secondary font-mono text-sm">
+            <Bell className="text-fg-muted/20 h-12 w-12" />
+            <p className="text-fg-secondary font-mono text-sm">
               No {tab === 'unread' ? 'unread ' : ''}notifications.
             </p>
           </div>
@@ -214,10 +214,10 @@ export default function NotificationsPage() {
               <div
                 key={n.id}
                 className={cn(
-                  'border-border-default/50 flex cursor-pointer items-center gap-4 border-b py-3 pr-6 transition-colors',
+                  'border-line/50 flex cursor-pointer items-center gap-4 border-b py-3 pr-6 transition-colors',
                   !n.readAt
-                    ? 'border-l-accent-blue bg-accent-blue/5 border-l-2 pl-[22px]'
-                    : 'hover:bg-bg-elevated/50 border-l-2 border-l-transparent pl-[22px]'
+                    ? 'border-l-accent-blue bg-surface-inset/5 border-l-2 pl-[22px]'
+                    : 'hover:bg-surface-inset/50 border-l-2 border-l-transparent pl-[22px]'
                 )}
                 onClick={() => !n.readAt && handleMarkRead(n.id)}
               >
@@ -226,13 +226,13 @@ export default function NotificationsPage() {
                   <p
                     className={cn(
                       'text-sm leading-snug',
-                      !n.readAt ? 'text-text-primary font-medium' : 'text-text-secondary'
+                      !n.readAt ? 'text-fg font-medium' : 'text-fg-secondary'
                     )}
                   >
                     {n.title}
                   </p>
-                  <p className="text-text-secondary mt-0.5 line-clamp-1 text-xs">{n.message}</p>
-                  <p className="text-text-muted mt-0.5 font-mono text-xs uppercase">
+                  <p className="text-fg-secondary mt-0.5 line-clamp-1 text-xs">{n.message}</p>
+                  <p className="text-fg-muted mt-0.5 font-mono text-xs uppercase">
                     {formatRelativeTime(n.createdAt)}
                   </p>
                 </div>

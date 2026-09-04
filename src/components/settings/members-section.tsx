@@ -146,31 +146,31 @@ export function MembersSection({ projectId, userRole, initialMembers }: MembersS
   return (
     <TooltipProvider>
       <section className="flex flex-col gap-4">
-        <h2 className="text-text-muted font-mono text-xs tracking-widest uppercase">MEMBERS</h2>
+        <h2 className="text-fg-muted font-mono text-xs tracking-widest uppercase">MEMBERS</h2>
 
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
-              <tr className="border-border border-b text-left">
-                <th className="text-text-muted pr-4 pb-2 font-mono font-normal tracking-widest uppercase">
+              <tr className="border-line border-b text-left">
+                <th className="text-fg-muted pr-4 pb-2 font-mono font-normal tracking-widest uppercase">
                   Name
                 </th>
-                <th className="text-text-muted pr-4 pb-2 font-mono font-normal tracking-widest uppercase">
+                <th className="text-fg-muted pr-4 pb-2 font-mono font-normal tracking-widest uppercase">
                   Email
                 </th>
-                <th className="text-text-muted pr-4 pb-2 font-mono font-normal tracking-widest uppercase">
+                <th className="text-fg-muted pr-4 pb-2 font-mono font-normal tracking-widest uppercase">
                   Role
                 </th>
-                <th className="text-text-muted pb-2 font-mono font-normal tracking-widest uppercase">
+                <th className="text-fg-muted pb-2 font-mono font-normal tracking-widest uppercase">
                   Actions
                 </th>
               </tr>
             </thead>
             <tbody>
               {members.map((member) => (
-                <tr key={member.userId} className="border-border border-b">
-                  <td className="text-text-primary py-3 pr-4 font-mono">{member.name}</td>
-                  <td className="text-text-secondary py-3 pr-4 font-mono">{member.email}</td>
+                <tr key={member.userId} className="border-line border-b">
+                  <td className="text-fg py-3 pr-4 font-mono">{member.name}</td>
+                  <td className="text-fg-secondary py-3 pr-4 font-mono">{member.email}</td>
                   <td className="py-3 pr-4">
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -222,12 +222,12 @@ export function MembersSection({ projectId, userRole, initialMembers }: MembersS
 
         {/* Invite form */}
         <div className="mt-2">
-          <p className="text-text-muted mb-2 font-mono text-xs tracking-widest uppercase">
+          <p className="text-fg-muted mb-2 font-mono text-xs tracking-widest uppercase">
             Invite member
           </p>
           <form onSubmit={handleInvite} className="flex flex-wrap items-end gap-2">
             <div className="flex flex-col gap-1">
-              <label className="text-text-secondary font-mono text-xs" htmlFor="invite-email">
+              <label className="text-fg-secondary font-mono text-xs" htmlFor="invite-email">
                 Email
               </label>
               <Input
@@ -241,7 +241,7 @@ export function MembersSection({ projectId, userRole, initialMembers }: MembersS
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-text-secondary font-mono text-xs" htmlFor="invite-role">
+              <label className="text-fg-secondary font-mono text-xs" htmlFor="invite-role">
                 Role
               </label>
               <Select

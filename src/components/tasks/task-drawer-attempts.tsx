@@ -5,7 +5,7 @@ import { usePolling } from '@/hooks/use-polling';
 import { TerminalLog } from '@/components/ui/terminal-log';
 import dynamic from 'next/dynamic';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { StatusIcon } from '@/components/ui/status-icon';
 import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -31,9 +31,9 @@ interface TaskDrawerAttemptsProps {
 }
 
 const statusBadgeClass: Record<Attempt['status'], string> = {
-  running: 'bg-accent-blue/10 text-accent-blue',
+  running: 'bg-surface-inset/10 text-accent',
   completed: 'bg-emerald-500/10 text-emerald-400',
-  failed: 'bg-status-red/10 text-status-red',
+  failed: 'bg-danger/10 text-danger',
 };
 
 function formatDuration(ms: number): string {
@@ -68,7 +68,7 @@ export function TaskDrawerAttempts({ taskId, taskStatus }: TaskDrawerAttemptsPro
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <span className="text-text-muted font-mono text-xs">Loading attempts...</span>
+        <span className="text-fg-muted font-mono text-xs">Loading attempts...</span>
       </div>
     );
   }
@@ -76,8 +76,8 @@ export function TaskDrawerAttempts({ taskId, taskStatus }: TaskDrawerAttemptsPro
   if (!attempts || attempts.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-16">
-        <DaemonMascot size={48} expression="idle" />
-        <span className="text-text-secondary font-mono text-sm">No attempts yet.</span>
+        <StatusIcon size={24} status="idle" />
+        <span className="text-fg-secondary font-mono text-sm">No attempts yet.</span>
       </div>
     );
   }
@@ -94,16 +94,11 @@ export function TaskDrawerAttempts({ taskId, taskStatus }: TaskDrawerAttemptsPro
             open={isOpen}
             onOpenChange={() => toggleExpanded(attempt.id)}
           >
-            <CollapsibleTrigger className="border-border-default hover:bg-bg-elevated data-[state=open]:bg-bg-elevated/50 flex w-full items-center gap-4 rounded-md border px-4 py-3 transition-colors">
+            <CollapsibleTrigger className="border-line hover:bg-surface-inset data-[state=open]:bg-surface-inset/50 flex w-full items-center gap-4 rounded-md border px-4 py-3 transition-colors">
               <ChevronRight
-                className={cn(
-                  'text-text-muted h-4 w-4 transition-transform',
-                  isOpen && 'rotate-90'
-                )}
+                className={cn('text-fg-muted h-4 w-4 transition-transform', isOpen && 'rotate-90')}
               />
-              <span className="text-text-primary font-mono text-sm font-medium">
-                Attempt #{attempt.seq}
-              </span>
+              <span className="text-fg font-mono text-sm font-medium">Attempt #{attempt.seq}</span>
               <span
                 className={cn(
                   'rounded-sm px-2 py-0.5 font-mono text-[10px] tracking-widest uppercase',
@@ -113,7 +108,7 @@ export function TaskDrawerAttempts({ taskId, taskStatus }: TaskDrawerAttemptsPro
                 {attempt.status}
               </span>
               {attempt.durationMs != null && (
-                <span className="text-text-muted ml-auto font-mono text-xs">
+                <span className="text-fg-muted ml-auto font-mono text-xs">
                   {formatDuration(attempt.durationMs)}
                 </span>
               )}

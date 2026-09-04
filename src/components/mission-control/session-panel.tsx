@@ -6,12 +6,12 @@ import { Pause, Play, XCircle, RefreshCw, ChevronRight, ExternalLink } from 'luc
 import { GitHubLogoIcon } from '@radix-ui/react-icons';
 import { cn } from '@/lib/utils';
 import type { UserRole } from '@/db/schema';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { StatusIcon } from '@/components/ui/status-icon';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress, ASCIIProgress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { PixelBadge } from '@/components/ui/pixel-badge';
+import { Badge } from '@/components/ui/badge';
 
 type SessionPanelState = 'idle' | 'running' | 'paused' | 'completed' | 'failed' | 'cancelled';
 
@@ -142,10 +142,10 @@ export function SessionPanel({
   if (panelState === 'idle') {
     return (
       <div className="flex flex-col items-center gap-3 py-6 text-center">
-        <DaemonMascot size={48} expression="idle" />
-        <p className="text-text-muted font-mono text-xs tracking-widest uppercase">SYSTEM READY</p>
-        <p className="text-text-secondary text-sm">No active session.</p>
-        <Button asChild variant="phosphor" size="sm" className="mt-1">
+        <StatusIcon size={24} status="idle" />
+        <p className="text-fg-muted font-mono text-xs tracking-widest uppercase">SYSTEM READY</p>
+        <p className="text-fg-secondary text-sm">No active session.</p>
+        <Button asChild variant="warning" size="sm" className="mt-1">
           <Link href="/specs/new">
             Start a new spec
             <ChevronRight className="ml-1 h-3 w-3" />
@@ -164,35 +164,35 @@ export function SessionPanel({
       <TooltipProvider>
         <div
           className={cn(
-            'scanline-overlay flex flex-col gap-3 rounded-lg border p-3 transition-all',
-            panelState === 'running' ? 'cyber-glow-active border-accent-blue/30' : 'border-border'
+            'flex flex-col gap-3 rounded-lg border p-3 transition-all',
+            panelState === 'running' ? 'border-accent/30' : 'border-line'
           )}
         >
           {/* Header row: session ID badge + status + timer */}
           <div className="flex items-center gap-2">
-            <span className="bg-bg-elevated text-text-muted rounded px-1.5 py-0.5 font-mono text-[10px] shadow-sm">
+            <span className="bg-surface-inset text-fg-muted rounded px-1.5 py-0.5 font-mono text-[10px]">
               SES-{session!.id}
             </span>
             {session?.backend && (
-              <span className="bg-bg-elevated text-text-secondary rounded px-1.5 py-0.5 font-mono text-[10px] shadow-sm">
+              <span className="bg-surface-inset text-fg-secondary rounded px-1.5 py-0.5 font-mono text-[10px]">
                 {session.backend === 'claude' ? '🤖 Claude' : '✨ Gemini'}
               </span>
             )}
             {panelState === 'running' ? (
-              <PixelBadge variant="blue" dot>
+              <Badge variant="info" dot>
                 RUNNING
-              </PixelBadge>
+              </Badge>
             ) : (
-              <PixelBadge variant="amber">PAUSED</PixelBadge>
+              <Badge variant="warning">PAUSED</Badge>
             )}
-            <span className="text-text-muted ml-auto font-mono text-xs tracking-tighter tabular-nums">
+            <span className="text-fg-muted ml-auto font-mono text-xs tracking-tighter tabular-nums">
               {mm}:{ss}
             </span>
           </div>
 
           {/* Spec name */}
           {session?.specName && (
-            <p className="text-text-secondary truncate font-mono text-xs tracking-tight">
+            <p className="text-fg-secondary truncate font-mono text-xs tracking-tight">
               {session.specName}
             </p>
           )}
@@ -200,14 +200,14 @@ export function SessionPanel({
           {/* Progress bar */}
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <span className="text-text-muted font-mono text-[10px] tracking-wider uppercase">
+              <span className="text-fg-muted font-mono text-[10px] tracking-wider uppercase">
                 Progress: {succeeded}/{totalTasks > 0 ? totalTasks : '?'} · {progressPct}%
               </span>
               <ASCIIProgress
                 value={succeeded}
                 max={totalTasks > 0 ? totalTasks : 100}
                 length={12}
-                className="text-status-emerald"
+                className="text-success"
               />
             </div>
             <Progress value={progressPct} className="h-1 shadow-inner" />
@@ -215,15 +215,15 @@ export function SessionPanel({
 
           {/* Current task pill */}
           {session?.currentTaskExternalId && (
-            <div className="border-phosphor-amber/30 bg-phosphor-amber/5 flex items-center gap-2 rounded border px-2 py-1.5 shadow-sm transition-all">
-              <div className="bg-phosphor-amber/20 flex h-4 w-4 shrink-0 items-center justify-center rounded-[2px]">
-                <ChevronRight className="text-phosphor-amber h-3 w-3" />
+            <div className="border-warning/30 bg-warning/5 flex items-center gap-2 rounded border px-2 py-1.5 transition-all">
+              <div className="bg-warning/20 flex h-4 w-4 shrink-0 items-center justify-center rounded-[2px]">
+                <ChevronRight className="text-warning h-3 w-3" />
               </div>
-              <span className="text-phosphor-amber font-mono text-[10px] font-bold">
+              <span className="text-warning font-mono text-[10px] font-bold">
                 {session.currentTaskExternalId}
               </span>
               {session.currentTaskTitle && (
-                <span className="text-text-secondary truncate font-mono text-[10px] tracking-tight">
+                <span className="text-fg-secondary truncate font-mono text-[10px] tracking-tight">
                   {session.currentTaskTitle}
                 </span>
               )}
@@ -239,7 +239,7 @@ export function SessionPanel({
                 icon={<Pause className="mr-2 h-3 w-3" />}
                 label="Pause Session"
                 variant="outline"
-                className="border-phosphor-amber/40 text-phosphor-amber hover:bg-phosphor-amber/10 h-8 flex-1"
+                className="border-warning/40 text-warning hover:bg-warning/10 h-8 flex-1"
               />
             ) : (
               <ControlButton
@@ -248,7 +248,7 @@ export function SessionPanel({
                 icon={<Play className="mr-2 h-3 w-3" />}
                 label="Resume Session"
                 variant="outline"
-                className="border-status-emerald/40 text-status-emerald hover:bg-status-emerald/10 h-8 flex-1"
+                className="border-success/40 text-success hover:bg-success/10 h-8 flex-1"
               />
             )}
             <ControlButton
@@ -257,7 +257,7 @@ export function SessionPanel({
               icon={<XCircle className="mr-2 h-3 w-3" />}
               label="Abort"
               variant="outline"
-              className="border-status-red/40 text-status-red hover:bg-status-red/10 h-8 px-3"
+              className="border-danger/40 text-danger hover:bg-danger/10 h-8 px-3"
             />
           </div>
         </div>
@@ -268,19 +268,17 @@ export function SessionPanel({
   if (panelState === 'completed') {
     return (
       <div className="flex flex-col items-center gap-3 py-4 text-center">
-        <DaemonMascot size={48} expression="success" />
-        <PixelBadge variant="emerald">EXECUTION COMPLETE</PixelBadge>
+        <StatusIcon size={24} status="success" />
+        <Badge variant="success">EXECUTION COMPLETE</Badge>
         {session && (
           <div className="flex flex-col items-center gap-1.5 font-mono text-xs">
-            <div className="text-text-secondary flex gap-4">
+            <div className="text-fg-secondary flex gap-4">
               <span>Executed: {session.tasksExecuted}</span>
-              <span className="text-status-emerald">OK: {session.tasksSucceeded}</span>
-              <span className="text-status-red">Failed: {session.tasksFailed}</span>
+              <span className="text-success">OK: {session.tasksSucceeded}</span>
+              <span className="text-danger">Failed: {session.tasksFailed}</span>
             </div>
             {session.totalCostUsd != null && session.totalCostUsd > 0 && (
-              <span className="text-text-muted">
-                TOTAL COST: ${session.totalCostUsd.toFixed(4)}
-              </span>
+              <span className="text-fg-muted">TOTAL COST: ${session.totalCostUsd.toFixed(4)}</span>
             )}
           </div>
         )}
@@ -288,17 +286,17 @@ export function SessionPanel({
           <div className="flex items-center gap-3">
             <Link
               href={`/specs/${session.specId}?tab=changes`}
-              className="text-phosphor-amber text-sm underline-offset-2 hover:underline"
+              className="text-warning text-sm underline-offset-2 hover:underline"
             >
               View Changes →
             </Link>
             {session.pullRequestUrl && (
               <>
-                <span className="text-border-default">|</span>
+                <span className="text-line">|</span>
                 <Button
                   variant="link"
                   size="sm"
-                  className="text-text-secondary hover:text-text-primary h-auto p-0 text-sm font-normal"
+                  className="text-fg-secondary hover:text-fg h-auto p-0 text-sm font-normal"
                   onClick={() => window.open(session.pullRequestUrl!, '_blank')}
                 >
                   <GitHubLogoIcon className="mr-1.5 h-3.5 w-3.5" />
@@ -317,10 +315,10 @@ export function SessionPanel({
     return (
       <TooltipProvider>
         <div className="flex flex-col items-center gap-3 py-4 text-center">
-          <DaemonMascot size={48} expression="error" />
-          <PixelBadge variant="red">EXECUTION FAILED</PixelBadge>
+          <StatusIcon size={24} status="error" />
+          <Badge variant="danger">EXECUTION FAILED</Badge>
           {session?.totalCostUsd != null && session.totalCostUsd > 0 && (
-            <span className="text-text-muted font-mono text-[10px]">
+            <span className="text-fg-muted font-mono text-[10px]">
               EST. COST: ${session.totalCostUsd.toFixed(4)}
             </span>
           )}
@@ -355,12 +353,9 @@ export function SessionPanel({
   // cancelled
   return (
     <div className="flex flex-col items-center gap-3 py-6 text-center">
-      <DaemonMascot size={48} expression="idle" />
-      <PixelBadge variant="muted">CANCELLED</PixelBadge>
-      <Link
-        href="/specs"
-        className="text-phosphor-amber text-sm underline-offset-2 hover:underline"
-      >
+      <StatusIcon size={24} status="idle" />
+      <Badge variant="muted">CANCELLED</Badge>
+      <Link href="/specs" className="text-warning text-sm underline-offset-2 hover:underline">
         Return to specs
       </Link>
     </div>

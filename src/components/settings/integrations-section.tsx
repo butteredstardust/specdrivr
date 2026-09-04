@@ -22,7 +22,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { PixelBadge } from '@/components/ui/pixel-badge';
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
@@ -133,7 +133,7 @@ function PasswordInput({ id, value, onChange, disabled, placeholder }: PasswordI
         variant="ghost"
         size="icon"
         onClick={() => setShow((prev) => !prev)}
-        className="text-text-secondary hover:text-text-primary absolute top-1/2 right-1.5 h-6 w-6 -translate-y-1/2 p-0 disabled:pointer-events-none"
+        className="text-fg-secondary hover:text-fg absolute top-1/2 right-1.5 h-6 w-6 -translate-y-1/2 p-0 disabled:pointer-events-none"
         aria-label={show ? 'Hide value' : 'Show value'}
         disabled={disabled}
         tabIndex={-1}
@@ -157,7 +157,7 @@ interface FormFieldProps {
 function FormField({ label, htmlFor, children }: FormFieldProps) {
   return (
     <div className="flex flex-col gap-1.5">
-      <Label htmlFor={htmlFor} className="text-text-secondary font-mono text-xs uppercase">
+      <Label htmlFor={htmlFor} className="text-fg-secondary font-mono text-xs uppercase">
         {label}
       </Label>
       {children}
@@ -171,9 +171,9 @@ function FormField({ label, htmlFor, children }: FormFieldProps) {
 
 function ConnectedBadge({ connected }: { connected: boolean }) {
   return (
-    <PixelBadge variant={connected ? 'emerald' : 'muted'} className="font-mono text-[10px]">
+    <Badge variant={connected ? 'success' : 'muted'} className="font-mono text-[10px]">
       {connected ? 'Connected' : 'Not connected'}
-    </PixelBadge>
+    </Badge>
   );
 }
 
@@ -308,13 +308,13 @@ function GitHubCard({ projectId, editable, initialData, onSaved }: GitHubCardPro
 
   return (
     <>
-      <Card className="border-border-default bg-bg-surface">
+      <Card className="border-line bg-surface-raised">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <Github className="text-text-secondary h-5 w-5" />
-            <CardTitle className="text-text-primary text-sm font-semibold">GitHub</CardTitle>
+            <Github className="text-fg-secondary h-5 w-5" />
+            <CardTitle className="text-fg text-sm font-semibold">GitHub</CardTitle>
           </div>
-          <CardDescription className="text-text-secondary text-xs">
+          <CardDescription className="text-fg-secondary text-xs">
             Connect your repository for automated commits.
           </CardDescription>
           <ConnectedBadge connected={connected} />
@@ -433,8 +433,8 @@ function GitHubCard({ projectId, editable, initialData, onSaved }: GitHubCardPro
           </FormField>
 
           {connected && (
-            <div className="border-border-default bg-bg-base flex items-center gap-2 rounded-md border px-3 py-2">
-              <p className="text-text-secondary min-w-0 flex-1 truncate font-mono text-xs">
+            <div className="border-line bg-surface-base flex items-center gap-2 rounded-md border px-3 py-2">
+              <p className="text-fg-secondary min-w-0 flex-1 truncate font-mono text-xs">
                 {webhookUrl}
               </p>
               <Button
@@ -442,7 +442,7 @@ function GitHubCard({ projectId, editable, initialData, onSaved }: GitHubCardPro
                 variant="ghost"
                 size="icon"
                 onClick={copyWebhookUrl}
-                className="text-text-secondary hover:text-text-primary h-7 w-7 shrink-0 p-0"
+                className="text-fg-secondary hover:text-fg h-7 w-7 shrink-0 p-0"
                 aria-label="Copy webhook URL"
               >
                 <Copy className="h-3.5 w-3.5" />
@@ -467,7 +467,7 @@ function GitHubCard({ projectId, editable, initialData, onSaved }: GitHubCardPro
                     variant="outline"
                     onClick={() => setDisconnectOpen(true)}
                     disabled={isSaving}
-                    className="text-status-red hover:text-status-red"
+                    className="text-danger hover:text-danger"
                   >
                     Disconnect
                   </Button>
@@ -504,10 +504,7 @@ function GitHubCard({ projectId, editable, initialData, onSaved }: GitHubCardPro
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDisconnect}
-              className="bg-status-red hover:bg-status-red/90"
-            >
+            <AlertDialogAction onClick={handleDisconnect} className="bg-danger hover:bg-danger/90">
               Disconnect
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -606,13 +603,13 @@ function SlackCard({ projectId, editable, initialData, onSaved }: SlackCardProps
 
   return (
     <>
-      <Card className="border-border-default bg-bg-surface">
+      <Card className="border-line bg-surface-raised">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <Hash className="text-text-secondary h-5 w-5" />
-            <CardTitle className="text-text-primary text-sm font-semibold">Slack</CardTitle>
+            <Hash className="text-fg-secondary h-5 w-5" />
+            <CardTitle className="text-fg text-sm font-semibold">Slack</CardTitle>
           </div>
-          <CardDescription className="text-text-secondary text-xs">
+          <CardDescription className="text-fg-secondary text-xs">
             Send notifications to Slack.
           </CardDescription>
           <ConnectedBadge connected={connected} />
@@ -691,7 +688,7 @@ function SlackCard({ projectId, editable, initialData, onSaved }: SlackCardProps
                     variant="outline"
                     onClick={() => setDisconnectOpen(true)}
                     disabled={isSaving}
-                    className="text-status-red hover:text-status-red"
+                    className="text-danger hover:text-danger"
                   >
                     Disconnect
                   </Button>
@@ -728,10 +725,7 @@ function SlackCard({ projectId, editable, initialData, onSaved }: SlackCardProps
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDisconnect}
-              className="bg-status-red hover:bg-status-red/90"
-            >
+            <AlertDialogAction onClick={handleDisconnect} className="bg-danger hover:bg-danger/90">
               Disconnect
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -816,7 +810,7 @@ function WebhookDialog({ open, onClose, onSave, initial, isSaving }: WebhookDial
           </FormField>
 
           <div className="flex flex-col gap-2">
-            <Label className="text-text-secondary font-mono text-xs uppercase">EVENTS</Label>
+            <Label className="text-fg-secondary font-mono text-xs uppercase">EVENTS</Label>
             <div className="flex flex-col gap-2">
               {WEBHOOK_EVENTS.map((ev) => (
                 <div key={ev.value} className="flex items-center gap-2">
@@ -827,7 +821,7 @@ function WebhookDialog({ open, onClose, onSave, initial, isSaving }: WebhookDial
                   />
                   <Label
                     htmlFor={`event-${ev.value}`}
-                    className="text-text-secondary cursor-pointer font-mono text-xs"
+                    className="text-fg-secondary cursor-pointer font-mono text-xs"
                   >
                     {ev.label}
                   </Label>
@@ -974,13 +968,13 @@ function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
 
   return (
     <>
-      <Card className="border-border-default bg-bg-surface">
+      <Card className="border-line bg-surface-raised">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <Globe className="text-text-secondary h-5 w-5" />
-            <CardTitle className="text-text-primary text-sm font-semibold">Webhooks</CardTitle>
+            <Globe className="text-fg-secondary h-5 w-5" />
+            <CardTitle className="text-fg text-sm font-semibold">Webhooks</CardTitle>
           </div>
-          <CardDescription className="text-text-secondary text-xs">
+          <CardDescription className="text-fg-secondary text-xs">
             Send events to external endpoints.
           </CardDescription>
         </CardHeader>
@@ -1002,29 +996,29 @@ function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
 
           {/* Webhook list */}
           {isLoading ? (
-            <p className="text-text-secondary font-mono text-xs">Loading webhooks…</p>
+            <p className="text-fg-secondary font-mono text-xs">Loading webhooks…</p>
           ) : webhooks.length === 0 ? (
-            <p className="text-text-secondary text-xs">No webhooks configured.</p>
+            <p className="text-fg-secondary text-xs">No webhooks configured.</p>
           ) : (
-            <div className="divide-border-default flex flex-col divide-y">
+            <div className="divide-line flex flex-col divide-y">
               {webhooks.map((wh) => (
                 <div key={wh.id} className="flex items-center gap-2 py-2">
-                  <p className="text-text-secondary min-w-0 flex-1 truncate font-mono text-xs">
+                  <p className="text-fg-secondary min-w-0 flex-1 truncate font-mono text-xs">
                     {wh.url}
                   </p>
-                  <PixelBadge
-                    variant={wh.status === 'active' ? 'emerald' : 'red'}
+                  <Badge
+                    variant={wh.status === 'active' ? 'success' : 'danger'}
                     className="font-mono text-[10px]"
                   >
                     {wh.status}
-                  </PixelBadge>
+                  </Badge>
                   {editable ? (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="text-text-secondary hover:text-text-primary h-7 w-7 shrink-0"
+                          className="text-fg-secondary hover:text-fg h-7 w-7 shrink-0"
                           aria-label="Webhook actions"
                         >
                           <MoreHorizontal className="h-4 w-4" />
@@ -1037,7 +1031,7 @@ function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => setDeleteTarget(wh)}
-                          className="text-status-red focus:text-status-red gap-2"
+                          className="text-danger focus:text-danger gap-2"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                           Delete
@@ -1052,7 +1046,7 @@ function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="text-text-secondary h-7 w-7 shrink-0"
+                              className="text-fg-secondary h-7 w-7 shrink-0"
                               aria-label="Webhook actions"
                               disabled
                             >
@@ -1095,7 +1089,7 @@ function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
             <AlertDialogAction
               onClick={handleDelete}
               disabled={isSaving}
-              className="bg-status-red hover:bg-status-red/90"
+              className="bg-danger hover:bg-danger/90"
             >
               {isSaving ? 'Deleting…' : 'Delete'}
             </AlertDialogAction>
@@ -1140,7 +1134,7 @@ export function IntegrationsSection({ projectId, userRole }: IntegrationsSection
   }, [restartConfig]);
 
   if (isLoading) {
-    return <p className="text-text-secondary font-mono text-xs">Loading integrations…</p>;
+    return <p className="text-fg-secondary font-mono text-xs">Loading integrations…</p>;
   }
 
   return (

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { clientLogger } from '@/lib/logger-client';
 import { usePolling } from '@/hooks/use-polling';
 import { Button } from '@/components/ui/button';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { StatusIcon } from '@/components/ui/status-icon';
 import { cn } from '@/lib/utils';
 
 interface Notification {
@@ -60,15 +60,15 @@ export function NotificationPanel() {
   return (
     <div className="flex flex-col">
       {/* Header */}
-      <div className="border-border-default flex items-center justify-between border-b px-4 py-3">
-        <span className="text-text-muted font-mono text-[11px] tracking-[0.08em] uppercase">
+      <div className="border-line flex items-center justify-between border-b px-4 py-3">
+        <span className="text-fg-muted font-mono text-[11px] tracking-[0.08em] uppercase">
           Notifications
         </span>
         {hasUnread && (
           <Button
             size="sm"
             variant="ghost"
-            className="text-accent-blue hover:text-accent-blue-dim h-6 font-mono text-[10px] tracking-[0.08em] uppercase transition-colors"
+            className="text-accent hover:text-accent-hover h-6 font-mono text-[10px] tracking-[0.08em] uppercase transition-colors"
             onClick={handleMarkAllRead}
           >
             Mark all read
@@ -80,44 +80,44 @@ export function NotificationPanel() {
       <div className="flex flex-col">
         {list.length === 0 && !isLoading && (
           <div className="flex flex-col items-center gap-3 py-8">
-            <DaemonMascot size={32} expression="idle" />
-            <span className="text-text-muted font-mono text-xs">Nothing to report.</span>
+            <StatusIcon size={20} status="idle" />
+            <span className="text-fg-muted font-mono text-xs">Nothing to report.</span>
           </div>
         )}
         {isLoading && list.length === 0 && (
-          <div className="text-text-muted py-6 text-center font-mono text-xs">Loading...</div>
+          <div className="text-fg-muted py-6 text-center font-mono text-xs">Loading...</div>
         )}
         {list.slice(0, 5).map((n) => (
           <div
             key={n.id}
             className={cn(
-              'border-border-default flex items-center gap-3 border-b px-4 py-3 transition-colors last:border-0',
-              !n.readAt ? 'bg-accent-blue/5' : 'hover:bg-bg-elevated/50'
+              'border-line flex items-center gap-3 border-b px-4 py-3 transition-colors last:border-0',
+              !n.readAt ? 'bg-surface-inset/5' : 'hover:bg-surface-inset/50'
             )}
           >
             <div className="min-w-0 flex-1">
               <p
                 className={cn(
                   'truncate text-sm',
-                  !n.readAt ? 'text-text-primary font-medium' : 'text-text-secondary'
+                  !n.readAt ? 'text-fg font-medium' : 'text-fg-secondary'
                 )}
               >
                 {n.title}
               </p>
             </div>
-            <span className="text-text-muted shrink-0 font-mono text-[10px]">
+            <span className="text-fg-muted shrink-0 font-mono text-[10px]">
               {formatRelativeTime(n.createdAt)}
             </span>
-            {!n.readAt && <div className="bg-accent-blue h-1.5 w-1.5 shrink-0 rounded-full" />}
+            {!n.readAt && <div className="bg-surface-inset h-1.5 w-1.5 shrink-0 rounded-full" />}
           </div>
         ))}
       </div>
 
       {/* Footer */}
-      <div className="border-border-default border-t px-4 py-2.5">
+      <div className="border-line border-t px-4 py-2.5">
         <Link
           href="/notifications"
-          className="text-accent-blue hover:text-accent-blue-dim font-mono text-xs transition-colors hover:underline"
+          className="text-accent hover:text-accent-hover font-mono text-xs transition-colors hover:underline"
         >
           View all notifications &rarr;
         </Link>

@@ -8,7 +8,7 @@ import { authClient } from '@/lib/auth-client';
 import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { PixelBadge } from '@/components/ui/pixel-badge';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -82,7 +82,7 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
   };
 
   return (
-    <header className="border-border-default bg-bg-surface flex h-16 items-center gap-4 border-b px-8">
+    <header className="border-line bg-surface-raised flex h-16 items-center gap-4 border-b px-8">
       {/* Breadcrumbs */}
       <div className="flex flex-1 items-center overflow-hidden">
         <Breadcrumb>
@@ -92,18 +92,18 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
                 {i > 0 && <BreadcrumbSeparator className="opacity-40" />}
                 <BreadcrumbItem className="overflow-hidden">
                   {pathname === '/' && !crumb.href ? (
-                    <h1 className="text-text-primary truncate text-lg font-semibold tracking-[-0.01em]">
+                    <h1 className="text-fg truncate text-lg font-semibold tracking-[-0.01em]">
                       {crumb.label}
                     </h1>
                   ) : !crumb.href ? (
-                    <BreadcrumbPage className="text-text-primary truncate font-medium">
+                    <BreadcrumbPage className="text-fg truncate font-medium">
                       {crumb.label}
                     </BreadcrumbPage>
                   ) : (
                     <BreadcrumbLink asChild>
                       <Link
                         href={crumb.href}
-                        className="text-text-muted hover:text-text-primary truncate transition-colors"
+                        className="text-fg-muted hover:text-fg truncate transition-colors"
                       >
                         {crumb.label}
                       </Link>
@@ -124,22 +124,22 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="text-text-secondary hover:text-text-primary relative h-9 w-9 transition-colors"
+              className="text-fg-secondary hover:text-fg relative h-9 w-9 transition-colors"
               suppressHydrationWarning
             >
               <Bell className="h-[18px] w-[18px]" />
               {unreadCount > 0 && (
-                <PixelBadge
-                  variant="blue"
-                  className="border-bg-surface absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full border-2 p-0 text-[10px] shadow-sm"
+                <Badge
+                  variant="info"
+                  className="border-surface-raised absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full border-2 p-0 text-[10px]"
                 >
                   {unreadCount > 9 ? '9+' : unreadCount}
-                </PixelBadge>
+                </Badge>
               )}
             </Button>
           </PopoverTrigger>
           <PopoverContent
-            className="border-border-default bg-bg-surface cyber-glow mt-2 max-h-[480px] w-[380px] p-0 shadow-lg"
+            className="border-line bg-surface-raised shadow-popover mt-2 max-h-[480px] w-[380px] p-0"
             align="end"
           >
             <NotificationPanel />
@@ -147,66 +147,66 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
         </Popover>
 
         {/* Theme toggle */}
-        <div className="border-border-muted h-4 w-px border-l" />
+        <div className="border-line-subtle h-4 w-px border-l" />
         <ThemeToggle />
 
         {/* Shortcuts chip */}
         <Button
           variant="ghost"
           size="icon"
-          className="text-text-muted hover:text-text-primary h-9 w-9 transition-colors"
+          className="text-fg-muted hover:text-fg h-9 w-9 transition-colors"
           onClick={() => setShortcutsOpen(true)}
           title="Keyboard shortcuts"
         >
           <Command className="h-[18px] w-[18px]" />
         </Button>
 
-        <div className="border-border-muted mr-1 h-4 w-px border-l" />
+        <div className="border-line-subtle mr-1 h-4 w-px border-l" />
 
         {/* User dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="hover:bg-bg-elevated/50 flex h-10 items-center gap-2 rounded-full pr-1 pl-1 transition-colors"
+              className="hover:bg-surface-inset/50 flex h-10 items-center gap-2 rounded-full pr-1 pl-1 transition-colors"
               suppressHydrationWarning
             >
-              <Avatar className="border-border-default h-8 w-8 border shadow-sm">
-                <AvatarFallback className="bg-accent-blue/10 text-accent-blue text-xs font-semibold">
+              <Avatar className="border-line h-8 w-8 border">
+                <AvatarFallback className="bg-surface-inset/10 text-accent text-xs font-semibold">
                   {initials}
                 </AvatarFallback>
               </Avatar>
-              <ChevronDown className="text-text-muted h-3.5 w-3.5" />
+              <ChevronDown className="text-fg-muted h-3.5 w-3.5" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="cyber-glow mt-2 w-64 shadow-lg">
+          <DropdownMenuContent align="end" className="shadow-popover mt-2 w-64">
             <div className="px-3 py-3">
-              <p className="text-text-primary text-sm font-semibold">{user?.name}</p>
-              <p className="text-text-muted truncate text-xs">{user?.email}</p>
+              <p className="text-fg text-sm font-semibold">{user?.name}</p>
+              <p className="text-fg-muted truncate text-xs">{user?.email}</p>
               {user?.role && (
                 <div className="mt-2">
-                  <PixelBadge variant="blue" className="font-mono text-[10px] tracking-[0.08em]">
+                  <Badge variant="info" className="font-mono text-[10px] tracking-[0.08em]">
                     {user.role}
-                  </PixelBadge>
+                  </Badge>
                 </div>
               )}
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild className="cursor-pointer py-2">
               <Link href="/settings/profile" className="flex items-center gap-2.5">
-                <User className="text-text-muted h-4 w-4" />
+                <User className="text-fg-muted h-4 w-4" />
                 <span>Profile Settings</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild className="cursor-pointer py-2">
               <Link href="/settings/security" className="flex items-center gap-2.5">
-                <Shield className="text-text-muted h-4 w-4" />
+                <Shield className="text-fg-muted h-4 w-4" />
                 <span>Security</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild className="cursor-pointer py-2">
               <Link href="/settings/notifications" className="flex items-center gap-2.5">
-                <Bell className="text-text-muted h-4 w-4" />
+                <Bell className="text-fg-muted h-4 w-4" />
                 <span>Notifications</span>
               </Link>
             </DropdownMenuItem>
@@ -214,13 +214,13 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
               onClick={() => setShortcutsOpen(true)}
               className="cursor-pointer py-2"
             >
-              <Keyboard className="text-text-muted h-4 w-4" />
+              <Keyboard className="text-fg-muted h-4 w-4" />
               <span>Keyboard Shortcuts</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={handleSignOut}
-              className="text-status-red focus:text-status-red cursor-pointer py-2"
+              className="text-danger focus:text-danger cursor-pointer py-2"
             >
               <LogOut className="h-4 w-4" />
               <span>Sign Out</span>

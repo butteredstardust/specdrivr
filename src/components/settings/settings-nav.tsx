@@ -61,7 +61,7 @@ export function SettingsNav({ userRole }: SettingsNavProps) {
     <nav className="flex flex-col gap-5">
       {NAV_GROUPS.map((group) => (
         <div key={group.label}>
-          <p className="text-text-secondary mb-1 px-2 font-mono text-xs tracking-[0.15em] uppercase">
+          <p className="text-fg-secondary mb-1 px-2 font-mono text-xs tracking-[0.15em] uppercase">
             {group.label}
           </p>
           <div className="flex flex-col gap-0.5">
@@ -76,8 +76,8 @@ export function SettingsNav({ userRole }: SettingsNavProps) {
                     className={cn(
                       'rounded px-2 py-1.5 text-sm transition-colors',
                       active
-                        ? 'bg-accent-blue/10 text-accent-blue font-medium'
-                        : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                        ? 'bg-surface-inset/10 text-accent font-medium'
+                        : 'text-fg-muted hover:bg-surface-inset hover:text-fg'
                     )}
                   >
                     {item.label}
@@ -92,8 +92,8 @@ export function SettingsNav({ userRole }: SettingsNavProps) {
               className={cn(
                 'mt-3 block rounded px-2 py-1.5 font-mono text-xs tracking-wider uppercase transition-colors',
                 isDangerActive
-                  ? 'bg-status-red/10 text-status-red font-medium'
-                  : 'text-status-red/70 hover:text-status-red'
+                  ? 'bg-danger/10 text-danger font-medium'
+                  : 'text-danger/70 hover:text-danger'
               )}
             >
               Danger Zone

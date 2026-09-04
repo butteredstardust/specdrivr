@@ -76,9 +76,9 @@ function isMobile(ua: string | null): boolean {
 }
 
 function SessionIcon({ ua }: { ua: string | null }) {
-  if (isMobile(ua)) return <Smartphone className="text-text-muted size-4 shrink-0" />;
-  if (!ua) return <Globe className="text-text-muted size-4 shrink-0" />;
-  return <Monitor className="text-text-muted size-4 shrink-0" />;
+  if (isMobile(ua)) return <Smartphone className="text-fg-muted size-4 shrink-0" />;
+  if (!ua) return <Globe className="text-fg-muted size-4 shrink-0" />;
+  return <Monitor className="text-fg-muted size-4 shrink-0" />;
 }
 
 export function ActiveSessionsSection() {
@@ -156,12 +156,10 @@ export function ActiveSessionsSection() {
 
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="text-text-muted font-mono text-xs tracking-widest uppercase">
-        ACTIVE SESSIONS
-      </h2>
+      <h2 className="text-fg-muted font-mono text-xs tracking-widest uppercase">ACTIVE SESSIONS</h2>
 
       {isLoading && (
-        <div className="text-text-muted flex items-center gap-2">
+        <div className="text-fg-muted flex items-center gap-2">
           <Loader2 className="size-3 animate-spin" />
           <span className="font-mono text-xs">Loading sessions…</span>
         </div>
@@ -169,12 +167,12 @@ export function ActiveSessionsSection() {
 
       {error && !isLoading && (
         <div className="flex items-center gap-2">
-          <span className="text-status-red font-mono text-xs">Failed to load sessions.</span>
+          <span className="text-danger font-mono text-xs">Failed to load sessions.</span>
           <Button
             variant="ghost"
             size="sm"
             onClick={restart}
-            className="text-text-muted hover:text-text-primary h-auto px-0 font-mono text-xs underline hover:bg-transparent"
+            className="text-fg-muted hover:text-fg h-auto px-0 font-mono text-xs underline hover:bg-transparent"
           >
             Retry
           </Button>
@@ -192,26 +190,26 @@ export function ActiveSessionsSection() {
             return (
               <div
                 key={s.id}
-                className="border-border-default flex items-center gap-3 rounded border px-3 py-2.5"
+                className="border-line flex items-center gap-3 rounded border px-3 py-2.5"
               >
                 <SessionIcon ua={s.userAgent} />
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className="text-text-primary font-mono text-xs">
+                  <span className="text-fg font-mono text-xs">
                     {browser} &middot; {os}
                   </span>
-                  <span className="text-text-muted font-mono text-xs">
+                  <span className="text-fg-muted font-mono text-xs">
                     {s.ipAddress ?? 'Unknown IP'} &middot; {lastActive}
                   </span>
                 </div>
                 {isCurrent ? (
-                  <span className="border-phosphor-amber/40 text-phosphor-amber shrink-0 rounded border px-1.5 py-0.5 font-mono text-xs">
+                  <span className="border-warning/40 text-warning shrink-0 rounded border px-1.5 py-0.5 font-mono text-xs">
                     this session
                   </span>
                 ) : (
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-status-red hover:bg-status-red/10 hover:text-status-red shrink-0 font-mono text-xs"
+                    className="text-danger hover:bg-danger/10 hover:text-danger shrink-0 font-mono text-xs"
                     onClick={() => setRevokeTargetId(s.id)}
                   >
                     Revoke
@@ -227,7 +225,7 @@ export function ActiveSessionsSection() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setRevokeAllOpen(true)}
-                className="text-status-red h-auto px-0 font-mono text-xs underline hover:bg-transparent hover:opacity-80"
+                className="text-danger h-auto px-0 font-mono text-xs underline hover:bg-transparent hover:opacity-80"
               >
                 Revoke all other sessions
               </Button>
@@ -235,7 +233,7 @@ export function ActiveSessionsSection() {
           )}
 
           {sessions.length === 0 && (
-            <p className="text-text-muted font-mono text-xs">No active sessions found.</p>
+            <p className="text-fg-muted font-mono text-xs">No active sessions found.</p>
           )}
         </div>
       )}
@@ -257,7 +255,7 @@ export function ActiveSessionsSection() {
             <AlertDialogAction
               onClick={handleRevoke}
               disabled={isRevoking}
-              className="bg-status-red hover:bg-status-red/90 text-white"
+              className="bg-danger hover:bg-danger/90 text-white"
             >
               {isRevoking ? 'Revoking…' : 'Revoke'}
             </AlertDialogAction>
@@ -280,7 +278,7 @@ export function ActiveSessionsSection() {
             <AlertDialogAction
               onClick={handleRevokeAll}
               disabled={isRevoking}
-              className="bg-status-red hover:bg-status-red/90 text-white"
+              className="bg-danger hover:bg-danger/90 text-white"
             >
               {isRevoking ? 'Revoking…' : 'Revoke all'}
             </AlertDialogAction>

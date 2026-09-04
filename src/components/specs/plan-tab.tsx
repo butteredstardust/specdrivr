@@ -6,7 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
 import { clientLogger } from '@/lib/logger-client';
 import { usePolling } from '@/hooks/use-polling';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { StatusIcon } from '@/components/ui/status-icon';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { CheckCircle2 } from 'lucide-react';
@@ -85,7 +85,7 @@ function ElapsedTimer({ startedAt }: { startedAt: Date }): React.ReactElement {
   const mins = Math.floor(elapsed / 60);
   const secs = elapsed % 60;
   return (
-    <span className="text-text-muted font-mono text-xs">
+    <span className="text-fg-muted font-mono text-xs">
       {mins > 0 ? `${mins}m ` : ''}
       {secs}s
     </span>
@@ -272,20 +272,20 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
       <div className="flex flex-col items-center gap-4 py-16">
         {isTimedOut ? (
           <>
-            <DaemonMascot size={48} expression="error" />
-            <p className="text-status-red font-mono text-sm">
+            <StatusIcon size={24} status="error" />
+            <p className="text-danger font-mono text-sm">
               Plan generation timed out. Please try again.
             </p>
           </>
         ) : (
           <>
-            <DaemonMascot size={48} expression="working" />
-            <p className="text-text-secondary font-mono text-sm tracking-widest uppercase">
+            <StatusIcon size={24} status="working" />
+            <p className="text-fg-secondary font-mono text-sm tracking-widest uppercase">
               GENERATING PLAN…
             </p>
             <ElapsedTimer startedAt={startedAt} />
             {isSlowWarning && (
-              <p className="text-phosphor-amber max-w-xs text-center font-mono text-xs">
+              <p className="text-warning max-w-xs text-center font-mono text-xs">
                 Taking longer than expected…
               </p>
             )}
@@ -297,19 +297,19 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
 
   // Loading plan from API
   if (planLoading) {
-    return <div className="text-text-muted py-8 text-center font-mono text-xs">Loading plan…</div>;
+    return <div className="text-fg-muted py-8 text-center font-mono text-xs">Loading plan…</div>;
   }
 
   if (planError) {
-    return <p className="text-status-red py-8 text-center font-mono text-xs">{planError}</p>;
+    return <p className="text-danger py-8 text-center font-mono text-xs">{planError}</p>;
   }
 
   if (!plan) {
     return (
       <div className="flex flex-col items-center gap-3 py-16">
-        <DaemonMascot size={48} expression="idle" />
-        <p className="text-text-secondary font-mono text-sm">No plan found.</p>
-        <p className="text-text-muted font-mono text-xs italic">
+        <StatusIcon size={24} status="idle" />
+        <p className="text-fg-secondary font-mono text-sm">No plan found.</p>
+        <p className="text-fg-muted font-mono text-xs italic">
           &quot;Approve your specification to generate an implementation plan.&quot;
         </p>
       </div>
@@ -320,9 +320,9 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
   if (plan.status === 'approved' || plan.status === 'executing' || plan.status === 'completed') {
     const isExecuting = plan.status === 'executing';
     const bannerBorder = isExecuting
-      ? 'border-accent-blue/30 bg-accent-blue/5'
-      : 'border-status-emerald/30 bg-status-emerald/5';
-    const bannerText = isExecuting ? 'text-accent-blue' : 'text-status-emerald';
+      ? 'border-accent/30 bg-surface-inset/5'
+      : 'border-success/30 bg-success/5';
+    const bannerText = isExecuting ? 'text-accent' : 'text-success';
     const bannerLabel = isExecuting
       ? 'EXECUTING'
       : plan.status === 'approved'
@@ -332,13 +332,13 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
     return (
       <div className="space-y-4">
         <div className={`flex items-center gap-2.5 rounded border px-3 py-2.5 ${bannerBorder}`}>
-          <DaemonMascot size={16} expression={isExecuting ? 'working' : 'idle'} />
+          <StatusIcon size={16} status={isExecuting ? 'working' : 'idle'} />
           <span className={`font-mono text-xs font-semibold tracking-widest ${bannerText}`}>
             {bannerLabel}
           </span>
-          <span className="text-muted-foreground font-mono text-xs">{timeAgo(plan.updatedAt)}</span>
+          <span className="text-fg-muted font-mono text-xs">{timeAgo(plan.updatedAt)}</span>
         </div>
-        <div className="border-border-default bg-bg-elevated surface-dual-border scanline-overlay rounded-md border p-4">
+        <div className="border-line bg-surface-inset border-line rounded-md border p-4">
           <div className="prose prose-invert max-w-none">
             <ReactMarkdown>{plan.markdownContent}</ReactMarkdown>
           </div>
@@ -351,20 +351,20 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
   if (plan.status === 'rejected' || plan.status === 'abandoned') {
     return (
       <div className="flex flex-col items-center gap-4 py-12">
-        <DaemonMascot size={48} expression="blocked" />
-        <p className="text-text-muted font-mono text-sm">
+        <StatusIcon size={24} status="blocked" />
+        <p className="text-fg-muted font-mono text-sm">
           Plan {plan.status}. Re-generate to continue.
         </p>
         <TooltipProvider>
           {canMember ? (
-            <Button variant="phosphor" size="sm" onClick={handleRegenerate} disabled={isActioning}>
+            <Button variant="warning" size="sm" onClick={handleRegenerate} disabled={isActioning}>
               Re-generate Plan
             </Button>
           ) : (
             <Tooltip>
               <TooltipTrigger asChild>
                 <span tabIndex={0}>
-                  <Button variant="phosphor" size="sm" disabled aria-disabled>
+                  <Button variant="warning" size="sm" disabled aria-disabled>
                     Re-generate Plan
                   </Button>
                 </span>
@@ -382,26 +382,26 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
     return (
       <div className="space-y-4">
         {plan.reviewerFeedback && (
-          <blockquote className="border-phosphor-amber bg-phosphor-amber/5 border-l-2 py-2 pl-4">
-            <p className="text-phosphor-amber font-mono text-xs">Reviewer feedback:</p>
-            <p className="text-text-secondary mt-1 text-sm">{plan.reviewerFeedback}</p>
+          <blockquote className="border-warning bg-warning/5 border-l-2 py-2 pl-4">
+            <p className="text-warning font-mono text-xs">Reviewer feedback:</p>
+            <p className="text-fg-secondary mt-1 text-sm">{plan.reviewerFeedback}</p>
           </blockquote>
         )}
-        <div className="border-border-default bg-bg-elevated surface-dual-border scanline-overlay rounded-md border p-4">
+        <div className="border-line bg-surface-inset border-line rounded-md border p-4">
           <div className="prose prose-invert max-w-none">
             <ReactMarkdown>{plan.markdownContent}</ReactMarkdown>
           </div>
         </div>
         <TooltipProvider>
           {canMember ? (
-            <Button variant="phosphor" size="sm" onClick={handleRegenerate} disabled={isActioning}>
+            <Button variant="warning" size="sm" onClick={handleRegenerate} disabled={isActioning}>
               Re-generate Plan
             </Button>
           ) : (
             <Tooltip>
               <TooltipTrigger asChild>
                 <span tabIndex={0}>
-                  <Button variant="phosphor" size="sm" disabled aria-disabled>
+                  <Button variant="warning" size="sm" disabled aria-disabled>
                     Re-generate Plan
                   </Button>
                 </span>
@@ -419,13 +419,13 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
     <TooltipProvider>
       <div className="space-y-4">
         {/* Status banner ABOVE content */}
-        <div className="border-phosphor-amber/20 bg-phosphor-amber/5 flex items-center gap-3 rounded-md border px-3 py-2.5">
-          <DaemonMascot size={16} expression="working" />
+        <div className="border-warning/20 bg-warning/5 flex items-center gap-3 rounded-md border px-3 py-2.5">
+          <StatusIcon size={16} status="working" />
           <div className="flex flex-1 flex-col gap-0.5">
-            <span className="text-phosphor-amber font-mono text-xs font-semibold tracking-widest uppercase">
+            <span className="text-warning font-mono text-xs font-semibold tracking-widest uppercase">
               Plan Ready for Review
             </span>
-            <span className="text-text-muted font-mono text-[10px]">
+            <span className="text-fg-muted font-mono text-[10px]">
               {timeAgo(plan.createdAt)}
               {plan.taskCount != null ? ` · ${plan.taskCount} tasks` : ''}
             </span>
@@ -459,7 +459,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
               <Button
                 size="sm"
                 variant="outline"
-                className="text-status-red hover:text-status-red"
+                className="text-danger hover:text-danger"
                 onClick={() => {
                   setRejectOpen((v) => !v);
                   setChangesOpen(false);
@@ -475,7 +475,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="text-status-red"
+                      className="text-danger"
                       disabled
                       aria-disabled
                     >
@@ -490,7 +490,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
               <Button
                 size="sm"
                 variant="outline"
-                className="border-status-emerald/50 text-status-emerald hover:bg-status-emerald/10 h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase"
+                className="border-success/50 text-success hover:bg-success/10 h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase"
                 onClick={() => setApproveOpen(true)}
                 disabled={isActioning}
               >
@@ -504,7 +504,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-status-emerald/50 text-status-emerald h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase opacity-50"
+                      className="border-success/50 text-success h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase opacity-50"
                       disabled
                       aria-disabled
                     >
@@ -522,7 +522,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
         {/* Plan document (Editable when pending_approval) */}
         <div>
           <div className="mb-2 flex items-center justify-between">
-            <p className="text-text-muted font-mono text-[10px] tracking-[0.2em] uppercase">
+            <p className="text-fg-muted font-mono text-[10px] tracking-[0.2em] uppercase">
               Plan Document
             </p>
             {canMember && (
@@ -564,7 +564,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
               </div>
             )}
           </div>
-          <div className="border-border-default bg-bg-elevated surface-dual-border scanline-overlay rounded-md border p-4">
+          <div className="border-line bg-surface-inset border-line rounded-md border p-4">
             {isEditing ? (
               <CodeMirror
                 value={editContent}
@@ -591,8 +591,8 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
 
         {/* Request Changes panel */}
         {changesOpen && (
-          <div className="border-border-default bg-bg-elevated space-y-2 rounded-md border p-4">
-            <p className="text-text-muted font-mono text-xs">Describe the required changes:</p>
+          <div className="border-line bg-surface-inset space-y-2 rounded-md border p-4">
+            <p className="text-fg-muted font-mono text-xs">Describe the required changes:</p>
             <Textarea
               value={feedbackText}
               onChange={(e) => setFeedbackText(e.target.value)}
@@ -602,7 +602,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
             <div className="flex gap-2">
               <Button
                 size="sm"
-                variant="phosphor"
+                variant="warning"
                 onClick={handleRequestChanges}
                 disabled={isActioning || !feedbackText.trim()}
                 className="h-8 font-mono text-[10px] tracking-widest uppercase"
@@ -626,8 +626,8 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
 
         {/* Reject panel */}
         {rejectOpen && (
-          <div className="border-border-default bg-bg-elevated space-y-2 rounded-md border p-4">
-            <p className="text-text-muted font-mono text-xs">Reason for rejection:</p>
+          <div className="border-line bg-surface-inset space-y-2 rounded-md border p-4">
+            <p className="text-fg-muted font-mono text-xs">Reason for rejection:</p>
             <Textarea
               value={rejectText}
               onChange={(e) => setRejectText(e.target.value)}
@@ -638,7 +638,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
               <Button
                 size="sm"
                 variant="outline"
-                className="bg-status-red/10 border-status-red/50 text-status-red hover:bg-status-red/20 h-8 font-mono text-[10px] tracking-widest uppercase"
+                className="bg-danger/10 border-danger/50 text-danger hover:bg-danger/20 h-8 font-mono text-[10px] tracking-widest uppercase"
                 onClick={handleReject}
                 disabled={isActioning || !rejectText.trim()}
               >
@@ -666,7 +666,7 @@ export function PlanTab({ spec, userRole }: PlanTabProps): React.ReactElement {
                 Review the execution target before starting {plan.taskCount ?? 0} tasks.
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <div className="border-border-default bg-bg-elevated space-y-1 rounded border p-3 font-mono text-xs">
+            <div className="border-line bg-surface-inset space-y-1 rounded border p-3 font-mono text-xs">
               <p>Repository: {plan.executionTarget?.repository ?? 'Not configured'}</p>
               <p>Branch: {plan.executionTarget?.branch ?? 'main'}</p>
               <p>Tasks: {plan.taskCount ?? 0}</p>

@@ -1,8 +1,8 @@
 'use client';
 
 import { useActivePlanJobs } from '@/hooks/use-active-plan-jobs';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
-import { PixelBadge } from '@/components/ui/pixel-badge';
+import { StatusIcon } from '@/components/ui/status-icon';
+import { Badge } from '@/components/ui/badge';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -27,27 +27,27 @@ export function PlanJobStatusIndicator({ projectId, className }: PlanJobStatusIn
         isGeneratingTasks ? 'AI agent architecting tasks' : 'AI agent generating execution plan'
       }
       className={cn(
-        'bg-bg-elevated/80 border-border-muted animate-in fade-in slide-in-from-bottom-2 flex items-center gap-3 rounded-lg border px-4 py-2 shadow-lg backdrop-blur-sm',
+        'bg-surface-inset/80 border-line-subtle animate-in fade-in slide-in-from-bottom-2 shadow-popover flex items-center gap-3 rounded-lg border px-4 py-2 backdrop-blur-sm',
         className
       )}
     >
       <div className="relative">
-        <DaemonMascot size={24} expression="working" />
+        <StatusIcon size={18} status="working" />
         <div className="absolute -top-1 -right-1">
-          <Loader2 className="text-accent-blue h-3 w-3 animate-spin" />
+          <Loader2 className="text-accent h-3 w-3 animate-spin" />
         </div>
       </div>
       <div className="flex flex-col gap-0.5">
-        <span className="text-text-muted font-mono text-[10px] tracking-[0.08em] uppercase">
+        <span className="text-fg-muted font-mono text-[10px] tracking-[0.08em] uppercase">
           AI AGENT WORKING
         </span>
-        <span className="text-text-primary text-xs font-medium">
+        <span className="text-fg text-xs font-medium">
           {isGeneratingTasks ? 'Architecting tasks...' : 'Generating execution plan...'}
         </span>
       </div>
-      <PixelBadge variant="blue" className="ml-2 h-5 px-2 text-[9px]">
+      <Badge variant="info" className="ml-2 h-5 px-2 text-[9px]">
         {job.status.toUpperCase()}
-      </PixelBadge>
+      </Badge>
     </div>
   );
 }

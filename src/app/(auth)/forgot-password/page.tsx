@@ -58,7 +58,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <Card className="border-border-default bg-bg-surface w-full max-w-sm">
+    <Card className="border-line bg-surface-raised w-full max-w-sm">
       <CardHeader className="items-center gap-2 pb-2">
         <BrandMark size={48} />
         <p className="font-mono text-sm font-bold tracking-widest">SPECDRIVR</p>
@@ -66,11 +66,11 @@ export default function ForgotPasswordPage() {
       <CardContent>
         {state === 'sent' ? (
           <div className="space-y-3 text-center">
-            <p className="text-text-primary text-sm">Check your email.</p>
-            <p className="text-text-muted text-xs">
+            <p className="text-fg text-sm">Check your email.</p>
+            <p className="text-fg-muted text-xs">
               If that address is registered, a reset link is on its way.
             </p>
-            <Link href="/login" className="text-accent-blue text-xs hover:underline">
+            <Link href="/login" className="text-accent text-xs hover:underline">
               Back to login
             </Link>
           </div>
@@ -89,21 +89,19 @@ export default function ForgotPasswordPage() {
                 type="email"
                 autoFocus
                 placeholder="you@example.com"
-                className="border-border-default bg-bg-base"
+                className="border-line bg-surface-base"
               />
-              {errors.email && (
-                <p className="text-status-red text-[10px]">{errors.email.message}</p>
-              )}
+              {errors.email && <p className="text-danger text-[10px]">{errors.email.message}</p>}
             </div>
             <Button
               type="submit"
               disabled={isPending}
-              className="bg-accent-blue hover:bg-accent-blue-dim w-full"
+              className="bg-surface-inset hover:bg-accent-hover w-full"
             >
               {isPending ? 'Sending…' : 'Send Reset Link'}
             </Button>
             <div className="text-center">
-              <Link href="/login" className="text-text-muted hover:text-text-secondary text-xs">
+              <Link href="/login" className="text-fg-muted hover:text-fg-secondary text-xs">
                 Back to login
               </Link>
             </div>

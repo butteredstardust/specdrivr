@@ -8,7 +8,7 @@ export default async function NotificationsPage() {
 
   return (
     <div className="flex max-w-2xl flex-col gap-8">
-      <h2 className="text-muted-foreground font-mono text-[10px] tracking-[0.2em] uppercase">
+      <h2 className="text-fg-muted font-mono text-[10px] tracking-[0.2em] uppercase">
         Notifications
       </h2>
       <NotificationPreferencesSection />

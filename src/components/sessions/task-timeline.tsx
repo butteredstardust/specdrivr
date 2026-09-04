@@ -31,39 +31,39 @@ function statusColor(status: string): { bg: string; text: string; dot: string } 
   switch (status) {
     case 'in_progress':
       return {
-        bg: 'bg-phosphor-amber/10',
-        text: 'text-phosphor-amber',
-        dot: 'bg-phosphor-amber',
+        bg: 'bg-warning/10',
+        text: 'text-warning',
+        dot: 'bg-warning',
       };
     case 'done':
       return {
-        bg: 'bg-status-emerald/10',
-        text: 'text-status-emerald',
-        dot: 'bg-status-emerald',
+        bg: 'bg-success/10',
+        text: 'text-success',
+        dot: 'bg-success',
       };
     case 'blocked':
       return {
-        bg: 'bg-status-red/10',
-        text: 'text-status-red',
-        dot: 'bg-status-red',
+        bg: 'bg-danger/10',
+        text: 'text-danger',
+        dot: 'bg-danger',
       };
     case 'failed':
       return {
-        bg: 'bg-status-red/10',
-        text: 'text-status-red',
-        dot: 'bg-status-red',
+        bg: 'bg-danger/10',
+        text: 'text-danger',
+        dot: 'bg-danger',
       };
     case 'skipped':
       return {
-        bg: 'bg-secondary',
-        text: 'text-muted-foreground',
-        dot: 'bg-muted-foreground',
+        bg: 'bg-surface-inset',
+        text: 'text-fg-muted',
+        dot: 'bg-fg-muted',
       };
     default:
       return {
-        bg: 'bg-secondary',
-        text: 'text-muted-foreground',
-        dot: 'bg-muted-foreground',
+        bg: 'bg-surface-inset',
+        text: 'text-fg-muted',
+        dot: 'bg-fg-muted',
       };
   }
 }
@@ -100,7 +100,7 @@ function LiveDuration({ startedAt }: { startedAt: string }) {
     return () => clearInterval(id);
   }, [startedAt]);
 
-  return <span className="text-muted-foreground font-mono text-[10px]">{elapsed}</span>;
+  return <span className="text-fg-muted font-mono text-[10px]">{elapsed}</span>;
 }
 
 function taskDuration(task: TaskItem): React.ReactNode {
@@ -112,12 +112,12 @@ function taskDuration(task: TaskItem): React.ReactNode {
     const mm = String(Math.floor(secs / 60)).padStart(2, '0');
     const ss = String(secs % 60).padStart(2, '0');
     return (
-      <span className="text-muted-foreground font-mono text-[10px]">
+      <span className="text-fg-muted font-mono text-[10px]">
         {mm}:{ss}
       </span>
     );
   }
-  return <span className="text-muted-foreground font-mono text-[10px]">—</span>;
+  return <span className="text-fg-muted font-mono text-[10px]">—</span>;
 }
 
 interface TaskTimelineProps {
@@ -141,13 +141,13 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
 
   return (
     <div>
-      <p className="text-muted-foreground mb-6 font-mono text-[10px] tracking-[0.2em] uppercase">
+      <p className="text-fg-muted mb-6 font-mono text-[10px] tracking-[0.2em] uppercase">
         Task Execution Timeline
       </p>
       {isLoading && tasks.length === 0 ? (
-        <p className="text-text-muted font-mono text-xs">Loading tasks…</p>
+        <p className="text-fg-muted font-mono text-xs">Loading tasks…</p>
       ) : tasks.length === 0 ? (
-        <p className="text-text-muted font-mono text-xs">No tasks found.</p>
+        <p className="text-fg-muted font-mono text-xs">No tasks found.</p>
       ) : (
         <div className="relative space-y-3">
           {tasks.map((task, idx) => {
@@ -162,20 +162,20 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
                   {/* Vertical line (extends down from dot) */}
                   {!isLast && (
                     <div
-                      className={`bg-border-default/30 absolute top-6 left-1/2 w-0.5 -translate-x-1/2 ${isExpanded ? 'h-full' : 'h-12'}`}
+                      className={`bg-line/30 absolute top-6 left-1/2 w-0.5 -translate-x-1/2 ${isExpanded ? 'h-full' : 'h-12'}`}
                     />
                   )}
 
                   {/* Dot */}
                   <div
-                    className={`relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all ${colors.dot} border-bg-default ${
+                    className={`relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all ${colors.dot} border-surface-base ${
                       task.status === 'in_progress'
-                        ? 'ring-phosphor-amber shadow-lg ring-2 ring-offset-2'
+                        ? 'ring-warning shadow-popover ring-2 ring-offset-2'
                         : ''
                     }`}
                   >
                     {task.status === 'in_progress' && (
-                      <div className="bg-phosphor-amber/30 absolute inset-0 animate-pulse rounded-full" />
+                      <div className="bg-warning/30 absolute inset-0 animate-pulse rounded-full" />
                     )}
                   </div>
                 </div>
@@ -184,19 +184,19 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
                 <div className="flex-1 pt-0.5">
                   <div
                     onClick={() => toggleTask(task.id)}
-                    className={`cursor-pointer rounded-lg border transition-all ${colors.bg} border-border-default/50 hover:border-border-default px-3 py-2.5`}
+                    className={`cursor-pointer rounded-lg border transition-all ${colors.bg} border-line/50 hover:border-line px-3 py-2.5`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
                         <div className="mb-1 flex items-center gap-2">
-                          <span className="text-muted-foreground shrink-0 font-mono text-[10px] font-semibold tracking-wider uppercase">
+                          <span className="text-fg-muted shrink-0 font-mono text-[10px] font-semibold tracking-wider uppercase">
                             {task.externalId}
                           </span>
                           <div className={`flex items-center gap-1 ${colors.text}`}>
                             <StatusIcon status={task.status} />
                           </div>
                         </div>
-                        <p className="text-foreground truncate font-mono text-xs">{task.title}</p>
+                        <p className="text-fg truncate font-mono text-xs">{task.title}</p>
                       </div>
                       <div className="flex shrink-0 flex-col items-end gap-1">
                         {taskDuration(task)}
@@ -215,25 +215,25 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
 
                     {isExpanded && (
                       <div
-                        className="border-border-default/50 mt-3 cursor-auto space-y-2 border-t pt-3"
+                        className="border-line/50 mt-3 cursor-auto space-y-2 border-t pt-3"
                         onClick={(e) => e.stopPropagation()}
                       >
                         {task.description && (
                           <div>
-                            <span className="text-muted-foreground mb-0.5 block font-mono text-[9px] tracking-wider uppercase">
+                            <span className="text-fg-muted mb-0.5 block font-mono text-[9px] tracking-wider uppercase">
                               Description
                             </span>
-                            <p className="text-foreground font-mono text-[10px] whitespace-pre-wrap">
+                            <p className="text-fg font-mono text-[10px] whitespace-pre-wrap">
                               {task.description}
                             </p>
                           </div>
                         )}
                         {task.blockedReason && (
                           <div>
-                            <span className="text-status-red mb-0.5 block font-mono text-[9px] tracking-wider uppercase">
+                            <span className="text-danger mb-0.5 block font-mono text-[9px] tracking-wider uppercase">
                               Blocked Reason
                             </span>
-                            <p className="text-status-red font-mono text-[10px] whitespace-pre-wrap">
+                            <p className="text-danger font-mono text-[10px] whitespace-pre-wrap">
                               {task.blockedReason}
                             </p>
                           </div>
@@ -241,22 +241,20 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
                         <div className="mt-2 flex gap-4">
                           {task.attemptCount !== undefined && task.attemptCount > 0 && (
                             <div>
-                              <span className="text-muted-foreground mb-0.5 block font-mono text-[9px] tracking-wider uppercase">
+                              <span className="text-fg-muted mb-0.5 block font-mono text-[9px] tracking-wider uppercase">
                                 Attempts
                               </span>
-                              <p className="text-foreground font-mono text-[10px]">
-                                {task.attemptCount}
-                              </p>
+                              <p className="text-fg font-mono text-[10px]">{task.attemptCount}</p>
                             </div>
                           )}
                           {task.verificationPassed !== undefined &&
                             task.verificationPassed !== null && (
                               <div>
-                                <span className="text-muted-foreground mb-0.5 block font-mono text-[9px] tracking-wider uppercase">
+                                <span className="text-fg-muted mb-0.5 block font-mono text-[9px] tracking-wider uppercase">
                                   Verification
                                 </span>
                                 <p
-                                  className={`font-mono text-[10px] ${task.verificationPassed ? 'text-status-emerald' : 'text-status-red'}`}
+                                  className={`font-mono text-[10px] ${task.verificationPassed ? 'text-success' : 'text-danger'}`}
                                 >
                                   {task.verificationPassed ? 'Passed' : 'Failed'}
                                 </p>

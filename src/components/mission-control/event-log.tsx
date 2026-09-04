@@ -139,13 +139,13 @@ export function EventLog({ sessionId, onUpdate, className }: EventLogProps) {
   return (
     <div className={className}>
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-text-muted font-mono text-[11px] tracking-[0.08em] uppercase">
+        <p className="text-fg-muted font-mono text-[11px] tracking-[0.08em] uppercase">
           Session Log
         </p>
         <Button
           variant="ghost"
           size="sm"
-          className={`h-6 px-2 font-mono text-[10px] tracking-[0.08em] uppercase ${showErrorsOnly ? 'bg-bg-elevated' : ''}`}
+          className={`h-6 px-2 font-mono text-[10px] tracking-[0.08em] uppercase ${showErrorsOnly ? 'bg-surface-inset' : ''}`}
           onClick={() => setShowErrorsOnly(!showErrorsOnly)}
         >
           <Filter className="mr-1 h-3 w-3" />
@@ -153,16 +153,16 @@ export function EventLog({ sessionId, onUpdate, className }: EventLogProps) {
         </Button>
       </div>
 
-      <div className="bg-bg-elevated border-border-default relative flex min-h-0 flex-1 flex-col overflow-hidden rounded border">
+      <div className="bg-surface-inset border-line relative flex min-h-0 flex-1 flex-col overflow-hidden rounded border">
         {error && (
-          <div className="bg-status-red/10 text-status-red border-status-red/20 absolute top-0 right-0 left-0 z-10 border-b px-3 py-1 font-mono text-[10px]">
+          <div className="bg-danger/10 text-danger border-danger/20 absolute top-0 right-0 left-0 z-10 border-b px-3 py-1 font-mono text-[10px]">
             {error}
           </div>
         )}
         {!isConnected && logs.length === 0 && !error ? (
-          <p className="text-muted-foreground px-3 py-2 font-mono text-xs">Connecting to stream…</p>
+          <p className="text-fg-muted px-3 py-2 font-mono text-xs">Connecting to stream…</p>
         ) : sessionId === null ? (
-          <p className="text-muted-foreground px-3 py-2 font-mono text-xs">No active session.</p>
+          <p className="text-fg-muted px-3 py-2 font-mono text-xs">No active session.</p>
         ) : (
           <TerminalLog
             lines={logLines}

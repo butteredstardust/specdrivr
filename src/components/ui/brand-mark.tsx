@@ -12,7 +12,7 @@ export function BrandMark({ size = 32, className, label }: BrandMarkProps): Reac
       viewBox="0 0 1024 1024"
       width={size}
       height={size}
-      className={cn('ring-brand-blue/20 shrink-0 rounded-[22%] ring-1', className)}
+      className={cn('ring-accent/20 shrink-0 rounded-[22%] ring-1', className)}
       xmlns="http://www.w3.org/2000/svg"
       role={label ? 'img' : undefined}
       aria-hidden={label ? undefined : true}
@@ -52,7 +52,7 @@ export function BrandLockup({
     <div className={cn('flex items-center gap-3', className)}>
       <BrandMark size={size} />
       {!compact && (
-        <span className="text-text-primary font-mono text-lg font-semibold tracking-[-0.04em]">
+        <span className="text-fg font-mono text-lg font-semibold tracking-[-0.04em]">
           specdrivr
         </span>
       )}

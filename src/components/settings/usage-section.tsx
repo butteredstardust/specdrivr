@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import { clientLogger } from '@/lib/logger-client';
 import { usePolling } from '@/hooks/use-polling';
 import { Button } from '@/components/ui/button';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { StatusIcon } from '@/components/ui/status-icon';
 import { Loader2, Download } from 'lucide-react';
 import type { UsageSnapshotSelect } from '@/db/schema';
 
@@ -40,9 +40,9 @@ function formatDate(date: string | Date): string {
 
 function SummaryCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border-border-default bg-bg-surface flex flex-col gap-1 rounded-lg border p-4">
-      <span className="text-text-muted font-mono text-xs">{label}</span>
-      <span className="text-text-primary font-mono text-lg">{value}</span>
+    <div className="border-line bg-surface-raised flex flex-col gap-1 rounded-lg border p-4">
+      <span className="text-fg-muted font-mono text-xs">{label}</span>
+      <span className="text-fg font-mono text-lg">{value}</span>
     </div>
   );
 }
@@ -86,7 +86,7 @@ export function UsageSection({ projectId }: UsageSectionProps) {
 
   if (isLoading) {
     return (
-      <div className="text-text-muted flex items-center gap-2">
+      <div className="text-fg-muted flex items-center gap-2">
         <Loader2 className="size-3 animate-spin" />
         <span className="font-mono text-xs">Loading usage data…</span>
       </div>
@@ -96,12 +96,12 @@ export function UsageSection({ projectId }: UsageSectionProps) {
   if (error && !isLoading) {
     return (
       <div className="flex items-center gap-2">
-        <span className="text-status-red font-mono text-xs">Failed to load usage data.</span>
+        <span className="text-danger font-mono text-xs">Failed to load usage data.</span>
         <Button
           variant="ghost"
           size="sm"
           onClick={restart}
-          className="text-text-muted hover:text-text-primary h-auto px-0 font-mono text-xs underline hover:bg-transparent"
+          className="text-fg-muted hover:text-fg h-auto px-0 font-mono text-xs underline hover:bg-transparent"
         >
           Retry
         </Button>
@@ -112,9 +112,9 @@ export function UsageSection({ projectId }: UsageSectionProps) {
   if (!summary || snapshots.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-16">
-        <DaemonMascot size={48} expression="idle" />
-        <p className="text-text-muted font-mono text-sm">No usage data yet.</p>
-        <p className="text-text-muted font-mono text-xs">
+        <StatusIcon size={24} status="idle" />
+        <p className="text-fg-muted font-mono text-sm">No usage data yet.</p>
+        <p className="text-fg-muted font-mono text-xs">
           Usage will appear here once execution begins.
         </p>
       </div>
@@ -145,34 +145,30 @@ export function UsageSection({ projectId }: UsageSectionProps) {
       </div>
 
       {/* Daily breakdown table */}
-      <div className="border-border-default overflow-x-auto rounded-lg border">
+      <div className="border-line overflow-x-auto rounded-lg border">
         <table className="w-full text-left">
           <thead>
-            <tr className="border-border-default bg-bg-surface border-b">
-              <th className="text-text-muted px-4 py-2 font-mono text-xs">Date</th>
-              <th className="text-text-muted px-4 py-2 font-mono text-xs">Sessions</th>
-              <th className="text-text-muted px-4 py-2 font-mono text-xs">Tasks</th>
-              <th className="text-text-muted px-4 py-2 font-mono text-xs">Tokens</th>
-              <th className="text-text-muted px-4 py-2 font-mono text-xs">Cost</th>
+            <tr className="border-line bg-surface-raised border-b">
+              <th className="text-fg-muted px-4 py-2 font-mono text-xs">Date</th>
+              <th className="text-fg-muted px-4 py-2 font-mono text-xs">Sessions</th>
+              <th className="text-fg-muted px-4 py-2 font-mono text-xs">Tasks</th>
+              <th className="text-fg-muted px-4 py-2 font-mono text-xs">Tokens</th>
+              <th className="text-fg-muted px-4 py-2 font-mono text-xs">Cost</th>
             </tr>
           </thead>
           <tbody>
             {snapshots.map((s) => (
               <tr
                 key={s.id}
-                className="border-border-default hover:bg-bg-elevated/50 border-b last:border-0"
+                className="border-line hover:bg-surface-inset/50 border-b last:border-0"
               >
-                <td className="text-text-primary px-4 py-2.5 font-mono text-xs">
-                  {formatDate(s.date)}
-                </td>
-                <td className="text-text-primary px-4 py-2.5 font-mono text-xs">{s.sessionsRun}</td>
-                <td className="text-text-primary px-4 py-2.5 font-mono text-xs">
-                  {s.tasksExecuted}
-                </td>
-                <td className="text-text-primary px-4 py-2.5 font-mono text-xs">
+                <td className="text-fg px-4 py-2.5 font-mono text-xs">{formatDate(s.date)}</td>
+                <td className="text-fg px-4 py-2.5 font-mono text-xs">{s.sessionsRun}</td>
+                <td className="text-fg px-4 py-2.5 font-mono text-xs">{s.tasksExecuted}</td>
+                <td className="text-fg px-4 py-2.5 font-mono text-xs">
                   {formatTokens(s.promptTokens + s.completionTokens)}
                 </td>
-                <td className="text-text-primary px-4 py-2.5 font-mono text-xs">
+                <td className="text-fg px-4 py-2.5 font-mono text-xs">
                   ${Number(s.estimatedCostUsd).toFixed(4)}
                 </td>
               </tr>

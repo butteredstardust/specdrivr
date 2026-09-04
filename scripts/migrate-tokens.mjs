@@ -159,13 +159,19 @@ const keys = Object.keys(MAP).sort((a, b) => b.length - a.length);
 
 const escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-// Match the token only when it starts a class (preceded by start, whitespace,
-// quote, backtick, or `:` for variants) and is not followed by more of a name.
-const patterns = keys.map((k) => ({
-  key: k,
-  value: MAP[k],
-  re: new RegExp(`(^|[\\s'"\`:])${escape(k)}(?![\\w-])`, 'g'),
-}));
+/**
+ * ONE combined alternation, applied in a SINGLE pass.
+ *
+ * Applying each rule as its own sequential pass is wrong and was the original
+ * bug: `bg-primary` -> `bg-accent` would then be re-matched by the
+ * `bg-accent` -> `bg-surface-inset` rule, silently turning 38 primary buttons
+ * into muted fills. A single pass means each source token is consumed exactly
+ * once and output is never re-examined.
+ */
+const combined = new RegExp(
+  `(^|[\\s'"\`:])(${keys.map(escape).join('|')})(?![\\w-])`,
+  'g'
+);
 
 const files = execSync(
   "git ls-files 'src/**/*.tsx' 'src/**/*.ts' | grep -v -e 'daemon-mascot' -e 'matrix-screensaver'",
@@ -179,14 +185,12 @@ const tally = Object.create(null);
 
 for (const file of files) {
   const before = readFileSync(file, 'utf8');
-  let after = before;
 
-  for (const { key, value, re } of patterns) {
-    after = after.replace(re, (_m, lead) => {
-      tally[key] = (tally[key] ?? 0) + 1;
-      return value ? `${lead}${value}` : lead;
-    });
-  }
+  let after = before.replace(combined, (_m, lead, key) => {
+    tally[key] = (tally[key] ?? 0) + 1;
+    const value = MAP[key];
+    return value ? `${lead}${value}` : lead;
+  });
 
   // Collapse whitespace left behind by removed classes, inside class strings only.
   after = after.replace(/className="([^"]*)"/g, (m, cls) => {

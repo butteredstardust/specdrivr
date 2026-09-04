@@ -133,9 +133,9 @@ export function SpecEditor(props: SpecEditorProps) {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Untitled spec"
-          className="text-text-primary placeholder:text-text-muted min-w-0 flex-1 basis-full border-none bg-transparent font-mono text-sm shadow-none outline-none focus-visible:ring-0 sm:basis-auto"
+          className="text-fg placeholder:text-fg-muted min-w-0 flex-1 basis-full border-none bg-transparent font-mono text-sm shadow-none outline-none focus-visible:ring-0 sm:basis-auto"
         />
-        {saveError && <p className="text-status-red text-sm">{saveError}</p>}
+        {saveError && <p className="text-danger text-sm">{saveError}</p>}
         <div className="flex flex-1 gap-2 sm:flex-none">
           <Button
             size="sm"
@@ -148,7 +148,7 @@ export function SpecEditor(props: SpecEditorProps) {
           </Button>
           <Button
             size="sm"
-            variant="blue"
+            variant="default"
             onClick={handleSaveAndGenerate}
             disabled={isSaving || !title.trim() || content.length < 50}
             className="h-8 flex-1 gap-1.5 sm:flex-none"
@@ -165,7 +165,7 @@ export function SpecEditor(props: SpecEditorProps) {
         </div>
         <Link
           href="/specs"
-          className="text-text-muted hover:text-text-secondary font-mono text-xs transition-colors sm:ml-2"
+          className="text-fg-muted hover:text-fg-secondary font-mono text-xs transition-colors sm:ml-2"
         >
           Back
         </Link>

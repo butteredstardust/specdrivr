@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { clientLogger } from '@/lib/logger-client';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { StatusIcon } from '@/components/ui/status-icon';
 import { DiffViewer } from '@/components/ui/diff-viewer';
 
 interface DiffFile {
@@ -59,21 +59,19 @@ export function ChangesTab({ specId }: ChangesTabProps): React.ReactElement {
   }, [specId]);
 
   if (isLoading) {
-    return (
-      <div className="text-text-muted py-8 text-center font-mono text-xs">Loading changes…</div>
-    );
+    return <div className="text-fg-muted py-8 text-center font-mono text-xs">Loading changes…</div>;
   }
 
   if (fetchError) {
-    return <p className="text-text-muted py-8 text-center font-mono text-xs">{fetchError}</p>;
+    return <p className="text-fg-muted py-8 text-center font-mono text-xs">{fetchError}</p>;
   }
 
   if (!files || files.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 py-16">
-        <DaemonMascot size={48} expression="idle" />
-        <p className="text-text-secondary font-mono text-sm">No file changes yet.</p>
-        <p className="text-text-muted font-mono text-xs italic">
+        <StatusIcon size={24} status="idle" />
+        <p className="text-fg-secondary font-mono text-sm">No file changes yet.</p>
+        <p className="text-fg-muted font-mono text-xs italic">
           &quot;Changes will appear here as DAEMON completes tasks.&quot;
         </p>
       </div>
@@ -85,12 +83,12 @@ export function ChangesTab({ specId }: ChangesTabProps): React.ReactElement {
 
   return (
     <div className="space-y-3">
-      <p className="text-text-muted font-mono text-xs">
+      <p className="text-fg-muted font-mono text-xs">
         {files.length} {files.length === 1 ? 'file' : 'files'} changed,{' '}
         <span className="text-emerald-400">+{totalAdditions} insertions</span>,{' '}
-        <span className="text-status-red">-{totalDeletions} deletions</span>
+        <span className="text-danger">-{totalDeletions} deletions</span>
       </p>
-      <div className="border-border-default min-h-96 overflow-hidden rounded-md border">
+      <div className="border-line min-h-96 overflow-hidden rounded-md border">
         <DiffViewer files={files} />
       </div>
     </div>

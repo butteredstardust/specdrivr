@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { clientLogger } from '@/lib/logger-client';
 import { usePolling } from '@/hooks/use-polling';
 import { TaskRow } from '@/components/ui/task-row';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { StatusIcon } from '@/components/ui/status-icon';
 import { useTaskDrawer } from '@/components/shell/task-drawer-context';
 import type { UserRole } from '@/db/schema';
 
@@ -75,7 +75,7 @@ export function TasksTab({ specId, userRole }: TasksTabProps): React.ReactElemen
   );
 
   if (isLoading) {
-    return <div className="text-text-muted py-8 text-center font-mono text-xs">Loading tasks…</div>;
+    return <div className="text-fg-muted py-8 text-center font-mono text-xs">Loading tasks…</div>;
   }
 
   const list = tasks ?? [];
@@ -83,9 +83,9 @@ export function TasksTab({ specId, userRole }: TasksTabProps): React.ReactElemen
   if (list.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 py-16">
-        <DaemonMascot size={48} expression="idle" />
-        <p className="text-text-secondary font-mono text-sm">No tasks yet.</p>
-        <p className="text-text-muted font-mono text-xs italic">
+        <StatusIcon size={24} status="idle" />
+        <p className="text-fg-secondary font-mono text-sm">No tasks yet.</p>
+        <p className="text-fg-muted font-mono text-xs italic">
           &quot;Approve the plan to begin task execution.&quot;
         </p>
       </div>
@@ -100,20 +100,20 @@ export function TasksTab({ specId, userRole }: TasksTabProps): React.ReactElemen
   return (
     <div className="space-y-4">
       {/* Summary header */}
-      <div className="border-border-default bg-bg-elevated flex items-center gap-4 rounded-md border px-4 py-2">
-        <span className="text-text-muted font-mono text-xs">
-          Total: <span className="text-text-primary">{total}</span>
+      <div className="border-line bg-surface-inset flex items-center gap-4 rounded-md border px-4 py-2">
+        <span className="text-fg-muted font-mono text-xs">
+          Total: <span className="text-fg">{total}</span>
         </span>
         <span className="font-mono text-xs text-emerald-400">Done: {done}</span>
-        {failed > 0 && <span className="text-status-red font-mono text-xs">Failed: {failed}</span>}
+        {failed > 0 && <span className="text-danger font-mono text-xs">Failed: {failed}</span>}
         {inProgress > 0 && (
-          <span className="text-accent-blue font-mono text-xs">In Progress: {inProgress}</span>
+          <span className="text-accent font-mono text-xs">In Progress: {inProgress}</span>
         )}
       </div>
 
       {list.every((t) => t.status === 'todo') && (
-        <div className="border-border-default bg-bg-elevated rounded border px-3 py-2">
-          <p className="text-text-muted font-mono text-[10px] tracking-wider uppercase">
+        <div className="border-line bg-surface-inset rounded border px-3 py-2">
+          <p className="text-fg-muted font-mono text-[10px] tracking-wider uppercase">
             Tasks will begin executing after plan approval.
           </p>
         </div>

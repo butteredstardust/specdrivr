@@ -26,8 +26,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
-import { PixelBadge, type PixelBadgeProps } from '@/components/ui/pixel-badge';
+import { StatusIcon, type Status } from '@/components/ui/status-icon';
+import { Badge } from '@/components/ui/badge';
+import { EntityId } from '@/components/ui/entity-id';
+import { TASK_STATUS } from '@/lib/ui-status';
 import { useTaskDrawer } from '@/components/shell/task-drawer-context';
 import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
@@ -57,37 +59,10 @@ export interface Task {
   pullRequestUrl?: string | null;
 }
 
-const TASK_STATUS_CONFIG: Record<
-  TaskStatus,
-  { label: string; char: string; variant: PixelBadgeProps['variant'] }
-> = {
-  todo: { label: 'TODO', char: '○', variant: 'muted' },
-  in_progress: { label: 'RUNNING', char: '▶', variant: 'blue' },
-  blocked: { label: 'BLOCKED', char: '⚠', variant: 'amber' },
-  done: { label: 'DONE', char: '✓', variant: 'emerald' },
-  failed: { label: 'FAILED', char: '✕', variant: 'red' },
-  skipped: { label: 'SKIPPED', char: '-', variant: 'muted' },
-};
+const TASK_STATUS_CONFIG = TASK_STATUS;
 
-type DaemonExpression = 'idle' | 'working' | 'success' | 'blocked' | 'error';
-
-function statusToExpression(status: TaskStatus): DaemonExpression {
-  switch (status) {
-    case 'todo':
-      return 'idle';
-    case 'in_progress':
-      return 'working';
-    case 'blocked':
-      return 'blocked';
-    case 'done':
-      return 'success';
-    case 'failed':
-      return 'error';
-    case 'skipped':
-      return 'idle';
-    default:
-      return 'idle';
-  }
+function statusToExpression(status: TaskStatus): Status {
+  return TASK_STATUS[status]?.status ?? 'idle';
 }
 
 export function TaskDrawer() {
@@ -226,7 +201,7 @@ export function TaskDrawer() {
       <Drawer.Root open={!!activeTaskId} onOpenChange={handleOpenChange} direction="right">
         <Drawer.Portal>
           <Drawer.Overlay className="fixed inset-0 z-40 bg-black/60" />
-          <Drawer.Content className="border-border-default bg-bg-surface fixed top-0 right-0 bottom-0 z-50 flex w-full max-w-[640px] flex-col border-l outline-none">
+          <Drawer.Content className="border-line bg-surface-raised fixed top-0 right-0 bottom-0 z-50 flex w-full max-w-[640px] flex-col border-l outline-none">
             <Drawer.Title className="sr-only">{task?.title ?? 'Task'}</Drawer.Title>
             <Drawer.Description className="sr-only">
               {task ? `${task.externalId} — ${task.status}` : 'Loading task'}
@@ -234,40 +209,38 @@ export function TaskDrawer() {
             {task && (
               <>
                 {/* Header */}
-                <div className="bg-bg-base border-border-default flex shrink-0 items-center gap-4 border-b px-6 py-5">
-                  <PixelBadge variant="amber">{task.externalId}</PixelBadge>
-                  <span className="text-text-primary flex-1 truncate text-lg font-semibold tracking-tight">
+                <div className="bg-surface-base border-line flex shrink-0 items-center gap-4 border-b px-6 py-5">
+                  <EntityId chip>{task.externalId}</EntityId>
+                  <span className="text-fg flex-1 truncate text-lg font-semibold tracking-tight">
                     {task.title}
                   </span>
-                  <DaemonMascot size={32} expression={statusToExpression(task.status)} />
+                  <StatusIcon size={20} status={statusToExpression(task.status)} />
                   <TooltipProvider>
                     {canManage ? (
                       <Select value={task.status} onValueChange={handleStatusChange}>
-                        <SelectTrigger className="bg-bg-elevated h-8 w-40 border-none px-2 shadow-none focus:ring-0">
+                        <SelectTrigger className="bg-surface-inset h-8 w-40 border-none px-2 shadow-none focus:ring-0">
                           <SelectValue>
-                            <PixelBadge
+                            <Badge
                               variant={TASK_STATUS_CONFIG[task.status].variant}
                               dot={task.status === 'in_progress'}
                               className="w-32 justify-center"
                             >
-                              {TASK_STATUS_CONFIG[task.status].char}
                               {TASK_STATUS_CONFIG[task.status].label}
-                            </PixelBadge>
+                            </Badge>
                           </SelectValue>
                         </SelectTrigger>
-                        <SelectContent className="bg-bg-surface border-border-default">
+                        <SelectContent className="bg-surface-raised border-line">
                           {(Object.keys(TASK_STATUS_CONFIG) as Array<TaskStatus>)
                             .filter((s) => s !== 'done')
                             .map((s) => (
-                              <SelectItem key={s} value={s} className="focus:bg-bg-elevated py-2">
-                                <PixelBadge
+                              <SelectItem key={s} value={s} className="focus:bg-surface-inset py-2">
+                                <Badge
                                   variant={TASK_STATUS_CONFIG[s].variant}
                                   dot={s === 'in_progress'}
                                   className="w-32 justify-center"
                                 >
-                                  {TASK_STATUS_CONFIG[s].char}
                                   {TASK_STATUS_CONFIG[s].label}
-                                </PixelBadge>
+                                </Badge>
                               </SelectItem>
                             ))}
                         </SelectContent>
@@ -276,14 +249,13 @@ export function TaskDrawer() {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <span>
-                            <PixelBadge
+                            <Badge
                               variant={TASK_STATUS_CONFIG[task.status].variant}
                               dot={task.status === 'in_progress'}
                               className="w-32 justify-center opacity-60"
                             >
-                              {TASK_STATUS_CONFIG[task.status].char}
                               {TASK_STATUS_CONFIG[task.status].label}
-                            </PixelBadge>
+                            </Badge>
                           </span>
                         </TooltipTrigger>
                         <TooltipContent>Requires Admin or Owner role</TooltipContent>
@@ -293,7 +265,7 @@ export function TaskDrawer() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-text-muted hover:text-text-primary h-8 w-8 shrink-0 rounded-md"
+                    className="text-fg-muted hover:text-fg h-8 w-8 shrink-0 rounded-md"
                     onClick={closeDrawer}
                   >
                     <XCircle className="h-4 w-4" />
@@ -302,12 +274,12 @@ export function TaskDrawer() {
 
                 {/* Tabs */}
                 <Tabs defaultValue="overview" className="flex min-h-0 flex-1 flex-col">
-                  <TabsList className="border-border-default mx-6 mt-4 mb-0 h-auto shrink-0 justify-start gap-4 rounded-none border-b bg-transparent p-0">
+                  <TabsList className="border-line mx-6 mt-4 mb-0 h-auto shrink-0 justify-start gap-4 rounded-none border-b bg-transparent p-0">
                     {DRAWER_TABS.map((tab) => (
                       <TabsTrigger
                         key={tab}
                         value={tab}
-                        className="data-[state=active]:border-accent-blue data-[state=active]:text-text-primary data-[state=inactive]:text-text-muted hover:text-text-secondary rounded-none bg-transparent px-1 py-2.5 font-mono text-xs tracking-[0.08em] uppercase shadow-none transition-colors data-[state=active]:border-b-2 data-[state=inactive]:border-transparent"
+                        className="data-[state=active]:border-accent data-[state=active]:text-fg data-[state=inactive]:text-fg-muted hover:text-fg-secondary rounded-none bg-transparent px-1 py-2.5 font-mono text-xs tracking-[0.08em] uppercase shadow-none transition-colors data-[state=active]:border-b-2 data-[state=inactive]:border-transparent"
                       >
                         {tab}
                       </TabsTrigger>
@@ -359,7 +331,7 @@ export function TaskDrawer() {
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isActioning}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-status-red hover:bg-status-red/90"
+              className="bg-danger hover:bg-danger/90"
               onClick={() => handleMarkDone(true)}
               disabled={isActioning || !forceReason.trim()}
             >
@@ -393,10 +365,10 @@ function DrawerFooter({
   const [jsonOpen, setJsonOpen] = useState(false);
 
   return (
-    <div className="bg-bg-elevated/50 border-border-default shrink-0 space-y-4 border-t px-6 py-5">
+    <div className="bg-surface-inset/50 border-line shrink-0 space-y-4 border-t px-6 py-5">
       <div className="flex items-center gap-3">
         {showRerun && (
-          <Button variant="blue" size="sm" onClick={() => void onRetry()} className="h-8 gap-1.5">
+          <Button variant="info" size="sm" onClick={() => void onRetry()} className="h-8 gap-1.5">
             <RefreshCw className="h-3.5 w-3.5" />
             RE-RUN
           </Button>
@@ -405,7 +377,7 @@ function DrawerFooter({
         <TooltipProvider>
           {canManage ? (
             <Button
-              variant="phosphor"
+              variant="warning"
               size="sm"
               onClick={onMarkBlocked}
               className="h-8 gap-1.5"
@@ -419,7 +391,7 @@ function DrawerFooter({
               <TooltipTrigger asChild>
                 <span>
                   <Button
-                    variant="phosphor"
+                    variant="warning"
                     size="sm"
                     disabled
                     className="h-8 cursor-not-allowed gap-1.5"
@@ -440,7 +412,7 @@ function DrawerFooter({
               variant="outline"
               size="sm"
               onClick={onMarkDone}
-              className="border-status-emerald/50 text-status-emerald hover:bg-status-emerald/10 h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase transition-colors"
+              className="border-success/50 text-success hover:bg-success/10 h-8 gap-1.5 font-mono text-[10px] tracking-widest uppercase transition-colors"
               disabled={task.status === 'done'}
             >
               <CheckCircle2 className="h-3.5 w-3.5" />
@@ -470,7 +442,7 @@ function DrawerFooter({
       {(devMode || jsonOpen || (task.totalCostUsd && task.totalCostUsd > 0)) && (
         <div className="space-y-3">
           {(devMode || (task.totalCostUsd && task.totalCostUsd > 0)) && (
-            <div className="text-text-muted flex items-center gap-4 font-mono text-[10px] tracking-[0.08em] uppercase">
+            <div className="text-fg-muted flex items-center gap-4 font-mono text-[10px] tracking-[0.08em] uppercase">
               {devMode && (
                 <>
                   <span>Prompt: {task.promptTokensUsed?.toLocaleString() ?? '---'}</span>
@@ -484,14 +456,14 @@ function DrawerFooter({
           )}
           {devMode && (
             <Collapsible open={jsonOpen} onOpenChange={setJsonOpen}>
-              <CollapsibleTrigger className="text-text-muted hover:text-text-secondary flex cursor-pointer items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] uppercase select-none">
+              <CollapsibleTrigger className="text-fg-muted hover:text-fg-secondary flex cursor-pointer items-center gap-1.5 font-mono text-[10px] tracking-[0.08em] uppercase select-none">
                 {jsonOpen ? 'Hide JSON' : 'Inspect JSON'}
                 <ChevronRight
                   className={cn('h-3 w-3 transition-transform', jsonOpen && 'rotate-90')}
                 />
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <pre className="bg-terminal-bg text-terminal-green border-border-subtle mt-2 overflow-auto rounded border p-3 font-mono text-[10px]">
+                <pre className="bg-log-bg text-success border-border-subtle mt-2 overflow-auto rounded border p-3 font-mono text-[10px]">
                   {JSON.stringify(task, null, 2)}
                 </pre>
               </CollapsibleContent>

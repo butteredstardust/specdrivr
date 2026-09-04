@@ -6,11 +6,11 @@ import { useQueryState, parseAsString } from 'nuqs';
 import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
 import { CreateProjectDialog } from '@/components/projects/create-project-dialog';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { StatusIcon } from '@/components/ui/status-icon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PageHeader } from '@/components/ui/page-header';
-import { PixelBadge } from '@/components/ui/pixel-badge';
+import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -67,7 +67,7 @@ export default function ProjectsPage() {
 
   return (
     <TooltipProvider>
-      <div className="animate-entrance -mx-6 -mt-6 flex min-h-full flex-col">
+      <div className="animate-fade-in-up -mx-6 -mt-6 flex min-h-full flex-col">
         <PageHeader
           category="Projects"
           title="All Projects"
@@ -75,12 +75,12 @@ export default function ProjectsPage() {
         />
 
         {/* Toolbar */}
-        <div className="border-border-default flex items-center border-b px-6 py-3">
+        <div className="border-line flex items-center border-b px-6 py-3">
           <div className="relative w-full md:w-64">
-            <Search className="text-text-muted absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
+            <Search className="text-fg-muted absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
             <Input
               placeholder="SEARCH PROJECTS..."
-              className="bg-bg-elevated focus:ring-accent-blue/30 h-8 pl-8 font-mono text-[10px] tracking-widest uppercase transition-all focus:ring-1"
+              className="bg-surface-inset focus:ring-accent/30 h-8 pl-8 font-mono text-[10px] tracking-widest uppercase transition-all focus:ring-1"
               value={search}
               onChange={(e) => setSearch(e.target.value || null)}
             />
@@ -89,32 +89,32 @@ export default function ProjectsPage() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setSearch(null)}
-                className="text-text-muted hover:text-text-primary absolute top-1/2 right-1 h-6 w-6 -translate-y-1/2"
+                className="text-fg-muted hover:text-fg absolute top-1/2 right-1 h-6 w-6 -translate-y-1/2"
               >
                 <X className="h-3 w-3" />
               </Button>
             )}
           </div>
 
-          <div className="bg-border-default/50 mx-1 h-4 w-px" />
+          <div className="bg-line/50 mx-1 h-4 w-px" />
 
           <div className="flex items-center gap-2">
-            <span className="text-text-muted font-mono text-[10px] tracking-widest uppercase opacity-50">
+            <span className="text-fg-muted font-mono text-[10px] tracking-widest uppercase opacity-50">
               Total: {allProjects.length}
             </span>
           </div>
         </div>
 
         {/* Content */}
-        <div className="surface-dual-border scanline-overlay flex-1">
+        <div className="border-line flex-1 border">
           {isLoading && allProjects.length === 0 ? (
-            <div className="text-muted-foreground py-16 text-center font-mono text-xs">
+            <div className="text-fg-muted py-16 text-center font-mono text-xs">
               Loading projects…
             </div>
           ) : filteredProjects.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-16">
-              <DaemonMascot size={48} expression="idle" />
-              <p className="text-text-secondary font-mono text-sm">
+              <StatusIcon size={24} status="idle" />
+              <p className="text-fg-secondary font-mono text-sm">
                 {search ? 'No projects matching search.' : 'No projects yet.'}
               </p>
               {!search && (
@@ -124,7 +124,7 @@ export default function ProjectsPage() {
           ) : (
             <Table>
               <TableHeader>
-                <TableRow className="border-border-default text-text-secondary font-mono text-xs tracking-[0.15em] uppercase hover:bg-transparent">
+                <TableRow className="border-line text-fg-secondary font-mono text-xs tracking-[0.15em] uppercase hover:bg-transparent">
                   <TableHead className="h-auto w-36 px-6 py-2.5 font-medium">ID</TableHead>
                   <TableHead className="h-auto px-3 py-2.5 font-medium">Name</TableHead>
                   <TableHead className="h-auto px-3 py-2.5 font-medium">Description</TableHead>
@@ -134,16 +134,11 @@ export default function ProjectsPage() {
               </TableHeader>
               <TableBody>
                 {filteredProjects.map((project) => (
-                  <TableRow
-                    key={project.id}
-                    className="border-border-default/50 hover:bg-bg-elevated/50"
-                  >
+                  <TableRow key={project.id} className="border-line/50 hover:bg-surface-inset/50">
                     <TableCell className="px-6 py-3">
-                      <PixelBadge variant="amber">
-                        PROJ-{String(project.id).padStart(3, '0')}
-                      </PixelBadge>
+                      <Badge variant="warning">PROJ-{String(project.id).padStart(3, '0')}</Badge>
                     </TableCell>
-                    <TableCell className="text-text-primary px-3 py-3 text-sm font-medium">
+                    <TableCell className="text-fg px-3 py-3 text-sm font-medium">
                       <Button
                         type="button"
                         variant="link"
@@ -153,10 +148,10 @@ export default function ProjectsPage() {
                         {project.name}
                       </Button>
                     </TableCell>
-                    <TableCell className="text-muted-foreground px-3 py-3 text-sm">
+                    <TableCell className="text-fg-muted px-3 py-3 text-sm">
                       {project.description ?? '—'}
                     </TableCell>
-                    <TableCell className="text-muted-foreground px-3 py-3 font-mono text-[10px]">
+                    <TableCell className="text-fg-muted px-3 py-3 font-mono text-[10px]">
                       {new Date(project.createdAt).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="px-3 py-3 text-right">
@@ -166,7 +161,7 @@ export default function ProjectsPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="text-muted-foreground h-6 w-6"
+                              className="text-fg-muted h-6 w-6"
                               onClick={() => openProject(project.id, '/settings')}
                               aria-label={`Open settings for ${project.name}`}
                             >

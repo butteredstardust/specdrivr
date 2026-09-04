@@ -130,7 +130,7 @@ function GlobTagInput({ value, onChange, disabled, placeholder }: GlobTagInputPr
           {value.map((tag) => (
             <span
               key={tag}
-              className="border-border-default bg-bg-surface text-text-secondary flex items-center gap-1 rounded border px-2 py-0.5 font-mono text-xs"
+              className="border-line bg-surface-raised text-fg-secondary flex items-center gap-1 rounded border px-2 py-0.5 font-mono text-xs"
             >
               {tag}
               {!disabled && (
@@ -139,7 +139,7 @@ function GlobTagInput({ value, onChange, disabled, placeholder }: GlobTagInputPr
                   variant="ghost"
                   size="icon"
                   onClick={() => removeTag(tag)}
-                  className="text-text-muted hover:text-text-primary ml-0.5 h-4 w-4 shrink-0 p-0"
+                  className="text-fg-muted hover:text-fg ml-0.5 h-4 w-4 shrink-0 p-0"
                   aria-label={`Remove ${tag}`}
                 >
                   <X className="h-3 w-3" />
@@ -176,11 +176,11 @@ interface FormFieldProps {
 function FormField({ label, htmlFor, helper, children }: FormFieldProps) {
   return (
     <div className="flex flex-col gap-1.5">
-      <Label htmlFor={htmlFor} className="text-text-secondary font-mono text-xs uppercase">
+      <Label htmlFor={htmlFor} className="text-fg-secondary font-mono text-xs uppercase">
         {label}
       </Label>
       {children}
-      {helper && <p className="text-text-muted text-xs">{helper}</p>}
+      {helper && <p className="text-fg-muted text-xs">{helper}</p>}
     </div>
   );
 }
@@ -190,9 +190,7 @@ function FormField({ label, htmlFor, helper, children }: FormFieldProps) {
 // ---------------------------------------------------------------------------
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
-  return (
-    <h2 className="text-text-muted font-mono text-xs tracking-widest uppercase">{children}</h2>
-  );
+  return <h2 className="text-fg-muted font-mono text-xs tracking-widest uppercase">{children}</h2>;
 }
 
 // ---------------------------------------------------------------------------
@@ -320,7 +318,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
   };
 
   if (isLoading) {
-    return <p className="text-text-muted font-mono text-xs">Loading agent configuration…</p>;
+    return <p className="text-fg-muted font-mono text-xs">Loading agent configuration…</p>;
   }
 
   return (
@@ -366,8 +364,8 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             {/* Gemini Group */}
-            <div className="border-border-default bg-bg-surface flex flex-col gap-4 rounded-md border p-4">
-              <p className="text-text-secondary font-mono text-xs tracking-widest uppercase">
+            <div className="border-line bg-surface-raised flex flex-col gap-4 rounded-md border p-4">
+              <p className="text-fg-secondary font-mono text-xs tracking-widest uppercase">
                 Google Gemini
               </p>
 
@@ -408,8 +406,8 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
             </div>
 
             {/* Claude Group */}
-            <div className="border-border-default bg-bg-surface flex flex-col gap-4 rounded-md border p-4">
-              <p className="text-text-secondary font-mono text-xs tracking-widest uppercase">
+            <div className="border-line bg-surface-raised flex flex-col gap-4 rounded-md border p-4">
+              <p className="text-fg-secondary font-mono text-xs tracking-widest uppercase">
                 Anthropic Claude
               </p>
 
@@ -487,7 +485,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
                       />
                     )}
                   />
-                  <span className="text-text-secondary w-16 font-mono text-sm">
+                  <span className="text-fg-secondary w-16 font-mono text-sm">
                     {watch('maxConcurrentTasks')} tasks
                   </span>
                 </div>
@@ -534,7 +532,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
                       />
                     )}
                   />
-                  <span className="text-text-secondary w-16 font-mono text-sm">
+                  <span className="text-fg-secondary w-16 font-mono text-sm">
                     {watch('maxRetriesPerTask')}
                   </span>
                 </div>
@@ -674,7 +672,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
           </FormField>
 
           <div className="flex items-center justify-between">
-            <Label className="text-text-secondary font-mono text-xs uppercase">
+            <Label className="text-fg-secondary font-mono text-xs uppercase">
               AUTO-CREATE PULL REQUESTS
             </Label>
             <Tooltip>
@@ -719,7 +717,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
           <SectionHeading>PLANNING</SectionHeading>
 
           <div className="flex items-center justify-between">
-            <Label className="text-text-secondary font-mono text-xs uppercase">
+            <Label className="text-fg-secondary font-mono text-xs uppercase">
               REQUIRE PLAN APPROVAL
             </Label>
             <Tooltip>
@@ -737,7 +735,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
           </div>
 
           <div className="flex items-center justify-between">
-            <Label className="text-text-secondary font-mono text-xs uppercase">
+            <Label className="text-fg-secondary font-mono text-xs uppercase">
               AUTO-GENERATE PLAN ON SPEC SAVE
             </Label>
             <Tooltip>
@@ -824,12 +822,10 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
         <section className="flex flex-col gap-4">
           <SectionHeading>AGENT TOKEN</SectionHeading>
 
-          <div className="border-border-default bg-bg-surface rounded-md border p-4">
-            <p className="text-text-muted font-mono text-xs tracking-widest uppercase">
-              AGENT TOKEN
-            </p>
-            <p className="text-text-primary mt-2 font-mono text-sm">sdk_••••••••••••</p>
-            <p className="text-text-muted mt-1 text-xs">
+          <div className="border-line bg-surface-raised rounded-md border p-4">
+            <p className="text-fg-muted font-mono text-xs tracking-widest uppercase">AGENT TOKEN</p>
+            <p className="text-fg mt-2 font-mono text-sm">sdk_••••••••••••</p>
+            <p className="text-fg-muted mt-1 text-xs">
               This token is set via environment variable. Rotate it in your infrastructure, then
               update AGENT_TOKEN.
             </p>

@@ -45,8 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Toaster
               position="bottom-right"
               toastOptions={{
-                className:
-                  'font-mono text-xs border-border-default bg-bg-surface text-text-primary',
+                className: 'font-mono text-xs border-line bg-surface-raised text-fg',
               }}
             />
           </NuqsAdapter>

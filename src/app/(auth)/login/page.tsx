@@ -84,12 +84,12 @@ export default function LoginPage() {
   };
 
   return (
-    <Card className="border-border-default bg-bg-surface w-full max-w-sm">
+    <Card className="border-line bg-surface-raised w-full max-w-sm">
       <CardHeader className="items-center gap-2 pb-2">
         <BrandMark size={48} className={isPending ? 'animate-pulse' : undefined} />
         <div className="text-center">
-          <p className="text-text-primary font-mono text-sm font-bold tracking-widest">SPECDRIVR</p>
-          <p className="text-text-secondary font-mono text-xs tracking-tight uppercase">
+          <p className="text-fg font-mono text-sm font-bold tracking-widest">SPECDRIVR</p>
+          <p className="text-fg-secondary font-mono text-xs tracking-tight uppercase">
             Build what you spec.
           </p>
         </div>
@@ -104,7 +104,7 @@ export default function LoginPage() {
           <div className="space-y-1.5">
             <Label
               htmlFor="email"
-              className="text-text-muted font-mono text-[11px] tracking-[0.08em] uppercase"
+              className="text-fg-muted font-mono text-[11px] tracking-[0.08em] uppercase"
             >
               Email
             </Label>
@@ -114,14 +114,14 @@ export default function LoginPage() {
               type="email"
               autoFocus
               placeholder="you@example.com"
-              className="border-border-default bg-bg-base"
+              className="border-line bg-surface-base"
             />
-            {errors.email && <p className="text-status-red text-[10px]">{errors.email.message}</p>}
+            {errors.email && <p className="text-danger text-[10px]">{errors.email.message}</p>}
           </div>
           <div className="space-y-1.5">
             <Label
               htmlFor="password"
-              className="text-text-muted font-mono text-[11px] tracking-[0.08em] uppercase"
+              className="text-fg-muted font-mono text-[11px] tracking-[0.08em] uppercase"
             >
               Password
             </Label>
@@ -130,10 +130,10 @@ export default function LoginPage() {
               {...register('password')}
               type="password"
               placeholder="••••••••"
-              className="border-border-default bg-bg-base"
+              className="border-line bg-surface-base"
             />
             {errors.password && (
-              <p className="text-status-red text-[10px]">{errors.password.message}</p>
+              <p className="text-danger text-[10px]">{errors.password.message}</p>
             )}
           </div>
 
@@ -148,14 +148,14 @@ export default function LoginPage() {
           <Button
             type="submit"
             disabled={isPending}
-            className="bg-accent-blue hover:bg-accent-blue-dim w-full font-mono text-sm tracking-wider uppercase transition-colors"
+            className="bg-surface-inset hover:bg-accent-hover w-full font-mono text-sm tracking-wider uppercase transition-colors"
           >
             {isPending ? 'Signing in…' : 'Sign In'}
           </Button>
           <div className="text-right">
             <Link
               href="/forgot-password"
-              className="text-text-muted hover:text-text-secondary font-mono text-[10px] uppercase underline-offset-4 hover:underline"
+              className="text-fg-muted hover:text-fg-secondary font-mono text-[10px] uppercase underline-offset-4 hover:underline"
             >
               Forgot password?
             </Link>
@@ -163,8 +163,8 @@ export default function LoginPage() {
         </form>
 
         {isDev && (
-          <div className="border-border-muted mt-4 space-y-2 border-t border-dashed pt-4">
-            <p className="text-text-secondary font-mono text-xs tracking-widest">DEV QUICK LOGIN</p>
+          <div className="border-line-subtle mt-4 space-y-2 border-t border-dashed pt-4">
+            <p className="text-fg-secondary font-mono text-xs tracking-widest">DEV QUICK LOGIN</p>
             {[
               { label: 'Owner', email: 'alex@specdrivr.dev' },
               { label: 'Admin', email: 'sam@specdrivr.dev' },
@@ -175,7 +175,7 @@ export default function LoginPage() {
                 type="button"
                 variant="outline"
                 size="sm"
-                className="hover:bg-accent-blue/5 hover:text-accent-blue w-full font-mono text-xs transition-colors"
+                className="hover:bg-surface-inset/5 hover:text-accent w-full font-mono text-xs transition-colors"
                 onClick={() => {
                   setValue('email', quickEmail);
                   setValue('password', 'Password123!');

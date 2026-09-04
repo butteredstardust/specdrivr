@@ -12,14 +12,14 @@ export default async function WebhooksPage() {
 
   return (
     <div className="flex max-w-4xl flex-col gap-8">
-      <h2 className="text-muted-foreground font-mono text-[10px] tracking-[0.2em] uppercase">
+      <h2 className="text-fg-muted font-mono text-[10px] tracking-[0.2em] uppercase">
         Webhook Delivery Log
       </h2>
 
       {project ? (
         <WebhookLogSection projectId={project.id} />
       ) : (
-        <p className="text-muted-foreground text-sm">No project found.</p>
+        <p className="text-fg-muted text-sm">No project found.</p>
       )}
     </div>
   );

@@ -6,7 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
-import { DaemonMascot } from '@/components/ui/daemon-mascot';
+import { StatusIcon } from '@/components/ui/status-icon';
 import { cn } from '@/lib/utils';
 import type { SpecStatus } from '@/components/specs/spec-editor';
 import type { UserRole } from '@/db/schema';
@@ -74,8 +74,8 @@ export function SpecTab({ spec, userRole }: SpecTabProps): React.ReactElement {
               className={cn(
                 'h-auto rounded px-2 py-0.5 font-mono text-xs',
                 selectedVersionIdx === i
-                  ? 'bg-phosphor-amber/20 text-phosphor-amber hover:bg-phosphor-amber/30 hover:text-phosphor-amber'
-                  : 'bg-secondary text-muted-foreground hover:text-foreground'
+                  ? 'bg-warning/20 text-warning hover:bg-warning/30 hover:text-warning'
+                  : 'bg-surface-inset text-fg-muted hover:text-fg'
               )}
             >
               v{v.versionNumber}
@@ -93,7 +93,7 @@ export function SpecTab({ spec, userRole }: SpecTabProps): React.ReactElement {
             <Skeleton className="h-4 w-3/5" />
           </div>
         ) : content ? (
-          <div className="prose prose-invert animate-entrance max-w-none">
+          <div className="prose prose-invert animate-fade-in-up max-w-none">
             <ReactMarkdown
               components={{
                 code({
@@ -110,16 +110,16 @@ export function SpecTab({ spec, userRole }: SpecTabProps): React.ReactElement {
                 }) {
                   const match = /language-(\w+)/.exec(className || '');
                   return !inline ? (
-                    <div className="bg-bg-elevated border-border-default my-6 overflow-hidden rounded-lg border shadow-sm">
+                    <div className="bg-surface-inset border-line my-6 overflow-hidden rounded-lg border">
                       {match && (
-                        <div className="border-border-default bg-bg-surface flex items-center justify-between border-b px-4 py-1.5">
-                          <span className="text-text-muted font-mono text-[10px] tracking-widest uppercase">
+                        <div className="border-line bg-surface-raised flex items-center justify-between border-b px-4 py-1.5">
+                          <span className="text-fg-muted font-mono text-[10px] tracking-widest uppercase">
                             {match[1]}
                           </span>
                         </div>
                       )}
                       <pre className="m-0 overflow-x-auto p-4 font-mono text-sm leading-relaxed">
-                        <code className={cn('text-text-primary', className)} {...props}>
+                        <code className={cn('text-fg', className)} {...props}>
                           {children}
                         </code>
                       </pre>
@@ -127,7 +127,7 @@ export function SpecTab({ spec, userRole }: SpecTabProps): React.ReactElement {
                   ) : (
                     <code
                       className={cn(
-                        'bg-bg-elevated border-border-default text-accent-blue rounded border px-1.5 py-0.5 font-mono text-[0.9em]',
+                        'bg-surface-inset border-line text-accent rounded border px-1.5 py-0.5 font-mono text-[0.9em]',
                         className
                       )}
                       {...props}
@@ -143,9 +143,9 @@ export function SpecTab({ spec, userRole }: SpecTabProps): React.ReactElement {
           </div>
         ) : (
           <div className="flex flex-col items-center gap-3 py-16">
-            <DaemonMascot size={48} expression="idle" />
-            <p className="text-text-secondary font-mono text-sm">No content yet.</p>
-            <p className="text-text-muted mb-4 font-mono text-xs italic">
+            <StatusIcon size={24} status="idle" />
+            <p className="text-fg-secondary font-mono text-sm">No content yet.</p>
+            <p className="text-fg-muted mb-4 font-mono text-xs italic">
               &quot;Write a specification to begin plan generation.&quot;
             </p>
             {canEdit && (

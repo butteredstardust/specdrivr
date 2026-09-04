@@ -76,7 +76,7 @@ export function CreateProjectDialog({
 
   const triggerButton = (
     <Button
-      variant="phosphor"
+      variant="warning"
       size="sm"
       disabled={!canCreate}
       onClick={canCreate ? () => setOpen(true) : undefined}
