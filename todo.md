@@ -98,20 +98,32 @@ Target: one consistent vintage across all primitives.
 
 Ordered by blast radius. Decompose the monoliths while rebuilding — do not port 1,167-line files as-is.
 
-- [ ] **Mission control / home** — `page.tsx`, `session-panel.tsx` (368), `event-log.tsx` (176), `activity-feed.tsx` (128), `recent-sessions.tsx` (128), `needs-attention-banner.tsx` (77)
-- [ ] **Specs** — `plan-tab.tsx` (690 → decompose), `spec-editor.tsx` (212), `spec-tab.tsx`, `tasks-tab.tsx`, `activity-tab.tsx`, `changes-tab.tsx`; routes `specs/`, `specs/new`, `specs/[id]`, `specs/[id]/edit`
-- [ ] **Tasks** — `task-drawer.tsx` (504 → decompose), `task-drawer-overview/attempts/changes`, `ui/task-row.tsx` (8.3K)
-- [ ] **Sessions** — `sessions/`, `sessions/[id]`, `task-timeline.tsx` (277)
-- [ ] **Settings** (11 routes, the largest cluster):
-  - [ ] `integrations-section.tsx` (**1,167 LOC → decompose**)
-  - [ ] `agent-config-form.tsx` (**873 LOC → decompose**)
-  - [ ] `api-tokens-section.tsx` (394), `audit-log-section.tsx` (348), `active-sessions-section.tsx` (292), `members-section.tsx` (283), `project-settings-form.tsx` (253), `webhook-log-section.tsx` (245), `notification-preferences-section.tsx` (223), `usage-section.tsx` (185), `change-password-section.tsx` (171), `danger-zone-section.tsx` (126), `profile-form.tsx` (109)
-  - [ ] `settings-nav.tsx` — **fix the duplicate `/settings/security` entry** (copy-paste bug)
-- [ ] **Projects** — `projects/page.tsx`, `create-project-dialog.tsx` (165)
-- [ ] **Notifications** — `notifications/page.tsx`, `notification-panel.tsx` (127)
-- [ ] **Auth** (4 routes) — `login`, `invite`, `forgot-password`, `reset-password`
-- [ ] **Onboarding** — `onboarding-wizard.tsx` (214)
-- [ ] **Jobs** — `plan-job-status-indicator.tsx`
+- [x] **Mission control / home** — `page.tsx`, `session-panel.tsx`, `event-log.tsx`, `activity-feed.tsx`, `recent-sessions.tsx`, `needs-attention-banner.tsx`
+- [x] **Specs** — `plan-tab.tsx` (682 → 164 + `specs/plan/{shared,use-plan,plan-review}`), `spec-editor.tsx`, `spec-tab.tsx`, `tasks-tab.tsx`, `activity-tab.tsx`, `changes-tab.tsx`
+- [x] **Tasks** — `task-drawer.tsx` (473 → 254 + `task-drawer-footer.tsx` + `use-task-actions.ts`), `task-drawer-overview/attempts/changes`, `ui/task-row.tsx`
+- [x] **Sessions** — `sessions/`, `sessions/[id]`, `task-timeline.tsx`
+- [x] **Settings** (11 routes, the largest cluster):
+  - [x] `integrations-section.tsx` (1,161 → 61 + `integrations/{shared,github-card,slack-card,webhooks-card}`)
+  - [x] `agent-config-form.tsx` (859 → 160 + `agent-config/` — one file per section, wired through `FormProvider`)
+  - [x] `api-tokens-section.tsx`, `audit-log-section.tsx`, `active-sessions-section.tsx`, `members-section.tsx`, `project-settings-form.tsx`, `webhook-log-section.tsx`, `notification-preferences-section.tsx`, `usage-section.tsx`, `change-password-section.tsx`, `danger-zone-section.tsx`, `profile-form.tsx`
+  - [x] `settings-nav.tsx` — duplicate `/settings/security` entry replaced with the webhook log and an anchor to API tokens
+- [x] **Projects** — `projects/page.tsx`, `create-project-dialog.tsx`
+- [x] **Notifications** — `notifications/page.tsx`, `notification-panel.tsx`
+- [x] **Auth** (4 routes) — `login`, `invite`, `forgot-password`, `reset-password`
+- [x] **Onboarding** — `onboarding-wizard.tsx`
+- [x] **Jobs** — `plan-job-status-indicator.tsx`
+
+Found and fixed along the way, beyond the planned scope:
+
+- **All rendered markdown was unstyled.** Six surfaces used `prose prose-invert`, but
+  `@tailwindcss/typography` has never been a dependency, so those classes matched nothing. Replaced
+  with a token-driven `.markdown` block in `globals.css`.
+- **`GatedButton`** (`ui/gated-button.tsx`) — the "disabled button that explains itself" pattern was
+  written out by hand at a dozen call sites, which was most of the bulk in the plan tab and drawer.
+- **Hardcoded palette colours** — `border-amber-500/40 bg-amber-500/10 text-amber-300` on the spec
+  editor banners plus three `text-emerald-400` readouts, all now on status tokens.
+- **`spec-editor.tsx` used `h-screen`** inside the shell's already-sized `main`, pushing the preview
+  pane below the fold.
 
 ## Phase 6 — Accessibility
 

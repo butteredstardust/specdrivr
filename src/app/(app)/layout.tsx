@@ -51,10 +51,21 @@ async function AuthenticatedApp({ children }: { children: React.ReactNode }) {
     <ShellProvider user={shellUser} initialId={validatedProjectId}>
       <TaskDrawerProvider>
         <div className="bg-surface-base relative flex h-screen overflow-hidden">
+          {/* The sidebar is ~15 links deep, so keyboard users get a way past it. */}
+          <a
+            href="#main-content"
+            className="bg-surface-overlay text-fg border-line sr-only rounded-md border px-4 py-2 text-sm focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50"
+          >
+            Skip to content
+          </a>
           <Sidebar projects={projects} />
           <div className="flex flex-1 flex-col overflow-hidden">
             <TopBar />
-            <main className="relative flex-1 overflow-y-auto px-4 py-6 [--shell-gutter-y:1.5rem] [--shell-gutter:1rem] md:px-8 md:py-8 md:[--shell-gutter-y:2rem] md:[--shell-gutter:2rem]">
+            <main
+              id="main-content"
+              tabIndex={-1}
+              className="relative flex-1 overflow-y-auto px-4 py-6 [--shell-gutter-y:1.5rem] [--shell-gutter:1rem] md:px-8 md:py-8 md:[--shell-gutter-y:2rem] md:[--shell-gutter:2rem]"
+            >
               <div className="mx-auto max-w-[1600px]">{children}</div>
               <ActiveJobsOverlay />
             </main>

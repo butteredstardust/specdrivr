@@ -561,7 +561,14 @@
   *::after {
     scroll-behavior: auto !important;
     animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
   }
+
+  /* Vaul drives the drawer with an inline `transition: transform …`, and the
+     `!important` above beats an inline declaration — so the drawer is covered
+     by the same rule. The remaining motion in the app is CSS-only, so there is
+     no JS animation to gate behind a `matchMedia` check. */
 }

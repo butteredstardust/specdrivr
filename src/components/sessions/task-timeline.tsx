@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSSE } from '@/hooks/use-sse';
+import { TASK_STATUS } from '@/lib/ui-status';
 import {
   CheckCircle2,
   AlertCircle,
@@ -181,10 +182,17 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
                 {/* Right column: content card */}
                 <div className="flex-1 pt-0.5">
                   <div
-                    onClick={() => toggleTask(task.id)}
-                    className={`cursor-pointer rounded-lg border transition-all ${colors.bg} border-line-subtle hover:border-line px-3 py-2.5`}
+                    className={`rounded-lg border transition-colors ${colors.bg} border-line-subtle hover:border-line px-3 py-2.5`}
                   >
-                    <div className="flex items-start justify-between gap-3">
+                    {/* The whole card used to be a clickable div, which put the
+                        expanded panel inside the click target. Only the header
+                        toggles now, so the panel's contents stay reachable. */}
+                    <button
+                      type="button"
+                      onClick={() => toggleTask(task.id)}
+                      aria-expanded={isExpanded}
+                      className="flex w-full cursor-pointer items-start justify-between gap-3 text-left"
+                    >
                       <div className="min-w-0 flex-1">
                         <div className="mb-1 flex items-center gap-2">
                           <span className="text-fg-muted text-2xs shrink-0 font-semibold">
@@ -194,14 +202,15 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
                             <StatusIcon status={task.status} />
                           </div>
                         </div>
-                        <p className="text-fg truncate font-mono text-xs">{task.title}</p>
+                        <p className="text-fg truncate text-xs">{task.title}</p>
                       </div>
                       <div className="flex shrink-0 flex-col items-end gap-1">
                         {taskDuration(task)}
                         <span
                           className={`text-2xs flex items-center gap-1 rounded px-1.5 py-0.5 ${colors.bg} ${colors.text}`}
                         >
-                          {task.status.replace(/_/g, ' ')}
+                          {TASK_STATUS[task.status as keyof typeof TASK_STATUS]?.label ??
+                            task.status.replace(/_/g, ' ')}
                           {isExpanded ? (
                             <ChevronDown className="h-3 w-3" />
                           ) : (
@@ -209,13 +218,10 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
                           )}
                         </span>
                       </div>
-                    </div>
+                    </button>
 
                     {isExpanded && (
-                      <div
-                        className="border-line-subtle mt-3 cursor-auto space-y-2 border-t pt-3"
-                        onClick={(e) => e.stopPropagation()}
-                      >
+                      <div className="border-line-subtle mt-3 space-y-2 border-t pt-3">
                         {task.description && (
                           <div>
                             <span className="text-fg-muted text-2xs mb-0.5 block">Description</span>

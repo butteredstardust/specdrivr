@@ -101,8 +101,14 @@ export function DiffViewer({ files, className }: DiffViewerProps) {
       {/* Header */}
       <div className="border-line flex items-center gap-3 border-b px-4 py-2">
         <span className="text-fg text-sm font-medium">File changes</span>
-        <span className="text-success font-mono text-xs">+{totalAdditions}</span>
-        <span className="text-danger font-mono text-xs">−{totalDeletions}</span>
+        <span className="text-success font-mono text-xs">
+          +{totalAdditions}
+          <span className="sr-only"> insertions</span>
+        </span>
+        <span className="text-danger font-mono text-xs">
+          −{totalDeletions}
+          <span className="sr-only"> deletions</span>
+        </span>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
@@ -117,7 +123,10 @@ export function DiffViewer({ files, className }: DiffViewerProps) {
               key={`${file.filename}-${i}`}
               variant="ghost"
               role="tab"
+              id={`diff-tab-${i}`}
+              aria-controls="diff-panel"
               aria-selected={selectedFile === file.filename}
+              tabIndex={selectedFile === file.filename ? 0 : -1}
               onClick={() => setSelectedFile(file.filename)}
               className={cn(
                 'flex h-auto w-full items-center justify-start gap-1.5 truncate rounded-none px-3 py-2 text-left font-mono text-xs',
@@ -136,6 +145,8 @@ export function DiffViewer({ files, className }: DiffViewerProps) {
         <div
           className="bg-surface-base flex-1 overflow-auto"
           role="tabpanel"
+          id="diff-panel"
+          tabIndex={0}
           aria-label={selected ? `Diff for ${selected.filename}` : 'Diff'}
         >
           {selected ? (

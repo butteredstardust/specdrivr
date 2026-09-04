@@ -128,6 +128,9 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
               size="icon"
               className="text-fg-secondary hover:text-fg relative h-9 w-9 transition-colors"
               suppressHydrationWarning
+              aria-label={
+                unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'
+              }
             >
               <Bell className="size-[18px]" />
               {unreadCount > 0 && (
@@ -158,7 +161,7 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
           size="icon"
           className="text-fg-muted hover:text-fg h-9 w-9 transition-colors"
           onClick={() => setShortcutsOpen(true)}
-          title="Keyboard shortcuts"
+          aria-label="Keyboard shortcuts"
         >
           <Command className="size-[18px]" />
         </Button>
@@ -172,6 +175,7 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
               variant="ghost"
               className="hover:bg-surface-inset flex h-10 items-center gap-2 rounded-full px-1 transition-colors"
               suppressHydrationWarning
+              aria-label={user?.name ? `Account menu for ${user.name}` : 'Account menu'}
             >
               <Avatar className="border-line border">
                 <AvatarFallback>{initials}</AvatarFallback>

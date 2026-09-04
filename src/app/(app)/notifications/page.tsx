@@ -197,47 +197,60 @@ export default function NotificationsPage() {
         {activeProjectId === null ? (
           <div className="flex flex-col items-center gap-4 py-16">
             <StatusIcon size={24} status="idle" />
-            <p className="text-fg-secondary font-mono text-sm">
-              Select a project to view notifications.
-            </p>
+            <p className="text-fg-secondary text-sm">Select a project to view notifications.</p>
           </div>
         ) : isLoading && !data ? (
           <div className="text-fg-secondary py-16 text-center font-mono text-xs">Loading…</div>
         ) : notifications.length === 0 ? (
           <div className="flex flex-col items-center gap-4 py-16">
             <Bell className="text-fg-muted/20 h-12 w-12" />
-            <p className="text-fg-secondary font-mono text-sm">
+            <p className="text-fg-secondary text-sm">
               No {tab === 'unread' ? 'unread ' : ''}notifications.
             </p>
           </div>
         ) : (
           <div className="flex flex-col">
-            {notifications.map((n) => (
-              <div
-                key={n.id}
-                className={cn(
-                  'border-line-subtle flex cursor-pointer items-center gap-4 border-b py-3 pr-6 transition-colors',
-                  !n.readAt
-                    ? 'border-l-accent bg-accent-subtle border-l-2 pl-[22px]'
-                    : 'hover:bg-surface-inset border-l-2 border-l-transparent pl-[22px]'
-                )}
-                onClick={() => !n.readAt && handleMarkRead(n.id)}
-              >
-                <div className="shrink-0">{getTypeIcon(n.type)}</div>
-                <div className="min-w-0 flex-1">
-                  <p
-                    className={cn(
-                      'text-sm leading-snug',
-                      !n.readAt ? 'text-fg font-medium' : 'text-fg-secondary'
-                    )}
-                  >
-                    {n.title}
-                  </p>
-                  <p className="text-fg-secondary mt-0.5 line-clamp-1 text-xs">{n.message}</p>
-                  <p className="text-fg-muted mt-0.5 text-xs">{formatRelativeTime(n.createdAt)}</p>
-                </div>
-              </div>
-            ))}
+            {notifications.map((n) => {
+              const unread = !n.readAt;
+              // Only an unread row does anything on click, so only an unread row
+              // is a button. A read one was a cursor-pointer div that swallowed
+              // the click and was unreachable by keyboard.
+              const Row = unread ? 'button' : 'div';
+              return (
+                <Row
+                  key={n.id}
+                  {...(unread
+                    ? {
+                        type: 'button' as const,
+                        onClick: () => handleMarkRead(n.id),
+                        'aria-label': `Mark "${n.title}" as read`,
+                      }
+                    : {})}
+                  className={cn(
+                    'border-line-subtle flex w-full items-center gap-4 border-b py-3 pr-6 pl-[22px] text-left transition-colors',
+                    unread
+                      ? 'border-l-accent bg-accent-subtle hover:bg-accent-subtle/70 cursor-pointer border-l-2'
+                      : 'border-l-2 border-l-transparent'
+                  )}
+                >
+                  <div className="shrink-0">{getTypeIcon(n.type)}</div>
+                  <div className="min-w-0 flex-1">
+                    <p
+                      className={cn(
+                        'text-sm leading-snug',
+                        unread ? 'text-fg font-medium' : 'text-fg-secondary'
+                      )}
+                    >
+                      {n.title}
+                    </p>
+                    <p className="text-fg-secondary mt-0.5 line-clamp-1 text-xs">{n.message}</p>
+                    <p className="text-fg-muted mt-0.5 text-xs">
+                      {formatRelativeTime(n.createdAt)}
+                    </p>
+                  </div>
+                </Row>
+              );
+            })}
           </div>
         )}
       </div>
