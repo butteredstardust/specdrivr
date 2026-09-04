@@ -23,6 +23,7 @@ import { db } from '../src/db';
 import { eq, desc, and } from 'drizzle-orm';
 
 const POLL_INTERVAL_MS = 5000;
+const JOB_HEARTBEAT_INTERVAL_MS = 60_000;
 
 class StalePlanJobError extends Error {}
 
@@ -59,6 +60,7 @@ async function logEvent(
 
 async function processJob(job: PlanJob) {
   const startMs = Date.now();
+  let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
   logger.info(
     { correlationId: job.generationToken, jobId: job.id, type: job.type },
     '🚀 Processing plan job'
@@ -78,6 +80,19 @@ async function processJob(job: PlanJob) {
     if (!job.specVersionId || !job.generationToken) {
       throw new StalePlanJobError(`Job ${job.id} is not bound to a specification version`);
     }
+    heartbeatTimer = setInterval(() => {
+      void planJobRepository
+        .heartbeat(job.id, job.generationToken!)
+        .then((isAlive) => {
+          if (!isAlive) {
+            logger.warn({ jobId: job.id }, 'Plan job heartbeat rejected for inactive lease');
+          }
+        })
+        .catch((err: unknown) => {
+          logger.warn({ err, jobId: job.id }, 'Failed to heartbeat plan job');
+        });
+    }, JOB_HEARTBEAT_INTERVAL_MS);
+    heartbeatTimer.unref();
     const spec = await specificationRepository.getById(job.specId);
     const targetVersion = await specificationRepository.getVersionById(
       job.specId,
@@ -346,6 +361,8 @@ ${generated.architectureDecisions.map((d: { title: string; rationale: string; tr
           )
         );
     }
+  } finally {
+    if (heartbeatTimer) clearInterval(heartbeatTimer);
   }
 }
 

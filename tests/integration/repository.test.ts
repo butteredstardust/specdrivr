@@ -155,6 +155,7 @@ describe('Repository Integration Tests', () => {
           type: 'generate_plan',
           status: 'running',
           startedAt: staleDate,
+          updatedAt: staleDate,
         })
         .returning();
 
@@ -167,6 +168,63 @@ describe('Repository Integration Tests', () => {
         .where(eq(schema.planJobs.id, stuckJob.id));
       expect(updatedJob.status).toBe('failed');
       expect(updatedJob.error).toContain('Job timed out');
+    });
+
+    it('keeps a long-running job alive while its generation lease heartbeats', async () => {
+      const user = await createTestUser('user_1', 'test@example.com');
+      const project = await createTestProject('Test Project', user.id);
+      const staleDate = new Date(Date.now() - 20 * 60 * 1000);
+      const [runningJob] = await testDb
+        .insert(schema.planJobs)
+        .values({
+          projectId: project.id,
+          type: 'generate_plan',
+          status: 'running',
+          generationToken: 'generation-lease',
+          startedAt: staleDate,
+          updatedAt: staleDate,
+        })
+        .returning();
+
+      await expect(planJobRepository.heartbeat(runningJob.id, 'generation-lease')).resolves.toBe(
+        true
+      );
+      await expect(planJobRepository.recoverStuckJobs(15)).resolves.toBe(0);
+
+      const [updatedJob] = await testDb
+        .select()
+        .from(schema.planJobs)
+        .where(eq(schema.planJobs.id, runningJob.id));
+      expect(updatedJob.status).toBe('running');
+    });
+  });
+
+  describe('TaskRepository.update', () => {
+    it('persists an edited task title', async () => {
+      const user = await createTestUser('user_1', 'test@example.com');
+      const project = await createTestProject('Test Project', user.id);
+      const spec = await specificationRepository.createWithVersion({
+        projectId: project.id,
+        name: 'Editable Spec',
+        markdownContent: '# v1',
+        createdBy: user.id,
+      });
+      const [plan] = await testDb
+        .insert(schema.plans)
+        .values({
+          specId: spec.id,
+          status: 'pending_approval',
+          specVersionId: spec.currentVersionId,
+        })
+        .returning();
+      const [task] = await testDb
+        .insert(schema.tasks)
+        .values({ planId: plan.id, externalId: 'T-1', title: 'Old title' })
+        .returning();
+
+      const updatedTask = await taskRepository.update(task.id, { title: '  New title  ' });
+
+      expect(updatedTask.title).toBe('New title');
     });
   });
 
@@ -414,6 +472,7 @@ describe('Repository Integration Tests', () => {
           title: 'Complete me',
           status: 'in_progress',
           executionOrder: 1,
+          totalCostUsd: 1.25,
         })
         .returning();
 
@@ -433,6 +492,7 @@ describe('Repository Integration Tests', () => {
         status: 'done',
         output: 'All checks passed',
         exitCode: 0,
+        totalCostUsd: 0,
       });
 
       // 1. Returns the running session ID
@@ -445,6 +505,7 @@ describe('Repository Integration Tests', () => {
         .where(eq(schema.tasks.id, task.id));
       expect(updatedTask.status).toBe('done');
       expect(updatedTask.completedAt).not.toBeNull();
+      expect(updatedTask.totalCostUsd).toBe(0);
 
       // 3. A taskAttempt record was created with correct values
       const [completedAttempt] = await testDb

@@ -3,7 +3,7 @@ import { taskRepository } from '@/repositories/task-repository';
 import { planRepository } from '@/repositories/plan-repository';
 import { specificationRepository } from '@/repositories/specification-repository';
 import { handleApiError, formatErrorResponse } from '@/lib/error-handler';
-import { NotFoundError } from '@/lib/errors';
+import { NotFoundError, ValidationError } from '@/lib/errors';
 import { auth } from '@/lib/auth';
 import { requireAdmin, requireMember } from '@/lib/rbac';
 import { z } from 'zod';
@@ -97,11 +97,17 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     const { status, notes, ...taskUpdates } = parsed;
     const hasTaskUpdates = Object.values(taskUpdates).some((value) => value !== undefined);
+    if (notes !== undefined && status === undefined) {
+      return NextResponse.json(
+        formatErrorResponse(new ValidationError('Notes can only accompany a status override')),
+        { status: 400 }
+      );
+    }
     if (status && hasTaskUpdates) {
       return NextResponse.json(
-        formatErrorResponse({
-          message: 'Status overrides must be submitted separately from task edits',
-        }),
+        formatErrorResponse(
+          new ValidationError('Status overrides must be submitted separately from task edits')
+        ),
         { status: 400 }
       );
     }

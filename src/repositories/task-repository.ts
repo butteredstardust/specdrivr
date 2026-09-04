@@ -193,6 +193,17 @@ export class TaskRepository extends BaseRepository {
 
     const updateData: Record<string, unknown> = {};
 
+    if (data.title !== undefined) {
+      const trimmedTitle = data.title.trim();
+      if (trimmedTitle.length === 0) {
+        throw new ValidationError('Task title cannot be empty');
+      }
+      if (trimmedTitle.length > 255) {
+        throw new ValidationError('Task title cannot exceed 255 characters');
+      }
+      updateData.title = trimmedTitle;
+    }
+
     if (data.description !== undefined) {
       const trimmedDescription = data.description.trim();
       if (trimmedDescription.length === 0) {
@@ -759,7 +770,7 @@ export class TaskRepository extends BaseRepository {
             completedAt: finalStatus === 'done' ? new Date() : null,
             gitBranch: data.gitBranch || task.gitBranch,
             gitCommitHash: data.gitCommitHash || task.gitCommitHash,
-            totalCostUsd: data.totalCostUsd || task.totalCostUsd,
+            totalCostUsd: data.totalCostUsd ?? task.totalCostUsd,
             verificationPassed: data.verificationPassed ?? task.verificationPassed,
             verificationOutput: data.verificationOutput ?? task.verificationOutput,
             verificationExitCode: data.verificationExitCode ?? task.verificationExitCode,

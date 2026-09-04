@@ -44,25 +44,29 @@ export async function dispatchWebhookEvent(
   event: WebhookEventType,
   payload: Omit<WebhookPayload, 'event' | 'timestamp' | 'projectId'>
 ): Promise<void> {
-  const targets = await webhookRepository.getActiveWebhooksForEvent(projectId, event);
-  if (targets.length === 0) return;
-  const fullPayload: WebhookPayload = {
-    timestamp: new Date().toISOString(),
-    projectId,
-    event,
-    ...payload,
-  };
-  await db.insert(webhookDeliveries).values(
-    targets.map((target) => ({
-      webhookId: target.id,
+  try {
+    const targets = await webhookRepository.getActiveWebhooksForEvent(projectId, event);
+    if (targets.length === 0) return;
+    const fullPayload: WebhookPayload = {
+      timestamp: new Date().toISOString(),
       projectId,
-      eventType: event,
-      payload: fullPayload,
-      status: 'pending',
-      attempt: 0,
-      nextRetryAt: new Date(),
-    }))
-  );
+      event,
+      ...payload,
+    };
+    await db.insert(webhookDeliveries).values(
+      targets.map((target) => ({
+        webhookId: target.id,
+        projectId,
+        eventType: event,
+        payload: fullPayload,
+        status: 'pending',
+        attempt: 0,
+        nextRetryAt: new Date(),
+      }))
+    );
+  } catch (err) {
+    logger.error({ err, projectId, event }, 'Failed to queue webhook event');
+  }
 }
 
 async function readBoundedBody(response: Response): Promise<string> {
