@@ -12,12 +12,16 @@ const Switch = React.forwardRef<
   <SwitchPrimitives.Root
     data-slot="switch"
     className={cn(
-      'peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent',
+      'peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2',
       'transition-colors duration-[120ms]',
       // On = accent, off = a plain inset track. The token migration had
       // briefly collapsed both states onto the same fill, so the switch read
       // as permanently off.
       'data-[state=checked]:bg-accent data-[state=unchecked]:bg-surface-inset',
+      // The off track sits at ~1.05:1 against the page, so on its own it is not
+      // a visible control. The border carries the boundary; on, the accent fill
+      // already does, so the border gets out of the way.
+      'data-[state=unchecked]:border-line-control data-[state=checked]:border-transparent',
       'disabled:cursor-not-allowed disabled:opacity-50',
       className
     )}

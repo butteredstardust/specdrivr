@@ -9,7 +9,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, React.ComponentProps<'tex
       <textarea
         data-slot="textarea"
         className={cn(
-          'border-line bg-surface-base text-fg placeholder:text-fg-muted',
+          'border-line-control bg-surface-base text-fg placeholder:text-fg-muted',
           'flex min-h-16 w-full rounded-md border px-3 py-2 text-sm',
           'transition-colors duration-[120ms]',
           'focus:border-accent',

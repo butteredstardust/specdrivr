@@ -36,15 +36,23 @@
     --border-subtle: #eceff3;
     --border-default: #e0e4ea;
     --border-strong: #c9d0da;
+    /* Cards and dividers are structure, and a hairline is the point of the
+       aesthetic — WCAG 1.4.11 does not ask anything of them. A form control is
+       different: an empty checkbox has no affordance but its outline, so it
+       needs the 3:1 the others are exempt from. 3.13:1 on surface-inset. */
+    --border-control: #83878e;
 
     /* --- Text ----------------------------------------------------------- */
     --text-primary: #14161a;
     --text-secondary: #4a5260;
-    --text-muted: #767f8e;
+    /* 4.80:1 on surface-inset, the darkest surface it lands on. Was #767f8e,
+       which read 3.50:1 there — below AA for the 12px it is mostly used at. */
+    --text-muted: #616977;
     --text-inverse: #ffffff;
 
     /* --- Accent (single) ------------------------------------------------ */
-    --accent: #2563eb;
+    /* 4.83:1 on surface-inset. Was #2563eb, at 4.48:1. */
+    --accent: #1f5fe0;
     --accent-hover: #1d4ed8;
     --accent-active: #1e40af;
     --accent-subtle: #eff4ff;
@@ -103,11 +111,14 @@
     --border-subtle: #1c212a;
     --border-default: #262c37;
     --border-strong: #38404e;
+    /* 3.06:1 on surface-inset. See the light-theme note. */
+    --border-control: #5d6a81;
 
     /* --- Text ----------------------------------------------------------- */
     --text-primary: #f2f4f7;
     --text-secondary: #a6b0be;
-    --text-muted: #737d8c;
+    /* 4.84:1 on surface-inset. Was #737d8c, at 4.01:1. */
+    --text-muted: #808b9b;
     --text-inverse: #0b0d11;
 
     /* --- Accent (single) ------------------------------------------------ */
@@ -205,6 +216,7 @@
   --color-line-subtle: var(--border-subtle);
   --color-line: var(--border-default);
   --color-line-strong: var(--border-strong);
+  --color-line-control: var(--border-control);
 
   /* --- Text ------------------------------------------------------------- */
   /* Named "fg" so utilities read `text-fg-muted` and never collide with the

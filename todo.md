@@ -129,13 +129,49 @@ Found and fixed along the way, beyond the planned scope:
 
 Audit baseline: only **16 of 78** component files use `aria-*` at all.
 
-- [ ] `aria-live` on the streaming surfaces that have none: `task-row.tsx`, `live-terminal.tsx`, `diff-viewer.tsx`
-- [ ] Focus management on dialog / drawer / popover open and close
-- [ ] Full keyboard path through sidebar, tabs, task drawer, and the command palette
-- [ ] Semantic landmarks (`nav`, `main`, `aside`, headings in order)
-- [ ] Contrast check every status colour against its surface in **both** themes
-- [ ] Extend reduced-motion beyond the single global CSS rule to JS-driven animation
-- [ ] Accessible names on all icon-only buttons
+- [x] `aria-live` on the streaming surfaces that have none: `task-row.tsx`, `live-terminal.tsx`, ~~`diff-viewer.tsx`~~
+- [x] Focus management on dialog / drawer / popover open and close
+- [x] Full keyboard path through sidebar, tabs, task drawer, and the command palette
+- [x] Semantic landmarks (`nav`, `main`, `aside`, headings in order)
+- [x] Contrast check every status colour against its surface in **both** themes
+- [x] Extend reduced-motion beyond the single global CSS rule to JS-driven animation
+- [x] Accessible names on all icon-only buttons
+
+Corrections to the plan as written:
+
+- **`diff-viewer.tsx` did not need `aria-live`.** It is not a streaming surface — its
+  content changes only when the user picks a file. The actual defect was that the file
+  list looked like a tablist without being one, so it got `role="tab"` / `aria-controls` /
+  `aria-selected` / roving `tabIndex` and a matching `role="tabpanel"` instead.
+- **Focus management needed no work.** Every overlay in the app is Radix or vaul
+  (`dialog.tsx`, `alert-dialog.tsx`, `drawer.tsx` are the only `fixed inset-0` surfaces),
+  so trapping and restoration come from the libraries.
+- **Reduced motion needed no JS gate.** There is no `requestAnimationFrame`, no smooth
+  scroll, and no JS-driven animation in the app; the three `setInterval`s are elapsed-time
+  counters. Vaul's inline drawer transition is already covered, because a stylesheet
+  `!important` outranks an inline declaration. Added the two delay resets to complete
+  the recipe.
+
+The keyboard path was blocked in two places by `onClick` on a plain `<div>` — the session
+timeline card and the notification row — both now real controls. Added the skip link the
+shell never had.
+
+Contrast audit (computed over every token pair, both themes). Four failures, all fixed:
+
+| Token | Was | Now | Worst ratio before → after |
+| --- | --- | --- | --- |
+| `--text-muted` (light) | `#767f8e` | `#616977` | 3.50 → 4.80 |
+| `--text-muted` (dark) | `#737d8c` | `#808b9b` | 4.01 → 4.84 |
+| `--accent` (light) | `#2563eb` | `#1f5fe0` | 4.48 → 4.83 |
+| control borders | `--border-default` | new `--border-control` | 1.15 → 3.13 |
+
+Every status colour (`success`, `warning`, `danger`, `info`) already passed on all four
+neutral surfaces and on its own tinted background, in both themes — the worst was 4.71.
+
+`--border-control` is a new token rather than a change to `--border-default`: hairlines on
+cards and dividers are the D1 aesthetic and WCAG 1.4.11 exempts them, but an empty checkbox
+has no affordance except its outline. `input`, `textarea`, `select`, `checkbox` and the
+`switch`'s off track now use it; cards and dividers are untouched.
 
 ## Phase 7 — Cleanup
 
@@ -144,6 +180,9 @@ Audit baseline: only **16 of 78** component files use `aria-*` at all.
 - [ ] Empty out `knip.json`'s UI ignore list and let CI see the real dead code
 - [ ] Grep for surviving hex codes and arbitrary bracket values; drive the 133 count toward zero
 - [ ] Delete now-unused assets and keyframes
+- [ ] The `no-restricted-syntax` raw-primitive rule in `eslint.config.js` named
+      `@pxlkit/ui-kit`, which D1 killed. Message retargeted at `@/components/ui`; the
+      four `@pxlkit/*` entries in `knip.json`'s `ignoreDependencies` still need removing
 
 ## Phase 8 — Documentation reconciliation
 

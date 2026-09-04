@@ -17,7 +17,7 @@ const Checkbox = React.forwardRef<
       [
         // Unchecked was `border-accent`, so every empty checkbox drew a blue
         // outline and read as partially active.
-        'peer border-line grid h-4 w-4 shrink-0 place-content-center rounded-sm border',
+        'peer border-line-control grid h-4 w-4 shrink-0 place-content-center rounded-sm border',
         'transition-colors duration-[120ms]',
         'data-[state=checked]:bg-accent data-[state=checked]:border-accent data-[state=checked]:text-accent-fg',
         'disabled:cursor-not-allowed disabled:opacity-50',

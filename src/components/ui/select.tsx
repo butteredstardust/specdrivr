@@ -22,7 +22,7 @@ const SelectTrigger = React.forwardRef<
     suppressHydrationWarning
     className={cn(
       [
-        'border-line bg-surface-base text-fg data-[placeholder]:text-fg-muted',
+        'border-line-control bg-surface-base text-fg data-[placeholder]:text-fg-muted',
         'flex h-9 w-full items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm whitespace-nowrap',
         'focus:border-accent transition-colors duration-[120ms]',
         'disabled:bg-surface-inset disabled:cursor-not-allowed disabled:opacity-50',
