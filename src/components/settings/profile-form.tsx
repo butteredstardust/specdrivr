@@ -65,11 +65,11 @@ export function ProfileForm({ user }: ProfileFormProps) {
   };
 
   return (
-    <section className="flex flex-col gap-6">
+    <section className="border-line bg-surface-raised flex max-w-2xl flex-col gap-6 rounded-lg border p-6">
       {/* Avatar */}
       <div className="flex items-center gap-4">
-        <div className="bg-surface-inset flex h-14 w-14 shrink-0 items-center justify-center rounded-full">
-          <span className="text-lg font-semibold text-white">{initials || '?'}</span>
+        <div className="bg-surface-inset text-fg flex h-14 w-14 shrink-0 items-center justify-center rounded-full">
+          <span className="text-lg font-semibold">{initials || '?'}</span>
         </div>
         <p className="text-fg-muted text-sm">
           Avatar is generated from your name. Custom avatars are not supported.
@@ -78,23 +78,49 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <label className="text-fg-secondary font-mono text-xs" htmlFor="profile-name">
+          <label className="text-fg-secondary text-xs" htmlFor="profile-name">
             Display name
           </label>
-          <Input id="profile-name" autoComplete="name" {...register('name')} />
-          {errors.name && <p className="text-danger font-mono text-xs">{errors.name.message}</p>}
+          <Input
+            id="profile-name"
+            autoComplete="name"
+            aria-invalid={Boolean(errors.name)}
+            aria-describedby={errors.name ? 'profile-name-error' : undefined}
+            {...register('name')}
+          />
+          {errors.name && (
+            <p id="profile-name-error" className="text-danger text-xs">
+              {errors.name.message}
+            </p>
+          )}
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="text-fg-secondary font-mono text-xs" htmlFor="profile-email">
+          <label className="text-fg-secondary text-xs" htmlFor="profile-email">
             Email
           </label>
-          <Input id="profile-email" type="email" autoComplete="email" {...register('email')} />
-          {errors.email && <p className="text-danger font-mono text-xs">{errors.email.message}</p>}
-          <p className="text-fg-muted text-xs">To change your email, contact your administrator.</p>
+          <Input
+            id="profile-email"
+            type="email"
+            autoComplete="email"
+            readOnly
+            aria-readonly="true"
+            aria-invalid={Boolean(errors.email)}
+            aria-describedby={errors.email ? 'profile-email-error' : 'profile-email-help'}
+            className="bg-surface-inset"
+            {...register('email')}
+          />
+          {errors.email && (
+            <p id="profile-email-error" className="text-danger text-xs">
+              {errors.email.message}
+            </p>
+          )}
+          <p id="profile-email-help" className="text-fg-muted text-xs">
+            To change your email, contact your administrator.
+          </p>
         </div>
         <div>
           <Button type="submit" disabled={isSubmitting} size="sm">
-            {isSubmitting ? 'Saving…' : 'Save Profile'}
+            {isSubmitting ? 'Saving…' : 'Save profile'}
           </Button>
         </div>
       </form>

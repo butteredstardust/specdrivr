@@ -8,8 +8,8 @@ import { clientLogger } from '@/lib/logger-client';
 import type { UserRole } from '@/db/schema';
 import type { PublicAgentConfig } from '@/lib/agent-config-public';
 import { usePolling } from '@/hooks/use-polling';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { GatedButton } from '@/components/ui/gated-button';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { agentConfigFormSchema } from '@/lib/schemas';
 import { updateAgentConfigAction } from '@/actions/settings';
 import { canEdit, DEFAULTS, type FormValues } from './agent-config/shared';
@@ -137,7 +137,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
   return (
     <TooltipProvider>
       <FormProvider {...methods}>
-        <form onSubmit={handleSubmit(onFormSubmit)} className="flex flex-col gap-10">
+        <form onSubmit={handleSubmit(onFormSubmit)} className="flex max-w-2xl flex-col gap-6">
           <ProvidersSection editable={editable} />
           <LimitsSection editable={editable} />
           <CommandsSection editable={editable} />
@@ -147,16 +147,15 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
           <TokenSection />
 
           <div>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span tabIndex={!editable ? 0 : undefined}>
-                  <Button type="submit" disabled={!editable || isSubmitting || !isDirty} size="sm">
-                    {isSubmitting ? 'Saving…' : 'Save configuration'}
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              {!editable && <TooltipContent>Requires Admin or Owner role</TooltipContent>}
-            </Tooltip>
+            <GatedButton
+              allowed={editable}
+              reason="Requires Admin or Owner role"
+              type="submit"
+              disabled={isSubmitting || !isDirty}
+              size="sm"
+            >
+              {isSubmitting ? 'Saving…' : 'Save configuration'}
+            </GatedButton>
           </div>
         </form>
       </FormProvider>

@@ -113,18 +113,18 @@ export function SlackCard({ projectId, editable, initialData, onSaved }: SlackCa
 
   return (
     <>
-      <Card className="border-line bg-surface-raised">
+      <Card className="border-line bg-surface-raised h-full">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <Hash className="text-fg-secondary h-5 w-5" />
-            <CardTitle className="text-fg text-sm font-semibold">Slack</CardTitle>
+            <Hash className="text-fg-secondary size-4" />
+            <CardTitle>Slack</CardTitle>
           </div>
           <CardDescription className="text-fg-secondary text-xs">
             Send notifications to Slack.
           </CardDescription>
           <ConnectedBadge connected={connected} />
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
+        <CardContent className="flex flex-1 flex-col gap-4">
           <FormField label="Bot token" htmlFor="slackBotToken">
             {editable ? (
               <PasswordInput
@@ -181,7 +181,7 @@ export function SlackCard({ projectId, editable, initialData, onSaved }: SlackCa
             )}
           </FormField>
 
-          <div className="flex gap-2 pt-1">
+          <div className="mt-auto flex gap-2 pt-1">
             {editable ? (
               <>
                 <Button
@@ -190,7 +190,7 @@ export function SlackCard({ projectId, editable, initialData, onSaved }: SlackCa
                   disabled={isSaving}
                   className="flex-1 sm:flex-none"
                 >
-                  {isSaving ? 'Saving…' : 'Save Slack Settings'}
+                  {isSaving ? 'Saving…' : 'Save Slack settings'}
                 </Button>
                 {connected && (
                   <Button
@@ -208,7 +208,7 @@ export function SlackCard({ projectId, editable, initialData, onSaved }: SlackCa
               <>
                 <DisabledButtonWithTooltip tooltip="Requires Admin or Owner role">
                   <Button size="sm" disabled className="flex-1 sm:flex-none">
-                    Save Slack Settings
+                    Save Slack settings
                   </Button>
                 </DisabledButtonWithTooltip>
                 {connected && (
@@ -235,7 +235,7 @@ export function SlackCard({ projectId, editable, initialData, onSaved }: SlackCa
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDisconnect} className="bg-danger hover:bg-danger/90">
+            <AlertDialogAction onClick={handleDisconnect} className="bg-danger hover:opacity-90">
               Disconnect
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -8,11 +8,12 @@ export function BoundariesSection({ editable }: { editable: boolean }) {
   const { control } = useFormContext<FormValues>();
 
   return (
-    <section className="flex flex-col gap-4">
+    <section className="border-line bg-surface-raised flex flex-col gap-4 rounded-lg border p-6">
       <SectionHeading>File boundaries</SectionHeading>
 
       <FormField
         label="Allowed file globs"
+        htmlFor="allowed-file-globs"
         helper="Type a glob pattern and press Enter or comma to add. Leave empty to allow all files."
       >
         <Tooltip>
@@ -23,6 +24,7 @@ export function BoundariesSection({ editable }: { editable: boolean }) {
                 control={control}
                 render={({ field }) => (
                   <GlobTagInput
+                    id="allowed-file-globs"
                     value={field.value}
                     onChange={field.onChange}
                     disabled={!editable}
@@ -38,6 +40,7 @@ export function BoundariesSection({ editable }: { editable: boolean }) {
 
       <FormField
         label="Forbidden file globs"
+        htmlFor="forbidden-file-globs"
         helper="Files matching these patterns will never be touched by the agent."
       >
         <Tooltip>
@@ -48,6 +51,7 @@ export function BoundariesSection({ editable }: { editable: boolean }) {
                 control={control}
                 render={({ field }) => (
                   <GlobTagInput
+                    id="forbidden-file-globs"
                     value={field.value}
                     onChange={field.onChange}
                     disabled={!editable}

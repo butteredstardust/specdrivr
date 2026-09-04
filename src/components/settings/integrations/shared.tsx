@@ -65,9 +65,19 @@ interface PasswordInputProps {
   onChange: (v: string) => void;
   disabled: boolean;
   placeholder?: string;
+  ariaInvalid?: boolean;
+  ariaDescribedBy?: string;
 }
 
-export function PasswordInput({ id, value, onChange, disabled, placeholder }: PasswordInputProps) {
+export function PasswordInput({
+  id,
+  value,
+  onChange,
+  disabled,
+  placeholder,
+  ariaInvalid,
+  ariaDescribedBy,
+}: PasswordInputProps) {
   const [show, setShow] = useState(false);
 
   return (
@@ -79,6 +89,8 @@ export function PasswordInput({ id, value, onChange, disabled, placeholder }: Pa
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
         placeholder={placeholder}
+        aria-invalid={ariaInvalid}
+        aria-describedby={ariaDescribedBy}
         className="pr-9 font-mono text-sm"
       />
       <Button
@@ -89,7 +101,6 @@ export function PasswordInput({ id, value, onChange, disabled, placeholder }: Pa
         className="text-fg-secondary hover:text-fg absolute top-1/2 right-1.5 h-6 w-6 -translate-y-1/2 p-0 disabled:pointer-events-none"
         aria-label={show ? 'Hide value' : 'Show value'}
         disabled={disabled}
-        tabIndex={-1}
       >
         {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
       </Button>
@@ -124,7 +135,7 @@ export function FormField({ label, htmlFor, children }: FormFieldProps) {
 
 export function ConnectedBadge({ connected }: { connected: boolean }) {
   return (
-    <Badge variant={connected ? 'success' : 'muted'} className="text-2xs font-mono">
+    <Badge variant={connected ? 'success' : 'muted'}>
       {connected ? 'Connected' : 'Not connected'}
     </Badge>
   );

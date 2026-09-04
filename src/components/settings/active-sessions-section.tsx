@@ -155,8 +155,8 @@ export function ActiveSessionsSection() {
   const otherSessions = sessions.filter((s) => s.id !== currentSessionId);
 
   return (
-    <section className="flex flex-col gap-4">
-      <h2 className="text-fg-muted text-2xs font-medium">Active sessions</h2>
+    <section className="border-line bg-surface-raised flex max-w-2xl flex-col gap-4 rounded-lg border p-6">
+      <h3 className="text-fg text-base font-semibold">Active sessions</h3>
 
       {isLoading && (
         <div className="text-fg-muted flex items-center gap-2">
@@ -172,7 +172,7 @@ export function ActiveSessionsSection() {
             variant="ghost"
             size="sm"
             onClick={restart}
-            className="text-fg-muted hover:text-fg h-auto px-0 font-mono text-xs underline hover:bg-transparent"
+            className="text-fg-muted hover:text-fg h-auto px-0 text-xs underline hover:bg-transparent"
           >
             Retry
           </Button>
@@ -190,26 +190,26 @@ export function ActiveSessionsSection() {
             return (
               <div
                 key={s.id}
-                className="border-line flex items-center gap-3 rounded border px-3 py-2.5"
+                className="border-line flex items-center gap-3 rounded-md border px-3 py-2.5"
               >
                 <SessionIcon ua={s.userAgent} />
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className="text-fg font-mono text-xs">
+                  <span className="text-fg text-sm">
                     {browser} &middot; {os}
                   </span>
-                  <span className="text-fg-muted font-mono text-xs">
+                  <span className="text-fg-muted text-xs">
                     {s.ipAddress ?? 'Unknown IP'} &middot; {lastActive}
                   </span>
                 </div>
                 {isCurrent ? (
-                  <span className="border-warning-border text-warning shrink-0 rounded border px-1.5 py-0.5 font-mono text-xs">
-                    this session
+                  <span className="border-success-border bg-success-bg text-success shrink-0 rounded-sm border px-1.5 py-0.5 text-xs font-medium">
+                    Current session
                   </span>
                 ) : (
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-danger hover:bg-danger-bg hover:text-danger shrink-0 font-mono text-xs"
+                    className="text-danger hover:bg-danger-bg hover:text-danger shrink-0 text-xs"
                     onClick={() => setRevokeTargetId(s.id)}
                   >
                     Revoke
@@ -225,7 +225,7 @@ export function ActiveSessionsSection() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setRevokeAllOpen(true)}
-                className="text-danger h-auto px-0 font-mono text-xs underline hover:bg-transparent hover:opacity-80"
+                className="text-danger h-auto px-0 text-xs underline hover:bg-transparent hover:opacity-80"
               >
                 Revoke all other sessions
               </Button>
@@ -245,8 +245,8 @@ export function ActiveSessionsSection() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-mono">Revoke session?</AlertDialogTitle>
-            <AlertDialogDescription className="font-mono text-xs">
+            <AlertDialogTitle>Revoke session?</AlertDialogTitle>
+            <AlertDialogDescription>
               This session will be signed out immediately. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -255,7 +255,7 @@ export function ActiveSessionsSection() {
             <AlertDialogAction
               onClick={handleRevoke}
               disabled={isRevoking}
-              className="bg-danger hover:bg-danger/90 text-white"
+              className="bg-danger text-fg-inverse hover:opacity-90"
             >
               {isRevoking ? 'Revoking…' : 'Revoke'}
             </AlertDialogAction>
@@ -267,8 +267,8 @@ export function ActiveSessionsSection() {
       <AlertDialog open={revokeAllOpen} onOpenChange={setRevokeAllOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-mono">Revoke all other sessions?</AlertDialogTitle>
-            <AlertDialogDescription className="font-mono text-xs">
+            <AlertDialogTitle>Revoke all other sessions?</AlertDialogTitle>
+            <AlertDialogDescription>
               All sessions except this one will be signed out immediately. This action cannot be
               undone.
             </AlertDialogDescription>
@@ -278,7 +278,7 @@ export function ActiveSessionsSection() {
             <AlertDialogAction
               onClick={handleRevokeAll}
               disabled={isRevoking}
-              className="bg-danger hover:bg-danger/90 text-white"
+              className="bg-danger text-fg-inverse hover:opacity-90"
             >
               {isRevoking ? 'Revoking…' : 'Revoke all'}
             </AlertDialogAction>

@@ -42,7 +42,7 @@ function SummaryCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="border-line bg-surface-raised flex flex-col gap-1 rounded-lg border p-4">
       <span className="text-fg-muted text-xs font-medium">{label}</span>
-      <span className="text-fg font-mono text-lg tabular-nums">{value}</span>
+      <span className="text-fg text-lg tabular-nums">{value}</span>
     </div>
   );
 }
@@ -111,10 +111,10 @@ export function UsageSection({ projectId }: UsageSectionProps) {
 
   if (!summary || snapshots.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 py-16">
+      <div className="border-line bg-surface-raised flex flex-col items-center justify-center gap-3 rounded-lg border py-12 text-center">
         <StatusIcon size={24} status="idle" />
-        <p className="text-fg-secondary text-sm">No usage data yet.</p>
-        <p className="text-fg-muted text-xs">Usage will appear here once execution begins.</p>
+        <p className="text-fg text-lg font-semibold">No usage data</p>
+        <p className="text-fg-muted text-sm">Usage will appear here once execution begins.</p>
       </div>
     );
   }
@@ -141,7 +141,7 @@ export function UsageSection({ projectId }: UsageSectionProps) {
       <div className="border-line overflow-x-auto rounded-lg border">
         <table className="w-full text-left">
           <thead>
-            <tr className="border-line bg-surface-raised border-b">
+            <tr className="border-line bg-surface-sunken border-b">
               <th className="text-fg-muted px-4 py-2 text-xs font-medium">Date</th>
               <th className="text-fg-muted px-4 py-2 text-xs font-medium">Sessions</th>
               <th className="text-fg-muted px-4 py-2 text-xs font-medium">Tasks</th>

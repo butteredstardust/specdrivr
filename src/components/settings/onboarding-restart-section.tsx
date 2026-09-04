@@ -35,8 +35,8 @@ export function OnboardingRestartSection() {
   };
 
   return (
-    <section className="border-line flex flex-col gap-3 rounded-md border p-4">
-      <h2 className="text-fg-muted text-2xs font-medium">Onboarding</h2>
+    <section className="border-line bg-surface-raised flex max-w-2xl flex-col gap-3 rounded-lg border p-6">
+      <h3 className="text-fg text-base font-semibold">Onboarding</h3>
       <p className="text-fg-secondary text-sm">
         You can restart the onboarding tour to revisit the setup steps.
       </p>
@@ -47,7 +47,7 @@ export function OnboardingRestartSection() {
         disabled={loading}
         className="w-fit"
       >
-        {loading ? 'Restarting…' : 'Restart Onboarding Tour'}
+        {loading ? 'Restarting…' : 'Restart onboarding tour'}
       </Button>
     </section>
   );

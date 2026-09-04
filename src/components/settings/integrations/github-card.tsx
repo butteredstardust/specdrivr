@@ -134,19 +134,19 @@ export function GitHubCard({ projectId, editable, initialData, onSaved }: GitHub
 
   return (
     <>
-      <Card className="border-line bg-surface-raised">
+      <Card className="border-line bg-surface-raised h-full">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <Github className="text-fg-secondary h-5 w-5" />
-            <CardTitle className="text-fg text-sm font-semibold">GitHub</CardTitle>
+            <Github className="text-fg-secondary size-4" />
+            <CardTitle>GitHub</CardTitle>
           </div>
           <CardDescription className="text-fg-secondary text-xs">
             Connect your repository for automated commits.
           </CardDescription>
           <ConnectedBadge connected={connected} />
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <FormField label="Github token" htmlFor="githubToken">
+        <CardContent className="flex flex-1 flex-col gap-4">
+          <FormField label="GitHub token" htmlFor="githubToken">
             {editable ? (
               <PasswordInput
                 id="githubToken"
@@ -276,7 +276,7 @@ export function GitHubCard({ projectId, editable, initialData, onSaved }: GitHub
             </div>
           )}
 
-          <div className="flex gap-2 pt-1">
+          <div className="mt-auto flex gap-2 pt-1">
             {editable ? (
               <>
                 <Button
@@ -285,7 +285,7 @@ export function GitHubCard({ projectId, editable, initialData, onSaved }: GitHub
                   disabled={isSaving}
                   className="flex-1 sm:flex-none"
                 >
-                  {isSaving ? 'Saving…' : 'Save GitHub Settings'}
+                  {isSaving ? 'Saving…' : 'Save GitHub settings'}
                 </Button>
                 {connected && (
                   <Button
@@ -303,7 +303,7 @@ export function GitHubCard({ projectId, editable, initialData, onSaved }: GitHub
               <>
                 <DisabledButtonWithTooltip tooltip="Requires Admin or Owner role">
                   <Button size="sm" disabled className="flex-1 sm:flex-none">
-                    Save GitHub Settings
+                    Save GitHub settings
                   </Button>
                 </DisabledButtonWithTooltip>
                 {connected && (
@@ -330,7 +330,7 @@ export function GitHubCard({ projectId, editable, initialData, onSaved }: GitHub
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDisconnect} className="bg-danger hover:bg-danger/90">
+            <AlertDialogAction onClick={handleDisconnect} className="bg-danger hover:opacity-90">
               Disconnect
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -170,16 +170,16 @@ export function NotificationPreferencesSection() {
   // ---------------------------------------------------------------------------
 
   return (
-    <section className="flex flex-col gap-6">
+    <section className="border-line bg-surface-raised flex max-w-2xl flex-col gap-6 rounded-lg border p-6">
       <p className="text-fg-secondary text-sm">Choose when DAEMON notifies you.</p>
 
-      {loadError && <p className="text-danger font-mono text-xs">{loadError}</p>}
+      {loadError && <p className="text-danger text-xs">{loadError}</p>}
 
       {/* Table header */}
       <div className="border-line-subtle grid grid-cols-[1fr_4rem_4rem] items-center gap-2 border-b pb-2">
         <span className="text-fg-muted text-xs">Event</span>
         <span className="text-fg-muted text-center text-xs">Email</span>
-        <span className="text-fg-muted text-center text-xs">In-App</span>
+        <span className="text-fg-muted text-center text-xs">In-app</span>
       </div>
 
       {/* Rows */}
@@ -210,7 +210,7 @@ export function NotificationPreferencesSection() {
       {/* Save row */}
       <div className="flex items-center gap-3 pt-2">
         <Button size="sm" disabled={!isDirty || isSaving} onClick={handleSave}>
-          {isSaving ? 'Saving…' : 'Save Preferences'}
+          {isSaving ? 'Saving…' : 'Save preferences'}
         </Button>
         {isDirty && <span className="text-warning text-xs">• Unsaved changes</span>}
       </div>

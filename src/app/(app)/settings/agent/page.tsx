@@ -17,7 +17,7 @@ export default async function AgentPage() {
     : 'viewer';
 
   return (
-    <div className="flex max-w-2xl flex-col gap-8">
+    <div className="flex max-w-4xl flex-col gap-6">
       <h2 className="text-fg text-lg font-semibold">Agent</h2>
 
       {project ? (

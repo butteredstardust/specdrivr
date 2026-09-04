@@ -6,7 +6,8 @@ import { toast } from 'sonner';
 import { clientLogger } from '@/lib/logger-client';
 import type { UserRole } from '@/db/schema';
 import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { GatedButton } from '@/components/ui/gated-button';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import {
   Dialog,
   DialogContent,
@@ -64,10 +65,10 @@ export function DangerZoneSection({ project, userRole }: DangerZoneSectionProps)
 
   return (
     <TooltipProvider>
-      <div className="border-danger-border rounded border p-4">
-        <h3 className="text-danger mb-3 text-xs">Danger zone</h3>
+      <section className="border-danger-border bg-danger-bg flex max-w-2xl flex-col gap-4 rounded-lg border p-6">
+        <h3 className="text-danger text-base font-semibold">Delete project</h3>
         <div className="flex items-center justify-between gap-4">
-          <p className="text-fg-muted font-mono text-xs">
+          <p className="text-fg-secondary text-sm">
             Permanently delete this project and all its data.
           </p>
           {deletable ? (
@@ -78,8 +79,8 @@ export function DangerZoneSection({ project, userRole }: DangerZoneSectionProps)
               <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle className="font-mono">Delete project?</DialogTitle>
-                    <DialogDescription className="font-mono text-xs">
+                    <DialogTitle>Delete project?</DialogTitle>
+                    <DialogDescription>
                       This action cannot be undone. All specs, sessions, and data for{' '}
                       <strong>{project.name}</strong> will be permanently deleted.
                     </DialogDescription>
@@ -106,19 +107,17 @@ export function DangerZoneSection({ project, userRole }: DangerZoneSectionProps)
               </Dialog>
             </>
           ) : (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span tabIndex={0}>
-                  <Button variant="destructive" size="sm" disabled>
-                    Delete project
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>Only project owners can delete</TooltipContent>
-            </Tooltip>
+            <GatedButton
+              allowed={false}
+              reason="Only project owners can delete"
+              variant="destructive"
+              size="sm"
+            >
+              Delete project
+            </GatedButton>
           )}
         </div>
-      </div>
+      </section>
     </TooltipProvider>
   );
 }

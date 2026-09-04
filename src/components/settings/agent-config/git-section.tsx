@@ -11,13 +11,14 @@ export function GitSection({ editable }: { editable: boolean }) {
   const { register, control } = useFormContext<FormValues>();
 
   return (
-    <section className="flex flex-col gap-4">
+    <section className="border-line bg-surface-raised flex flex-col gap-4 rounded-lg border p-6">
       <SectionHeading>Git settings</SectionHeading>
 
-      <FormField label="Branch prefix">
+      <FormField label="Branch prefix" htmlFor="branch-prefix">
         <Tooltip>
           <TooltipTrigger asChild>
             <Input
+              id="branch-prefix"
               {...register('branchPrefix')}
               placeholder="daemon"
               disabled={!editable}
@@ -28,10 +29,11 @@ export function GitSection({ editable }: { editable: boolean }) {
         </Tooltip>
       </FormField>
 
-      <FormField label="Commit prefix">
+      <FormField label="Commit prefix" htmlFor="commit-prefix">
         <Tooltip>
           <TooltipTrigger asChild>
             <Input
+              id="commit-prefix"
               {...register('commitMessagePrefix')}
               placeholder="feat"
               disabled={!editable}
@@ -43,7 +45,9 @@ export function GitSection({ editable }: { editable: boolean }) {
       </FormField>
 
       <div className="flex items-center justify-between">
-        <Label className="text-fg-secondary text-xs">AUTO-CREATE PULL REQUESTS</Label>
+        <Label htmlFor="auto-create-prs" className="text-fg-secondary text-xs">
+          Auto-create pull requests
+        </Label>
         <Tooltip>
           <TooltipTrigger asChild>
             <div className="flex items-center">
@@ -52,6 +56,7 @@ export function GitSection({ editable }: { editable: boolean }) {
                 control={control}
                 render={({ field }) => (
                   <Switch
+                    id="auto-create-prs"
                     checked={field.value}
                     onCheckedChange={field.onChange}
                     disabled={!editable}
@@ -64,10 +69,11 @@ export function GitSection({ editable }: { editable: boolean }) {
         </Tooltip>
       </div>
 
-      <FormField label="PR target branch">
+      <FormField label="PR target branch" htmlFor="pr-target-branch">
         <Tooltip>
           <TooltipTrigger asChild>
             <Input
+              id="pr-target-branch"
               {...register('prTargetBranch')}
               placeholder="main"
               disabled={!editable}

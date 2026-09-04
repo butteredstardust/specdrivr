@@ -17,10 +17,10 @@ export function LimitsSection({ editable }: { editable: boolean }) {
   const { register, control, watch } = useFormContext<FormValues>();
 
   return (
-    <section className="flex flex-col gap-4">
+    <section className="border-line bg-surface-raised flex flex-col gap-4 rounded-lg border p-6">
       <SectionHeading>Execution limits</SectionHeading>
 
-      <FormField label="Max concurrent tasks">
+      <FormField label="Max concurrent tasks" htmlFor="max-concurrent-tasks">
         <Tooltip>
           <TooltipTrigger asChild>
             <div className="flex items-center gap-4">
@@ -29,6 +29,7 @@ export function LimitsSection({ editable }: { editable: boolean }) {
                 control={control}
                 render={({ field }) => (
                   <Slider
+                    id="max-concurrent-tasks"
                     min={1}
                     max={10}
                     step={1}
@@ -39,7 +40,7 @@ export function LimitsSection({ editable }: { editable: boolean }) {
                   />
                 )}
               />
-              <span className="text-fg-secondary w-16 font-mono text-sm">
+              <span className="text-fg-secondary w-16 text-sm tabular-nums">
                 {watch('maxConcurrentTasks')} tasks
               </span>
             </div>
@@ -50,24 +51,26 @@ export function LimitsSection({ editable }: { editable: boolean }) {
 
       <FormField
         label="Task timeout (seconds)"
+        htmlFor="task-timeout"
         helper={`Tasks will be killed after ${Math.round(watch('taskTimeoutSeconds') / 60)} minutes`}
       >
         <Tooltip>
           <TooltipTrigger asChild>
             <Input
+              id="task-timeout"
               {...register('taskTimeoutSeconds', { valueAsNumber: true })}
               type="number"
               min={30}
               max={3600}
               disabled={!editable}
-              className="font-mono text-sm"
+              className="text-sm tabular-nums"
             />
           </TooltipTrigger>
           {!editable && <TooltipContent>Requires Admin or Owner role</TooltipContent>}
         </Tooltip>
       </FormField>
 
-      <FormField label="Max retries">
+      <FormField label="Max retries" htmlFor="max-retries">
         <Tooltip>
           <TooltipTrigger asChild>
             <div className="flex items-center gap-4">
@@ -76,6 +79,7 @@ export function LimitsSection({ editable }: { editable: boolean }) {
                 control={control}
                 render={({ field }) => (
                   <Slider
+                    id="max-retries"
                     min={0}
                     max={5}
                     step={1}
@@ -86,7 +90,7 @@ export function LimitsSection({ editable }: { editable: boolean }) {
                   />
                 )}
               />
-              <span className="text-fg-secondary w-16 font-mono text-sm">
+              <span className="text-fg-secondary w-16 text-sm tabular-nums">
                 {watch('maxRetriesPerTask')}
               </span>
             </div>
@@ -95,7 +99,7 @@ export function LimitsSection({ editable }: { editable: boolean }) {
         </Tooltip>
       </FormField>
 
-      <FormField label="Retry delay">
+      <FormField label="Retry delay" htmlFor="retry-delay">
         <Tooltip>
           <TooltipTrigger asChild>
             <div className="w-full">
@@ -108,7 +112,7 @@ export function LimitsSection({ editable }: { editable: boolean }) {
                     onValueChange={(v) => field.onChange(parseInt(v, 10))}
                     disabled={!editable}
                   >
-                    <SelectTrigger className="text-sm">
+                    <SelectTrigger id="retry-delay" className="text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -126,15 +130,16 @@ export function LimitsSection({ editable }: { editable: boolean }) {
         </Tooltip>
       </FormField>
 
-      <FormField label="Max diff size (KB)">
+      <FormField label="Max diff size (KB)" htmlFor="max-diff-size">
         <Tooltip>
           <TooltipTrigger asChild>
             <Input
+              id="max-diff-size"
               {...register('maxDiffSizeKb', { valueAsNumber: true })}
               type="number"
               min={1}
               disabled={!editable}
-              className="font-mono text-sm"
+              className="text-sm tabular-nums"
             />
           </TooltipTrigger>
           {!editable && <TooltipContent>Requires Admin or Owner role</TooltipContent>}

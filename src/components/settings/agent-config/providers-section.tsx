@@ -16,11 +16,12 @@ export function ProvidersSection({ editable }: { editable: boolean }) {
   const { register, control } = useFormContext<FormValues>();
 
   return (
-    <section className="flex flex-col gap-4">
+    <section className="border-line bg-surface-raised flex flex-col gap-4 rounded-lg border p-6">
       <SectionHeading>AI providers</SectionHeading>
 
       <FormField
         label="Execution backend"
+        htmlFor="agent-backend"
         helper="Which AI agent executes your tasks. Both require the respective CLI installed on the agent machine."
       >
         <Tooltip>
@@ -31,7 +32,7 @@ export function ProvidersSection({ editable }: { editable: boolean }) {
                 control={control}
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange} disabled={!editable}>
-                    <SelectTrigger className="text-sm">
+                    <SelectTrigger id="agent-backend" className="text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -49,16 +50,18 @@ export function ProvidersSection({ editable }: { editable: boolean }) {
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {/* Gemini Group */}
-        <div className="border-line bg-surface-raised flex flex-col gap-4 rounded-md border p-4">
+        <div className="border-line bg-surface-sunken flex flex-col gap-4 rounded-lg border p-4">
           <p className="text-fg-secondary text-xs">Google Gemini</p>
 
           <FormField
             label="Gemini API key"
+            htmlFor="gemini-api-key"
             helper="Project-specific API key. Leave blank to use system default."
           >
             <Tooltip>
               <TooltipTrigger asChild>
                 <Input
+                  id="gemini-api-key"
                   {...register('geminiApiKey')}
                   type="password"
                   placeholder="AIzaSy..."
@@ -72,11 +75,13 @@ export function ProvidersSection({ editable }: { editable: boolean }) {
 
           <FormField
             label="Gemini model"
+            htmlFor="gemini-model"
             helper="Model used for plan generation and Gemini execution"
           >
             <Tooltip>
               <TooltipTrigger asChild>
                 <Input
+                  id="gemini-model"
                   {...register('geminiModel')}
                   placeholder="gemini-2.0-flash"
                   disabled={!editable}
@@ -89,16 +94,18 @@ export function ProvidersSection({ editable }: { editable: boolean }) {
         </div>
 
         {/* Claude Group */}
-        <div className="border-line bg-surface-raised flex flex-col gap-4 rounded-md border p-4">
+        <div className="border-line bg-surface-sunken flex flex-col gap-4 rounded-lg border p-4">
           <p className="text-fg-secondary text-xs">Anthropic Claude</p>
 
           <FormField
             label="Claude API key"
+            htmlFor="claude-api-key"
             helper="Project-specific API key. Leave blank to use system default."
           >
             <Tooltip>
               <TooltipTrigger asChild>
                 <Input
+                  id="claude-api-key"
                   {...register('claudeApiKey')}
                   type="password"
                   placeholder="sk-ant-..."
@@ -110,10 +117,15 @@ export function ProvidersSection({ editable }: { editable: boolean }) {
             </Tooltip>
           </FormField>
 
-          <FormField label="Execution model" helper="Execution model for tasks">
+          <FormField
+            label="Execution model"
+            htmlFor="execution-model"
+            helper="Execution model for tasks"
+          >
             <Tooltip>
               <TooltipTrigger asChild>
                 <Input
+                  id="execution-model"
                   {...register('modelId')}
                   placeholder="claude-sonnet-4-6"
                   disabled={!editable}
@@ -124,10 +136,15 @@ export function ProvidersSection({ editable }: { editable: boolean }) {
             </Tooltip>
           </FormField>
 
-          <FormField label="Plan model" helper="Model used for plan generation">
+          <FormField
+            label="Plan model"
+            htmlFor="plan-model"
+            helper="Model used for plan generation"
+          >
             <Tooltip>
               <TooltipTrigger asChild>
                 <Input
+                  id="plan-model"
                   {...register('planModelId')}
                   placeholder="claude-opus-4-6"
                   disabled={!editable}

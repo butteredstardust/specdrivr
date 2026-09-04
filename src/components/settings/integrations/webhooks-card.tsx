@@ -101,9 +101,7 @@ function WebhookDialog({ open, onClose, onSave, initial, isSaving }: WebhookDial
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-xs">
-            {initial?.url ? 'Edit webhook' : 'Add webhook'}
-          </DialogTitle>
+          <DialogTitle>{initial?.url ? 'Edit webhook' : 'Add webhook'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSave)} className="flex flex-col gap-4">
           <FormField label="Endpoint URL *" htmlFor="webhookUrl">
@@ -112,11 +110,16 @@ function WebhookDialog({ open, onClose, onSave, initial, isSaving }: WebhookDial
               type="url"
               placeholder="https://example.com/hook"
               aria-invalid={Boolean(errors.url)}
+              aria-describedby={errors.url ? 'webhook-url-error' : undefined}
               className="font-mono text-sm"
               {...register('url')}
             />
           </FormField>
-          {errors.url && <p className="text-danger text-xs">{errors.url.message}</p>}
+          {errors.url && (
+            <p id="webhook-url-error" className="text-danger text-xs">
+              {errors.url.message}
+            </p>
+          )}
 
           <FormField label="HMAC secret (optional)" htmlFor="webhookSecret">
             <Controller
@@ -129,14 +132,20 @@ function WebhookDialog({ open, onClose, onSave, initial, isSaving }: WebhookDial
                   onChange={field.onChange}
                   disabled={false}
                   placeholder="your-secret"
+                  ariaInvalid={Boolean(errors.secret)}
+                  ariaDescribedBy={errors.secret ? 'webhook-secret-error' : undefined}
                 />
               )}
             />
           </FormField>
-          {errors.secret && <p className="text-danger text-xs">{errors.secret.message}</p>}
+          {errors.secret && (
+            <p id="webhook-secret-error" className="text-danger text-xs">
+              {errors.secret.message}
+            </p>
+          )}
 
-          <div className="flex flex-col gap-2">
-            <Label className="text-fg-muted text-2xs font-medium">Events</Label>
+          <fieldset className="flex flex-col gap-2">
+            <legend className="text-fg text-sm font-medium">Events</legend>
             {/* A checkbox group is one field holding an array, so it is driven
                 through a single Controller rather than per-box registration. */}
             <Controller
@@ -163,14 +172,14 @@ function WebhookDialog({ open, onClose, onSave, initial, isSaving }: WebhookDial
               )}
             />
             {errors.events && <p className="text-danger text-xs">{errors.events.message}</p>}
-          </div>
+          </fieldset>
 
           <DialogFooter className="pt-2">
             <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={isSaving}>
               Cancel
             </Button>
             <Button type="submit" size="sm" disabled={isSaving}>
-              {isSaving ? 'Saving…' : 'Save Webhook'}
+              {isSaving ? 'Saving…' : 'Save webhook'}
             </Button>
           </DialogFooter>
         </form>
@@ -310,17 +319,17 @@ export function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
 
   return (
     <>
-      <Card className="border-line bg-surface-raised">
+      <Card className="border-line bg-surface-raised h-full">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <Globe className="text-fg-secondary h-5 w-5" />
-            <CardTitle className="text-fg text-sm font-semibold">Webhooks</CardTitle>
+            <Globe className="text-fg-secondary size-4" />
+            <CardTitle>Webhooks</CardTitle>
           </div>
           <CardDescription className="text-fg-secondary text-xs">
             Send events to external endpoints.
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col gap-3">
+        <CardContent className="flex flex-1 flex-col gap-3">
           {/* Add button */}
           {editable ? (
             <Button size="sm" variant="outline" onClick={openAdd} className="self-start">
@@ -348,12 +357,7 @@ export function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
                   <p className="text-fg-secondary min-w-0 flex-1 truncate font-mono text-xs">
                     {wh.url}
                   </p>
-                  <Badge
-                    variant={wh.status === 'active' ? 'success' : 'danger'}
-                    className="text-2xs font-mono"
-                  >
-                    {wh.status}
-                  </Badge>
+                  <Badge variant={wh.status === 'active' ? 'success' : 'danger'}>{wh.status}</Badge>
                   {editable ? (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -431,7 +435,7 @@ export function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
             <AlertDialogAction
               onClick={handleDelete}
               disabled={isSaving}
-              className="bg-danger hover:bg-danger/90"
+              className="bg-danger hover:opacity-90"
             >
               {isSaving ? 'Deleting…' : 'Delete'}
             </AlertDialogAction>

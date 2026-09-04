@@ -58,13 +58,14 @@ export function canEdit(role: UserRole): boolean {
 // ---------------------------------------------------------------------------
 
 export interface GlobTagInputProps {
+  id?: string;
   value: string[];
   onChange: (next: string[]) => void;
   disabled: boolean;
   placeholder?: string;
 }
 
-export function GlobTagInput({ value, onChange, disabled, placeholder }: GlobTagInputProps) {
+export function GlobTagInput({ id, value, onChange, disabled, placeholder }: GlobTagInputProps) {
   const [inputVal, setInputVal] = useState('');
 
   const addTag = (raw: string) => {
@@ -100,7 +101,7 @@ export function GlobTagInput({ value, onChange, disabled, placeholder }: GlobTag
           {value.map((tag) => (
             <span
               key={tag}
-              className="border-line bg-surface-raised text-fg-secondary flex items-center gap-1 rounded border px-2 py-0.5 font-mono text-xs"
+              className="border-line bg-surface-sunken text-fg-secondary flex items-center gap-1 rounded-sm border px-2 py-0.5 font-mono text-xs"
             >
               {tag}
               {!disabled && (
@@ -120,6 +121,7 @@ export function GlobTagInput({ value, onChange, disabled, placeholder }: GlobTag
         </div>
       )}
       <Input
+        id={id}
         value={inputVal}
         onChange={(e) => setInputVal(e.target.value)}
         onKeyDown={handleKeyDown}
@@ -160,7 +162,7 @@ export function FormField({ label, htmlFor, helper, children }: FormFieldProps) 
 // ---------------------------------------------------------------------------
 
 export function SectionHeading({ children }: { children: React.ReactNode }) {
-  return <h2 className="text-fg text-sm font-semibold">{children}</h2>;
+  return <h3 className="text-fg text-base font-semibold">{children}</h3>;
 }
 
 // ---------------------------------------------------------------------------

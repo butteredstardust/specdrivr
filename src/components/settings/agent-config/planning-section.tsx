@@ -35,15 +35,18 @@ export function PlanningSection({ editable }: { editable: boolean }) {
 
   return (
     <>
-      <section className="flex flex-col gap-4">
+      <section className="border-line bg-surface-raised flex flex-col gap-4 rounded-lg border p-6">
         <SectionHeading>Planning</SectionHeading>
 
         <div className="flex items-center justify-between">
-          <Label className="text-fg-secondary text-xs">Require plan approval</Label>
+          <Label htmlFor="require-plan-approval" className="text-fg-secondary text-xs">
+            Require plan approval
+          </Label>
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="flex items-center">
                 <Switch
+                  id="require-plan-approval"
                   checked={requireApproval}
                   onCheckedChange={handleRequireApprovalChange}
                   disabled={!editable}
@@ -55,7 +58,9 @@ export function PlanningSection({ editable }: { editable: boolean }) {
         </div>
 
         <div className="flex items-center justify-between">
-          <Label className="text-fg-secondary text-xs">Auto-generate plan on spec save</Label>
+          <Label htmlFor="auto-generate-plan" className="text-fg-secondary text-xs">
+            Auto-generate plan on spec save
+          </Label>
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="flex items-center">
@@ -64,6 +69,7 @@ export function PlanningSection({ editable }: { editable: boolean }) {
                   control={control}
                   render={({ field }) => (
                     <Switch
+                      id="auto-generate-plan"
                       checked={field.value}
                       onCheckedChange={field.onChange}
                       disabled={!editable}

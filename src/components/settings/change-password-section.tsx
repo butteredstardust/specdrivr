@@ -31,19 +31,26 @@ const STRENGTH_COLORS: Record<number, string> = {
   4: 'bg-success',
 };
 
+const STRENGTH_LABELS = ['None', 'Weak', 'Fair', 'Good', 'Strong'] as const;
+
 function StrengthIndicator({ password }: { password: string }) {
   const level = getStrength(password);
 
   return (
-    <div className="flex gap-1">
-      {([1, 2, 3, 4] as const).map((seg) => (
-        <div
-          key={seg}
-          className={`h-1 flex-1 rounded-full transition-colors ${
-            password.length > 0 && seg <= level ? STRENGTH_COLORS[level] : 'bg-surface-inset'
-          }`}
-        />
-      ))}
+    <div className="flex flex-col gap-1.5">
+      <div className="flex gap-1" aria-hidden="true">
+        {([1, 2, 3, 4] as const).map((seg) => (
+          <div
+            key={seg}
+            className={`h-1 flex-1 rounded-full transition-colors ${
+              password.length > 0 && seg <= level ? STRENGTH_COLORS[level] : 'bg-surface-inset'
+            }`}
+          />
+        ))}
+      </div>
+      {password.length > 0 && (
+        <p className="text-fg-muted text-xs">Password strength: {STRENGTH_LABELS[level]}</p>
+      )}
     </div>
   );
 }
@@ -100,8 +107,8 @@ export function ChangePasswordSection() {
   };
 
   return (
-    <section className="flex flex-col gap-4">
-      <h2 className="text-fg-muted text-2xs font-medium">Change password</h2>
+    <section className="border-line bg-surface-raised flex max-w-2xl flex-col gap-4 rounded-lg border p-6">
+      <h3 className="text-fg text-base font-semibold">Change password</h3>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <label className="text-fg-secondary text-xs" htmlFor="current-password">
@@ -112,10 +119,13 @@ export function ChangePasswordSection() {
             type="password"
             autoComplete="current-password"
             aria-invalid={Boolean(errors.currentPassword)}
+            aria-describedby={errors.currentPassword ? 'current-password-error' : undefined}
             {...register('currentPassword')}
           />
           {errors.currentPassword && (
-            <p className="text-danger text-xs">{errors.currentPassword.message}</p>
+            <p id="current-password-error" className="text-danger text-xs">
+              {errors.currentPassword.message}
+            </p>
           )}
         </div>
 
@@ -128,11 +138,14 @@ export function ChangePasswordSection() {
             type="password"
             autoComplete="new-password"
             aria-invalid={Boolean(errors.newPassword)}
+            aria-describedby={errors.newPassword ? 'new-password-error' : undefined}
             {...register('newPassword')}
           />
           <StrengthIndicator password={newPassword} />
           {errors.newPassword && (
-            <p className="text-danger text-xs">{errors.newPassword.message}</p>
+            <p id="new-password-error" className="text-danger text-xs">
+              {errors.newPassword.message}
+            </p>
           )}
         </div>
 
@@ -145,16 +158,19 @@ export function ChangePasswordSection() {
             type="password"
             autoComplete="new-password"
             aria-invalid={Boolean(errors.confirmPassword)}
+            aria-describedby={errors.confirmPassword ? 'confirm-password-error' : undefined}
             {...register('confirmPassword')}
           />
           {errors.confirmPassword && (
-            <p className="text-danger text-xs">{errors.confirmPassword.message}</p>
+            <p id="confirm-password-error" className="text-danger text-xs">
+              {errors.confirmPassword.message}
+            </p>
           )}
         </div>
 
         <div>
           <Button type="submit" disabled={isSubmitting} size="sm">
-            {isSubmitting ? 'Updating…' : 'Update Password'}
+            {isSubmitting ? 'Updating…' : 'Update password'}
           </Button>
         </div>
       </form>

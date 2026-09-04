@@ -9,9 +9,9 @@ import { clientLogger } from '@/lib/logger-client';
 import { projectSettingsFormSchema, type ProjectSettingsFormValues } from '@/lib/schemas';
 import type { UserRole } from '@/db/schema';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { DangerZoneSection } from '@/components/settings/danger-zone-section';
 
 interface ProjectSettingsFormProps {
   project: {
@@ -22,8 +22,6 @@ interface ProjectSettingsFormProps {
     repositoryBranch?: string | null;
   };
   userRole: UserRole;
-  /** When true, renders only the Danger Zone section and hides the project fields form. */
-  dangerZoneOnly?: boolean;
 }
 
 type VerifyStatus = 'idle' | 'checking' | 'connected' | 'unreachable';
@@ -32,11 +30,7 @@ function canEdit(role: UserRole): boolean {
   return role === 'admin' || role === 'owner';
 }
 
-export function ProjectSettingsForm({
-  project,
-  userRole,
-  dangerZoneOnly = false,
-}: ProjectSettingsFormProps) {
+export function ProjectSettingsForm({ project, userRole }: ProjectSettingsFormProps) {
   const [verifyStatus, setVerifyStatus] = useState<VerifyStatus>('idle');
 
   const editable = canEdit(userRole);
@@ -115,152 +109,159 @@ export function ProjectSettingsForm({
 
   return (
     <TooltipProvider>
-      <section className="flex flex-col gap-4">
-        {!dangerZoneOnly && <h2 className="text-fg-muted text-xs">Project settings</h2>}
-        {!dangerZoneOnly && (
-          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-fg-secondary text-xs" htmlFor="project-name">
-                Project name
-              </label>
+      <section className="border-line bg-surface-raised flex max-w-2xl flex-col gap-4 rounded-lg border p-6">
+        <h3 className="text-fg text-base font-semibold">Project settings</h3>
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-fg-secondary text-xs" htmlFor="project-name">
+              Project name
+            </label>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Input
+                  id="project-name"
+                  disabled={!editable}
+                  aria-invalid={Boolean(errors.name)}
+                  aria-describedby={errors.name ? 'project-name-error' : undefined}
+                  {...register('name')}
+                />
+              </TooltipTrigger>
+              {!editable && <TooltipContent>Requires admin or owner role to edit</TooltipContent>}
+            </Tooltip>
+            {errors.name && (
+              <p id="project-name-error" className="text-danger text-xs">
+                {errors.name.message}
+              </p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-fg-secondary text-xs" htmlFor="project-description">
+              Description
+            </label>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Textarea
+                  id="project-description"
+                  disabled={!editable}
+                  aria-invalid={Boolean(errors.description)}
+                  aria-describedby={errors.description ? 'project-description-error' : undefined}
+                  {...register('description')}
+                />
+              </TooltipTrigger>
+              {!editable && <TooltipContent>Requires admin or owner role to edit</TooltipContent>}
+            </Tooltip>
+            {errors.description && (
+              <p id="project-description-error" className="text-danger text-xs">
+                {errors.description.message}
+              </p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-fg-secondary text-xs" htmlFor="project-repo-url">
+              Repository URL
+            </label>
+            <div className="flex items-center gap-2">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Input
-                    id="project-name"
+                    id="project-repo-url"
+                    placeholder="https://github.com/owner/repo"
                     disabled={!editable}
-                    aria-invalid={Boolean(errors.name)}
-                    {...register('name')}
+                    aria-invalid={Boolean(errors.repositoryUrl)}
+                    aria-describedby={errors.repositoryUrl ? 'project-repo-url-error' : undefined}
+                    className="flex-1"
+                    {...repositoryUrlField}
+                    onChange={(e) => {
+                      setVerifyStatus('idle');
+                      return repositoryUrlField.onChange(e);
+                    }}
                   />
                 </TooltipTrigger>
                 {!editable && <TooltipContent>Requires admin or owner role to edit</TooltipContent>}
               </Tooltip>
-              {errors.name && <p className="text-danger text-xs">{errors.name.message}</p>}
-            </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-fg-secondary text-xs" htmlFor="project-description">
-                Description
-              </label>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Input
-                    id="project-description"
-                    disabled={!editable}
-                    aria-invalid={Boolean(errors.description)}
-                    {...register('description')}
-                  />
-                </TooltipTrigger>
-                {!editable && <TooltipContent>Requires admin or owner role to edit</TooltipContent>}
-              </Tooltip>
-              {errors.description && (
-                <p className="text-danger text-xs">{errors.description.message}</p>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label className="text-fg-secondary text-xs" htmlFor="project-repo-url">
-                Repository URL
-              </label>
-              <div className="flex items-center gap-2">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Input
-                      id="project-repo-url"
-                      placeholder="https://github.com/owner/repo"
-                      disabled={!editable}
-                      aria-invalid={Boolean(errors.repositoryUrl)}
-                      className="flex-1"
-                      {...repositoryUrlField}
-                      onChange={(e) => {
-                        setVerifyStatus('idle');
-                        return repositoryUrlField.onChange(e);
-                      }}
-                    />
-                  </TooltipTrigger>
-                  {!editable && (
-                    <TooltipContent>Requires admin or owner role to edit</TooltipContent>
-                  )}
-                </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span tabIndex={!editable ? 0 : undefined}>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={handleVerifyConnection}
-                        disabled={!editable || verifyStatus === 'checking'}
-                        className="shrink-0"
-                      >
-                        {verifyStatus === 'checking' ? (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        ) : (
-                          'Verify Connection'
-                        )}
-                      </Button>
-                    </span>
-                  </TooltipTrigger>
-                  {!editable && <TooltipContent>Requires admin or owner role</TooltipContent>}
-                </Tooltip>
-
-                {verifyStatus === 'connected' && (
-                  <span className="text-warning flex items-center gap-1 text-xs">
-                    <CheckCircle className="h-3.5 w-3.5" />
-                    Connected
-                  </span>
-                )}
-                {verifyStatus === 'unreachable' && (
-                  <span className="text-fg-muted flex items-center gap-1 text-xs">
-                    <XCircle className="h-3.5 w-3.5" />
-                    Unreachable
-                  </span>
-                )}
-              </div>
-              {errors.repositoryUrl && (
-                <p className="text-danger text-xs">{errors.repositoryUrl.message}</p>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label className="text-fg-secondary text-xs" htmlFor="project-repo-branch">
-                Default branch
-              </label>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Input
-                    id="project-repo-branch"
-                    placeholder="main"
-                    disabled={!editable}
-                    aria-invalid={Boolean(errors.repositoryBranch)}
-                    {...register('repositoryBranch')}
-                  />
-                </TooltipTrigger>
-                {!editable && <TooltipContent>Requires admin or owner role to edit</TooltipContent>}
-              </Tooltip>
-              {errors.repositoryBranch && (
-                <p className="text-danger text-xs">{errors.repositoryBranch.message}</p>
-              )}
-            </div>
-
-            <div>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span tabIndex={!editable ? 0 : undefined}>
-                    <Button type="submit" disabled={!editable || isSubmitting} size="sm">
-                      {isSubmitting ? 'Saving Changes…' : 'Save Changes'}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleVerifyConnection}
+                      disabled={!editable || verifyStatus === 'checking'}
+                      className="shrink-0"
+                    >
+                      {verifyStatus === 'checking' ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        'Verify connection'
+                      )}
                     </Button>
                   </span>
                 </TooltipTrigger>
                 {!editable && <TooltipContent>Requires admin or owner role</TooltipContent>}
               </Tooltip>
-            </div>
-          </form>
-        )}
 
-        <div className="mt-4">
-          <DangerZoneSection project={{ id: project.id, name: project.name }} userRole={userRole} />
-        </div>
+              {verifyStatus === 'connected' && (
+                <span className="text-success flex items-center gap-1 text-xs">
+                  <CheckCircle className="h-3.5 w-3.5" />
+                  Connected
+                </span>
+              )}
+              {verifyStatus === 'unreachable' && (
+                <span className="text-fg-muted flex items-center gap-1 text-xs">
+                  <XCircle className="h-3.5 w-3.5" />
+                  Unreachable
+                </span>
+              )}
+            </div>
+            {errors.repositoryUrl && (
+              <p id="project-repo-url-error" className="text-danger text-xs">
+                {errors.repositoryUrl.message}
+              </p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-fg-secondary text-xs" htmlFor="project-repo-branch">
+              Default branch
+            </label>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Input
+                  id="project-repo-branch"
+                  placeholder="main"
+                  disabled={!editable}
+                  aria-invalid={Boolean(errors.repositoryBranch)}
+                  aria-describedby={
+                    errors.repositoryBranch ? 'project-repo-branch-error' : undefined
+                  }
+                  {...register('repositoryBranch')}
+                />
+              </TooltipTrigger>
+              {!editable && <TooltipContent>Requires admin or owner role to edit</TooltipContent>}
+            </Tooltip>
+            {errors.repositoryBranch && (
+              <p id="project-repo-branch-error" className="text-danger text-xs">
+                {errors.repositoryBranch.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span tabIndex={!editable ? 0 : undefined}>
+                  <Button type="submit" disabled={!editable || isSubmitting} size="sm">
+                    {isSubmitting ? 'Saving changes…' : 'Save changes'}
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {!editable && <TooltipContent>Requires admin or owner role</TooltipContent>}
+            </Tooltip>
+          </div>
+        </form>
       </section>
     </TooltipProvider>
   );

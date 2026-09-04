@@ -62,17 +62,21 @@ function AuditRow({ entry }: { entry: AuditLogSelect }) {
 
   return (
     <>
-      <tr
-        className="border-line hover:bg-surface-inset cursor-pointer border-b last:border-0"
-        onClick={() => setExpanded((v) => !v)}
-      >
+      <tr className="border-line-subtle hover:bg-surface-inset border-b last:border-0">
         <td className="text-fg-muted px-4 py-2.5 font-mono text-xs">
-          <span className="flex items-center gap-1.5">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            aria-expanded={expanded}
+            onClick={() => setExpanded((value) => !value)}
+            className="text-fg-muted hover:text-fg h-auto gap-1.5 px-0 font-mono text-xs"
+          >
             <ChevronDown
               className={`size-3 shrink-0 transition-transform ${expanded ? 'rotate-0' : '-rotate-90'}`}
             />
             {entry.userId ?? '—'}
-          </span>
+          </Button>
         </td>
         <td className="text-fg px-4 py-2.5 font-mono text-xs">{entry.action}</td>
         <td className="text-fg-muted px-4 py-2.5 font-mono text-xs">{entry.targetType ?? '—'}</td>
@@ -84,7 +88,7 @@ function AuditRow({ entry }: { entry: AuditLogSelect }) {
       {expanded && (
         <tr className="border-line border-b">
           <td colSpan={6} className="px-4 pt-0 pb-3">
-            <pre className="bg-surface-base text-fg max-h-64 overflow-auto rounded-md p-3 font-mono text-xs">
+            <pre className="border-line bg-log-bg text-log-text max-h-64 overflow-auto rounded-md border p-3 font-mono text-xs">
               {entry.detail ? JSON.stringify(entry.detail, null, 2) : '(no detail)'}
             </pre>
           </td>
@@ -227,7 +231,7 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <section className="border-line bg-surface-raised flex flex-col gap-4 rounded-lg border p-4">
       <FilterToolbar variant="inline">
         <FilterSearch
           value={searchInput}
@@ -286,7 +290,7 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
             variant="ghost"
             size="sm"
             onClick={restart}
-            className="text-fg-muted hover:text-fg h-auto px-0 font-mono text-xs underline hover:bg-transparent"
+            className="text-fg-muted hover:text-fg h-auto px-0 text-xs underline hover:bg-transparent"
           >
             Retry
           </Button>
@@ -294,12 +298,10 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
       )}
 
       {!isLoading && !error && entries.length === 0 && (
-        <div className="flex flex-col items-center justify-center gap-3 py-16">
+        <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
           <StatusIcon size={24} status="idle" />
-          <p className="text-fg-muted text-sm">No audit entries.</p>
-          <p className="text-fg-muted font-mono text-xs">
-            Administrative actions will be logged here.
-          </p>
+          <p className="text-fg text-lg font-semibold">No audit entries</p>
+          <p className="text-fg-muted text-sm">Administrative actions will be logged here.</p>
         </div>
       )}
 
@@ -308,13 +310,13 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
           <div className="border-line overflow-x-auto rounded-lg border">
             <table className="w-full text-left">
               <thead>
-                <tr className="border-line bg-surface-raised border-b">
-                  <th className="text-fg-muted px-4 py-2 text-xs">Actor</th>
-                  <th className="text-fg-muted px-4 py-2 text-xs">Action</th>
-                  <th className="text-fg-muted px-4 py-2 text-xs">Resource</th>
-                  <th className="text-fg-muted px-4 py-2 text-xs">Resource ID</th>
-                  <th className="text-fg-muted px-4 py-2 text-xs">IP</th>
-                  <th className="text-fg-muted px-4 py-2 text-xs">Timestamp</th>
+                <tr className="border-line bg-surface-sunken border-b">
+                  <th className="text-fg-muted px-4 py-2 text-xs font-medium">Actor</th>
+                  <th className="text-fg-muted px-4 py-2 text-xs font-medium">Action</th>
+                  <th className="text-fg-muted px-4 py-2 text-xs font-medium">Resource</th>
+                  <th className="text-fg-muted px-4 py-2 text-xs font-medium">Resource ID</th>
+                  <th className="text-fg-muted px-4 py-2 text-xs font-medium">IP</th>
+                  <th className="text-fg-muted px-4 py-2 text-xs font-medium">Timestamp</th>
                 </tr>
               </thead>
               <tbody>
@@ -328,7 +330,7 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
           {/* Pagination */}
           {meta && meta.total > meta.pageSize && (
             <div className="flex items-center justify-between">
-              <span className="text-fg-muted font-mono text-xs">
+              <span className="text-fg-muted text-xs tabular-nums">
                 Page {page} of {totalPages}
               </span>
               <div className="flex items-center gap-2">
@@ -337,7 +339,7 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
                   size="sm"
                   onClick={() => goToPage(page - 1)}
                   disabled={page <= 1}
-                  className="gap-1 font-mono text-xs"
+                  className="gap-1 text-xs"
                 >
                   <ChevronLeft className="size-3" />
                   Prev
@@ -347,7 +349,7 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
                   size="sm"
                   onClick={() => goToPage(page + 1)}
                   disabled={page >= totalPages}
-                  className="gap-1 font-mono text-xs"
+                  className="gap-1 text-xs"
                 >
                   Next
                   <ChevronRight className="size-3" />
@@ -357,6 +359,6 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
           )}
         </>
       )}
-    </div>
+    </section>
   );
 }

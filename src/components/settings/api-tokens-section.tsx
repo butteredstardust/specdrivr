@@ -180,9 +180,12 @@ export function ApiTokensSection() {
   };
 
   return (
-    <section id="api-tokens" className="flex flex-col gap-4">
+    <section
+      id="api-tokens"
+      className="border-line bg-surface-raised flex max-w-2xl flex-col gap-4 rounded-lg border p-6"
+    >
       <div className="flex items-center justify-between">
-        <h2 className="text-fg-muted text-2xs font-medium">API tokens</h2>
+        <h3 className="text-fg text-base font-semibold">API tokens</h3>
         <Button
           variant="outline"
           size="sm"
@@ -221,13 +224,19 @@ export function ApiTokensSection() {
       {!isLoading && !error && (
         <>
           {tokens.length === 0 ? (
-            <p className="text-fg-muted text-xs">No API tokens yet.</p>
+            <div className="flex flex-col items-center gap-3 py-12 text-center">
+              <Key className="text-fg-muted size-6" />
+              <p className="text-fg text-lg font-semibold">No API tokens</p>
+              <p className="text-fg-muted text-sm">
+                Generate a token to authenticate an agent or integration.
+              </p>
+            </div>
           ) : (
-            <div className="border-line flex flex-col gap-0 overflow-hidden rounded border">
+            <div className="border-line flex flex-col gap-0 overflow-hidden rounded-lg border">
               {/* Header row */}
               <div className="border-line grid grid-cols-[1fr_auto_auto_auto_auto] gap-4 border-b px-3 py-2">
-                {['NAME', 'PREFIX', 'CREATED', 'LAST USED', 'EXPIRES'].map((col) => (
-                  <span key={col} className="text-fg-muted text-xs">
+                {['Name', 'Prefix', 'Created', 'Last used', 'Expires'].map((col) => (
+                  <span key={col} className="text-fg-muted text-xs font-medium">
                     {col}
                   </span>
                 ))}
@@ -277,12 +286,12 @@ export function ApiTokensSection() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Generate API Token</DialogTitle>
+            <DialogTitle>Generate API token</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit(handleGenerate)} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-fg-secondary text-xs" htmlFor="token-name">
-                TOKEN NAME <span className="text-danger">*</span>
+                Token name <span className="text-danger">*</span>
               </label>
               <Input id="token-name" placeholder="e.g. CI Deploy" {...register('tokenName')} />
               {errors.tokenName && (
@@ -292,7 +301,7 @@ export function ApiTokensSection() {
 
             <div className="flex flex-col gap-1.5">
               <label className="text-fg-secondary text-xs" htmlFor="token-expiry">
-                EXPIRY
+                Expiry
               </label>
               <Controller
                 name="expiryOption"
@@ -344,7 +353,7 @@ export function ApiTokensSection() {
             <p className="text-fg-muted text-xs">
               This token is shown once only. Copy it now — you will not be able to see it again.
             </p>
-            <div className="border-line bg-surface-raised flex items-center gap-2 rounded border px-3 py-2">
+            <div className="border-line bg-surface-sunken flex items-center gap-2 rounded-md border px-3 py-2">
               <code className="text-warning flex-1 font-mono text-xs break-all">{revealToken}</code>
               <Button variant="ghost" size="sm" onClick={handleCopy} className="shrink-0 gap-1.5">
                 <Copy className="size-3" />
@@ -378,7 +387,7 @@ export function ApiTokensSection() {
             <AlertDialogAction
               onClick={handleRevoke}
               disabled={isRevoking}
-              className="bg-danger hover:bg-danger/90 text-white"
+              className="bg-danger text-fg-inverse hover:opacity-90"
             >
               {isRevoking ? 'Revoking…' : 'Revoke'}
             </AlertDialogAction>

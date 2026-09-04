@@ -15,7 +15,7 @@ export default async function TeamPage() {
 
   if (!project) {
     return (
-      <div className="flex max-w-2xl flex-col gap-8">
+      <div className="flex max-w-4xl flex-col gap-6">
         <h2 className="text-fg text-lg font-semibold">Team</h2>
         <p className="text-fg-muted text-xs">No project found.</p>
       </div>
@@ -27,7 +27,7 @@ export default async function TeamPage() {
   const initialMembers = await memberRepository.getByProjectId(project.id);
 
   return (
-    <div className="flex max-w-2xl flex-col gap-8">
+    <div className="flex max-w-4xl flex-col gap-6">
       <h2 className="text-fg text-lg font-semibold">Team</h2>
       <MembersSection projectId={project.id} userRole={userRole} initialMembers={initialMembers} />
     </div>

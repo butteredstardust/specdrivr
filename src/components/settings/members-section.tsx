@@ -9,7 +9,7 @@ import { clientLogger } from '@/lib/logger-client';
 import { inviteMemberFormSchema, type InviteMemberFormData } from '@/lib/schemas';
 import type { UserRole } from '@/db/schema';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { GatedButton } from '@/components/ui/gated-button';
 import {
   Select,
   SelectContent,
@@ -154,25 +154,28 @@ export function MembersSection({ projectId, userRole, initialMembers }: MembersS
 
   return (
     <TooltipProvider>
-      <section className="flex flex-col gap-4">
-        <h2 className="text-fg-muted text-2xs font-medium">Members</h2>
+      <section className="border-line bg-surface-raised flex flex-col gap-6 rounded-lg border p-6">
+        <h3 className="text-fg text-base font-semibold">Members</h3>
 
-        <div className="overflow-x-auto">
+        <div className="border-line overflow-x-auto rounded-lg border">
           <table className="w-full text-xs">
             <thead>
-              <tr className="border-line border-b text-left">
-                <th className="text-fg-muted pr-4 pb-2 font-normal">Name</th>
-                <th className="text-fg-muted pr-4 pb-2 font-normal">Email</th>
-                <th className="text-fg-muted pr-4 pb-2 font-normal">Role</th>
-                <th className="text-fg-muted pb-2 font-normal">Actions</th>
+              <tr className="border-line bg-surface-sunken border-b text-left">
+                <th className="text-fg-muted px-4 py-2 font-medium">Name</th>
+                <th className="text-fg-muted px-4 py-2 font-medium">Email</th>
+                <th className="text-fg-muted px-4 py-2 font-medium">Role</th>
+                <th className="text-fg-muted px-4 py-2 font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
               {members.map((member) => (
-                <tr key={member.userId} className="border-line border-b">
-                  <td className="text-fg py-3 pr-4">{member.name}</td>
-                  <td className="text-fg-secondary py-3 pr-4 font-mono">{member.email}</td>
-                  <td className="py-3 pr-4">
+                <tr
+                  key={member.userId}
+                  className="border-line-subtle hover:bg-surface-inset border-b last:border-0"
+                >
+                  <td className="text-fg px-4 py-3">{member.name}</td>
+                  <td className="text-fg-secondary px-4 py-3">{member.email}</td>
+                  <td className="px-4 py-3">
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <span>
@@ -181,7 +184,10 @@ export function MembersSection({ projectId, userRole, initialMembers }: MembersS
                             onValueChange={(v) => handleRoleChange(member.userId, v as UserRole)}
                             disabled={!isAdmin}
                           >
-                            <SelectTrigger className="h-7 w-28 text-xs">
+                            <SelectTrigger
+                              aria-label={`Role for ${member.name}`}
+                              className="h-7 w-28 text-xs"
+                            >
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -197,23 +203,17 @@ export function MembersSection({ projectId, userRole, initialMembers }: MembersS
                       {!isAdmin && <TooltipContent>Requires admin role to change</TooltipContent>}
                     </Tooltip>
                   </td>
-                  <td className="py-3">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            disabled={!isAdmin}
-                            onClick={() => handleRemove(member.userId)}
-                            aria-label={`Remove ${member.name}`}
-                          >
-                            <Trash2 size={14} />
-                          </Button>
-                        </span>
-                      </TooltipTrigger>
-                      {!isAdmin && <TooltipContent>Requires admin role to remove</TooltipContent>}
-                    </Tooltip>
+                  <td className="px-4 py-3">
+                    <GatedButton
+                      allowed={isAdmin}
+                      reason="Requires admin role to remove"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleRemove(member.userId)}
+                      aria-label={`Remove ${member.name}`}
+                    >
+                      <Trash2 size={14} />
+                    </GatedButton>
                   </td>
                 </tr>
               ))}
@@ -222,8 +222,8 @@ export function MembersSection({ projectId, userRole, initialMembers }: MembersS
         </div>
 
         {/* Invite form */}
-        <div className="mt-2">
-          <p className="text-fg-muted mb-2 text-xs">Invite member</p>
+        <div>
+          <h4 className="text-fg mb-3 text-sm font-medium">Invite member</h4>
           <form onSubmit={handleSubmit(handleInvite)} className="flex flex-wrap items-end gap-2">
             <div className="flex flex-col gap-1">
               <label className="text-fg-secondary text-xs" htmlFor="invite-email">
@@ -235,10 +235,15 @@ export function MembersSection({ projectId, userRole, initialMembers }: MembersS
                 placeholder="user@example.com"
                 disabled={!isAdmin}
                 aria-invalid={Boolean(errors.email)}
-                className="w-56"
+                aria-describedby={errors.email ? 'invite-email-error' : undefined}
+                className="w-64"
                 {...register('email')}
               />
-              {errors.email && <p className="text-danger text-xs">{errors.email.message}</p>}
+              {errors.email && (
+                <p id="invite-email-error" className="text-danger text-xs">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-fg-secondary text-xs" htmlFor="invite-role">
@@ -251,7 +256,7 @@ export function MembersSection({ projectId, userRole, initialMembers }: MembersS
                 control={control}
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange} disabled={!isAdmin}>
-                    <SelectTrigger id="invite-role" className="h-10 w-28 text-xs">
+                    <SelectTrigger id="invite-role" className="w-32">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -265,16 +270,14 @@ export function MembersSection({ projectId, userRole, initialMembers }: MembersS
                 )}
               />
             </div>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
-                  <Button type="submit" size="sm" disabled={!isAdmin || isSubmitting}>
-                    {isSubmitting ? 'Sending…' : 'Invite'}
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              {!isAdmin && <TooltipContent>Requires admin role to invite</TooltipContent>}
-            </Tooltip>
+            <GatedButton
+              allowed={isAdmin}
+              reason="Requires admin role to invite"
+              type="submit"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Sending…' : 'Send invite'}
+            </GatedButton>
           </form>
         </div>
       </section>

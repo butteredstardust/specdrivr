@@ -4,10 +4,11 @@ import { useState, useCallback } from 'react';
 import { clientLogger } from '@/lib/logger-client';
 import { usePolling } from '@/hooks/use-polling';
 import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Badge, type BadgeProps } from '@/components/ui/badge';
+import { GatedButton } from '@/components/ui/gated-button';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { StatusIcon } from '@/components/ui/status-icon';
 import { Loader2, ChevronDown, ChevronRight, RotateCcw, ChevronLeft } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import type { WebhookDeliverySelect } from '@/db/schema';
 
 interface DeliveryMeta {
@@ -30,16 +31,19 @@ interface WebhookLogSectionProps {
 type DeliveryStatus = 'delivered' | 'failed' | 'pending' | 'exhausted';
 
 function StatusBadge({ status }: { status: DeliveryStatus }) {
-  const classes: Record<string, string> = {
-    delivered: 'bg-success-bg text-success',
-    failed: 'bg-danger-bg text-danger',
-    pending: 'bg-warning-bg text-warning',
-    exhausted: 'bg-danger-bg text-danger',
+  const variants: Record<DeliveryStatus, BadgeProps['variant']> = {
+    delivered: 'success',
+    failed: 'danger',
+    pending: 'warning',
+    exhausted: 'danger',
   };
-
-  const cls = classes[status] ?? 'bg-surface-raised text-fg-muted';
-
-  return <span className={cn('rounded px-1.5 py-0.5 font-mono text-xs', cls)}>{status}</span>;
+  const labels: Record<DeliveryStatus, string> = {
+    delivered: 'Delivered',
+    failed: 'Failed',
+    pending: 'Pending',
+    exhausted: 'Exhausted',
+  };
+  return <Badge variant={variants[status]}>{labels[status]}</Badge>;
 }
 
 function formatTs(date: string | Date): string {
@@ -57,21 +61,25 @@ function DeliveryRow({ entry }: { entry: DeliveryRow }) {
 
   return (
     <>
-      <tr
-        className="border-line hover:bg-surface-inset cursor-pointer border-b last:border-0"
-        onClick={() => setExpanded((v) => !v)}
-      >
+      <tr className="border-line-subtle hover:bg-surface-inset border-b last:border-0">
         <td className="text-fg px-4 py-2.5 font-mono text-xs">
-          <span className="flex items-center gap-1.5">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            aria-expanded={expanded}
+            onClick={() => setExpanded((value) => !value)}
+            className="text-fg h-auto gap-1.5 px-0 font-mono text-xs"
+          >
             {expanded ? (
               <ChevronDown className="text-fg-muted size-3 shrink-0" />
             ) : (
               <ChevronRight className="text-fg-muted size-3 shrink-0" />
             )}
             {entry.eventType}
-          </span>
+          </Button>
         </td>
-        <td className="text-fg-muted max-w-[160px] truncate px-4 py-2.5 font-mono text-xs">
+        <td className="text-fg-muted max-w-40 truncate px-4 py-2.5 font-mono text-xs">
           {entry.endpointUrl ?? '—'}
         </td>
         <td className="px-4 py-2.5">
@@ -79,32 +87,24 @@ function DeliveryRow({ entry }: { entry: DeliveryRow }) {
         </td>
         <td className="text-fg px-4 py-2.5 font-mono text-xs">{entry.responseStatus ?? '—'}</td>
         <td className="text-fg-muted px-4 py-2.5 font-mono text-xs">{formatTs(entry.createdAt)}</td>
-        <td className="px-4 py-2.5" onClick={(e) => e.stopPropagation()}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  disabled
-                  className="text-fg-muted h-auto gap-1 px-2 font-mono text-xs"
-                >
-                  <RotateCcw className="size-3" />
-                  Retry
-                </Button>
-              </span>
-            </TooltipTrigger>
-            <TooltipContent side="top" className="font-mono text-xs">
-              Retry not yet available
-            </TooltipContent>
-          </Tooltip>
+        <td className="px-4 py-2.5">
+          <GatedButton
+            allowed={false}
+            reason="Retry not yet available"
+            variant="ghost"
+            size="sm"
+            className="text-fg-muted h-auto gap-1 px-2 text-xs"
+          >
+            <RotateCcw className="size-3" />
+            Retry
+          </GatedButton>
         </td>
       </tr>
 
       {expanded && (
         <tr className="border-line border-b">
           <td colSpan={6} className="px-4 pt-0 pb-3">
-            <pre className="bg-surface-base text-fg max-h-48 overflow-auto rounded-md p-3 font-mono text-xs">
+            <pre className="border-line bg-log-bg text-log-text max-h-48 overflow-auto rounded-md border p-3 font-mono text-xs">
               {entry.responseBody || '(no response body)'}
             </pre>
           </td>
@@ -163,7 +163,7 @@ export function WebhookLogSection({ projectId }: WebhookLogSectionProps) {
           variant="ghost"
           size="sm"
           onClick={restart}
-          className="text-fg-muted hover:text-fg h-auto px-0 font-mono text-xs underline hover:bg-transparent"
+          className="text-fg-muted hover:text-fg h-auto px-0 text-xs underline hover:bg-transparent"
         >
           Retry
         </Button>
@@ -173,9 +173,10 @@ export function WebhookLogSection({ projectId }: WebhookLogSectionProps) {
 
   if (!isLoading && deliveries.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 py-16">
+      <div className="border-line bg-surface-raised flex flex-col items-center justify-center gap-3 rounded-lg border py-12 text-center">
         <StatusIcon size={24} status="idle" />
-        <p className="text-fg-muted text-sm">No webhook deliveries yet.</p>
+        <p className="text-fg text-lg font-semibold">No webhook deliveries</p>
+        <p className="text-fg-muted text-sm">Delivery attempts will appear here.</p>
       </div>
     );
   }
@@ -186,13 +187,15 @@ export function WebhookLogSection({ projectId }: WebhookLogSectionProps) {
         <div className="border-line overflow-x-auto rounded-lg border">
           <table className="w-full text-left">
             <thead>
-              <tr className="border-line bg-surface-raised border-b">
-                <th className="text-fg-muted px-4 py-2 text-xs">Event</th>
-                <th className="text-fg-muted px-4 py-2 text-xs">Endpoint</th>
-                <th className="text-fg-muted px-4 py-2 text-xs">Status</th>
-                <th className="text-fg-muted px-4 py-2 text-xs">HTTP Code</th>
-                <th className="text-fg-muted px-4 py-2 text-xs">Timestamp</th>
-                <th className="text-fg-muted px-4 py-2 text-xs"></th>
+              <tr className="border-line bg-surface-sunken border-b">
+                <th className="text-fg-muted px-4 py-2 text-xs font-medium">Event</th>
+                <th className="text-fg-muted px-4 py-2 text-xs font-medium">Endpoint</th>
+                <th className="text-fg-muted px-4 py-2 text-xs font-medium">Status</th>
+                <th className="text-fg-muted px-4 py-2 text-xs font-medium">HTTP code</th>
+                <th className="text-fg-muted px-4 py-2 text-xs font-medium">Timestamp</th>
+                <th className="px-4 py-2">
+                  <span className="sr-only">Actions</span>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -207,7 +210,7 @@ export function WebhookLogSection({ projectId }: WebhookLogSectionProps) {
       {/* Pagination */}
       {meta && meta.total > meta.pageSize && (
         <div className="flex items-center justify-between">
-          <span className="text-fg-muted font-mono text-xs">
+          <span className="text-fg-muted text-xs tabular-nums">
             Page {page} of {totalPages}
           </span>
           <div className="flex items-center gap-2">
@@ -216,7 +219,7 @@ export function WebhookLogSection({ projectId }: WebhookLogSectionProps) {
               size="sm"
               onClick={() => goToPage(page - 1)}
               disabled={page <= 1}
-              className="gap-1 font-mono text-xs"
+              className="gap-1 text-xs"
             >
               <ChevronLeft className="size-3" />
               Prev
@@ -226,7 +229,7 @@ export function WebhookLogSection({ projectId }: WebhookLogSectionProps) {
               size="sm"
               onClick={() => goToPage(page + 1)}
               disabled={page >= totalPages}
-              className="gap-1 font-mono text-xs"
+              className="gap-1 text-xs"
             >
               Next
               <ChevronRight className="size-3" />

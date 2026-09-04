@@ -20,15 +20,16 @@ export default async function AuditPage() {
   const canAudit = userRole === 'admin' || userRole === 'owner';
 
   return (
-    <div className="flex max-w-4xl flex-col gap-8">
+    <div className="flex max-w-4xl flex-col gap-6">
       <h2 className="text-fg text-lg font-semibold">Audit log</h2>
 
       {canAudit ? (
         <AuditLogSection projectId={project!.id} />
       ) : (
-        <div className="flex flex-col items-center justify-center gap-3 py-24">
-          <Lock className="text-fg-muted h-8 w-8" />
-          <p className="text-fg-muted text-sm">Audit log requires Admin or Owner role.</p>
+        <div className="border-line bg-surface-raised flex flex-col items-center justify-center gap-3 rounded-lg border py-12">
+          <Lock className="text-fg-muted size-6" />
+          <p className="text-fg text-lg font-semibold">Audit log unavailable</p>
+          <p className="text-fg-muted text-sm">Requires Admin or Owner role.</p>
         </div>
       )}
     </div>

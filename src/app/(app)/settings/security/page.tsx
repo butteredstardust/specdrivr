@@ -9,7 +9,7 @@ export default async function SecurityPage() {
   if (!session?.user?.id) redirect('/login');
 
   return (
-    <div className="flex max-w-2xl flex-col gap-8">
+    <div className="flex max-w-4xl flex-col gap-6">
       <h2 className="text-fg text-lg font-semibold">Security</h2>
       <ChangePasswordSection />
       <ActiveSessionsSection />

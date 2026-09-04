@@ -11,7 +11,7 @@ export default async function WebhooksPage() {
   const project = projects[0] ?? null;
 
   return (
-    <div className="flex max-w-4xl flex-col gap-8">
+    <div className="flex max-w-4xl flex-col gap-6">
       <h2 className="text-fg text-lg font-semibold">Webhook delivery log</h2>
 
       {project ? (

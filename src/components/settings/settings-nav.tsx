@@ -14,7 +14,6 @@ interface NavItem {
 interface NavGroup {
   label: string;
   items: NavItem[];
-  afterSlot?: 'danger-zone';
 }
 
 const NAV_GROUPS: NavGroup[] = [
@@ -31,12 +30,11 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/settings/general', label: 'General' },
       { href: '/settings/team', label: 'Team' },
-      { href: '/settings/agent', label: 'Agent' },
       { href: '/settings/integrations', label: 'Integrations' },
+      { href: '/settings/agent', label: 'Agent' },
       { href: '/settings/usage', label: 'Usage' },
       { href: '/settings/audit', label: 'Audit log', hideForRoles: ['member', 'viewer'] },
     ],
-    afterSlot: 'danger-zone',
   },
   {
     label: 'Developer',
@@ -58,7 +56,10 @@ export function SettingsNav({ userRole }: SettingsNavProps) {
     pathname === '/settings/danger' || pathname.startsWith('/settings/danger/');
 
   return (
-    <nav className="flex flex-col gap-5">
+    <nav
+      aria-label="Settings"
+      className="grid grid-cols-1 gap-5 sm:grid-cols-3 md:flex md:flex-col"
+    >
       {NAV_GROUPS.map((group) => (
         <div key={group.label}>
           <p className="text-fg-secondary mb-1 px-2 text-xs">{group.label}</p>
@@ -75,7 +76,7 @@ export function SettingsNav({ userRole }: SettingsNavProps) {
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      'rounded px-2 py-1.5 text-sm transition-colors',
+                      'rounded-md px-2 py-1.5 text-sm transition-colors',
                       active
                         ? 'bg-accent-subtle text-accent font-medium'
                         : 'text-fg-muted hover:bg-surface-inset hover:text-fg'
@@ -86,22 +87,22 @@ export function SettingsNav({ userRole }: SettingsNavProps) {
                 );
               })}
           </div>
-
-          {group.afterSlot === 'danger-zone' && (
-            <Link
-              href="/settings/danger"
-              className={cn(
-                'mt-3 block rounded px-2 py-1.5 text-xs transition-colors',
-                isDangerActive
-                  ? 'bg-danger-bg text-danger font-medium'
-                  : 'text-danger/70 hover:text-danger'
-              )}
-            >
-              Danger zone
-            </Link>
-          )}
         </div>
       ))}
+      <div>
+        <p className="text-fg-secondary mb-1 px-2 text-xs">Danger</p>
+        <Link
+          href="/settings/danger"
+          className={cn(
+            'block rounded-md px-2 py-1.5 text-sm transition-colors',
+            isDangerActive
+              ? 'bg-danger-bg text-danger font-medium'
+              : 'text-danger hover:bg-danger-bg'
+          )}
+        >
+          Danger zone
+        </Link>
+      </div>
     </nav>
   );
 }
