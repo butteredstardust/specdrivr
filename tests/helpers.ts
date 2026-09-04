@@ -10,6 +10,16 @@ const databaseUrl =
 const testQueryClient = postgres(databaseUrl, { max: 1 });
 export const testDb = drizzle(testQueryClient, { schema });
 
+function postgresErrorCode(error: unknown): string | undefined {
+  let current: unknown = error;
+  while (current && typeof current === 'object') {
+    const candidate = current as { code?: unknown; cause?: unknown };
+    if (typeof candidate.code === 'string') return candidate.code;
+    current = candidate.cause;
+  }
+  return undefined;
+}
+
 /**
  * Cleans the database by TRUNCATING all tables.
  */
@@ -53,12 +63,13 @@ export async function cleanDatabase() {
       await testDb.execute(sql.raw(query));
       break;
     } catch (error) {
-      const pgError = error as { code?: string };
-      if (pgError.code === '40P01' || pgError.code === '55P03') {
+      const code = postgresErrorCode(error);
+      if (code === '40P01' || code === '55P03') {
         // Deadlock or lock_not_available
         retries--;
         if (retries === 0) throw error;
-        await new Promise((res) => setTimeout(res, 200));
+        const backoffMs = 100 * 2 ** (5 - retries) + Math.floor(Math.random() * 100);
+        await new Promise((res) => setTimeout(res, backoffMs));
       } else {
         throw error;
       }

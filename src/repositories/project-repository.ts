@@ -1,11 +1,5 @@
 import { db } from '@/db';
-import {
-  projects,
-  projectMembers,
-  agentConfig,
-  auditLog,
-  type ProjectSelect as Project,
-} from '@/db/schema';
+import { projects, projectMembers, agentConfig, type ProjectSelect as Project } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { BaseRepository } from './base-repository';
 import { NotFoundError, ValidationError, DatabaseError } from '@/lib/errors';
@@ -193,49 +187,6 @@ export class ProjectRepository extends BaseRepository {
 
   async archive(id: number): Promise<Project> {
     return this.update(id, { status: 'archived' });
-  }
-
-  async getAgentConfig(projectId: number) {
-    const result = await this.executeQuery(() =>
-      db.select().from(agentConfig).where(eq(agentConfig.projectId, projectId)).limit(1)
-    );
-    return result[0] || null;
-  }
-
-  async updateAgentConfig(
-    projectId: number,
-    data: Partial<import('@/db/schema').AgentConfigInsert>,
-    actorId: string
-  ) {
-    return await this.executeQuery(async () => {
-      return await db.transaction(async (tx) => {
-        const [updated] = await tx
-          .update(agentConfig)
-          .set({ ...data, updatedAt: new Date() })
-          .where(eq(agentConfig.projectId, projectId))
-          .returning();
-
-        if (!updated) {
-          // If for some reason config doesn't exist, create it
-          const [created] = await tx
-            .insert(agentConfig)
-            .values({ ...data, projectId } as import('@/db/schema').AgentConfigInsert)
-            .returning();
-          return created;
-        }
-
-        await tx.insert(auditLog).values({
-          projectId,
-          userId: actorId,
-          action: 'update_agent_config',
-          targetType: 'agent_config',
-          targetId: String(updated.id),
-          detail: data,
-        });
-
-        return updated;
-      });
-    });
   }
 }
 

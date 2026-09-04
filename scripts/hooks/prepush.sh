@@ -4,8 +4,11 @@
 
 set -euo pipefail
 
-# Ensure Homebrew tools (pnpm, etc.) are available in git hook context
-export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+# Fall back to common Homebrew paths only when the caller has not already
+# provided the repository-pinned pnpm through Corepack or another toolchain.
+if ! command -v pnpm >/dev/null 2>&1; then
+    export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+fi
 
 HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CHECK_DIR="${HOOK_DIR}/checks"

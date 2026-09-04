@@ -141,7 +141,9 @@ export default function SessionDetailPage({ params }: PageProps) {
             Executor
           </div>
           <div className="flex min-w-0 items-center gap-3">
-            <h1 className="text-foreground truncate text-xl font-semibold">Session</h1>
+            <h1 className="text-foreground truncate text-2xl leading-tight font-semibold tracking-[-0.015em]">
+              Session
+            </h1>
             <code className="bg-phosphor-amber/10 text-phosphor-amber shrink-0 rounded px-1.5 py-0.5 font-mono text-xs">
               {sessionLabel}
             </code>
@@ -206,7 +208,7 @@ export default function SessionDetailPage({ params }: PageProps) {
       </div>
 
       {(session || isLoading) && (
-        <div className="border-border-default grid grid-cols-5 gap-4 border-b px-6 py-4">
+        <div className="border-border-default grid grid-cols-2 gap-3 border-b px-4 py-4 md:grid-cols-5 md:gap-4 md:px-6">
           <StatBox label="Started" value={timeAgo(session?.startedAt)} />
           <StatBox label="Duration" value={formatDuration(session)} />
           <div className="bg-bg-elevated border-border-default col-span-2 flex flex-col justify-center rounded border px-3 py-2">
@@ -236,12 +238,12 @@ export default function SessionDetailPage({ params }: PageProps) {
         </div>
       )}
 
-      <div className="divide-border-default flex min-h-0 flex-1 divide-x overflow-hidden">
-        <div className="w-1/2 overflow-y-auto p-4">
+      <div className="divide-border-default flex min-h-0 flex-1 flex-col divide-y overflow-y-auto md:flex-row md:divide-x md:divide-y-0 md:overflow-hidden">
+        <div className="w-full overflow-y-auto p-4 md:w-1/2">
           <TaskTimeline sessionId={id} />
         </div>
 
-        <div className="flex w-1/2 flex-col overflow-y-auto p-4">
+        <div className="flex min-h-[20rem] w-full flex-col overflow-y-auto p-4 md:min-h-0 md:w-1/2">
           <p className="text-text-secondary mb-3 font-mono text-[10px] tracking-widest uppercase">
             Session Log
           </p>

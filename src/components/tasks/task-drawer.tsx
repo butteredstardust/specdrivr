@@ -6,6 +6,8 @@ import { Drawer } from 'vaul';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { XCircle, RefreshCw, AlertCircle, CheckCircle2, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { overrideTaskStatusAction, retryTaskAction, unblockTaskAction } from '@/actions/tasks';
 import {
   Select,
   SelectContent,
@@ -44,7 +46,7 @@ export interface Task {
   title: string;
   description: string | null;
   status: TaskStatus;
-  orderIndex: number;
+  executionOrder: number;
   dependsOn: string[];
   blockedReason: string | null;
   humanContext: string | null;
@@ -95,6 +97,7 @@ export function TaskDrawer() {
 
   const [localTask, setLocalTask] = useState<Task | null>(null);
   const [forceConfirmOpen, setForceConfirmOpen] = useState(false);
+  const [forceReason, setForceReason] = useState('');
   const [isActioning, setIsActioning] = useState(false);
 
   const { data: polledTask, isLoading: _isLoading } = usePolling<Task>({
@@ -139,22 +142,29 @@ export function TaskDrawer() {
       if (!task) return;
       if (task.status === 'done') return;
 
-      if (!force && !task.verificationPassed) {
+      if (!force) {
         setForceConfirmOpen(true);
         return;
       }
 
+      if (!forceReason.trim()) {
+        toast.error('Add a reason for the manual completion.');
+        return;
+      }
       setIsActioning(true);
       try {
-        const res = await fetch(`/api/v1/tasks/${task.id}/complete`, {
-          method: 'POST',
-          credentials: 'include',
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const formData = new FormData();
+        formData.set('id', String(task.id));
+        formData.set('status', 'done');
+        formData.set('notes', forceReason.trim());
+        const result = await overrideTaskStatusAction(formData);
+        if (!result.success || !result.data) {
+          throw new Error(result.error?.message ?? 'Manual completion failed');
+        }
         toast.success('Task marked as done.');
         setForceConfirmOpen(false);
-        const updated = await res.json();
-        setLocalTask(updated.data ?? updated);
+        setForceReason('');
+        setLocalTask(result.data as Task);
       } catch (err) {
         clientLogger.error('Mark done error', err);
         toast.error('Failed to mark as done');
@@ -162,26 +172,37 @@ export function TaskDrawer() {
         setIsActioning(false);
       }
     },
-    [task]
+    [task, forceReason]
   );
 
-  const handleRetry = useCallback(async () => {
-    if (!task) return;
-    setIsActioning(true);
-    try {
-      const res = await fetch(`/api/v1/tasks/${task.id}/unblock`, {
-        method: 'POST',
-        credentials: 'include',
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      toast.success('Task queued for retry.');
-    } catch (err) {
-      clientLogger.error('Retry failed', err);
-      toast.error('Failed to retry task');
-    } finally {
-      setIsActioning(false);
-    }
-  }, [task]);
+  const handleRetry = useCallback(
+    async (humanContext?: string) => {
+      if (!task) return;
+      setIsActioning(true);
+      try {
+        const formData = new FormData();
+        formData.set('id', String(task.id));
+        const result =
+          task.status === 'blocked'
+            ? await (async () => {
+                formData.set('humanContext', humanContext ?? '');
+                return unblockTaskAction(formData);
+              })()
+            : await retryTaskAction(formData);
+        if (!result.success || !result.data) {
+          throw new Error(result.error?.message ?? 'Retry failed');
+        }
+        setLocalTask(result.data as Task);
+        toast.success('Task queued for retry.');
+      } catch (err) {
+        clientLogger.error('Retry failed', err);
+        toast.error('Failed to retry task');
+      } finally {
+        setIsActioning(false);
+      }
+    },
+    [task]
+  );
 
   const handleMarkBlocked = useCallback(async () => {
     if (!task) return;
@@ -205,7 +226,7 @@ export function TaskDrawer() {
       <Drawer.Root open={!!activeTaskId} onOpenChange={handleOpenChange} direction="right">
         <Drawer.Portal>
           <Drawer.Overlay className="fixed inset-0 z-40 bg-black/60" />
-          <Drawer.Content className="border-border-default bg-bg-surface fixed top-0 right-0 bottom-0 z-50 flex w-[640px] flex-col border-l outline-none">
+          <Drawer.Content className="border-border-default bg-bg-surface fixed top-0 right-0 bottom-0 z-50 flex w-full max-w-[640px] flex-col border-l outline-none">
             <Drawer.Title className="sr-only">{task?.title ?? 'Task'}</Drawer.Title>
             <Drawer.Description className="sr-only">
               {task ? `${task.externalId} — ${task.status}` : 'Loading task'}
@@ -235,18 +256,20 @@ export function TaskDrawer() {
                           </SelectValue>
                         </SelectTrigger>
                         <SelectContent className="bg-bg-surface border-border-default">
-                          {(Object.keys(TASK_STATUS_CONFIG) as Array<TaskStatus>).map((s) => (
-                            <SelectItem key={s} value={s} className="focus:bg-bg-elevated py-2">
-                              <PixelBadge
-                                variant={TASK_STATUS_CONFIG[s].variant}
-                                dot={s === 'in_progress'}
-                                className="w-32 justify-center"
-                              >
-                                {TASK_STATUS_CONFIG[s].char}
-                                {TASK_STATUS_CONFIG[s].label}
-                              </PixelBadge>
-                            </SelectItem>
-                          ))}
+                          {(Object.keys(TASK_STATUS_CONFIG) as Array<TaskStatus>)
+                            .filter((s) => s !== 'done')
+                            .map((s) => (
+                              <SelectItem key={s} value={s} className="focus:bg-bg-elevated py-2">
+                                <PixelBadge
+                                  variant={TASK_STATUS_CONFIG[s].variant}
+                                  dot={s === 'in_progress'}
+                                  className="w-32 justify-center"
+                                >
+                                  {TASK_STATUS_CONFIG[s].char}
+                                  {TASK_STATUS_CONFIG[s].label}
+                                </PixelBadge>
+                              </SelectItem>
+                            ))}
                         </SelectContent>
                       </Select>
                     ) : (
@@ -292,11 +315,7 @@ export function TaskDrawer() {
                   </TabsList>
                   <div className="flex-1 overflow-y-auto">
                     <TabsContent value="overview" className="mt-0 h-full">
-                      <TaskDrawerOverview
-                        task={task}
-                        onRetry={handleRetry}
-                        onTaskUpdated={setLocalTask}
-                      />
+                      <TaskDrawerOverview task={task} onRetry={handleRetry} />
                     </TabsContent>
                     <TabsContent value="attempts" className="mt-0 h-full">
                       <TaskDrawerAttempts taskId={task.id} taskStatus={task.status} />
@@ -327,16 +346,22 @@ export function TaskDrawer() {
           <AlertDialogHeader>
             <AlertDialogTitle>Force Mark as Done?</AlertDialogTitle>
             <AlertDialogDescription>
-              This task has not passed automated verification. Marking it as done manually may cause
-              issues with dependent tasks.
+              Manual completion bypasses the agent workflow. Record why this transition is safe for
+              the audit trail.
             </AlertDialogDescription>
+            <Textarea
+              value={forceReason}
+              onChange={(event) => setForceReason(event.target.value)}
+              placeholder="Explain why this task is safe to complete manually"
+              className="mt-3 min-h-24"
+            />
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isActioning}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className="bg-status-red hover:bg-status-red/90"
               onClick={() => handleMarkDone(true)}
-              disabled={isActioning}
+              disabled={isActioning || !forceReason.trim()}
             >
               Force Mark Done
             </AlertDialogAction>
@@ -351,7 +376,7 @@ interface DrawerFooterProps {
   task: Task;
   canManage: boolean;
   devMode: boolean;
-  onRetry: () => Promise<void>;
+  onRetry: (humanContext?: string) => Promise<void>;
   onMarkBlocked: () => Promise<void>;
   onMarkDone: () => Promise<void>;
 }
@@ -364,14 +389,14 @@ function DrawerFooter({
   onMarkBlocked,
   onMarkDone,
 }: DrawerFooterProps) {
-  const showRerun = ['failed', 'blocked', 'done'].includes(task.status);
+  const showRerun = ['failed', 'done'].includes(task.status);
   const [jsonOpen, setJsonOpen] = useState(false);
 
   return (
     <div className="bg-bg-elevated/50 border-border-default shrink-0 space-y-4 border-t px-6 py-5">
       <div className="flex items-center gap-3">
         {showRerun && (
-          <Button variant="blue" size="sm" onClick={onRetry} className="h-8 gap-1.5">
+          <Button variant="blue" size="sm" onClick={() => void onRetry()} className="h-8 gap-1.5">
             <RefreshCw className="h-3.5 w-3.5" />
             RE-RUN
           </Button>

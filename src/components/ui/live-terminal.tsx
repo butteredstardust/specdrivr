@@ -32,7 +32,6 @@ export function LiveTerminal({
     const { WebLinksAddon } = await import('@xterm/addon-web-links');
 
     // Import xterm CSS dynamically
-    // @ts-expect-error - CSS modules might not have declarations
     await import('@xterm/xterm/css/xterm.css');
 
     // Resolve theme colors from CSS variables
@@ -61,7 +60,7 @@ export function LiveTerminal({
         brightBlue: accentBlue,
       },
 
-      fontFamily: '"Berkeley Mono", "Fira Code", "Courier New", monospace',
+      fontFamily: '"Fira Code", ui-monospace, "SFMono-Regular", monospace',
       fontSize: 13,
       lineHeight: 1.4,
       cursorBlink: true,

@@ -415,6 +415,11 @@ export class PlanRepository extends BaseRepository {
           action: 'abandoned',
         });
 
+        await tx
+          .update(specifications)
+          .set({ status: 'drafting', updatedAt: new Date() })
+          .where(eq(specifications.id, plan.specId));
+
         // 4. Audit log
         await tx.insert(auditLog).values({
           projectId: (

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useShell } from '@/components/shell/shell-context';
 import { SpecEditor } from '@/components/specs/spec-editor';
 import { clientLogger } from '@/lib/logger-client';
+import { createSpecificationAction } from '@/actions/specifications';
 
 export default function NewSpecPage() {
   const router = useRouter();
@@ -12,25 +13,22 @@ export default function NewSpecPage() {
   const handleSave = async (
     title: string,
     content: string
-  ): Promise<{ success: boolean; error?: string }> => {
+  ): Promise<{ success: boolean; specId?: number; error?: string }> => {
     try {
-      const res = await fetch('/api/v1/specs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ title, content, projectId: activeProjectId }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
+      if (!activeProjectId) return { success: false, error: 'Select a project first' };
+      const formData = new FormData();
+      formData.set('projectId', String(activeProjectId));
+      formData.set('name', title);
+      formData.set('markdownContent', content);
+      const result = await createSpecificationAction(formData);
+      if (!result.success || !result.data) {
         return {
           success: false,
-          error:
-            (err as { error?: { message?: string } })?.error?.message ?? 'Failed to create spec',
+          error: result.error?.message ?? 'Failed to create spec',
         };
       }
-      const data = (await res.json()) as { data: { id: number } };
-      router.replace(`/specs/${data.data.id}/edit`);
-      return { success: true };
+      router.replace(`/specs/${result.data.id}/edit`);
+      return { success: true, specId: result.data.id };
     } catch (e) {
       clientLogger.error('Failed to create spec', { error: e });
       return { success: false, error: 'Network error' };

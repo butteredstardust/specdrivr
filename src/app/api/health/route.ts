@@ -4,18 +4,27 @@ import { db } from '@/db';
 import { sql } from 'drizzle-orm';
 import { redis } from '@/lib/redis';
 
+async function bounded<T>(operation: Promise<T>, timeoutMs = 2000): Promise<T> {
+  return Promise.race([
+    operation,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Dependency check timed out')), timeoutMs)
+    ),
+  ]);
+}
+
 export async function GET() {
   let dbStatus = 'ok';
   let redisStatus = 'ok';
 
   try {
-    await db.execute(sql`SELECT 1`);
+    await bounded(db.execute(sql`SELECT 1`));
   } catch {
     dbStatus = 'error';
   }
 
   try {
-    await redis.ping();
+    await bounded(redis.ping());
   } catch {
     redisStatus = 'error';
   }
@@ -23,7 +32,7 @@ export async function GET() {
   const status = dbStatus === 'ok' && redisStatus === 'ok' ? 'ok' : 'error';
 
   return NextResponse.json(
-    { success: true, data: { status, db: dbStatus, redis: redisStatus } },
+    { success: status === 'ok', status, dependencies: { database: dbStatus, redis: redisStatus } },
     { status: status === 'ok' ? 200 : 503 }
   );
 }

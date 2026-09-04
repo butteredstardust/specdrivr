@@ -6,16 +6,26 @@ import {
   agentConfigRepository,
   memberRepository,
   notificationRepository,
-  taskRepository,
 } from '../src/repositories';
 import { generatePlan, generateTasks } from '../src/lib/gemini';
 import { logger } from '../src/lib/logger';
 import { env } from '../src/lib/env';
-import { type PlanJobSelect as PlanJob, agentEvents, agentSessions } from '../src/db/schema';
+import {
+  type PlanJobSelect as PlanJob,
+  agentEvents,
+  agentSessions,
+  planJobs,
+  plans,
+  specifications,
+  tasks,
+} from '../src/db/schema';
 import { db } from '../src/db';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and } from 'drizzle-orm';
 
 const POLL_INTERVAL_MS = 5000;
+const JOB_HEARTBEAT_INTERVAL_MS = 60_000;
+
+class StalePlanJobError extends Error {}
 
 async function logEvent(
   job: PlanJob,
@@ -50,7 +60,11 @@ async function logEvent(
 
 async function processJob(job: PlanJob) {
   const startMs = Date.now();
-  logger.info({ jobId: job.id, type: job.type }, '🚀 Processing plan job');
+  let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+  logger.info(
+    { correlationId: job.generationToken, jobId: job.id, type: job.type },
+    '🚀 Processing plan job'
+  );
 
   // Log job start
   await logEvent(
@@ -63,10 +77,29 @@ async function processJob(job: PlanJob) {
     if (!job.specId) throw new Error(`Job ${job.id} is missing specId`);
     if (!job.planId) throw new Error(`Job ${job.id} is missing planId`);
 
-    const spec = await specificationRepository.getByIdWithVersion(job.specId);
-    if (!spec || !spec.currentVersion) {
-      throw new Error(`Specification ${job.specId} or its current version not found`);
+    if (!job.specVersionId || !job.generationToken) {
+      throw new StalePlanJobError(`Job ${job.id} is not bound to a specification version`);
     }
+    heartbeatTimer = setInterval(() => {
+      void planJobRepository
+        .heartbeat(job.id, job.generationToken!)
+        .then((isAlive) => {
+          if (!isAlive) {
+            logger.warn({ jobId: job.id }, 'Plan job heartbeat rejected for inactive lease');
+          }
+        })
+        .catch((err: unknown) => {
+          logger.warn({ err, jobId: job.id }, 'Failed to heartbeat plan job');
+        });
+    }, JOB_HEARTBEAT_INTERVAL_MS);
+    heartbeatTimer.unref();
+    const spec = await specificationRepository.getById(job.specId);
+    const targetVersion = await specificationRepository.getVersionById(
+      job.specId,
+      job.specVersionId
+    );
+    if (!spec || !targetVersion)
+      throw new StalePlanJobError('Target specification version is gone');
 
     const config = await agentConfigRepository.getByProjectId(job.projectId);
     const apiKey = config?.geminiApiKey || env.GEMINI_API_KEY || '';
@@ -79,7 +112,7 @@ async function processJob(job: PlanJob) {
       const generated = await generatePlan(
         {
           name: spec.name,
-          content: spec.currentVersion.markdownContent,
+          content: targetVersion.markdownContent,
         },
         {
           apiKey,
@@ -99,19 +132,60 @@ ${generated.architectureDecisions.map((d: { title: string; rationale: string; tr
 *Estimated time: ${generated.estimatedTotalMinutes} minutes*
 `;
 
-      await planRepository.update(job.planId, {
-        intent: generated.intent,
-        phaseLabel: generated.phaseLabel,
-        architectureDecisions: generated.architectureDecisions,
-        markdownContent: synthesizedMarkdown,
-        totalEstimatedMinutes: generated.estimatedTotalMinutes,
-        modelVersion: config?.geminiModel || env.GEMINI_MODEL || 'gemini-2.0-flash',
-        generationDurationMs: Date.now() - startMs,
-        status: 'pending_approval',
-      });
+      await db.transaction(async (tx) => {
+        const [currentJob] = await tx
+          .select()
+          .from(planJobs)
+          .where(eq(planJobs.id, job.id))
+          .limit(1)
+          .for('update');
+        const [currentSpec] = await tx
+          .select({
+            currentVersionId: specifications.currentVersionId,
+            status: specifications.status,
+          })
+          .from(specifications)
+          .where(eq(specifications.id, job.specId!))
+          .limit(1);
+        const [currentPlan] = await tx
+          .select({ status: plans.status, specVersionId: plans.specVersionId })
+          .from(plans)
+          .where(eq(plans.id, job.planId!))
+          .limit(1);
 
-      // Update spec status
-      await specificationRepository.updateStatus(job.specId, 'pending_approval');
+        if (
+          currentJob?.status !== 'running' ||
+          currentJob.generationToken !== job.generationToken ||
+          currentSpec?.currentVersionId !== job.specVersionId ||
+          currentSpec.status !== 'pending_plan' ||
+          currentPlan?.specVersionId !== job.specVersionId ||
+          currentPlan.status !== 'pending_approval'
+        ) {
+          throw new StalePlanJobError('Plan generation result was superseded');
+        }
+
+        await tx
+          .update(plans)
+          .set({
+            intent: generated.intent,
+            phaseLabel: generated.phaseLabel,
+            architectureDecisions: generated.architectureDecisions,
+            markdownContent: synthesizedMarkdown,
+            totalEstimatedMinutes: generated.estimatedTotalMinutes,
+            modelVersion: config?.geminiModel || env.GEMINI_MODEL || 'gemini-2.0-flash',
+            generationDurationMs: Date.now() - startMs,
+            status: 'pending_approval',
+          })
+          .where(eq(plans.id, job.planId!));
+        await tx
+          .update(specifications)
+          .set({ status: 'pending_approval', updatedAt: new Date() })
+          .where(eq(specifications.id, job.specId!));
+        await tx
+          .update(planJobs)
+          .set({ status: 'completed', completedAt: new Date(), updatedAt: new Date() })
+          .where(eq(planJobs.id, job.id));
+      });
 
       // Create notifications for project admins
       const admins = await memberRepository.getAdminsByProjectId(job.projectId);
@@ -160,15 +234,15 @@ ${generated.architectureDecisions.map((d: { title: string; rationale: string; tr
         };
       } else {
         generatedTasks = await generateTasks(
-          { name: spec.name, content: spec.currentVersion.markdownContent },
+          { name: spec.name, content: targetVersion.markdownContent },
           { markdownContent: plan.markdownContent || '' },
           { apiKey, model: config?.geminiModel }
         );
       }
 
-      // Create task records
+      // Validate and materialize the entire DAG before opening the transaction.
       const taskIdMap = new Map<number, string>();
-
+      const taskRows: (typeof tasks.$inferInsert)[] = [];
       for (let i = 0; i < generatedTasks.tasks.length; i++) {
         const t = generatedTasks.tasks[i];
         const externalId = `T-${(i + 1).toString().padStart(3, '0')}`;
@@ -178,7 +252,10 @@ ${generated.architectureDecisions.map((d: { title: string; rationale: string; tr
             ? ([taskIdMap.get(t.dependsOnIndex)].filter(Boolean) as string[])
             : [];
 
-        await taskRepository.create({
+        if (t.dependsOnIndex !== null && !taskIdMap.has(t.dependsOnIndex)) {
+          throw new Error(`Task ${i} has an invalid or forward dependency`);
+        }
+        taskRows.push({
           planId: job.planId,
           specId: job.specId,
           externalId,
@@ -188,6 +265,7 @@ ${generated.architectureDecisions.map((d: { title: string; rationale: string; tr
           dependsOn,
           executionOrder: i + 1,
           estimatedMinutes: t.estimatedMinutes,
+          expectedFiles: t.filesInvolved,
           doneCriteria: t.doneCriteria,
           verifyCommand: t.verifyCommand,
           recommendedModel: t.recommendedModel === 'pro' ? 'pro' : 'sonnet',
@@ -196,17 +274,46 @@ ${generated.architectureDecisions.map((d: { title: string; rationale: string; tr
         taskIdMap.set(i, externalId);
       }
 
-      // Update plan task count
-      await planRepository.update(job.planId, {
-        taskCount: generatedTasks.tasks.length,
+      await db.transaction(async (tx) => {
+        const [currentJob] = await tx
+          .select()
+          .from(planJobs)
+          .where(eq(planJobs.id, job.id))
+          .limit(1)
+          .for('update');
+        const [currentSpec] = await tx
+          .select({ currentVersionId: specifications.currentVersionId })
+          .from(specifications)
+          .where(eq(specifications.id, job.specId!))
+          .limit(1);
+        const [currentPlan] = await tx
+          .select({ status: plans.status, specVersionId: plans.specVersionId })
+          .from(plans)
+          .where(eq(plans.id, job.planId!))
+          .limit(1);
+        if (
+          currentJob?.status !== 'running' ||
+          currentJob.generationToken !== job.generationToken ||
+          currentSpec?.currentVersionId !== job.specVersionId ||
+          currentPlan?.specVersionId !== job.specVersionId ||
+          currentPlan.status !== 'executing'
+        ) {
+          throw new StalePlanJobError('Task generation result was superseded');
+        }
+
+        await tx.delete(tasks).where(eq(tasks.planId, job.planId!));
+        if (taskRows.length > 0) await tx.insert(tasks).values(taskRows);
+        await tx.update(plans).set({ taskCount: taskRows.length }).where(eq(plans.id, job.planId!));
+        await tx
+          .update(planJobs)
+          .set({
+            status: 'completed',
+            completedAt: new Date(),
+            updatedAt: new Date(),
+          })
+          .where(eq(planJobs.id, job.id));
       });
     }
-
-    // Mark job as completed
-    await planJobRepository.update(job.id, {
-      status: 'completed',
-      completedAt: new Date(),
-    });
 
     // Log job completion
     await logEvent(
@@ -223,11 +330,15 @@ ${generated.architectureDecisions.map((d: { title: string; rationale: string; tr
     const error = err instanceof Error ? err : new Error(String(err));
     logger.error({ err: error, jobId: job.id }, '❌ Job failed');
 
-    await planJobRepository.update(job.id, {
-      status: 'failed',
-      error: error.message,
-      completedAt: new Date(),
-    });
+    await db
+      .update(planJobs)
+      .set({
+        status: error instanceof StalePlanJobError ? 'cancelled' : 'failed',
+        error: error.message,
+        completedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(and(eq(planJobs.id, job.id), eq(planJobs.status, 'running')));
 
     // Log job failure
     await logEvent(
@@ -238,9 +349,20 @@ ${generated.architectureDecisions.map((d: { title: string; rationale: string; tr
     );
 
     // If it was a plan generation job, set spec to stalled
-    if (job.type === 'generate_plan' && job.specId) {
-      await specificationRepository.updateStatus(job.specId, 'stalled');
+    if (job.type === 'generate_plan' && job.specId && !(error instanceof StalePlanJobError)) {
+      await db
+        .update(specifications)
+        .set({ status: 'stalled', updatedAt: new Date() })
+        .where(
+          and(
+            eq(specifications.id, job.specId),
+            eq(specifications.currentVersionId, job.specVersionId!),
+            eq(specifications.status, 'pending_plan')
+          )
+        );
     }
+  } finally {
+    if (heartbeatTimer) clearInterval(heartbeatTimer);
   }
 }
 

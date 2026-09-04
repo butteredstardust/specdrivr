@@ -38,7 +38,12 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     }
 
     const list = await webhookRepository.getByProjectId(projectId);
-    return NextResponse.json({ data: list });
+    return NextResponse.json({
+      data: list.map(({ secret, ...webhook }) => ({
+        ...webhook,
+        secretConfigured: Boolean(secret),
+      })),
+    });
   } catch (error) {
     return handleApiError(error);
   }
@@ -69,7 +74,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const parsed = CreateWebhookSchema.parse({ projectId, ...body });
 
     const webhook = await webhookRepository.create(parsed);
-    return NextResponse.json({ data: webhook }, { status: 201 });
+    const { secret: storedSecret, ...publicWebhook } = webhook;
+    return NextResponse.json(
+      { data: { ...publicWebhook, secretConfigured: Boolean(storedSecret) } },
+      { status: 201 }
+    );
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(

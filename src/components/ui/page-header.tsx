@@ -17,10 +17,12 @@ export function PageHeader({ category, title, action, className }: PageHeaderPro
       )}
     >
       <div>
-        <div className="text-muted-foreground mb-1 font-mono text-[10px] tracking-[0.2em] uppercase">
+        <div className="text-muted-foreground mb-1 font-mono text-[11px] font-medium tracking-[0.12em] uppercase">
           {category}
         </div>
-        <h1 className="text-foreground text-xl font-semibold">{title}</h1>
+        <h1 className="text-foreground text-2xl leading-tight font-semibold tracking-[-0.015em]">
+          {title}
+        </h1>
       </div>
       {action && <div className="flex items-center gap-2">{action}</div>}
     </div>

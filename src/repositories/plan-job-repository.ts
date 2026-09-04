@@ -88,6 +88,23 @@ export class PlanJobRepository extends BaseRepository {
     });
   }
 
+  async heartbeat(id: number, generationToken: string): Promise<boolean> {
+    return await this.executeQuery(async () => {
+      const [job] = await db
+        .update(planJobs)
+        .set({ updatedAt: new Date() })
+        .where(
+          and(
+            eq(planJobs.id, id),
+            eq(planJobs.status, 'running'),
+            eq(planJobs.generationToken, generationToken)
+          )
+        )
+        .returning({ id: planJobs.id });
+      return job !== undefined;
+    });
+  }
+
   async getFilteredByProject(
     projectId: number,
     options: { status?: 'pending' | 'running' | 'completed' | 'failed' | null },
@@ -127,7 +144,7 @@ export class PlanJobRepository extends BaseRepository {
   }
 
   /**
-   * Recovers jobs that have been stuck in 'running' for too long.
+   * Recovers running jobs whose worker heartbeat has gone stale.
    */
   async recoverStuckJobs(thresholdMinutes = 15): Promise<number> {
     return await this.executeQuery(async () => {
@@ -137,11 +154,11 @@ export class PlanJobRepository extends BaseRepository {
         .update(planJobs)
         .set({
           status: 'failed',
-          error: `Job timed out (stuck in running for >${thresholdMinutes}m)`,
+          error: `Job timed out (no heartbeat for >${thresholdMinutes}m)`,
           updatedAt: new Date(),
           completedAt: new Date(),
         })
-        .where(and(eq(planJobs.status, 'running'), lt(planJobs.startedAt, thresholdDate)))
+        .where(and(eq(planJobs.status, 'running'), lt(planJobs.updatedAt, thresholdDate)))
         .returning();
 
       return stuckJobs.length;

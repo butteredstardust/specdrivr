@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { logger } from '@/lib/logger';
+import { requireAdmin } from '@/lib/rbac';
+
+const ALLOWED_PROVIDERS = new Set(['github.com', 'gitlab.com']);
 
 /**
- * GET /api/v1/verify-repo?url=<encoded-url>
+ * GET /api/v1/verify-repo?projectId=<id>&url=<encoded-url>
  *
  * Server-side proxy that performs a HEAD request against the given repository
  * URL. This avoids browser CORS restrictions when checking repo reachability.
@@ -23,6 +26,22 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const raw = searchParams.get('url');
+  const projectId = Number(searchParams.get('projectId'));
+
+  if (!Number.isInteger(projectId) || projectId <= 0) {
+    return NextResponse.json(
+      { error: { code: 'INVALID_PROJECT', message: 'A valid projectId is required' } },
+      { status: 422 }
+    );
+  }
+
+  const { allowed } = await requireAdmin(session.user.id, projectId);
+  if (!allowed) {
+    return NextResponse.json(
+      { error: { code: 'FORBIDDEN', message: 'Project admin access is required' } },
+      { status: 403 }
+    );
+  }
 
   if (!raw) {
     return NextResponse.json(
@@ -41,9 +60,21 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+  if (
+    parsed.protocol !== 'https:' ||
+    parsed.port !== '' ||
+    parsed.username !== '' ||
+    parsed.password !== '' ||
+    !ALLOWED_PROVIDERS.has(parsed.hostname.toLowerCase()) ||
+    parsed.pathname.split('/').filter(Boolean).length < 2
+  ) {
     return NextResponse.json(
-      { error: { code: 'INVALID_URL', message: 'url must use http or https protocol' } },
+      {
+        error: {
+          code: 'INVALID_URL',
+          message: 'url must be an HTTPS GitHub or GitLab repository URL',
+        },
+      },
       { status: 422 }
     );
   }
@@ -51,11 +82,11 @@ export async function GET(request: NextRequest) {
   try {
     const upstream = await fetch(parsed.toString(), {
       method: 'HEAD',
-      redirect: 'follow',
+      redirect: 'manual',
       signal: AbortSignal.timeout(8000),
     });
 
-    const reachable = upstream.status < 400;
+    const reachable = upstream.status >= 200 && upstream.status < 300;
     if (reachable) {
       return NextResponse.json({ data: { reachable: true, status: upstream.status } });
     }
@@ -65,7 +96,7 @@ export async function GET(request: NextRequest) {
       { status: 502 }
     );
   } catch (err) {
-    logger.warn({ err, url: parsed.toString() }, 'verify-repo: upstream unreachable');
+    logger.warn({ err, provider: parsed.hostname }, 'verify-repo: upstream unreachable');
     return NextResponse.json(
       { error: { code: 'UNREACHABLE', message: 'Repository URL is unreachable' } },
       { status: 502 }

@@ -2,6 +2,7 @@
   "name": "specdrivr",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.28.2",
   "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
@@ -18,27 +19,18 @@
     "db:aggregate": "tsx src/lib/jobs/aggregate-usage.ts",
     "setup": "pnpm db:migrate && pnpm db:seed",
     "test:unit": "vitest run --no-file-parallelism",
+    "test:coverage": "vitest run --no-file-parallelism --coverage",
     "test:unit:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "screenshots": "tsx scripts/capture-readme-screenshots.ts",
     "test": "pnpm test:unit && pnpm test:e2e",
     "prepare": "husky",
     "agent": "tsx scripts/agent.ts",
     "worker": "tsx scripts/plan-worker.ts",
+    "worker:recovery": "tsx scripts/recovery-worker.ts",
+    "worker:webhooks": "tsx scripts/webhook-worker.ts",
     "ghost-buster": "tsx scripts/ghost-buster.ts"
-  },
-  "pnpm": {
-    "overrides": {
-      "vite": "^7.3.1",
-      "undici": "^7.24.0",
-      "esbuild": "^0.25.0",
-      "@hono/node-server": "^1.19.10",
-      "hono": "^4.12.7",
-      "lodash": "^4.17.23",
-      "flatted": "^3.4.2",
-      "kysely": "^0.28.14",
-      "effect": "^3.20.0"
-    }
   },
   "dependencies": {
     "@base-ui/react": "^1.2.0",
@@ -131,6 +123,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.4",
+    "@vitest/coverage-v8": "4.0.18",
     "@vitest/ui": "^4.0.18",
     "autoprefixer": "^10.4.0",
     "babel-plugin-react-compiler": "^1.0.0",

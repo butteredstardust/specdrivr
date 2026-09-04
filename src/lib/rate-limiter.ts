@@ -1,5 +1,6 @@
 import 'server-only';
 import { redis } from './redis';
+import { logger } from './logger';
 
 interface RateLimitResult {
   allowed: boolean;
@@ -44,8 +45,9 @@ export async function checkRateLimit(tier: Tier, identifier: string): Promise<Ra
     const resetAt = now + windowMs;
 
     return { allowed, remaining, resetAt };
-  } catch {
+  } catch (error) {
     // If Redis is unavailable, fail open to avoid blocking all traffic
+    logger.warn({ error, tier }, 'Rate limiter failed open');
     return { allowed: true, remaining: limit, resetAt: now + windowMs };
   }
 }

@@ -1,5 +1,5 @@
 import 'server-only';
-import { projectRepository } from '@/repositories/project-repository';
+import { agentConfigRepository } from '@/repositories/agent-config-repository';
 import { logger } from './logger';
 
 export type SlackEventType =
@@ -29,7 +29,7 @@ export async function getSlackConfig(projectId: number): Promise<{
   channelId: string;
 } | null> {
   try {
-    const config = await projectRepository.getAgentConfig(projectId);
+    const config = await agentConfigRepository.getByProjectId(projectId);
 
     if (!config || !config.slackBotToken || !config.slackChannelId) {
       return null;
@@ -51,17 +51,13 @@ export async function getSlackConfig(projectId: number): Promise<{
 export async function setSlackConfig(
   projectId: number,
   config: { botToken: string; channelId: string },
-  actorId: string
+  _actorId: string
 ): Promise<void> {
   try {
-    await projectRepository.updateAgentConfig(
-      projectId,
-      {
-        slackBotToken: config.botToken,
-        slackChannelId: config.channelId,
-      },
-      actorId
-    );
+    await agentConfigRepository.upsertByProjectId(projectId, {
+      slackBotToken: config.botToken,
+      slackChannelId: config.channelId,
+    });
 
     logger.info({ projectId, slackConfigured: true }, 'Slack config updated');
   } catch (error) {
@@ -73,16 +69,12 @@ export async function setSlackConfig(
 /**
  * Remove Slack config for a project (disconnect).
  */
-export async function removeSlackConfig(projectId: number, actorId: string): Promise<void> {
+export async function removeSlackConfig(projectId: number, _actorId: string): Promise<void> {
   try {
-    await projectRepository.updateAgentConfig(
-      projectId,
-      {
-        slackBotToken: null,
-        slackChannelId: null,
-      },
-      actorId
-    );
+    await agentConfigRepository.upsertByProjectId(projectId, {
+      slackBotToken: null,
+      slackChannelId: null,
+    });
 
     logger.info({ projectId }, 'Slack config removed');
   } catch (error) {

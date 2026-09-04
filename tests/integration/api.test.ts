@@ -38,6 +38,7 @@ import { POST as addVersion } from '@/app/api/v1/specs/[id]/versions/route';
 import { POST as approvePlan } from '@/app/api/v1/plans/[id]/approve/route';
 import { POST as rejectPlan } from '@/app/api/v1/plans/[id]/reject/route';
 import { POST as unblockTask } from '@/app/api/v1/tasks/[id]/unblock/route';
+import { PATCH as updateTask } from '@/app/api/v1/tasks/[id]/route';
 import { GET as getAttempts } from '@/app/api/v1/tasks/[id]/attempts/route';
 import { POST as cancelSession } from '@/app/api/v1/sessions/[id]/cancel/route';
 import { POST as heartbeatSession } from '@/app/api/v1/sessions/[id]/heartbeat/route';
@@ -380,6 +381,61 @@ describe('API Route Integration Tests', () => {
     });
   });
 
+  describe('PATCH /api/v1/tasks/:id', () => {
+    async function createTaskFixture() {
+      const user = await createTestUser('u1', 'u1@example.com', 'owner');
+      const project = await createTestProject('P1', user.id);
+      await mockSession(user.id, user.email);
+
+      const [spec] = await testDb
+        .insert(schema.specifications)
+        .values({ projectId: project.id, name: 'S1' })
+        .returning();
+      const [plan] = await testDb.insert(schema.plans).values({ specId: spec.id }).returning();
+      const [task] = await testDb
+        .insert(schema.tasks)
+        .values({ planId: plan.id, externalId: 'T-1', title: 'Original title' })
+        .returning();
+
+      return task;
+    }
+
+    it('persists title updates', async () => {
+      const task = await createTaskFixture();
+      const request = new NextRequest(`http://localhost/api/v1/tasks/${task.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ title: '  Updated title  ' }),
+      });
+
+      const response = await updateTask(request, {
+        params: Promise.resolve({ id: String(task.id) }),
+      });
+      const [storedTask] = await testDb
+        .select()
+        .from(schema.tasks)
+        .where(eq(schema.tasks.id, task.id));
+
+      expect(response.status).toBe(200);
+      expect(storedTask.title).toBe('Updated title');
+    });
+
+    it('rejects notes without a status override', async () => {
+      const task = await createTaskFixture();
+      const request = new NextRequest(`http://localhost/api/v1/tasks/${task.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ notes: 'Explain the override' }),
+      });
+
+      const response = await updateTask(request, {
+        params: Promise.resolve({ id: String(task.id) }),
+      });
+      const body = (await response.json()) as { error: { message: string } };
+
+      expect(response.status).toBe(400);
+      expect(body.error.message).toBe('Notes can only accompany a status override');
+    });
+  });
+
   describe('GET /api/v1/tasks/:id/attempts', () => {
     it('returns ordered attempts', async () => {
       const user = await createTestUser('u1', 'u1@example.com', 'owner');
@@ -396,7 +452,9 @@ describe('API Route Integration Tests', () => {
         .values({ planId: plan.id, externalId: 'T-1', title: 'T1' })
         .returning();
 
-      await testDb.insert(schema.taskAttempts).values({ taskId: task.id, seq: 1 });
+      await testDb
+        .insert(schema.taskAttempts)
+        .values({ taskId: task.id, seq: 1, status: 'succeeded', endedAt: new Date() });
       await testDb.insert(schema.taskAttempts).values({ taskId: task.id, seq: 2 });
 
       const req = new NextRequest(`http://localhost/api/v1/tasks/${task.id}/attempts`);

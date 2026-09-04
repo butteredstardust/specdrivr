@@ -1,4 +1,4 @@
-import { relations } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 import {
   pgTable,
   serial,
@@ -70,6 +70,7 @@ export const planJobStatusEnum = pgEnum('plan_job_status', [
   'running',
   'completed',
   'failed',
+  'cancelled',
 ]);
 
 export const planJobTypeEnum = pgEnum('plan_job_type', ['generate_plan', 'generate_tasks']);
@@ -338,6 +339,8 @@ export const tasks = pgTable(
     externalId: text('external_id').notNull(), // e.g. "T-101" — display identifier
     title: text('title').notNull(),
     description: text('description'),
+    doneCriteria: text('done_criteria'),
+    verifyCommand: text('verify_command'),
     status: taskStatusEnum('status').notNull().default('todo'),
     dependsOn: text('depends_on').array().default([]), // array of externalIds e.g. ["T-099", "T-100"]
     executionOrder: integer('execution_order').notNull().default(0),
@@ -347,6 +350,9 @@ export const tasks = pgTable(
     attemptCount: integer('attempt_count').notNull().default(0),
     currentAttemptId: integer('current_attempt_id'), // set to latest attempt FK after start
     verificationPassed: boolean('verification_passed'),
+    verificationOutput: text('verification_output'),
+    verificationExitCode: integer('verification_exit_code'),
+    verificationCompletedAt: timestamp('verification_completed_at', { withTimezone: true }),
     estimatedMinutes: integer('estimated_minutes'),
     actualDurationMs: integer('actual_duration_ms'),
     gitBranch: text('git_branch'),
@@ -366,7 +372,7 @@ export const tasks = pgTable(
   (table) => ({
     planStatusIdx: index('task_plan_status_idx').on(table.planId, table.status),
     specIdx: index('task_spec_idx').on(table.specId),
-    externalIdIdx: index('task_external_id_idx').on(table.planId, table.externalId),
+    externalIdIdx: uniqueIndex('task_external_id_idx').on(table.planId, table.externalId),
   })
 );
 
@@ -391,11 +397,19 @@ export const taskAttempts = pgTable(
     exitCode: integer('exit_code'),
     workingDirectory: text('working_directory'),
     errorMessage: text('error_message'),
+    completionKey: text('completion_key'),
     startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
     endedAt: timestamp('ended_at', { withTimezone: true }),
   },
   (table) => ({
     taskIdx: index('attempt_task_idx').on(table.taskId),
+    taskSeqUnique: uniqueIndex('attempt_task_seq_unique').on(table.taskId, table.seq),
+    completionKeyUnique: uniqueIndex('attempt_completion_key_unique')
+      .on(table.completionKey)
+      .where(sql`${table.completionKey} IS NOT NULL`),
+    activeTaskUnique: uniqueIndex('attempt_active_task_unique')
+      .on(table.taskId)
+      .where(sql`${table.status} = 'running'`),
   })
 );
 
@@ -624,6 +638,10 @@ export const planJobs = pgTable(
       .references(() => projects.id, { onDelete: 'cascade' }),
     specId: integer('spec_id').references(() => specifications.id, { onDelete: 'cascade' }),
     planId: integer('plan_id').references(() => plans.id, { onDelete: 'cascade' }),
+    specVersionId: integer('spec_version_id').references(() => specVersions.id, {
+      onDelete: 'cascade',
+    }),
+    generationToken: text('generation_token'),
     status: planJobStatusEnum('status').notNull().default('pending'),
     type: planJobTypeEnum('type').notNull(),
     error: text('error'),
@@ -635,6 +653,7 @@ export const planJobs = pgTable(
   (table) => ({
     // I-7: Allow efficient lookups by project + status (used by getActiveByProject / getPendingByProject)
     projectStatusIdx: index('plan_job_project_status_idx').on(table.projectId, table.status),
+    planTypeUnique: uniqueIndex('plan_job_plan_type_unique').on(table.planId, table.type),
   })
 );
 
@@ -659,24 +678,32 @@ export const webhooks = pgTable('webhooks', {
 // Webhook Deliveries
 // ---------------------------------------------------------------------------
 
-export const webhookDeliveries = pgTable('webhook_deliveries', {
-  id: serial('id').primaryKey(),
-  webhookId: integer('webhook_id').references(() => webhooks.id, { onDelete: 'set null' }),
-  projectId: integer('project_id')
-    .notNull()
-    .references(() => projects.id, { onDelete: 'cascade' }),
-  eventType: text('event_type').notNull(),
-  payload: jsonb('payload').notNull(),
-  requestHeaders: jsonb('request_headers'),
-  responseStatus: integer('response_status'),
-  responseBody: text('response_body'),
-  durationMs: integer('duration_ms'),
-  attempt: integer('attempt').notNull().default(1),
-  status: text('status').notNull().default('pending'), // pending | delivered | failed | exhausted
-  nextRetryAt: timestamp('next_retry_at', { withTimezone: true }),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  deliveredAt: timestamp('delivered_at', { withTimezone: true }),
-});
+export const webhookDeliveries = pgTable(
+  'webhook_deliveries',
+  {
+    id: serial('id').primaryKey(),
+    webhookId: integer('webhook_id').references(() => webhooks.id, { onDelete: 'set null' }),
+    projectId: integer('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    eventType: text('event_type').notNull(),
+    payload: jsonb('payload').notNull(),
+    requestHeaders: jsonb('request_headers'),
+    responseStatus: integer('response_status'),
+    responseBody: text('response_body'),
+    durationMs: integer('duration_ms'),
+    attempt: integer('attempt').notNull().default(1),
+    status: text('status').notNull().default('pending'), // pending | delivered | failed | exhausted
+    nextRetryAt: timestamp('next_retry_at', { withTimezone: true }),
+    lockedAt: timestamp('locked_at', { withTimezone: true }),
+    leaseToken: text('lease_token'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    deliveredAt: timestamp('delivered_at', { withTimezone: true }),
+  },
+  (table) => ({
+    queueIdx: index('webhook_delivery_queue_idx').on(table.status, table.nextRetryAt),
+  })
+);
 
 // ---------------------------------------------------------------------------
 // Usage Snapshots
@@ -735,6 +762,7 @@ export const apiRequestLogs = pgTable('api_request_logs', {
   method: text('method').notNull(),
   statusCode: integer('status_code').notNull(),
   durationMs: integer('duration_ms').notNull(),
+  correlationId: text('correlation_id'),
   requestedAt: timestamp('requested_at', { withTimezone: true }).notNull().defaultNow(),
 });
 

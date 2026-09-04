@@ -1,5 +1,6 @@
 #!/usr/bin/env tsx
-import { execSync, spawn } from 'child_process';
+import { execSync, spawn, type ChildProcess } from 'child_process';
+import { randomUUID } from 'node:crypto';
 import { BACKEND_CONFIG, buildCliArgs, AgentBackend, TaskWeight } from '../src/lib/agent-models';
 
 const API_BASE = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
@@ -22,6 +23,8 @@ const headers = {
 
 interface Task {
   id: number;
+  attemptId: number;
+  sessionId: number;
   externalId: string;
   title: string;
   description: string;
@@ -32,7 +35,7 @@ interface Task {
   specId?: number;
   projectName?: string;
   specName?: string;
-  filesInvolved?: string[];
+  expectedFiles?: string[];
   dependencies?: { title: string; doneCriteria: string }[];
   humanContext?: string;
   githubConfig?: {
@@ -44,9 +47,27 @@ interface Task {
   };
   agentConfig?: {
     backend?: string;
-    geminiApiKey?: string;
-    claudeApiKey?: string;
+    taskTimeoutSeconds?: number;
   };
+}
+
+function terminateProcessGroup(child: ChildProcess): void {
+  if (!child.pid || child.killed) return;
+  try {
+    if (process.platform === 'win32') child.kill('SIGTERM');
+    else process.kill(-child.pid, 'SIGTERM');
+  } catch {
+    child.kill('SIGTERM');
+  }
+  setTimeout(() => {
+    if (child.exitCode !== null) return;
+    try {
+      if (process.platform === 'win32') child.kill('SIGKILL');
+      else if (child.pid) process.kill(-child.pid, 'SIGKILL');
+    } catch {
+      child.kill('SIGKILL');
+    }
+  }, 5000).unref();
 }
 
 async function api(method: string, path: string, body?: unknown) {
@@ -73,7 +94,65 @@ function git(args: string[]): string {
   }
 }
 
+function buildTaskPrompt(task: Task, backend: AgentBackend): string {
+  return [
+    `You are executing ${task.externalId} with the ${backend} backend.`,
+    `Title: ${task.title}`,
+    `Description: ${task.description}`,
+    task.doneCriteria ? `Done criteria: ${task.doneCriteria}` : '',
+    task.expectedFiles?.length ? `Expected files: ${task.expectedFiles.join(', ')}` : '',
+    task.dependencies?.length
+      ? `Completed dependencies:\n${task.dependencies.map((dep) => `- ${dep.title}: ${dep.doneCriteria}`).join('\n')}`
+      : '',
+    task.humanContext ? `Human context: ${task.humanContext}` : '',
+    'Implement the task completely, keep changes scoped, and leave the working tree ready for verification.',
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+}
+
+async function runVerification(
+  task: Task,
+  command: string
+): Promise<{ exitCode: number; output: string; sessionStopped: boolean }> {
+  await streamLog(`⚙ Verifying with: ${command}`, task.id);
+  const child = spawn(command, [], {
+    shell: true,
+    stdio: ['ignore', 'pipe', 'pipe'],
+    detached: process.platform !== 'win32',
+    env: process.env,
+  });
+  let output = '';
+  let sessionStopped = false;
+  const append = (chunk: unknown) => {
+    output = `${output}${String(chunk)}`.slice(-50_000);
+  };
+  child.stdout?.on('data', append);
+  child.stderr?.on('data', append);
+
+  return new Promise((resolve) => {
+    const timeout = setTimeout(() => terminateProcessGroup(child), 120_000);
+    const heartbeat = setInterval(async () => {
+      try {
+        const result = await api('POST', `/api/v1/sessions/${task.sessionId}/heartbeat`, {});
+        if (result.data?.shouldStop) {
+          sessionStopped = true;
+          terminateProcessGroup(child);
+        }
+      } catch (error) {
+        await streamLog(`Verification heartbeat warning: ${String(error)}`, task.id, 'warn');
+      }
+    }, 15_000);
+    child.on('close', (code) => {
+      clearTimeout(timeout);
+      clearInterval(heartbeat);
+      resolve({ exitCode: code ?? 1, output, sessionStopped });
+    });
+  });
+}
+
 async function executeTask(task: Task): Promise<void> {
+  const completionKey = randomUUID();
   const backend = (task.agentConfig?.backend as AgentBackend) || DEFAULT_BACKEND;
   const config = BACKEND_CONFIG[backend];
 
@@ -122,6 +201,8 @@ async function executeTask(task: Task): Promise<void> {
   let fullOutput = '';
   let exitCode = 0;
   let errorMessage: string | undefined;
+  let sessionStopped = false;
+  let timedOut = false;
 
   // Prepare environment with project-specific API keys
   const env = { ...process.env };
@@ -138,6 +219,7 @@ async function executeTask(task: Task): Promise<void> {
       stdio: ['ignore', 'pipe', 'pipe'],
       shell: process.platform === 'win32',
       env,
+      detached: process.platform !== 'win32',
     });
 
     child.stdout.on('data', (chunk) => {
@@ -152,8 +234,48 @@ async function executeTask(task: Task): Promise<void> {
     });
 
     exitCode = await new Promise<number>((resolve) => {
-      child.on('close', (code) => resolve(code ?? 0));
+      let heartbeatTimer: NodeJS.Timeout | undefined;
+      const timeoutTimer = setTimeout(
+        () => {
+          timedOut = true;
+          terminateProcessGroup(child);
+        },
+        (task.agentConfig?.taskTimeoutSeconds ?? 300) * 1000
+      );
+
+      const scheduleHeartbeat = () => {
+        const jitterMs = Math.floor(Math.random() * 4001) - 2000;
+        heartbeatTimer = setTimeout(async () => {
+          try {
+            const heartbeat = await api('POST', `/api/v1/sessions/${task.sessionId}/heartbeat`, {});
+            if (heartbeat.data?.shouldStop) {
+              sessionStopped = true;
+              terminateProcessGroup(child);
+              return;
+            }
+          } catch (heartbeatError) {
+            await streamLog(`Heartbeat warning: ${String(heartbeatError)}`, task.id, 'warn');
+          }
+          scheduleHeartbeat();
+        }, 15_000 + jitterMs);
+      };
+      scheduleHeartbeat();
+
+      child.on('close', (code) => {
+        clearTimeout(timeoutTimer);
+        if (heartbeatTimer) clearTimeout(heartbeatTimer);
+        resolve(code ?? 0);
+      });
     });
+
+    if (sessionStopped) {
+      await streamLog('Session stopped; released task without reporting completion.', task.id);
+      return;
+    }
+
+    if (timedOut) {
+      throw new Error(`Task exceeded ${task.agentConfig?.taskTimeoutSeconds ?? 300}s timeout`);
+    }
 
     if (exitCode !== 0) {
       throw new Error(`Process exited with code ${exitCode}`);
@@ -166,6 +288,9 @@ async function executeTask(task: Task): Promise<void> {
     await streamLog(`Task failed with exit code ${exitCode}`, task.id, 'error');
 
     await api('POST', `/api/v1/tasks/${task.id}/complete`, {
+      attemptId: task.attemptId,
+      sessionId: task.sessionId,
+      completionKey,
       output: fullOutput.slice(0, 50000),
       status: 'failed',
       exitCode,
@@ -189,6 +314,30 @@ async function executeTask(task: Task): Promise<void> {
     }
   }
 
+  let verification: { exitCode: number; output: string; sessionStopped: boolean } | undefined;
+  if (task.verifyCommand?.trim()) {
+    verification = await runVerification(task, task.verifyCommand);
+    if (verification.sessionStopped) {
+      await streamLog('Session stopped during verification.', task.id, 'warn');
+      return;
+    }
+    await streamLog(verification.output, task.id, verification.exitCode === 0 ? 'info' : 'error');
+    if (verification.exitCode !== 0) {
+      await api('POST', `/api/v1/tasks/${task.id}/complete`, {
+        attemptId: task.attemptId,
+        sessionId: task.sessionId,
+        completionKey,
+        status: 'failed',
+        exitCode: verification.exitCode,
+        errorMessage: 'Verification command failed',
+        verificationPassed: false,
+        verificationOutput: verification.output,
+        verificationExitCode: verification.exitCode,
+      });
+      return;
+    }
+  }
+
   // Git Commit & Push
   let commitHash: string | undefined;
   if (task.githubConfig) {
@@ -197,7 +346,7 @@ async function executeTask(task: Task): Promise<void> {
       await streamLog(`⚙ Git: Committing changes to ${branchName}...`, task.id);
 
       git(['add', '-A']);
-      
+
       // Ensure git user is configured
       try {
         git(['config', 'user.name', 'Specdrivr DAEMON']);
@@ -213,7 +362,7 @@ async function executeTask(task: Task): Promise<void> {
         commitHash = git(['rev-parse', 'HEAD']);
 
         await streamLog(`⚙ Git: Pushing to origin/${branchName}...`, task.id);
-        
+
         // Push using token for auth
         const remoteUrl = `https://x-access-token:${token}@github.com/${repo}.git`;
         git(['push', '-u', remoteUrl, branchName, '--force']);
@@ -227,12 +376,18 @@ async function executeTask(task: Task): Promise<void> {
 
   // Finalize Task
   await api('POST', `/api/v1/tasks/${task.id}/complete`, {
+    attemptId: task.attemptId,
+    sessionId: task.sessionId,
+    completionKey,
     output: logOutput.slice(0, 50000),
     status: 'done',
     exitCode: 0,
     gitBranch: task.githubConfig?.branchName,
     gitCommitHash: commitHash,
     totalCostUsd,
+    verificationPassed: verification ? true : undefined,
+    verificationOutput: verification?.output,
+    verificationExitCode: verification?.exitCode,
   });
 
   await streamLog(`✓ T-${task.externalId} complete`, task.id);

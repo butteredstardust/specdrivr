@@ -15,7 +15,8 @@ import {
   Trash2,
 } from 'lucide-react';
 import { clientLogger } from '@/lib/logger-client';
-import type { UserRole, AgentConfigSelect, WebhookSelect } from '@/db/schema';
+import type { UserRole, WebhookSelect } from '@/db/schema';
+import type { PublicAgentConfig } from '@/lib/agent-config-public';
 import { usePolling } from '@/hooks/use-polling';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -74,6 +75,8 @@ interface WebhookFormData {
   secret: string;
   events: string[];
 }
+
+type PublicWebhook = Omit<WebhookSelect, 'secret'> & { secretConfigured: boolean };
 
 const WEBHOOK_EVENTS = [
   { value: 'task.completed', label: 'task.completed' },
@@ -202,21 +205,21 @@ function DisabledButtonWithTooltip({
 interface GitHubCardProps {
   projectId: number;
   editable: boolean;
-  initialData: AgentConfigSelect | null;
+  initialData: PublicAgentConfig | null;
   onSaved: () => void;
 }
 
 function GitHubCard({ projectId, editable, initialData, onSaved }: GitHubCardProps) {
   const [form, setForm] = useState<GitHubFields>({
-    githubToken: initialData?.githubToken ?? '',
+    githubToken: '',
     githubRepo: initialData?.githubRepo ?? '',
     githubBranch: initialData?.githubBranch ?? 'main',
-    githubWebhookSecret: initialData?.githubWebhookSecret ?? '',
+    githubWebhookSecret: '',
   });
   const [isSaving, setIsSaving] = useState(false);
   const [disconnectOpen, setDisconnectOpen] = useState(false);
 
-  const connected = Boolean(form.githubToken && form.githubRepo);
+  const connected = Boolean(initialData?.githubTokenConfigured && form.githubRepo);
   const webhookUrl =
     typeof window !== 'undefined'
       ? `${window.location.origin}/api/webhooks/github/${projectId}`
@@ -235,10 +238,12 @@ function GitHubCard({ projectId, editable, initialData, onSaved }: GitHubCardPro
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          githubToken: form.githubToken.trim() || null,
+          ...(form.githubToken.trim() ? { githubToken: form.githubToken.trim() } : {}),
           githubRepo: form.githubRepo.trim() || null,
           githubBranch: form.githubBranch.trim() || 'main',
-          githubWebhookSecret: form.githubWebhookSecret.trim() || null,
+          ...(form.githubWebhookSecret.trim()
+            ? { githubWebhookSecret: form.githubWebhookSecret.trim() }
+            : {}),
         }),
       });
       if (!res.ok) {
@@ -519,19 +524,19 @@ function GitHubCard({ projectId, editable, initialData, onSaved }: GitHubCardPro
 interface SlackCardProps {
   projectId: number;
   editable: boolean;
-  initialData: AgentConfigSelect | null;
+  initialData: PublicAgentConfig | null;
   onSaved: () => void;
 }
 
 function SlackCard({ projectId, editable, initialData, onSaved }: SlackCardProps) {
   const [form, setForm] = useState<SlackFields>({
-    slackBotToken: initialData?.slackBotToken ?? '',
+    slackBotToken: '',
     slackChannelId: initialData?.slackChannelId ?? '',
   });
   const [isSaving, setIsSaving] = useState(false);
   const [disconnectOpen, setDisconnectOpen] = useState(false);
 
-  const connected = Boolean(form.slackBotToken && form.slackChannelId);
+  const connected = Boolean(initialData?.slackBotTokenConfigured && form.slackChannelId);
 
   const set = <K extends keyof SlackFields>(key: K, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -546,7 +551,7 @@ function SlackCard({ projectId, editable, initialData, onSaved }: SlackCardProps
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          slackBotToken: form.slackBotToken.trim() || null,
+          ...(form.slackBotToken.trim() ? { slackBotToken: form.slackBotToken.trim() } : {}),
           slackChannelId: form.slackChannelId.trim() || null,
         }),
       });
@@ -855,13 +860,13 @@ interface WebhooksCardProps {
 }
 
 function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
-  const [webhooks, setWebhooks] = useState<WebhookSelect[]>([]);
+  const [webhooks, setWebhooks] = useState<PublicWebhook[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editTarget, setEditTarget] = useState<WebhookSelect | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<WebhookSelect | null>(null);
+  const [editTarget, setEditTarget] = useState<PublicWebhook | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<PublicWebhook | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const onData = useCallback((data: WebhookSelect[]) => {
+  const onData = useCallback((data: PublicWebhook[]) => {
     setWebhooks(data ?? []);
   }, []);
 
@@ -869,7 +874,7 @@ function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
     clientLogger.error('Failed to load webhooks', err);
   }, []);
 
-  const { isLoading, restart } = usePolling<WebhookSelect[]>({
+  const { isLoading, restart } = usePolling<PublicWebhook[]>({
     url: `/api/v1/projects/${projectId}/webhooks`,
     stopWhen: () => true,
     onData,
@@ -881,7 +886,7 @@ function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
     setDialogOpen(true);
   };
 
-  const openEdit = (wh: WebhookSelect) => {
+  const openEdit = (wh: PublicWebhook) => {
     setEditTarget(wh);
     setDialogOpen(true);
   };
@@ -897,7 +902,7 @@ function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             url: data.url,
-            secret: data.secret || null,
+            ...(data.secret ? { secret: data.secret } : {}),
             events: data.events,
           }),
         });
@@ -962,7 +967,7 @@ function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
   const editInitial: WebhookFormData | undefined = editTarget
     ? {
         url: editTarget.url,
-        secret: (editTarget.secret as string | null) ?? '',
+        secret: '',
         events: (editTarget.events as string[]) ?? [],
       }
     : undefined;
@@ -1108,10 +1113,10 @@ function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
 export function IntegrationsSection({ projectId, userRole }: IntegrationsSectionProps) {
   const editable = canEdit(userRole);
 
-  const [agentConfig, setAgentConfig] = useState<AgentConfigSelect | null>(null);
+  const [agentConfig, setAgentConfig] = useState<PublicAgentConfig | null>(null);
   const [configVersion, setConfigVersion] = useState(0);
 
-  const onData = useCallback((data: AgentConfigSelect | null) => {
+  const onData = useCallback((data: PublicAgentConfig | null) => {
     setAgentConfig(data);
   }, []);
 
@@ -1120,7 +1125,7 @@ export function IntegrationsSection({ projectId, userRole }: IntegrationsSection
     toast.error('Failed to load integration settings');
   }, []);
 
-  const { isLoading, restart: restartConfig } = usePolling<AgentConfigSelect | null>({
+  const { isLoading, restart: restartConfig } = usePolling<PublicAgentConfig | null>({
     url: `/api/v1/projects/${projectId}/agent-config`,
     interval: 60_000,
     stopWhen: () => true,

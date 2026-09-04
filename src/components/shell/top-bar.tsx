@@ -61,7 +61,11 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
     const label = PATH_LABELS[path] ?? (isLast && pageLabel ? pageLabel : seg);
     return { label, href: path };
   });
-  const crumbs = breadcrumbs ?? autoCrumbs;
+  const crumbs =
+    breadcrumbs ??
+    (pathname === '/'
+      ? [{ label: PATH_LABELS['/'] ?? 'Mission Control' }]
+      : [{ label: PATH_LABELS['/'] ?? 'Mission Control', href: '/' }, ...autoCrumbs.slice(0, -1)]);
 
   const initials = user?.name
     ? user.name
@@ -83,21 +87,15 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
       <div className="flex flex-1 items-center overflow-hidden">
         <Breadcrumb>
           <BreadcrumbList className="flex-nowrap">
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link
-                  href="/"
-                  className="text-text-muted hover:text-text-primary transition-colors"
-                >
-                  {PATH_LABELS['/'] ?? 'Home'}
-                </Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
             {crumbs.map((crumb, i) => (
               <Fragment key={crumb.href ?? i}>
-                <BreadcrumbSeparator className="opacity-40" />
+                {i > 0 && <BreadcrumbSeparator className="opacity-40" />}
                 <BreadcrumbItem className="overflow-hidden">
-                  {i === crumbs.length - 1 || !crumb.href ? (
+                  {pathname === '/' && !crumb.href ? (
+                    <h1 className="text-text-primary truncate text-lg font-semibold tracking-[-0.01em]">
+                      {crumb.label}
+                    </h1>
+                  ) : !crumb.href ? (
                     <BreadcrumbPage className="text-text-primary truncate font-medium">
                       {crumb.label}
                     </BreadcrumbPage>
@@ -133,7 +131,7 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
               {unreadCount > 0 && (
                 <PixelBadge
                   variant="blue"
-                  className="border-bg-surface absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full border-2 p-0 text-[8px] shadow-sm"
+                  className="border-bg-surface absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full border-2 p-0 text-[10px] shadow-sm"
                 >
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </PixelBadge>
@@ -187,7 +185,7 @@ export function TopBar({ breadcrumbs }: TopBarProps) {
               <p className="text-text-muted truncate text-xs">{user?.email}</p>
               {user?.role && (
                 <div className="mt-2">
-                  <PixelBadge variant="blue" className="font-mono text-[9px] tracking-[0.1em]">
+                  <PixelBadge variant="blue" className="font-mono text-[10px] tracking-[0.08em]">
                     {user.role}
                   </PixelBadge>
                 </div>

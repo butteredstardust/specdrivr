@@ -31,11 +31,21 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       );
     }
 
+    const existing = await webhookRepository.getById(wId);
+    if (!existing || existing.projectId !== projectId) {
+      return NextResponse.json(
+        { error: { code: 'NOT_FOUND', message: 'Webhook not found' } },
+        { status: 404 }
+      );
+    }
+
     const body = await request.json();
     const parsed = updateWebhookSchema.parse({ id: wId, ...body });
 
-    const webhook = await webhookRepository.update(wId, parsed);
-    return NextResponse.json({ data: webhook });
+    const { id: _validatedId, ...update } = parsed;
+    const webhook = await webhookRepository.update(wId, update);
+    const { secret, ...publicWebhook } = webhook;
+    return NextResponse.json({ data: { ...publicWebhook, secretConfigured: Boolean(secret) } });
   } catch (error) {
     return handleApiError(error);
   }
@@ -60,6 +70,14 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
       return NextResponse.json(
         { error: { code: 'FORBIDDEN', message: 'You must be a project admin to manage webhooks' } },
         { status: 403 }
+      );
+    }
+
+    const existing = await webhookRepository.getById(wId);
+    if (!existing || existing.projectId !== projectId) {
+      return NextResponse.json(
+        { error: { code: 'NOT_FOUND', message: 'Webhook not found' } },
+        { status: 404 }
       );
     }
 

@@ -7,7 +7,8 @@ import { z } from 'zod';
 import { toast } from 'sonner';
 import { X } from 'lucide-react';
 import { clientLogger } from '@/lib/logger-client';
-import type { UserRole, AgentConfigSelect } from '@/db/schema';
+import type { UserRole } from '@/db/schema';
+import type { PublicAgentConfig } from '@/lib/agent-config-public';
 import { usePolling } from '@/hooks/use-polling';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -219,7 +220,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
 
   // One-shot fetch via usePolling — stop immediately after first successful load
   const onData = useCallback(
-    (data: AgentConfigSelect | null) => {
+    (data: PublicAgentConfig | null) => {
       if (!data) return;
       reset({
         modelId: data.modelId ?? DEFAULTS.modelId,
@@ -240,9 +241,9 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
         maxDiffSizeKb: data.maxDiffSizeKb ?? DEFAULTS.maxDiffSizeKb,
         prAutoCreate: data.prAutoCreate ?? DEFAULTS.prAutoCreate,
         prTargetBranch: data.prTargetBranch ?? DEFAULTS.prTargetBranch,
-        geminiApiKey: data.geminiApiKey ?? DEFAULTS.geminiApiKey,
+        geminiApiKey: DEFAULTS.geminiApiKey,
         geminiModel: data.geminiModel ?? DEFAULTS.geminiModel,
-        claudeApiKey: data.claudeApiKey ?? DEFAULTS.claudeApiKey,
+        claudeApiKey: DEFAULTS.claudeApiKey,
         backend: (data.backend as 'gemini' | 'claude') ?? DEFAULTS.backend,
       });
     },
@@ -254,7 +255,7 @@ export function AgentConfigForm({ projectId, userRole }: AgentConfigFormProps) {
     toast.error('Failed to load agent configuration');
   }, []);
 
-  const { isLoading } = usePolling<AgentConfigSelect | null>({
+  const { isLoading } = usePolling<PublicAgentConfig | null>({
     url: `/api/v1/projects/${projectId}/agent-config`,
     stopWhen: () => true,
     onData,

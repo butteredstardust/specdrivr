@@ -92,7 +92,7 @@ function SystemIcon({
               )}
             />
           </div>
-          <span className="text-text-muted group-hover:text-text-secondary mt-0.5 font-mono text-[8px] tracking-[0.12em] uppercase transition-colors">
+          <span className="text-text-muted group-hover:text-text-secondary mt-0.5 font-mono text-[10px] tracking-[0.08em] uppercase transition-colors">
             {label}
           </span>
         </div>
@@ -163,7 +163,7 @@ function SidebarBottom({ collapsed }: { collapsed: boolean }) {
     <div className="border-border-muted border-t">
       {/* Systems icons */}
       <div className="px-4 pt-4 pb-2">
-        <span className="text-text-muted mb-3 block px-1 font-mono text-[10px] tracking-[0.15em] uppercase opacity-70">
+        <span className="text-text-muted mb-3 block px-1 font-mono text-[11px] tracking-[0.1em] uppercase opacity-70">
           Systems
         </span>
         <div className="flex items-end justify-between px-1">
@@ -178,12 +178,12 @@ function SidebarBottom({ collapsed }: { collapsed: boolean }) {
       <div className="px-4 pt-2 pb-4">
         <div className="flex items-center gap-2">
           <DaemonMascot size={20} expression={overallExpr} />
-          <span className={cn('font-mono text-[10px] tracking-[0.1em] uppercase', statusClass)}>
+          <span className={cn('font-mono text-[11px] tracking-[0.08em] uppercase', statusClass)}>
             DAEMON · {statusText}
           </span>
         </div>
         <div className="mt-1.5 px-0.5">
-          <span className="text-text-muted/40 font-mono text-[9px] tracking-wider">v0.1.0</span>
+          <span className="text-text-muted/50 font-mono text-[10px] tracking-wide">v0.1.0</span>
         </div>
       </div>
     </div>
@@ -245,7 +245,7 @@ export function Sidebar({ projects }: SidebarProps) {
                 {devMode && (
                   <PixelBadge
                     variant="amber"
-                    className="mt-0.5 w-fit origin-left scale-90 font-mono text-[9px]"
+                    className="mt-0.5 w-fit origin-left scale-90 font-mono text-[10px]"
                   >
                     DEV MODE
                   </PixelBadge>
@@ -298,7 +298,7 @@ export function Sidebar({ projects }: SidebarProps) {
             >
               <SelectTrigger className="border-border-muted bg-bg-elevated/50 hover:bg-bg-elevated h-auto w-full border px-3 py-2 text-xs transition-colors [&>svg:last-child]:hidden">
                 <div className="flex flex-1 flex-col items-start overflow-hidden text-left">
-                  <span className="text-text-muted mb-0.5 font-mono text-[9px] tracking-widest uppercase opacity-60">
+                  <span className="text-text-muted mb-0.5 font-mono text-[10px] tracking-[0.08em] uppercase opacity-70">
                     Active Project
                   </span>
                   <span className="text-text-secondary w-full truncate font-mono font-medium">
@@ -356,7 +356,7 @@ export function Sidebar({ projects }: SidebarProps) {
                 {isCollapsed && showBadge && (
                   <PixelBadge
                     variant="blue"
-                    className="absolute top-2 right-2 flex h-4 min-w-4 items-center justify-center rounded-full p-0 text-[9px] shadow-sm"
+                    className="absolute top-2 right-2 flex h-4 min-w-4 items-center justify-center rounded-full p-0 text-[10px] shadow-sm"
                   >
                     {badgeText}
                   </PixelBadge>

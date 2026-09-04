@@ -1,0 +1,13 @@
+packages:
+  - .
+
+overrides:
+  vite: ^7.3.1
+  undici: ^7.24.0
+  esbuild: ^0.25.0
+  '@hono/node-server': ^1.19.10
+  hono: ^4.12.7
+  lodash: ^4.17.23
+  flatted: ^3.4.2
+  kysely: ^0.28.14
+  effect: ^3.20.0

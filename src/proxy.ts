@@ -10,10 +10,25 @@ const PUBLIC_PATHS = new Set([
   '/reset-password',
   '/accept-invite',
   '/api/v1/health',
+  '/api/health',
+  '/api/health/live',
 ]);
 
 // Routes only the agent token can access (no user session required)
 const AGENT_PATHS = ['/api/v1/agent/'];
+
+const localWindows = new Map<string, { count: number; resetAt: number }>();
+
+function localRateLimit(key: string, limit: number, windowMs = 60_000): number | null {
+  const now = Date.now();
+  const current = localWindows.get(key);
+  if (!current || current.resetAt <= now) {
+    localWindows.set(key, { count: 1, resetAt: now + windowMs });
+    return null;
+  }
+  current.count += 1;
+  return current.count > limit ? current.resetAt : null;
+}
 
 function isPublic(pathname: string): boolean {
   if (PUBLIC_PATHS.has(pathname)) return true;
@@ -42,9 +57,35 @@ function hasSessionCookie(request: NextRequest): boolean {
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const correlationId = request.headers.get('x-request-id') ?? crypto.randomUUID();
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-request-id', correlationId);
+
+  if (pathname.startsWith('/api/') && !pathname.startsWith('/api/health')) {
+    const forwardedFor = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim();
+    const sessionIdentity =
+      request.cookies.get('__Secure-better-auth.session_token')?.value ??
+      request.cookies.get('better-auth.session_token')?.value;
+    const identity = sessionIdentity ?? forwardedFor ?? 'unknown';
+    const tier = pathname.startsWith('/api/auth/') ? 'auth' : 'api';
+    const resetAt = localRateLimit(`${tier}:${identity}`, tier === 'auth' ? 10 : 100);
+    if (resetAt) {
+      return NextResponse.json(
+        { error: { code: 'RATE_LIMITED', message: 'Too many requests' } },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(Math.max(1, Math.ceil((resetAt - Date.now()) / 1000))),
+            'X-Request-ID': correlationId,
+          },
+        }
+      );
+    }
+  }
 
   // Security headers on every response
-  const response = NextResponse.next();
+  const response = NextResponse.next({ request: { headers: requestHeaders } });
+  response.headers.set('X-Request-ID', correlationId);
   response.headers.set('X-Frame-Options', 'DENY');
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
@@ -68,7 +109,7 @@ export async function proxy(request: NextRequest) {
     if (!auth_header?.startsWith('Bearer ')) {
       return NextResponse.json(
         { error: { code: 'UNAUTHORIZED', message: 'Agent token required' } },
-        { status: 401 }
+        { status: 401, headers: { 'X-Request-ID': correlationId } }
       );
     }
     return response;
@@ -82,12 +123,14 @@ export async function proxy(request: NextRequest) {
     if (pathname.startsWith('/api/')) {
       return NextResponse.json(
         { error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
-        { status: 401 }
+        { status: 401, headers: { 'X-Request-ID': correlationId } }
       );
     }
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('next', pathname);
-    return NextResponse.redirect(loginUrl);
+    const redirect = NextResponse.redirect(loginUrl);
+    redirect.headers.set('X-Request-ID', correlationId);
+    return redirect;
   }
 
   return response;

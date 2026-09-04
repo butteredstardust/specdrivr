@@ -34,6 +34,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Key, Loader2, Copy, Plus } from 'lucide-react';
+import { useShell } from '@/components/shell/shell-context';
 
 interface TokenRow {
   id: number;
@@ -69,6 +70,7 @@ function computeExpiresAt(option: ExpiryOption): string | null {
 }
 
 export function ApiTokensSection() {
+  const { activeProjectId } = useShell();
   const [tokens, setTokens] = useState<TokenRow[]>([]);
   const [generateOpen, setGenerateOpen] = useState(false);
   const [revealOpen, setRevealOpen] = useState(false);
@@ -98,13 +100,22 @@ export function ApiTokensSection() {
   });
 
   const handleGenerate = async (values: GenerateTokenValues) => {
+    if (activeProjectId === null) {
+      toast.error('Select a project before generating an agent token.');
+      return;
+    }
+
     try {
       const expiresAt = computeExpiresAt(values.expiryOption);
       const res = await fetch('/api/v1/users/me/tokens', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: values.tokenName.trim(), expiresAt }),
+        body: JSON.stringify({
+          name: values.tokenName.trim(),
+          projectId: activeProjectId,
+          expiresAt,
+        }),
       });
 
       const data = await res.json().catch(() => ({}));

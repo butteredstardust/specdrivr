@@ -46,20 +46,8 @@ export default async function MissionControlPage() {
   }
 
   return (
-    <div className="-mx-6 -mt-6 flex min-h-full flex-col">
-      {/* Header */}
-      <div className="border-border-default flex items-center justify-between border-b px-6 py-4">
-        <div>
-          <div className="text-text-muted font-mono text-[11px] tracking-[0.08em] uppercase">
-            Mission Control
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="flex flex-col gap-6 px-6 py-6">
-        <DashboardClient initialSessions={initialSessions} initialTasks={initialTasks} />
-      </div>
+    <div className="flex min-h-full flex-col gap-6">
+      <DashboardClient initialSessions={initialSessions} initialTasks={initialTasks} />
     </div>
   );
 }

@@ -67,7 +67,7 @@ export default function EditSpecPage() {
   const handleSave = async (
     title: string,
     content: string
-  ): Promise<{ success: boolean; error?: string }> => {
+  ): Promise<{ success: boolean; specId?: number; error?: string }> => {
     try {
       // Update spec name
       const nameRes = await fetch(`/api/v1/specs/${id}`, {
@@ -100,7 +100,7 @@ export default function EditSpecPage() {
         };
       }
 
-      return { success: true };
+      return { success: true, specId: Number(id) };
     } catch (e) {
       clientLogger.error('Failed to save spec', { error: e });
       return { success: false, error: 'Network error' };

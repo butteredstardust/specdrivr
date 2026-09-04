@@ -16,13 +16,33 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   const { id } = await params;
-  const sessionId = parseInt(id);
+  const sessionId = parseInt(id, 10);
+  if (Number.isNaN(sessionId)) {
+    return NextResponse.json(
+      { error: { code: 'INVALID_INPUT', message: 'Invalid session ID' } },
+      { status: 400 }
+    );
+  }
 
   try {
     const body = await request.json();
     const { totalPromptTokens, totalCompletionTokens } = completeSchema.parse(body);
 
-    await agentSessionRepository.complete(sessionId, {
+    const session = await agentSessionRepository.getById(sessionId);
+    if (!session) {
+      return NextResponse.json(
+        { error: { code: 'NOT_FOUND', message: 'Session not found' } },
+        { status: 404 }
+      );
+    }
+    if (session.projectId !== authResult.token.projectId) {
+      return NextResponse.json(
+        { error: { code: 'FORBIDDEN', message: 'Session does not belong to this project' } },
+        { status: 403 }
+      );
+    }
+
+    await agentSessionRepository.complete(sessionId, authResult.token.projectId, {
       totalPromptTokens,
       totalCompletionTokens,
     });

@@ -20,10 +20,12 @@ export default async function SettingsLayout({ children }: { children: React.Rea
     <div className="animate-entrance -mx-6 -mt-6 flex min-h-full flex-col">
       {/* Header */}
       <div className="border-border-default border-b px-6 py-4">
-        <div className="text-text-secondary mb-1 font-mono text-xs tracking-[0.2em] uppercase">
-          Settings
+        <div className="text-text-secondary mb-1 font-mono text-[11px] font-medium tracking-[0.12em] uppercase">
+          Workspace
         </div>
-        <h1 className="text-foreground text-xl font-semibold">Configuration</h1>
+        <h1 className="text-foreground text-2xl leading-tight font-semibold tracking-[-0.015em]">
+          Configuration
+        </h1>
       </div>
 
       {/* Two-column body */}

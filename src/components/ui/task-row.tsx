@@ -117,7 +117,7 @@ export function TaskRow({
                   {dependsOn.slice(0, 3).map((dep) => (
                     <span
                       key={dep}
-                      className="text-text-muted bg-bg-elevated rounded px-1 font-mono text-[9px]"
+                      className="text-text-muted bg-bg-elevated rounded px-1 font-mono text-[10px]"
                     >
                       +{dep}
                     </span>

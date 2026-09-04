@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { planRepository, specificationRepository } from '@/repositories';
+import { planRepository, projectRepository, specificationRepository } from '@/repositories';
+import { requireMember } from '@/lib/rbac';
 import { auth } from '@/lib/auth';
 import { handleApiError } from '@/lib/error-handler';
 import { NotFoundError } from '@/lib/errors';
@@ -25,6 +26,13 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     if (!spec) {
       throw new NotFoundError(`Specification with ID ${specId} not found`);
     }
+    const { allowed } = await requireMember(session.user.id, spec.projectId);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: { code: 'FORBIDDEN', message: 'Project access required' } },
+        { status: 403 }
+      );
+    }
 
     const plans = await planRepository.getBySpecId(specId);
 
@@ -34,7 +42,18 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
         ? plans.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0]
         : null;
 
-    return NextResponse.json({ data: latestPlan });
+    const project = await projectRepository.getById(spec.projectId);
+    return NextResponse.json({
+      data: latestPlan
+        ? {
+            ...latestPlan,
+            executionTarget: {
+              repository: project?.repositoryUrl ?? 'Not configured',
+              branch: project?.repositoryBranch ?? 'main',
+            },
+          }
+        : null,
+    });
   } catch (error) {
     return handleApiError(error);
   }

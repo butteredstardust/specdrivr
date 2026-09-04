@@ -18,6 +18,18 @@ export default defineConfig({
       },
     },
     setupFiles: ['./tests/setup.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json-summary', 'html'],
+      thresholds: {
+        // Ratcheted repository baseline. Raise these floors as coverage grows;
+        // the project-wide target remains 80% for business logic/repositories.
+        lines: 46,
+        functions: 38,
+        statements: 45,
+        branches: 33,
+      },
+    },
     exclude: [
       '**/node_modules/**',
       '**/dist/**',

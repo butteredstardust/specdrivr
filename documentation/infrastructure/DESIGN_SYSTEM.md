@@ -73,14 +73,19 @@ authentication, onboarding, metadata, or error-page branding.
 
 ## **8.3 Typography**
 
-| **Usage**                               | **Font**                                | **Size**      | **Weight**                  |
-| --------------------------------------- | --------------------------------------- | ------------- | --------------------------- |
-| Body text                               | Inter                                   | 14px (22 DXA) | Regular 400                 |
-| Labels / captions                       | Inter                                   | 12px          | 400 / 500                   |
-| Monospace IDs (T-042, SES-001)          | Berkeley Mono / Fira Code / Courier New | 12px          | 400                         |
-| Terminal output                         | Berkeley Mono / Fira Code / Courier New | 13px          | 400                         |
-| Retro uppercase labels (SPECIFICATIONS) | Inter mono                              | 11px          | 600, letter-spacing: 0.08em |
-| Spec editor                             | @uiw/react-codemirror (CodeMirror 6)    | 14px          | 400                         |
+| **Usage**                               | **Font**                             | **Size** | **Weight**                  |
+| --------------------------------------- | ------------------------------------ | -------- | --------------------------- |
+| Body text                               | Source Sans 3                        | 15px     | Regular 400                 |
+| Labels / captions                       | Source Sans 3                        | 13px     | 400 / 500                   |
+| Monospace IDs (T-042, SES-001)          | Fira Code                            | 12px     | 400                         |
+| Terminal output                         | Fira Code                            | 13px     | 400                         |
+| Retro uppercase labels (SPECIFICATIONS) | Fira Code                            | 11px     | 600, letter-spacing: 0.08em |
+| Spec editor                             | @uiw/react-codemirror (CodeMirror 6) | 15px     | 400                         |
+
+Source Sans 3 is the default for navigation, headings, forms, and prose. Fira Code is reserved for
+machine-readable content: IDs, statuses, timestamps, keyboard shortcuts, diffs, and terminal output.
+Avoid interface text below 11px; 10px is reserved for compact numeric badges with an accessible
+name.
 
 ## **8.4 Retro Aesthetic System**
 

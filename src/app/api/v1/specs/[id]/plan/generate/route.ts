@@ -1,17 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { specificationRepository, memberRepository, planJobRepository } from '@/repositories';
+import { specificationRepository, memberRepository } from '@/repositories';
 import { db } from '@/db';
-import { plans } from '@/db/schema';
+import { planJobs, plans, specifications } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
 import { handleApiError } from '@/lib/error-handler';
 import { NotFoundError, AuthorizationError } from '@/lib/errors';
 import { logger } from '@/lib/logger';
+import { randomUUID } from 'node:crypto';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
-export async function POST(_request: NextRequest, { params }: RouteParams) {
+export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -55,6 +57,7 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
 
     // I-6: Wrap all 3 writes atomically. If job creation fails, the plan and spec
     // status change are rolled back — the spec cannot get stuck in 'pending_plan'.
+    const correlationId = request.headers.get('x-request-id') ?? randomUUID();
     const plan = await db.transaction(async (tx) => {
       const [createdPlan] = await tx
         .insert(plans)
@@ -66,12 +69,17 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
         })
         .returning();
 
-      await specificationRepository.updateStatus(specId, 'pending_plan');
+      await tx
+        .update(specifications)
+        .set({ status: 'pending_plan', updatedAt: new Date() })
+        .where(eq(specifications.id, specId));
 
-      await planJobRepository.create({
+      await tx.insert(planJobs).values({
         projectId: spec.projectId,
         specId,
         planId: createdPlan.id,
+        specVersionId: spec.currentVersionId,
+        generationToken: correlationId,
         type: 'generate_plan',
         status: 'pending',
       });
@@ -79,7 +87,7 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
       return createdPlan;
     });
 
-    logger.info({ specId, planId: plan.id }, 'Plan generation job queued');
+    logger.info({ correlationId, specId, planId: plan.id }, 'Plan generation job queued');
 
     return NextResponse.json({ data: plan }, { status: 202 });
   } catch (error) {

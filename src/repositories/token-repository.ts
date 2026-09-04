@@ -27,7 +27,9 @@ export class TokenRepository extends BaseRepository {
     );
   }
 
-  async create(data: Omit<AgentTokenInsert, 'id' | 'createdAt'>): Promise<AgentToken> {
+  async create(
+    data: Omit<AgentTokenInsert, 'id' | 'createdAt' | 'projectId'> & { projectId: number }
+  ): Promise<AgentToken> {
     const [token] = await this.executeQuery(() => db.insert(agentTokens).values(data).returning());
 
     if (!token) {

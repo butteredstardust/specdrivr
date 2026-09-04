@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { useQueryState, parseAsString } from 'nuqs';
 import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
@@ -20,7 +21,6 @@ import {
 } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { MoreHorizontal, Search, X } from 'lucide-react';
-import Link from 'next/link';
 import type { UserRole } from '@/db/schema';
 
 interface Project {
@@ -31,7 +31,8 @@ interface Project {
 }
 
 export default function ProjectsPage() {
-  const { user } = useShell();
+  const { user, setActiveProjectId } = useShell();
+  const router = useRouter();
   const userRole = (user.role ?? 'viewer') as UserRole;
 
   const { data: projects, isLoading } = usePolling<Project[]>({
@@ -57,6 +58,12 @@ export default function ProjectsPage() {
       (p) => p.name.toLowerCase().includes(term) || p.description?.toLowerCase().includes(term)
     );
   }, [allProjects, search]);
+
+  const openProject = (projectId: number, path: '/specs' | '/settings') => {
+    setActiveProjectId(projectId);
+    router.push(path);
+    router.refresh();
+  };
 
   return (
     <TooltipProvider>
@@ -137,9 +144,14 @@ export default function ProjectsPage() {
                       </PixelBadge>
                     </TableCell>
                     <TableCell className="text-text-primary px-3 py-3 text-sm font-medium">
-                      <Link href={`/specs?projectId=${project.id}`} className="hover:underline">
+                      <Button
+                        type="button"
+                        variant="link"
+                        onClick={() => openProject(project.id, '/specs')}
+                        className="h-auto cursor-pointer p-0 text-inherit"
+                      >
                         {project.name}
-                      </Link>
+                      </Button>
                     </TableCell>
                     <TableCell className="text-muted-foreground px-3 py-3 text-sm">
                       {project.description ?? '—'}
@@ -155,11 +167,10 @@ export default function ProjectsPage() {
                               variant="ghost"
                               size="icon"
                               className="text-muted-foreground h-6 w-6"
-                              asChild
+                              onClick={() => openProject(project.id, '/settings')}
+                              aria-label={`Open settings for ${project.name}`}
                             >
-                              <Link href={`/settings?projectId=${project.id}`}>
-                                <MoreHorizontal className="h-3.5 w-3.5" />
-                              </Link>
+                              <MoreHorizontal className="h-3.5 w-3.5" />
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>Project settings</TooltipContent>

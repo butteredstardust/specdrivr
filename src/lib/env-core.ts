@@ -11,6 +11,7 @@ export const envSchema = z.object({
   BETTER_AUTH_SECRET: z
     .string()
     .min(32, 'BETTER_AUTH_SECRET must be at least 32 characters for security'),
+  CREDENTIAL_ENCRYPTION_KEY: z.string().min(32).optional(),
   BETTER_AUTH_URL: z
     .string()
     .url('BETTER_AUTH_URL must be a valid URL')
@@ -64,6 +65,7 @@ export function parseEnv(): Env {
     DATABASE_URL: process.env.DATABASE_URL,
     BETTER_AUTH_SECRET:
       process.env.BETTER_AUTH_SECRET || (process.env.VITEST ? 'a'.repeat(32) : undefined),
+    CREDENTIAL_ENCRYPTION_KEY: process.env.CREDENTIAL_ENCRYPTION_KEY,
     BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || process.env.BETTER_AUTH_URL,
     REDIS_URL: process.env.REDIS_URL,

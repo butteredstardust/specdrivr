@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
-import { requireAdmin, requireMember } from '@/lib/rbac';
+import { requireAdmin } from '@/lib/rbac';
 import { agentConfigRepository } from '@/repositories/agent-config-repository';
 import { formatErrorResponse, handleApiError } from '@/lib/error-handler';
+import { toPublicAgentConfig } from '@/lib/agent-config-public';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -59,10 +60,15 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       });
     }
 
-    const { allowed } = await requireMember(session.user.id, projectId);
+    const { allowed } = await requireAdmin(session.user.id, projectId);
     if (!allowed) {
       return NextResponse.json(
-        { error: { code: 'FORBIDDEN', message: 'You do not have access to this project' } },
+        {
+          error: {
+            code: 'FORBIDDEN',
+            message: 'You must be a project admin to view agent configuration',
+          },
+        },
         { status: 403 }
       );
     }
@@ -70,7 +76,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     const config = await agentConfigRepository.getByProjectId(projectId);
 
     // Return config or null — client will use schema defaults when null
-    return NextResponse.json({ data: config });
+    return NextResponse.json({ data: config ? toPublicAgentConfig(config) : null });
   } catch (error) {
     return handleApiError(error);
   }
@@ -113,7 +119,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     const updated = await agentConfigRepository.upsertByProjectId(projectId, parsed);
 
-    return NextResponse.json({ data: updated });
+    return NextResponse.json({ data: toPublicAgentConfig(updated) });
   } catch (error) {
     return handleApiError(error);
   }

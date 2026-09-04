@@ -14,37 +14,17 @@ import type { Task } from './task-drawer';
 
 interface TaskDrawerOverviewProps {
   task: Task;
-  onRetry: () => Promise<void>;
-  onTaskUpdated: (task: Task) => void;
+  onRetry: (humanContext?: string) => Promise<void>;
 }
 
-export function TaskDrawerOverview({ task, onRetry, onTaskUpdated }: TaskDrawerOverviewProps) {
+export function TaskDrawerOverview({ task, onRetry }: TaskDrawerOverviewProps) {
   const [humanContext, setHumanContext] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleRetryWithContext = useCallback(async () => {
     setIsSubmitting(true);
     try {
-      // First patch humanContext
-      const patchRes = await fetch(`/api/v1/tasks/${task.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ humanContext }),
-      });
-
-      if (!patchRes.ok) {
-        toast.error('Failed to save context');
-        setIsSubmitting(false);
-        return;
-      }
-
-      const patchJson = await patchRes.json();
-      const patched = patchJson.data !== undefined ? patchJson.data : patchJson;
-      if (patched?.id) onTaskUpdated(patched);
-
-      // Then delegate to parent retry logic
-      await onRetry();
+      await onRetry(humanContext);
       setHumanContext('');
     } catch (err) {
       clientLogger.error('Retry with context error', err);
@@ -52,7 +32,7 @@ export function TaskDrawerOverview({ task, onRetry, onTaskUpdated }: TaskDrawerO
     } finally {
       setIsSubmitting(false);
     }
-  }, [task.id, humanContext, onTaskUpdated, onRetry]);
+  }, [humanContext, onRetry]);
 
   return (
     <div className="space-y-8 p-6">
@@ -148,7 +128,12 @@ export function TaskDrawerOverview({ task, onRetry, onTaskUpdated }: TaskDrawerO
             <p className="text-text-secondary text-sm leading-relaxed">{task.blockedReason}</p>
           )}
           <div className="pt-2">
-            <Button variant="blue" size="sm" onClick={onRetry} className="h-8 w-full gap-1.5">
+            <Button
+              variant="blue"
+              size="sm"
+              onClick={() => void onRetry()}
+              className="h-8 w-full gap-1.5"
+            >
               <RefreshCw className="h-3.5 w-3.5" />
               RETRY TASK
             </Button>
