@@ -70,6 +70,20 @@ function formatDuration(session: Session): string {
   return formatElapsed(ms / 1000);
 }
 
+/**
+ * Time of day for today's rows, date and time for anything older. The column
+ * used to be time-only for every row, so a session started three days ago read
+ * "03:00 AM" next to a duration of 89 hours.
+ */
+function formatStarted(isoString: string): string {
+  const date = new Date(isoString);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  if (date >= today) return time;
+  return `${date.toLocaleDateString([], { month: 'short', day: 'numeric' })} ${time}`;
+}
+
 function getGroupLabel(isoString: string): string {
   const date = new Date(isoString);
   const today = new Date();
@@ -242,10 +256,7 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
                         </div>
                       </TableCell>
                       <TableCell className="text-fg-muted text-2xs px-3 py-3">
-                        {new Date(session.startedAt).toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
+                        {formatStarted(session.startedAt)}
                       </TableCell>
                       <TableCell className="text-fg-muted text-2xs px-3 py-3 font-mono">
                         {formatDuration(session)}

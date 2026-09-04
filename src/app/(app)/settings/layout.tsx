@@ -17,7 +17,7 @@ export default async function SettingsLayout({ children }: { children: React.Rea
     : 'viewer';
 
   return (
-    <div className="animate-fade-in-up full-bleed flex min-h-full flex-col">
+    <div className="animate-fade-in-up full-bleed fill-shell flex flex-col">
       {/* Header */}
       <div className="border-line border-b px-6 py-4">
         <div className="text-fg-secondary text-2xs mb-1 font-medium">Workspace</div>

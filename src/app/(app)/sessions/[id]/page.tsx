@@ -131,7 +131,7 @@ export default function SessionDetailPage({ params }: PageProps) {
   const progressPercent = totalTasks > 0 ? ((session?.tasksSucceeded || 0) / totalTasks) * 100 : 0;
 
   return (
-    <div className="full-bleed flex min-h-full flex-col">
+    <div className="full-bleed fill-shell flex flex-col">
       <div className="border-line flex items-center justify-between border-b px-6 py-4">
         <div className="flex min-w-0 flex-col gap-1">
           <div className="text-fg-secondary text-xs">Executor</div>

@@ -128,11 +128,15 @@ const eslintConfig = [
       'no-restricted-properties': 'off',
     },
   },
+  // The primitives themselves are where the raw elements are allowed to live.
   {
     files: [
       'src/components/ui/input.tsx',
       'src/components/ui/button.tsx',
       'src/components/ui/select.tsx',
+      // Segmented filter tabs: a `Button` here would mean overriding its
+      // height, padding, radius and variant colours, which is not a wrapper.
+      'src/components/ui/filter-toolbar.tsx',
     ],
     rules: {
       'no-restricted-syntax': 'off',

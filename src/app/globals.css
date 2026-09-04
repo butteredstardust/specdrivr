@@ -336,7 +336,17 @@
      publishes its gutter and every page reads it. */
   .full-bleed {
     margin-inline: calc(var(--shell-gutter, 0px) * -1);
-    margin-top: calc(var(--shell-gutter-y, 0px) * -1);
+    margin-block: calc(var(--shell-gutter-y, 0px) * -1);
+  }
+
+  /* `min-h-full` on a `.full-bleed` page stops two gutters short of the bottom:
+     the element is pulled up by one and the shell still pads by another, which
+     is why the settings column rule and the index-page content borders ended in
+     mid-air. Use this instead of `min-h-full` on a full-bleed root. The 100%
+     resolves because the shell's content wrapper is a stretched flex item and
+     so has a definite height — see `src/app/(app)/layout.tsx`. */
+  .fill-shell {
+    min-height: calc(100% + var(--shell-gutter-y, 0px) * 2);
   }
 
   .scrollbar-thin {

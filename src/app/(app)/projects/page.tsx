@@ -8,8 +8,14 @@ import { usePolling } from '@/hooks/use-polling';
 import { CreateProjectDialog } from '@/components/projects/create-project-dialog';
 import { StatusIcon } from '@/components/ui/status-icon';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { PageHeader } from '@/components/ui/page-header';
+import {
+  FilterToolbar,
+  FilterToolbarActions,
+  FilterToolbarMeta,
+  FilterSearch,
+  FilterClearButton,
+} from '@/components/ui/filter-toolbar';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
@@ -20,7 +26,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { MoreHorizontal, Search, X } from 'lucide-react';
+import { MoreHorizontal } from 'lucide-react';
 import type { UserRole } from '@/db/schema';
 
 interface Project {
@@ -67,42 +73,33 @@ export default function ProjectsPage() {
 
   return (
     <TooltipProvider>
-      <div className="animate-fade-in-up full-bleed flex min-h-full flex-col">
+      <div className="animate-fade-in-up full-bleed fill-shell flex flex-col">
         <PageHeader
           category="Projects"
           title="All Projects"
           action={<CreateProjectDialog userRole={userRole} />}
         />
 
-        {/* Toolbar */}
-        <div className="border-line flex items-center border-b px-6 py-3">
-          <div className="relative w-full md:w-64">
-            <Search className="text-fg-muted absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
-            <Input
-              placeholder="Search projects…"
-              className="bg-surface-inset text-2xs h-8 pl-8 transition-all"
-              value={search}
-              onChange={(e) => setSearch(e.target.value || null)}
-            />
-            {search && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSearch(null)}
-                aria-label="Clear search"
-                className="text-fg-muted hover:text-fg absolute top-1/2 right-1 h-6 w-6 -translate-y-1/2"
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            )}
-          </div>
+        <FilterToolbar>
+          <FilterSearch
+            value={search}
+            onValueChange={(value) => setSearch(value || null)}
+            placeholder="Search projects…"
+            label="Search projects"
+          />
 
-          <div className="bg-line/50 mx-1 h-4 w-px" />
+          <FilterToolbarMeta>
+            {filteredProjects.length === allProjects.length
+              ? `${allProjects.length} ${allProjects.length === 1 ? 'project' : 'projects'}`
+              : `${filteredProjects.length} of ${allProjects.length} projects`}
+          </FilterToolbarMeta>
 
-          <div className="flex items-center gap-2">
-            <span className="text-fg-muted text-2xs opacity-50">Total: {allProjects.length}</span>
-          </div>
-        </div>
+          {search !== '' && (
+            <FilterToolbarActions>
+              <FilterClearButton onClear={() => setSearch(null)} />
+            </FilterToolbarActions>
+          )}
+        </FilterToolbar>
 
         {/* Content */}
         <div className="border-line flex-1 border">

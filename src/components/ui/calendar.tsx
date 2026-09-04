@@ -45,20 +45,20 @@ function Calendar({
         ),
         button_previous: cn(
           buttonVariants({ variant: buttonVariant }),
-          'h-[--cell-size] w-[--cell-size] select-none p-0 aria-disabled:opacity-50',
+          'h-[var(--cell-size)] w-[var(--cell-size)] select-none p-0 aria-disabled:opacity-50',
           defaultClassNames.button_previous
         ),
         button_next: cn(
           buttonVariants({ variant: buttonVariant }),
-          'h-[--cell-size] w-[--cell-size] select-none p-0 aria-disabled:opacity-50',
+          'h-[var(--cell-size)] w-[var(--cell-size)] select-none p-0 aria-disabled:opacity-50',
           defaultClassNames.button_next
         ),
         month_caption: cn(
-          'flex h-[--cell-size] w-full items-center justify-center px-[--cell-size]',
+          'flex h-[var(--cell-size)] w-full items-center justify-center px-[var(--cell-size)]',
           defaultClassNames.month_caption
         ),
         dropdowns: cn(
-          'flex h-[--cell-size] w-full items-center justify-center gap-1.5 text-sm font-medium',
+          'flex h-[var(--cell-size)] w-full items-center justify-center gap-1.5 text-sm font-medium',
           defaultClassNames.dropdowns
         ),
         dropdown_root: cn(
@@ -80,7 +80,10 @@ function Calendar({
           defaultClassNames.weekday
         ),
         week: cn('mt-2 flex w-full', defaultClassNames.week),
-        week_number_header: cn('w-[--cell-size] select-none', defaultClassNames.week_number_header),
+        week_number_header: cn(
+          'w-[var(--cell-size)] select-none',
+          defaultClassNames.week_number_header
+        ),
         week_number: cn('text-fg-muted select-none text-[0.8rem]', defaultClassNames.week_number),
         day: cn(
           'group/day relative aspect-square h-full w-full select-none p-0 text-center [&:first-child[data-selected=true]_button]:rounded-l-md [&:last-child[data-selected=true]_button]:rounded-r-md',
@@ -117,7 +120,7 @@ function Calendar({
         WeekNumber: ({ children, ...props }) => {
           return (
             <td {...props}>
-              <div className="flex size-[--cell-size] items-center justify-center text-center">
+              <div className="flex size-[var(--cell-size)] items-center justify-center text-center">
                 {children}
               </div>
             </td>
@@ -159,7 +162,7 @@ function CalendarDayButton({
       data-range-end={modifiers.range_end}
       data-range-middle={modifiers.range_middle}
       className={cn(
-        'data-[selected-single=true]:bg-accent data-[selected-single=true]:text-accent-fg data-[range-middle=true]:bg-surface-inset data-[range-middle=true]:text-fg data-[range-start=true]:bg-accent data-[range-start=true]:text-accent-fg data-[range-end=true]:bg-accent data-[range-end=true]:text-accent-fg group-data-[focused=true]/day:border-accent group-data-[focused=true]/day:ring-accent/50 flex aspect-square h-auto w-full min-w-[--cell-size] flex-col gap-1 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-[3px] data-[range-end=true]:rounded-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md [&>span]:text-xs [&>span]:opacity-70',
+        'data-[selected-single=true]:bg-accent data-[selected-single=true]:text-accent-fg data-[range-middle=true]:bg-surface-inset data-[range-middle=true]:text-fg data-[range-start=true]:bg-accent data-[range-start=true]:text-accent-fg data-[range-end=true]:bg-accent data-[range-end=true]:text-accent-fg group-data-[focused=true]/day:border-accent group-data-[focused=true]/day:ring-accent/50 flex aspect-square h-auto w-full min-w-[var(--cell-size)] flex-col gap-1 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-[3px] data-[range-end=true]:rounded-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md [&>span]:text-xs [&>span]:opacity-70',
         defaultClassNames.day,
         className
       )}

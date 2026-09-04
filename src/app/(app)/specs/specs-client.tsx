@@ -1,14 +1,21 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQueryState, parseAsString } from 'nuqs';
+import { useQueryState, parseAsString, parseAsStringLiteral } from 'nuqs';
 import { useShell } from '@/components/shell/shell-context';
 import { usePolling } from '@/hooks/use-polling';
 import { StatusIcon } from '@/components/ui/status-icon';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { PageHeader } from '@/components/ui/page-header';
+import {
+  FilterToolbar,
+  FilterToolbarActions,
+  FilterSearch,
+  FilterTabs,
+  FilterClearButton,
+  type FilterTabOption,
+} from '@/components/ui/filter-toolbar';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
@@ -19,8 +26,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Plus, MoreHorizontal, Search, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Plus, MoreHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import type { UserRole, SpecStatus } from '@/db/schema';
 
@@ -34,7 +40,20 @@ export interface Spec {
   currentVersionNumber?: number | null;
 }
 
-const STATUS_TABS: Array<{ value: string; label: string; status?: SpecStatus }> = [
+/** The only values `?status=` accepts; anything else falls back to `all`. */
+const STATUS_TAB_VALUES = [
+  'all',
+  'drafting',
+  'pending',
+  'executing',
+  'completed',
+  'stalled',
+  'archived',
+] as const;
+
+type StatusTabValue = (typeof STATUS_TAB_VALUES)[number];
+
+const STATUS_TABS: ReadonlyArray<{ value: StatusTabValue; label: string; status?: SpecStatus }> = [
   { value: 'all', label: 'All' },
   { value: 'drafting', label: 'Drafting', status: 'drafting' },
   { value: 'pending', label: 'Pending' },
@@ -87,7 +106,16 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
 
   const effectiveProjectId = activeProjectId;
 
-  const [activeTab, setActiveTab] = useState<string>('all');
+  // In the URL like every other filter in the app: the tab used to be local
+  // state, so a link to a filtered spec list silently reset to "All". Parsed
+  // as a literal so a hand-edited `?status=bogus` shows every spec rather than
+  // an empty table with no tab selected.
+  const [activeTab, setActiveTab] = useQueryState(
+    'status',
+    parseAsStringLiteral(STATUS_TAB_VALUES)
+      .withDefault('all')
+      .withOptions({ shallow: true, history: 'replace' })
+  );
   const [search, setSearch] = useQueryState(
     'search',
     parseAsString.withDefault('').withOptions({
@@ -110,14 +138,24 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
 
   const allSpecs = useMemo(() => specs ?? [], [specs]);
 
-  const countByStatus = (value: string, status?: SpecStatus) => {
-    if (value === 'all') return allSpecs.length;
-    if (value === 'pending') {
-      return allSpecs.filter((s) => s.status === 'pending_plan' || s.status === 'pending_approval')
-        .length;
-    }
-    return status ? allSpecs.filter((s) => s.status === status).length : 0;
-  };
+  const statusTabs = useMemo<FilterTabOption<StatusTabValue>[]>(
+    () =>
+      STATUS_TABS.map(({ value, label, status }) => ({
+        value,
+        label,
+        count:
+          value === 'all'
+            ? allSpecs.length
+            : value === 'pending'
+              ? allSpecs.filter(
+                  (s) => s.status === 'pending_plan' || s.status === 'pending_approval'
+                ).length
+              : allSpecs.filter((s) => s.status === status).length,
+      })),
+    [allSpecs]
+  );
+
+  const isAnyFilterActive = search !== '' || activeTab !== 'all';
 
   const filteredSpecs = useMemo(() => {
     let result = allSpecs;
@@ -154,7 +192,7 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
 
   return (
     <TooltipProvider>
-      <div className="animate-fade-in-up full-bleed flex min-h-full flex-col">
+      <div className="animate-fade-in-up full-bleed fill-shell flex flex-col">
         <PageHeader
           category="Specifications"
           title="Specs"
@@ -174,57 +212,32 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
           }
         />
 
-        {/* Toolbar: Search + Filter tabs */}
-        <div className="border-line flex flex-wrap items-center gap-4 border-b px-6 py-3">
-          {/* Search */}
-          <div className="relative w-64">
-            <Search className="text-fg-muted absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
-            <Input
-              placeholder="Search specs…"
-              className="bg-surface-inset text-2xs h-8 pl-8 transition-all"
-              value={search}
-              onChange={(e) => setSearch(e.target.value || null)}
-            />
-            {search && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSearch(null)}
-                aria-label="Clear search"
-                className="text-fg-muted hover:text-fg absolute top-1/2 right-1 h-6 w-6 -translate-y-1/2"
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            )}
-          </div>
+        <FilterToolbar>
+          <FilterSearch
+            value={search}
+            onValueChange={(value) => setSearch(value || null)}
+            placeholder="Search specs…"
+            label="Search specs"
+          />
 
-          <div className="bg-line/50 mx-1 h-4 w-px" />
+          <FilterTabs
+            value={activeTab}
+            onValueChange={(value) => setActiveTab(value === 'all' ? null : value)}
+            options={statusTabs}
+            label="Filter specs by status"
+          />
 
-          {/* Status Filter Tabs */}
-          <div className="flex items-center gap-1.5">
-            {STATUS_TABS.map(({ value, label, status }) => {
-              const count = countByStatus(value, status);
-              const isActive = activeTab === value;
-              return (
-                <Button
-                  key={value}
-                  variant={isActive ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setActiveTab(value)}
-                  className={cn(
-                    'text-2xs h-7 px-3 transition-all',
-                    isActive
-                      ? 'bg-surface-inset text-white'
-                      : 'text-fg-muted hover:bg-surface-inset hover:text-fg'
-                  )}
-                >
-                  {label}
-                  {count > 0 && <span className="ml-1.5 opacity-50">{count}</span>}
-                </Button>
-              );
-            })}
-          </div>
-        </div>
+          {isAnyFilterActive && (
+            <FilterToolbarActions>
+              <FilterClearButton
+                onClear={() => {
+                  setSearch(null);
+                  setActiveTab(null);
+                }}
+              />
+            </FilterToolbarActions>
+          )}
+        </FilterToolbar>
 
         <div className="border-line flex-1 border">
           {effectiveProjectId === null ? (

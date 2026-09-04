@@ -64,13 +64,14 @@ const captures: CaptureDefinition[] = [
         .waitFor({ state: 'detached', timeout: 20_000 })
         .catch(() => undefined);
       await waitForTerminalOutput(page);
-      await waitForHealthResolved(page);
     },
   },
   {
     filename: 'projects.png',
     path: '/projects',
-    ready: (page) => page.getByRole('heading', { level: 1, name: 'All Projects' }),
+    // The table is filled by `usePolling`, so waiting on the h1 caught the page
+    // mid-"Loading projects…" with an empty table and a "Total: 0" toolbar.
+    ready: (page) => page.getByRole('cell', { name: 'Auth Service', exact: true }),
   },
   {
     filename: 'spec-view.png',
@@ -92,9 +93,6 @@ const captures: CaptureDefinition[] = [
     filename: 'session-detail.png',
     path: '/sessions/5',
     ready: (page) => page.getByText('Store OAuth tokens securely', { exact: true }).first(),
-    settled: async (page) => {
-      await waitForHealthResolved(page);
-    },
   },
   {
     filename: 'activity.png',
@@ -169,6 +167,9 @@ async function main(): Promise<void> {
     for (const capture of captures) {
       await page.goto(`${origin}${capture.path}`, { waitUntil: 'domcontentloaded' });
       await waitForStablePage(page, capture.ready(page));
+      // The sidebar is on every page, so its dots are waited for centrally
+      // rather than being remembered per capture.
+      await waitForHealthResolved(page);
       await capture.settled?.(page);
       await page.screenshot({
         path: path.join(outputDirectory, capture.filename),

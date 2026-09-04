@@ -331,7 +331,16 @@ inert in this project.
 
 **Full bleed.** Pages with their own full-width header or section dividers use `.full-bleed`. It
 negates the shell-owned `--shell-gutter` and `--shell-gutter-y` custom properties, avoiding hardcoded
-negative margins that drift when shell padding changes.
+negative margins that drift when shell padding changes. Pair it with `.fill-shell` rather than
+`min-h-full` — inside a full-bleed page `100%` stops two vertical gutters short, which is what left
+column rules and content borders ending in mid-air.
+
+**Filter toolbar.** The strip under `PageHeader` on an index page is `FilterToolbar` from
+`src/components/ui/filter-toolbar.tsx`, composed from its own parts (`FilterSearch`, `FilterTabs`,
+`FilterSelect`, `FilterDateRange`, `FilterTextInput`, `FilterToolbarActions`, `FilterToolbarMeta`,
+`FilterClearButton`). Every control is `h-8 text-xs`; labels are sentence-case sans. Use
+`variant="inline"` inside a panel that already owns its padding. Do not hand-roll a search-and-pills
+row on a new page.
 
 ### 9.1 Breakpoint strategy
 

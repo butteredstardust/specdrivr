@@ -1,19 +1,20 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { clientLogger } from '@/lib/logger-client';
 import { usePolling } from '@/hooks/use-polling';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  FilterToolbar,
+  FilterToolbarActions,
+  FilterSearch,
+  FilterTextInput,
+  FilterSelect,
+  FilterDateRange,
+  FilterClearButton,
+} from '@/components/ui/filter-toolbar';
 import { StatusIcon } from '@/components/ui/status-icon';
-import { Loader2, ChevronLeft, ChevronRight, ChevronDown, Download } from 'lucide-react';
+import { Loader2, ChevronLeft, ChevronRight, ChevronDown, Download, Activity } from 'lucide-react';
 import type { AuditLogSelect } from '@/db/schema';
 
 interface AuditMeta {
@@ -33,13 +34,17 @@ interface AuditLogSectionProps {
   projectId: number;
 }
 
-const KNOWN_ACTIONS = [
-  'project.updated',
-  'member.invited',
-  'member.removed',
-  'spec.created',
-  'plan.approved',
-  'session.started',
+/** Sentinel for "no action filter": Radix Select rejects an empty item value. */
+const ALL_ACTIONS = '__all__';
+
+const ACTION_OPTIONS = [
+  { value: ALL_ACTIONS, label: 'All actions' },
+  { value: 'project.updated', label: 'project.updated' },
+  { value: 'member.invited', label: 'member.invited' },
+  { value: 'member.removed', label: 'member.removed' },
+  { value: 'spec.created', label: 'spec.created' },
+  { value: 'plan.approved', label: 'plan.approved' },
+  { value: 'session.started', label: 'session.started' },
 ];
 
 function formatTs(date: string | Date): string {
@@ -97,6 +102,7 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
 
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
+  const [actorInput, setActorInput] = useState('');
   const [actor, setActor] = useState('');
   const [action, setAction] = useState('');
   const [fromDate, setFromDate] = useState('');
@@ -104,11 +110,19 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  useEffect(
+    () => () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    },
+    []
+  );
+
   const buildUrl = () => {
     const params = new URLSearchParams({ page: String(page) });
     if (search) params.set('search', search);
     if (actor) params.set('actor', actor);
-    if (action && action !== '__all__') params.set('action', action);
+    // `action` never holds the sentinel — `handleActionChange` maps it to `''`.
+    if (action) params.set('action', action);
     if (fromDate) params.set('from', fromDate);
     if (toDate) params.set('to', toDate);
     params.set('_t', String(reqKey));
@@ -152,28 +166,45 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
     restart();
   };
 
-  const handleActorBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    if (e.target.value !== actor) {
-      setActor(e.target.value);
-      setPage(1);
-      restart();
-    }
+  const handleActorCommit = (value: string) => {
+    if (value === actor) return;
+    setActor(value);
+    setPage(1);
+    restart();
   };
 
   const handleActionChange = (value: string) => {
-    setAction(value);
+    setAction(value === ALL_ACTIONS ? '' : value);
     setPage(1);
     restart();
   };
 
-  const handleFromChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFromDate(e.target.value);
+  const handleFromChange = (value: string) => {
+    setFromDate(value);
     setPage(1);
     restart();
   };
 
-  const handleToChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setToDate(e.target.value);
+  const handleToChange = (value: string) => {
+    setToDate(value);
+    setPage(1);
+    restart();
+  };
+
+  const isAnyFilterActive =
+    search !== '' || actor !== '' || action !== '' || fromDate !== '' || toDate !== '';
+
+  const clearFilters = () => {
+    // A search typed within the last 300ms still has a pending commit; without
+    // this the field clears and then silently re-filters on that stale term.
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    setSearchInput('');
+    setSearch('');
+    setActorInput('');
+    setActor('');
+    setAction('');
+    setFromDate('');
+    setToDate('');
     setPage(1);
     restart();
   };
@@ -197,64 +228,49 @@ export function AuditLogSection({ projectId }: AuditLogSectionProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Filter bar */}
-      <div className="flex flex-wrap items-center gap-2">
-        <Input
-          placeholder="Search actions…"
+      <FilterToolbar variant="inline">
+        <FilterSearch
           value={searchInput}
-          onChange={(e) => handleSearchInput(e.target.value)}
-          className="h-8 w-48 font-mono text-xs"
+          onValueChange={handleSearchInput}
+          placeholder="Search actions…"
+          label="Search audit actions"
         />
-        <Input
+        <FilterTextInput
+          value={actorInput}
+          onValueChange={setActorInput}
+          onCommit={handleActorCommit}
           placeholder="Actor user ID"
-          defaultValue={actor}
-          onBlur={handleActorBlur}
-          className="h-8 w-48 font-mono text-xs"
+          label="Filter by actor user ID"
         />
-        <Select value={action || '__all__'} onValueChange={handleActionChange}>
-          <SelectTrigger className="h-8 w-44 text-xs">
-            <SelectValue placeholder="All actions" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="__all__" className="text-xs">
-              All actions
-            </SelectItem>
-            {KNOWN_ACTIONS.map((a) => (
-              <SelectItem key={a} value={a} className="text-xs">
-                {a}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Input
-          type="date"
-          value={fromDate}
-          onChange={handleFromChange}
-          className="h-8 w-36 font-mono text-xs"
-          aria-label="From date"
+        <FilterSelect
+          value={action || ALL_ACTIONS}
+          onValueChange={handleActionChange}
+          options={ACTION_OPTIONS}
+          label="Filter by action"
+          icon={Activity}
         />
-        <Input
-          type="date"
-          value={toDate}
-          onChange={handleToChange}
-          className="h-8 w-36 font-mono text-xs"
-          aria-label="To date"
+        <FilterDateRange
+          from={fromDate}
+          to={toDate}
+          onFromChange={handleFromChange}
+          onToChange={handleToChange}
+          label="Logged between"
         />
 
-        <div className="ml-auto">
+        <FilterToolbarActions>
+          {isAnyFilterActive && <FilterClearButton onClear={clearFilters} />}
           <Button
             variant="outline"
             size="sm"
             onClick={handleExport}
             disabled={entries.length === 0}
-            className="gap-2 font-mono text-xs"
+            className="h-8 gap-2 text-xs"
           >
             <Download className="size-3" />
             Export CSV
           </Button>
-        </div>
-      </div>
+        </FilterToolbarActions>
+      </FilterToolbar>
 
       {isLoading && (
         <div className="text-fg-muted flex items-center gap-2">

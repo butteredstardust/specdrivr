@@ -131,7 +131,7 @@ export default function NotificationsPage() {
   };
 
   return (
-    <div className="animate-fade-in-up full-bleed flex min-h-full flex-col">
+    <div className="animate-fade-in-up full-bleed fill-shell flex flex-col">
       <PageHeader
         category="System"
         title="Notifications"

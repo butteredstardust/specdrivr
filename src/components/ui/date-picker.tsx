@@ -14,6 +14,10 @@ interface DatePickerProps {
   setDate: (date: Date | undefined) => void;
   className?: string;
   placeholder?: string;
+  /** `date-fns` pattern for the trigger label. Narrow triggers pass a short one. */
+  dateFormat?: string;
+  /** Accessible name for the trigger, needed when two pickers form a range. */
+  triggerLabel?: string;
 }
 
 export function DatePicker({
@@ -21,12 +25,15 @@ export function DatePicker({
   setDate,
   className,
   placeholder = 'Pick a date',
+  dateFormat = 'PPP',
+  triggerLabel,
 }: DatePickerProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button
           variant={'outline'}
+          aria-label={triggerLabel}
           className={cn(
             'w-[240px] justify-start text-left font-normal',
             !date && 'text-fg-muted',
@@ -34,7 +41,7 @@ export function DatePicker({
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? format(date, 'PPP') : <span>{placeholder}</span>}
+          {date ? format(date, dateFormat) : <span>{placeholder}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">

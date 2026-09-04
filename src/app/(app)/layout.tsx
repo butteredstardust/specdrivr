@@ -64,9 +64,12 @@ async function AuthenticatedApp({ children }: { children: React.ReactNode }) {
             <main
               id="main-content"
               tabIndex={-1}
-              className="relative flex-1 overflow-y-auto px-4 py-6 [--shell-gutter-y:1.5rem] [--shell-gutter:1rem] md:px-8 md:py-8 md:[--shell-gutter-y:2rem] md:[--shell-gutter:2rem]"
+              className="relative flex flex-1 flex-col overflow-y-auto px-4 py-6 [--shell-gutter-y:1.5rem] [--shell-gutter:1rem] md:px-8 md:py-8 md:[--shell-gutter-y:2rem] md:[--shell-gutter:2rem]"
             >
-              <div className="mx-auto max-w-[1600px]">{children}</div>
+              {/* `flex-1` rather than a plain block: a stretched flex item has a
+                  definite height, which is what lets a page root resolve a
+                  percentage `min-height` (`.fill-shell`) against the shell. */}
+              <div className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col">{children}</div>
               <ActiveJobsOverlay />
             </main>
           </div>
