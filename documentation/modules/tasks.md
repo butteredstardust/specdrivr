@@ -16,7 +16,7 @@ Tasks are the atomic units of implementation work in Specdrivr. They are authore
 
 - **Contents**: A dependency-ordered list of all tasks for the specification.
 - **Columns**:
-  - **ID**: Mono-spaced badge (e.g., `T-042`).
+  - **ID**: Mono entity identifier (e.g., `T-042`).
   - **Title**: Short description of the work.
   - **Status**: Visual indicator (`todo`, `in_progress`, `done`, `blocked`, `failed`).
   - **Dependencies**: Icon indicating if the task is waiting on others.
@@ -26,20 +26,22 @@ Tasks are the atomic units of implementation work in Specdrivr. They are authore
 
 The central hub for task-level detail, accessible from any task row:
 
-- **OVERVIEW**: Full task description and explicit "Done Criteria."
-- **ATTEMPTS**: A reverse-chronological list of execution attempts, each containing the full ANSI terminal log from the agent.
-- **CHANGES**: Shiki-powered diff viewer showing every file modification made by the agent during this specific task.
-- **CONTEXT**: Textarea for providing "Human Context" to unblock the agent.
+- **Overview**: Full task description, done criteria, and blocked-task human-context form.
+- **Attempts**: A reverse-chronological list of execution attempts with agent log output.
+- **Changes**: Shiki-powered diff viewer for modifications made during this task.
+
+The footer owns lifecycle actions. Admin/Owner status controls are visible in the header; gated
+actions explain the required role instead of disappearing.
 
 ## 3. Interaction Flows
 
 ### 3.1 Unblocking a Task
 
 1. Agent encounters an ambiguity or missing dependency and marks the task as `blocked`.
-2. A "Needs Attention" amber banner appears in Mission Control.
+2. A semantic **Needs attention** warning appears in Mission Control.
 3. User opens the **Task Drawer** for the blocked task.
 4. User enters instructions or missing data in the **Human Context** field.
-5. User clicks `[RETRY WITH CONTEXT]`.
+5. User clicks **Retry with context**.
 6. Task status reverts to `todo`, and the new context is prioritized in the agent's next execution prompt.
 
 ### 3.2 Manual Task Management
@@ -65,7 +67,9 @@ The central hub for task-level detail, accessible from any task row:
 
 - **Logic**: `src/repositories/task-repository.ts`, `src/actions/tasks.ts`.
 - **Database**: `src/db/schema.ts` (`tasks`, `taskAttempts`, `fileChanges` tables).
-- **UI Components**: `src/components/tasks/task-drawer.tsx`, `src/components/tasks/task-drawer-attempts.tsx`, `src/components/tasks/task-drawer-changes.tsx`, `src/components/tasks/task-drawer-overview.tsx`.
+- **UI Components**: `src/components/tasks/task-drawer.tsx`, `task-drawer-footer.tsx`,
+  `task-drawer-attempts.tsx`, `task-drawer-changes.tsx`, `task-drawer-overview.tsx`, and
+  `use-task-actions.ts`.
 
 ### 5.2 Critical Paths
 

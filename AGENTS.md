@@ -46,15 +46,17 @@ To maximize efficiency and minimize context window usage:
 
 _See `documentation/infrastructure/DESIGN_SYSTEM.md` for full specifications._
 
-- **Visual Aesthetic**: "Linear" style—matte surfaces, subtle borders, high contrast, obsidian-tinted interactive states.
-- **Design Tokens**: Defined as CSS variables in `globals.css`. Never use hex codes.
+- **Visual Aesthetic**: D1 "Linear-clean"—matte surfaces, hairline structural borders, high-contrast controls, one blue accent, and restrained motion. No CRT chrome, scanlines, phosphor glow, pixel styling, or mascots.
+- **Design Tokens**: The single semantic vocabulary is defined in `src/app/globals.css` for light and dark themes. Components use its Tailwind bridges; never add a parallel shadcn token set or hardcoded palette values.
 - **Component Selection**:
   1. **shadcn/ui**: Standard interface controls (Button, Input). Prefer standard components.
   2. **Custom**: Only use custom components when absolutely necessary; must inherit from `documentation/infrastructure/DESIGN_SYSTEM.md`.
 - **Import Standard**:
   - Components: `import { Button } from '@/components/ui/button'`.
   - Icons: `import { Check } from 'lucide-react'` (or preferred icon set).
-- **Token names**: This project does not use the generic shadcn tokens `bg-background`, `text-foreground`, or `bg-destructive`. Use the project's own tokens instead — e.g. `bg-[--bg-base]`, `text-[--text-primary]`, `bg-[--status-red]`.
+- **Token names**: This project does not use generic shadcn tokens such as `bg-background`, `text-foreground`, or `bg-destructive`. Use semantic utilities such as `bg-surface-raised`, `text-fg`, `border-line`, and `bg-danger`.
+- **Typography and shape**: `text-2xs` (11px) is the floor. Mono is only for IDs, code, logs, timestamps, and numeric columns with `tabular-nums`; never prose, headings, table headers, badges, or controls. Use `rounded-lg` for containers/cards, `rounded-md` for controls, and `rounded-sm` for chips/badges. Labels and badges are sentence-cased.
+- **Focus**: The single global `:focus-visible` rule in `globals.css` owns focus rings. Per-component focus rings or outlines are forbidden.
 
 ## 6. Git Hooks & Integrity Protection
 
@@ -160,11 +162,14 @@ export async function createProject(formData: FormData) {
 - Never write a custom component when a `shadcn/ui` equivalent exists.
 - No hardcoded hex colors — use design tokens from `src/app/globals.css`.
 - No custom CSS files for minor tweaks — extend existing tokens, use Tailwind utility classes.
-- Never modify `shadcn/ui` source files under `@/components/ui/`; customize via CSS variables only.
+- Treat local files under `src/components/ui/` as maintained shadcn/Radix wrappers: reuse them first and change them deliberately for system-wide behavior; never patch vendored dependency source.
 - Before building a new screen, check the **Modular Specifications** (`documentation/modules/*.md`) for the planned flow and layout.
 - No visual decisions (color, spacing, typography, layout) without consulting `documentation/infrastructure/DESIGN_SYSTEM.md`.
 - Promote one-off inline style values that appear more than once to a design token.
 - All client-side `fetch` calls to authenticated routes must include `{ credentials: 'include' }`.
+- Use `GatedButton` for disabled role/lifecycle actions that need to explain the gate.
+- Use `.markdown` around rendered Markdown; `prose` classes are inert because the typography plugin is not installed.
+- Use the global `.full-bleed` utility for shell-gutter escape; never hardcode compensating negative margins.
 
 ## 13. Security Requirements
 

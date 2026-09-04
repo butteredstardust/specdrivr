@@ -67,9 +67,15 @@ without a border between them; use `sunken` for the inner region instead.
 | `border-line-subtle` | `--border-subtle` | `#eceff3` | `#1c212a` | Row dividers, internal separators. |
 | `border-line` | `--border-default` | `#e0e4ea` | `#262c37` | **Default.** Card, input, panel edges. |
 | `border-line-strong` | `--border-strong` | `#c9d0da` | `#38404e` | Hover state, emphasis, scrollbar thumb. |
+| `border-line-control` | `--border-control` | `#83878e` | `#5d6a81` | Unfilled form-control boundaries. |
 
 `--border-default` is also applied as the global `border-color` in `@layer base`, so
 `border` alone yields the correct colour without a `border-line` class.
+
+`--border-control` is deliberately separate from `--border-default`. Card edges and dividers are
+structural hairlines, which WCAG 1.4.11 exempts. An empty checkbox, input, select, textarea, or
+unchecked switch has no affordance except its outline, so its boundary must reach 3:1. The stronger
+control token does that without making every card and divider visually heavy.
 
 ### 2.3 Text
 
@@ -77,7 +83,7 @@ without a border between them; use `sunken` for the inner region instead.
 |---|---|---|---|---|
 | `text-fg` | `--text-primary` | `#14161a` | `#f2f4f7` | Headings, primary body, values. |
 | `text-fg-secondary` | `--text-secondary` | `#4a5260` | `#a6b0be` | Supporting body, entity IDs, descriptions. |
-| `text-fg-muted` | `--text-muted` | `#767f8e` | `#737d8c` | Labels, timestamps, placeholders, captions. |
+| `text-fg-muted` | `--text-muted` | `#616977` | `#808b9b` | Labels, timestamps, placeholders, captions. |
 | `text-fg-inverse` | `--text-inverse` | `#ffffff` | `#0b0d11` | Text on a solid accent or inverted fill. |
 
 Three levels of text, and only three. If something needs a fourth, it needs a different size or
@@ -87,7 +93,7 @@ weight, not a fourth colour.
 
 | Utility | Token | Light | Dark | Use |
 |---|---|---|---|---|
-| `bg-accent` / `text-accent` | `--accent` | `#2563eb` | `#4d8dfa` | Primary buttons, links, active nav, focus ring. |
+| `bg-accent` / `text-accent` | `--accent` | `#1f5fe0` | `#4d8dfa` | Primary buttons, links, active nav, focus ring. |
 | `bg-accent-hover` | `--accent-hover` | `#1d4ed8` | `#6ba1fb` | Hover on a solid accent fill. |
 | `bg-accent-active` | `--accent-active` | `#1e40af` | `#85b2fc` | Active/pressed on a solid accent fill. |
 | `bg-accent-subtle` | `--accent-subtle` | `#eff4ff` | `#10203a` | Selected row, active nav background, soft chip. |
@@ -128,7 +134,8 @@ flicker, and no glow. The content is the terminal; the chrome is not.
 ## 3. Typography
 
 **Sans:** Source Sans 3 (`--font-sans`) — all interface text.
-**Mono:** Fira Code (`--font-mono`) — identifiers, logs, diffs, paths, timestamps, code.
+**Mono:** Fira Code (`--font-mono`) — IDs, code, log output, timestamps, and numeric table columns
+when paired with `tabular-nums`.
 
 ### 3.1 Scale
 
@@ -154,9 +161,12 @@ is wrong.
 
 ### 3.3 Mono rules
 
-- Uppercase mono gets `letter-spacing: 0.05em` automatically (handled globally in `globals.css`).
-- Entity IDs (`SPEC-003`, `T-042`, `SES-0091`) render mono at `text-fg-secondary` — **not** accent,
-  and no longer amber. They are reference data, not calls to action.
+- Mono is semantic, not decorative. It is **only** for IDs, code, log output, timestamps, and
+  numeric columns with `tabular-nums`.
+- Never use mono for prose, headings, table headers, badges, or control labels. Those are readable
+  interface language and use the sans face in sentence case.
+- Entity IDs (`SPEC-003`, `T-042`, `SES-0091`) render mono at `text-fg-secondary` — **not** accent.
+  They are reference data, not calls to action.
 - Ligatures (`calt`, `liga`) are on. Leave them on; they are why Fira Code was chosen.
 
 ---
@@ -189,9 +199,9 @@ and read by nothing.
 | Utility | Value | Use |
 |---|---|---|
 | `rounded-sm` | 4px | Chips, badges, small inline marks. |
-| `rounded-md` | 6px | **Default.** Buttons, inputs, selects. |
-| `rounded-lg` | 8px | Cards, panels. |
-| `rounded-xl` | 12px | Dialogs, drawers, large containers. |
+| `rounded-md` | 6px | Controls: buttons, inputs, selects, menus. |
+| `rounded-lg` | 8px | Containers: cards, panels, dialogs, drawers. |
+| `rounded-xl` | 12px | Available token; not part of the standard component vocabulary. |
 | `rounded-full` | — | Avatars, status dots, pills. |
 
 ---
@@ -226,20 +236,24 @@ cards get borders.
 Three animations exist: `animate-fade-in`, `animate-fade-in-up`, `animate-pulse-subtle`.
 `pulse-subtle` is the **only** looping animation, reserved for genuine live-activity indicators.
 
-`prefers-reduced-motion: reduce` collapses all animation and transition durations globally. **CSS
-cover is not sufficient** — JS-driven animation (canvas, xterm, timers) must check the media query
-itself.
+`globals.css` imports `tw-animate-css` because Radix overlay primitives use its `animate-in`,
+`fade-in-0`, `zoom-in-95`, and `slide-in-from-*` utilities; Tailwind v4 core does not provide them.
+The global `prefers-reduced-motion: reduce` block collapses those animations and all other CSS
+animation/transition durations. The shipped app has no JS-driven animation; elapsed-time intervals
+are counters rather than animation.
 
 ---
 
 ## 8. Component conventions
 
-Every primitive in `src/components/ui/` follows all of these. No exceptions.
+These are the primitive-layer conventions. The current catalogue mixes simple wrappers and
+composite helpers; apply each convention where the component exposes the relevant behavior.
 
 ### 8.1 Structure
 
-- **`data-slot` attribute** on every rendered part, matching the modern shadcn convention. Enables
-  styling and testing without brittle class selectors. *(Pre-overhaul: 1 of 37 primitives did this.)*
+- **`data-slot` attribute** on stable primitive parts, matching the modern shadcn convention. New
+  or rebuilt low-level controls must expose slots; composite helpers that delegate to slotted
+  primitives do not add synthetic slots solely for coverage.
 - **`cva` for variants.** Any primitive with more than one visual variant declares them with
   `class-variance-authority`, exports its `VariantProps`, and never hand-rolls conditional `cn()`
   strings. *(Pre-overhaul: 5 of 37.)*
@@ -276,6 +290,17 @@ Status is never conveyed by colour alone. Use colour **plus** a glyph or label:
 | Failed | `X` | `danger` |
 | Todo / idle | `Circle` | `fg-muted` |
 
+### 8.5 Labels and gated actions
+
+- Badges and all other UI labels are sentence-cased in source and rendered with the sans face.
+  Never restore the old CSS-driven uppercase/mono treatment.
+- Use `GatedButton` from `src/components/ui/gated-button.tsx` when a role or lifecycle rule disables
+  an action. Pass `allowed` and a human-readable `reason`; the primitive provides the disabled
+  button plus a focusable tooltip trigger. It requires an ancestor `TooltipProvider`.
+- There is exactly one focus-ring rule: the global `:focus-visible` declaration in `globals.css`.
+  Per-component focus rings, outlines, and ring utilities are forbidden. Components may change
+  border colour on focus, but may not replace or duplicate the global outline.
+
 ---
 
 ## 9. Composition patterns
@@ -286,7 +311,8 @@ Status is never conveyed by colour alone. Use colour **plus** a glyph or label:
 **Card.** `bg-surface-raised border border-line rounded-lg p-6`. No shadow.
 
 **Table.** `bg-surface-raised` container, `border border-line rounded-lg overflow-hidden`. Header
-row `text-2xs uppercase tracking-wide text-fg-muted bg-surface-sunken`. Body rows separated by
+row `text-xs font-medium text-fg-muted bg-surface-sunken`; table headers are sentence-case sans.
+Body rows are separated by
 `border-line-subtle`. Row hover `bg-surface-inset`. Selected row `bg-accent-subtle`.
 
 **Empty state.** Centred, `py-12`. Icon (24px, `text-fg-muted`) → `text-lg` heading → `text-sm
@@ -297,6 +323,24 @@ text-fg-muted` explanation → single primary action. Never a mascot.
 
 **Log surface.** `bg-log-bg border border-line rounded-md p-3 font-mono text-xs`, `scrollbar-thin`,
 `aria-live="polite"` when streaming.
+
+**Rendered markdown.** Apply the global `.markdown` class to the wrapper around `ReactMarkdown`.
+It supplies token-driven headings, lists, links, inline code, code blocks, quotes, rules, and tables.
+Do not use `prose` / `prose-invert`: `@tailwindcss/typography` is not installed and those classes are
+inert in this project.
+
+**Full bleed.** Pages with their own full-width header or section dividers use `.full-bleed`. It
+negates the shell-owned `--shell-gutter` and `--shell-gutter-y` custom properties, avoiding hardcoded
+negative margins that drift when shell padding changes.
+
+### 9.1 Breakpoint strategy
+
+The app is mobile-first and uses Tailwind's standard breakpoints; there are no custom breakpoint
+tokens. Base classes define narrow layouts. `sm:` is used only when a local row or grid has enough
+room to expand, `md:` is the shell boundary (main gutters move from `px-4 py-6` to `px-8 py-8`), and
+`lg:` is reserved for multi-column feature layouts. Core actions and information must remain
+available below every breakpoint; responsive variants rearrange or wrap them rather than hiding
+functionality. `.full-bleed` reads the shell variables at both gutter sizes.
 
 ---
 
@@ -309,8 +353,8 @@ Non-negotiable, and checked at the Phase 9 gate.
   returns to the trigger on close.
 - **Keyboard:** every action reachable without a pointer. Tab order follows visual order.
 - **Landmarks:** one `<main>`, `<nav>` for navigation, headings in order without skipping levels.
-- **Live regions:** `aria-live="polite"` on streaming logs, task status, and progress.
-  *(Pre-overhaul, the three live surfaces — `task-row`, `live-terminal`, `diff-viewer` — had none.)*
+- **Live regions:** `aria-live="polite"` on streaming logs, task status, and progress. `DiffViewer`
+  is not live; it uses tab/tabpanel semantics for its selectable file list.
 - **Names:** every icon-only button has `aria-label` or visually-hidden text.
 - **Never colour-only:** see §8.4.
 - **Reduced motion:** respected by CSS *and* by JS-driven animation.
@@ -331,6 +375,16 @@ Non-negotiable, and checked at the Phase 9 gate.
 | Hand-rolled `cn()` variant chains | `cva` |
 | A one-off `px-10` gutter | The §4 spacing scale |
 | Decorative looping animation | `animate-pulse-subtle`, only for live activity |
+| `prose prose-invert` around `ReactMarkdown` | `.markdown` |
+| Local `focus-visible:ring-*` / outline classes | The single global `:focus-visible` outline |
+| Mono prose, heading, table header, badge, or control label | Sans sentence case |
+
+### 11.1 CodeMirror token exception
+
+`src/lib/editor-theme.ts` transcribes the light and dark token values as colour literals because
+CodeMirror's `createTheme` builds its own stylesheet and cannot read CSS custom properties. This is
+the sole design-token transcription outside `globals.css`; update both files together. The editor
+in `src/components/specs/spec-editor.tsx` selects the pair from `useTheme().resolvedTheme`.
 
 ---
 

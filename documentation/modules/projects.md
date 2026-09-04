@@ -15,16 +15,15 @@ This module covers the project lifecycle, including creation, switching, and adm
 ### 2.1 Projects List (`/projects`)
 
 - **Route**: `/projects`
-- **Contents**: Full-width table showing:
-  - Project ID & Name
-  - Repository URL & Branch
-  - Spec Count & Last Run status
-- **Action**: `+ New Project` button in the top bar.
+- **Contents**: Searchable full-width table showing project ID, name, description, creation date,
+  and a settings action.
+- **Action**: **New project** is a page-header action and opens `CreateProjectDialog`.
 
 ### 2.2 Project Switching
 
 - **Location**: Sidebar dropdown (below logo).
-- **Behavior**: Shows current project as `org/repo`. Switching projects triggers a global context update and navigates to the Mission Control for the selected project.
+- **Behavior**: Shows the current project name. Switching updates shell context and navigates to
+  Mission Control for the selected project.
 
 ### 2.3 General Project Settings (`/settings/general`)
 
@@ -35,9 +34,9 @@ This module covers the project lifecycle, including creation, switching, and adm
   - **Default Branch**: Default is `main`.
   - **Timezone**: Used for date displays and scheduling.
 
-### 2.4 Danger Zone
+### 2.4 Danger Zone (`/settings/danger`)
 
-destructive actions found in `/settings/general` (bottom):
+Destructive actions are isolated on the dedicated danger settings route:
 
 - **Abandon All Sessions**: Immediately stops running agent sessions.
 - **Delete All Specs & Plans**: Purges data but keeps the project and team.
@@ -47,10 +46,10 @@ destructive actions found in `/settings/general` (bottom):
 
 ### 3.1 FLOW 1: Create a New Project
 
-1. User clicks `+ New Project` on the Projects page.
+1. User clicks **New project** on the Projects page.
 2. Opens **New Project Dialog**.
 3. User enters Name and Repository URL.
-4. User clicks `[Create Project]`.
+4. User clicks **Create project**.
 5. System validates repository access.
 6. On success, the user is redirected to the new project's Mission Control.
 

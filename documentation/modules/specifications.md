@@ -18,8 +18,8 @@ This module is the core of Specdrivr. It covers the creation of Markdown-based s
 - **Contents**: Full-width table showing:
   - Spec ID & Name
   - Status (Drafting, Pending Plan, Pending Approval, Executing, Complete)
-  - Version & Task Progress (ASCII bar)
-- **Action**: `+ New Spec` button navigates to the Editor.
+  - Version and task count
+- **Action**: **New spec** navigates to the editor.
 
 ### 2.2 Spec Editor (`/specs/new` | `/specs/[id]/edit`)
 
@@ -28,42 +28,45 @@ This module is the core of Specdrivr. It covers the creation of Markdown-based s
   - CodeMirror 6 Markdown editor (left).
   - Live preview (right).
   - Warning banner if editing a spec with an active plan.
-- **Actions**: `Save Draft` or `Save & Generate Plan`.
+- **Actions**: **Save draft** or **Save & generate plan**.
 
 ### 2.3 Specification Detail (`/specs/[id]`)
 
 Five-tab interface for managing the spec lifecycle:
 
-1. **SPEC**: Rendered markdown of the current version + version history pills.
-2. **PLAN**:
+1. **Spec**: Rendered markdown of the current version plus version history controls.
+2. **Plan**:
    - Displays the AI-generated implementation plan.
-   - If `pending_approval`: Shows `[ABANDON]`, `[REQUEST CHANGES]`, and `[APPROVE & EXECUTE]`.
-3. **TASKS**: Filterable, dependency-ordered list of tasks. (Detailed in [tasks.md](./tasks.md)).
-4. **CHANGES**: File tree and Shiki diff viewer showing agent-authored code.
-5. **ACTIVITY**: Scoped event log for the specification.
+   - Lifecycle routing shows generation, timeout, empty, review, changes-requested,
+     rejected/abandoned, approved, executing, and completed states.
+   - During `pending_approval`, members can edit/request changes and admins can reject or
+     **Approve & execute**; unavailable actions use `GatedButton` explanations.
+3. **Tasks**: Filterable, dependency-ordered list of tasks. (Detailed in [tasks.md](./tasks.md)).
+4. **Changes**: File tabs and a Shiki diff viewer showing agent-authored code.
+5. **Activity**: Scoped event log for the specification.
 
 ## 3. Interaction Flows
 
 ### 3.1 FLOW 3: Create a New Specification
 
-1. User clicks `+ New Spec` on the Specifications page.
+1. User clicks **New spec** on the Specifications page.
 2. Navigates to the Spec Editor.
 3. User writes the specification in Markdown.
-4. User clicks `Save Draft`.
-5. System creates the spec record and redirects to the Spec Detail page (SPEC tab).
+4. User clicks **Save draft**.
+5. System creates the spec record and redirects to the Spec Detail page (Spec tab).
 
 ### 3.2 FLOW 4: Save Spec and Generate Plan
 
-1. In the Spec Editor, user clicks `Save & Generate Plan`.
+1. In the Spec Editor, user clicks **Save & generate plan**.
 2. System saves the spec and triggers an **async plan generation job** (Gemini).
 3. Spec status set to `pending_plan`.
-4. User is redirected to Spec Detail (PLAN tab) with a loading state.
+4. User is redirected to Spec Detail (Plan tab) with a loading state.
 5. When generation completes, status updates to `pending_approval`.
 
 ### 3.3 FLOW 5: Approve Plan and Start Execution
 
 1. User reviews the plan in the PLAN tab.
-2. User clicks `[APPROVE & EXECUTE]`.
+2. User clicks **Approve & execute**.
 3. Confirmation dialog opens.
 4. On confirm, system:
    - Sets plan status to `approved`.
@@ -89,7 +92,8 @@ Five-tab interface for managing the spec lifecycle:
 
 - **Logic**: `src/lib/gemini.ts` (Plan generation), `src/actions/specifications.ts`.
 - **Database**: `src/db/schema.ts` (`specifications`, `specVersions`, `plans`, `planJobs`, `planReviews` tables).
-- **UI Components**: `src/components/specs/spec-editor.tsx`, `src/components/specs/plan-tab.tsx`, `src/components/specs/changes-tab.tsx`.
+- **UI Components**: `src/components/specs/spec-editor.tsx`, `plan-tab.tsx`, `changes-tab.tsx`, and
+  `src/components/specs/plan/{shared,plan-review,use-plan}`.
 
 ### 5.2 Critical Paths
 

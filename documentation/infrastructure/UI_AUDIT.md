@@ -1,5 +1,10 @@
 # UI Audit — 2026-09-04
 
+> **Historical snapshot — pre-rebuild.** This audit records the UI as it existed before decision
+> D1 and the 2026-09-04 UI overhaul. It is retained as provenance, not current guidance. For the
+> shipped system, use [`DESIGN_SYSTEM.md`](./DESIGN_SYSTEM.md) and
+> [`UI_SPEC.md`](./UI_SPEC.md).
+
 Scope: `src/app/globals.css`, `src/components/ui/**` (37 files), `src/components/**` (78 `.tsx` files
 total), `src/app/(app)/**` and `src/app/(auth)/**`, `package.json` UI deps, `components.json`,
 `documentation/infrastructure/DESIGN_SYSTEM.md` (576 lines). Read-only audit; no source files were

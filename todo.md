@@ -223,13 +223,13 @@ to CI, which is what this item was for.
 > because it is the specification the implementation is built against. This phase only reconciles it
 > with what actually shipped, plus the surrounding docs.
 
-- [ ] Reconcile `documentation/infrastructure/DESIGN_SYSTEM.md` against the shipped code; correct anywhere implementation diverged from spec
-- [ ] Update `AGENTS.md` §5 and §12 to match the rebuilt system
-- [ ] Update `documentation/infrastructure/CODING_PATTERNS.md` for the new component conventions
-- [ ] Update `documentation/infrastructure/DIRECTORY_MAP.md` if the component tree moved
-- [ ] Update `documentation/infrastructure/SYMBOL_REGISTRY.md` for deleted and added symbols
-- [ ] Update `documentation/modules/*.md` where screen descriptions changed
-- [ ] Mark `UI_AUDIT.md` as historical, superseded by the rewritten design system
+- [x] Reconcile `documentation/infrastructure/DESIGN_SYSTEM.md` against the shipped code; correct anywhere implementation diverged from spec
+- [x] Update `AGENTS.md` §5 and §12 to match the rebuilt system
+- [x] Update `documentation/infrastructure/CODING_PATTERNS.md` for the new component conventions
+- [x] Update `documentation/infrastructure/DIRECTORY_MAP.md` if the component tree moved
+- [x] Update `documentation/infrastructure/SYMBOL_REGISTRY.md` for deleted and added symbols
+- [x] Update `documentation/modules/*.md` where screen descriptions changed
+- [x] Mark `UI_AUDIT.md` as historical, superseded by the rewritten design system
 
 ## Phase 9 — Verification gate (deferred until everything above is done)
 

@@ -17,23 +17,25 @@ This module covers the live execution of implementation plans. It includes the M
 The primary dashboard for active work:
 
 - **Live Execution Panel**: Shows the current session ID, elapsed timer, progress bar, and active task.
-- **Terminal UI**: Real-time log tailing using `xterm.js`.
+- **Log surface**: Real-time `xterm.js` tailing in a neutral mono panel with no CRT effects.
 - **Event Log**: A feed of the last 30 agent events (pushed via WebSockets/Server-Sent Events).
-- **Needs Attention**: An amber banner that appears only if tasks are blocked (Links to [tasks.md](./tasks.md)).
+- **Needs attention**: A semantic warning banner that appears only if tasks are blocked (links to [tasks.md](./tasks.md)).
 
 ### 2.2 Sessions Browser (`/sessions`)
 
 - **Route**: `/sessions`
-- **Contents**: A timeline list of historical and active sessions grouped by date.
-- **Action**: Click a row to expand the per-task event log and live terminal tail.
+- **Contents**: A filterable table of historical and active sessions grouped by date, with status,
+  specification, start time, duration, and task counts.
+- **Actions**: The disclosure button expands the session event log in place; the session ID and
+  row action navigate to the dedicated session detail page.
 
 ## 3. Interaction Flows
 
 ### 3.1 Session Control (Pause/Resume/Cancel)
 
-- **Pause**: User clicks `[PAUSE]`. System sets session status to `paused`. The agent receives `shouldStop: true` on its next heartbeat and stops execution after the current task.
-- **Resume**: User clicks `[RESUME]`. Status returns to `running`. The agent resumes polling for the next task.
-- **Cancel**: User clicks `[CANCEL]`. Status set to `cancelled`. All in-progress tasks are marked `failed`.
+- **Pause**: User clicks **Pause**. System sets session status to `paused`. The agent receives `shouldStop: true` on its next heartbeat and stops execution after the current task.
+- **Resume**: User clicks **Resume**. Status returns to `running`. The agent resumes polling for the next task.
+- **Cancel**: User clicks **Cancel**. Status is set to `cancelled` and active leases are recovered.
 
 ## 4. DAEMON Agent Protocol
 
