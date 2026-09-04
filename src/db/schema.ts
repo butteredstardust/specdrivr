@@ -119,6 +119,12 @@ export const accounts = pgTable('accounts', {
   id: text('id').primaryKey(),
   accountId: text('account_id').notNull(),
   providerId: text('provider_id').notNull(),
+  // Required by better-auth >= 1.7. Sign-in matches the credential account on
+  // `issuer === createLocalAccountIssuer('credential')` (i.e. `local:credential`),
+  // so without this column the lookup never matches and every password login
+  // fails with a generic "invalid email or password". The default keeps the
+  // column addable to existing rows; the migration backfills them.
+  issuer: text('issuer').notNull().default(''),
   userId: text('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
