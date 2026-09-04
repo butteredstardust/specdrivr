@@ -76,14 +76,14 @@ Everything from Phase 2 onward is built against this document. It is written **b
 
 Target: one consistent vintage across all primitives.
 
-- [ ] Standardise on the modern shadcn `data-slot` pattern — currently **1 of 37** (`calendar.tsx`) uses it
-- [ ] Convert every multi-variant primitive to `cva` (currently 5/37)
-- [ ] **Resurrect the dead stock primitives** the custom layer displaced: `badge.tsx` (confirmed dead by knip), `alert.tsx`, `separator.tsx` — and **remove their entries from `knip.json`'s ignore list** so CI can see them again
-- [ ] Wrap `vaul`'s `Drawer` as `ui/drawer.tsx` like every other headless dep, instead of raw imports
-- [ ] Unify on `lucide-react`; remove the 2 `@radix-ui/react-icons` holdouts
-- [ ] Uniform focus-visible ring across every interactive primitive (replaces `.phosphor-focus`)
-- [ ] Uniform disabled, loading, and invalid states
-- [ ] Per-primitive pass over all 37 files: `button`, `input`, `textarea`, `select`, `checkbox`, `switch`, `slider`, `label`, `card`, `table`, `tabs`, `dialog`, `alert-dialog`, `popover`, `dropdown-menu`, `tooltip`, `progress`, `skeleton`, `avatar`, `breadcrumb`, `collapsible`, `calendar`, `date-picker`, `page-header`, `diff-viewer`, `task-row`, `theme-toggle`, `keyboard-shortcuts-modal`
+- [x] Standardise on the modern shadcn `data-slot` pattern — currently **1 of 37** (`calendar.tsx`) uses it
+- [x] Convert every multi-variant primitive to `cva` (currently 5/37)
+- [x] **Resurrect the dead stock primitives** the custom layer displaced: `badge.tsx` (confirmed dead by knip), `alert.tsx`, `separator.tsx` — and **remove their entries from `knip.json`'s ignore list** so CI can see them again
+- [x] Wrap `vaul`'s `Drawer` as `ui/drawer.tsx` like every other headless dep, instead of raw imports
+- [x] Unify on `lucide-react`; remove the 2 `@radix-ui/react-icons` holdouts
+- [x] Uniform focus-visible ring across every interactive primitive (replaces `.phosphor-focus`)
+- [x] Uniform disabled, loading, and invalid states
+- [x] Per-primitive pass over all 37 files: `button`, `input`, `textarea`, `select`, `checkbox`, `switch`, `slider`, `label`, `card`, `table`, `tabs`, `dialog`, `alert-dialog`, `popover`, `dropdown-menu`, `tooltip`, `progress`, `skeleton`, `avatar`, `breadcrumb`, `collapsible`, `calendar`, `date-picker`, `page-header`, `diff-viewer`, `task-row`, `theme-toggle`, `keyboard-shortcuts-modal`
 
 ## Phase 4 — App shell
 

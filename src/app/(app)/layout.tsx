@@ -54,7 +54,7 @@ async function AuthenticatedApp({ children }: { children: React.ReactNode }) {
           <Sidebar projects={projects} />
           <div className="flex flex-1 flex-col overflow-hidden">
             <TopBar />
-            <main className="relative flex-1 overflow-y-auto px-8 py-8 md:px-10">
+            <main className="relative flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8">
               <div className="mx-auto max-w-[1600px]">{children}</div>
               <ActiveJobsOverlay />
             </main>
@@ -71,13 +71,15 @@ async function AuthenticatedApp({ children }: { children: React.ReactNode }) {
 function LayoutSkeleton() {
   return (
     <div className="bg-surface-base relative flex h-screen overflow-hidden">
-      <div className="border-line bg-surface-raised w-64 space-y-6 border-r p-6">
-        <Skeleton className="h-10 w-3/4 rounded-md" />
-        <div className="space-y-3">
+      <div className="border-line bg-surface-raised w-64 shrink-0 border-r px-4 py-6">
+        <Skeleton className="mb-6 h-8 w-3/4 rounded-md" />
+        <div className="space-y-1.5">
           <Skeleton className="h-9 w-full rounded-md" />
           <Skeleton className="h-9 w-full rounded-md" />
           <Skeleton className="h-9 w-full rounded-md" />
-          <Skeleton className="h-9 w-5/6 rounded-md" />
+          <Skeleton className="h-9 w-full rounded-md" />
+          <Skeleton className="h-9 w-full rounded-md" />
+          <Skeleton className="h-9 w-full rounded-md" />
         </div>
       </div>
       <div className="flex flex-1 flex-col overflow-hidden">
@@ -88,7 +90,7 @@ function LayoutSkeleton() {
             <Skeleton className="h-9 w-9 rounded-full" />
           </div>
         </div>
-        <main className="flex-1 overflow-y-auto p-8 md:p-10">
+        <main className="flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8">
           <div className="mx-auto max-w-[1600px] space-y-6">
             <Skeleton className="h-10 w-1/4 rounded" />
             <div className="space-y-4">

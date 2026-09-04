@@ -42,10 +42,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem={true}>
           <NuqsAdapter>
             {children}
+            {/* Toasts are UI chrome, not log output — sans, not mono. Styled
+                off the same tokens as every other overlay. */}
             <Toaster
               position="bottom-right"
+              closeButton
               toastOptions={{
-                className: 'font-mono text-xs border-line bg-surface-raised text-fg',
+                className:
+                  'border-line bg-surface-overlay text-fg shadow-overlay rounded-md text-sm',
               }}
             />
           </NuqsAdapter>
