@@ -205,6 +205,12 @@ export class WebhookRepository extends BaseRepository {
    * `staleLockMs` means nobody is still working on them. The `SELECT … FOR
    * UPDATE SKIP LOCKED` is what keeps two concurrent workers off the same row,
    * so the whole sequence has to stay inside one transaction.
+   *
+   * Deliberately not wrapped in `executeQuery`: its retry treats a dropped
+   * connection as transient, but a claim that committed just before the socket
+   * died is invisible to the client, and re-running would claim a second row
+   * under the same lease while the first sits in `delivering` until the stale
+   * lock expires. Failing outward lets the poll loop pick things up cleanly.
    */
   async claimNextPendingDelivery(
     leaseToken: string,
@@ -213,40 +219,34 @@ export class WebhookRepository extends BaseRepository {
     const now = new Date();
     const staleLock = new Date(Date.now() - staleLockMs);
 
-    return await this.executeQuery(async () => {
-      const claimed = await db.transaction(async (tx) => {
-        await tx
-          .update(webhookDeliveries)
-          .set({ status: 'pending', leaseToken: null, lockedAt: null })
-          .where(
-            and(
-              eq(webhookDeliveries.status, 'delivering'),
-              lt(webhookDeliveries.lockedAt, staleLock)
-            )
-          );
+    return await db.transaction(async (tx) => {
+      await tx
+        .update(webhookDeliveries)
+        .set({ status: 'pending', leaseToken: null, lockedAt: null })
+        .where(
+          and(eq(webhookDeliveries.status, 'delivering'), lt(webhookDeliveries.lockedAt, staleLock))
+        );
 
-        const [candidate] = await tx
-          .select()
-          .from(webhookDeliveries)
-          .where(
-            and(
-              eq(webhookDeliveries.status, 'pending'),
-              or(isNull(webhookDeliveries.nextRetryAt), lte(webhookDeliveries.nextRetryAt, now))
-            )
+      const [candidate] = await tx
+        .select()
+        .from(webhookDeliveries)
+        .where(
+          and(
+            eq(webhookDeliveries.status, 'pending'),
+            or(isNull(webhookDeliveries.nextRetryAt), lte(webhookDeliveries.nextRetryAt, now))
           )
-          .orderBy(asc(webhookDeliveries.createdAt))
-          .limit(1)
-          .for('update', { skipLocked: true });
-        if (!candidate) return null;
+        )
+        .orderBy(asc(webhookDeliveries.createdAt))
+        .limit(1)
+        .for('update', { skipLocked: true });
+      if (!candidate) return null;
 
-        const [row] = await tx
-          .update(webhookDeliveries)
-          .set({ status: 'delivering', leaseToken, lockedAt: now })
-          .where(eq(webhookDeliveries.id, candidate.id))
-          .returning();
-        return row ?? null;
-      });
-      return claimed;
+      const [row] = await tx
+        .update(webhookDeliveries)
+        .set({ status: 'delivering', leaseToken, lockedAt: now })
+        .where(eq(webhookDeliveries.id, candidate.id))
+        .returning();
+      return row ?? null;
     });
   }
 

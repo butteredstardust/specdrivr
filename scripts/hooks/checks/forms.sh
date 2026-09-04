@@ -35,10 +35,15 @@ for file in $react_files; do
         # `useForm<Values>(...)` is the normal typed call, so the paren does not
         # follow the name directly — matching only `useForm(` missed every form
         # that passes a type argument, which is most of them.
-        HAS_USEFORM=$(grep -qE "useForm\s*[<(]|useFormContext" "$file" && echo 1 || echo 0)
-        # Schemas live in @/lib/schemas and arrive via zodResolver, so requiring
-        # an inline z.object() flagged correctly-validated forms as violations.
-        HAS_ZOD=$(grep -qE "z\.object|from\s+['\"]zod|zodResolver|from\s+['\"]@/lib/schemas" "$file" && echo 1 || echo 0)
+        # `useForm as X` covers the aliased import, whose call site the other
+        # two patterns cannot see.
+        HAS_USEFORM=$(grep -qE "useForm\s*[<(]|useFormContext|useForm\s+as\s+" "$file" && echo 1 || echo 0)
+        # A schema only validates once it is wired to the form, so the import
+        # alone does not count — zodResolver or an inline z.object() is the
+        # evidence of an actual connection. (Requiring an inline z.object()
+        # outright would flag every form whose schema lives in @/lib/schemas,
+        # which is the sanctioned location.)
+        HAS_ZOD=$(grep -qE "z\.object|zodResolver" "$file" && echo 1 || echo 0)
         # A section does not own the schema — its parent resolver does.
         if grep -q "useFormContext" "$file"; then HAS_ZOD=1; fi
 

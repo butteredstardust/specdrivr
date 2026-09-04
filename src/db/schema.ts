@@ -115,29 +115,42 @@ export const sessions = pgTable('sessions', {
     .references(() => users.id, { onDelete: 'cascade' }),
 });
 
-export const accounts = pgTable('accounts', {
-  id: text('id').primaryKey(),
-  accountId: text('account_id').notNull(),
-  providerId: text('provider_id').notNull(),
-  // Required by better-auth >= 1.7. Sign-in matches the credential account on
-  // `issuer === createLocalAccountIssuer('credential')` (i.e. `local:credential`),
-  // so without this column the lookup never matches and every password login
-  // fails with a generic "invalid email or password". The default keeps the
-  // column addable to existing rows; the migration backfills them.
-  issuer: text('issuer').notNull().default(''),
-  userId: text('user_id')
-    .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
-  accessToken: text('access_token'),
-  refreshToken: text('refresh_token'),
-  idToken: text('id_token'),
-  accessTokenExpiresAt: timestamp('access_token_expires_at', { withTimezone: true }),
-  refreshTokenExpiresAt: timestamp('refresh_token_expires_at', { withTimezone: true }),
-  scope: text('scope'),
-  password: text('password'),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-});
+export const accounts = pgTable(
+  'accounts',
+  {
+    id: text('id').primaryKey(),
+    accountId: text('account_id').notNull(),
+    providerId: text('provider_id').notNull(),
+    // Required by better-auth >= 1.7. Sign-in matches the credential account on
+    // `issuer === createLocalAccountIssuer('credential')` (i.e. `local:credential`),
+    // so without this column the lookup never matches and every password login
+    // fails with a generic "invalid email or password". The default keeps the
+    // column addable to existing rows; the migration backfills them.
+    issuer: text('issuer').notNull().default(''),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    accessToken: text('access_token'),
+    refreshToken: text('refresh_token'),
+    idToken: text('id_token'),
+    accessTokenExpiresAt: timestamp('access_token_expires_at', { withTimezone: true }),
+    refreshTokenExpiresAt: timestamp('refresh_token_expires_at', { withTimezone: true }),
+    scope: text('scope'),
+    password: text('password'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => ({
+    // better-auth 1.7 declares this pair as its account identity constraint
+    // (getAuthTables() → `account_issuer_accountId_uidx`). Without it two
+    // concurrent links can create rival rows for the same external identity and
+    // the adapter's findOne has no deterministic owner.
+    issuerAccountIdx: uniqueIndex('account_issuer_accountId_uidx').on(
+      table.issuer,
+      table.accountId
+    ),
+  })
+);
 
 export const verifications = pgTable('verifications', {
   id: text('id').primaryKey(),

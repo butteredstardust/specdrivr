@@ -601,13 +601,25 @@ export const resetPasswordSchema = z
  * Client-side shape of the invite acceptance form. The token comes from the URL
  * and the email is fixed by the invite, so neither is user-editable.
  * Bounds match `/api/v1/auth/accept-invite`.
+ *
+ * An invitee who already has an account is only being added to a project — the
+ * route ignores name and password for them and never asks for either, so the
+ * requirement is conditional rather than baked into one schema.
  */
-export const acceptInviteFormSchema = z.object({
+export const acceptInviteExistingUserFormSchema = z.object({
+  name: z.string().optional(),
+  password: z.string().optional(),
+});
+
+export const acceptInviteNewUserFormSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
 });
 
-export type AcceptInviteFormValues = z.infer<typeof acceptInviteFormSchema>;
+export const acceptInviteFormSchema = (isExistingUser: boolean) =>
+  isExistingUser ? acceptInviteExistingUserFormSchema : acceptInviteNewUserFormSchema;
+
+export type AcceptInviteFormValues = z.infer<typeof acceptInviteExistingUserFormSchema>;
 
 /**
  * Client-side shape of the change-password form. The 12-character floor matches

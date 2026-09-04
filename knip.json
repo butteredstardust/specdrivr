@@ -5,6 +5,7 @@
     "src/lib/pricing.ts",
     "scripts/health-check.js",
     "scripts/nuke-db.ts",
+    "scripts/db-verify.ts",
     "tests/generate-slack-json.js",
     "tests/manual-db-update.ts",
     "tests/verify-github-service.ts"

@@ -15,10 +15,11 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
 type TokenState = 'loading' | 'valid' | 'invalid';
 
+/** Mirrors the payload of `GET /api/v1/auth/invite`. */
 interface InviteData {
   email: string;
   projectName: string;
-  inviterName: string;
+  isExistingUser: boolean;
 }
 
 export default function InvitePage() {
@@ -29,12 +30,16 @@ export default function InvitePage() {
   const [tokenState, setTokenState] = useState<TokenState>('loading');
   const [invite, setInvite] = useState<InviteData | null>(null);
 
+  // An invitee who already has an account only gets added to the project, so
+  // the credential fields are neither shown nor required for them.
+  const isExistingUser = invite?.isExistingUser ?? false;
+
   const {
     register,
     handleSubmit,
     formState: { isSubmitting, errors },
   } = useForm<AcceptInviteFormValues>({
-    resolver: zodResolver(acceptInviteFormSchema),
+    resolver: zodResolver(acceptInviteFormSchema(isExistingUser)),
     defaultValues: { name: '', password: '' },
   });
 
@@ -64,7 +69,9 @@ export default function InvitePage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ token, name: values.name, password: values.password }),
+        body: JSON.stringify(
+          isExistingUser ? { token } : { token, name: values.name, password: values.password }
+        ),
       });
       if (!res.ok) throw new Error('Failed to accept invite');
       toast.success('Welcome to the project!');
@@ -108,7 +115,7 @@ export default function InvitePage() {
           <p className="text-fg font-mono text-lg font-semibold tracking-[-0.04em]">specdrivr</p>
           {invite && (
             <p className="text-fg-muted text-xs">
-              {invite.inviterName} invited you to <strong>{invite.projectName}</strong>
+              You&apos;ve been invited to <strong>{invite.projectName}</strong>
             </p>
           )}
         </div>
@@ -125,30 +132,36 @@ export default function InvitePage() {
               className="border-line bg-surface-base opacity-60"
             />
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="name">Full name</Label>
-            <Input
-              id="name"
-              type="text"
-              autoComplete="name"
-              aria-invalid={Boolean(errors.name)}
-              className="border-line bg-surface-base"
-              {...register('name')}
-            />
-            {errors.name && <p className="text-danger text-xs">{errors.name.message}</p>}
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="password">Create password</Label>
-            <Input
-              id="password"
-              type="password"
-              autoComplete="new-password"
-              aria-invalid={Boolean(errors.password)}
-              className="border-line bg-surface-base"
-              {...register('password')}
-            />
-            {errors.password && <p className="text-danger text-xs">{errors.password.message}</p>}
-          </div>
+          {!isExistingUser && (
+            <>
+              <div className="space-y-1.5">
+                <Label htmlFor="name">Full name</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  autoComplete="name"
+                  aria-invalid={Boolean(errors.name)}
+                  className="border-line bg-surface-base"
+                  {...register('name')}
+                />
+                {errors.name && <p className="text-danger text-xs">{errors.name.message}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="password">Create password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  autoComplete="new-password"
+                  aria-invalid={Boolean(errors.password)}
+                  className="border-line bg-surface-base"
+                  {...register('password')}
+                />
+                {errors.password && (
+                  <p className="text-danger text-xs">{errors.password.message}</p>
+                )}
+              </div>
+            </>
+          )}
           <Button
             type="submit"
             disabled={isSubmitting}

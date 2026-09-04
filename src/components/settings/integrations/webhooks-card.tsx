@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
@@ -68,11 +68,19 @@ function WebhookDialog({ open, onClose, onSave, initial, isSaving }: WebhookDial
     defaultValues: initial ?? WEBHOOK_FORM_DEFAULTS,
   });
 
-  // Sync form when dialog opens with new initial data
-  const handleOpenChange = (isOpen: boolean) => {
-    if (isOpen) {
+  // `defaultValues` is captured on the first render only, and the parent opens
+  // this dialog by flipping the `open` prop directly — Radix does not call
+  // `onOpenChange` for that transition, so resetting from there would leave the
+  // previous webhook's URL and events on screen (and save them over the new
+  // one). Reacting to `open`/`initial` is what actually catches every open.
+  useEffect(() => {
+    if (open) {
       reset(initial ?? WEBHOOK_FORM_DEFAULTS);
-    } else {
+    }
+  }, [open, initial, reset]);
+
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
       onClose();
     }
   };
@@ -285,13 +293,20 @@ export function WebhooksCard({ projectId, editable }: WebhooksCardProps) {
     }
   };
 
-  const editInitial: WebhookFormData | undefined = editTarget
-    ? {
-        url: editTarget.url,
-        secret: '',
-        events: (editTarget.events as string[]) ?? [],
-      }
-    : undefined;
+  // The dialog resets its form whenever this changes, and polling re-renders
+  // this component every few seconds — a fresh object literal each time would
+  // wipe out whatever the user is typing.
+  const editInitial: WebhookFormData | undefined = useMemo(
+    () =>
+      editTarget
+        ? {
+            url: editTarget.url,
+            secret: '',
+            events: (editTarget.events as string[]) ?? [],
+          }
+        : undefined,
+    [editTarget]
+  );
 
   return (
     <>

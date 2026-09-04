@@ -79,7 +79,9 @@ export function MembersSection({ projectId, userRole, initialMembers }: MembersS
     const email = values.email.trim();
 
     try {
-      const res = await fetch(`/api/v1/projects/${projectId}/invites`, {
+      // Invitations are created by POSTing to the members collection; there is
+      // no /invites route, and posting to one silently 404'd every invite.
+      const res = await fetch(`/api/v1/projects/${projectId}/members`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

@@ -8,6 +8,7 @@ interface CreateProjectData {
   name: string;
   description?: string | null;
   createdBy?: string;
+  repositoryUrl?: string | null;
 }
 
 interface UpdateProjectData {
@@ -73,6 +74,7 @@ export class ProjectRepository extends BaseRepository {
       slug: `${slugBase}-${Date.now()}`,
       description: data.description ?? null,
       createdBy: data.createdBy || null,
+      repositoryUrl: data.repositoryUrl?.trim() || null,
       status: 'active' as const,
     };
 
