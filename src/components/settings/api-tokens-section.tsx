@@ -211,7 +211,7 @@ export function ApiTokensSection() {
             variant="ghost"
             size="sm"
             onClick={restart}
-            className="text-fg-muted hover:text-fg h-auto px-0 font-mono text-xs underline hover:bg-transparent"
+            className="text-fg-muted hover:text-fg h-auto px-0 text-xs underline hover:bg-transparent"
           >
             Retry
           </Button>
@@ -227,7 +227,7 @@ export function ApiTokensSection() {
               {/* Header row */}
               <div className="border-line grid grid-cols-[1fr_auto_auto_auto_auto] gap-4 border-b px-3 py-2">
                 {['NAME', 'PREFIX', 'CREATED', 'LAST USED', 'EXPIRES'].map((col) => (
-                  <span key={col} className="text-fg-muted font-mono text-xs">
+                  <span key={col} className="text-fg-muted text-xs">
                     {col}
                   </span>
                 ))}
@@ -240,7 +240,7 @@ export function ApiTokensSection() {
                 >
                   <div className="flex min-w-0 items-center gap-2">
                     <Key className="text-fg-muted size-3 shrink-0" />
-                    <span className="text-fg truncate font-mono text-xs">{t.name}</span>
+                    <span className="text-fg truncate text-xs">{t.name}</span>
                   </div>
                   <span className="text-fg-muted font-mono text-xs">{t.prefix}&hellip;</span>
                   <span className="text-fg-muted font-mono text-xs">{formatDate(t.createdAt)}</span>
@@ -254,7 +254,7 @@ export function ApiTokensSection() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-danger hover:bg-danger-bg hover:text-danger h-auto px-1.5 py-0.5 font-mono text-xs"
+                      className="text-danger hover:bg-danger-bg hover:text-danger h-auto px-1.5 py-0.5 text-xs"
                       onClick={() => setRevokeTargetId(t.id)}
                     >
                       Revoke
@@ -277,21 +277,21 @@ export function ApiTokensSection() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="font-mono">Generate API Token</DialogTitle>
+            <DialogTitle>Generate API Token</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit(handleGenerate)} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <label className="text-fg-secondary font-mono text-xs" htmlFor="token-name">
+              <label className="text-fg-secondary text-xs" htmlFor="token-name">
                 TOKEN NAME <span className="text-danger">*</span>
               </label>
               <Input id="token-name" placeholder="e.g. CI Deploy" {...register('tokenName')} />
               {errors.tokenName && (
-                <p className="text-danger font-mono text-xs">{errors.tokenName.message}</p>
+                <p className="text-danger text-xs">{errors.tokenName.message}</p>
               )}
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-fg-secondary font-mono text-xs" htmlFor="token-expiry">
+              <label className="text-fg-secondary text-xs" htmlFor="token-expiry">
                 EXPIRY
               </label>
               <Controller
@@ -338,10 +338,10 @@ export function ApiTokensSection() {
       <Dialog open={revealOpen} onOpenChange={setRevealOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="font-mono">Your new API token</DialogTitle>
+            <DialogTitle>Your new API token</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-3">
-            <p className="text-fg-muted font-mono text-xs">
+            <p className="text-fg-muted text-xs">
               This token is shown once only. Copy it now — you will not be able to see it again.
             </p>
             <div className="border-line bg-surface-raised flex items-center gap-2 rounded border px-3 py-2">
@@ -367,8 +367,8 @@ export function ApiTokensSection() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-mono">Revoke token?</AlertDialogTitle>
-            <AlertDialogDescription className="font-mono text-xs">
+            <AlertDialogTitle>Revoke token?</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs">
               This token will be permanently revoked. Any applications using it will stop working
               immediately. This action cannot be undone.
             </AlertDialogDescription>

@@ -187,6 +187,11 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
                     {/* The whole card used to be a clickable div, which put the
                         expanded panel inside the click target. Only the header
                         toggles now, so the panel's contents stay reachable. */}
+                    {/* Not a Button: this is a disclosure trigger that has to be
+                        a bare full-width region wrapping the card header. Every
+                        Button variant brings its own height, padding and centring,
+                        which would have to be unset one by one to get back here. */}
+                    {/* eslint-disable-next-line no-restricted-syntax */}
                     <button
                       type="button"
                       onClick={() => toggleTask(task.id)}

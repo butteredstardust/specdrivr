@@ -86,9 +86,7 @@ export function ActivityTab({ specId, specStatus }: ActivityTabProps): React.Rea
   const loading = isExecuting ? false : isLoading;
 
   if (loading) {
-    return (
-      <div className="text-fg-muted py-8 text-center font-mono text-xs">Loading activity…</div>
-    );
+    return <div className="text-fg-muted py-8 text-center text-xs">Loading activity…</div>;
   }
 
   // Sort newest first
@@ -101,7 +99,7 @@ export function ActivityTab({ specId, specStatus }: ActivityTabProps): React.Rea
       <div className="flex flex-col items-center gap-3 py-16">
         <StatusIcon size={24} status="idle" />
         <p className="text-fg-secondary text-sm">No activity yet.</p>
-        <p className="text-fg-muted font-mono text-xs italic">
+        <p className="text-fg-muted text-xs italic">
           &quot;Events will be logged as the agent executes your plan.&quot;
         </p>
       </div>
@@ -124,7 +122,7 @@ export function ActivityTab({ specId, specStatus }: ActivityTabProps): React.Rea
               {timeAgo(event.timestamp)}
             </span>
             <span
-              className={`bg-surface-inset shrink-0 rounded-sm px-1.5 py-0.5 font-mono text-xs ${eventTypeBadgeClass(event.type)}`}
+              className={`bg-surface-inset shrink-0 rounded-sm px-1.5 py-0.5 text-xs ${eventTypeBadgeClass(event.type)}`}
             >
               [{event.type}]
             </span>

@@ -107,13 +107,11 @@ export default function ProjectsPage() {
         {/* Content */}
         <div className="border-line flex-1 border">
           {isLoading && allProjects.length === 0 ? (
-            <div className="text-fg-muted py-16 text-center font-mono text-xs">
-              Loading projects…
-            </div>
+            <div className="text-fg-muted py-16 text-center text-xs">Loading projects…</div>
           ) : filteredProjects.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-16">
               <StatusIcon size={24} status="idle" />
-              <p className="text-fg-secondary font-mono text-sm">
+              <p className="text-fg-secondary text-sm">
                 {search ? 'No projects matching search.' : 'No projects yet.'}
               </p>
               {!search && (

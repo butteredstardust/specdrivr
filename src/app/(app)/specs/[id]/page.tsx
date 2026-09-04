@@ -34,11 +34,11 @@ interface Spec {
 type TabName = 'spec' | 'plan' | 'tasks' | 'changes' | 'activity';
 
 const TABS: { id: TabName; label: string }[] = [
-  { id: 'spec', label: 'SPEC' },
-  { id: 'plan', label: 'PLAN' },
-  { id: 'tasks', label: 'TASKS' },
-  { id: 'changes', label: 'CHANGES' },
-  { id: 'activity', label: 'ACTIVITY' },
+  { id: 'spec', label: 'Spec' },
+  { id: 'plan', label: 'Plan' },
+  { id: 'tasks', label: 'Tasks' },
+  { id: 'changes', label: 'Changes' },
+  { id: 'activity', label: 'Activity' },
 ];
 
 function StatusBadge({ status }: { status: SpecStatus }) {
@@ -224,7 +224,7 @@ export default function SpecDetailPage(): React.ReactElement {
               <TabsTrigger
                 key={tab.id}
                 value={tab.id}
-                className="data-[state=active]:border-accent data-[state=active]:text-fg text-fg-muted hover:text-fg rounded-none border-b-2 border-transparent bg-transparent px-1 py-3 font-mono text-xs shadow-none transition-colors"
+                className="data-[state=active]:border-accent data-[state=active]:text-fg text-fg-muted hover:text-fg rounded-none border-b-2 border-transparent bg-transparent px-1 py-3 text-xs shadow-none transition-colors"
               >
                 {tab.label}
               </TabsTrigger>
