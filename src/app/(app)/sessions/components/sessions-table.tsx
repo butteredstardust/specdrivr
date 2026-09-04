@@ -280,7 +280,10 @@ export function SessionsTable({ sessions, isLoading, error, activeProjectId }: S
                                 className="text-fg-muted h-6 w-6"
                                 asChild
                               >
-                                <Link href={`/sessions/${session.id}`}>
+                                <Link
+                                  href={`/sessions/${session.id}`}
+                                  aria-label={`Open session ${session.id}`}
+                                >
                                   <MoreHorizontal className="h-3.5 w-3.5" />
                                 </Link>
                               </Button>

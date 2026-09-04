@@ -190,6 +190,7 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
                 variant="ghost"
                 size="icon"
                 onClick={() => setSearch(null)}
+                aria-label="Clear search"
                 className="text-fg-muted hover:text-fg absolute top-1/2 right-1 h-6 w-6 -translate-y-1/2"
               >
                 <X className="h-3 w-3" />
@@ -288,7 +289,11 @@ export function SpecsClient({ initialSpecs }: { initialSpecs?: Spec[] }): React.
                             className="text-fg-muted h-6 w-6"
                             asChild
                           >
-                            <Link href={`/specs/${spec.id}`} onClick={(e) => e.stopPropagation()}>
+                            <Link
+                              href={`/specs/${spec.id}`}
+                              onClick={(e) => e.stopPropagation()}
+                              aria-label={`Open spec ${spec.name}`}
+                            >
                               <MoreHorizontal className="h-3.5 w-3.5" />
                             </Link>
                           </Button>

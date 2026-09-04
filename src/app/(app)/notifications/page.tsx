@@ -172,6 +172,7 @@ export default function NotificationsPage() {
                 size="icon"
                 disabled={page <= 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
+                aria-label="Previous page"
                 className="h-6 w-6 transition-all disabled:opacity-30"
               >
                 <ChevronLeft className="h-3.5 w-3.5" />
@@ -181,6 +182,7 @@ export default function NotificationsPage() {
                 size="icon"
                 disabled={page >= totalPages}
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                aria-label="Next page"
                 className="h-6 w-6 transition-all disabled:opacity-30"
               >
                 <ChevronRight className="h-3.5 w-3.5" />

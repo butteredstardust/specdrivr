@@ -89,6 +89,7 @@ export default function ProjectsPage() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setSearch(null)}
+                aria-label="Clear search"
                 className="text-fg-muted hover:text-fg absolute top-1/2 right-1 h-6 w-6 -translate-y-1/2"
               >
                 <X className="h-3 w-3" />
