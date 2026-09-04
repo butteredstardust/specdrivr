@@ -48,7 +48,7 @@ Full rules are in `AGENTS.md`. The ones most likely to trip up a fresh agent:
 
 ## 5. Documentation & Reporting
 
-- **Branch Docs**: Mandatory `BRANCH_CHANGES.md` and `BRANCH_CODE_REVIEW.md` in `documentation/branches/{branch-name}/` before submitting a PR — see `AGENTS.md` §18 for the exact format.
+- **PR Body**: Describe the change and its rationale in the pull request itself. The per-branch `BRANCH_CHANGES.md`/`BRANCH_CODE_REVIEW.md` files were retired on 2026-09-04 — see `AGENTS.md` §18.
 - **Closure**: End tasks with an Executive Summary, Completion Statement, and a checklist of deliverables.
 
 ## 6. Environment & Setup

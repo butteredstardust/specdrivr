@@ -71,7 +71,7 @@ The project uses Husky to enforce quality at the local boundary.
 Bypassing hooks should be rarer than 1 in 100 operations.
 
 1. **Root Cause Analysis (RCA)**: Perform a deep audit to ensure the failure isn't masking a critical bug or architectural regression.
-2. **Justification**: If a bypass is necessary (e.g., environment-specific test flake during doc update), document the rationale in `BRANCH_CHANGES.md`.
+2. **Justification**: If a bypass is necessary (e.g., environment-specific test flake during doc update), state the rationale in the commit message and the PR body.
 3. **Execution**: Use `git push --no-verify` ONLY if the RCA confirms safety OR the user provides a direct order.
 
 ## 7. Core Engineering Rules
@@ -243,14 +243,14 @@ export async function createProject(formData: FormData) {
 Every task must end with these steps:
 
 1. **Verification**: Run `pnpm test` and `pnpm lint`.
-2. **Branch Documentation**: Before submitting any Pull Request:
-   - Create directory `documentation/branches/{branch-name}`.
-   - Create `BRANCH_CHANGES.md` with a markdown table:
-     `File Name | Summary of Changes | Summary Reason for Change | Expected Impact | Best Practice Evaluation Score (e.g., 8/10 because ...) | Reason for Deletion` (or 'not deleted').
-   - At the end of `BRANCH_CHANGES.md`, include a summary of any changes to CI config or test files and why.
-   - Create `BRANCH_CODE_REVIEW.md`: a thoughtful senior review of the changes, listing problems and improvements with reasoning.
-   - Commit these documentation files as part of the final pre-commit steps.
+2. **Pull Request**: Describe the change in the PR body — what changed, why, and
+   anything a reviewer should check by hand. The diff and the PR are the record.
 3. **Final Summary**: Provide an Executive Summary, Completion Statement, and a checklist of deliverables.
+
+> **Removed 2026-09-04.** This section used to mandate `BRANCH_CHANGES.md` and
+> `BRANCH_CODE_REVIEW.md` under `documentation/branches/{branch-name}`. They
+> duplicated the diff and the PR body, went stale immediately, and were never
+> read after merge. Do not reintroduce them.
 
 ## 19. Standard Commands Reference
 

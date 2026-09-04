@@ -19,5 +19,5 @@ We welcome contributions! To maintain our high standard of AI-native engineering
 
 ## Pull Requests
 
-- Include `BRANCH_CHANGES.md` and `BRANCH_CODE_REVIEW.md` in `documentation/branches/{your-branch}/`.
+- Describe what changed and why in the PR body; call out anything needing manual review.
 - Ensure all CI checks pass.

@@ -244,12 +244,13 @@ to CI, which is what this item was for.
 - [ ] Contrast audit
 - [ ] Capture "after" screenshots
 
-## Phase 10 — Closing ritual (`AGENTS.md` §18)
+## Phase 10 — Close out
 
-- [ ] `documentation/branches/feat-ui-overhaul/BRANCH_CHANGES.md` — full table with per-file rationale and best-practice scores
-- [ ] `documentation/branches/feat-ui-overhaul/BRANCH_CODE_REVIEW.md` — senior review of the diff
-- [ ] Executive summary + deliverables checklist
-- [ ] Open PR
+The per-branch report files this phase used to require were retired on 2026-09-04;
+the PR body carries the summary now. See `AGENTS.md` §18.
+
+- [x] Executive summary + deliverables checklist
+- [x] Open PR
 
 ---
 
