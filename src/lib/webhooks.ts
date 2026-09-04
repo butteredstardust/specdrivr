@@ -1,9 +1,6 @@
 import 'server-only';
 
 import crypto, { randomUUID } from 'node:crypto';
-import { and, asc, eq, isNull, lt, lte, or } from 'drizzle-orm';
-import { db } from '@/db';
-import { webhookDeliveries, webhooks } from '@/db/schema';
 import { logger } from '@/lib/logger';
 import { webhookRepository } from '@/repositories/webhook-repository';
 import { decryptCredential } from '@/lib/credential-crypto';
@@ -53,17 +50,12 @@ export async function dispatchWebhookEvent(
       event,
       ...payload,
     };
-    await db.insert(webhookDeliveries).values(
-      targets.map((target) => ({
-        webhookId: target.id,
-        projectId,
-        eventType: event,
-        payload: fullPayload,
-        status: 'pending',
-        attempt: 0,
-        nextRetryAt: new Date(),
-      }))
-    );
+    await webhookRepository.enqueueDeliveries({
+      webhookIds: targets.map((target) => target.id),
+      projectId,
+      eventType: event,
+      payload: fullPayload,
+    });
   } catch (err) {
     logger.error({ err, projectId, event }, 'Failed to queue webhook event');
   }
@@ -92,42 +84,10 @@ async function readBoundedBody(response: Response): Promise<string> {
 
 export async function processNextWebhookDelivery(): Promise<boolean> {
   const leaseToken = randomUUID();
-  const now = new Date();
-  const staleLock = new Date(Date.now() - 60_000);
-  const delivery = await db.transaction(async (tx) => {
-    await tx
-      .update(webhookDeliveries)
-      .set({ status: 'pending', leaseToken: null, lockedAt: null })
-      .where(
-        and(eq(webhookDeliveries.status, 'delivering'), lt(webhookDeliveries.lockedAt, staleLock))
-      );
-    const [candidate] = await tx
-      .select()
-      .from(webhookDeliveries)
-      .where(
-        and(
-          eq(webhookDeliveries.status, 'pending'),
-          or(isNull(webhookDeliveries.nextRetryAt), lte(webhookDeliveries.nextRetryAt, now))
-        )
-      )
-      .orderBy(asc(webhookDeliveries.createdAt))
-      .limit(1)
-      .for('update', { skipLocked: true });
-    if (!candidate) return null;
-    const [claimed] = await tx
-      .update(webhookDeliveries)
-      .set({ status: 'delivering', leaseToken, lockedAt: now })
-      .where(eq(webhookDeliveries.id, candidate.id))
-      .returning();
-    return claimed;
-  });
+  const delivery = await webhookRepository.claimNextPendingDelivery(leaseToken);
   if (!delivery) return false;
 
-  const [target] = await db
-    .select({ url: webhooks.url, secret: webhooks.secret, isActive: webhooks.isActive })
-    .from(webhooks)
-    .where(eq(webhooks.id, delivery.webhookId!))
-    .limit(1);
+  const target = await webhookRepository.getDeliveryTarget(delivery.webhookId!);
   const startedAt = Date.now();
   let responseStatus: number | null = null;
   let responseBody = '';
@@ -167,22 +127,15 @@ export async function processNextWebhookDelivery(): Promise<boolean> {
   const exhausted = !delivered && attempt > RETRY_DELAYS_MS.length;
   const delay = RETRY_DELAYS_MS[Math.min(attempt - 1, RETRY_DELAYS_MS.length - 1)] ?? 300_000;
   const jitter = Math.floor(delay * (Math.random() * 0.4 - 0.2));
-  await db
-    .update(webhookDeliveries)
-    .set({
-      status: delivered ? 'delivered' : exhausted ? 'exhausted' : 'pending',
-      attempt,
-      responseStatus,
-      responseBody,
-      durationMs: Date.now() - startedAt,
-      deliveredAt: delivered ? new Date() : null,
-      nextRetryAt: delivered || exhausted ? null : new Date(Date.now() + delay + jitter),
-      leaseToken: null,
-      lockedAt: null,
-    })
-    .where(
-      and(eq(webhookDeliveries.id, delivery.id), eq(webhookDeliveries.leaseToken, leaseToken))
-    );
+  await webhookRepository.completeDeliveryAttempt(delivery.id, leaseToken, {
+    status: delivered ? 'delivered' : exhausted ? 'exhausted' : 'pending',
+    attempt,
+    responseStatus,
+    responseBody,
+    durationMs: Date.now() - startedAt,
+    deliveredAt: delivered ? new Date() : null,
+    nextRetryAt: delivered || exhausted ? null : new Date(Date.now() + delay + jitter),
+  });
 
   if (exhausted && delivery.webhookId) {
     await webhookRepository.setErrorStatus(delivery.webhookId);

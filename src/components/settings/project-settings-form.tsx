@@ -1,9 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { clientLogger } from '@/lib/logger-client';
+import { projectSettingsFormSchema, type ProjectSettingsFormValues } from '@/lib/schemas';
 import type { UserRole } from '@/db/schema';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -34,19 +37,31 @@ export function ProjectSettingsForm({
   userRole,
   dangerZoneOnly = false,
 }: ProjectSettingsFormProps) {
-  const [name, setName] = useState(project.name);
-  const [description, setDescription] = useState(project.description ?? '');
-  const [repositoryUrl, setRepositoryUrl] = useState(project.repositoryUrl ?? '');
-  const [repositoryBranch, setRepositoryBranch] = useState(project.repositoryBranch ?? 'main');
-  const [isSaving, setIsSaving] = useState(false);
   const [verifyStatus, setVerifyStatus] = useState<VerifyStatus>('idle');
 
   const editable = canEdit(userRole);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    getValues,
+    formState: { isSubmitting, errors },
+  } = useForm<ProjectSettingsFormValues>({
+    resolver: zodResolver(projectSettingsFormSchema),
+    defaultValues: {
+      name: project.name,
+      description: project.description ?? '',
+      repositoryUrl: project.repositoryUrl ?? '',
+      repositoryBranch: project.repositoryBranch ?? 'main',
+    },
+  });
+
+  // The repository URL input also drives the verify indicator, so its change
+  // handler wraps rather than replaces the one `register` provides.
+  const repositoryUrlField = register('repositoryUrl');
+
+  const onSubmit = async (values: ProjectSettingsFormValues) => {
     if (!editable) return;
-    setIsSaving(true);
 
     try {
       const res = await fetch(`/api/v1/projects/${project.id}`, {
@@ -54,10 +69,10 @@ export function ProjectSettingsForm({
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name,
-          description,
-          repositoryUrl: repositoryUrl || null,
-          repositoryBranch: repositoryBranch || null,
+          name: values.name,
+          description: values.description,
+          repositoryUrl: values.repositoryUrl || null,
+          repositoryBranch: values.repositoryBranch || null,
         }),
       });
 
@@ -71,13 +86,11 @@ export function ProjectSettingsForm({
       const error = err instanceof Error ? err : new Error(String(err));
       clientLogger.error('Failed to update project', error);
       toast.error('Failed to update project');
-    } finally {
-      setIsSaving(false);
     }
   };
 
   const handleVerifyConnection = async () => {
-    const url = repositoryUrl.trim();
+    const url = getValues('repositoryUrl').trim();
     if (!url) {
       toast.error('Enter a repository URL first.');
       return;
@@ -103,60 +116,65 @@ export function ProjectSettingsForm({
   return (
     <TooltipProvider>
       <section className="flex flex-col gap-4">
-        {!dangerZoneOnly && <h2 className="text-fg-muted text-xs">PROJECT SETTINGS</h2>}
+        {!dangerZoneOnly && <h2 className="text-fg-muted text-xs">Project settings</h2>}
         {!dangerZoneOnly && (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <label className="text-fg-secondary font-mono text-xs" htmlFor="project-name">
+              <label className="text-fg-secondary text-xs" htmlFor="project-name">
                 Project name
               </label>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Input
                     id="project-name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
                     disabled={!editable}
+                    aria-invalid={Boolean(errors.name)}
+                    {...register('name')}
                   />
                 </TooltipTrigger>
                 {!editable && <TooltipContent>Requires admin or owner role to edit</TooltipContent>}
               </Tooltip>
+              {errors.name && <p className="text-danger text-xs">{errors.name.message}</p>}
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-fg-secondary font-mono text-xs" htmlFor="project-description">
+              <label className="text-fg-secondary text-xs" htmlFor="project-description">
                 Description
               </label>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Input
                     id="project-description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
                     disabled={!editable}
+                    aria-invalid={Boolean(errors.description)}
+                    {...register('description')}
                   />
                 </TooltipTrigger>
                 {!editable && <TooltipContent>Requires admin or owner role to edit</TooltipContent>}
               </Tooltip>
+              {errors.description && (
+                <p className="text-danger text-xs">{errors.description.message}</p>
+              )}
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-fg-secondary font-mono text-xs" htmlFor="project-repo-url">
-                REPOSITORY URL
+              <label className="text-fg-secondary text-xs" htmlFor="project-repo-url">
+                Repository URL
               </label>
               <div className="flex items-center gap-2">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Input
                       id="project-repo-url"
-                      value={repositoryUrl}
-                      onChange={(e) => {
-                        setRepositoryUrl(e.target.value);
-                        setVerifyStatus('idle');
-                      }}
                       placeholder="https://github.com/owner/repo"
                       disabled={!editable}
+                      aria-invalid={Boolean(errors.repositoryUrl)}
                       className="flex-1"
+                      {...repositoryUrlField}
+                      onChange={(e) => {
+                        setVerifyStatus('idle');
+                        return repositoryUrlField.onChange(e);
+                      }}
                     />
                   </TooltipTrigger>
                   {!editable && (
@@ -199,32 +217,38 @@ export function ProjectSettingsForm({
                   </span>
                 )}
               </div>
+              {errors.repositoryUrl && (
+                <p className="text-danger text-xs">{errors.repositoryUrl.message}</p>
+              )}
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-fg-secondary font-mono text-xs" htmlFor="project-repo-branch">
-                DEFAULT BRANCH
+              <label className="text-fg-secondary text-xs" htmlFor="project-repo-branch">
+                Default branch
               </label>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Input
                     id="project-repo-branch"
-                    value={repositoryBranch}
-                    onChange={(e) => setRepositoryBranch(e.target.value)}
                     placeholder="main"
                     disabled={!editable}
+                    aria-invalid={Boolean(errors.repositoryBranch)}
+                    {...register('repositoryBranch')}
                   />
                 </TooltipTrigger>
                 {!editable && <TooltipContent>Requires admin or owner role to edit</TooltipContent>}
               </Tooltip>
+              {errors.repositoryBranch && (
+                <p className="text-danger text-xs">{errors.repositoryBranch.message}</p>
+              )}
             </div>
 
             <div>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span tabIndex={!editable ? 0 : undefined}>
-                    <Button type="submit" disabled={!editable || isSaving} size="sm">
-                      {isSaving ? 'Saving Changes…' : 'Save Changes'}
+                    <Button type="submit" disabled={!editable || isSubmitting} size="sm">
+                      {isSubmitting ? 'Saving Changes…' : 'Save Changes'}
                     </Button>
                   </span>
                 </TooltipTrigger>

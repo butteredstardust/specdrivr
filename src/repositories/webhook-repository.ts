@@ -5,7 +5,7 @@ import {
   type WebhookSelect as Webhook,
   type WebhookDeliverySelect as WebhookDelivery,
 } from '@/db/schema';
-import { eq, and, sql, ne, desc, getTableColumns } from 'drizzle-orm';
+import { eq, and, sql, ne, desc, asc, lt, lte, or, isNull, getTableColumns } from 'drizzle-orm';
 
 export type { WebhookDeliverySelect as WebhookDelivery } from '@/db/schema';
 import { BaseRepository } from './base-repository';
@@ -170,6 +170,127 @@ export class WebhookRepository extends BaseRepository {
             sql`${webhooks.events} @> ${JSON.stringify([event])}::jsonb OR ${webhooks.events} @> ${JSON.stringify(['*'])}::jsonb`
           )
         )
+    );
+  }
+
+  /**
+   * Queues one pending delivery row per subscribed endpoint.
+   */
+  async enqueueDeliveries(data: {
+    webhookIds: number[];
+    projectId: number;
+    eventType: string;
+    payload: unknown;
+  }): Promise<void> {
+    if (data.webhookIds.length === 0) return;
+    await this.executeQuery(() =>
+      db.insert(webhookDeliveries).values(
+        data.webhookIds.map((webhookId) => ({
+          webhookId,
+          projectId: data.projectId,
+          eventType: data.eventType,
+          payload: data.payload,
+          status: 'pending',
+          attempt: 0,
+          nextRetryAt: new Date(),
+        }))
+      )
+    );
+  }
+
+  /**
+   * Atomically claims the next due delivery for this worker.
+   *
+   * Rows locked by a worker that died are released first: `lockedAt` older than
+   * `staleLockMs` means nobody is still working on them. The `SELECT … FOR
+   * UPDATE SKIP LOCKED` is what keeps two concurrent workers off the same row,
+   * so the whole sequence has to stay inside one transaction.
+   */
+  async claimNextPendingDelivery(
+    leaseToken: string,
+    staleLockMs = 60_000
+  ): Promise<WebhookDelivery | null> {
+    const now = new Date();
+    const staleLock = new Date(Date.now() - staleLockMs);
+
+    return await this.executeQuery(async () => {
+      const claimed = await db.transaction(async (tx) => {
+        await tx
+          .update(webhookDeliveries)
+          .set({ status: 'pending', leaseToken: null, lockedAt: null })
+          .where(
+            and(
+              eq(webhookDeliveries.status, 'delivering'),
+              lt(webhookDeliveries.lockedAt, staleLock)
+            )
+          );
+
+        const [candidate] = await tx
+          .select()
+          .from(webhookDeliveries)
+          .where(
+            and(
+              eq(webhookDeliveries.status, 'pending'),
+              or(isNull(webhookDeliveries.nextRetryAt), lte(webhookDeliveries.nextRetryAt, now))
+            )
+          )
+          .orderBy(asc(webhookDeliveries.createdAt))
+          .limit(1)
+          .for('update', { skipLocked: true });
+        if (!candidate) return null;
+
+        const [row] = await tx
+          .update(webhookDeliveries)
+          .set({ status: 'delivering', leaseToken, lockedAt: now })
+          .where(eq(webhookDeliveries.id, candidate.id))
+          .returning();
+        return row ?? null;
+      });
+      return claimed;
+    });
+  }
+
+  /**
+   * Returns just the fields the delivery worker needs to make the request.
+   */
+  async getDeliveryTarget(
+    id: number
+  ): Promise<{ url: string; secret: string | null; isActive: boolean } | null> {
+    const result = await this.executeQuery(() =>
+      db
+        .select({ url: webhooks.url, secret: webhooks.secret, isActive: webhooks.isActive })
+        .from(webhooks)
+        .where(eq(webhooks.id, id))
+        .limit(1)
+    );
+    return result[0] ?? null;
+  }
+
+  /**
+   * Writes the outcome of an attempt back, releasing the lease.
+   *
+   * The `leaseToken` is part of the WHERE clause on purpose: if this worker's
+   * lease was already reclaimed as stale, the update matches nothing rather
+   * than clobbering whatever the new owner wrote.
+   */
+  async completeDeliveryAttempt(
+    id: number,
+    leaseToken: string,
+    result: {
+      status: string;
+      attempt: number;
+      responseStatus: number | null;
+      responseBody: string;
+      durationMs: number;
+      deliveredAt: Date | null;
+      nextRetryAt: Date | null;
+    }
+  ): Promise<void> {
+    await this.executeQuery(() =>
+      db
+        .update(webhookDeliveries)
+        .set({ ...result, leaseToken: null, lockedAt: null })
+        .where(and(eq(webhookDeliveries.id, id), eq(webhookDeliveries.leaseToken, leaseToken)))
     );
   }
 

@@ -29,6 +29,7 @@
     "unlisted": "off"
   },
   "entry": [
-    "src/actions/**/*.ts"
+    "src/actions/**/*.ts",
+    "scripts/audit-hooks.js"
   ]
 }

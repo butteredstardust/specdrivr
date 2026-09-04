@@ -1,9 +1,12 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { Globe, Plus, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import { clientLogger } from '@/lib/logger-client';
+import { webhookFormSchema } from '@/lib/schemas';
 import { usePolling } from '@/hooks/use-polling';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -54,34 +57,36 @@ interface WebhookDialogProps {
 }
 
 function WebhookDialog({ open, onClose, onSave, initial, isSaving }: WebhookDialogProps) {
-  const [form, setForm] = useState<WebhookFormData>(initial ?? WEBHOOK_FORM_DEFAULTS);
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    formState: { errors },
+  } = useForm<WebhookFormData>({
+    resolver: zodResolver(webhookFormSchema),
+    defaultValues: initial ?? WEBHOOK_FORM_DEFAULTS,
+  });
 
   // Sync form when dialog opens with new initial data
   const handleOpenChange = (isOpen: boolean) => {
     if (isOpen) {
-      setForm(initial ?? WEBHOOK_FORM_DEFAULTS);
+      reset(initial ?? WEBHOOK_FORM_DEFAULTS);
     } else {
       onClose();
     }
   };
 
-  const toggleEvent = (value: string) => {
-    setForm((prev) => {
-      const has = prev.events.includes(value);
-      if (has) {
-        return { ...prev, events: prev.events.filter((e) => e !== value) };
-      }
-      // If selecting *, clear all others; if selecting specific, remove *
-      if (value === '*') {
-        return { ...prev, events: ['*'] };
-      }
-      return { ...prev, events: prev.events.filter((e) => e !== '*').concat(value) };
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await onSave(form);
+  // `*` means "everything", so it is mutually exclusive with the specific events
+  // rather than just another entry in the list.
+  const toggleEvent = (events: string[], value: string): string[] => {
+    if (events.includes(value)) {
+      return events.filter((e) => e !== value);
+    }
+    if (value === '*') {
+      return ['*'];
+    }
+    return events.filter((e) => e !== '*').concat(value);
   };
 
   return (
@@ -89,58 +94,74 @@ function WebhookDialog({ open, onClose, onSave, initial, isSaving }: WebhookDial
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-xs">
-            {initial?.url ? 'EDIT WEBHOOK' : 'ADD WEBHOOK'}
+            {initial?.url ? 'Edit webhook' : 'Add webhook'}
           </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit(onSave)} className="flex flex-col gap-4">
           <FormField label="Endpoint URL *" htmlFor="webhookUrl">
             <Input
               id="webhookUrl"
               type="url"
-              value={form.url}
-              onChange={(e) => setForm((prev) => ({ ...prev, url: e.target.value }))}
               placeholder="https://example.com/hook"
-              required
+              aria-invalid={Boolean(errors.url)}
               className="font-mono text-sm"
+              {...register('url')}
             />
           </FormField>
+          {errors.url && <p className="text-danger text-xs">{errors.url.message}</p>}
 
           <FormField label="HMAC secret (optional)" htmlFor="webhookSecret">
-            <PasswordInput
-              id="webhookSecret"
-              value={form.secret}
-              onChange={(v) => setForm((prev) => ({ ...prev, secret: v }))}
-              disabled={false}
-              placeholder="your-secret"
+            <Controller
+              name="secret"
+              control={control}
+              render={({ field }) => (
+                <PasswordInput
+                  id="webhookSecret"
+                  value={field.value}
+                  onChange={field.onChange}
+                  disabled={false}
+                  placeholder="your-secret"
+                />
+              )}
             />
           </FormField>
+          {errors.secret && <p className="text-danger text-xs">{errors.secret.message}</p>}
 
           <div className="flex flex-col gap-2">
             <Label className="text-fg-muted text-2xs font-medium">Events</Label>
-            <div className="flex flex-col gap-2">
-              {WEBHOOK_EVENTS.map((ev) => (
-                <div key={ev.value} className="flex items-center gap-2">
-                  <Checkbox
-                    id={`event-${ev.value}`}
-                    checked={form.events.includes(ev.value)}
-                    onCheckedChange={() => toggleEvent(ev.value)}
-                  />
-                  <Label
-                    htmlFor={`event-${ev.value}`}
-                    className="text-fg-secondary cursor-pointer font-mono text-xs"
-                  >
-                    {ev.label}
-                  </Label>
+            {/* A checkbox group is one field holding an array, so it is driven
+                through a single Controller rather than per-box registration. */}
+            <Controller
+              name="events"
+              control={control}
+              render={({ field }) => (
+                <div className="flex flex-col gap-2">
+                  {WEBHOOK_EVENTS.map((ev) => (
+                    <div key={ev.value} className="flex items-center gap-2">
+                      <Checkbox
+                        id={`event-${ev.value}`}
+                        checked={field.value.includes(ev.value)}
+                        onCheckedChange={() => field.onChange(toggleEvent(field.value, ev.value))}
+                      />
+                      <Label
+                        htmlFor={`event-${ev.value}`}
+                        className="text-fg-secondary cursor-pointer font-mono text-xs"
+                      >
+                        {ev.label}
+                      </Label>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              )}
+            />
+            {errors.events && <p className="text-danger text-xs">{errors.events.message}</p>}
           </div>
 
           <DialogFooter className="pt-2">
             <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={isSaving}>
               Cancel
             </Button>
-            <Button type="submit" size="sm" disabled={isSaving || form.events.length === 0}>
+            <Button type="submit" size="sm" disabled={isSaving}>
               {isSaving ? 'Saving…' : 'Save Webhook'}
             </Button>
           </DialogFooter>

@@ -2,8 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { clientLogger } from '@/lib/logger-client';
+import { acceptInviteFormSchema, type AcceptInviteFormValues } from '@/lib/schemas';
 import { BrandMark } from '@/components/ui/brand-mark';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,9 +28,15 @@ export default function InvitePage() {
 
   const [tokenState, setTokenState] = useState<TokenState>('loading');
   const [invite, setInvite] = useState<InviteData | null>(null);
-  const [name, setName] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting, errors },
+  } = useForm<AcceptInviteFormValues>({
+    resolver: zodResolver(acceptInviteFormSchema),
+    defaultValues: { name: '', password: '' },
+  });
 
   useEffect(() => {
     if (!token) {
@@ -49,15 +58,13 @@ export default function InvitePage() {
       });
   }, [token]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const onSubmit = async (values: AcceptInviteFormValues) => {
     try {
       const res = await fetch('/api/v1/auth/accept-invite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ token, name, password }),
+        body: JSON.stringify({ token, name: values.name, password: values.password }),
       });
       if (!res.ok) throw new Error('Failed to accept invite');
       toast.success('Welcome to the project!');
@@ -68,8 +75,6 @@ export default function InvitePage() {
         err instanceof Error ? err : new Error(String(err))
       );
       toast.error('Failed to accept invite. Please try again.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -109,7 +114,7 @@ export default function InvitePage() {
         </div>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -125,27 +130,31 @@ export default function InvitePage() {
             <Input
               id="name"
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              autoComplete="name"
+              aria-invalid={Boolean(errors.name)}
               className="border-line bg-surface-base"
+              {...register('name')}
             />
+            {errors.name && <p className="text-danger text-xs">{errors.name.message}</p>}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="password">Create password</Label>
             <Input
               id="password"
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
+              aria-invalid={Boolean(errors.password)}
               className="border-line bg-surface-base"
+              {...register('password')}
             />
+            {errors.password && <p className="text-danger text-xs">{errors.password.message}</p>}
           </div>
           <Button
             type="submit"
-            disabled={loading}
+            disabled={isSubmitting}
             className="bg-surface-inset hover:bg-accent-hover w-full"
           >
-            {loading ? 'Joining…' : 'Accept Invitation'}
+            {isSubmitting ? 'Joining…' : 'Accept Invitation'}
           </Button>
         </form>
       </CardContent>

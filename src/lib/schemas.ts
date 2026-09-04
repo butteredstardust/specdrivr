@@ -380,6 +380,17 @@ export const inviteMemberSchema = z.object({
 });
 
 /**
+ * Client-side shape of the invite form. The project is taken from the route the
+ * form is rendered under, so it is not a field the user can fill in.
+ */
+export const inviteMemberFormSchema = z.object({
+  email: z.string().min(1, 'Email is required').email('Invalid email address'),
+  role: userRoleSchema,
+});
+
+export type InviteMemberFormData = z.infer<typeof inviteMemberFormSchema>;
+
+/**
  * Schema for updating a member's role
  */
 export const updateMemberRoleSchema = z.object({
@@ -477,6 +488,18 @@ export const updateWebhookSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
+/**
+ * Client-side shape of the webhook dialog. `projectId` comes from the route and
+ * `secret` is an empty string rather than null because it is bound to an input.
+ */
+export const webhookFormSchema = z.object({
+  url: z.string().min(1, 'Endpoint URL is required').url('Invalid webhook URL'),
+  secret: z.string().max(255, 'Secret cannot exceed 255 characters'),
+  events: z.array(z.string()).min(1, 'Select at least one event'),
+});
+
+export type WebhookFormValues = z.infer<typeof webhookFormSchema>;
+
 export const createProjectSchema = z.object({
   name: z
     .string()
@@ -515,6 +538,38 @@ export const updateProjectSchema = z
   );
 
 /**
+ * Client-side shape of the "new project" dialog. `createdBy` is taken from the
+ * session server-side, so it is not part of the form.
+ */
+export const createProjectFormSchema = z.object({
+  name: z
+    .string()
+    .min(1, 'Project name is required')
+    .max(255, 'Project name cannot exceed 255 characters'),
+  description: z.string().max(1000, 'Description cannot exceed 1000 characters'),
+  githubRepo: z.string().max(255, 'Repository cannot exceed 255 characters'),
+});
+
+export type CreateProjectFormValues = z.infer<typeof createProjectFormSchema>;
+
+/**
+ * Client-side shape of the project settings form. The id travels in the URL, and
+ * every field is a controlled string because empty inputs are '' rather than
+ * null — the submit handler maps '' back to null for the API.
+ */
+export const projectSettingsFormSchema = z.object({
+  name: z.string().min(1, 'Project name is required').max(255, 'Project name too long'),
+  description: z.string().max(1000, 'Description too long'),
+  repositoryUrl: z
+    .string()
+    .max(1000, 'Repository URL too long')
+    .refine((v) => v === '' || z.string().url().safeParse(v).success, 'Invalid repository URL'),
+  repositoryBranch: z.string().max(255, 'Branch name too long'),
+});
+
+export type ProjectSettingsFormValues = z.infer<typeof projectSettingsFormSchema>;
+
+/**
  * Schema for user login
  */
 export const loginSchema = z.object({
@@ -541,6 +596,35 @@ export const resetPasswordSchema = z
     message: "Passwords don't match",
     path: ['confirmPassword'],
   });
+
+/**
+ * Client-side shape of the invite acceptance form. The token comes from the URL
+ * and the email is fixed by the invite, so neither is user-editable.
+ * Bounds match `/api/v1/auth/accept-invite`.
+ */
+export const acceptInviteFormSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+});
+
+export type AcceptInviteFormValues = z.infer<typeof acceptInviteFormSchema>;
+
+/**
+ * Client-side shape of the change-password form. The 12-character floor matches
+ * `/api/v1/users/me/password`; confirmation is client-only and never sent.
+ */
+export const changePasswordFormSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'Current password is required'),
+    newPassword: z.string().min(12, 'New password must be at least 12 characters'),
+    confirmPassword: z.string().min(1, 'Please confirm your new password'),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: 'Passwords do not match.',
+    path: ['confirmPassword'],
+  });
+
+export type ChangePasswordFormValues = z.infer<typeof changePasswordFormSchema>;
 
 /**
  * Notifications & Preferences Schemas

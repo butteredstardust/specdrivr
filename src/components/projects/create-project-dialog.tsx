@@ -2,8 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { clientLogger } from '@/lib/logger-client';
+import { createProjectFormSchema, type CreateProjectFormValues } from '@/lib/schemas';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import {
@@ -29,29 +32,30 @@ export function CreateProjectDialog({
 }: CreateProjectDialogProps): React.ReactElement {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [githubRepo, setGithubRepo] = useState('');
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { isSubmitting, errors },
+  } = useForm<CreateProjectFormValues>({
+    resolver: zodResolver(createProjectFormSchema),
+    defaultValues: { name: '', description: '', githubRepo: '' },
+  });
 
   const canCreate = userRole === 'admin' || userRole === 'owner';
   const label = triggerLabel ?? 'New Project';
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!name.trim()) return;
-
-    setIsSubmitting(true);
+  const onSubmit = async (values: CreateProjectFormValues) => {
     try {
       const response = await fetch('/api/v1/projects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          name: name.trim(),
-          description: description.trim() || undefined,
-          githubRepo: githubRepo.trim() || undefined,
+          name: values.name.trim(),
+          description: values.description.trim() || undefined,
+          githubRepo: values.githubRepo.trim() || undefined,
         }),
       });
 
@@ -61,18 +65,14 @@ export function CreateProjectDialog({
       }
 
       setOpen(false);
-      setName('');
-      setDescription('');
-      setGithubRepo('');
+      reset();
       router.refresh();
       toast.success('Project created');
     } catch (err) {
       clientLogger.error('Failed to create project', err);
       toast.error('Failed to create project');
-    } finally {
-      setIsSubmitting(false);
     }
-  }
+  };
 
   const triggerButton = (
     <Button
@@ -111,37 +111,43 @@ export function CreateProjectDialog({
             <DialogTitle>New project</DialogTitle>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="project-name">Project name</Label>
               <Input
                 id="project-name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
                 placeholder="My awesome project"
-                required
                 autoFocus
+                aria-invalid={Boolean(errors.name)}
+                {...register('name')}
               />
+              {errors.name && <p className="text-danger text-xs">{errors.name.message}</p>}
             </div>
 
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="project-description">Description</Label>
               <Input
                 id="project-description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
                 placeholder="Optional description"
+                aria-invalid={Boolean(errors.description)}
+                {...register('description')}
               />
+              {errors.description && (
+                <p className="text-danger text-xs">{errors.description.message}</p>
+              )}
             </div>
 
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="project-github-repo">GitHub Repo (owner/repo format)</Label>
               <Input
                 id="project-github-repo"
-                value={githubRepo}
-                onChange={(e) => setGithubRepo(e.target.value)}
                 placeholder="owner/repo-name"
+                aria-invalid={Boolean(errors.githubRepo)}
+                {...register('githubRepo')}
               />
+              {errors.githubRepo && (
+                <p className="text-danger text-xs">{errors.githubRepo.message}</p>
+              )}
             </div>
 
             <DialogFooter>
@@ -153,7 +159,7 @@ export function CreateProjectDialog({
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting || !name.trim()}>
+              <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? 'Creating…' : 'Create Project'}
               </Button>
             </DialogFooter>

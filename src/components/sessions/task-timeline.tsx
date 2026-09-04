@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSSE } from '@/hooks/use-sse';
 import { TASK_STATUS } from '@/lib/ui-status';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   CheckCircle2,
   AlertCircle,
@@ -186,47 +187,44 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
                   >
                     {/* The whole card used to be a clickable div, which put the
                         expanded panel inside the click target. Only the header
-                        toggles now, so the panel's contents stay reachable. */}
-                    {/* Not a Button: this is a disclosure trigger that has to be
-                        a bare full-width region wrapping the card header. Every
-                        Button variant brings its own height, padding and centring,
-                        which would have to be unset one by one to get back here. */}
-                    {/* eslint-disable-next-line no-restricted-syntax */}
-                    <button
-                      type="button"
-                      onClick={() => toggleTask(task.id)}
-                      aria-expanded={isExpanded}
-                      className="flex w-full cursor-pointer items-start justify-between gap-3 text-left"
+                        toggles now, so the panel's contents stay reachable.
+                        Collapsible is the disclosure primitive: it owns the
+                        aria-expanded/aria-controls pairing and renders an
+                        unstyled trigger, which a Button variant would not. */}
+                    <Collapsible
+                      open={isExpanded}
+                      onOpenChange={() => toggleTask(task.id)}
+                      className="w-full"
                     >
-                      <div className="min-w-0 flex-1">
-                        <div className="mb-1 flex items-center gap-2">
-                          <span className="text-fg-muted text-2xs shrink-0 font-semibold">
-                            {task.externalId}
-                          </span>
-                          <div className={`flex items-center gap-1 ${colors.text}`}>
-                            <StatusIcon status={task.status} />
+                      <CollapsibleTrigger className="flex w-full cursor-pointer items-start justify-between gap-3 text-left">
+                        <div className="min-w-0 flex-1">
+                          <div className="mb-1 flex items-center gap-2">
+                            <span className="text-fg-muted text-2xs shrink-0 font-semibold">
+                              {task.externalId}
+                            </span>
+                            <div className={`flex items-center gap-1 ${colors.text}`}>
+                              <StatusIcon status={task.status} />
+                            </div>
                           </div>
+                          <p className="text-fg truncate text-xs">{task.title}</p>
                         </div>
-                        <p className="text-fg truncate text-xs">{task.title}</p>
-                      </div>
-                      <div className="flex shrink-0 flex-col items-end gap-1">
-                        {taskDuration(task)}
-                        <span
-                          className={`text-2xs flex items-center gap-1 rounded px-1.5 py-0.5 ${colors.bg} ${colors.text}`}
-                        >
-                          {TASK_STATUS[task.status as keyof typeof TASK_STATUS]?.label ??
-                            task.status.replace(/_/g, ' ')}
-                          {isExpanded ? (
-                            <ChevronDown className="h-3 w-3" />
-                          ) : (
-                            <ChevronRight className="h-3 w-3" />
-                          )}
-                        </span>
-                      </div>
-                    </button>
+                        <div className="flex shrink-0 flex-col items-end gap-1">
+                          {taskDuration(task)}
+                          <span
+                            className={`text-2xs flex items-center gap-1 rounded px-1.5 py-0.5 ${colors.bg} ${colors.text}`}
+                          >
+                            {TASK_STATUS[task.status as keyof typeof TASK_STATUS]?.label ??
+                              task.status.replace(/_/g, ' ')}
+                            {isExpanded ? (
+                              <ChevronDown className="h-3 w-3" />
+                            ) : (
+                              <ChevronRight className="h-3 w-3" />
+                            )}
+                          </span>
+                        </div>
+                      </CollapsibleTrigger>
 
-                    {isExpanded && (
-                      <div className="border-line-subtle mt-3 space-y-2 border-t pt-3">
+                      <CollapsibleContent className="border-line-subtle mt-3 space-y-2 border-t pt-3">
                         {task.description && (
                           <div>
                             <span className="text-fg-muted text-2xs mb-0.5 block">Description</span>
@@ -266,8 +264,8 @@ export function TaskTimeline({ sessionId }: TaskTimelineProps) {
                               </div>
                             )}
                         </div>
-                      </div>
-                    )}
+                      </CollapsibleContent>
+                    </Collapsible>
                   </div>
                 </div>
               </div>
