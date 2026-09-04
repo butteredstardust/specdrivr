@@ -61,6 +61,9 @@ tests pass with enforced coverage floors, the production build succeeds, and Pla
   validation branches use typed errors so the intended client message is retained.
 - Task completion used a truthy fallback for cost, which discarded a legitimate `0`. Nullish
   fallback now preserves exact accounting and is covered by an integration assertion.
+- The repository-policy workflow called the hook verifier without its required command, making the
+  job fail after printing usage instead of checking checksums. CI now invokes the explicit `verify`
+  mode; the same command passes locally.
 
 ## Independent-review disposition
 

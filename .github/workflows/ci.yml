@@ -137,7 +137,7 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Verify hook integrity
-        run: node scripts/verify-hooks.js
+        run: node scripts/verify-hooks.js verify
       - name: Validate hook shell syntax
         run: |
           find scripts/hooks -type f -name '*.sh' -exec bash -n {} \;

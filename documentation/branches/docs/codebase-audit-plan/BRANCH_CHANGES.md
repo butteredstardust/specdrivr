@@ -25,6 +25,7 @@
 
 - CI now provisions PostgreSQL and Redis, migrates the database, runs coverage and Playwright, and uploads failure reports.
 - A repository-policy job validates hook integrity and shell syntax.
+- The repository-policy job invokes the verifier's explicit `verify` mode so the checksum check runs instead of exiting on command usage.
 - Test databases are isolated and serialized; retry handling recognizes nested PostgreSQL lock/deadlock codes.
 - Coverage is enforced at the measured baseline and documented as an upward-only ratchet toward 80%.
 - The E2E smoke test now verifies that an unauthenticated protected route reaches a usable login form.
