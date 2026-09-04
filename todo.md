@@ -175,14 +175,47 @@ has no affordance except its outline. `input`, `textarea`, `select`, `checkbox` 
 
 ## Phase 7 — Cleanup
 
-- [ ] Remove `@base-ui/react` from `package.json` and its `knip.json` `ignoreDependencies` entry
-- [ ] Fix `components.json` — it points at `tailwind.config.mjs`, **which does not exist** (project is Tailwind v4 CSS-first). Stale manifest misdirects `shadcn add` / `shadcn diff`
-- [ ] Empty out `knip.json`'s UI ignore list and let CI see the real dead code
-- [ ] Grep for surviving hex codes and arbitrary bracket values; drive the 133 count toward zero
-- [ ] Delete now-unused assets and keyframes
-- [ ] The `no-restricted-syntax` raw-primitive rule in `eslint.config.js` named
-      `@pxlkit/ui-kit`, which D1 killed. Message retargeted at `@/components/ui`; the
-      four `@pxlkit/*` entries in `knip.json`'s `ignoreDependencies` still need removing
+- [x] Remove `@base-ui/react` from `package.json` and its `knip.json` `ignoreDependencies` entry
+- [x] Fix `components.json` — it points at `tailwind.config.mjs`, **which does not exist** (project is Tailwind v4 CSS-first). Stale manifest misdirects `shadcn add` / `shadcn diff`
+- [x] Empty out `knip.json`'s UI ignore list and let CI see the real dead code
+- [x] Grep for surviving hex codes and arbitrary bracket values; drive the 133 count toward zero
+- [x] Delete now-unused assets and keyframes
+- [x] The `no-restricted-syntax` raw-primitive rule in `eslint.config.js` named
+      `@pxlkit/ui-kit`, which D1 killed — message retargeted at `@/components/ui`
+
+`ERR_PNPM_UNEXPECTED_STORE`, which blocked this phase twice, is worked around with
+`pnpm --store-dir /Users/tuxgeek/Dev/.pnpm-store/v10 …`; `node_modules` is linked from
+the repo-local store while pnpm now defaults to `~/Library/pnpm/store/v10`.
+
+Eleven dependencies removed, none of which had a single import: `@base-ui/react`,
+`@radix-ui/react-icons`, `@radix-ui/react-separator`, `@pxlkit/weather`, `@dnd-kit/core`,
+`@dnd-kit/sortable`, `@dnd-kit/utilities`, `ts-morph`, `@upstash/ratelimit`,
+`rehype-sanitize`, `nanoid`. `knip.json` went from 29 ignored dependencies to 11 and from
+13 ignored files to 8; it now reports **zero configuration hints**.
+
+Two more inert-CSS bugs of the same family as the dead `prose`:
+
+- **Every overlay animation in the app was doing nothing.** Seven primitives — dialog,
+  alert-dialog, dropdown-menu, popover, select, tooltip, card — carry `animate-in`,
+  `fade-in-0`, `zoom-in-95` and `slide-in-from-*`. None of those exist in Tailwind v4
+  core; they come from `tw-animate-css`, which was installed but never imported.
+  `globals.css` imports it now.
+- **`editor-theme.ts` was still the retro palette** — `#39ff14` phosphor green, `#ffb300`
+  amber — and hardcoded to `theme: 'dark'`, so the spec editor stayed a dark box inside a
+  light-themed app. Rewritten as a light/dark pair transcribed from the design tokens and
+  selected off `useTheme().resolvedTheme`.
+
+On the "133 arbitrary bracket values": the count was wrong. The overwhelming majority are
+`data-[state=…]` / `data-[side=…]` variant selectors, which are how Radix state is
+addressed and are not arbitrary *values* at all. Genuine hex literals came to four files:
+`manifest.ts` (JSON, cannot reference a variable — resynced to `--surface-base`),
+`auth.ts` (an HTML email; clients do not support custom properties), `live-terminal.tsx`
+(xterm needs literals, already reads tokens at runtime with documented fallbacks) and
+`editor-theme.ts` (rewritten above). Nothing left to remove.
+
+Knip still reports 16 unused files, all backend — `src/queries/*`, one repository, two
+scripts, a seed and a schema. Left alone: outside a UI rebuild's scope, and now visible
+to CI, which is what this item was for.
 
 ## Phase 8 — Documentation reconciliation
 

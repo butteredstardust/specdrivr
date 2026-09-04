@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTheme } from 'next-themes';
 import Link from 'next/link';
 import CodeMirror from '@uiw/react-codemirror';
 import { markdown } from '@codemirror/lang-markdown';
@@ -12,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { clientLogger } from '@/lib/logger-client';
-import { specdrivrTheme } from '@/lib/editor-theme';
+import { editorTheme } from '@/lib/editor-theme';
 
 export type SpecStatus =
   | 'drafting'
@@ -38,6 +39,7 @@ interface SpecEditorProps {
 
 export function SpecEditor(props: SpecEditorProps) {
   const router = useRouter();
+  const { resolvedTheme } = useTheme();
   const {
     initialContent,
     initialTitle,
@@ -197,7 +199,7 @@ export function SpecEditor(props: SpecEditorProps) {
             value={content}
             onChange={setContent}
             extensions={[markdown()]}
-            theme={specdrivrTheme}
+            theme={editorTheme(resolvedTheme)}
             height="100%"
             className="h-full"
             editable={!isReadOnly}

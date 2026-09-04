@@ -1,4 +1,10 @@
 @import 'tailwindcss';
+/* Supplies `animate-in` / `fade-in-0` / `zoom-in-95` / `slide-in-from-*`, which
+   Tailwind v4 core does not. Seven overlay primitives already carried those
+   classes, but the package was installed and never imported, so every Radix
+   enter/exit transition in the app was inert. The reduced-motion block below
+   still gates all of it. */
+@import 'tw-animate-css';
 
 /* ============================================================================
    SPECDRIVR DESIGN TOKENS

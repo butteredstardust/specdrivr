@@ -1,32 +1,17 @@
 {
   "ignore": [
-    "src/components/error-boundary.tsx",
     "src/lib/api-response.ts",
     "src/lib/lock-manager.ts",
     "src/lib/pricing.ts",
-    "src/lib/rate-limiter.ts",
-    "scripts/fix-enum-data.ts",
     "scripts/health-check.js",
     "scripts/nuke-db.ts",
-    "scripts/restore-spec-status.ts",
-    "src/components/ui/form.tsx",
     "tests/generate-slack-json.js",
     "tests/manual-db-update.ts",
     "tests/verify-github-service.ts"
   ],
   "ignoreDependencies": [
-    "@base-ui/react",
-    "@dnd-kit/core",
-    "@dnd-kit/sortable",
-    "@dnd-kit/utilities",
-    "@types/dompurify",
-    "@uiw/react-md-editor",
-    "dompurify",
-    "isomorphic-dompurify",
     "next-remove-imports",
     "pino-pretty",
-    "rehype-sanitize",
-    "ts-morph",
     "@eslint/eslintrc",
     "@faker-js/faker",
     "@types/bcryptjs",
@@ -35,15 +20,7 @@
     "eslint-plugin-react",
     "eslint-plugin-react-hooks",
     "shadcn",
-    "@upstash/ratelimit",
-    "@hookform/resolvers",
-    "@pxlkit/social",
-    "@pxlkit/effects",
-    "@pxlkit/gamification",
-    "@pxlkit/weather",
-    "nanoid",
-    "react-hook-form",
-    "husky"
+    "lint-staged"
   ],
   "ignoreExportsUsedInFile": true,
   "rules": {
@@ -51,5 +28,7 @@
     "types": "off",
     "unlisted": "off"
   },
-  "entry": ["src/actions/**/*.ts"]
+  "entry": [
+    "src/actions/**/*.ts"
+  ]
 }

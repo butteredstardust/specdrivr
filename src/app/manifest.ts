@@ -7,8 +7,10 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'AI-native orchestration platform',
     start_url: '/',
     display: 'standalone',
-    background_color: '#12131C',
-    theme_color: '#12131C',
+    // A web app manifest is JSON, so these cannot reference a CSS variable and
+    // have to be literals. Kept in step with `--surface-base` in the dark theme.
+    background_color: '#0b0d11',
+    theme_color: '#0b0d11',
     icons: [
       {
         src: '/brand/icon.svg',
