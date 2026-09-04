@@ -203,7 +203,7 @@ export function SpecEditor(props: SpecEditorProps) {
         </div>
 
         {/* Preview pane */}
-        <div className="prose prose-invert prose-sm min-h-[40vh] max-w-none overflow-y-auto p-4 md:min-h-0">
+        <div className="markdown min-h-[40vh] overflow-y-auto p-4 md:min-h-0">
           <ReactMarkdown>{content}</ReactMarkdown>
         </div>
       </div>

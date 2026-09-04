@@ -93,7 +93,7 @@ export function SpecTab({ spec, userRole }: SpecTabProps): React.ReactElement {
             <Skeleton className="h-4 w-3/5" />
           </div>
         ) : content ? (
-          <div className="prose prose-invert animate-fade-in-up max-w-none">
+          <div className="markdown animate-fade-in-up">
             <ReactMarkdown
               components={{
                 code({

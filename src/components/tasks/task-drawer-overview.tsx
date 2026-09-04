@@ -36,7 +36,7 @@ export function TaskDrawerOverview({ task, onRetry }: TaskDrawerOverviewProps) {
   return (
     <div className="space-y-8 p-6">
       {/* Description */}
-      <div className="prose prose-sm prose-invert max-w-none">
+      <div className="markdown">
         <ReactMarkdown>{task.description ?? ''}</ReactMarkdown>
       </div>
 
