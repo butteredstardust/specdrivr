@@ -1,576 +1,351 @@
-**SPECDRIVR**
+# Design System
 
-Master Product Specification
+**Status:** Canonical. This document is the specification; `src/app/globals.css` is its implementation.
+**Last rewritten:** 2026-09-04 (UI overhaul, branch `feat/ui-overhaul`)
+**Companion docs:** [`UI_SPEC.md`](./UI_SPEC.md) (per-page layout spec) · [`UI_AUDIT.md`](./UI_AUDIT.md) (historical, superseded)
 
-Version 1.0 · Confidential
-
-_Spec-driven autonomous code execution for engineering teams_
+> **Rule of precedence.** If this document and the code disagree, that is a bug in one of them —
+> open it and fix it. Do not work around the gap. Every token named here exists in `globals.css`,
+> and every token in `globals.css` is named here. That one-to-one property is load-bearing; the
+> previous system lost it and accumulated two parallel vocabularies, 133 arbitrary values, and a
+> design doc that documented only dark mode.
 
 ---
 
-[Status: GROUND TRUTH]
-
-# **8\. Design System**
-
-## **8.1 Design Philosophy**
-
-The aesthetic is developer-native: precision, information density, and honest interfaces. The retro-computing accents (phosphor terminals, monospace IDs, scanline overlays) are applied surgically to agent-facing surfaces only. The base layout is clean and Linear-precise.
-
-Simple by default, powerful on demand: default views hide complexity behind progressive disclosure. Power users unlock depth via keyboard shortcuts, not navigation changes.
-
-## **8.1.1 Brand Identity**
-
-The Specdrivr mark is an isometric pair of interlocking pipeline/spec layers. Its exact source
-colours are navy #12131C, blue #2C7ED4, and cyan #A7FFFF. Use the full rounded-square mark for
-application icons and the BrandMark component in product chrome. Cyan is a planar highlight,
-not body text on light backgrounds.
-
-The brand mark and DAEMON have separate jobs: the mark identifies the product; DAEMON
-communicates agent and system state. DAEMON must not replace the product mark in the sidebar,
-authentication, onboarding, metadata, or error-page branding.
-
-## **8.2 Colour Tokens**
-
-| **Token**             | **Dark Hex** | **Usage**                                              |
-| --------------------- | ------------ | ------------------------------------------------------ |
-| \--brand-navy         | #12131C      | Exact icon field and branded dark surfaces.            |
-| \--brand-blue         | #2C7ED4      | Exact icon depth planes; decorative brand graphics.    |
-| \--brand-cyan         | #A7FFFF      | Exact icon top planes; dark-background highlights.     |
-| \--bg-base            | #0C0D13      | Page background. Never use pure black.                 |
-| \--bg-surface         | #12131C      | Cards, panels, sidebar, dialogs.                       |
-| \--bg-elevated        | #191C28      | Hover states, dropdowns, tooltips.                     |
-| \--border-default     | #252A3A      | All borders in layout chrome.                          |
-| \--border-muted       | #30364A      | Separator lines within surfaces.                       |
-| \--text-primary       | #F4F8FB      | Primary text.                                          |
-| \--text-secondary     | #A7B2C3      | Secondary labels, descriptions.                        |
-| \--text-muted         | #6F7C91      | Timestamps, IDs when dev mode off, captions.           |
-| \--accent-blue        | #5CAFFF      | Accessible action, navigation, and running-state text. |
-| \--accent-blue-dim    | #2C7ED4      | Hover state and branded depth accent.                  |
-| \--phosphor-amber     | #F59E0B      | Terminal surfaces, retro IDs, blocked state, warnings. |
-| \--phosphor-amber-dim | #D97706      | Text on amber surfaces.                                |
-| \--status-emerald     | #10B981      | Success, done, complete states.                        |
-| \--status-red         | #EF4444      | Error, failed, rejected, danger zone.                  |
-| \--status-orange      | #F59E0B      | Failed task attempts, degraded state.                  |
-| \--terminal-bg        | #090B12      | xterm.js container background.                         |
-| \--terminal-green     | #22C55E      | Success lines in terminal output.                      |
-
-## **8.2.1 Visual Intent Mapping (Tailwind 4 / CSS Variables)**
-
-| **Visual Intent**        | **CSS Variable Token**  | **Tailwind 4 Utility Example** |
-| ------------------------ | ----------------------- | ------------------------------ |
-| Primary Text             | `var(--text-primary)`   | `text-[--text-primary]`        |
-| Secondary/Muted Text     | `var(--text-secondary)` | `text-[--text-secondary]`      |
-| Disabled/Caption Text    | `var(--text-muted)`     | `text-[--text-muted]`          |
-| Success Status           | `var(--status-emerald)` | `text-[--status-emerald]`      |
-| Error/Failure Status     | `var(--status-red)`     | `bg-[--status-red]`            |
-| Warning/Blocked Status   | `var(--phosphor-amber)` | `text-[--phosphor-amber]`      |
-| Standard Border          | `var(--border-default)` | `border-[--border-default]`    |
-| Soft/Internal Border     | `var(--border-muted)`   | `border-[--border-muted]`      |
-| Page Background          | `var(--bg-base)`        | `bg-[--bg-base]`               |
-| Panel/Surface Background | `var(--bg-surface)`     | `bg-[--bg-surface]`            |
-| Primary Action Button    | `var(--accent-blue)`    | `bg-[--accent-blue]`           |
-| Hover/Elevated Surface   | `var(--bg-elevated)`    | `bg-[--bg-elevated]`           |
-
-## **8.3 Typography**
-
-| **Usage**                               | **Font**                             | **Size** | **Weight**                  |
-| --------------------------------------- | ------------------------------------ | -------- | --------------------------- |
-| Body text                               | Source Sans 3                        | 15px     | Regular 400                 |
-| Labels / captions                       | Source Sans 3                        | 13px     | 400 / 500                   |
-| Monospace IDs (T-042, SES-001)          | Fira Code                            | 12px     | 400                         |
-| Terminal output                         | Fira Code                            | 13px     | 400                         |
-| Retro uppercase labels (SPECIFICATIONS) | Fira Code                            | 11px     | 600, letter-spacing: 0.08em |
-| Spec editor                             | @uiw/react-codemirror (CodeMirror 6) | 15px     | 400                         |
-
-Source Sans 3 is the default for navigation, headings, forms, and prose. Fira Code is reserved for
-machine-readable content: IDs, statuses, timestamps, keyboard shortcuts, diffs, and terminal output.
-Avoid interface text below 11px; 10px is reserved for compact numeric badges with an accessible
-name.
-
-## **8.4 Retro Aesthetic System**
-
-Retro elements are applied selectively. The layout chrome (sidebar, top bar, page structure) is clean and modern. Retro accents appear exclusively on terminal/agent-facing surfaces.
-
-- Scanline overlay (.terminal-surface): CSS ::after pseudo-element with repeating-linear-gradient of 0.15 opacity horizontal lines on 4px pitch. Applied to xterm.js containers and agent log panels.
-- ASCII progress bars: ▓ for filled segments, ▒ for empty. Monospace font. Used in specs table Tasks column.
-- Status characters: ▶ (in_progress, blinking), ✓ (done, emerald), ⚠ (blocked, amber), ✕ (failed, red), ○ (todo, muted).
-- Monospace ID badges: T-042, SPEC-003, SES-0091 - code element with amber text, amber-950/30 background, rounded-sm.
-- Retro uppercase section labels: uppercase, monospace, letter-spaced, muted - used for section headers like SPECIFICATIONS, EVENT LOG.
-- Phosphor palette: amber #ffb300 and green #39ff14 used only within .terminal-surface elements. Never in layout chrome.
-
-## **8.5 Component Rules**
-
-- Buttons: rounded-md everywhere. Never rounded-full. Primary = blue fill. Outline = transparent with border. Destructive = red fill.
-- Lists: dense table rows, not card grids. Row height: 36px for task rows, 40px for session rows, 48px for notification rows.
-- Loading states: shadcn Skeleton rows. Never spinners on page-level. Button-level operations use button spinner only.
-- Toasts: Sonner, bottom-right, max 3 simultaneous. Success auto-close 3s. Error auto-close 6s. Destructive: persist until dismissed.
-- Dialogs: shadcn Dialog (full modal) for destructive confirms, onboarding. shadcn AlertDialog (compact) for quick confirms.
-- Drawers: Vaul for Task Detail - slides from right, 640px wide on desktop, snap points at 50% and 95% height.
-
-# **9\. DAEMON Mascot Specification**
-
-## **9.1 Identity**
-
-DAEMON (Data-Autonomous Execution Machine - Operational Node) is the app's agent-state mascot.
-A small, friendly retro robot rendered as an SVG component, it appears only where agent or system
-state is being communicated: status areas, task/session feedback, and agent-facing empty states.
-
-Design lineage: inspired by CRT-era robot aesthetics applied to modern flat SVG style. No outlines - fill only. Amber eyes are the primary emotional indicator. Antenna is the secondary state indicator visible even at 16px.
-
-## **9.2 Physical Design (viewBox: 0 0 34 40)**
-
-| **Part**    | **Specification**                                                              |
-| ----------- | ------------------------------------------------------------------------------ |
-| Body        | Rounded-rect using the accessible blue accent tokens.                          |
-| Head/screen | Inset page-background panel with no ornamental glow.                           |
-| Eyes        | Amber #ffb300 ellipses. The only warm colour - all emotional focus here.       |
-| Antenna     | Thin blue wire from top of body + amber dot tip. Primary 16px state indicator. |
-| Feet        | Two small rounded rects at base of body. Same blue as body.                    |
-| Mouth       | Simple arc or flat line. Visible at 32px+. Hidden at 16px.                     |
-
-## **9.3 Expressions**
-
-| **Expression** | **Eyes**                              | **Mouth**            | **Antenna**                       | **Use case**                                      |
-| -------------- | ------------------------------------- | -------------------- | --------------------------------- | ------------------------------------------------- |
-| idle           | Round amber ellipses                  | Flat line (neutral)  | Upright, slow pulse               | Ready state, empty states, plan approval wait     |
-| working        | Horizontal scan-bar (CRT scan effect) | Hidden               | Upright, tip pulses amber         | Active session, plan generation, async operations |
-| success        | Wider ellipses (^\_^ shape)           | Upward arc (smile)   | Tips forward slightly, fast pulse | Session complete, task done, approval confirmed   |
-| blocked        | Narrowed ellipses (>\_< shape)        | Downward arc (frown) | Droops to -34°                    | Task blocked, needs attention banner              |
-| error          | X shape (✕ amber)                     | Deeper downward arc  | Droops to -18°, no pulse          | Session failed, plan rejected, 404 page           |
-
-## **9.4 Usage Sizes & Rules**
-
-| **Size** | **Context**                        | **Visible parts**                     |
-| -------- | ---------------------------------- | ------------------------------------- |
-| 16px     | Sidebar status bar, toasts         | Body silhouette + antenna angle only  |
-| 20-24px  | Plan review banner, blocked banner | Body + eyes (simplified) + antenna    |
-| 32px     | Dialog headers, plan states        | Full design - all expressions legible |
-| 48-64px  | Empty states, Mission Control idle | Full design with animation            |
-| 120px+   | Reserved agent illustrations       | Full design with full animation       |
-
-## **9.5 Microcopy Voice**
-
-DAEMON speaks in first person. Always one sentence. No exclamation marks. No ellipsis. Sparse and purposeful - fewer appearances means more impact.
-
-| **Context**                   | **Copy**                                                |
-| ----------------------------- | ------------------------------------------------------- |
-| Idle, no specs                | "No specs yet. I'm ready to build something."           |
-| Plan ready for approval       | "Ready when you are."                                   |
-| Blocked                       | "I hit a wall on T-042. I need your input to continue." |
-| Session complete              | "All tasks complete. Ship it."                          |
-| Plan generating               | "Working on your plan."                                 |
-| Empty sessions                | "No sessions yet. Approve a plan to begin."             |
-| All caught up (notifications) | "Nothing to report."                                    |
-
-# **10\. Application Shell**
-
-## **10.1 Persistent Shell (all pages except Spec Editor)**
-
-The app shell is a fixed layout - sidebar and top bar never unmount during navigation. Only the main content area changes.
-
-### **Left Sidebar (240px fixed width)**
-
-- Top: Specdrivr brand mark (32px) + lowercase specdrivr wordmark in monospace.
-- Below logo: Project switcher dropdown. Displays current project as org/repo. Clicking opens a popover listing all projects. Switching sets activeProjectId in session and triggers re-fetch of all scoped data.
-- Nav links (icon + label, in order): Mission Control · Specifications · Sessions · Settings.
-- Active nav item: blue left border + blue text. Inactive: muted text, no border.
-- Bottom section: DAEMON status bar (16px animated sprite + status text). See priority table in Section 12. Clicking when state is "N BLOCKED" navigates to Mission Control.
-- Below status: version tag (v0.1.0, muted, tiny). Dev Mode badge \[DEV\] in amber monospace when active.
-
-### **Top Bar (per-page, 56px height)**
-
-- Left: page title (bold, 18px) + breadcrumb for nested pages (muted, separated by / ).
-- Right (always present): notification bell with unread count badge · user avatar (32px initials circle) + dropdown menu.
-- Right (per-page contextual): primary action button(s) that change based on the current page and state.
-
-### **User Avatar Dropdown**
-
-- Shows: name + email (read-only header) · Profile Settings · Security · Notification Preferences · Keyboard Shortcuts · Sign Out.
-- Sign Out: immediate, no confirm. Clears session cookie. Redirects to /login.
-
-## **10.2 Global Overlays**
-
-| **Overlay**                | **Trigger**                                          | **Dismissal**          |
-| -------------------------- | ---------------------------------------------------- | ---------------------- |
-| Task Drawer (Vaul)         | Open Detail → link in task row, or blocked task pill | Escape / close button  |
-| New Project Dialog         | \+ New Project button on /projects                   | Escape / Cancel        |
-| Approve & Execute Dialog   | \[APPROVE & EXECUTE\] button on PLAN tab             | Escape / \[CANCEL\]    |
-| Danger Zone Confirm Dialog | Any Danger Zone action button                        | Escape / \[CANCEL\]    |
-| Command Palette            | Cmd+K from anywhere                                  | Escape / click outside |
-| Keyboard Shortcut Help     | ? key from anywhere (not in input)                   | Escape                 |
-| Notification Panel         | Bell icon click                                      | Click outside / Escape |
-| Member Profile Sheet       | View Profile in Team table                           | Escape / close         |
-
-## **10.3 Keyboard Shortcuts**
-
-| **Shortcut**                 | **Action**                                 |
-| ---------------------------- | ------------------------------------------ |
-| Cmd+K                        | Open command palette                       |
-| N                            | New specification (when not in text input) |
-| G M                          | Go to Mission Control                      |
-| G S                          | Go to Specifications                       |
-| G A                          | Go to Sessions (Activity)                  |
-| Ctrl+\`                      | Toggle Dev Mode                            |
-| ?                            | Show keyboard shortcut reference dialog    |
-| Escape                       | Close drawer / dialog / panel              |
-| ↑ / ↓ (in task list)         | Move focus between task rows               |
-| Enter / Space (in task list) | Expand / collapse focused task row         |
-| O (in task list)             | Open Task Drawer for focused row           |
-
-# **11\. Pages - Detailed Specification**
-
-## **11.1 Authentication Pages**
-
-### **Login (/login)**
-
-- Shell: none. Full-page centered layout on #0a0a0b background.
-- Card: 400px wide, bg-surface, border, rounded-xl, p-8. Contains: brand mark (48px) + SPECDRIVR wordmark + tagline.
-- Fields: EMAIL (text, autofocus) · PASSWORD (password type) · \[Sign In\] (primary blue, full width) · Forgot password? link.
-- \[Sign In\] disabled only while request in-flight. Never disabled due to empty fields - server validates.
-- Error state: red banner below button ("Invalid email or password."). Never field-level errors - security principle.
-- Demo bar (dev only): below card, dashed border, \[Sign in as Admin\] and \[Sign in as Member\] buttons.
-- Redirect: unauthenticated access to any route → /login?next={path}. After login → next param or /.
-
-### **Forgot Password (/forgot-password)**
-
-- Single email field. \[Send Reset Link\] button.
-- Always shows success state regardless of whether email exists: brand mark + "Check your email."
-
-### **Reset Password (/reset-password?token={token})**
-
-- Token validated on page load. Invalid/expired token: brand mark + "This link has expired." + \[Request a new link\].
-- Two password fields + 4-segment strength indicator (colour only, no text labels).
-- Passwords must match. Minimum 12 characters.
-
-### **Accept Invite (/invite?token={token})**
-
-- Token validated on page load. Invalid token: brand mark + "This invite link has expired."
-- Valid token: email pre-filled (read-only). Fields: Name + Password + Confirm. \[Accept Invite & Sign In\].
-- On success: user created, auto-signed in, redirected to / with onboarding overlay (if first time).
-
-## **11.2 Mission Control (/)**
-
-### **Needs Attention Banner (conditional - only when blocked tasks exist)**
-
-- Amber full-width banner. DAEMON blocked (20px) + "I need your help with {N} tasks".
-- Blocked task pills inline: T-019 T-033 T-041 - each clickable, opens Task Drawer.
-- \[Dismiss\] button right-aligned. Dismissal is session-only - banner re-appears on next load if tasks still blocked.
-
-### **Live Execution Panel (left 60%)**
-
-- Session running: header with ● LIVE badge (pulsing blue) + Session ID (mono amber) + elapsed timer. Progress bar: N / N tasks. Current task line: ▶ T-019 · Scaffold auth middleware (blinking ▶). xterm.js log tail (200px height, last ~20 lines, ANSI colours, scanline overlay, auto-scroll). Footer: \[PAUSE\] · \[CANCEL\] buttons.
-- Session paused: same layout but timer frozen, \[RESUME\] instead of \[PAUSE\], amber ⏸ PAUSED indicator, terminal shows > SESSION PAUSED line.
-- Session just completed (< 60s): DAEMON success (48px) + "Execution complete." + "N/N tasks succeeded." + \[View Changes →\] link. Auto-clears to idle after 60 seconds.
-- No active session: DAEMON idle (48px, centred) + "SYSTEM READY" (mono, muted) + "No active session." + link to /specs.
-- Boot sequence: when a new session starts, 800ms typewriter animation in terminal before real log lines begin.
-
-### **Event Log Feed (right 40%)**
-
-- Header: EVENT LOG (mono, muted, uppercase, small). Last 30 agent events.
-- Row format: timestamp (mono) · \[EVENT_TYPE\] (colour-coded) · entity ID · description.
-- Colour coding: \[TASK*DONE\] emerald · \[BLOCKED\] amber · \[ERROR\] red · \[PLAN*\*\] blue.
-- Newest row has pulsing dot if session active. View all → link to /sessions.
-
-## **11.3 Projects (/projects)**
-
-- Table columns: ID (mono amber) · Name · Repository (mono, org/repo) · Branch (mono) · Specs count · Last Run · Status · ⋯ menu.
-- \+ New Project (top bar) → New Project Dialog: Name · Repository URL · Branch (default: main) · Description. \[Initialize Project\] button.
-- Row click → sets active project → navigates to /specs.
-- Empty state: DAEMON idle + "No projects yet." + "Point me at a repository and I'll get to work." + \[Initialize First Project\].
-
-## **11.4 Specifications (/specs)**
-
-- Table columns: ID (mono amber) · Name · Status badge · Version (mono, muted) · Tasks (ASCII progress bar ▓▒) · Plan badge · Last Run · ⋯ menu.
-- Status badges: DRAFT (muted) · GENERATING (blue, pulsing) · REVIEW (amber) · RUNNING (blue, pulsing) · STALLED (red) · DONE (emerald).
-- \+ New Spec → navigates to /specs/new (not a dialog).
-- Empty state: DAEMON idle + "No specifications." + "Write what you want to build. I'll figure out the how." + \[Write First Spec\].
-
-## **11.5 Spec Editor (/specs/new, /specs/\[id\]/edit)**
-
-- Full-page. Sidebar hidden. Top bar only: back arrow · spec name (large input, mono font) · \[Save Draft\] · \[Save & Generate Plan\].
-- \[Save Draft\]: enabled when name is non-empty. \[Save & Generate Plan\]: enabled when name filled AND content ≥ 50 characters.
-- Layout: two-pane split with drag handle, default 50/50. Left: CodeMirror 6 editor (line numbers, active line highlight, wrap on). Right: live preview (Markdown rendered, prose styles).
-- Footer strip: word count · line count · version indicator (v3 if editing).
-- If editing a spec with an active plan: amber sticky banner - "⚠ This spec has an active plan (vN). Saving will create vN+1 and abandon the current plan."
-- If Changes Requested by reviewer: amber sticky banner quoting the reviewer's note.
-- Concurrent edit warning: if another user has the editor open, amber banner - "\[Name\] is currently editing this spec."
-
-## **11.6 Specification Detail (/specs/\[id\])**
-
-### **Page Header**
-
-- SPEC-003 badge (mono amber) above spec name h1. Status indicator + plan status badge.
-- Contextual action button (right):
-  - drafting / stalled → \[Generate Plan →\] (primary blue)
-  - pending_approval → \[Review Plan →\] (amber outline) - scrolls to PLAN tab
-  - executing → \[▶ SES-0091\] (blue link) + \[PAUSE\] (outline)
-  - complete → \[Re-run\] + \[Edit\] (both outline)
-- ⋯ menu: Edit · Duplicate · Delete (contextual based on status).
-
-### **Tab: SPEC**
-
-- Rendered Markdown of current version.
-- Version history strip: v1 Jan 3 → v2 Jan 8 → v3 Jan 12 (current) - clickable pills. Clicking shows that version's content inline with a "Viewing v1 · Not current" banner. \[Back to current\] link.
-
-### **Tab: PLAN**
-
-- No plan: DAEMON idle + "No plan generated." + \[Generate Plan\] button.
-- pending_approval: amber review banner (DAEMON idle 20px + summary + three action buttons) → Architecture Decisions accordion → Execution plan (task list, read-only, all tasks show ○) → Review History (collapsed).
-- changes_requested: amber banner with quoted note + \[Edit Spec →\]. Plan content visible but greyed. No action buttons.
-- rejected: red banner with quoted reason + \[Generate New Plan\] + \[View Rejected Plan ▾\] collapsible.
-- approved / executing / complete: plan content read-only + approval timestamp. No action buttons.
-
-### **Plan Review Action Buttons (pending_approval only)**
-
-- \[Request Changes\] (amber outline): slide-down panel with required textarea. On submit: plan → changes_requested, spec author notified.
-- \[Reject Plan\] (red outline): slide-down panel with required reason textarea + warning text. On confirm: plan → rejected, spec → drafting.
-- \[Approve & Execute\] (primary blue): opens Approval Confirmation Dialog. Admin/Owner only. Member sees disabled button with Tooltip.
-- Approval Confirmation Dialog: DAEMON working (32px) + repo/branch + task count + optional notes field. \[CANCEL\] · \[CONFIRM EXECUTION\].
-
-### **Tab: TASKS**
-
-- pending_approval state: task list visible (read-only preview, no click handlers) + amber notice strip: "Tasks will begin executing after plan approval."
-- Other states: full interactive list. Filter pills (ALL · TODO · RUNNING · BLOCKED · DONE · FAILED) + search. Summary strip with colour-coded counts.
-- Task row (36px): status char · T-042 (mono amber) · title · duration (muted, right) · ⋯ menu.
-- Blocked rows: red left border · ⚠ · blockedReason truncated inline (60 chars).
-- Click row (not ⋯): inline expand - description (3 lines) · dependency pills · last log line · attempt count if > 1 · \[Open Detail →\] link.
-- \[Open Detail →\] or ⋯ → View Full Detail → opens Task Drawer. Row click never opens drawer directly.
-
-### **Tab: CHANGES**
-
-- Header: FILE CHANGES (mono) + +142 −38 summary (green/red, mono).
-- Two-pane: file tree (200px, +/~/- prefix, file path mono, line counts) + Shiki diff viewer (line numbers, green additions, red deletions, via T-019 task link).
-
-### **Tab: ACTIVITY**
-
-- Event log scoped to this spec, grouped by session. Session headers collapsible. Links to /sessions filtered to that session.
-
-## **11.7 Task Drawer (Vaul Overlay)**
-
-- Entry: \[Open Detail →\] in expanded task row, or ⋯ → View Full Detail, or blocked task pill in Mission Control.
-- Header: T-042 (mono amber, large) · title · status badge (editable inline dropdown) · DAEMON sprite (expression = task status).
-
-### **Tab: OVERVIEW**
-
-- Description (Markdown rendered). Dependencies (↳ linked pills - click navigates to that task's drawer). Architecture decisions referencing this task.
-- Blocked state: red surface panel · DAEMON blocked (24px) · blockedReason text · Context textarea ("Provide context for DAEMON") · \[RETRY WITH CONTEXT\] button (blue, disabled until textarea non-empty).
-- Failed state: orange panel · last error message · \[RETRY\] button.
-
-### **Tab: ATTEMPTS**
-
-- List newest-first. Each row header: Attempt N · status · duration · timestamp (collapsible).
-- Expanded: xterm.js terminal panel (320px, ANSI colours, scanline overlay, scrollable).
-- In-progress attempt: auto-scroll + blinking cursor.
-
-### **Tab: CHANGES**
-
-- Shiki diff viewer scoped to this task. Empty state: DAEMON idle + "No file changes yet." if task not complete.
-
-### **Footer Actions (context-sensitive)**
-
-- \[RE-RUN\] · \[MARK BLOCKED\] · \[MARK DONE\] - shown only when contextually valid. Never shown for done tasks in terminal state.
-
-## **11.8 Sessions (/sessions)**
-
-- Filter bar: search · status filter · spec dropdown · date range.
-- Timeline grouped by date: TODAY / YESTERDAY / THIS WEEK (mono uppercase group headers).
-- Session row (40px): status dot (pulsing blue if running) · session ID (mono amber) · spec name (linked) · time range · task count + status char · ⋯ menu.
-- Click row: inline expand with per-task event log (mono, colour-coded). Running session: mini xterm.js panel (120px) at bottom of expanded row.
-
-## **11.9 Notifications (/notifications)**
-
-- Filter tabs: All · Unread · Mentions. Full-width list, 56px rows.
-- \[Mark all read\] button (top right). Infinite scroll (50 per page).
-- Bell icon in top bar: amber numeric badge (max: 9+). Click → Notification Panel (Popover, 380px wide, 480px max).
-
-## **11.10 Settings (/settings)**
-
-### **Sub-navigation (200px left column)**
-
-- ACCOUNT: Profile · Security · Notifications
-- PROJECT: General · Team · Integrations · Agent · Audit Log
-- DANGER ZONE
-
-### **Profile**
-
-- Initials avatar (64px, deterministic colour from name hash). Name field (editable). Email (read-only, with note).
-
-### **Security**
-
-- Change password: Current · New · Confirm. Same strength indicator as reset flow.
-- Active sessions table: Device · Location · Last active · \[Revoke\]. Current session highlighted "(this session)", no revoke. \[Revoke all other sessions\] link.
-- API tokens table: Name · Prefix · Created · Last used · Expires · \[Revoke\]. \[+ Generate Token\] → Dialog (name + expiry radio) → one-time reveal dialog on creation.
-
-### **Notifications**
-
-- Two-column toggle grid: event type (left) · Email switch · In-app switch. \[Save Preferences\] at bottom.
-
-### **General (Project)**
-
-- Name · Description · Repository URL (with \[Verify Connection\] inline) · Default Branch · Timezone. \[Save Changes\].
-
-### **Team**
-
-- Invite section: email + role dropdown + \[Send Invite\] in one row.
-- Members table: Avatar+Name · Email · Role (inline editable popover) · Status · Last Active · ⋯ menu.
-- ⋯ menu: View Profile · Resend Invite (if invited) · Suspend (if active) · Reactivate (if suspended) · Remove from Project.
-
-### **Integrations**
-
-- Card grid (3 columns). GitHub: OAuth connect, webhook URL after connect, event checkboxes. Slack: OAuth connect, channel selector, event toggles. Generic Webhook: endpoint URL + HMAC secret + event checkboxes.
-
-### **Agent**
-
-- Max concurrent tasks (Slider 1-10). Task timeout (number input, live human-readable preview). Max retries (Slider 0-5). Retry delay (Select). Require approval (Switch, default ON, disabling requires AlertDialog). Auto-generate plan (Switch). Plan expiry (Select).
-- Agent Token section: masked token display + rotation instructions. Never editable here - set via environment variable.
-
-### **Audit Log**
-
-- Admin/Owner only. Filter bar: search · actor · action type · date range. Full-width table. Row expand shows raw JSON detail (.terminal-surface). \[Export CSV\].
-
-### **Danger Zone**
-
-- \[Abandon All Sessions\] → AlertDialog (no type-to-confirm needed).
-- \[Reset Agent Settings to Defaults\] → AlertDialog.
-- \[Delete All Specs & Plans\] → type project name to confirm.
-- \[Delete Project\] → two-step: AlertDialog first, then type-to-confirm dialog. Success → navigates to /projects.
-
-# **12\. State Machines**
-
-## **12.1 Spec Status**
-
-| **Transition**                  | **Trigger**                     | **Side effects**                                                          |
-| ------------------------------- | ------------------------------- | ------------------------------------------------------------------------- |
-| (none) → drafting               | Spec created (Save Draft)       | Creates spec + version 1                                                  |
-| drafting → pending_plan         | Save & Generate Plan clicked    | Creates new version if editing; triggers async plan generation            |
-| pending_plan → pending_approval | Plan generation succeeds        | Plan record created with all tasks and arch decisions; notifications sent |
-| pending_plan → stalled          | Plan generation fails           | Plan record with error; DAEMON error state; notification sent             |
-| pending_approval → executing    | Plan approved                   | Plan status → approved; agent_session created; first task queued          |
-| pending_approval → stalled      | Plan rejected                   | Plan status → rejected; notification to spec creator                      |
-| pending_approval → stalled      | Changes requested               | Plan status → changes_requested; notification to spec creator             |
-| executing → complete            | All tasks reach done            | Session completed; notifications sent; confetti on Mission Control        |
-| executing → stalled             | Session cancelled               | In-progress tasks → failed; DAEMON idle                                   |
-| any → drafting                  | Spec edited (new version saved) | New spec_version; active non-complete plan → abandoned                    |
-| complete → pending_plan         | Re-run triggered                | New plan generation cycle begins                                          |
-
-## **12.2 Plan Status**
-
-| **Status**        | **Meaning**                                                            | **Next valid statuses**                          |
-| ----------------- | ---------------------------------------------------------------------- | ------------------------------------------------ |
-| pending_approval  | Plan generated, awaiting review. Approval buttons visible.             | approved, rejected, changes_requested, abandoned |
-| approved          | Admin approved. Session starting/running.                              | complete (via executing implicitly)              |
-| rejected          | Rejected by reviewer. Cannot be recovered - must generate new plan.    | (terminal)                                       |
-| changes_requested | Reviewer wants spec changes first. Cannot approve until spec re-saved. | (terminal for this plan - new plan needed)       |
-| abandoned         | Spec was edited while plan was active. Auto-set.                       | (terminal)                                       |
-| complete          | All tasks done.                                                        | (terminal)                                       |
-
-## **12.3 Task Status**
-
-| **Status**  | **Character** | **Colour** | **Can transition to**               |
-| ----------- | ------------- | ---------- | ----------------------------------- |
-| todo        | ○             | Muted      | in_progress                         |
-| in_progress | ▶ (blink)     | Blue       | done, failed, blocked               |
-| blocked     | ⚠             | Amber      | in_progress (on retry with context) |
-| done        | ✓             | Emerald    | todo (on re-run, manual override)   |
-| failed      | ✕             | Red        | todo (on retry)                     |
-
-## **12.4 Session Status**
-
-| **Status** | **Panel state on Mission Control**                       | **DAEMON sidebar**                             |
-| ---------- | -------------------------------------------------------- | ---------------------------------------------- |
-| running    | Live panel with log stream, timer, progress              | working · T-{taskId} (blue)                    |
-| paused     | Same panel, timer frozen, \[RESUME\] button, ⏸ indicator | idle · PAUSED (amber)                          |
-| completed  | DAEMON success + summary (auto-clears after 60s)         | success · COMPLETE (brief), then READY         |
-| failed     | DAEMON error + \[View Session →\] + \[Retry →\]          | error · SESSION FAILED (red, highest priority) |
-| cancelled  | Returns to idle state immediately                        | idle · READY                                   |
-
-## **12.5 Sidebar DAEMON Priority**
-
-| **Priority** | **Condition**         | **Expression** | **Text**                       | **Colour** |
-| ------------ | --------------------- | -------------- | ------------------------------ | ---------- |
-| 1 (highest)  | Any session failed    | error          | DAEMON · SESSION FAILED        | Red        |
-| 2            | Any task blocked      | blocked        | DAEMON · N BLOCKED (clickable) | Amber      |
-| 3            | Any session running   | working        | DAEMON · T-{taskId}            | Blue       |
-| 4            | Any session paused    | idle           | DAEMON · PAUSED                | Amber      |
-| 5            | Plan pending approval | idle           | DAEMON · PLAN READY            | Amber      |
-| 6 (lowest)   | None of above         | idle           | DAEMON · READY                 | Muted      |
-
-# **15\. Notification System**
-
-## **15.1 Delivery Channels**
-
-- In-app: Notification Panel (bell icon popover) + /notifications page. Polled every 3 seconds (same interval as session polling).
-- Email: transactional via Resend. Templates are plain-text-first, minimal HTML. Never send more than one email per event per user.
-
-## **15.2 Notification Events & Defaults**
-
-| **Event**         | **Trigger**                                          | **Email default** | **In-app default** |
-| ----------------- | ---------------------------------------------------- | ----------------- | ------------------ |
-| plan_generated    | Plan generation complete for a spec the user created | Off               | On                 |
-| plan_approved     | Plan approved (notify spec creator and team members) | Off               | On                 |
-| plan_rejected     | Plan rejected (notify spec creator)                  | On                | On                 |
-| changes_requested | Changes requested (notify spec creator)              | On                | On                 |
-| session_complete  | Execution session completed                          | Off               | On                 |
-| session_failed    | Execution session failed                             | On                | On                 |
-| task_blocked      | Task blocked - for specs the user owns               | On                | On                 |
-| member_invited    | User invited to a project                            | On                | On                 |
-| role_changed      | User's role in a project changed                     | On                | On                 |
-
-## **15.3 Notification Panel Behaviour**
-
-- Bell badge: amber background, white text, max displayed "9+". Updates via 3-second poll on GET /api/v1/notifications?unread=true&count=true.
-- Click notification row: marks as read (PATCH /api/v1/notifications/{id}) + navigates to linkUrl. Single action, no separate mark-read step.
-- \[Mark all read\]: POST /api/v1/notifications/read-all. Badge clears immediately (optimistic).
+## 1. Philosophy
+
+Specdrivr is a dense, professional tool for people who watch agents work. The interface should
+disappear into the task.
+
+**Five principles, in priority order:**
+
+1. **Borders over shadows.** Elevation is communicated by a hairline border and a surface step, not
+   by a drop shadow. Shadows are reserved for things that genuinely float above the page — dialogs,
+   popovers, dropdowns.
+2. **One accent.** Blue means "interactive or selected". It never means "decorative". Status colours
+   are a separate, semantically-reserved axis and are never used for emphasis.
+3. **Density with air.** Rows are compact; the space *between* groups is generous. Cramming happens
+   inside a group, never between them.
+4. **Motion confirms, never entertains.** Two durations, two easings. Animation exists to make a
+   state change legible. Nothing loops purely for decoration.
+5. **Monospace carries meaning.** Mono is reserved for content that is literally machine text —
+   identifiers, logs, diffs, paths, timestamps, code. It is not a stylistic choice.
+
+**Explicit non-goals.** No CRT chrome, scanlines, phosphor glow, flicker, vignettes, pixel art, or
+mascots. These were removed in the overhaul. If a future direction wants them back, that is a
+deliberate product decision, not a component-level liberty.
 
 ---
 
-# **16. Navigation Flow Diagram**
+## 2. Colour tokens
 
-```
-[Sidebar: Mission Control] ──────────────────────────────► P1 Mission Control
-                                                               │
-                                                               ├─ View all → ──────────────► P6 Sessions
-                                                               └─ Blocked pill → ──────────► Task Drawer (overlay)
+Two layers. **Raw tokens** are declared in `:root` / `.dark` as hex. **Bridge tokens** in
+`@theme inline` expose them as Tailwind utilities. Components only ever touch the utilities.
 
-[Sidebar: Specifications] ────────────────────────────────► P3 Specifications
-                                                               │
-                                                               ├─ Row click ──────────────► P5 Spec Detail
-                                                               │                               │
-                                                               │                               ├─ Edit ──────────► P4 Spec Editor
-                                                               │                               ├─ Generate Plan ─► (stays, PLAN tab)
-                                                               │                               ├─ Approve ───────► (dialog → executing)
-                                                               │                               ├─ Task row ──────► Task Drawer (overlay)
-                                                               │                               ├─ Session link ──► P6 Sessions
-                                                               │                               └─ Breadcrumb ────► P3 Specifications
-                                                               │
-                                                               └─ + New Spec ─────────────► P4 Spec Editor (new)
-                                                                                               │
-                                                                                               ├─ Save Draft ────► P5 Spec Detail (SPEC tab)
-                                                                                               └─ Save & Plan ───► P5 Spec Detail (PLAN tab)
+> Tailwind v4 shares a single `--color-*` namespace across `bg-`, `text-`, and `border-`. That is
+> why borders are prefixed `line-` and text is prefixed `fg-` — so `border-line-strong` and
+> `text-fg-muted` can coexist without collision. Do not add a `--color-*` token whose name could be
+> read as belonging to a different axis.
 
-[Sidebar: Sessions] ─────────────────────────────────────► P6 Sessions
-                                                               └─ Spec name link ─────────► P5 Spec Detail (ACTIVITY tab)
+### 2.1 Surfaces
 
-[Sidebar: Settings] ─────────────────────────────────────► P7 Settings
-                                                               └─ Delete Project ─────────► P2 Projects
+| Utility | Token | Light | Dark | Use |
+|---|---|---|---|---|
+| `bg-surface-base` | `--surface-base` | `#f7f8fa` | `#0b0d11` | Page background. The floor. |
+| `bg-surface-raised` | `--surface-raised` | `#ffffff` | `#14171d` | Cards, tables, panels, sidebar, top bar. |
+| `bg-surface-overlay` | `--surface-overlay` | `#ffffff` | `#1a1e26` | Dialogs, popovers, dropdowns, drawers. |
+| `bg-surface-sunken` | `--surface-sunken` | `#f0f2f5` | `#0f1116` | Wells recessed below their parent. |
+| `bg-surface-inset` | `--surface-inset` | `#eceff3` | `#1a1e26` | Inputs, hover fills, inline code. |
 
-[Project Switcher (sidebar)] ─────────────────────────────► P2 Projects
+**Stacking rule:** `base → raised → overlay`. Never nest a `raised` directly inside a `raised`
+without a border between them; use `sunken` for the inner region instead.
 
-[Cmd+K anywhere] ─────────────────────────────────────────► Command Palette (overlay)
-                                                               └─ Any nav item ───────────► Respective page
-```
+### 2.2 Borders
 
-# **17. Shared Component Inventory**
+| Utility | Token | Light | Dark | Use |
+|---|---|---|---|---|
+| `border-line-subtle` | `--border-subtle` | `#eceff3` | `#1c212a` | Row dividers, internal separators. |
+| `border-line` | `--border-default` | `#e0e4ea` | `#262c37` | **Default.** Card, input, panel edges. |
+| `border-line-strong` | `--border-strong` | `#c9d0da` | `#38404e` | Hover state, emphasis, scrollbar thumb. |
 
-| Component                         | Used on                                                             |
-| --------------------------------- | ------------------------------------------------------------------- |
-| Brand mark                        | Sidebar identity, auth, onboarding, metadata, application errors    |
-| DAEMON sprite (all expressions)   | Agent/system status, agent empty states, toasts, Task Drawer header |
-| Task row (collapsed + expanded)   | P5 TASKS tab, P1 Mission Control blocked pills                      |
-| Event log row (mono, color-coded) | P1 Event feed, P5 ACTIVITY tab, P6 Sessions expanded                |
-| xterm.js terminal panel           | P1 live log, P5-OVERLAY ATTEMPTS tab, P6 inline expand              |
-| Shiki diff viewer                 | P5 CHANGES tab, P5-OVERLAY CHANGES tab                              |
-| ASCII progress bar (`▓▒`)         | P3 Specifications table, P5 header summary                          |
-| Session row                       | P6 Sessions, P1 (compact version)                                   |
-| Status indicator (retro char)     | All task rows, all spec rows, all session rows                      |
-| Amber ID badge (mono)             | All task IDs (T-042), spec IDs (SPEC-003), session IDs (SES-0091)   |
+`--border-default` is also applied as the global `border-color` in `@layer base`, so
+`border` alone yields the correct colour without a `border-line` class.
+
+### 2.3 Text
+
+| Utility | Token | Light | Dark | Use |
+|---|---|---|---|---|
+| `text-fg` | `--text-primary` | `#14161a` | `#f2f4f7` | Headings, primary body, values. |
+| `text-fg-secondary` | `--text-secondary` | `#4a5260` | `#a6b0be` | Supporting body, entity IDs, descriptions. |
+| `text-fg-muted` | `--text-muted` | `#767f8e` | `#737d8c` | Labels, timestamps, placeholders, captions. |
+| `text-fg-inverse` | `--text-inverse` | `#ffffff` | `#0b0d11` | Text on a solid accent or inverted fill. |
+
+Three levels of text, and only three. If something needs a fourth, it needs a different size or
+weight, not a fourth colour.
+
+### 2.4 Accent
+
+| Utility | Token | Light | Dark | Use |
+|---|---|---|---|---|
+| `bg-accent` / `text-accent` | `--accent` | `#2563eb` | `#4d8dfa` | Primary buttons, links, active nav, focus ring. |
+| `bg-accent-hover` | `--accent-hover` | `#1d4ed8` | `#6ba1fb` | Hover on a solid accent fill. |
+| `bg-accent-active` | `--accent-active` | `#1e40af` | `#85b2fc` | Active/pressed on a solid accent fill. |
+| `bg-accent-subtle` | `--accent-subtle` | `#eff4ff` | `#10203a` | Selected row, active nav background, soft chip. |
+| `border-accent-border` | `--accent-border` | `#c3d6fd` | `#1e3a60` | Border paired with `accent-subtle`. |
+| `text-accent-fg` | `--accent-fg` | `#ffffff` | `#0b0d11` | Text on a solid accent fill. |
+
+Note the dark ramp inverts: `hover` and `active` get **lighter**, because the fill sits on a dark
+ground. Do not "fix" this to match light mode.
+
+### 2.5 Status
+
+Four statuses, each a triple of foreground / background / border. Never use these for emphasis.
+
+| Status | `text-*` | `bg-*-bg` | `border-*-border` | Meaning |
+|---|---|---|---|---|
+| `success` | `#067647` / `#47cd89` | `#ecfdf3` / `#0c1f16` | `#abefc6` / `#17452f` | Completed, passing, connected. |
+| `warning` | `#b54708` / `#f5b544` | `#fffaeb` / `#241a08` | `#fedf89` / `#4e3a11` | Blocked, needs review, degraded. |
+| `danger` | `#b42318` / `#f97066` | `#fef3f2` / `#2a1210` | `#fecdca` / `#5a2721` | Failed, error, destructive. |
+| `info` | `#175cd3` / `#6ba1fb` | `#eff8ff` / `#10203a` | `#b2ddff` / `#1e3a60` | Running, in progress, neutral notice. |
+
+*(Format: light / dark.)*
+
+**Status is never colour-only.** Every status must also carry a glyph, a label, or both — see §8.
+
+### 2.6 Diff and log
+
+| Utility | Use |
+|---|---|
+| `bg-diff-added-bg`, `border-diff-added-border` | Added lines in a diff. |
+| `bg-diff-removed-bg`, `border-diff-removed-border` | Removed lines in a diff. |
+| `bg-log-bg`, `text-log-text`, `text-log-muted` | Log and terminal-output surfaces. |
+
+The log surface is a plain recessed panel with mono text. It has no scanline, no vignette, no
+flicker, and no glow. The content is the terminal; the chrome is not.
+
+---
+
+## 3. Typography
+
+**Sans:** Source Sans 3 (`--font-sans`) — all interface text.
+**Mono:** Fira Code (`--font-mono`) — identifiers, logs, diffs, paths, timestamps, code.
+
+### 3.1 Scale
+
+| Utility | Size | Line height | Use |
+|---|---|---|---|
+| `text-2xs` | 11px | 16px | **Floor.** Dense metadata, table sub-labels. |
+| `text-xs` | 12px | 18px | Badges, timestamps, captions. |
+| `text-sm` | 13px | 20px | Secondary body, table cells. |
+| `text-base` | 14px | 22px | **Default body.** |
+| `text-md` | 15px | 24px | Emphasised body, card lead text. |
+| `text-lg` | 17px | 24px | Card and section titles. |
+| `text-xl` | 21px | 28px | Page titles. |
+| `text-2xl` | 26px | 32px | Display, empty-state headings. |
+
+**11px is a hard floor.** The pre-overhaul code had 133 arbitrary bracket values, mostly
+`text-[9px]` and `text-[10px]`, concentrated in mission-control and session components. Anything
+below 11px fails legibility at normal viewing distance. If a layout only fits at 10px, the layout
+is wrong.
+
+### 3.2 Weights
+
+`400` body · `500` emphasis and labels · `600` headings and buttons. Nothing heavier. Never `700`.
+
+### 3.3 Mono rules
+
+- Uppercase mono gets `letter-spacing: 0.05em` automatically (handled globally in `globals.css`).
+- Entity IDs (`SPEC-003`, `T-042`, `SES-0091`) render mono at `text-fg-secondary` — **not** accent,
+  and no longer amber. They are reference data, not calls to action.
+- Ligatures (`calt`, `liga`) are on. Leave them on; they are why Fira Code was chosen.
+
+---
+
+## 4. Spacing
+
+A 4px base grid. Use Tailwind's default scale; the meaningful part is *which* step applies where.
+
+| Context | Step |
+|---|---|
+| Icon-to-label, inline chip padding | `gap-1.5` / `gap-2` (6–8px) |
+| Inside a form field, table cell padding | `px-3 py-2` (12/8px) |
+| Card interior padding | `p-4` compact · `p-6` standard |
+| Between related elements in a group | `space-y-3` (12px) |
+| Between groups within a section | `space-y-6` (24px) |
+| Between page sections | `space-y-8` (32px) |
+| Page gutter | `px-6 py-6` mobile · `px-8 py-8` desktop |
+
+**Never invent a one-off gutter.** The pre-overhaul shell used `px-8 py-8 md:px-10`, a value that
+appeared nowhere else. Page padding is set once in `src/app/(app)/layout.tsx` and inherited.
+
+---
+
+## 5. Radii
+
+`--radius` is `0.375rem` (6px) and is **load-bearing** — every other step is `calc()`'d from it, so
+changing that one value rescales the whole system. In the previous system `--radius` was declared
+and read by nothing.
+
+| Utility | Value | Use |
+|---|---|---|
+| `rounded-sm` | 4px | Chips, badges, small inline marks. |
+| `rounded-md` | 6px | **Default.** Buttons, inputs, selects. |
+| `rounded-lg` | 8px | Cards, panels. |
+| `rounded-xl` | 12px | Dialogs, drawers, large containers. |
+| `rounded-full` | — | Avatars, status dots, pills. |
+
+---
+
+## 6. Elevation
+
+Elevation is expressed as **surface step + border**, in this order of preference:
+
+1. Change the surface token (`base` → `raised` → `overlay`).
+2. Add `border border-line`.
+3. Only if it genuinely floats: add a shadow.
+
+| Utility | Use |
+|---|---|
+| `shadow-popover` | Popovers, dropdowns, tooltips, selects. |
+| `shadow-overlay` | Dialogs, drawers, command palette. |
+
+Two shadows exist. There is no `shadow-sm`, no `shadow-md`, and no glow. Cards do not get shadows —
+cards get borders.
+
+---
+
+## 7. Motion
+
+| Token | Value | Use |
+|---|---|---|
+| `--animate-duration-fast` | `120ms` | Hover, focus, colour and border transitions. |
+| `--animate-duration-base` | `200ms` | Enter/exit, expand/collapse, overlays. |
+| `--ease-standard` | `cubic-bezier(0.4, 0, 0.2, 1)` | Everything entering or moving. |
+| `--ease-exit` | `cubic-bezier(0.4, 0, 1, 1)` | Things leaving. |
+
+Three animations exist: `animate-fade-in`, `animate-fade-in-up`, `animate-pulse-subtle`.
+`pulse-subtle` is the **only** looping animation, reserved for genuine live-activity indicators.
+
+`prefers-reduced-motion: reduce` collapses all animation and transition durations globally. **CSS
+cover is not sufficient** — JS-driven animation (canvas, xterm, timers) must check the media query
+itself.
+
+---
+
+## 8. Component conventions
+
+Every primitive in `src/components/ui/` follows all of these. No exceptions.
+
+### 8.1 Structure
+
+- **`data-slot` attribute** on every rendered part, matching the modern shadcn convention. Enables
+  styling and testing without brittle class selectors. *(Pre-overhaul: 1 of 37 primitives did this.)*
+- **`cva` for variants.** Any primitive with more than one visual variant declares them with
+  `class-variance-authority`, exports its `VariantProps`, and never hand-rolls conditional `cn()`
+  strings. *(Pre-overhaul: 5 of 37.)*
+- **`cn()` for merging**, and `className` is always accepted and merged last so callers can override.
+- **Radix is the headless foundation.** Every headless dependency is wrapped in `src/components/ui/`
+  and imported from there — never imported raw into a feature component.
+
+### 8.2 Required states
+
+Every interactive primitive implements all five:
+
+| State | Treatment |
+|---|---|
+| Default | Per variant. |
+| Hover | Surface or border step up. Never a size or position change. |
+| Focus-visible | `outline: 2px solid var(--focus-ring); outline-offset: 2px`. Set globally; do not override per component. |
+| Disabled | `opacity-50 pointer-events-none`, plus a real `disabled` / `aria-disabled` attribute. |
+| Invalid | `border-danger-border` + `aria-invalid`, with the message linked by `aria-describedby`. |
+
+### 8.3 Icons
+
+`lucide-react` only. No `@radix-ui/react-icons`. Default `size={16}`; `14` in dense rows.
+Every icon-only control needs an accessible name.
+
+### 8.4 Status display
+
+Status is never conveyed by colour alone. Use colour **plus** a glyph or label:
+
+| Status | Glyph | Colour |
+|---|---|---|
+| Done / success | `Check` | `success` |
+| Running | `Loader` (spin) or pulsing dot | `info` |
+| Blocked / needs review | `AlertTriangle` | `warning` |
+| Failed | `X` | `danger` |
+| Todo / idle | `Circle` | `fg-muted` |
+
+---
+
+## 9. Composition patterns
+
+**Page.** `PageHeader` (title, optional breadcrumb, optional description, right-aligned actions) →
+`space-y-6` content sections.
+
+**Card.** `bg-surface-raised border border-line rounded-lg p-6`. No shadow.
+
+**Table.** `bg-surface-raised` container, `border border-line rounded-lg overflow-hidden`. Header
+row `text-2xs uppercase tracking-wide text-fg-muted bg-surface-sunken`. Body rows separated by
+`border-line-subtle`. Row hover `bg-surface-inset`. Selected row `bg-accent-subtle`.
+
+**Empty state.** Centred, `py-12`. Icon (24px, `text-fg-muted`) → `text-lg` heading → `text-sm
+text-fg-muted` explanation → single primary action. Never a mascot.
+
+**Form.** `Label` above `Input`, `space-y-1.5`. Help text `text-xs text-fg-muted` below. Error
+`text-xs text-danger`, linked via `aria-describedby`. Fields `space-y-4` apart.
+
+**Log surface.** `bg-log-bg border border-line rounded-md p-3 font-mono text-xs`, `scrollbar-thin`,
+`aria-live="polite"` when streaming.
+
+---
+
+## 10. Accessibility requirements
+
+Non-negotiable, and checked at the Phase 9 gate.
+
+- **Contrast:** 4.5:1 body text, 3:1 large text and UI boundaries — verified in **both** themes.
+- **Focus:** visible on every interactive element. Focus moves into dialogs/drawers on open and
+  returns to the trigger on close.
+- **Keyboard:** every action reachable without a pointer. Tab order follows visual order.
+- **Landmarks:** one `<main>`, `<nav>` for navigation, headings in order without skipping levels.
+- **Live regions:** `aria-live="polite"` on streaming logs, task status, and progress.
+  *(Pre-overhaul, the three live surfaces — `task-row`, `live-terminal`, `diff-viewer` — had none.)*
+- **Names:** every icon-only button has `aria-label` or visually-hidden text.
+- **Never colour-only:** see §8.4.
+- **Reduced motion:** respected by CSS *and* by JS-driven animation.
+
+---
+
+## 11. Do / Don't
+
+| Don't | Do |
+|---|---|
+| `text-[#2563eb]`, `bg-[#14171d]` | `text-accent`, `bg-surface-raised` |
+| `text-[10px]` | `text-2xs` (11px floor) |
+| `shadow-md` on a card | `border border-line` |
+| A second accent colour | The one accent; differentiate with weight or surface |
+| Status by colour alone | Colour **and** glyph/label |
+| Raw `import { Drawer } from 'vaul'` | `import { Drawer } from '@/components/ui/drawer'` |
+| A new one-off component | Check `src/components/ui/` first |
+| Hand-rolled `cn()` variant chains | `cva` |
+| A one-off `px-10` gutter | The §4 spacing scale |
+| Decorative looping animation | `animate-pulse-subtle`, only for live activity |
+
+---
+
+## 12. Removed in the 2026-09-04 overhaul
+
+Recorded so the decision is not silently re-litigated.
+
+| Removed | Why |
+|---|---|
+| shadcn HSL token set (`--background`, `--primary`, …) | Second parallel vocabulary; already banned by `AGENTS.md` §5 but still fully wired. |
+| `.bg-bg-elevated` hand-written rule | Shadowed the Tailwind-generated utility of the same name and silently injected `border` + `shadow-sm`. |
+| `.terminal-surface`, `.scanline-overlay`, `.cyber-glow*`, `.phosphor-focus` | CRT chrome; conflicts with the Linear-clean direction. |
+| DAEMON mascot + all `daemon-*` keyframes | Decorative looping animation; replaced by plain empty states. |
+| `matrix-screensaver.tsx` | Undocumented "Concept #5" canvas animation. |
+| `pixel-badge.tsx` | Replaced by a standard `badge.tsx`, which knip had confirmed dead. |
+| `.theme-amber` scrollbar rules | Referenced a theme that does not exist. |
+| `@base-ui/react` | Zero imports in `src`; an abandoned migration suppressed in `knip.json`. |
+| Amber as an entity-ID colour | Second accent; IDs are reference data, now `text-fg-secondary`. |
