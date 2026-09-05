@@ -1,59 +1,50 @@
-# Specdrivr Documentation
+# Specdrivr documentation
 
-Welcome to the master product specification for Specdrivr.
+Use this index to find product, module, and infrastructure documentation.
 
-[Status: GROUND TRUTH]
+## Infrastructure specifications
 
-## 🏗️ Infrastructure Specs
+- [Architecture](./infrastructure/ARCHITECTURE.md): System overview, technical stack, and security.
+- [Database](./infrastructure/DATABASE.md): Schema, data models, and enums.
+- [API](./infrastructure/API.md): REST API reference.
+- [AI Protocols](./infrastructure/AI_PROTOCOLS.md): AI prompts and JSON schemas.
+- [Billing and usage](./infrastructure/BILLING_ALGORITHM.md): Cost calculation logic.
+- [Webhook schemas](./infrastructure/WEBHOOK_SCHEMAS.md): Outgoing integration payloads.
+- [State machines](./infrastructure/STATE_MACHINES.md): Status enums and transition rules.
+- [Flow diagrams](./infrastructure/FLOW_DIAGRAMS.md): Mermaid diagrams for asynchronous flows.
+- [Error registry](./infrastructure/ERROR_REGISTRY.md): Error codes and envelopes.
+- [Redis registry](./infrastructure/REDIS_REGISTRY.md): Key prefixes, TTLs, and cache policies.
+- [Testing handbook](./infrastructure/TESTING_HANDBOOK.md): Mock and E2E patterns.
+- [Coding patterns](./infrastructure/CODING_PATTERNS.md): Standard implementation patterns.
+- [Symbol registry](./infrastructure/SYMBOL_REGISTRY.md): Repository method signatures.
+- [Directory map](./infrastructure/DIRECTORY_MAP.md): Folder responsibilities and rules.
+- [Troubleshooting](./infrastructure/TROUBLESHOOTING.md): Recovery procedures.
+- [Workflows](./infrastructure/WORKFLOWS.md): Technical task checklists.
+- [Scripts reference](./infrastructure/SCRIPTS_REFERENCE.md): Automation utilities.
+- [Environment variables](./infrastructure/ENVIRONMENT_VARIABLES.md): Zod-validated variables.
+- [Design system](./infrastructure/DESIGN_SYSTEM.md): UI tokens and shell patterns.
+- [Development](./infrastructure/DEVELOPMENT.md): Setup, Git workflow, and testing.
+- [Integrations](./infrastructure/INTEGRATIONS.md): External services and webhooks.
+- [Database ER diagram](./infrastructure/DATABASE_DIAGRAM.md): Entity diagram for the database.
 
-Global system architecture, technical constraints, and development guidelines.
+## Product documentation
 
-- **[Architecture](./infrastructure/ARCHITECTURE.md)**: System overview, tech stack, and security.
-- **[Database](./infrastructure/DATABASE.md)**: Schema, data models, and enums.
-- **[API](./infrastructure/API.md)**: Complete REST API reference.
-- **[AI Protocols](./infrastructure/AI_PROTOCOLS.md)**: AI prompts and JSON schemas.
-- **[Billing & Usage](./infrastructure/BILLING_ALGORITHM.md)**: Cost calculation logic.
-- **[Webhook Schemas](./infrastructure/WEBHOOK_SCHEMAS.md)**: Outgoing integration payloads.
-- **[State Machines](./infrastructure/STATE_MACHINES.md)**: Status enums and transition rules.
-- **[Core Flow Diagrams](./infrastructure/FLOW_DIAGRAMS.md)**: Mermaid sequence diagrams for async flows.
-- **[Error Registry](./infrastructure/ERROR_REGISTRY.md)**: Standardized error codes and envelopes.
-- **[Redis Registry](./infrastructure/REDIS_REGISTRY.md)**: Key prefixes, TTLs, and cache policies.
-- **[Testing Handbook](./infrastructure/TESTING_HANDBOOK.md)**: Standardized patterns for mocks and E2E.
-- **[Coding Patterns](./infrastructure/CODING_PATTERNS.md)**: Copy-pasteable "Golden Path" snippets.
-- **[Symbol Registry](./infrastructure/SYMBOL_REGISTRY.md)**: Core method signatures for Repositories.
-- **[Directory Map](./infrastructure/DIRECTORY_MAP.md)**: Strict folder responsibilities and rules.
-- **[Troubleshooting](./infrastructure/TROUBLESHOOTING.md)**: Decision tree for agent-led healing.
-- **[Workflows & Recipes](./infrastructure/WORKFLOWS.md)**: Checklists for common technical tasks.
-- **[Scripts Reference](./infrastructure/SCRIPTS_REFERENCE.md)**: Documentation for automation utilities.
-- **[Environment Variables](./infrastructure/ENVIRONMENT_VARIABLES.md)**: Registry of all Zod-validated vars.
-- **[Design System](./infrastructure/DESIGN_SYSTEM.md)**: UI tokens, mascot, and app shell patterns.
-- **[Development](./infrastructure/DEVELOPMENT.md)**: Setup, Git workflow, and testing.
-- **[Authentication & RBAC](./modules/auth.md)**: Technical auth specs and RBAC rules.
-- **[Integrations](./infrastructure/INTEGRATIONS.md)**: External services and webhooks.
-- **[Database ER Diagram](./infrastructure/DATABASE_DIAGRAM.md)**: Entity-relationship diagram companion to [Database](./infrastructure/DATABASE.md).
+- [Product specification](./PRODUCT.md): Product-level specification.
+- [Product map](./PRODUCT_MAP.md): Feature implementation map.
+- [Roadmap](./ROADMAP.md): Product roadmap.
+- [Architecture decisions](./DECISIONS.md): Architecture decision log.
 
-## 🗂️ Specification Index
+## Feature modules
 
-- **[Specification Index](./SPECIFICATION_INDEX.md)**: Feature-area → documentation module → audience mapping. Use this to find which module doc owns a given feature.
-- **[Master Product Specification](./PRODUCT.md)**: Product-level spec.
-- **[Implementation Plan](./IMPLEMENTATION_PLAN_V5.md)**: Master vision roadmap.
+- [Authentication and access](./modules/auth.md): Login, RBAC, onboarding, and team management. Audience: all developers.
+- [Project management](./modules/projects.md): Project lifecycle, switching, and settings. Audience: all developers.
+- [Specifications and planning](./modules/specifications.md): Spec editor, plan generation, and approval. Audience: frontend and product engineers.
+- [Tasks and intervention](./modules/tasks.md): Task list, task drawer, unblocking, and dependencies. Audience: all developers.
+- [Execution and sessions](./modules/execution.md): Mission Control, session browser, and agent protocol. Audience: backend and agent engineers.
+- [Settings and administration](./modules/settings.md): Profile, security, audit log, and usage. Audience: administrators and DevOps engineers.
 
-## 📦 Feature Modules
+## Future documentation
 
-Vertical slices of the application combining UI, flows, and business logic.
+- [Future specifications](./FUTURE_SPECIFICATIONS.md): Planned features and designs.
 
-- **[Product Map & Status](./PRODUCT_MAP.md)**: High-level dashboard of implemented features.
-- **[Authentication & Access](./modules/auth.md)**: Login, RBAC, Onboarding, and Team management.
-- **[Project Management](./modules/projects.md)**: Project lifecycle, switching, and general settings.
-- **[Specifications & Planning](./modules/specifications.md)**: Spec Editor, Plan generation, and Approval workflow.
-- **[Tasks & Intervention](./modules/tasks.md)**: Task list, Drawer, Unblocking, and Dependency rules.
-- **[Execution & Agent Sessions](./modules/execution.md)**: Mission Control, Session Browser, and Agent protocol.
-- **[Settings & Admin](./modules/settings.md)**: Profile, Security, Audit Log, and Usage.
-
-## 🔮 Future Vision
-
-- **[Future Specifications](./FUTURE_SPECIFICATIONS.md)**: Planned features and visionary designs.
-
----
-
-_For new developers: Start with [Architecture](./infrastructure/ARCHITECTURE.md) and the [Auth Module](./modules/auth.md)._
+Start with [Architecture](./infrastructure/ARCHITECTURE.md). Then read [Authentication](./modules/auth.md).

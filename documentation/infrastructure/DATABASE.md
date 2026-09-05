@@ -2,9 +2,9 @@
 
 ## Overview
 
-Specdrivr uses PostgreSQL with Drizzle ORM for type-safe database operations. The schema supports AI agent orchestration, project management, specifications, plans, tasks, git integration, audit logging, and usage tracking.
+Use PostgreSQL with Drizzle ORM for type-safe database operations. The schema supports agent orchestration, project management, specifications, plans, tasks, Git integration, audit logs, and usage tracking.
 
-**Package Manager:** All database commands use `pnpm` (not npm)
+**Package manager:** Run all database commands with `pnpm`. Do not run `npm` commands.
 
 ```bash
 pnpm db:generate  # Generate migration files
@@ -17,41 +17,41 @@ pnpm db:seed      # Seed database with test data
 
 ### `plan_status`
 
-Plan lifecycle: `pending_approval`, `executing`, `rejected`, `abandoned`, `changes_requested`, `completed`
+Use these plan lifecycle values: `pending_approval`, `executing`, `rejected`, `abandoned`, `changes_requested`, `completed`
 
 ### `spec_status`
 
-Specification states: `drafting`, `pending_plan`, `pending_approval`, `executing`, `completed`, `stalled`, `archived`
+Use these specification states: `drafting`, `pending_plan`, `pending_approval`, `executing`, `completed`, `stalled`, `archived`
 
 ### `task_status`
 
-Task workflow: `todo`, `in_progress`, `done`, `blocked`, `failed`, `skipped`
+Use these task workflow values: `todo`, `in_progress`, `done`, `blocked`, `failed`, `skipped`
 
 ### `session_status`
 
-Agent session states: `running`, `paused`, `completed`, `failed`, `cancelled`
+Use these agent session states: `running`, `paused`, `completed`, `failed`, `cancelled`
 
 ### `project_status`
 
-Project states: `active`, `archived`
+Use these project states: `active`, `archived`
 
 ### `log_level`
 
-Logging levels: `debug`, `info`, `warn`, `error`
+Use these logging levels: `debug`, `info`, `warn`, `error`
 
 ### `user_role`
 
-User permissions: `owner`, `admin`, `member`, `viewer`
+Use these user permission values: `owner`, `admin`, `member`, `viewer`
 
 ### `task_attempt_status`
 
-Attempt workflow: `running`, `succeeded`, `failed`
+Use these attempt workflow values: `running`, `succeeded`, `failed`
 
 ## Core Tables
 
 ### `users`
 
-Standard user table managed by BetterAuth with custom extensions.
+BetterAuth manages this standard user table with custom extensions.
 
 ```sql
 id: text PRIMARY KEY
@@ -74,7 +74,7 @@ last_active_at: timestamp with time zone
 
 ### `projects`
 
-Main project container for all work.
+This table is the main project container for all work.
 
 ```sql
 id: serial PRIMARY KEY
@@ -93,7 +93,7 @@ updated_at: timestamp with time zone NOT NULL DEFAULT now()
 
 ### `project_members`
 
-Association table for project members and their roles.
+This table associates project members with their roles.
 
 ```sql
 id: serial PRIMARY KEY
@@ -108,7 +108,7 @@ created_at: timestamp with time zone NOT NULL DEFAULT now()
 
 ### `specifications`
 
-User-written specifications that drive plan generation.
+This table stores user-written specifications for plan generation.
 
 ```sql
 id: serial PRIMARY KEY
@@ -123,7 +123,7 @@ updated_at: timestamp with time zone NOT NULL DEFAULT now()
 
 ### `spec_versions`
 
-Historical versions of specifications.
+This table stores specification versions.
 
 ```sql
 id: serial PRIMARY KEY
@@ -136,7 +136,7 @@ created_at: timestamp with time zone NOT NULL DEFAULT now()
 
 ### `plans`
 
-AI-generated execution plans containing multiple tasks.
+This table stores AI-generated execution plans with multiple tasks.
 
 ```sql
 id: serial PRIMARY KEY
@@ -161,7 +161,7 @@ created_at: timestamp with time zone NOT NULL DEFAULT now()
 
 ### `tasks`
 
-Individual work items within a plan.
+This table stores individual work items in a plan.
 
 ```sql
 id: serial PRIMARY KEY
@@ -197,7 +197,7 @@ updated_at: timestamp with time zone NOT NULL DEFAULT now()
 
 ### `agent_sessions`
 
-Runtime container for task execution.
+This table is the runtime container for task execution.
 
 ```sql
 id: serial PRIMARY KEY
@@ -226,7 +226,7 @@ ended_at: timestamp with time zone
 
 ### `task_attempts`
 
-Detailed logs for each execution attempt of a task.
+This table stores detailed logs for each task execution attempt.
 
 ```sql
 id: serial PRIMARY KEY
@@ -247,7 +247,7 @@ ended_at: timestamp with time zone
 
 ### `file_changes`
 
-Snapshots of file modifications produced by tasks.
+This table stores snapshots of task file changes.
 
 ```sql
 id: serial PRIMARY KEY
@@ -268,7 +268,7 @@ created_at: timestamp with time zone NOT NULL DEFAULT now()
 
 ### `agent_config`
 
-Per-project agent settings.
+This table stores agent settings for each project.
 
 ```sql
 id: serial PRIMARY KEY
@@ -307,7 +307,7 @@ updated_at: timestamp with time zone NOT NULL DEFAULT now()
 
 ### `audit_log`
 
-Security and governance audit trail.
+This table stores the security and governance audit trail.
 
 ```sql
 id: serial PRIMARY KEY
@@ -324,7 +324,7 @@ created_at: timestamp with time zone NOT NULL DEFAULT now()
 
 ### `agent_events`
 
-Session-scoped event stream for the live Mission Control feed.
+This table stores the session-scoped event stream for the live Mission Control feed.
 
 ```sql
 id: serial PRIMARY KEY
@@ -340,7 +340,7 @@ created_at: timestamp with time zone NOT NULL DEFAULT now()
 
 ### `agent_logs`
 
-Task-scoped technical logs for the terminal view.
+This table stores task-scoped technical logs for the terminal view.
 
 ```sql
 id: serial PRIMARY KEY
@@ -356,13 +356,13 @@ timestamp: timestamp with time zone NOT NULL DEFAULT now()
 
 ## Secondary Tables
 
-- `sessions`: Managed by BetterAuth (user browser sessions)
-- `accounts`: Managed by BetterAuth (OAuth accounts)
-- `verifications`: Managed by BetterAuth (Email verification tokens)
-- `agent_tokens`: Project-scoped API tokens for the DAEMON agent
-- `invites`: Project invitation tokens
-- `notifications`: User-specific in-app notifications
-- `notification_preferences`: Per-user notification toggles
-- `usage_snapshots`: Daily project usage aggregation
-- `webhooks`: Outbound webhook configuration
-- `webhook_deliveries`: Webhook delivery audit trail
+- `sessions`: BetterAuth manages user browser sessions.
+- `accounts`: BetterAuth manages OAuth accounts.
+- `verifications`: BetterAuth manages email verification tokens.
+- `agent_tokens`: This table stores project-scoped API tokens for the DAEMON agent.
+- `invites`: This table stores project invitation tokens.
+- `notifications`: This table stores user-specific in-app notifications.
+- `notification_preferences`: This table stores notification toggles for each user.
+- `usage_snapshots`: This table stores daily project usage aggregation.
+- `webhooks`: This table stores outbound webhook configuration.
+- `webhook_deliveries`: This table stores the webhook delivery audit trail.

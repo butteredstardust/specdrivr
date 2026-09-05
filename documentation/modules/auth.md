@@ -1,14 +1,12 @@
-**SPECDRIVR**
+SPECDRIVR
 
 Master Product Specification — Authentication & RBAC
-
-[Status: GROUND TRUTH]
 
 ---
 
 ## 1. Overview
 
-This module covers the authentication system and role-based access control (RBAC). Specdrivr uses a strict, per-project permission model to ensure secure autonomous code execution.
+Use this module for authentication and role-based access control (RBAC). Apply project permissions before autonomous code execution.
 
 ## 2. Technical Specification
 
@@ -23,7 +21,7 @@ This module covers the authentication system and role-based access control (RBAC
 
 ### 2.2 RBAC - Roles & Permissions
 
-Roles are per-project. A user can be Admin on Project A and Member on Project B.
+Roles apply to each project. A user can be Admin on Project A and Member on Project B.
 
 | **Permission**                              | **Viewer** | **Member** | **Admin** | **Owner** |
 | ------------------------------------------- | ---------- | ---------- | --------- | --------- |
@@ -48,45 +46,45 @@ Roles are per-project. A user can be Admin on Project A and Member on Project B.
 ### 3.1 Login Page (`/login`)
 
 - **Route**: `/login` (No sidebar/topbar).
-- **Redirect**: Unauthenticated requests redirect here with `?next=`.
-- **Validation**: Email format check on blur; required password on submit.
-- **Error UI**: Token-driven danger alert below the form: `"Invalid email or password."`
+- **Redirect**: Redirect unauthenticated requests here with `?next=`.
+- **Validation**: Check the email format on blur. Require a password on submit.
+- **Error UI**: Show a token-driven danger alert below the form: `"Invalid email or password."`
 
 ### 3.2 Forgot & Reset Password
 
-- **Forgot**: `/forgot-password` (Email only). Always shows success UI for security.
+- **Forgot**: `/forgot-password` (Email only). Always show the success UI for security.
 - **Reset**: `/reset-password?token=[token]` (Two password fields).
 
 ### 3.3 Member Management UI
 
-- **Invite Dialog**: Email input + Role dropdown.
-- **Team List**: Shows name, email, role, and status (Active/Invited).
-- **Role Dropdown**: Inline, per row. Cannot set a role higher than your own.
+- **Invite Dialog**: Provide an email input and a Role dropdown.
+- **Team List**: Show name, email, role, and status (Active/Invited).
+- **Role Dropdown**: Show it inline for each row. Do not set a role higher than your own.
 
 ### 3.4 Onboarding Flow
 
-- **Trigger**: `onboardingStep === 0` on the authenticated user.
+- **Trigger**: Start when `onboardingStep === 0` for the authenticated user.
 - **Steps**:
-  1. **Welcome**: Specdrivr brand introduction.
-  2. **The Flow**: Visual diagram of Spec → Plan → Approve → Build.
-  3. **First Project**: Inline form to create the initial project.
-- **Persistence**: Modal overlay that prevents interaction until complete.
+  1. **Welcome**: Introduce the Specdrivr brand.
+  2. **The Flow**: Show the Spec → Plan → Approve → Build diagram.
+  3. **First Project**: Provide an inline form to create the initial project.
+- **Persistence**: Use a modal overlay. Prevent interaction until onboarding is complete.
 
 ## 4. Agent Handbook
 
 ### 4.1 Key Files
 
-- **Logic**: `src/lib/auth.ts` (BetterAuth config), `src/lib/rbac.ts` (Permission checks), `src/lib/auth-client.ts` (client hooks).
-- **Database**: `src/db/schema.ts` (`users`, `sessions`, `accounts`, `verifications` tables).
+- **Logic**: `src/lib/auth.ts` configures BetterAuth. `src/lib/rbac.ts` checks permissions. `src/lib/auth-client.ts` provides client hooks.
+- **Database**: Use `src/db/schema.ts` for the `users`, `sessions`, `accounts`, and `verifications` tables.
 - **UI**: `src/app/(auth)/login/page.tsx`, `src/app/(auth)/reset-password/page.tsx`, `src/app/(auth)/forgot-password/page.tsx`, `src/app/(auth)/invite/page.tsx`.
 - **Routes**: `src/app/api/auth/[...all]/route.ts`.
 
 ### 4.2 Critical Paths
 
-- **Session Check**: Every Server Component/Action should use `await auth.getSession()`.
-- **RBAC Check**: Use `checkPermission(userId, projectId, action)` before any mutation.
+- **Session Check**: Use `await auth.getSession()` in every Server Component and Server Action.
+- **RBAC Check**: Run `checkPermission(userId, projectId, action)` before each mutation.
 
 ### 4.3 Common Pitfalls
 
-- **Direct process.env**: Never use `process.env` directly for auth secrets; use `@/lib/env`.
-- **Role Elevation**: Ensure users cannot change their own role to a higher one or change others to a role higher than their own.
+- **Direct process.env**: Never use `process.env` directly for auth secrets. Use `@/lib/env`.
+- **Role Elevation**: Do not let users increase their own role. Do not let them assign roles higher than their own.

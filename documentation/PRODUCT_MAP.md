@@ -1,40 +1,38 @@
-**SPECDRIVR**
+SPECDRIVR
 
-High-Level Implementation Map & Status
-
-[Status: GROUND TRUTH]
-
+High-Level implementation map and status
 ---
 
 ## 1. Overview
 
-This dashboard provides a real-time view of feature implementation status. It serves as the bridge between the **Master Implementation Plan** and the technical documentation.
+Use this map to check each feature status. It links implementation areas to their technical documentation.
 
 ## 2. Core Features
 
-| **Feature Area**             | **Status**             | **Primary Spec**                                                   |
-| ---------------------------- | ---------------------- | ------------------------------------------------------------------ |
-| **Multi-Project Support**    | [Status: GROUND TRUTH] | [modules/projects.md](./modules/projects.md)                       |
-| **RBAC / Permissions**       | [Status: GROUND TRUTH] | [modules/auth.md](./modules/auth.md)                               |
-| **Spec Editor (Markdown)**   | [Status: GROUND TRUTH] | [modules/specifications.md](./modules/specifications.md)           |
-| **Plan Generation (Gemini)** | [Status: GROUND TRUTH] | [modules/specifications.md](./modules/specifications.md)           |
-| **Agent Protocol (Polling)** | [Status: GROUND TRUTH] | [modules/execution.md](./modules/execution.md)                     |
-| **Task Lifecycle / Logic**   | [Status: GROUND TRUTH] | [modules/tasks.md](./modules/tasks.md)                             |
-| **Audit Logging**            | [Status: GROUND TRUTH] | [modules/settings.md](./modules/settings.md)                       |
-| **GitHub Webhooks**          | [Status: GROUND TRUTH] | [infrastructure/INTEGRATIONS.md](./infrastructure/INTEGRATIONS.md) |
+| **Feature area** | **Status** | **Primary specification** |
+| --- | --- | --- |
+| **Multi-project support** | Delivered | [modules/projects.md](./modules/projects.md) |
+| **RBAC / permissions** | Delivered | [modules/auth.md](./modules/auth.md) |
+| **Specification editor (Markdown)** | Delivered | [modules/specifications.md](./modules/specifications.md) |
+| **Plan generation (Gemini)** | Delivered | [modules/specifications.md](./modules/specifications.md) |
+| **Agent protocol (polling)** | Delivered | [modules/execution.md](./modules/execution.md) |
+| **Task lifecycle / logic** | Delivered | [modules/tasks.md](./modules/tasks.md) |
+| **Audit logging** | Delivered | [modules/settings.md](./modules/settings.md) |
+| **GitHub webhooks** | Delivered | [infrastructure/INTEGRATIONS.md](./infrastructure/INTEGRATIONS.md) |
 
-## 3. Advanced Features (Pending / Visionary)
+## 3. Advanced features
 
-| **Feature Area**           | **Status**          | **Roadmap / Future Spec**                              |
-| -------------------------- | ------------------- | ------------------------------------------------------ |
-| **Background Plan Worker** | [Status: VISIONARY] | [FUTURE_SPECIFICATIONS.md](./FUTURE_SPECIFICATIONS.md) |
-| **Ghost Task Recovery**    | [Status: VISIONARY] | [FUTURE_SPECIFICATIONS.md](./FUTURE_SPECIFICATIONS.md) |
-| **Blocking CI Hooks**      | [Status: VISIONARY] | [FUTURE_SPECIFICATIONS.md](./FUTURE_SPECIFICATIONS.md) |
-| **Agent Sandbox Jail**     | [Status: VISIONARY] | [FUTURE_SPECIFICATIONS.md](./FUTURE_SPECIFICATIONS.md) |
-| **Webhook DLQ**            | [Status: VISIONARY] | [FUTURE_SPECIFICATIONS.md](./FUTURE_SPECIFICATIONS.md) |
-| **Budget Alerts**          | [Status: VISIONARY] | [FUTURE_SPECIFICATIONS.md](./FUTURE_SPECIFICATIONS.md) |
-| **Automated PR Creation**  | [Status: VISIONARY] | [FUTURE_SPECIFICATIONS.md](./FUTURE_SPECIFICATIONS.md) |
+| **Feature area** | **Status** | **Documentation** |
+| --- | --- | --- |
+| **Background plan worker** | Delivered | [infrastructure/SCRIPTS_REFERENCE.md](./infrastructure/SCRIPTS_REFERENCE.md) |
+| **Ghost task recovery** | Delivered | [infrastructure/OPERATIONS.md](./infrastructure/OPERATIONS.md) |
+| **Blocking CI hooks** | Planned | [FUTURE_SPECIFICATIONS.md](./FUTURE_SPECIFICATIONS.md) |
+| **Agent sandbox jail** | Planned | [FUTURE_SPECIFICATIONS.md](./FUTURE_SPECIFICATIONS.md) |
+| **Webhook DLQ** | Planned | [FUTURE_SPECIFICATIONS.md](./FUTURE_SPECIFICATIONS.md) |
+| **Budget alerts** | Planned | [FUTURE_SPECIFICATIONS.md](./FUTURE_SPECIFICATIONS.md) |
+| **User-triggered PR creation** | Delivered | [infrastructure/INTEGRATIONS.md](./infrastructure/INTEGRATIONS.md) |
+| **Agent-automated PR creation** | Planned | [FUTURE_SPECIFICATIONS.md](./FUTURE_SPECIFICATIONS.md) |
 
 ---
 
-_Last Updated: 2026-03-20_
+_Updated: 2026-09-05_

@@ -1,28 +1,26 @@
-**SPECDRIVR**
+SPECDRIVR
 
 Master Product Specification — Webhook Schemas
-
-[Status: GROUND TRUTH]
 
 ---
 
 ## 1. Overview
 
-Specdrivr supports outgoing webhooks to notify external systems of session and task events. This document defines the payload structure and security requirements for these integrations.
+Specdrivr sends outgoing webhooks for session and task events. Use this document to implement payloads and integration security.
 
 ## 2. Security
 
 ### 2.1 HMAC Signing
 
-All outgoing webhooks are signed using the project's configured secret (HMAC-SHA256).
+Sign all outgoing webhooks with the configured project secret (HMAC-SHA256).
 
-- **Header**: `X-Specdrivr-Signature`
-- **Payload**: The raw UTF-8 JSON body.
-- **Verification**: Receivers should compute the HMAC-SHA256 hash of the payload using their secret and compare it to the header.
+- **Header**: Use `X-Specdrivr-Signature`.
+- **Payload**: Use the raw UTF-8 JSON body.
+- **Verification**: Receivers compute the payload HMAC-SHA256 hash with their secret. Compare it with the header.
 
 ## 3. Payload Structure
 
-All events follow a standardized envelope.
+Return all events in the standard envelope.
 
 ### 3.1 Common Envelope
 
@@ -64,5 +62,5 @@ All events follow a standardized envelope.
 
 ## 4. Retries
 
-- **Strategy**: Exponential backoff (1m, 5m, 1h).
-- **Failure**: A webhook is marked as `failed` after 3 attempts.
+- **Strategy**: Use exponential backoff (1m, 5m, 1h).
+- **Failure**: Mark a webhook as `failed` after 3 attempts.

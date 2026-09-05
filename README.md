@@ -23,16 +23,16 @@
 
 ## Why
 
-AI agents don't know your codebase, your architecture, or your constraints — so they scatter data access, skip auth checks, and solve the same problem three different ways.
+AI agents can miss codebase rules, architecture, and constraints. They can scatter data access, skip authentication checks, and duplicate work.
 
-Specdrivr is the single source of truth for _how_ your system gets built. You write a spec. The platform decomposes it into tasks. An agent executes against strict architectural rules. Your team reviews logic, not formatting.
+Specdrivr defines how to build your system. Write a specification. The platform creates ordered tasks. An agent follows architectural rules. Your team reviews the logic.
 
 ## How it works
 
-1. **Write a spec** — plain language: _"Add OAuth2 for Google and GitHub. Support account linking. Store refresh tokens securely."_
-2. **Tasks are generated** — the plan worker decomposes the spec into atomic, ordered work items.
-3. **An agent executes** — it reads `AGENTS.md` / `CLAUDE.md` / `GEMINI.md`, claims tasks, and commits behind pre-commit hooks.
-4. **You review and merge** — every session leaves a full audit trail: what changed, why, what was tested.
+1. **Write a specification** — Use plain language. Example: _"Add OAuth2 for Google and GitHub. Support account linking. Store refresh tokens securely."_
+2. **Generate tasks** — The plan worker creates atomic, ordered tasks from the specification.
+3. **Run an agent** — The agent reads `AGENTS.md` and `CLAUDE.md`. It claims tasks and commits behind pre-commit hooks.
+4. **Review and merge** — Each session records changes, reasons, and test results.
 
 ---
 
@@ -55,7 +55,7 @@ pnpm dev                          # http://localhost:3000
 
 ### Running the autonomous pipeline
 
-The web app alone lets you write specs. To take a spec all the way through plan → execute, run the two workers alongside it:
+The web app lets you write specifications. Run both workers to generate a plan and execute tasks.
 
 ```bash
 pnpm worker                       # plan generation + task decomposition (Gemini)
@@ -84,7 +84,7 @@ pnpm agent                        # claims and executes tasks
 
 ## Architecture
 
-Strict constraints are what make agent output predictable. Specdrivr enforces them on itself and on the projects built inside it:
+Strict rules make agent output predictable. Specdrivr applies these rules to itself and to managed projects.
 
 - **Repository pattern** — all data access goes through repositories. One place to read and write.
 - **Server Actions** — every mutation is a Server Action, and `await auth()` comes first. No exceptions.
@@ -129,9 +129,9 @@ pnpm db:studio        # drizzle studio
 | ------------------------------------ | ------------------------------------------------------------------------ |
 | [`AGENTS.md`](AGENTS.md)             | The architectural mandate — every rule an agent must follow. Read first. |
 | [`CLAUDE.md`](CLAUDE.md)             | Claude-specific workflows and gotchas.                                   |
-| [`GEMINI.md`](GEMINI.md)             | Gemini-specific patterns and integrations.                               |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | How to contribute.                                                       |
 | [`SECURITY.md`](SECURITY.md)         | Reporting vulnerabilities.                                               |
+| [`documentation/README.md`](documentation/README.md) | Product, module, and infrastructure documentation. |
 
 Bug or feature request? [Open an issue](https://github.com/butteredstardust/specdrivr/issues) and say what you were trying to do.
 
@@ -139,11 +139,7 @@ Bug or feature request? [Open an issue](https://github.com/butteredstardust/spec
 
 ## Roadmap
 
-- Real-time Mission Control for active sessions
-- Spec history and version diffing
-- Built-in review and approval workflows
-- Custom per-project rulesets
-- Swappable agent backends
+Specdrivr plans delivery work in the [roadmap](documentation/ROADMAP.md). Read the [product map](documentation/PRODUCT_MAP.md) for the implementation map.
 
 ---
 

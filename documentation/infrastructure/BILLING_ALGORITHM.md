@@ -1,18 +1,16 @@
-**SPECDRIVR**
+SPECDRIVR
 
 Master Product Specification — Billing & Usage Algorithm
-
-[Status: GROUND TRUTH]
 
 ---
 
 ## 1. Overview
 
-Specdrivr tracks the operational cost of AI interactions per specification and project. This document defines how token usage is translated into USD values displayed in the `/settings/usage` dashboard.
+Specdrivr tracks AI costs for each specification and project. Use this document to calculate token usage in USD for `/settings/usage`.
 
 ## 2. Pricing Configuration
 
-The system uses a versioned pricing table to handle changes in model costs over time.
+Use the versioned pricing table when model costs change.
 
 ### 2.1 Pricing Table
 
@@ -25,7 +23,7 @@ The system uses a versioned pricing table to handle changes in model costs over 
 
 ## 3. Calculation Formula
 
-Costs are calculated at the time of task completion or plan generation.
+Calculate costs when a task completes or a plan is generated.
 
 ### 3.1 Base Formula
 
@@ -33,10 +31,10 @@ $$Cost_{Total} = \left( \frac{Tokens_{Input}}{1000} \times Price_{Input} \right)
 
 ### 3.2 Implementation Rule
 
-- **Precision**: Store costs as `NUMERIC(10,4)` in the database to handle sub-cent values.
-- **Aggregation**: Daily usage is aggregated per project and stored in the `usage_stats` table to optimize dashboard performance.
+- **Precision**: Store costs as `NUMERIC(10,4)` in the database. This supports sub-cent values.
+- **Aggregation**: Aggregate daily usage by project. Store it in the `usage_stats` table for dashboard performance.
 
 ## 4. Reporting
 
-- **Real-time**: Individual task costs are visible in the Task Drawer's ATTEMPTS tab.
-- **Project-level**: Monthly and daily breakdowns are available in `/settings/usage`.
+- **Real-time**: Show each task cost in the Task Drawer ATTEMPTS tab.
+- **Project-level**: Show monthly and daily breakdowns in `/settings/usage`.

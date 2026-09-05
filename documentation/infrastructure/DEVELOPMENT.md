@@ -1,36 +1,34 @@
 # DEVELOPMENT.md | Human Developer Guide
 
-[Status: GROUND TRUTH]
+Use these development standards for Specdrivr.
 
-Development standards and best practices for Specdrivr, an AI-native orchestration platform.
-
-> **Cross-reference**: For AI agent operations, see `AGENTS.md`. For AI constraints, see `CLAUDE.md`.
+> For AI agent operations, see `AGENTS.md`. For AI constraints, see `CLAUDE.md`.
 
 ## Code Standards
 
 ### TypeScript
 
-- **Strict mode enabled** - No exceptions
-- **No `any` type** - Use `unknown` or explicit types
-- **Prefer interfaces** for object shapes, **type aliases** for unions
-- **Explicit return types** on all functions
-- **No type assertions** (`as Type`) - use type guards instead
+- Enable strict mode. Allow no exceptions.
+- Do not use `any`. Use `unknown` or explicit types.
+- Use interfaces for object shapes. Use type aliases for unions.
+- Declare return types on all functions.
+- Do not use type assertions (`as Type`). Use type guards.
 
 ### Component Architecture
 
-- **Server Components by default**
-- Add `"use client"` directive only when needed:
+- Use Server Components by default.
+- Add `"use client"` only when required:
   - Event handlers
   - Browser APIs (localStorage, etc.)
   - Hooks (useState, useEffect, etc.)
-- **Never use `useEffect` for data fetching** - use Server Components instead
+- Do not use `useEffect` for data fetching. Use Server Components.
 
 ### Database Access
 
-- **Always use repositories** - No direct DB calls in components
-- **Wrap operations in executeQuery** for error handling
-- **Retry logic** for transient failures (connection drops)
-- **Type-safe queries** with Drizzle ORM
+- Use repositories. Do not make direct DB calls in components.
+- Wrap operations in `executeQuery` for error handling.
+- Use retry logic for transient failures such as connection drops.
+- Use type-safe Drizzle ORM queries.
 
 ```typescript
 // Good
@@ -42,30 +40,30 @@ const projects = await db.select().from(projects);
 
 ### Error Handling
 
-- **Use custom error classes** from `src/lib/errors.ts`
-- **Consistent error responses** from `src/lib/error-handler.ts`
-- **Error boundaries** at route and component level
-- **Never swallow errors** - log and re-throw or handle
+- Use custom error classes from `src/lib/errors.ts`.
+- Use consistent responses from `src/lib/error-handler.ts`.
+- Add error boundaries at route and component level.
+- Do not swallow errors. Log and re-throw or handle them.
 
 ### Validation
 
-- **Zod schemas** for all API inputs
-- **Validate at boundaries** (API routes, form submissions)
-- **Descriptive validation errors**
-- **Never trust client input**
+- Use Zod schemas for all API inputs.
+- Validate at boundaries: API routes and form submissions.
+- Return descriptive validation errors.
+- Do not trust client input.
 
 ### UI Components
 
-- **shadcn/ui** - Prefer standard components. Use `@/components/ui/*`.
-- **Custom Components** - Only build custom components if no `shadcn/ui` equivalent exists.
+- Prefer shadcn/ui components from `@/components/ui/*`.
+- Create a custom component only when shadcn/ui has no equivalent.
 
 ### Styling
 
-- **Standard Imports** - Standard component imports from `@/components/ui/`.
-- **shadcn/ui components** - Use provided components
-- **Design tokens** from CSS variables in `src/app/globals.css`
-- **Tailwind utility classes** - No custom CSS unless necessary
-- **Consistent spacing** - Use Tailwind scale (sm, md, lg, etc.)
+- Import standard components from `@/components/ui/`.
+- Use provided shadcn/ui components.
+- Use CSS-variable design tokens from `src/app/globals.css`.
+- Use Tailwind utilities. Add custom CSS only when necessary.
+- Use the Tailwind spacing scale (sm, md, lg, etc.).
 
 ```css
 /* Wrong */
@@ -77,28 +75,28 @@ background: var(--destructive);
 
 ### Imports
 
-- **Group imports**:
+- Group imports in this order:
   1. React, Next.js
   2. External libraries
   3. Internal lib files
   4. Components
   5. Relative imports
-- **Path mapping** - Use `@/` alias, no relative paths from deep directories
-- **Named exports** - Prefer over default exports for clarity
+- Use the `@/` alias. Do not use relative paths from deep directories.
+- Prefer named exports for clarity.
 
 ### Node Version Management
 
-Always use the Node version specified in `.nvmrc`:
+Use the Node version in `.nvmrc`:
 
 ```bash
 nvm use  # Auto-switches to correct version
 ```
 
-This ensures consistent behavior across all environments. The current project requires Node.js v25.6.1 with pnpm package manager.
+This keeps behaviour consistent across environments. The project requires Node.js v25.6.1 and pnpm.
 
 ## Environment Configuration Architecture
 
-Environment variables must be validated with Zod and protected from client exposure using the `server-only` package.
+Validate environment variables with Zod. Protect them from clients with `server-only`.
 
 **For Next.js code (server components, API routes, server actions, repositories):**
 
@@ -112,14 +110,14 @@ import { env } from '@/lib/env'; // Has server-only protection
 import { env } from '@/lib/env-script'; // No server-only, safe for scripts
 ```
 
-**Never import directly from `env-core.ts`** - use one of the wrapper files above.
+Do not import `env-core.ts` directly. Use one of the wrapper files above.
 
 **Rationale:**
 
-- `server-only` is a Next.js runtime package that throws when imported outside Next.js environment
-- We decouple validation logic (`env-core.ts`) from the security boundary (`env.ts`)
-- Standalone scripts use `env-script.ts` which bypasses the server-only import
-- This maintains security boundaries while enabling script usage
+- `server-only` throws when code imports it outside the Next.js environment.
+- `env-core.ts` separates validation logic from the `env.ts` security boundary.
+- Standalone scripts use `env-script.ts`, which bypasses the `server-only` import.
+- This preserves the security boundary and supports scripts.
 
 ## 3. Architecture & Component Rules
 
@@ -138,7 +136,7 @@ import { env } from '@/lib/env-script'; // No server-only, safe for scripts
 - **Security**: bcryptjs, ioredis, RBAC utilities, lock-manager
 - **Utilities**: clsx, tailwind-merge, lucide icons, next-themes (dark mode), DOMPurify (sanitization)
 
-See `package.json` for full dependency list.
+See `package.json` for the full dependency list.
 
 ## Project Structure
 
@@ -174,27 +172,29 @@ src/
 
 ### Files
 
-- **Components:** `PascalCase.tsx`
-- **Utilities:** `kebab-case.ts`
-- **API routes:** `kebab-case/` directories with `route.ts`
-- **Repositories:** `kebab-case-repository.ts`
+- Name components `PascalCase.tsx`.
+- Name utilities `kebab-case.ts`.
+- Use `kebab-case/` directories with `route.ts` for API routes.
+- Name repositories `kebab-case-repository.ts`.
 
 ### Variables
 
-- **Constants:** `UPPER_SNAKE_CASE`
-- **Functions:** `camelCase` with action-oriented names (`fetchUser`, `createProject`)
-- **Booleans:** Prefixed with `is`, `has`, `should` (`isLoading`, `hasPermission`)
-- **Arrays:** Plural names (`users`, `projects`)
+- Name constants `UPPER_SNAKE_CASE`.
+- Name functions `camelCase` with actions (`fetchUser`, `createProject`).
+- Prefix booleans with `is`, `has`, or `should` (`isLoading`, `hasPermission`).
+- Use plural names for arrays (`users`, `projects`).
 
 ### Types/Interfaces
 
-- **Interfaces:** `PascalCase` (`UserInterface`, `ProjectConfig`)
-- **Types:** `PascalCase` (`UserId`, `ProjectStatus`)
-- **Generics:** `Single uppercase letter` (`T`, `K`, `V`)
+- Name interfaces `PascalCase` (`UserInterface`, `ProjectConfig`).
+- Name types `PascalCase` (`UserId`, `ProjectStatus`).
+- Name generics with one uppercase letter (`T`, `K`, `V`).
 
 ## API Route Standards
 
 ### Structure
+
+Use this route structure.
 
 ```typescript
 // GET /api/projects
@@ -216,6 +216,8 @@ export async function GET(request: NextRequest) {
 
 ### Response Format
 
+Return responses in this format.
+
 ```typescript
 // Success
 {
@@ -232,6 +234,8 @@ export async function GET(request: NextRequest) {
 
 ### Status Codes
 
+Use these status codes.
+
 - `200` - Success
 - `201` - Created
 - `400` - Bad Request (validation errors)
@@ -243,6 +247,8 @@ export async function GET(request: NextRequest) {
 ## Error Handling Patterns
 
 ### Try-Catch
+
+Use this pattern to handle an operation.
 
 ```typescript
 try {
@@ -258,6 +264,8 @@ try {
 ```
 
 ### Custom Errors
+
+Use these error classes for the related condition.
 
 ```typescript
 import { DatabaseError, NotFoundError, ValidationError } from '@/lib/errors';
@@ -279,6 +287,8 @@ if (!isValid) {
 ```
 
 ### Error Boundaries
+
+Use this boundary for routes.
 
 ```typescript
 // For routes
@@ -302,10 +312,10 @@ export default function ErrorPage({
 
 ### Testing Stack Details
 
-- **Unit Testing**: Vitest 4.x with @testing-library/react for component unit tests
-- **E2E Testing**: Playwright 1.42.x with ARIA-first selectors
-- **Test Environment**: jsdom 28.1.0 for DOM testing
-- **Mocking**: Use test factories (tests/factories) rather than fixtures
+- Use Vitest 4.x and @testing-library/react for component unit tests.
+- Use Playwright 1.42.x with ARIA-first selectors for E2E tests.
+- Use jsdom 28.1.0 for DOM tests.
+- Use test factories (`tests/factories`) instead of fixtures.
 
 ### Unit Tests
 
@@ -333,16 +343,16 @@ describe('ProjectRepository', () => {
 
 ### Test Organization
 
-- **Describe blocks** for class/function being tested
-- **Nested describes** for methods
-- **Clear test names** - "should [action] when [condition]"
-- **AAA pattern:** Arrange, Act, Assert
+- Use describe blocks for the class or function under test.
+- Use nested describes for methods.
+- Name tests "should [action] when [condition]".
+- Use Arrange, Act, Assert.
 
 ### Mocking
 
-- **Mock external dependencies** (APIs, DB)
-- **Don't mock** the system under test
-- **Use factories** for test data, not fixtures
+- Mock external dependencies such as APIs and DB.
+- Do not mock the system under test.
+- Use factories for test data, not fixtures.
 
 ### E2E Tests
 
@@ -365,7 +375,7 @@ test('should create new project', async ({ page }) => {
 
 ### Database Schema Updates
 
-Never use `pnpm db:push` for schema changes. Follow the migration flow:
+WARNING: Do not use `pnpm db:push` for schema changes. Use this migration flow:
 
 1. `pnpm db:generate` - Create a new migration file.
 2. `pnpm db:migrate` - Apply the migration to the database.
@@ -393,16 +403,16 @@ const result = await db.execute('SELECT * FROM projects WHERE id = ?', [id]);
 
 ### Performance
 
-- **Add indexes** for frequently queried columns
-- **Use pagination** for large result sets
-- **Fetch only needed fields**
-- **Avoid N+1 queries** by eager loading
+- Add indexes for frequently queried columns.
+- Use pagination for large result sets.
+- Fetch only required fields.
+- Avoid N+1 queries with eager loading.
 
 ## Security Libraries
 
 ### Rate Limiting (`src/lib/rate-limiter.ts`)
 
-Uses ioredis with Redis to protect API routes from abuse. This implements token bucket algorithm across distributed systems.
+Use ioredis with Redis to protect API routes from abuse. It uses a distributed token bucket algorithm.
 
 ```typescript
 import { ratelimit } from '@/lib/rate-limiter';
@@ -415,7 +425,7 @@ if (!success) {
 
 ### RBAC (`src/lib/rbac.ts`)
 
-Role-based access control utilities. Use to check project membership and permissions before database operations.
+Use these role-based access control utilities to check project membership and permissions before database operations.
 
 ```typescript
 import { canAccessProject } from '@/lib/rbac';
@@ -427,7 +437,7 @@ if (!(await canAccessProject(userId, projectId))) {
 
 ### Lock Manager (`src/lib/lock-manager.ts`)
 
-Distributed locking via Redis for concurrency control (e.g., task assignment, project locks).
+Use Redis distributed locks for concurrency control, such as task assignment and project locks.
 
 ```typescript
 import { acquireLock, releaseLock } from '@/lib/lock-manager';
@@ -444,11 +454,11 @@ if (lockAcquired) {
 
 ### Sanitization (`src/lib/sanitize.ts`)
 
-Uses `isomorphic-dompurify`. Mandatory for all Markdown and Spec content rendering in the UI to prevent XSS. Always sanitize before using `dangerouslySetInnerHTML`.
+Use `isomorphic-dompurify` for all Markdown and specification content in the UI. Sanitize before `dangerouslySetInnerHTML`.
 
 ### Auth Utilities (`src/lib/auth.ts`)
 
-Better Auth integration. Always use the `auth()` helper to retrieve the current session in Server Components and API routes.
+Use the Better Auth `auth()` helper to read the current session in Server Components and API routes.
 
 ```typescript
 import { auth } from '@/lib/auth';
@@ -479,7 +489,7 @@ export async function badAction() {
 
 ### Redis Utilities (`src/lib/redis.ts`)
 
-Abstracted access to Redis through ioredis (TCP). Production-grade Redis client used for rate limiting, auth sessions, and distributed locking. Configured with connection pooling and error recovery.
+Use this ioredis TCP client for rate limiting, auth sessions, and distributed locking. It uses connection pooling and error recovery.
 
 ## Git Workflow
 
@@ -506,9 +516,11 @@ refactor/project-repository
 
 ### Pull Requests
 
-- **Small scope** - One feature or fix per PR
-- **Tests included** - Unit and E2E tests
-- **Documentation** - Update docs for API changes
+Use these checks for each pull request.
+
+- Keep a small scope: one feature or fix per PR.
+- Include unit and E2E tests.
+- Update documentation for API changes.
 - **Review checklist:**
   - [ ] TypeScript passes
   - [ ] ESLint passes
@@ -520,46 +532,48 @@ refactor/project-repository
 
 ### Client-Side
 
-- **Code splitting** - Route-based with Next.js
-- **Image optimization** - Use Next.js Image component
-- **Memoization** - useMemo/useCallback where beneficial
-- **Bundle analysis** - Keep bundle size small
+- Use Next.js route-based code splitting.
+- Use the Next.js Image component for image optimization.
+- Use useMemo/useCallback when beneficial.
+- Keep bundle size small.
 
 ### Server-Side
 
-- **Streaming** - Use React streaming for large responses
-- **Caching** - Cache DB queries where appropriate
-- **Connection pooling** - Reuse DB connections
-- **Lazy loading** - Load heavy libraries on demand
+- Use React streaming for large responses.
+- Cache DB queries where appropriate.
+- Reuse DB connections through connection pooling.
+- Load heavy libraries on demand.
 
 ### Database
 
-- **Index foreign keys**
-- **Normalize data** - But denormalize for read-heavy operations
-- **Query optimization** - Use EXPLAIN ANALYZE
-- **Connection limits** - Monitor pool size
+- Index foreign keys.
+- Normalize data. Denormalize read-heavy operations.
+- Use EXPLAIN ANALYZE to optimize queries.
+- Monitor connection pool size.
 
 ## Common Pitfalls to Avoid
 
-1. **Don't use `any` type** - Use `unknown` with type guards
-2. **Don't disable ESLint rules** - Fix the underlying issue
-3. **Don't skip validation** - Validate all inputs at boundaries
-4. **Don't use client-side data fetching** - Use Server Components
-5. **Don't ignore error cases** - Handle all error paths
-6. **Don't duplicate logic** - Use repositories and helpers
-7. **Don't hardcode values** - Use design tokens and env vars
-8. **Don't skip tests** - Write tests as you code
-9. **Don't commit dead code** - Remove unused code
-10. **Don't ignore security warnings** - Address all pnpm audit issues
-11. **Don't use `console.log`** - Use Pino logger from `@/lib/logger`
-12. **Don't mix npm/pnpm** - Use pnpm for all commands
-13. **Don't forget to await dynamic APIs** - `params`, `searchParams`, `cookies`, `headers` require await in Next.js 16
-14. **Don't import env-core.ts** - Use `@/lib/env` or `@/lib/env-script` instead
-15. **Don't bypass type safety** - Avoid `as Type` assertions; use type guards
+Avoid these errors.
+
+1. Do not use `any`. Use `unknown` with type guards.
+2. Do not disable ESLint rules. Fix the issue.
+3. Validate every input at its boundary.
+4. Do not use client-side data fetching. Use Server Components.
+5. Handle every error path.
+6. Do not duplicate logic. Use repositories and helpers.
+7. Do not hardcode values. Use design tokens and environment variables.
+8. Write tests with the code.
+9. Remove unused code before commit.
+10. Address every pnpm audit warning.
+11. Do not use `console.log`. Use the Pino logger from `@/lib/logger`.
+12. Use pnpm for all commands. Do not mix npm and pnpm.
+13. Await `params`, `searchParams`, `cookies`, and `headers` in Next.js 16.
+14. Do not import `env-core.ts`. Use `@/lib/env` or `@/lib/env-script`.
+15. Do not bypass type safety. Use type guards instead of `as Type` assertions.
 
 ### Package Manager Security
 
-When pnpm audit reveals vulnerabilities, address them using pnpm overrides in package.json:
+When pnpm audit finds vulnerabilities, use pnpm overrides in package.json to address them:
 
 ```bash
 # Check for vulnerabilities
@@ -578,28 +592,30 @@ pnpm audit
 
 ## AI-Generated Code Issues
 
-AI coding assistants may produce code that violates project standards. Be vigilant:
+Check AI-generated code against these project standards:
 
-- **Environment file misuse**: Importing from `env-core.ts` instead of `env.ts` or `env-script.ts`
-- **Command confusion**: Using `npm` instead of `pnpm` for all commands
-- **Console logging**: Using `console.log`/`console.error` instead of Pino logger
-- **Type assertions**: Using `as Type` to bypass type checking - prefer type guards
-- **Missing validation**: Skipping Zod validation on API inputs
-- **Hardcoded styles**: Using hex values instead of CSS variables (`var(--color)`)
-- **Side-effect imports**: Importing server-only modules in client components
-- **Direct DB access**: Bypassing repositories
-- **Unawaited Next.js APIs**: Accessing `params`, `searchParams` without await in Next.js 16
-- **Global state mutation**: Modifying global variables or DB without transactions
-- **Missing error handling**: Not wrapping operations in try/catch with structured responses
-- **Incorrect error responses**: Throwing errors from Server Actions instead of returning `{ error }`
-- **Server Actions misplacement**: Using API Routes for UI-invoked mutations when Server Actions are appropriate
-- **Design token avoidance**: Not using the `ios-styles.ts` status colors or token system
+- **Environment files:** Do not import `env-core.ts`; use `env.ts` or `env-script.ts`.
+- **Commands:** Use pnpm, not npm.
+- **Logging:** Use Pino, not `console.log` or `console.error`.
+- **Type assertions:** Use type guards, not `as Type`.
+- **Validation:** Validate API input with Zod.
+- **Styles:** Use CSS variables, not hex values (`var(--color)`).
+- **Imports:** Do not import server-only modules in client components.
+- **Database:** Use repositories.
+- **Next.js APIs:** Await `params` and `searchParams` in Next.js 16.
+- **State:** Do not modify global variables or DB without transactions.
+- **Error handling:** Use try/catch with structured responses.
+- **Server Actions:** Return `{ error }`; do not throw errors.
+- **Mutation routes:** Use Server Actions for UI-invoked mutations when appropriate.
+- **Tokens:** Use `ios-styles.ts` status colours and the token system.
 
-If an AI-generated snippet fails review, correct it following the patterns in this document.
+Correct a failed AI-generated review by following this document.
 
 ## Code Review Checklist
 
 ### Functionality
+
+Check functionality before review.
 
 - [ ] Feature works as expected
 - [ ] Edge cases handled
@@ -607,6 +623,8 @@ If an AI-generated snippet fails review, correct it following the patterns in th
 - [ ] Loading states handled
 
 ### Code Quality
+
+Check code quality before review.
 
 - [ ] TypeScript strict mode passes
 - [ ] ESLint passes with no overrides
@@ -616,12 +634,16 @@ If an AI-generated snippet fails review, correct it following the patterns in th
 
 ### Testing
 
+Check testing before review.
+
 - [ ] Unit tests added/updated
 - [ ] E2E tests added/updated
 - [ ] Tests cover happy paths and error cases
 - [ ] Test coverage maintains or improves
 
 ### Documentation
+
+Check documentation before review.
 
 - [ ] JSDoc comments for public APIs
 - [ ] README updated if needed
@@ -630,12 +652,16 @@ If an AI-generated snippet fails review, correct it following the patterns in th
 
 ### Security
 
+Check security before review.
+
 - [ ] Input validation added
 - [ ] No sensitive data in responses
 - [ ] No SQL injection vulnerabilities
 - [ ] Dependencies have no vulnerabilities
 
 ### Performance
+
+Check performance before review.
 
 - [ ] No unnecessary re-renders
 - [ ] Efficient queries

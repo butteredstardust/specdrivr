@@ -1,29 +1,18 @@
 # Dependency & Secret Security
 
-How the `Security` workflow (`.github/workflows/security.yml`) works, and what
-to do when it goes red.
+Use this document to maintain the `Security` workflow (`.github/workflows/security.yml`). Follow its recovery procedure when a job fails.
 
-It runs on push to `main`, on pull requests targeting `main`, every Monday at
-midnight UTC, and on manual dispatch. The PR trigger is the important one: it
-means a dependency or secret regression blocks before merge rather than
-surfacing later on a scheduled run nobody is watching.
+The workflow runs on pushes to `main`, pull requests targeting `main`, every Monday at midnight UTC, and manual dispatch. The pull-request trigger blocks dependency and secret regressions before merge.
 
 ## Job: Dependency Audit
 
-`pnpm audit --audit-level=high` - fails on any high or critical advisory
-anywhere in the dependency tree.
+`pnpm audit --audit-level=high` fails on every high or critical advisory in the dependency tree.
 
 ### Why the tree is kept small
 
-`autoInstallPeers: false` in `pnpm-workspace.yaml` is load-bearing. `drizzle-orm`
-and `better-auth` declare every database driver and adapter they support as
-optional peer dependencies - `prisma`, `mysql2`, `better-sqlite3`, `pglite`,
-`@planetscale/database` and roughly a dozen more. With auto-install on, pnpm
-installed all of them even though this project only uses `pg` / `postgres`.
+Keep `autoInstallPeers: false` in `pnpm-workspace.yaml`. `drizzle-orm` and `better-auth` declare optional database drivers and adapters. These include `prisma`, `mysql2`, `better-sqlite3`, `pglite`, and `@planetscale/database`. This project uses `pg` / `postgres`.
 
-That dead subtree, which is never imported and never ships, produced the large
-majority of audit findings. Turning it off took the tree from 65 high and 2
-critical advisories to zero.
+Do not install unused optional peers. They add audit findings without adding application behavior.
 
 If you turn `autoInstallPeers` back on, expect this job to fail on
 vulnerabilities in code the application does not load. Declare the peer you
@@ -47,7 +36,7 @@ In order of preference:
 Do not lower `--audit-level`. It converts a specific, reviewable exception into
 a silent blanket one.
 
-Two things that will not work, both of which have already cost time here:
+Do not use either of these configurations:
 
 - **`pnpm` settings in `package.json` are ignored.** pnpm 10 reads `overrides`,
   `auditConfig` and friends from `pnpm-workspace.yaml`. A `"pnpm"` block in
@@ -55,16 +44,11 @@ Two things that will not work, both of which have already cost time here:
 - **`overrides` do not reach auto-installed peer dependencies.** `vite` arrives
   as a peer of `@vitejs/plugin-react` and `vitest`; an override for it has no
   effect. It is declared directly in `devDependencies` for exactly this reason.
-  A stale `vite: ^7.3.1` override previously pinned the tree *to* the vulnerable
-  version it was meant to fix.
+  Keep `vite` in `devDependencies` when the project requires it.
 
 ### Keeping it green
 
-`.github/dependabot.yml` opens grouped weekly PRs for npm packages and GitHub
-Actions. This is what makes the audit gate sustainable - without it the lockfile
-drifts until a routine advisory turns the workflow permanently red, at which
-point the failure stops being read as signal. That is precisely how this job
-came to fail every week for months.
+`.github/dependabot.yml` opens grouped weekly pull requests for npm packages and GitHub Actions. Review these updates to prevent dependency drift and recurring audit failures.
 
 ## Job: Secret Scan
 
@@ -86,15 +70,9 @@ that individually rather than assuming.
 
 ### Exclusions
 
-Known-safe paths live in `.github/trufflehog-exclude.txt` - one RE2 regex per
-line, matched against the repository-relative path. Currently: the local
-Docker Compose files and the two agent instruction docs, all of which carry
-placeholder or localhost-only database credentials.
+Known-safe paths live in `.github/trufflehog-exclude.txt`. Add one RE2 regex per line. Each regex matches a repository-relative path. The list covers local Docker Compose files and two agent instruction documents with placeholder or localhost-only database credentials.
 
-Because the scheduled run covers full history, **editing or deleting a file does
-not clear its finding** - the old blob is still reachable from old commits. Path
-exclusion is the only practical remedy short of rewriting history, which is why
-the exclude list also names paths these files used to live at.
+Because scheduled scans cover full history, **editing or removing a file does not clear its finding**. The old blob remains reachable. Use a path exclusion or rewrite history.
 
 Weigh that before adding an entry: an excluded path is a blind spot for all of
 history, including commits not yet written. Fix the file if you can. Also do not

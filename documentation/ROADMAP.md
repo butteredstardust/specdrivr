@@ -1,75 +1,69 @@
-# **Specdrivr Implementation Plan — Master Vision Roadmap (v6.1)**
+# Specdrivr roadmap
 
-[Status: GROUND TRUTH]
+This roadmap lists delivered and planned work for Specdrivr.
 
-This document serves as the definitive execution roadmap for Specdrivr, incorporating all refined specifications, architectural improvements, and long-term vision.
-
-## **Phase 1 — Core Infrastructure & Security (Completed)**
-
-### **1.1 Database Schema & ORM**
+## Phase 1 — Core Infrastructure & Security (Completed)
+### 1.1 Database Schema & ORM
 - [x] Implement the 17 core tables in `src/db/schema.ts`.
 - [x] Use Drizzle ORM for type-safe queries.
 - [x] Standardize on `pnpm db:generate` and `pnpm db:migrate`.
 
-### **1.2 Authentication**
+### 1.2 Authentication
 - [x] Set up **BetterAuth** with PostgreSQL (Drizzle adapter).
 - [x] Extend user schema with RBAC roles (`viewer`, `member`, `admin`, `owner`).
 - [x] Implement API tokens for agents with prefix-based Bcrypt verification.
 
-### **1.3 Environment & Config**
+### 1.3 Environment & Config
 - [x] Centralize all configuration in `src/lib/env-core.ts` with Zod validation.
 - [x] Enforce `server-only` imports for sensitive libraries.
 
 ---
 
-## **Phase 2 — Autonomous Pipeline (Completed)**
-
-### **2.1 Specification Management**
+## Phase 2 — Autonomous Pipeline (Completed)
+### 2.1 Specification Management
 - [x] Implement `SpecificationRepository` with versioning.
 - [x] Auto-abandon plans when a new spec version is created.
 
-### **2.2 Plan Generation**
+### 2.2 Plan Generation
 - [x] Implement `generatePlan` and `generateTasks` using **Gemini 2.0 Flash**.
-- [x] **Ground Truth**: Currently implemented as fire-and-forget async in Route Handlers. (Migration planned in Phase 5).
+- [x] Run `scripts/plan-worker.ts` for plan generation and task decomposition.
 
-### **2.3 Agent Worker Loop**
+### 2.3 Agent Worker Loop
 - [x] Implement `scripts/agent.ts` with API polling and heartbeat.
 - [x] Implement atomic task claiming via `SELECT ... FOR UPDATE SKIP LOCKED`.
 - [x] Support for multi-backend execution (Gemini/Claude).
 
 ---
 
-## **Phase 3 — UI & Developer Experience (In Progress)**
-
-### **3.1 Mission Control Dashboard**
+## Phase 3 — UI & Developer Experience (In Progress)
+### 3.1 Mission Control Dashboard
 - [x] Real-time session status monitoring and progress tracking.
 - [x] Live log streaming from agent to UI via session-scoped logs.
 
-### **3.2 Spec Editor**
+### 3.2 Spec Editor
 - [x] Markdown editor with live preview and XSS sanitization.
 
-### **3.3 Task Detail Drawer**
+### 3.3 Task Detail Drawer
 - [x] Implementation of `Vaul` drawer for task details.
 - [x] **Architectural Hardening**: Implementation of `SYMBOL_REGISTRY.md`, `DESIGN_SYSTEM.md` Visual Intent, and `data-testid` standards.
 
 ---
 
-## **Phase 4 — Operations & Monitoring (In Progress)**
-
-### **4.1 Audit Logging**
+## Phase 4 — Operations & Monitoring (In Progress)
+### 4.1 Audit Logging
 - [x] Comprehensive audit trail for all project actions (`audit_log`).
 - [x] Webhook delivery tracking table.
 
-### **4.2 Notifications**
+### 4.2 Notifications
 - [x] In-app notification system with real-time updates.
 - [ ] **PLANNED**: Integration with Resend for email alerts.
 
 ---
 
-## **Phase 5 — Reliability & Orchestration (Completed)**
+## Phase 5 — Reliability & Orchestration (Completed)
 *Focus: Resilience and state-tracked execution.*
 
-### 5.1 Asynchronous Background Worker
+### 5.1 Background plan worker
 - [x] Implement a dedicated `PlanWorker` process to handle Gemini/Claude plan generation.
 - [x] Create a `plan_jobs` table to track job state and provide better UI feedback.
 
@@ -82,7 +76,7 @@ This document serves as the definitive execution roadmap for Specdrivr, incorpor
 
 ---
 
-## **Phase 6 — Security & Governance (In Progress)**
+## Phase 6 — Security & Governance (In Progress)
 *Focus: Hardening system boundaries.*
 
 ### 6.1 Blocking Security Hooks
@@ -96,7 +90,7 @@ This document serves as the definitive execution roadmap for Specdrivr, incorpor
 
 ---
 
-## **Phase 7 — Integration & Scaling (In Progress)**
+## Phase 7 — Integration & Scaling (In Progress)
 *Focus: Reliability and cost management.*
 
 ### 7.1 Advanced Integration Service
@@ -110,7 +104,7 @@ This document serves as the definitive execution roadmap for Specdrivr, incorpor
 
 ---
 
-## **Phase 8 — Advanced UX & Analytics (In Progress)**
+## Phase 8 — Advanced UX & Analytics (In Progress)
 *Focus: Polishing and visibility.*
 
 ### 8.1 Shiki Diff Integration
@@ -124,7 +118,7 @@ This document serves as the definitive execution roadmap for Specdrivr, incorpor
 
 ---
 
-## **Phase 9 — Enterprise Quality & Ops (In Progress)**
+## Phase 9 — Enterprise Quality & Ops (In Progress)
 *Focus: Scale and automation.*
 
 ### 9.1 Playwright E2E Testing

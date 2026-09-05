@@ -1,51 +1,49 @@
-**SPECDRIVR**
+SPECDRIVR
 
 Master Product Specification — Technical Recipes & Workflows
-
-[Status: GROUND TRUTH]
 
 ---
 
 ## 1. Overview
 
-These recipes provide step-by-step checklists for common technical tasks. Following these ensures that code, database schema, and documentation remain perfectly aligned.
+Use these checklists for common technical tasks. Keep code, database schema, and documentation aligned.
 
 ## 2. Recipe: Adding a new Status / Enum
 
-Use this when adding a new state to `spec_status`, `task_status`, or similar.
+Use this recipe when you add a state to `spec_status`, `task_status`, or a similar enum.
 
-1.  **Database**: Update the enum definition in `src/db/schema.ts`.
-2.  **Migration**: Run `pnpm db:generate` then `pnpm db:migrate`.
-3.  **Documentation**: Update the relevant section in `infrastructure/STATE_MACHINES.md`.
-4.  **UI Tokens**: Add the new status color and icon to the status mapping in `infrastructure/DESIGN_SYSTEM.md`.
-5.  **Components**: Update status-aware components (e.g., `TaskStatusBadge`).
+1.  **Database**: Update the enum definition. Use `src/db/schema.ts`.
+2.  **Migration**: Run `pnpm db:generate`. Then run `pnpm db:migrate`.
+3.  **Documentation**: Update the relevant section of `infrastructure/STATE_MACHINES.md`.
+4.  **UI Tokens**: Add the new status color and icon to the status map in `infrastructure/DESIGN_SYSTEM.md`.
+5.  **Components**: Update status-aware components such as `TaskStatusBadge`.
 
 ## 3. Recipe: Creating a new API Endpoint
 
-Use this when adding a new resource or action to the system.
+Use this recipe when you add a resource or action to the system.
 
-1.  **Schema**: Define the request/response Zod schemas in `src/lib/schemas.ts`.
-2.  **Repository**: Implement the data access logic in the relevant `src/repositories/` file.
-3.  **Route Handler**: Create the `route.ts` file under `src/app/api/v1/`.
-    - Must use `import 'server-only'`.
-    - Must call `await auth()` first.
-    - Must use `checkPermission()` from `lib/rbac`.
-4.  **Error Registry**: If adding a new error condition, update `infrastructure/ERROR_REGISTRY.md`.
+1.  **Schema**: Define request and response Zod schemas in `src/lib/schemas.ts`.
+2.  **Repository**: Implement data access logic in the relevant `src/repositories/` file.
+3.  **Route Handler**: Create `route.ts` under `src/app/api/v1/`.
+    - Use `import 'server-only'`.
+    - Call `await auth()` first.
+    - Use `checkPermission()` from `lib/rbac`.
+4.  **Error Registry**: Update `infrastructure/ERROR_REGISTRY.md` when you add an error condition.
 5.  **Documentation**: Add the endpoint to `infrastructure/API.md`.
 
 ## 4. Recipe: Adding a Feature Module (Vertical Slice)
 
-Use this when building a major new feature area.
+Use this recipe when you build a major feature area.
 
-1.  **Architecture**: Determine the "Vertical Slice" boundaries (UI, Flow, Logic).
+1.  **Architecture**: Define the "Vertical Slice" boundaries: UI, Flow, and Logic.
 2.  **Documentation**: Create `documentation/modules/{feature}.md`.
-    - Include: Overview, UI, Interaction Flows, and **Agent Handbook**.
-3.  **Indexing**: Add the new module to `documentation/README.md` and `SPECIFICATION_INDEX.md`.
+    - Include Overview, UI, Interaction Flows, and **Agent Handbook**.
+3.  **Indexing**: Add the module to `documentation/README.md`.
 4.  **Status**: Update the high-level roadmap in `documentation/PRODUCT_MAP.md`.
 
 ## 5. Recipe: Fixing a Bug (Agent Procedure)
 
-1.  **Research**: Locate relevant error codes in `infrastructure/ERROR_REGISTRY.md`.
-2.  **State Check**: Verify the current entity state against `infrastructure/STATE_MACHINES.md`.
-3.  **Code Audit**: Use the "Key Files" list in the relevant `modules/*.md` to find the logic.
-4.  **Verification**: Add a Vitest unit test reproducing the failure before applying the fix.
+1.  **Research**: Find relevant error codes in `infrastructure/ERROR_REGISTRY.md`.
+2.  **State Check**: Check the current entity state against `infrastructure/STATE_MACHINES.md`.
+3.  **Code Audit**: Use the "Key Files" list in the relevant `modules/*.md`. Find the logic.
+4.  **Verification**: Create a Vitest unit test that reproduces the failure. Do this before you apply the fix.

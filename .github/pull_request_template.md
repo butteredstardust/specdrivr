@@ -2,7 +2,7 @@
 
 ## Description
 
-Brief description of the changes
+Describe the change and its purpose.
 
 ## Type of Change
 
@@ -16,7 +16,7 @@ Brief description of the changes
 - [ ] No temporary fix scripts (`fix-*.sh`) committed
 - [ ] `pnpm lint` passes
 - [ ] `pnpm tsc --noEmit` passes
-- [ ] Follows CLAUDE.md constraints
+- [ ] Follows `CLAUDE.md` constraints
 
 ## Screenshots (if applicable)
 

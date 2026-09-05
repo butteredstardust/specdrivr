@@ -1,27 +1,25 @@
-**SPECDRIVR**
+SPECDRIVR
 
 Master Product Specification — AI Protocols & Schemas
-
-[Status: GROUND TRUTH]
 
 ---
 
 ## 1. Overview
 
-This document defines the interface between Specdrivr and Large Language Models (LLMs) used for both high-level planning and task-level execution.
+Use this document to implement the interface between Specdrivr and large language models (LLMs). It defines plan generation and task execution.
 
 ## 2. Plan Generation Protocol (Gemini / Claude)
 
 ### 2.1 System Prompt Structure
 
-The system prompt for plan generation must include:
+Include these items in the plan-generation system prompt:
 
-1. **Context**: The project's tech stack and current repository structure.
-2. **Goal**: Transform a user's Markdown specification into a list of atomic, dependency-ordered tasks.
+1. **Context**: The project tech stack and current repository structure.
+2. **Goal**: Transform a user Markdown specification into independent tasks in dependency order.
 3. **Constraints**:
-   - Tasks must be independent where possible (enabling parallel execution).
-   - Tasks must include clear "Done Criteria" and optional "Verify Command."
-   - Output must be valid JSON.
+   - Keep tasks independent where possible. This enables parallel execution.
+   - Include clear "Done Criteria" for each task. Include "Verify Command" when available.
+   - Return valid JSON.
 
 ### 2.2 Output JSON Schema
 
@@ -52,7 +50,7 @@ The system prompt for plan generation must include:
 
 ### 3.1 Task Execution Prompt
 
-When the DAEMON agent executes a task, it wraps the task description in this template:
+Use this template when the DAEMON agent executes a task:
 
 ```markdown
 You are an AI coding agent executing a specific task within the Specdrivr ecosystem.
@@ -90,15 +88,15 @@ SPECIFICATION: {{specName}}
 
 ## 4. Agent Cost Extraction (Claude / LLM Output)
 
-When using the Claude backend, the DAEMON agent is designed to extract usage costs directly from the LLM output to provide real-time visibility.
+Use the Claude backend to extract usage cost from LLM output. This provides real-time cost visibility.
 
-- **Mechanism**: The agent regex-parses the **last JSON block** within the LLM's full output.
-- **Expected Key**: `cost_usd` (numeric).
-- **Fallback**: If no valid JSON is found or the key is missing, the agent reports `$0.00` and relies on the server's nightly pricing-table calculation.
+- **Mechanism**: The agent parses the **last JSON block** in the full LLM output with a regex.
+- **Expected Key**: Use numeric `cost_usd`.
+- **Fallback**: Report `$0.00` if no valid JSON exists. Report `$0.00` if the key is missing. Use the server nightly pricing-table calculation.
 
 ## 5. Model Selection & Weighting
 
-The `recommendedModel` field in the generated Plan determines the `TaskWeight` used by the agent:
+Use the generated Plan `recommendedModel` field to select the agent `TaskWeight`:
 
 | **Plan ID** | **TaskWeight** | **Target Backend**          |
 | ----------- | -------------- | --------------------------- |

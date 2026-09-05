@@ -1,18 +1,16 @@
-**SPECDRIVR**
+SPECDRIVR
 
 Master Product Specification — State Machines
-
-[Status: GROUND TRUTH]
 
 ---
 
 ## 1. Overview
 
-Specdrivr relies on deterministic state transitions to manage the asynchronous lifecycle of specifications, implementation plans, and agent execution.
+Use deterministic state transitions to manage specification, plan, and agent lifecycles.
 
 ## 2. Specification Status Machine
 
-The specification is the top-level entity.
+Use the specification as the top-level entity.
 
 | **State**          | **Trigger**                           | **Next State**     | **Action**                                    |
 | ------------------ | ------------------------------------- | ------------------ | --------------------------------------------- |
@@ -26,7 +24,7 @@ The specification is the top-level entity.
 
 ## 3. Plan Status Machine
 
-The plan represents a specific implementation strategy for a version of a spec.
+The plan defines an implementation strategy for one specification version.
 
 | **State**          | **Trigger**                  | **Resulting Action**                    |
 | ------------------ | ---------------------------- | --------------------------------------- |
@@ -37,7 +35,7 @@ The plan represents a specific implementation strategy for a version of a spec.
 
 ## 4. Task Status Machine
 
-Tasks are the atomic units of work within a session.
+Tasks are the smallest work units in a session.
 
 | **State**     | **Trigger**                                   | **Next State** |
 | ------------- | --------------------------------------------- | -------------- |
@@ -51,7 +49,7 @@ Tasks are the atomic units of work within a session.
 
 ## 5. Session Status Machine
 
-The session is the active runtime container for an agent.
+The session is the active run container for an agent.
 
 | **State** | **Trigger**            | **Next State** |
 | --------- | ---------------------- | -------------- |

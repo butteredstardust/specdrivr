@@ -2,8 +2,8 @@
 
 **AI Agent Operations Manual** for Specdrivr - an AI-native orchestration platform.
 
-> **This is the canonical, shared ruleset for all AI coding agents.** `CLAUDE.md` and `GEMINI.md`
-> are short, tool-specific supplements — they point back here rather than restating these rules.
+> **This is the canonical, shared ruleset for all AI coding agents.** `CLAUDE.md` is a short,
+> tool-specific supplement. It points here instead of restating these rules.
 > For human contributor guidance, see `documentation/infrastructure/DEVELOPMENT.md`.
 
 ## 1. Purpose
@@ -247,10 +247,7 @@ Every task must end with these steps:
    anything a reviewer should check by hand. The diff and the PR are the record.
 3. **Final Summary**: Provide an Executive Summary, Completion Statement, and a checklist of deliverables.
 
-> **Removed 2026-09-04.** This section used to mandate `BRANCH_CHANGES.md` and
-> `BRANCH_CODE_REVIEW.md` under `documentation/branches/{branch-name}`. They
-> duplicated the diff and the PR body, went stale immediately, and were never
-> read after merge. Do not reintroduce them.
+Put the change summary in the PR body. The diff and the PR are the record.
 
 ## 19. Standard Commands Reference
 
@@ -271,9 +268,9 @@ Every task must end with these steps:
 
 ## Summary
 
-Specdrivr enforces strict type safety, security, and performance standards. Always use repositories, validate inputs with Zod, log with Pino, and avoid prohibited patterns. When in doubt, consult `documentation/infrastructure/DEVELOPMENT.md` for implementations, `CLAUDE.md` for Claude-specific constraints, and `GEMINI.md` for Gemini-specific constraints. Cross-reference all three docs to maintain consistency.
+Specdrivr enforces strict type safety, security, and performance standards. Always use repositories. Validate inputs with Zod. Log with Pino. Avoid prohibited patterns. When in doubt, consult `documentation/infrastructure/DEVELOPMENT.md` for implementations and `CLAUDE.md` for Claude-specific constraints. Cross-reference both documents to maintain consistency.
 
-Remember: your changes will be reviewed by humans and automated systems. Follow these guidelines precisely.
+Remember: humans and automated systems review your changes. Follow these guidelines precisely.
 
 <!-- Keep this file under 500 lines total -->
 

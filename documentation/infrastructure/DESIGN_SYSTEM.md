@@ -1,51 +1,42 @@
 # Design System
 
-**Status:** Canonical. This document is the specification; `src/app/globals.css` is its implementation.
-**Last rewritten:** 2026-09-04 (UI overhaul, branch `feat/ui-overhaul`)
-**Companion docs:** [`UI_SPEC.md`](./UI_SPEC.md) (per-page layout spec) · [`UI_AUDIT.md`](./UI_AUDIT.md) (historical, superseded)
+**Status:** Canonical. This document defines the specification. `src/app/globals.css` implements it.
+**Companion document:** [`UI_SPEC.md`](./UI_SPEC.md) defines each page layout.
 
-> **Rule of precedence.** If this document and the code disagree, that is a bug in one of them —
-> open it and fix it. Do not work around the gap. Every token named here exists in `globals.css`,
-> and every token in `globals.css` is named here. That one-to-one property is load-bearing; the
-> previous system lost it and accumulated two parallel vocabularies, 133 arbitrary values, and a
-> design doc that documented only dark mode.
+> **Rule of precedence.** Check this document against the code. Fix any difference. Do not work around it.
+> Each token here exists in `globals.css`. Each token in `globals.css` exists here.
 
 ---
 
 ## 1. Philosophy
 
-Specdrivr is a dense, professional tool for people who watch agents work. The interface should
-disappear into the task.
+Specdrivr is a dense tool for people who monitor agent work. Keep the interface focused on the task.
 
 **Five principles, in priority order:**
 
 1. **Borders over shadows.** Elevation is communicated by a hairline border and a surface step, not
-   by a drop shadow. Shadows are reserved for things that genuinely float above the page — dialogs,
-   popovers, dropdowns.
+   by a drop shadow. Use shadows only for dialogs, popovers, and dropdowns.
 2. **One accent.** Blue means "interactive or selected". It never means "decorative". Status colours
-   are a separate, semantically-reserved axis and are never used for emphasis.
+   have their own meaning. Never use them for emphasis.
 3. **Density with air.** Rows are compact; the space *between* groups is generous. Cramming happens
-   inside a group, never between them.
+   inside groups, never between groups.
 4. **Motion confirms, never entertains.** Two durations, two easings. Animation exists to make a
-   state change legible. Nothing loops purely for decoration.
+   state change clear. Do not loop animation for decoration.
 5. **Monospace carries meaning.** Mono is reserved for content that is literally machine text —
-   identifiers, logs, diffs, paths, timestamps, code. It is not a stylistic choice.
+   identifiers, logs, diffs, paths, timestamps, and code. It is not decorative.
 
-**Explicit non-goals.** No CRT chrome, scanlines, phosphor glow, flicker, vignettes, pixel art, or
-mascots. These were removed in the overhaul. If a future direction wants them back, that is a
-deliberate product decision, not a component-level liberty.
+**Explicit non-goals.** Do not use CRT chrome, scanlines, phosphor glow, flicker, vignettes, pixel art, or mascots.
+Restore them only through a product decision.
 
 ---
 
 ## 2. Colour tokens
 
-Two layers. **Raw tokens** are declared in `:root` / `.dark` as hex. **Bridge tokens** in
-`@theme inline` expose them as Tailwind utilities. Components only ever touch the utilities.
+Use two token layers. Declare **raw tokens** in `:root` / `.dark` as hex.
+Expose them through **bridge tokens** in `@theme inline`. Components use only the utilities.
 
-> Tailwind v4 shares a single `--color-*` namespace across `bg-`, `text-`, and `border-`. That is
-> why borders are prefixed `line-` and text is prefixed `fg-` — so `border-line-strong` and
-> `text-fg-muted` can coexist without collision. Do not add a `--color-*` token whose name could be
-> read as belonging to a different axis.
+> Tailwind v4 shares `--color-*` across `bg-`, `text-`, and `border-`.
+> Use `line-` for borders and `fg-` for text. Do not add an ambiguous `--color-*` token.
 
 ### 2.1 Surfaces
 
@@ -57,8 +48,8 @@ Two layers. **Raw tokens** are declared in `:root` / `.dark` as hex. **Bridge to
 | `bg-surface-sunken` | `--surface-sunken` | `#f0f2f5` | `#0f1116` | Wells recessed below their parent. |
 | `bg-surface-inset` | `--surface-inset` | `#eceff3` | `#1a1e26` | Inputs, hover fills, inline code. |
 
-**Stacking rule:** `base → raised → overlay`. Never nest a `raised` directly inside a `raised`
-without a border between them; use `sunken` for the inner region instead.
+**Stacking rule:** `base → raised → overlay`. Do not nest `raised` inside `raised` without a border.
+Use `sunken` for the inner region.
 
 ### 2.2 Borders
 
@@ -69,13 +60,11 @@ without a border between them; use `sunken` for the inner region instead.
 | `border-line-strong` | `--border-strong` | `#c9d0da` | `#38404e` | Hover state, emphasis, scrollbar thumb. |
 | `border-line-control` | `--border-control` | `#83878e` | `#5d6a81` | Unfilled form-control boundaries. |
 
-`--border-default` is also applied as the global `border-color` in `@layer base`, so
-`border` alone yields the correct colour without a `border-line` class.
+`@layer base` applies `--border-default` as global `border-color`. Use `border` alone for that colour.
 
-`--border-control` is deliberately separate from `--border-default`. Card edges and dividers are
-structural hairlines, which WCAG 1.4.11 exempts. An empty checkbox, input, select, textarea, or
-unchecked switch has no affordance except its outline, so its boundary must reach 3:1. The stronger
-control token does that without making every card and divider visually heavy.
+`--border-control` differs from `--border-default`. WCAG 1.4.11 exempts card edges and dividers.
+An empty control relies on its outline. Its boundary must reach 3:1.
+Use the stronger token without making every card or divider heavy.
 
 ### 2.3 Text
 
@@ -86,8 +75,7 @@ control token does that without making every card and divider visually heavy.
 | `text-fg-muted` | `--text-muted` | `#616977` | `#808b9b` | Labels, timestamps, placeholders, captions. |
 | `text-fg-inverse` | `--text-inverse` | `#ffffff` | `#0b0d11` | Text on a solid accent or inverted fill. |
 
-Three levels of text, and only three. If something needs a fourth, it needs a different size or
-weight, not a fourth colour.
+Use only three text levels. Use a different size or weight instead of a fourth colour.
 
 ### 2.4 Accent
 
@@ -100,12 +88,11 @@ weight, not a fourth colour.
 | `border-accent-border` | `--accent-border` | `#c3d6fd` | `#1e3a60` | Border paired with `accent-subtle`. |
 | `text-accent-fg` | `--accent-fg` | `#ffffff` | `#0b0d11` | Text on a solid accent fill. |
 
-Note the dark ramp inverts: `hover` and `active` get **lighter**, because the fill sits on a dark
-ground. Do not "fix" this to match light mode.
+In dark mode, `hover` and `active` are **lighter**. Do not change this to match light mode.
 
 ### 2.5 Status
 
-Four statuses, each a triple of foreground / background / border. Never use these for emphasis.
+Use four statuses. Each has foreground, background, and border tokens. Never use them for emphasis.
 
 | Status | `text-*` | `bg-*-bg` | `border-*-border` | Meaning |
 |---|---|---|---|---|
@@ -126,8 +113,7 @@ Four statuses, each a triple of foreground / background / border. Never use thes
 | `bg-diff-removed-bg`, `border-diff-removed-border` | Removed lines in a diff. |
 | `bg-log-bg`, `text-log-text`, `text-log-muted` | Log and terminal-output surfaces. |
 
-The log surface is a plain recessed panel with mono text. It has no scanline, no vignette, no
-flicker, and no glow. The content is the terminal; the chrome is not.
+Use a plain recessed log panel with mono text. Do not use scanlines, vignettes, flicker, or glow.
 
 ---
 
@@ -150,10 +136,8 @@ when paired with `tabular-nums`.
 | `text-xl` | 21px | 28px | Page titles. |
 | `text-2xl` | 26px | 32px | Display, empty-state headings. |
 
-**11px is a hard floor.** The pre-overhaul code had 133 arbitrary bracket values, mostly
-`text-[9px]` and `text-[10px]`, concentrated in mission-control and session components. Anything
-below 11px fails legibility at normal viewing distance. If a layout only fits at 10px, the layout
-is wrong.
+**11px is a hard floor.** Text below 11px fails at normal viewing distance.
+Change the layout when it requires 10px text.
 
 ### 3.2 Weights
 
@@ -161,19 +145,16 @@ is wrong.
 
 ### 3.3 Mono rules
 
-- Mono is semantic, not decorative. It is **only** for IDs, code, log output, timestamps, and
-  numeric columns with `tabular-nums`.
-- Never use mono for prose, headings, table headers, badges, or control labels. Those are readable
-  interface language and use the sans face in sentence case.
-- Entity IDs (`SPEC-003`, `T-042`, `SES-0091`) render mono at `text-fg-secondary` — **not** accent.
-  They are reference data, not calls to action.
-- Ligatures (`calt`, `liga`) are on. Leave them on; they are why Fira Code was chosen.
+- Use mono only for IDs, code, log output, timestamps, and numeric columns with `tabular-nums`.
+- Do not use mono for prose, headings, table headers, badges, or control labels. Use sentence-case sans.
+- Render entity IDs (`SPEC-003`, `T-042`, `SES-0091`) in `text-fg-secondary`, not accent.
+- Keep ligatures (`calt`, `liga`) on.
 
 ---
 
 ## 4. Spacing
 
-A 4px base grid. Use Tailwind's default scale; the meaningful part is *which* step applies where.
+Use a 4px base grid. Use the Tailwind default scale and the listed step for each context.
 
 | Context | Step |
 |---|---|
@@ -185,16 +166,14 @@ A 4px base grid. Use Tailwind's default scale; the meaningful part is *which* st
 | Between page sections | `space-y-8` (32px) |
 | Page gutter | `px-6 py-6` mobile · `px-8 py-8` desktop |
 
-**Never invent a one-off gutter.** The pre-overhaul shell used `px-8 py-8 md:px-10`, a value that
-appeared nowhere else. Page padding is set once in `src/app/(app)/layout.tsx` and inherited.
+Do not create a one-off gutter. `src/app/(app)/layout.tsx` sets and shares page padding.
 
 ---
 
 ## 5. Radii
 
-`--radius` is `0.375rem` (6px) and is **load-bearing** — every other step is `calc()`'d from it, so
-changing that one value rescales the whole system. In the previous system `--radius` was declared
-and read by nothing.
+`--radius` is `0.375rem` (6px). Other steps use `calc()` from it.
+Changing it rescales the system.
 
 | Utility | Value | Use |
 |---|---|---|
@@ -208,19 +187,18 @@ and read by nothing.
 
 ## 6. Elevation
 
-Elevation is expressed as **surface step + border**, in this order of preference:
+Express elevation as **surface step + border**. Use this order:
 
 1. Change the surface token (`base` → `raised` → `overlay`).
 2. Add `border border-line`.
-3. Only if it genuinely floats: add a shadow.
+3. Add a shadow only when the element floats.
 
 | Utility | Use |
 |---|---|
 | `shadow-popover` | Popovers, dropdowns, tooltips, selects. |
 | `shadow-overlay` | Dialogs, drawers, command palette. |
 
-Two shadows exist. There is no `shadow-sm`, no `shadow-md`, and no glow. Cards do not get shadows —
-cards get borders.
+Use only these two shadows. Do not use `shadow-sm`, `shadow-md`, or glow. Use borders on cards.
 
 ---
 
@@ -233,37 +211,32 @@ cards get borders.
 | `--ease-standard` | `cubic-bezier(0.4, 0, 0.2, 1)` | Everything entering or moving. |
 | `--ease-exit` | `cubic-bezier(0.4, 0, 1, 1)` | Things leaving. |
 
-Three animations exist: `animate-fade-in`, `animate-fade-in-up`, `animate-pulse-subtle`.
-`pulse-subtle` is the **only** looping animation, reserved for genuine live-activity indicators.
+Use only `animate-fade-in`, `animate-fade-in-up`, and `animate-pulse-subtle`.
+Use looping `pulse-subtle` only for live-activity indicators.
 
-`globals.css` imports `tw-animate-css` because Radix overlay primitives use its `animate-in`,
-`fade-in-0`, `zoom-in-95`, and `slide-in-from-*` utilities; Tailwind v4 core does not provide them.
-The global `prefers-reduced-motion: reduce` block collapses those animations and all other CSS
-animation/transition durations. The shipped app has no JS-driven animation; elapsed-time intervals
-are counters rather than animation.
+`globals.css` imports `tw-animate-css` for Radix `animate-in`, `fade-in-0`, `zoom-in-95`, and `slide-in-from-*` utilities.
+Tailwind v4 core does not provide them. `prefers-reduced-motion: reduce` collapses all CSS motion durations.
+The app has no JS-driven animation. Elapsed-time intervals are counters.
 
 ---
 
 ## 8. Component conventions
 
-These are the primitive-layer conventions. The current catalogue mixes simple wrappers and
-composite helpers; apply each convention where the component exposes the relevant behavior.
+Use these primitive conventions. Apply each convention when the component has the related behavior.
 
 ### 8.1 Structure
 
-- **`data-slot` attribute** on stable primitive parts, matching the modern shadcn convention. New
-  or rebuilt low-level controls must expose slots; composite helpers that delegate to slotted
-  primitives do not add synthetic slots solely for coverage.
+- Add a **`data-slot` attribute** to stable primitive parts. New low-level controls must expose slots.
+  Do not add synthetic slots to helpers that delegate to slotted primitives.
 - **`cva` for variants.** Any primitive with more than one visual variant declares them with
-  `class-variance-authority`, exports its `VariantProps`, and never hand-rolls conditional `cn()`
-  strings. *(Pre-overhaul: 5 of 37.)*
-- **`cn()` for merging**, and `className` is always accepted and merged last so callers can override.
-- **Radix is the headless foundation.** Every headless dependency is wrapped in `src/components/ui/`
-  and imported from there — never imported raw into a feature component.
+  `class-variance-authority`, and export `VariantProps`. Do not hand-roll conditional `cn()` strings.
+- Use **`cn()` for merging**. Accept `className` and merge it last.
+- Use **Radix as the headless foundation.** Wrap each dependency in `src/components/ui/`.
+  Do not import it directly into a feature component.
 
 ### 8.2 Required states
 
-Every interactive primitive implements all five:
+Implement all five states for each interactive primitive:
 
 | State | Treatment |
 |---|---|
@@ -275,12 +248,12 @@ Every interactive primitive implements all five:
 
 ### 8.3 Icons
 
-`lucide-react` only. No `@radix-ui/react-icons`. Default `size={16}`; `14` in dense rows.
-Every icon-only control needs an accessible name.
+Use `lucide-react` only. Do not use `@radix-ui/react-icons`. Use `size={16}` by default and `14` in dense rows.
+Give every icon-only control an accessible name.
 
 ### 8.4 Status display
 
-Status is never conveyed by colour alone. Use colour **plus** a glyph or label:
+Do not convey status by colour alone. Use colour with a glyph or label:
 
 | Status | Glyph | Colour |
 |---|---|---|
@@ -292,31 +265,27 @@ Status is never conveyed by colour alone. Use colour **plus** a glyph or label:
 
 ### 8.5 Labels and gated actions
 
-- Badges and all other UI labels are sentence-cased in source and rendered with the sans face.
-  Never restore the old CSS-driven uppercase/mono treatment.
-- Use `GatedButton` from `src/components/ui/gated-button.tsx` when a role or lifecycle rule disables
-  an action. Pass `allowed` and a human-readable `reason`; the primitive provides the disabled
-  button plus a focusable tooltip trigger. It requires an ancestor `TooltipProvider`.
-- There is exactly one focus-ring rule: the global `:focus-visible` declaration in `globals.css`.
-  Per-component focus rings, outlines, and ring utilities are forbidden. Components may change
-  border colour on focus, but may not replace or duplicate the global outline.
+- Write badges and UI labels in sentence case. Render them with sans.
+- Use `GatedButton` from `src/components/ui/gated-button.tsx` for a disabled role or lifecycle action.
+  Pass `allowed` and a readable `reason`. Use an ancestor `TooltipProvider`.
+- Use only the global `:focus-visible` rule in `globals.css`. Do not add component focus rings or outlines.
+  Components can change border colour on focus.
 
 ---
 
 ## 9. Composition patterns
 
-**Page.** `PageHeader` (title, optional breadcrumb, optional description, right-aligned actions) →
-`space-y-6` content sections.
+**Page.** Use `PageHeader` with a title and optional breadcrumb, description, and right-aligned actions.
+Use `space-y-6` for content sections.
 
 **Card.** `bg-surface-raised border border-line rounded-lg p-6`. No shadow.
 
-**Table.** `bg-surface-raised` container, `border border-line rounded-lg overflow-hidden`. Header
-row `text-xs font-medium text-fg-muted bg-surface-sunken`; table headers are sentence-case sans.
-Body rows are separated by
-`border-line-subtle`. Row hover `bg-surface-inset`. Selected row `bg-accent-subtle`.
+**Table.** Use `bg-surface-raised`, `border border-line rounded-lg overflow-hidden`.
+Use `text-xs font-medium text-fg-muted bg-surface-sunken` for the header row. Use sentence-case sans headers.
+Separate body rows with `border-line-subtle`. Use `bg-surface-inset` on hover and `bg-accent-subtle` when selected.
 
-**Empty state.** Centred, `py-12`. Icon (24px, `text-fg-muted`) → `text-lg` heading → `text-sm
-text-fg-muted` explanation → single primary action. Never a mascot.
+**Empty state.** Centre it with `py-12`. Use a 24px `text-fg-muted` icon, `text-lg` heading, `text-sm text-fg-muted` explanation, and one primary action.
+Do not use a mascot.
 
 **Form.** `Label` above `Input`, `space-y-1.5`. Help text `text-xs text-fg-muted` below. Error
 `text-xs text-danger`, linked via `aria-describedby`. Fields `space-y-4` apart.
@@ -324,49 +293,40 @@ text-fg-muted` explanation → single primary action. Never a mascot.
 **Log surface.** `bg-log-bg border border-line rounded-md p-3 font-mono text-xs`, `scrollbar-thin`,
 `aria-live="polite"` when streaming.
 
-**Rendered markdown.** Apply the global `.markdown` class to the wrapper around `ReactMarkdown`.
-It supplies token-driven headings, lists, links, inline code, code blocks, quotes, rules, and tables.
-Do not use `prose` / `prose-invert`: `@tailwindcss/typography` is not installed and those classes are
-inert in this project.
+**Rendered markdown.** Apply `.markdown` to the `ReactMarkdown` wrapper. It styles headings, lists, links, code, quotes, rules, and tables.
+Do not use `prose` or `prose-invert`. `@tailwindcss/typography` is not installed.
 
-**Full bleed.** Pages with their own full-width header or section dividers use `.full-bleed`. It
-negates the shell-owned `--shell-gutter` and `--shell-gutter-y` custom properties, avoiding hardcoded
-negative margins that drift when shell padding changes. Pair it with `.fill-shell` rather than
-`min-h-full` — inside a full-bleed page `100%` stops two vertical gutters short, which is what left
-column rules and content borders ending in mid-air.
+**Full bleed.** Use `.full-bleed` for pages with a full-width header or divider.
+It negates `--shell-gutter` and `--shell-gutter-y`. Pair it with `.fill-shell`, not `min-h-full`.
+Inside a full-bleed page, `100%` ends two vertical gutters early.
 
-**Filter toolbar.** The strip under `PageHeader` on an index page is `FilterToolbar` from
-`src/components/ui/filter-toolbar.tsx`, composed from its own parts (`FilterSearch`, `FilterTabs`,
-`FilterSelect`, `FilterDateRange`, `FilterTextInput`, `FilterToolbarActions`, `FilterToolbarMeta`,
-`FilterClearButton`). Every control is `h-8 text-xs`; labels are sentence-case sans. Use
-`variant="inline"` inside a panel that already owns its padding. Do not hand-roll a search-and-pills
-row on a new page.
+**Filter toolbar.** Use `FilterToolbar` from `src/components/ui/filter-toolbar.tsx` below `PageHeader` on an index page.
+Use `FilterSearch`, `FilterTabs`, `FilterSelect`, and `FilterDateRange`.
+Use `FilterTextInput`, `FilterToolbarActions`, `FilterToolbarMeta`, and `FilterClearButton`.
+Set every control to `h-8 text-xs`. Use sentence-case sans labels. Use `variant="inline"` inside a padded panel.
+Do not create a search-and-pills row.
 
 ### 9.1 Breakpoint strategy
 
-The app is mobile-first and uses Tailwind's standard breakpoints; there are no custom breakpoint
-tokens. Base classes define narrow layouts. `sm:` is used only when a local row or grid has enough
-room to expand, `md:` is the shell boundary (main gutters move from `px-4 py-6` to `px-8 py-8`), and
-`lg:` is reserved for multi-column feature layouts. Core actions and information must remain
-available below every breakpoint; responsive variants rearrange or wrap them rather than hiding
-functionality. `.full-bleed` reads the shell variables at both gutter sizes.
+The app is mobile-first and uses Tailwind standard breakpoints. Do not create breakpoint tokens.
+Base classes define narrow layouts. Use `sm:` only when a local row or grid can expand.
+Use `md:` at the shell boundary (`px-4 py-6` to `px-8 py-8`). Reserve `lg:` for multi-column layouts.
+Keep core actions and information at every breakpoint. Rearrange or wrap them. `.full-bleed` reads both gutter sizes.
 
 ---
 
 ## 10. Accessibility requirements
 
-Non-negotiable, and checked at the Phase 9 gate.
+These requirements are mandatory. Check them at the Phase 9 gate.
 
-- **Contrast:** 4.5:1 body text, 3:1 large text and UI boundaries — verified in **both** themes.
-- **Focus:** visible on every interactive element. Focus moves into dialogs/drawers on open and
-  returns to the trigger on close.
-- **Keyboard:** every action reachable without a pointer. Tab order follows visual order.
-- **Landmarks:** one `<main>`, `<nav>` for navigation, headings in order without skipping levels.
-- **Live regions:** `aria-live="polite"` on streaming logs, task status, and progress. `DiffViewer`
-  is not live; it uses tab/tabpanel semantics for its selectable file list.
-- **Names:** every icon-only button has `aria-label` or visually-hidden text.
-- **Never colour-only:** see §8.4.
-- **Reduced motion:** respected by CSS *and* by JS-driven animation.
+- **Contrast:** Check 4.5:1 body text and 3:1 large text and UI boundaries in **both** themes.
+- **Focus:** Show focus on every interactive element. Move it into dialogs and drawers on open. Return it on close.
+- **Keyboard:** Make every action available without a pointer. Keep tab order aligned with visual order.
+- **Landmarks:** Use one `<main>` and `<nav>` for navigation. Keep heading levels in order.
+- **Live regions:** Use `aria-live="polite"` on streaming logs, task status, and progress. `DiffViewer` uses tab/tabpanel semantics.
+- **Names:** Give each icon-only button `aria-label` or visually-hidden text.
+- **Never colour-only:** See §8.4.
+- **Reduced motion:** Respect it in CSS and JS-driven animation.
 
 ---
 
@@ -390,16 +350,15 @@ Non-negotiable, and checked at the Phase 9 gate.
 
 ### 11.1 CodeMirror token exception
 
-`src/lib/editor-theme.ts` transcribes the light and dark token values as colour literals because
-CodeMirror's `createTheme` builds its own stylesheet and cannot read CSS custom properties. This is
-the sole design-token transcription outside `globals.css`; update both files together. The editor
-in `src/components/specs/spec-editor.tsx` selects the pair from `useTheme().resolvedTheme`.
+`src/lib/editor-theme.ts` copies light and dark token values as colour literals. CodeMirror `createTheme` cannot read CSS custom properties.
+This is the only token copy outside `globals.css`. Update both files together.
+`src/components/specs/spec-editor.tsx` selects the pair from `useTheme().resolvedTheme`.
 
 ---
 
-## 12. Removed in the 2026-09-04 overhaul
+## 12. Removed items
 
-Recorded so the decision is not silently re-litigated.
+Do not restore these items without a product decision.
 
 | Removed | Why |
 |---|---|

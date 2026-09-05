@@ -1,18 +1,16 @@
-**SPECDRIVR**
+SPECDRIVR
 
 Master Product Specification — One-Shot Coding Patterns
-
-[Status: GROUND TRUTH]
 
 ---
 
 ## 1. Overview
 
-To ensure "One-Shot" success, AI agents must follow these exact templates. These patterns enforce the project's security, error handling, and architectural standards.
+Use these templates for a correct first-pass implementation. They enforce project security, error handling, and architecture rules.
 
 ## 2. Pattern: Standard Server Action
 
-All mutations MUST follow this pattern.
+Use this pattern for every mutation.
 
 ```typescript
 'use server';
@@ -52,7 +50,7 @@ export async function myAction(rawData: unknown) {
 
 ## 3. Pattern: Repository Method
 
-Repositories MUST extend `BaseRepository` and wrap operations in `executeQuery`.
+Every repository must extend `BaseRepository`. Wrap each operation in `executeQuery`.
 
 ```typescript
 import { BaseRepository } from './base-repository';
@@ -75,8 +73,8 @@ export class MyRepository extends BaseRepository {
 
 ## 4. Pattern: Status-Aware UI
 
-Use the centralized semantic map in `src/lib/ui-status.ts`; do not duplicate labels, badge
-variants, or colours in feature components. Status text is sentence-cased and uses the sans face.
+Use the central semantic map in `src/lib/ui-status.ts`. Do not duplicate labels, badge variants, or
+colours in feature components. Use sentence case and the sans face for status text.
 
 ```tsx
 import { Badge } from '@/components/ui/badge';
@@ -91,10 +89,10 @@ export function TaskState({ status }: { status: TaskStatus }) {
 
 ## 5. Pattern: Large Form Context
 
-When a form is decomposed into several section components, create the form once and wrap the
-sections in `FormProvider`. Sections call `useFormContext<FormValues>()`; do not pass `register`,
-`control`, `errors`, and `watch` through every layer. `src/components/settings/agent-config-form.tsx`
-and `src/components/settings/agent-config/` are the reference implementation.
+When a form has several section components, create the form once. Wrap the sections in
+`FormProvider`. Have sections call `useFormContext<FormValues>()`. Do not pass `register`,
+`control`, `errors`, and `watch` through each layer. Use `src/components/settings/agent-config-form.tsx`
+and `src/components/settings/agent-config/` as the reference implementation.
 
 ```tsx
 const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues });
@@ -118,9 +116,9 @@ function PlanningSection() {
 
 ## 6. Pattern: Explained Permission Gate
 
-Use `GatedButton` when an action is visible but unavailable because of role or lifecycle state.
-It keeps the disabled native button and puts the explanation on a focusable tooltip trigger. The
-component must be under `TooltipProvider`.
+Use `GatedButton` when a visible action is unavailable due to role or lifecycle state. It keeps the
+native button disabled. It puts the explanation on a focusable tooltip trigger. Put the component
+under `TooltipProvider`.
 
 ```tsx
 <GatedButton allowed={canApprove} reason="Requires Admin or Owner role" onClick={approve}>
@@ -128,15 +126,15 @@ component must be under `TooltipProvider`.
 </GatedButton>
 ```
 
-Do not duplicate enabled and disabled button branches or attach a tooltip directly to a disabled
-button; disabled controls do not emit pointer events.
+Do not duplicate enabled and disabled button branches. Do not attach a tooltip directly to a
+disabled button. Disabled controls do not emit pointer events.
 
 ## 7. Pattern: Lifecycle Router
 
-For a feature whose layout changes by lifecycle state, keep the route component small and route to
-state-specific renderers. `src/components/specs/plan-tab.tsx` chooses loading, generation,
-failure, empty, and review surfaces; `src/components/specs/plan/plan-review.tsx` owns only the review
-state. This keeps polling and actions out of markup branches and avoids one monolithic component.
+For a feature whose layout changes by lifecycle state, keep the route component small. Route to
+state-specific renderers. `src/components/specs/plan-tab.tsx` selects loading, generation, failure,
+empty, and review surfaces. `src/components/specs/plan/plan-review.tsx` owns only the review state.
+This keeps polling and actions outside markup branches. It avoids one monolithic component.
 
 ```tsx
 if (job?.status === 'pending' || job?.status === 'running') return <GeneratingState job={job} />;
@@ -148,11 +146,11 @@ return <PlanReview plan={plan} actions={actions} />;
 
 ## 8. Pattern: Cohesive Fetch/Mutation Hook
 
-When a surface owns a resource fetch plus multiple mutations of that resource, move the whole
-operation set into one hook. The hook owns resource state, loading/error state, a shared busy flag,
-logging, toasts, refresh/refetch behavior, and authenticated fetch options. Mutations use one local
-`act` helper so success/failure behavior cannot drift. See `src/components/specs/plan/use-plan.ts`
-and `src/components/tasks/use-task-actions.ts`.
+When a surface owns a resource fetch and several mutations, move all operations into one hook. The
+hook owns resource state, loading and error state, a shared busy flag, logging, toasts, refresh and
+refetch behavior, and authenticated fetch options. Make mutations use one local `act` helper. This
+keeps success and failure behavior consistent. See `src/components/specs/plan/use-plan.ts` and
+`src/components/tasks/use-task-actions.ts`.
 
 ```tsx
 const act = useCallback(async (path: string, init: RequestInit, messages: Messages) => {

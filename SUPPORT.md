@@ -1,7 +1,7 @@
 # Support
 
-Need help with Specdrivr?
+Use these channels to get help with Specdrivr.
 
-- **Documentation**: Check out our [DEVELOPMENT.md](documentation/infrastructure/DEVELOPMENT.md).
-- **Issues**: Use GitHub Issues for bug reports and feature requests.
-- **Discussions**: Use GitHub Discussions for questions and ideas.
+- **Documentation**: Read [DEVELOPMENT.md](documentation/infrastructure/DEVELOPMENT.md).
+- **Issues**: Report bugs and request features in GitHub Issues.
+- **Discussions**: Ask questions and share ideas in GitHub Discussions.

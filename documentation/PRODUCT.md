@@ -1,4 +1,4 @@
-**SPECDRIVR**
+SPECDRIVR
 
 Master Product Specification
 
@@ -8,10 +8,7 @@ _Spec-driven autonomous code execution for engineering teams_
 
 ---
 
-[Status: GROUND TRUTH]
-
-# **1\. Executive Summary**
-
+# 1\. Executive Summary
 Specdrivr is a spec-driven autonomous coding platform that enables engineering teams to write plain-English specifications in Markdown and have an AI agent - DAEMON - translate those specs into a structured execution plan, receive human approval, then autonomously execute and commit code changes against a target repository.
 
 The core value proposition is accountability and control: DAEMON never executes code without explicit human approval of the generated plan. Every architectural decision is surfaced and reviewable. Every file change is diffed and attributed to the task that produced it. Humans remain the final authority; DAEMON is a force multiplier.
@@ -27,31 +24,25 @@ Specdrivr is a production-grade, multi-user, multi-project SaaS application targ
 | Data retention   | 90 days of session and event logs (configurable)          |
 | Deployment model | Cloud SaaS; self-hosted Docker option on roadmap          |
 
-# **2\. Product Vision & Goals**
-
-## **2.1 Vision Statement**
-
+# 2\. Product Vision & Goals
+## 2.1 Vision Statement
 Software specifications should be executable. The gap between "what we want to build" and "working code in the repository" should be occupied by a tireless, auditable, human-supervised agent - not by weeks of translation overhead between requirements documents and pull requests.
 
-## **2.2 Core Principles**
-
+## 2.2 Core Principles
 - **Human approval is non-negotiable. DAEMON never executes against a repository without a human reviewing and approving the generated plan. This is a hard constraint, not a toggleable preference.**
 - **Every action is observable. Every task attempt, log line, file change, and architectural decision is stored, attributed, and accessible. Nothing happens in a black box.**
 - **Complexity is progressive. Default views are clean and simple. Power-user depth - raw IDs, JSON inspection, timing data - is one keystroke away, not buried in settings.**
 - **Trust through precision. The application speaks plainly and precisely. No marketing copy in the UI. Status indicators use exact counts and identifiers, not vague "processing…" states.**
 - **Keyboard-first. Every primary action has a keyboard shortcut. Mouse interaction is never required for any core workflow.**
 
-## **2.3 What Specdrivr Is Not**
-
+## 2.3 What Specdrivr Is Not
 - Not a code review tool. Specdrivr generates and executes. Code review happens in your existing Git workflow after DAEMON creates branches and commits.
 - Not a CI/CD pipeline. It does not run tests, deploy, or monitor production. It writes code; your pipeline takes over.
 - Not a requirements management system. Specifications are Markdown files, not tickets. There is no backlog, no sprint, no velocity.
 - Not an autonomous system. DAEMON operates with exactly the permissions a human grants it, in exactly the scope defined by an approved plan, nothing more.
 
-# **3\. User Personas**
-
-## **3.1 Alex - Technical Lead (Primary Persona)**
-
+# 3\. User Personas
+## 3.1 Alex - Technical Lead (Primary Persona)
 | **Attribute**   | **Detail**                                                                                                                                |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | Role            | Engineering Manager / Technical Lead                                                                                                      |
@@ -62,8 +53,7 @@ Software specifications should be executable. The gap between "what we want to b
 | Technical level | High - comfortable with terminals, diffs, monorepos, and Drizzle schema files                                                             |
 | Key flows used  | Write spec → Generate plan → Approve → Monitor → Unblock → Review changes                                                                 |
 
-## **3.2 Sam - Senior Engineer (Contributor Persona)**
-
+## 3.2 Sam - Senior Engineer (Contributor Persona)
 | **Attribute**   | **Detail**                                                                                                               |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | Role            | Senior Software Engineer                                                                                                 |
@@ -74,8 +64,7 @@ Software specifications should be executable. The gap between "what we want to b
 | Technical level | High - reads diffs fluently; understands dependency graphs                                                               |
 | Key flows used  | Write spec → view plan (cannot approve) → request approval → monitor → unblock tasks                                     |
 
-## **3.3 Jordan - Engineering Manager (Observer Persona)**
-
+## 3.3 Jordan - Engineering Manager (Observer Persona)
 | **Attribute**   | **Detail**                                                                                                                 |
 | --------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | Role            | Engineering Manager (non-coding)                                                                                           |
@@ -86,8 +75,7 @@ Software specifications should be executable. The gap between "what we want to b
 | Technical level | Low - reads summaries; does not review diffs                                                                               |
 | Key flows used  | Dashboard / Mission Control → Sessions → Spec Activity                                                                     |
 
-# **14\. Onboarding**
-
+# 14\. Onboarding
 Triggered after invite acceptance or first login when `onboarding_step` in the database is less than 3. A centered modal dialog (`Dialog`) is used.
 
 | **Step** | **Title**                 | **Content**                                                                                               |
@@ -100,40 +88,31 @@ Triggered after invite acceptance or first login when `onboarding_step` in the d
 
 # **16\. Error States & Edge Cases** [Status: Verified Specification / Implementation Pending]
 
-## **16.1 Spec Name Collision**
-
+## 16.1 Spec Name Collision
 If a user saves a spec with the same name as an existing spec in the project, the server returns HTTP 409 CONFLICT. The editor shows an inline error below the name field with a generated suggestion chip (clicking fills the name field).
 
-## **16.2 Session Auto-Recovery**
-
+## 16.2 Session Auto-Recovery
 If lastHeartbeatAt is > 60 seconds old on a session with status = running, Mission Control and Spec Detail show a yellow banner: "Session SES-0091 may have lost connection. Last heartbeat N minutes ago." with \[Check Status\] and \[Abandon Session\] buttons. \[Check Status\] pings the session health endpoint; if dead, marks session failed. After 5 minutes without heartbeat, the server auto-marks the session failed and sends notifications.
 
-## **16.3 Concurrent Edit Warning**
-
+## 16.3 Concurrent Edit Warning
 If two users open the same Spec Editor simultaneously, each sees an amber banner: "\[Name\] is currently editing this spec." On save with a stale currentVersionId, the server returns HTTP 409 with options to \[View their changes\] or \[Save anyway as a new version\].
 
-## **16.4 Task Dependency Violation**
-
+## 16.4 Task Dependency Violation
 If a user manually marks a task done when its dependencies are not yet done, the server returns HTTP 422. An AlertDialog presents the dependency conflict and offers \[Force Mark Done\] which sets forcedDone: true on the task record.
 
-## **16.5 Plan Generation Timeout**
-
+## 16.5 Plan Generation Timeout
 If plan generation takes > 30 seconds: the PLAN tab updates subtext to "Still working... complex specs take a moment." After 2 minutes with no response: DAEMON error + "Plan generation is taking longer than expected." + \[Check again\] (re-polls) + \[Cancel generation\] link.
 
-## **16.6 Permission-Gated Actions**
-
+## 16.6 Permission-Gated Actions
 Actions unavailable to the current user's role are never hidden from the DOM - they are always visible in a disabled state with a Tooltip naming the required role and, where applicable, a secondary \[Request Approval\] button visible to Members that sends a notification to all Admins.
 
-## **16.7 Session Limit Warning**
-
+## 16.7 Session Limit Warning
 If maxConcurrentTasks = 1 and a task is already running, clicking \[RE-RUN\] in the Task Drawer shows an inline note: "Max concurrent tasks (1) reached. This task will queue and start when the current task completes." with \[Queue Anyway\] and \[Cancel\] options.
 
-## **16.8 404 / Unmatched Routes**
-
+## 16.8 404 / Unmatched Routes
 Specdrivr brand mark (large, centred) + "404 - Not found." + "This page doesn't exist or you don't have access." + \[Go to Mission Control\] link.
 
-# **20\. Empty States & Microcopy Reference**
-
+# 20\. Empty States & Microcopy Reference
 | **Context**                  | **DAEMON** | **Heading**           | **Subtext**                                                              | **CTA**                      |
 | ---------------------------- | ---------- | --------------------- | ------------------------------------------------------------------------ | ---------------------------- |
 | /projects (no projects)      | idle       | No projects yet.      | Point me at a repository and I'll get to work.                           | \[Initialize First Project\] |

@@ -1,39 +1,31 @@
 # UI Specification — Shell & Pages
 
 **Status:** Canonical for layout and behaviour.
-**Last rewritten:** 2026-09-04 (UI overhaul, branch `feat/ui-overhaul`)
-**Companion:** [`DESIGN_SYSTEM.md`](./DESIGN_SYSTEM.md) — tokens, primitives, and visual rules.
+**Companion:** [`DESIGN_SYSTEM.md`](./DESIGN_SYSTEM.md) defines tokens, primitives, and visual rules.
 
-This document describes **what each screen contains and how it behaves**. `DESIGN_SYSTEM.md`
-describes **how it looks**. When this document names a colour or a component, it is naming a token
-or primitive defined there — never a raw value.
+This document defines screen content and behaviour. `DESIGN_SYSTEM.md` defines visual design.
+When this document names a colour or component, use its defined token or primitive. Do not use raw values.
 
-> **Provenance.** This is the surviving §10–§11 and §15–§17 of the pre-overhaul `DESIGN_SYSTEM.md`,
-> retargeted to the rebuilt system. The layout and behavioural spec was sound and is preserved; the
-> retro visual instructions (DAEMON mascot, scanline overlays, amber IDs, ASCII progress bars,
-> typewriter boot sequences) are removed per the overhaul decision record in `todo.md`.
+> Do not use a DAEMON mascot, scanline overlays, amber IDs, ASCII progress bars, or typewriter boot sequences.
 
 ---
 
 ## 1. Application shell
 
-The shell is fixed — sidebar and top bar never unmount during navigation. Only the main content
-area changes. Implemented in `src/app/(app)/layout.tsx`.
+Keep the sidebar and top bar mounted during navigation. Update only the main content area.
+Use `src/app/(app)/layout.tsx`.
 
 ### 1.1 Left sidebar (240px fixed)
 
 - **Top:** brand mark (24px) + `specdrivr` wordmark.
-- **Project switcher:** shows the active project as `org/repo`. Click opens a popover listing all
-  projects. Switching sets `active-project-id` and re-fetches all scoped data.
+- **Project switcher:** Show the active project as `org/repo`. Open a popover with all projects.
+  Set `active-project-id` on switch. Update all scoped data.
 - **Nav links** (icon + label, in order): Mission Control · Specifications · Sessions · Projects ·
   Notifications · Settings.
-  > Six items. The pre-overhaul doc claimed four; Projects and Notifications had been added to the
-  > code without the doc following. Six is correct.
-- **Active item:** `bg-accent-subtle` + `text-accent`. **Inactive:** `text-fg-secondary`, hover
-  `bg-surface-inset`. The old blue-left-border treatment is replaced by the subtle fill.
-- **Bottom:** agent status line — status glyph + text (see §1.4). When blocked, it is a button that
-  navigates to Mission Control. Below it: version tag (`text-2xs text-fg-muted`) and a `DEV` badge
-  when dev mode is active.
+  > Use six items.
+- **Active item:** Use `bg-accent-subtle` + `text-accent`. **Inactive:** Use `text-fg-secondary` and `bg-surface-inset` on hover.
+- **Bottom:** Show the agent status glyph and text (see §1.4). Make it a Mission Control button when blocked.
+  Show the version tag (`text-2xs text-fg-muted`) and a `DEV` badge in dev mode.
 
 ### 1.2 Top bar (56px)
 
@@ -41,14 +33,14 @@ area changes. Implemented in `src/app/(app)/layout.tsx`.
   text-fg-muted`, `/` separated).
 - **Right, always:** notification bell with unread count · user avatar (28px initials circle) +
   dropdown.
-- **Right, contextual:** primary action button(s) for the current page and state.
+- **Right, contextual:** Show primary action buttons for the current page and state.
 
 ### 1.3 User avatar dropdown
 
 Name + email (read-only header) · Profile Settings · Security · Notification Preferences ·
 Keyboard Shortcuts · Sign Out.
 
-Sign Out is immediate with no confirm; clears the session cookie and redirects to `/login`.
+Sign Out has no confirmation. Clear the session cookie. Redirect to `/login`.
 
 ### 1.4 Agent status line
 
@@ -74,8 +66,8 @@ Replaces the DAEMON status bar. Glyph + label, using the §8.4 status vocabulary
 | Notification Panel | Bell icon | Click outside / Escape |
 | Member Profile Sheet | *View Profile* in the Team table | Escape / close |
 
-All overlays use `bg-surface-overlay` + `shadow-overlay` (dialogs, drawers) or `shadow-popover`
-(popovers, dropdowns), move focus in on open, and return focus to the trigger on close.
+Use `bg-surface-overlay` + `shadow-overlay` for dialogs and drawers. Use `shadow-popover` for popovers and dropdowns.
+Move focus into an overlay on open. Return it to the trigger on close.
 
 ### 1.6 Keyboard shortcuts
 
@@ -92,24 +84,21 @@ All overlays use `bg-surface-overlay` + `shadow-overlay` (dialogs, drawers) or `
 | `Enter` / `Space` | Expand / collapse focused task row |
 | `O` | Open Task Drawer for focused row |
 
-> `Ctrl+\`` (Toggle Dev Mode) is retained only if dev mode survives the overhaul; confirm during
-> Phase 4 and delete this line if not.
+> Use `Ctrl+\`` (Toggle Dev Mode) only when dev mode is available. Check this during Phase 4.
 
 ---
 
 ## 2. Authentication pages
 
-No shell. Full-page centred layout on `bg-surface-base`.
+Do not show the shell. Use a full-page centred `bg-surface-base` layout.
 
 **Card:** 400px, `bg-surface-raised border border-line rounded-xl p-8`. Brand mark (32px) +
 `Specdrivr` wordmark + tagline.
 
 ### Login (`/login`)
 - Fields: Email (autofocus) · Password · **Sign In** (accent, full width) · *Forgot password?* link.
-- **Sign In** is disabled only while the request is in flight — never because fields are empty. The
-  server validates.
-- Error state: a `danger` banner below the button — "Invalid email or password." **Never field-level
-  errors**; that would confirm which accounts exist.
+- Disable **Sign In** only while the request runs. Do not disable it for empty fields. The server validates.
+- Show a `danger` banner below the button for errors: "Invalid email or password." Do not show field-level errors.
 - Demo bar (dev only): dashed border, *Sign in as Admin* / *Sign in as Member*.
 - Redirect: unauthenticated access to any route → `/login?next={path}`; after login → `next` or `/`.
 
@@ -118,25 +107,23 @@ Single email field + **Send Reset Link**. Always shows the success state regardl
 email exists.
 
 ### Reset Password (`/reset-password?token=`)
-Token validated on load. Invalid/expired → "This link has expired." + **Request a new link**.
-Two password fields + a 4-segment strength indicator. Must match; minimum 12 characters.
+Validate the token on load. For an invalid or expired token, show "This link has expired." + **Request a new link**.
+Show two password fields and a 4-segment strength indicator. Require a match and 12 characters.
 
-> The strength indicator was previously colour-only. It now carries a text label as well (§10,
-> "never colour-only").
+> Include a text label in the strength indicator (§10, "never colour-only").
 
 ### Accept Invite (`/invite?token=`)
-Token validated on load. Valid → email pre-filled read-only, plus Name, Password, Confirm, and
-**Accept Invite & Sign In**. On success: user created, auto-signed-in, redirected to `/` with the
-onboarding overlay on first run.
+Validate the token on load. For a valid token, pre-fill a read-only email plus Name, Password, Confirm, and **Accept Invite & Sign In**.
+On success, create and sign in the user. Redirect to `/` and show onboarding on the first run.
 
 ---
 
 ## 3. Mission Control (`/`)
 
 ### Needs Attention banner (only when blocked tasks exist)
-Full-width `warning` banner: `AlertTriangle` + "{N} tasks need your input". Blocked task pills
-inline (`T-019`, `T-033`…), each opening the Task Drawer. **Dismiss** is session-only; the banner
-returns on next load while tasks remain blocked.
+Show a full-width `warning` banner: `AlertTriangle` + "{N} tasks need your input".
+Show inline blocked task pills (`T-019`, `T-033`…). Open the Task Drawer from each pill.
+**Dismiss** applies only to the session. Show the banner on the next load while tasks remain blocked.
 
 ### Live Execution panel (left 60%)
 - **Running:** header with a pulsing `info` dot + `LIVE`, session ID (mono, `text-fg-secondary`),
@@ -147,13 +134,13 @@ returns on next load while tasks remain blocked.
   **View Changes →**. Auto-clears to idle after 60s.
 - **Idle:** empty state — icon, "No active session.", link to `/specs`.
 
-> Removed: ASCII progress bar, blinking `▶`, xterm scanline overlay, and the 800ms typewriter boot
-> sequence. Progress uses the `Progress` primitive; the log starts streaming immediately.
+> Use the `Progress` primitive. Start log streaming immediately.
+> Do not use ASCII progress, blinking `▶`, an xterm scanline overlay, or an 800ms typewriter boot sequence.
 
 ### Event Log feed (right 40%)
-Header `EVENT LOG` (`text-2xs uppercase text-fg-muted`). Last 30 events. Row: timestamp (mono) ·
-event type (colour-coded + glyph) · entity ID · description. Newest row carries a pulsing dot while
-a session is active. **View all →** links to `/sessions`.
+Use the `EVENT LOG` header (`text-2xs uppercase text-fg-muted`). Show the last 30 events.
+Each row has a mono timestamp, colour-coded glyph event type, entity ID, and description. Show a pulsing dot on the newest row during an active session.
+Link **View all →** to `/sessions`.
 
 Colour coding: `TASK_DONE` → `success` · `BLOCKED` → `warning` · `ERROR` → `danger` · `PLAN_*` →
 `info`.
@@ -162,13 +149,12 @@ Colour coding: `TASK_DONE` → `success` · `BLOCKED` → `warning` · `ERROR` �
 
 ## 4. Projects (`/projects`)
 
-Table: ID (mono) · Name · Repository (mono `org/repo`) · Branch (mono) · Specs · Last Run · Status ·
-overflow menu.
+Use a table with ID (mono), Name, Repository (mono `org/repo`), Branch (mono), Specs, Last Run, Status, and overflow menu.
 
 **New Project** → dialog: Name · Repository URL · Branch (default `main`) · Description →
 **Initialize Project**.
 
-Row click sets the active project and navigates to `/specs`.
+Set the active project on row click. Navigate to `/specs`.
 
 Empty state: "No projects yet." + "Point Specdrivr at a repository to get started." +
 **Initialize First Project**.
@@ -177,13 +163,12 @@ Empty state: "No projects yet." + "Point Specdrivr at a repository to get starte
 
 ## 5. Specifications (`/specs`)
 
-Table: ID (mono) · Name · Status badge · Version (mono, muted) · Tasks (`Progress` bar + `n/m`) ·
-Plan badge · Last Run · overflow menu.
+Use a table with ID (mono), Name, Status badge, Version (mono, muted), Tasks (`Progress` bar + `n/m`), Plan badge, Last Run, and overflow menu.
 
 Status badges: `Draft` (muted) · `Generating` (info, pulsing) · `Review` (warning) · `Running`
 (info, pulsing) · `Stalled` (danger) · `Done` (success).
 
-**New Spec** navigates to `/specs/new` — not a dialog.
+Navigate **New Spec** to `/specs/new`. Do not use a dialog.
 
 Empty state: "No specifications." + "Describe what you want built. Specdrivr plans the how." +
 **Write First Spec**.
@@ -192,18 +177,15 @@ Empty state: "No specifications." + "Describe what you want built. Specdrivr pla
 
 ## 6. Spec Editor (`/specs/new`, `/specs/[id]/edit`)
 
-Full-page; sidebar hidden. Top bar only: back arrow · spec name (large mono input) · **Save Draft** ·
-**Save & Generate Plan**.
+Use a full page with the sidebar hidden. Show only a top bar: back arrow, spec name (large mono input), **Save Draft**, and **Save & Generate Plan**.
 
 - **Save Draft** enabled when the name is non-empty.
 - **Save & Generate Plan** enabled when the name is filled **and** content ≥ 50 characters.
-- Layout: two-pane split with a drag handle, default 50/50. Left: CodeMirror 6 (line numbers, active
-  line highlight, wrap on). Right: rendered Markdown preview.
-- Footer strip: word count · line count · version indicator.
-- **Active plan warning** (`warning`, sticky): "This spec has an active plan (vN). Saving creates
-  vN+1 and abandons the current plan."
-- **Changes requested** (`warning`, sticky): quotes the reviewer's note.
-- **Concurrent edit** (`warning`): "{Name} is currently editing this spec."
+- Use two panes with a drag handle and a 50/50 default split. Put CodeMirror 6 on the left and rendered Markdown on the right.
+- Show word count, line count, and version in the footer strip.
+- Show the sticky `warning`: "This spec has an active plan (vN). Saving creates vN+1 and abandons the current plan."
+- Show a sticky `warning` that quotes changes requested.
+- Show the `warning`: "{Name} is currently editing this spec."
 
 ---
 
@@ -212,7 +194,7 @@ Full-page; sidebar hidden. Top bar only: back arrow · spec name (large mono inp
 ### Header
 `SPEC-003` (mono, `text-fg-secondary`) above the spec name. Status indicator + plan status badge.
 
-Contextual action (right):
+Show this contextual action on the right:
 
 | Spec status | Action |
 |---|---|
@@ -221,12 +203,11 @@ Contextual action (right):
 | `executing` | **SES-0091** (link) + **Pause** (outline) |
 | `complete` | **Re-run** + **Edit** (both outline) |
 
-Overflow menu: Edit · Duplicate · Delete, contextual on status.
+Show Edit, Duplicate, and Delete in the overflow menu when the status allows it.
 
 ### Tab: Spec
-Rendered Markdown of the current version. Version history strip of clickable pills
-(`v1 → v2 → v3 (current)`). Viewing an old version shows a "Viewing v1 · Not current" banner +
-**Back to current**.
+Render Markdown for the current version. Show clickable history pills (`v1 → v2 → v3 (current)`).
+When viewing an old version, show "Viewing v1 · Not current" and **Back to current**.
 
 ### Tab: Plan
 
@@ -239,81 +220,72 @@ Rendered Markdown of the current version. Version history strip of clickable pil
 | `approved` / `executing` / `complete` | Read-only plan + approval timestamp, no actions |
 
 **Review actions** (`pending_approval` only):
-- **Request Changes** (warning outline) → slide-down panel, required textarea. Submitting sets the
-  plan to `changes_requested` and notifies the spec author.
-- **Reject Plan** (danger outline) → slide-down panel, required reason + warning. Confirming sets the
-  plan to `rejected` and the spec to `drafting`.
-- **Approve & Execute** (accent) → confirmation dialog. Admin/Owner only; Members see a disabled
-  button with an explanatory tooltip. Dialog shows repo/branch + task count + optional notes.
+- **Request Changes** (warning outline) opens a slide-down panel with a required textarea. Set the plan to `changes_requested`. Notify the spec author.
+- **Reject Plan** (danger outline) opens a slide-down panel with a required reason and warning. Set the plan to `rejected`. Set the specification to `drafting`.
+- **Approve & Execute** (accent) opens a confirmation dialog. Allow Admin/Owner only. Show Members a disabled button with an explanatory tooltip.
+  Show repo/branch, task count, and optional notes in the dialog.
 
 ### Tab: Tasks
-- `pending_approval`: read-only preview + notice — "Tasks begin executing after plan approval."
-- Otherwise: filter pills (All · Todo · Running · Blocked · Done · Failed) + search + a summary strip
-  of colour-coded counts.
-- **Task row** (36px): status glyph · `T-042` (mono) · title · duration (muted, right) · overflow.
-- Blocked rows: `border-l-2 border-danger-border` + `AlertTriangle` + truncated reason (60 chars).
-- Row click expands inline: description (3 lines) · dependency pills · last log line · attempt count
-  if > 1 · **Open Detail →**.
-- **Row click never opens the drawer directly** — only **Open Detail →** or the overflow menu do.
+- For `pending_approval`, show a read-only preview and "Tasks begin executing after plan approval."
+- Otherwise, show filter pills, search, and a summary strip of colour-coded counts.
+- Use 36px task rows with status glyph, `T-042` (mono), title, muted right duration, and overflow.
+- Use `border-l-2 border-danger-border`, `AlertTriangle`, and a 60-character reason for blocked rows.
+- Expand the row on click. Show three description lines, dependency pills, last log line, attempt count above 1, and **Open Detail →**.
+- Do not open the drawer on row click. Open it only from **Open Detail →** or overflow.
 
 ### Tab: Changes
-Header `FILE CHANGES` + `+142 −38` (mono, success/danger). Two panes: file tree (200px, `+`/`~`/`-`
-prefix) + diff viewer using `diff-added` / `diff-removed` tokens.
+Show `FILE CHANGES` + `+142 −38` (mono, success/danger). Use two panes.
+Use a 200px file tree (`+`/`~`/`-` prefix). Use `diff-added` / `diff-removed` tokens in the diff viewer.
 
 ### Tab: Activity
-Event log scoped to this spec, grouped by session, with collapsible session headers.
+Show the specification event log grouped by session. Use collapsible session headers.
 
 ---
 
 ## 8. Task Drawer
 
-**Entry:** **Open Detail →** in an expanded task row, the overflow menu, or a blocked task pill in
-Mission Control.
+Open from **Open Detail →**, the overflow menu, or a blocked Mission Control task pill.
 
 **Header:** `T-042` (mono, `text-lg`) · title · status badge (inline editable dropdown).
-*(The DAEMON sprite that previously mirrored task status is removed; the badge carries the status.)*
+*The status badge shows task status.*
 
-- **Overview:** description (Markdown) · dependency pills (click navigates to that task's drawer) ·
-  related architecture decisions.
+- **Overview:** Show Markdown description, dependency pills that open the related drawer, and architecture decisions.
   - *Blocked:* `danger` panel with the reason, a context textarea, and **Retry with context**
     (disabled until non-empty).
   - *Failed:* `warning` panel with the last error and **Retry**.
-- **Attempts:** newest first. Row header: `Attempt N` · status · duration · timestamp (collapsible).
-  Expanded: log panel (320px, `bg-log-bg`, scrollable). In-progress attempts auto-scroll.
-- **Changes:** diff viewer scoped to this task. Empty state when the task is incomplete.
-- **Footer:** **Re-run** · **Mark Blocked** · **Mark Done**, shown only when contextually valid and
-  never for tasks in a terminal state.
+- **Attempts:** Show newest first. Use a collapsible `Attempt N`, status, duration, and timestamp header.
+  Show a 320px scrollable `bg-log-bg` panel when expanded. Auto-scroll in-progress attempts.
+- **Changes:** Show the task diff viewer. Show an empty state for an incomplete task.
+- **Footer:** Show **Re-run**, **Mark Blocked**, and **Mark Done** only when valid. Never show them for terminal tasks.
 
 ---
 
 ## 9. Sessions (`/sessions`)
 
-Filter bar: search · status · spec · date range.
+Use a filter bar with search, status, specification, and date range.
 
-Timeline grouped by date (`TODAY` / `YESTERDAY` / `THIS WEEK`, `text-2xs uppercase text-fg-muted`).
+Group the timeline by date (`TODAY` / `YESTERDAY` / `THIS WEEK`, `text-2xs uppercase text-fg-muted`).
 
 Session row (40px): status dot (pulsing `info` when running) · session ID (mono) · spec name (link) ·
 time range · task count + status glyph · overflow menu.
 
-Row click expands inline with a per-task event log; running sessions get a compact log panel (120px)
-at the bottom of the expanded row.
+Expand the row on click with a per-task event log. Show a 120px compact log panel for running sessions.
 
 ---
 
 ## 10. Notifications (`/notifications`)
 
-Filter tabs: All · Unread · Mentions. Full-width list, 56px rows. **Mark all read** top-right.
-Infinite scroll, 50 per page.
+Use All, Unread, and Mentions filter tabs. Use a full-width list with 56px rows. Put **Mark all read** top-right.
+Use infinite scroll with 50 items per page.
 
 Bell icon in the top bar: numeric badge (max `9+`) in `accent`, click opens the Notification Panel
 (popover, 380px wide, 480px max height).
 
-> The badge was amber; amber is no longer an accent. It is now `accent`, consistent with every other
-> interactive indicator.
+> Use `accent` for the badge.
 
 ### Delivery channels
-- **In-app:** Notification Panel + `/notifications`, polled every 3s (same interval as session polling).
-- **Email:** transactional via Resend, plain-text-first. Never more than one email per event per user.
+- **In-app:** Use Notification Panel + `/notifications`. Poll every 3s.
+- **Email:** Use transactional Resend email with plain text first. Send no more than one email per event per user.
 
 ### Events & defaults
 
@@ -330,10 +302,9 @@ Bell icon in the top bar: numeric badge (max `9+`) in `accent`, click opens the 
 | `role_changed` | User's project role changed | On | On |
 
 ### Panel behaviour
-- Badge updates via the 3s poll on `GET /api/v1/notifications?unread=true&count=true`.
-- Clicking a row marks it read (`PATCH /api/v1/notifications/{id}`) **and** navigates to `linkUrl` —
-  one action, no separate mark-read step.
-- **Mark all read** → `POST /api/v1/notifications/read-all`, badge clears optimistically.
+- Update the badge through the 3s poll on `GET /api/v1/notifications?unread=true&count=true`.
+- Mark a clicked row read with `PATCH /api/v1/notifications/{id}`. Navigate to `linkUrl` in the same action.
+- Use `POST /api/v1/notifications/read-all` for **Mark all read**. Clear the badge optimistically.
 
 ---
 
@@ -344,8 +315,7 @@ Bell icon in the top bar: numeric badge (max `9+`) in `accent`, click opens the 
 - **Project:** General · Team · Integrations · Agent · Audit Log
 - **Danger Zone**
 
-> `settings-nav.tsx` currently has two entries pointing at `/settings/security` — a copy-paste bug.
-> Fixed in Phase 5.
+> `settings-nav.tsx` has a Security entry and an API tokens entry under `/settings/security`.
 
 | Section | Contents |
 |---|---|
@@ -408,14 +378,11 @@ Cmd+K anywhere ────────────► Command Palette (overlay)
 | Progress bar | Specifications table; Spec Detail header; Mission Control |
 | Session row | Sessions; Mission Control (compact) |
 
-> Removed from this inventory: the DAEMON sprite (all expressions), the ASCII progress bar (`▓▒`),
-> the retro status character set (`▶✓⚠✕○`), and the amber ID badge. Their replacements are listed
-> above.
+> Do not use the DAEMON sprite, ASCII progress bar (`▓▒`), retro status character set (`▶✓⚠✕○`), or amber ID badge.
 
 ---
 
 ## 14. State machines
 
-Spec, plan, task, and session state machines are specified in
-[`STATE_MACHINES.md`](./STATE_MACHINES.md). They are behavioural contracts, not UI, and are
-unaffected by this overhaul. This document only specifies how each state is *rendered*.
+[`STATE_MACHINES.md`](./STATE_MACHINES.md) specifies spec, plan, task, and session state machines.
+They are behavioural contracts. This document specifies their rendered state.

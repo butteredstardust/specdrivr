@@ -1,6 +1,6 @@
 # Infrastructure
 
-Consolidated infrastructure and deployment configuration.
+This directory contains infrastructure and deployment configuration.
 
 ## Structure
 
@@ -16,7 +16,7 @@ infra/
     └── docker-compose.ci.yml  # CI environment setup
 ```
 
-## Quick Commands
+## Quick commands
 
 ```bash
 # Start local environment
@@ -34,6 +34,6 @@ docker-compose down
 
 ## Notes
 
-- Symlinks exist at project root (`docker-compose.yml`, `docker-compose.ci.yml`) for convenience
-- All Docker builds reference files relative to project root
-- The `context: ..` in compose files keeps paths relative to root directory
+- Project-root symlinks provide `docker-compose.yml` and `docker-compose.ci.yml`.
+- Docker builds reference files from the project root.
+- `context: ..` keeps compose paths relative to the project root.

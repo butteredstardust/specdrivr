@@ -1,8 +1,8 @@
 # Scripts Directory
 
-Utility and automation scripts for development, testing, and deployment.
+Use these utility and automation scripts for development, testing, and deployment.
 
-**Canonical reference:** [`documentation/infrastructure/SCRIPTS_REFERENCE.md`](../documentation/infrastructure/SCRIPTS_REFERENCE.md) documents every script here (and every `package.json` script) with its invocation and purpose. This file just gets you running quickly.
+**Canonical reference:** [`documentation/infrastructure/SCRIPTS_REFERENCE.md`](../documentation/infrastructure/SCRIPTS_REFERENCE.md) lists each script and `package.json` command. This file provides quick-start commands.
 
 ## Quick Start
 
@@ -14,7 +14,7 @@ Utility and automation scripts for development, testing, and deployment.
 
 ## Running Scripts
 
-All shell scripts are executable. Run from the project root:
+Run executable shell scripts from the project root:
 
 ```bash
 bash scripts/<script-name>.sh
@@ -22,4 +22,4 @@ bash scripts/<script-name>.sh
 ./scripts/<script-name>.sh
 ```
 
-Some scripts require `docker`/`docker-compose`, `node`/`pnpm`, and the environment variables in `.env.example`.
+Some scripts require `docker`/`docker-compose` or `node`/`pnpm`. Read `.env.example` for required environment variables.

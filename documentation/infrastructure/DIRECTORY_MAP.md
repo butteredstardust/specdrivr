@@ -1,14 +1,12 @@
-**SPECDRIVR**
+SPECDRIVR
 
 Master Product Specification — Directory Map & Responsibilities
-
-[Status: GROUND TRUTH]
 
 ---
 
 ## 1. Overview
 
-This document defines the mental model for the Specdrivr codebase. Every directory has a single responsibility. Agents MUST NOT cross-pollinate logic between these layers.
+Use this document to navigate the Specdrivr codebase. Each directory has one responsibility. Agents MUST NOT mix logic between these layers.
 
 ## 2. Directory Mapping
 
@@ -31,23 +29,22 @@ This document defines the mental model for the Specdrivr codebase. Every directo
 
 ## 3. The "No-Fly" Zones
 
-1.  **No direct DB in Actions**: Always use a method from a Repository.
-2.  **No direct DB in Components**: Pass data via Props or call a Repository in a Server Component.
-3.  **No Side-Effects in Queries**: Functions in `src/queries` must be pure and read-only.
-4.  **No `process.env` in Components**: Always import `env` from `@/lib/env`.
+1.  **No direct DB in Actions**: Use a Repository method.
+2.  **No direct DB in Components**: Pass data by props. Or use a Repository in a Server Component.
+3.  **No Side-Effects in Queries**: Keep functions in `src/queries` pure and read-only.
+4.  **No `process.env` in Components**: Import `env` from `@/lib/env`.
 
 ## 4. UI Topology Notes
 
-- `src/components/layout/systems-bar.tsx` no longer exists. System-health presentation is part of
-  `src/components/shell/sidebar.tsx`; reusable polling/state lives in
-  `src/hooks/use-system-health.ts`.
-- Large settings and plan surfaces use directory-local `shared.tsx` modules for types and small
-  composition helpers. They are not global primitives.
-- `src/components/ui/gated-button.tsx`, `entity-id.tsx`, and `status-icon.tsx` are reusable semantic
-  primitives introduced by the UI overhaul.
+- System-health presentation is in `src/components/shell/sidebar.tsx`. Reusable polling and state
+  are in `src/hooks/use-system-health.ts`.
+- Large settings and plan surfaces use local `shared.tsx` modules. These modules provide types and
+  small composition helpers. They are not global primitives.
+- `src/components/ui/gated-button.tsx`, `entity-id.tsx`, and `status-icon.tsx` provide reusable
+  semantic primitives.
 
 ## 5. Barrel Exports
 
 - Repositories must be exported from `src/repositories/index.ts`.
 - Actions must be exported from `src/actions/index.ts`.
-- This ensures agents can find symbols easily.
+- This helps agents find symbols.

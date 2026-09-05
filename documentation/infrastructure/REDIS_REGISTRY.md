@@ -1,14 +1,12 @@
-**SPECDRIVR**
+SPECDRIVR
 
 Master Product Specification — Redis Registry
-
-[Status: GROUND TRUTH]
 
 ---
 
 ## 1. Overview
 
-Specdrivr utilizes Redis (via `ioredis`) for high-performance distributed state management. This document defines the key namespace and TTL policies to prevent collision and memory leakage.
+Specdrivr uses Redis through `ioredis` for distributed state. Use this document to prevent key collisions and memory leaks.
 
 ## 2. Key Namespace Registry
 
@@ -22,11 +20,11 @@ Specdrivr utilizes Redis (via `ioredis`) for high-performance distributed state 
 
 ## 3. Usage Rules
 
-1.  **Prefixing**: Every key MUST be prefixed using the `: ` (colon) separator for compatibility with Redis GUI tools (e.g., RedisInsight).
-2.  **Explicit TTL**: Never use `SET` without an accompanying `EX` or `PX` unless the data is permanent (rare in this system).
-3.  **Atomic Operations**: Use `multi()` or Lua scripts for multi-key updates to ensure consistency.
+1.  **Prefixing**: Prefix every key with the `: ` (colon) separator. This supports Redis GUI tools such as RedisInsight.
+2.  **Explicit TTL**: Do not use `SET` without `EX` or `PX`. Use it only when data is permanent, which is rare here.
+3.  **Atomic Operations**: Use `multi()` or Lua scripts for multi-key updates. This ensures consistency.
 
 ## 4. Maintenance
 
-- **Eviction Policy**: The production Redis instance is configured with `allkeys-lru`.
-- **Monitoring**: Key counts and memory usage are monitored via the Operations dashboard.
+- **Eviction Policy**: The production Redis instance uses `allkeys-lru`.
+- **Monitoring**: Monitor key counts and memory usage in the Operations dashboard.

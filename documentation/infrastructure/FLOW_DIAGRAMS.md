@@ -1,18 +1,16 @@
-**SPECDRIVR**
+SPECDRIVR
 
 Master Product Specification — Core Flow Diagrams
-
-[Status: GROUND TRUTH]
 
 ---
 
 ## 1. Overview
 
-This document provides visual sequence diagrams for the core asynchronous operations in Specdrivr. These diagrams are rendered using Mermaid.js.
+Use these Mermaid diagrams to understand core asynchronous operations in Specdrivr.
 
 ## 2. Specification-to-Execution Flow
 
-This flow covers the lifecycle from a user's initial spec save to the start of an agent session.
+This flow shows the lifecycle from a user specification save to an agent session start.
 
 ```mermaid
 sequenceDiagram
@@ -40,7 +38,7 @@ sequenceDiagram
 
 ## 3. Agent Polling & Execution Loop
 
-This flow covers the communication between the standalone DAEMON agent and the API.
+This flow shows communication between the standalone DAEMON agent and the API.
 
 ```mermaid
 sequenceDiagram
@@ -73,7 +71,7 @@ sequenceDiagram
 
 ## 4. Webhook Integration Flow
 
-This flow covers the outgoing notification system.
+This flow shows the outgoing notification system.
 
 ```mermaid
 sequenceDiagram
