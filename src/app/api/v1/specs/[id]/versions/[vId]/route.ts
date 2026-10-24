@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
 import { specificationRepository } from '@/repositories/specification-repository';
 import { auth } from '@/lib/auth';
+import { requireMember } from '@/lib/rbac';
 import { logger } from '@/lib/logger';
 import { handleApiError } from '@/lib/error-handler';
 
 export async function GET(req: Request, context: { params: Promise<{ id: string; vId: string }> }) {
   try {
     const session = await auth();
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json(
         { error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
         { status: 401 }
@@ -15,6 +16,22 @@ export async function GET(req: Request, context: { params: Promise<{ id: string;
     }
 
     const { id, vId } = await context.params;
+
+    const parent = await specificationRepository.getById(Number(id));
+    if (!parent) {
+      return NextResponse.json(
+        { error: { code: 'NOT_FOUND', message: 'Specification version not found' } },
+        { status: 404 }
+      );
+    }
+
+    const { allowed } = await requireMember(session.user.id, parent.projectId);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: { code: 'FORBIDDEN', message: 'You do not have access to this project' } },
+        { status: 403 }
+      );
+    }
 
     const spec = await specificationRepository.getVersionById(Number(id), Number(vId));
     if (!spec) {

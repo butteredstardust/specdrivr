@@ -72,9 +72,14 @@ export function parseEnv(): Env {
     NODE_ENV: process.env.NODE_ENV,
     GITHUB_TOKEN: process.env.GITHUB_TOKEN,
     GITHUB_WEBHOOK_SECRET: process.env.GITHUB_WEBHOOK_SECRET,
+    // Cron routes trust this secret, so a production server must never fall back to a
+    // known value. `next build` also runs as production but serves no requests, so the
+    // build phase may still use the placeholder.
     CRON_SECRET:
       process.env.CRON_SECRET ||
-      (process.env.NODE_ENV === 'production' && process.env.CI ? undefined : 'a'.repeat(32)),
+      (process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE !== 'phase-production-build'
+        ? undefined
+        : 'a'.repeat(32)),
     RESEND_API_KEY:
       process.env.RESEND_API_KEY ||
       (process.env.NODE_ENV === 'production' && process.env.CI

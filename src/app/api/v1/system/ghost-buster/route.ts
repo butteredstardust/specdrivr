@@ -3,6 +3,7 @@ import { agentSessionRepository } from '@/repositories/agent-session-repository'
 import { handleApiError } from '@/lib/error-handler';
 import { parseEnv } from '@/lib/env-core';
 import { logger } from '@/lib/logger';
+import { isValidBearerSecret } from '@/lib/cron-auth';
 
 // C-6: Module-level idempotency guard. Vercel Cron can fire twice on cold starts.
 // We reject runs that arrive within 60 seconds of the last successful run.
@@ -11,9 +12,7 @@ const MIN_INTERVAL_MS = 60_000;
 
 export async function POST(request: NextRequest) {
   const env = parseEnv();
-  const authHeader = request.headers.get('Authorization');
-
-  if (authHeader !== `Bearer ${env.CRON_SECRET}`) {
+  if (!isValidBearerSecret(request.headers.get('Authorization'), env.CRON_SECRET)) {
     return NextResponse.json(
       { error: { code: 'UNAUTHORIZED', message: 'Invalid CRON_SECRET' } },
       { status: 401 }
