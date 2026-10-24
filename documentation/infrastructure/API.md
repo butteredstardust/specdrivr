@@ -48,6 +48,8 @@ Authentication is managed by BetterAuth under `/api/auth/[...auth]`.
 ## 6.5 Tasks
 | **Method** | **Path**                   | **Description**                                       |
 | ---------- | -------------------------- | ----------------------------------------------------- |
+| **GET**    | /api/v1/tasks              | List one project's tasks. Needs `projectId`, `specId` or `planId`; caller must be a member. |
+| **POST**   | /api/v1/tasks              | Create a task in a plan. Caller needs `member` or higher on the plan's project. |
 | **GET**    | /api/v1/tasks/:id          | Get detailed task information and current status.     |
 | **PATCH**  | /api/v1/tasks/:id          | Update human context or manually override status.     |
 | **POST**   | /api/v1/tasks/:id/retry    | Re-queue a failed or done task.                       |

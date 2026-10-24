@@ -2,6 +2,7 @@
 import { execSync, spawn, type ChildProcess } from 'child_process';
 import { randomUUID } from 'node:crypto';
 import { BACKEND_CONFIG, buildCliArgs, AgentBackend, TaskWeight } from '../src/lib/agent-models';
+import { isSafeGitRef, isSafeRepoSlug, redactGitCredentials, runGit } from '../src/lib/agent-git';
 
 const API_BASE = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
 const AGENT_TOKEN = process.env.AGENT_TOKEN;
@@ -84,14 +85,10 @@ async function api(method: string, path: string, body?: unknown) {
 }
 
 /**
- * Executes a git command and returns output.
+ * Executes a git command without a shell and returns output.
  */
 function git(args: string[]): string {
-  try {
-    return execSync(`git ${args.join(' ')}`, { encoding: 'utf-8' }).trim();
-  } catch (err) {
-    throw new Error(`Git command failed: git ${args.join(' ')} - ${String(err)}`);
-  }
+  return runGit(args);
 }
 
 function buildTaskPrompt(task: Task, backend: AgentBackend): string {
@@ -171,6 +168,19 @@ async function executeTask(task: Task): Promise<void> {
     return;
   }
 
+  // Refuse git automation for values git could read as options or that redirect the push.
+  if (
+    task.githubConfig &&
+    !(
+      isSafeGitRef(task.githubConfig.branch) &&
+      isSafeGitRef(task.githubConfig.branchName) &&
+      isSafeRepoSlug(task.githubConfig.repo)
+    )
+  ) {
+    await streamLog('⚠ Git automation skipped: unsafe branch or repository name', task.id, 'warn');
+    task.githubConfig = undefined;
+  }
+
   // Git Setup: Create/Switch to feature branch
   if (task.githubConfig) {
     try {
@@ -188,7 +198,7 @@ async function executeTask(task: Task): Promise<void> {
         git(['checkout', branchName]);
       }
     } catch (err) {
-      await streamLog(`⚠ Git setup warning: ${String(err)}`, task.id, 'warn');
+      await streamLog(`⚠ Git setup warning: ${redactGitCredentials(String(err))}`, task.id, 'warn');
     }
   }
 
@@ -370,7 +380,11 @@ async function executeTask(task: Task): Promise<void> {
         await streamLog('⚙ Git: No changes detected.', task.id);
       }
     } catch (err) {
-      await streamLog(`⚠ Git automation failed: ${String(err)}`, task.id, 'warn');
+      await streamLog(
+        `⚠ Git automation failed: ${redactGitCredentials(String(err))}`,
+        task.id,
+        'warn'
+      );
     }
   }
 

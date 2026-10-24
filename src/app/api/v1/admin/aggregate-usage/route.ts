@@ -4,16 +4,14 @@ import { z } from 'zod';
 import { env } from '@/lib/env';
 import { aggregateUsageForDate } from '@/lib/jobs/aggregate-usage';
 import { logger } from '@/lib/logger';
+import { isValidBearerSecret } from '@/lib/cron-auth';
 
 const AggregateUsageSchema = z.object({
   date: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  const cronSecret = env.CRON_SECRET;
-
-  if (!authHeader?.startsWith('Bearer ') || authHeader.replace('Bearer ', '') !== cronSecret) {
+  if (!isValidBearerSecret(request.headers.get('Authorization'), env.CRON_SECRET)) {
     logger.warn('Unauthorized attempt to trigger usage aggregation');
     return NextResponse.json(
       { error: { code: 'UNAUTHORIZED', message: 'Invalid or missing CRON_SECRET' } },

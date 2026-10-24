@@ -52,16 +52,41 @@ export interface UpdateTaskData {
 }
 
 export class TaskRepository extends BaseRepository {
-  async getAll(options: { page?: number; limit?: number } = {}) {
-    const { page = 1, limit = 50 } = options;
+  /**
+   * Returns a page of tasks belonging to one project, optionally filtered by status.
+   * Joins through plans and specifications so tasks without a specId are still scoped.
+   */
+  async getByProjectId(
+    projectId: number,
+    options: { status?: TaskStatus; page?: number; limit?: number } = {}
+  ) {
+    const { status, page = 1, limit = 50 } = options;
     const safeLimit = Math.min(limit, 100);
     const offset = (page - 1) * safeLimit;
+    const where = status
+      ? and(eq(specifications.projectId, projectId), eq(tasks.status, status))
+      : eq(specifications.projectId, projectId);
 
     const [rows, countResult] = await Promise.all([
       this.executeQuery(() =>
-        db.select().from(tasks).orderBy(desc(tasks.createdAt)).limit(safeLimit).offset(offset)
+        db
+          .select(getTableColumns(tasks))
+          .from(tasks)
+          .innerJoin(plans, eq(tasks.planId, plans.id))
+          .innerJoin(specifications, eq(plans.specId, specifications.id))
+          .where(where)
+          .orderBy(desc(tasks.createdAt))
+          .limit(safeLimit)
+          .offset(offset)
       ),
-      this.executeQuery(() => db.select({ count: sql<number>`count(*)` }).from(tasks)),
+      this.executeQuery(() =>
+        db
+          .select({ count: sql<number>`count(*)` })
+          .from(tasks)
+          .innerJoin(plans, eq(tasks.planId, plans.id))
+          .innerJoin(specifications, eq(plans.specId, specifications.id))
+          .where(where)
+      ),
     ]);
 
     const total = Number(countResult[0]?.count ?? 0);
@@ -104,14 +129,6 @@ export class TaskRepository extends BaseRepository {
     const result = await this.executeQuery(() =>
       db.select().from(tasks).where(eq(tasks.specId, specId)).orderBy(asc(tasks.executionOrder))
     );
-    return result as Task[];
-  }
-
-  async getByStatus(status: TaskStatus): Promise<Task[]> {
-    const result = await this.executeQuery(() =>
-      db.select().from(tasks).where(eq(tasks.status, status)).orderBy(desc(tasks.createdAt))
-    );
-
     return result as Task[];
   }
 

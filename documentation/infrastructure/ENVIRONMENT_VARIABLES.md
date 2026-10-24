@@ -33,7 +33,7 @@ Use this document with `.env.example` to configure Specdrivr environment variabl
 
 | **Variable**  | **Description**                                                                                       | **Source**   | **Default** |
 | -------------- | ---------------------------------------------------------------------------------------------------------- | -------------- | ------------- |
-| `CRON_SECRET` | Set the 32+ character secret for scheduled and cron-triggered routes, such as usage aggregation and ghost-buster cleanup. | System Admin | -           |
+| `CRON_SECRET` | Set the 32+ character secret for scheduled and cron-triggered routes, such as usage aggregation and ghost-buster cleanup. Required when `NODE_ENV=production`; there is no default. | System Admin | -           |
 
 ## 5. Integrations & Notifications
 
