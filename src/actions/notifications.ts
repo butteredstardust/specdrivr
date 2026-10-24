@@ -87,7 +87,7 @@ export async function updateNotificationPreferencesAction(formData: FormData) {
     const result = updateNotificationPreferencesSchema.safeParse({ preferences: parsedData });
 
     if (!result.success) {
-      return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+      return { success: false, error: { code: 'INVALID_INPUT', details: result.error.issues } };
     }
 
     await notificationRepository.upsertPreferences(session.user.id, result.data.preferences);

@@ -22,7 +22,7 @@ export async function inviteMemberAction(formData: FormData) {
 
   const result = inviteMemberSchema.safeParse(rawData);
   if (!result.success) {
-    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.issues } };
   }
 
   const { allowed } = await requireAdmin(session.user.id, result.data.projectId);
@@ -75,7 +75,7 @@ export async function updateMemberRoleAction(formData: FormData) {
 
   const result = updateMemberRoleSchema.safeParse(rawData);
   if (!result.success) {
-    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.issues } };
   }
 
   const { allowed, role: actorRole } = await requireAdmin(session.user.id, result.data.projectId);

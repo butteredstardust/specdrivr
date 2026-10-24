@@ -24,7 +24,7 @@ export async function createProjectAction(formData: FormData) {
 
   const result = createProjectSchema.safeParse(rawData);
   if (!result.success) {
-    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.issues } };
   }
 
   try {
@@ -83,7 +83,7 @@ export async function updateProjectAction(formData: FormData) {
 
   const result = updateProjectSchema.safeParse(rawData);
   if (!result.success) {
-    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.issues } };
   }
 
   try {

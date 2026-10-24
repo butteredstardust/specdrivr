@@ -20,6 +20,14 @@ describe('GitHub Service', () => {
       expect(msg).toMatch(/^feat\(T-042\): A+\.\.\.$/);
     });
 
+    it('uses the configured commit type', () => {
+      expect(getAgentCommitMessage('T-042', 'Fix login', 'fix')).toBe('fix(T-042): Fix login');
+    });
+
+    it('falls back to feat for a blank commit type', () => {
+      expect(getAgentCommitMessage('T-042', 'Fix login', '  ')).toBe('feat(T-042): Fix login');
+    });
+
     it('should handle very long externalId', () => {
       const longId = '1234567890'.repeat(10); // 100 chars
       const msg = getAgentCommitMessage(longId, 'Title');

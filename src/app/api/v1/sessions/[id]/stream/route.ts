@@ -39,7 +39,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   const encoder = new TextEncoder();
 
   // Create a dedicated Redis subscriber
-  const subscriber = new Redis(env.REDIS_URL || 'redis://localhost:6379');
+  const subscriber = new Redis(env.REDIS_URL || 'redis://localhost:6379', { protocol: 2 });
   const logChannel = `session:${sId}:logs`;
   const updateChannel = `session:${sId}:updates`;
   const eventChannel = `session:${sId}:events`;

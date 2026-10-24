@@ -95,7 +95,7 @@ Strict rules make agent output predictable. Specdrivr applies these rules to its
 | Layer      | Choice                  | Why                                    |
 | ---------- | ----------------------- | -------------------------------------- |
 | Framework  | Next.js 16 (App Router) | Server-first, type-safe, AI-legible    |
-| Language   | TypeScript 5.9          | Catches agent mistakes at compile time |
+| Language   | TypeScript 6.0          | Catches agent mistakes at compile time |
 | Database   | PostgreSQL + Drizzle    | Migrations as code, typed queries      |
 | Auth       | better-auth             | Session-based, production-grade        |
 | UI         | shadcn/ui + Tailwind 4  | One consistent design system           |

@@ -56,7 +56,11 @@ export async function GET(request: NextRequest) {
         repo: ghConfig.repo,
         branch: ghConfig.branch,
         branchName: getAgentBranchName(nextTask.specId || '0', nextTask.id),
-        commitMessage: getAgentCommitMessage(nextTask.externalId, nextTask.title),
+        commitMessage: getAgentCommitMessage(
+          nextTask.externalId,
+          nextTask.title,
+          agentConfig?.commitMessagePrefix
+        ),
       };
     }
 

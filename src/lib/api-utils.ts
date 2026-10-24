@@ -14,7 +14,7 @@ export function parseUrlParams<T extends z.ZodTypeAny>(req: Request | URL, schem
 export function safeParseUrlParams<T extends z.ZodTypeAny>(
   req: Request | URL,
   schema: T
-): z.SafeParseReturnType<z.input<T>, z.infer<T>> {
+): z.ZodSafeParseResult<z.infer<T>> {
   const url = req instanceof URL ? req : new URL(req.url);
   return schema.safeParse(Object.fromEntries(url.searchParams.entries()));
 }

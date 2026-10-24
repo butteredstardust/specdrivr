@@ -30,7 +30,7 @@ export async function createAgentTokenAction(formData: FormData) {
 
   const result = createAgentTokenSchema.safeParse(rawData);
   if (!result.success) {
-    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.issues } };
   }
 
   const { allowed } = await requireAdmin(session.user.id, result.data.projectId);
@@ -93,7 +93,7 @@ export async function revokeAgentTokenAction(formData: FormData) {
   });
 
   if (!result.success) {
-    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.issues } };
   }
 
   try {

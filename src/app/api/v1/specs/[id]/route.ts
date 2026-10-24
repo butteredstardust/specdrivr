@@ -88,7 +88,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const parsed = UpdateSpecSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        formatErrorResponse({ message: 'Validation failed', details: parsed.error.errors }),
+        formatErrorResponse({ message: 'Validation failed', details: parsed.error.issues }),
         { status: 400 }
       );
     }

@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     const parsed = safeParseUrlParams(request, SpecsQuerySchema);
     if (!parsed.success) {
       return NextResponse.json(
-        formatErrorResponse({ message: 'Invalid query parameters', details: parsed.error.errors }),
+        formatErrorResponse({ message: 'Invalid query parameters', details: parsed.error.issues }),
         { status: 400 }
       );
     }

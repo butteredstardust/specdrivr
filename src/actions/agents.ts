@@ -23,7 +23,7 @@ export async function terminateAgentSessionAction(formData: FormData) {
 
   const result = terminateAgentSessionSchema.safeParse(rawData);
   if (!result.success) {
-    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.issues } };
   }
 
   const agentSession = await agentSessionRepository.getById(result.data.sessionId);

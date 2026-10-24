@@ -24,7 +24,7 @@ export async function uploadTestResultsAction(formData: FormData) {
 
   const result = testResultUploadSchema.safeParse(rawData);
   if (!result.success) {
-    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.issues } };
   }
 
   // Find the project via hierarchy to authorize

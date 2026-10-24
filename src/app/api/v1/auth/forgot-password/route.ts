@@ -20,7 +20,7 @@ export async function POST(req: Request) {
           error: {
             code: 'VALIDATION_ERROR',
             message: 'Invalid email format',
-            details: parsed.error.errors,
+            details: parsed.error.issues,
           },
         },
         { status: 400 }
