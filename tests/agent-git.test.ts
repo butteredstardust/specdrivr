@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, rmSync, writeFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { execFileSync } from 'node:child_process';
 import {
   githubAuthEnv,
   isSafeGitRef,
@@ -89,9 +90,14 @@ describe('isSafeRepoSlug', () => {
 describe('githubAuthEnv', () => {
   it('scopes the token to a github.com auth header and clears inherited headers', () => {
     const env = githubAuthEnv(FAKE_TOKEN, { PATH: process.env.PATH });
-    const headers = runGit(['config', '--get-all', 'http.https://github.com/.extraheader'], {
-      env,
-    }).split('\n');
+    // Read untrimmed output: runGit trims, which would drop a leading empty value.
+    const headers = execFileSync(
+      'git',
+      ['config', '--get-all', 'http.https://github.com/.extraheader'],
+      { env, encoding: 'utf-8' }
+    )
+      .replace(/\n$/, '')
+      .split('\n');
     const expected = Buffer.from(`x-access-token:${FAKE_TOKEN}`).toString('base64');
     expect(headers.at(-1)).toBe(`AUTHORIZATION: basic ${expected}`);
     // git drops every header listed before an empty value (e.g. one set by the
