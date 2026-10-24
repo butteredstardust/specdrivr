@@ -94,7 +94,27 @@ describe('githubAuthEnv', () => {
     }).split('\n');
     const expected = Buffer.from(`x-access-token:${FAKE_TOKEN}`).toString('base64');
     expect(headers.at(-1)).toBe(`AUTHORIZATION: basic ${expected}`);
-    expect(headers.slice(0, -1).every((h) => h === '')).toBe(true);
+    // git drops every header listed before an empty value (e.g. one set by the
+    // checkout's local config), so ours must be the only header after it.
+    const reset = headers.lastIndexOf('');
+    expect(reset).toBeGreaterThanOrEqual(0);
+    expect(headers.slice(reset + 1)).toEqual([`AUTHORIZATION: basic ${expected}`]);
     expect(env.GIT_TERMINAL_PROMPT).toBe('0');
+  });
+});
+
+describe('githubAuthEnv with inherited GIT_CONFIG entries', () => {
+  it('keeps entries the caller already set', () => {
+    const env = githubAuthEnv(FAKE_TOKEN, {
+      PATH: process.env.PATH,
+      GIT_CONFIG_COUNT: '1',
+      GIT_CONFIG_KEY_0: 'core.abbrev',
+      GIT_CONFIG_VALUE_0: '12',
+    });
+    expect(env.GIT_CONFIG_COUNT).toBe('3');
+    expect(runGit(['config', '--get', 'core.abbrev'], { env })).toBe('12');
+    expect(
+      runGit(['config', '--get-all', 'http.https://github.com/.extraheader'], { env })
+    ).toContain('AUTHORIZATION: basic ');
   });
 });

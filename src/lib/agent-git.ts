@@ -57,14 +57,17 @@ export function isSafeRepoSlug(repo: string): boolean {
  */
 export function githubAuthEnv(token: string, baseEnv: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   const basic = Buffer.from(`x-access-token:${token}`).toString('base64');
+  // Append after any GIT_CONFIG_* entries the caller already set, so they still apply.
+  const inherited = Number.parseInt(baseEnv.GIT_CONFIG_COUNT ?? '', 10);
+  const start = Number.isInteger(inherited) && inherited > 0 ? inherited : 0;
   return {
     ...baseEnv,
     GIT_TERMINAL_PROMPT: '0',
-    // An empty value first clears any extraheader inherited from the user's git config.
-    GIT_CONFIG_COUNT: '2',
-    GIT_CONFIG_KEY_0: 'http.https://github.com/.extraheader',
-    GIT_CONFIG_VALUE_0: '',
-    GIT_CONFIG_KEY_1: 'http.https://github.com/.extraheader',
-    GIT_CONFIG_VALUE_1: `AUTHORIZATION: basic ${basic}`,
+    GIT_CONFIG_COUNT: String(start + 2),
+    // An empty value first clears any extraheader inherited from earlier config.
+    [`GIT_CONFIG_KEY_${start}`]: 'http.https://github.com/.extraheader',
+    [`GIT_CONFIG_VALUE_${start}`]: '',
+    [`GIT_CONFIG_KEY_${start + 1}`]: 'http.https://github.com/.extraheader',
+    [`GIT_CONFIG_VALUE_${start + 1}`]: `AUTHORIZATION: basic ${basic}`,
   };
 }
