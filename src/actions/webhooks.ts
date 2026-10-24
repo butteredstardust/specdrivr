@@ -22,7 +22,7 @@ export async function createWebhookAction(formData: FormData) {
 
   const result = createWebhookSchema.safeParse(rawData);
   if (!result.success) {
-    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.issues } };
   }
 
   const { allowed } = await requireAdmin(session.user.id, result.data.projectId);
@@ -69,7 +69,7 @@ export async function updateWebhookAction(formData: FormData) {
 
   const result = updateWebhookSchema.safeParse(rawData);
   if (!result.success) {
-    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.issues } };
   }
 
   const webhook = await webhookRepository.getById(result.data.id);
@@ -156,7 +156,7 @@ export async function redeliverWebhookAction(formData: FormData) {
     deliveryId: Number(formData.get('deliveryId')),
   });
   if (!result.success) {
-    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.issues } };
   }
 
   const deliveryId = result.data.deliveryId;

@@ -30,7 +30,7 @@ export async function createSpecificationAction(formData: FormData) {
 
   const result = createSpecificationSchema.safeParse(rawData);
   if (!result.success) {
-    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.issues } };
   }
 
   const { allowed } = await requireMember(session.user.id, result.data.projectId);
@@ -88,7 +88,7 @@ export async function createSpecVersionAction(formData: FormData) {
 
   const result = createSpecVersionSchema.safeParse(rawData);
   if (!result.success) {
-    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.issues } };
   }
 
   const spec = await specificationRepository.getById(result.data.specId);
@@ -152,7 +152,7 @@ export async function updateSpecificationAction(formData: FormData) {
 
   const result = updateSpecificationSchema.safeParse(rawData);
   if (!result.success) {
-    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.issues } };
   }
 
   const spec = await specificationRepository.getById(result.data.id);

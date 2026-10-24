@@ -15,12 +15,12 @@ Define absolute behavioral anchors, technical constraints, and architectural man
 Specdrivr is built on a modern, high-performance stack optimized for AI-native development:
 
 - **Core Framework**: Next.js 16.1.6 (App Router) + React 19.2.4.
-- **Language**: TypeScript 5.9.3 with strictly enforced safety rules.
+- **Language**: TypeScript 6.0.3 with strictly enforced safety rules.
 - **Database**: PostgreSQL @16+ with Drizzle ORM 0.45.1.
 - **Authentication**: `better-auth` 1.5.5 with Drizzle session management.
 - **Styling**: Tailwind CSS 4.2.1 for utility-first layout.
 - **UI Architecture**: UI components are standardized on `shadcn/ui`.
-- **Safety**: Zod 3.22 for runtime validation; Pino 10.3 for structured logging.
+- **Safety**: Zod 4.6 for runtime validation; Pino 10.3 for structured logging.
 
 ## 3. Key Project Files & Directories
 

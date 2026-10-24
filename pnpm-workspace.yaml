@@ -23,14 +23,7 @@ autoInstallPeers: false
 # auditConfig:
 #   ignoreGhsas:
 #     - GHSA-xxxx-xxxx-xxxx # <package>: <reason>, recheck <date>
-auditConfig:
-  ignoreGhsas:
-    # zod: memory exhaustion on oversized constrained collections. Fixed only
-    # in zod 4.6.6; the app is on zod 3, and the zod 4 migration is a major
-    # change tracked in Dependabot PR #94. Recheck 2026-11-30.
-    - GHSA-mrhx-c7xc-m3w5
-
 overrides:
-  # better-auth and knip depend on zod 4 and resolved below the
-  # GHSA-mrhx-c7xc-m3w5 fix. Lift every zod 4 copy to the patched release.
+  # GHSA-mrhx-c7xc-m3w5 is fixed in zod 4.6.6. Keep every zod 4 copy (the app,
+  # better-auth, knip) on the patched release.
   'zod@^4': ^4.6.6

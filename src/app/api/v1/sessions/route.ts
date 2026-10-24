@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        formatErrorResponse({ message: 'Invalid query parameters', details: error.errors }),
+        formatErrorResponse({ message: 'Invalid query parameters', details: error.issues }),
         { status: 400 }
       );
     }
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
           error: {
             code: 'VALIDATION_ERROR',
             message: 'Invalid session data',
-            details: parsed.error.errors,
+            details: parsed.error.issues,
           },
         },
         { status: 400 }

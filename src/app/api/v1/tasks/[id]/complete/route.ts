@@ -44,7 +44,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const parsed = CompleteTaskSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { error: { code: 'INVALID_INPUT', details: parsed.error.errors } },
+        { error: { code: 'INVALID_INPUT', details: parsed.error.issues } },
         { status: 400 }
       );
     }

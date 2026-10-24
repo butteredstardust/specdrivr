@@ -80,7 +80,7 @@ export async function unblockTaskAction(formData: FormData) {
 
   const result = unblockTaskSchema.safeParse(rawData);
   if (!result.success) {
-    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.issues } };
   }
 
   const task = await taskRepository.getById(result.data.id);
@@ -145,7 +145,7 @@ export async function overrideTaskStatusAction(formData: FormData) {
 
   const result = overrideTaskStatusSchema.safeParse(rawData);
   if (!result.success) {
-    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.issues } };
   }
 
   const task = await taskRepository.getById(result.data.id);
@@ -219,7 +219,7 @@ export async function submitTaskFileChangesAction(formData: FormData) {
 
   const result = proposeTaskChangesSchema.safeParse(payload);
   if (!result.success) {
-    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.issues } };
   }
 
   const task = await taskRepository.getById(result.data.taskId);

@@ -27,7 +27,7 @@ export async function POST(request: Request) {
         {
           error: {
             code: 'VALIDATION_ERROR',
-            message: parsed.error.errors[0]?.message ?? 'Validation failed',
+            message: parsed.error.issues[0]?.message ?? 'Validation failed',
           },
         },
         { status: 400 }

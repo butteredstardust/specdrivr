@@ -34,7 +34,7 @@ export async function recordGitCommitAction(formData: FormData) {
 
   const result = insertGitCommitSchema.safeParse(payload);
   if (!result.success) {
-    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.issues } };
   }
 
   const { allowed } = await requireAdmin(session.user.id, result.data.projectId);

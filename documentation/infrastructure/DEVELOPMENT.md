@@ -92,7 +92,7 @@ Use the Node version in `.nvmrc`:
 nvm use  # Auto-switches to correct version
 ```
 
-This keeps behaviour consistent across environments. The project requires Node.js v25.6.1 and pnpm.
+This keeps behaviour consistent across environments. The project requires Node.js v24.22.1 (the current LTS line) and pnpm.
 
 ## Environment Configuration Architecture
 
@@ -124,12 +124,12 @@ Do not import `env-core.ts` directly. Use one of the wrapper files above.
 ## 4. Technical Stack
 
 - **Framework**: Next.js 16.1.6 (App Router)
-- **Language**: TypeScript 5.9.3
+- **Language**: TypeScript 6.0.3
 - **Database**: PostgreSQL (v16+) with Drizzle ORM 0.45.1
 - **Styling**: Tailwind CSS 4.2.1
 - **Auth**: better-auth 1.5.4
 - **Authentication**: better-auth 1.5.4 with Drizzle adapter
-- **Data Validation**: Zod 3.22.0
+- **Data Validation**: Zod 4.6.7
 - **Testing**: Vitest 4 (unit), Playwright 1.42 (E2E)
 - **State/Interactivity**: @dnd-kit (drag-and-drop), Base UI
 - **Rich Text**: @uiw/react-md-editor

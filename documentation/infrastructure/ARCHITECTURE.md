@@ -3,7 +3,7 @@
 | **Layer**        | **Technology / Library**                          | **Rationale**                                                     |
 | ---------------- | ------------------------------------------------- | ----------------------------------------------------------------- |
 | Framework        | Next.js 16 (App Router)                           | Server Components, Server Actions, built-in caching layer         |
-| Language         | TypeScript 5.x (strict mode)                      | Type safety across all layers; Drizzle types flow end-to-end      |
+| Language         | TypeScript 6.x (strict mode)                      | Type safety across all layers; Drizzle types flow end-to-end      |
 | Database         | PostgreSQL 16                                     | ACID transactions; JSONB for log lines and metadata               |
 | ORM              | Drizzle ORM + drizzle-kit                         | Type-safe queries; schema-first migrations; no code generation    |
 | Auth             | [Better Auth](https://www.better-auth.com/)       | Credentials + Email/Password; session in Postgres; CSRF built-in  |

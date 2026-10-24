@@ -122,7 +122,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        formatErrorResponse({ message: 'Validation failed', details: error.errors }),
+        formatErrorResponse({ message: 'Validation failed', details: error.issues }),
         { status: 400 }
       );
     }

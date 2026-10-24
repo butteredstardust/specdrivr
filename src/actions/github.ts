@@ -27,7 +27,7 @@ export async function createPullRequestAction(formData: FormData) {
 
   const result = createPullRequestSchema.safeParse(rawData);
   if (!result.success) {
-    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.issues } };
   }
 
   const { allowed } = await requireAdmin(session.user.id, result.data.projectId);

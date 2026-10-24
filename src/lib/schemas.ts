@@ -17,10 +17,8 @@ import { z } from 'zod';
 export const taskStatusSchema = z.enum(
   ['todo', 'in_progress', 'done', 'blocked', 'failed', 'skipped'],
   {
-    errorMap: () => ({
-      message:
-        "Status must be one of: 'todo', 'in_progress', 'done', 'blocked', 'failed', or 'skipped'",
-    }),
+    error:
+      "Status must be one of: 'todo', 'in_progress', 'done', 'blocked', 'failed', or 'skipped'",
   }
 );
 
@@ -29,7 +27,7 @@ export const taskStatusSchema = z.enum(
  * AI models that can be used for task execution
  */
 export const recommendedModelSchema = z.enum(['sonnet', 'opus', 'haiku'], {
-  errorMap: () => ({ message: "Recommended model must be one of: 'sonnet', 'opus', or 'haiku'" }),
+  error: "Recommended model must be one of: 'sonnet', 'opus', or 'haiku'",
 });
 
 /**
@@ -49,16 +47,16 @@ export const recommendedModelSchema = z.enum(['sonnet', 'opus', 'haiku'], {
 export const createTaskSchema = z.object({
   description: z
     .string({
-      required_error: 'Task description is required',
-      invalid_type_error: 'Description must be a string',
+      error: (issue) =>
+        issue.input === undefined ? 'Task description is required' : 'Description must be a string',
     })
     .min(1, 'Task description cannot be empty')
     .max(5000, 'Task description cannot exceed 5000 characters'),
 
   planId: z
     .number({
-      required_error: 'Plan ID is required',
-      invalid_type_error: 'Plan ID must be a number',
+      error: (issue) =>
+        issue.input === undefined ? 'Plan ID is required' : 'Plan ID must be a number',
     })
     .int('Plan ID must be an integer')
     .positive('Plan ID must be a positive number'),
@@ -67,7 +65,7 @@ export const createTaskSchema = z.object({
 
   priority: z
     .number({
-      invalid_type_error: 'Priority must be a number',
+      error: 'Priority must be a number',
     })
     .int('Priority must be an integer')
     .min(1, 'Priority must be at least 1')
@@ -77,7 +75,7 @@ export const createTaskSchema = z.object({
 
   estimateHours: z
     .number({
-      invalid_type_error: 'Estimate hours must be a number',
+      error: 'Estimate hours must be a number',
     })
     .int('Estimate hours must be an integer')
     .min(0, 'Estimate hours must be non-negative')
@@ -86,7 +84,7 @@ export const createTaskSchema = z.object({
 
   verifyCommand: z
     .string({
-      invalid_type_error: 'Verify command must be a string',
+      error: 'Verify command must be a string',
     })
     .max(1000, 'Verify command cannot exceed 1000 characters')
     .optional()
@@ -94,7 +92,7 @@ export const createTaskSchema = z.object({
 
   doneCriteria: z
     .string({
-      invalid_type_error: 'Done criteria must be a string',
+      error: 'Done criteria must be a string',
     })
     .max(2000, 'Done criteria cannot exceed 2000 characters')
     .optional()
@@ -104,7 +102,7 @@ export const createTaskSchema = z.object({
 
   createdByUserId: z
     .string({
-      invalid_type_error: 'Created by user ID must be a string',
+      error: 'Created by user ID must be a string',
     })
     .optional()
     .nullable(),
@@ -120,7 +118,7 @@ export const updateTaskSchema = z
   .object({
     description: z
       .string({
-        invalid_type_error: 'Description must be a string',
+        error: 'Description must be a string',
       })
       .min(1, 'Task description cannot be empty')
       .max(5000, 'Task description cannot exceed 5000 characters')
@@ -130,7 +128,7 @@ export const updateTaskSchema = z
 
     priority: z
       .number({
-        invalid_type_error: 'Priority must be a number',
+        error: 'Priority must be a number',
       })
       .int('Priority must be an integer')
       .min(1, 'Priority must be at least 1')
@@ -139,7 +137,7 @@ export const updateTaskSchema = z
 
     estimateHours: z
       .number({
-        invalid_type_error: 'Estimate hours must be a number',
+        error: 'Estimate hours must be a number',
       })
       .int('Estimate hours must be an integer')
       .min(0, 'Estimate hours must be non-negative')
@@ -148,7 +146,7 @@ export const updateTaskSchema = z
 
     verifyCommand: z
       .string({
-        invalid_type_error: 'Verify command must be a string',
+        error: 'Verify command must be a string',
       })
       .max(1000, 'Verify command cannot exceed 1000 characters')
       .optional()
@@ -156,7 +154,7 @@ export const updateTaskSchema = z
 
     doneCriteria: z
       .string({
-        invalid_type_error: 'Done criteria must be a string',
+        error: 'Done criteria must be a string',
       })
       .max(2000, 'Done criteria cannot exceed 2000 characters')
       .optional()
@@ -166,7 +164,7 @@ export const updateTaskSchema = z
 
     notes: z
       .string({
-        invalid_type_error: 'Notes must be a string',
+        error: 'Notes must be a string',
       })
       .max(5000, 'Notes cannot exceed 5000 characters')
       .optional()
@@ -174,7 +172,7 @@ export const updateTaskSchema = z
 
     completedAt: z
       .date({
-        invalid_type_error: 'Completed at must be a valid date',
+        error: 'Completed at must be a valid date',
       })
       .optional()
       .nullable(),
@@ -191,7 +189,7 @@ export const updateTaskSchema = z
 export const taskQuerySchema = z.object({
   planId: z
     .string({
-      invalid_type_error: 'Plan ID must be a string',
+      error: 'Plan ID must be a string',
     })
     .optional()
     .transform((val) => (val ? parseInt(val, 10) : undefined))
@@ -219,7 +217,7 @@ export const taskQuerySchema = z.object({
 
   page: z
     .string({
-      invalid_type_error: 'Page must be a string',
+      error: 'Page must be a string',
     })
     .optional()
     .transform((val) => (val ? parseInt(val, 10) : 1))
@@ -229,7 +227,7 @@ export const taskQuerySchema = z.object({
 
   limit: z
     .string({
-      invalid_type_error: 'Limit must be a string',
+      error: 'Limit must be a string',
     })
     .optional()
     .transform((val) => (val ? parseInt(val, 10) : 50))
@@ -245,10 +243,8 @@ export const taskQuerySchema = z.object({
 export const specStatusSchema = z.enum(
   ['drafting', 'pending_plan', 'pending_approval', 'executing', 'completed', 'stalled', 'archived'],
   {
-    errorMap: () => ({
-      message:
-        "Status must be one of: 'drafting', 'pending_plan', 'pending_approval', 'executing', 'completed', 'stalled', or 'archived'",
-    }),
+    error:
+      "Status must be one of: 'drafting', 'pending_plan', 'pending_approval', 'executing', 'completed', 'stalled', or 'archived'",
   }
 );
 
@@ -309,10 +305,8 @@ export const specQuerySchema = z.object({
 export const planStatusSchema = z.enum(
   ['pending_approval', 'executing', 'rejected', 'abandoned', 'changes_requested', 'completed'],
   {
-    errorMap: () => ({
-      message:
-        "Status must be one of: 'pending_approval', 'executing', 'rejected', 'abandoned', 'changes_requested', or 'completed'",
-    }),
+    error:
+      "Status must be one of: 'pending_approval', 'executing', 'rejected', 'abandoned', 'changes_requested', or 'completed'",
   }
 );
 
@@ -375,7 +369,7 @@ export const overrideTaskStatusSchema = z.object({
  * Represents the hierarchical roles in a project
  */
 export const userRoleSchema = z.enum(['owner', 'admin', 'member', 'viewer'], {
-  errorMap: () => ({ message: "Role must be one of: 'owner', 'admin', 'member', or 'viewer'" }),
+  error: "Role must be one of: 'owner', 'admin', 'member', or 'viewer'",
 });
 
 /**
@@ -759,7 +753,7 @@ export const insertGitCommitSchema = z.object({
   message: z.string().min(1, 'Commit message is required'),
   branch: z.string().min(1, 'Branch name is required'),
   author: z.string().optional().nullable(),
-  metadata: z.record(z.unknown()).optional().nullable(),
+  metadata: z.record(z.string(), z.unknown()).optional().nullable(),
 });
 
 export const apiLogsQuerySchema = z.object({

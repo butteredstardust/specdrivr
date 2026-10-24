@@ -54,7 +54,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        formatErrorResponse({ message: 'Invalid query parameters', details: error.errors }),
+        formatErrorResponse({ message: 'Invalid query parameters', details: error.issues }),
         { status: 400 }
       );
     }
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        formatErrorResponse({ message: 'Validation failed', details: error.errors }),
+        formatErrorResponse({ message: 'Validation failed', details: error.issues }),
         { status: 400 }
       );
     }

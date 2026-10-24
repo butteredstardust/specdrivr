@@ -87,13 +87,19 @@ export function getAgentBranchName(specId: string | number, taskId: string | num
 }
 
 /**
- * Returns: "feat(T-{externalId}): {taskTitle}"
+ * Returns: "{type}(T-{externalId}): {taskTitle}", where type is the project's
+ * commitMessagePrefix setting (default "feat").
  * Total commit message must not exceed 72 characters — truncate taskTitle if needed.
  */
-export function getAgentCommitMessage(externalId: string, taskTitle: string): string {
+export function getAgentCommitMessage(
+  externalId: string,
+  taskTitle: string,
+  commitType: string = 'feat'
+): string {
   // Ensure we don't double-prefix T- if externalId already has it
   const cleanId = externalId.startsWith('T-') ? externalId.slice(2) : externalId;
-  const prefix = `feat(T-${cleanId}): `;
+  const type = commitType.trim() || 'feat';
+  const prefix = `${type}(T-${cleanId}): `;
   const maxLength = 72;
 
   if (prefix.length >= maxLength) {

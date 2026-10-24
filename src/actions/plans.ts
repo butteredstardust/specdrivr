@@ -26,7 +26,7 @@ export async function approvePlanAction(formData: FormData) {
 
   const result = approvePlanSchema.safeParse(rawData);
   if (!result.success) {
-    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.issues } };
   }
 
   const plan = await planRepository.getById(result.data.id);
@@ -85,7 +85,7 @@ export async function rejectPlanAction(formData: FormData) {
 
   const result = rejectPlanSchema.safeParse(rawData);
   if (!result.success) {
-    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.issues } };
   }
 
   const plan = await planRepository.getById(result.data.id);
@@ -143,7 +143,7 @@ export async function requestChangesAction(formData: FormData) {
 
   const result = requestChangesSchema.safeParse(rawData);
   if (!result.success) {
-    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.issues } };
   }
 
   const plan = await planRepository.getById(result.data.id);
@@ -200,7 +200,7 @@ export async function abandonPlanAction(formData: FormData) {
 
   const result = abandonPlanSchema.safeParse(rawData);
   if (!result.success) {
-    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.issues } };
   }
 
   const plan = await planRepository.getById(result.data.id);
@@ -257,7 +257,7 @@ export async function retryPlanJobAction(formData: FormData) {
 
   const result = planJobActionSchema.safeParse({ jobId: Number(formData.get('jobId')) });
   if (!result.success)
-    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.issues } };
 
   const job = await planJobRepository.getById(result.data.jobId);
   if (!job) return { success: false, error: { code: 'NOT_FOUND', message: 'Job not found' } };
@@ -283,7 +283,7 @@ export async function cancelPlanJobAction(formData: FormData) {
 
   const result = planJobActionSchema.safeParse({ jobId: Number(formData.get('jobId')) });
   if (!result.success)
-    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.errors } };
+    return { success: false, error: { code: 'INVALID_INPUT', details: result.error.issues } };
 
   const job = await planJobRepository.getById(result.data.jobId);
   if (!job) return { success: false, error: { code: 'NOT_FOUND', message: 'Job not found' } };

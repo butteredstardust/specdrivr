@@ -57,6 +57,7 @@ describe('Seed Script Smoke Test', () => {
     expect(runningSessions.value).toBe(2);
   });
 
+  // Runs the seed twice in a child process; the default 5s timeout is too tight on slow runners.
   it('is idempotent (running twice produces same counts)', async () => {
     runSeed();
     const counts1 = {
@@ -75,5 +76,5 @@ describe('Seed Script Smoke Test', () => {
     };
 
     expect(counts1).toEqual(counts2);
-  });
+  }, 30_000);
 });

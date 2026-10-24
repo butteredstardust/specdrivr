@@ -2,7 +2,13 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, rmSync, writeFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { isSafeGitRef, isSafeRepoSlug, redactGitCredentials, runGit } from '@/lib/agent-git';
+import {
+  githubAuthEnv,
+  isSafeGitRef,
+  isSafeRepoSlug,
+  redactGitCredentials,
+  runGit,
+} from '@/lib/agent-git';
 
 // Built at runtime so secret scanners do not read the fixtures as real credentials.
 const FAKE_TOKEN = ['ghs', 'secret123'].join('_');
@@ -78,4 +84,17 @@ describe('isSafeRepoSlug', () => {
       expect(isSafeRepoSlug(repo)).toBe(false);
     }
   );
+});
+
+describe('githubAuthEnv', () => {
+  it('scopes the token to a github.com auth header and clears inherited headers', () => {
+    const env = githubAuthEnv(FAKE_TOKEN, { PATH: process.env.PATH });
+    const headers = runGit(['config', '--get-all', 'http.https://github.com/.extraheader'], {
+      env,
+    }).split('\n');
+    const expected = Buffer.from(`x-access-token:${FAKE_TOKEN}`).toString('base64');
+    expect(headers.at(-1)).toBe(`AUTHORIZATION: basic ${expected}`);
+    expect(headers.slice(0, -1).every((h) => h === '')).toBe(true);
+    expect(env.GIT_TERMINAL_PROMPT).toBe('0');
+  });
 });

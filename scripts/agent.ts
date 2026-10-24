@@ -2,7 +2,13 @@
 import { execSync, spawn, type ChildProcess } from 'child_process';
 import { randomUUID } from 'node:crypto';
 import { BACKEND_CONFIG, buildCliArgs, AgentBackend, TaskWeight } from '../src/lib/agent-models';
-import { isSafeGitRef, isSafeRepoSlug, redactGitCredentials, runGit } from '../src/lib/agent-git';
+import {
+  githubAuthEnv,
+  isSafeGitRef,
+  isSafeRepoSlug,
+  redactGitCredentials,
+  runGit,
+} from '../src/lib/agent-git';
 
 const API_BASE = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
 const AGENT_TOKEN = process.env.AGENT_TOKEN;
@@ -87,8 +93,8 @@ async function api(method: string, path: string, body?: unknown) {
 /**
  * Executes a git command without a shell and returns output.
  */
-function git(args: string[]): string {
-  return runGit(args);
+function git(args: string[], env?: NodeJS.ProcessEnv): string {
+  return runGit(args, { env });
 }
 
 function buildTaskPrompt(task: Task, backend: AgentBackend): string {
@@ -373,9 +379,11 @@ async function executeTask(task: Task): Promise<void> {
 
         await streamLog(`⚙ Git: Pushing to origin/${branchName}...`, task.id);
 
-        // Push using token for auth
-        const remoteUrl = `https://x-access-token:${token}@github.com/${repo}.git`;
-        git(['push', '-u', remoteUrl, branchName, '--force']);
+        // The token goes in an env-scoped auth header, never in the remote URL.
+        git(
+          ['push', '-u', `https://github.com/${repo}.git`, branchName, '--force'],
+          githubAuthEnv(token, process.env)
+        );
       } else {
         await streamLog('⚙ Git: No changes detected.', task.id);
       }

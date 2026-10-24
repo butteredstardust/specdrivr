@@ -25,7 +25,7 @@ export abstract class BaseRepository {
   ): Promise<void> {
     try {
       if (!this.redis) {
-        this.redis = new Redis(env.REDIS_URL || 'redis://localhost:6379');
+        this.redis = new Redis(env.REDIS_URL || 'redis://localhost:6379', { protocol: 2 });
       }
       const fullChannel = `session:${sessionId}:${channel}`;
       await this.redis.publish(fullChannel, JSON.stringify(payload));
