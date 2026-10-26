@@ -55,7 +55,7 @@ jobs:
       # rescans all of history. Known-safe placeholder credentials are
       # filtered by .github/trufflehog-exclude.txt - see that file before
       # adding anything to it.
-      - uses: trufflesecurity/trufflehog@e76dff8a7e57d6df0c60ad8cbf5d5cba505a8fc9 # v3.99.2
+      - uses: trufflesecurity/trufflehog@31ce31ee1abbcc7dc8eee5764c17121c3044c8b2 # v3.99.7
         with:
           path: ./
           # Pinned so a new detector release cannot turn main red without a
