@@ -17,6 +17,37 @@ vi.mock('@/lib/webhooks', () => ({
   webhookService: { dispatch: vi.fn().mockResolvedValue(undefined) },
 }));
 
+// WARNING: git hooks export GIT_DIR and related variables. From a linked
+// worktree GIT_DIR is absolute, so a test that runs git in a temp directory
+// would operate on the developer's real repository instead (commits, config).
+// Remove them so every git child process resolves the repository from its cwd.
+// The list is `git rev-parse --local-env-vars`, plus ref and quarantine
+// redirects. Keep GIT_EXEC_PATH, credential and editor variables.
+const REPO_LOCAL_GIT_VARS = new Set([
+  'GIT_ALTERNATE_OBJECT_DIRECTORIES',
+  'GIT_COMMON_DIR',
+  'GIT_CONFIG',
+  'GIT_CONFIG_COUNT',
+  'GIT_CONFIG_PARAMETERS',
+  'GIT_DIR',
+  'GIT_GRAFT_FILE',
+  'GIT_IMPLICIT_WORK_TREE',
+  'GIT_INDEX_FILE',
+  'GIT_NAMESPACE',
+  'GIT_NO_REPLACE_OBJECTS',
+  'GIT_OBJECT_DIRECTORY',
+  'GIT_PREFIX',
+  'GIT_QUARANTINE_PATH',
+  'GIT_REPLACE_REF_BASE',
+  'GIT_SHALLOW_FILE',
+  'GIT_WORK_TREE',
+]);
+for (const name of Object.keys(process.env)) {
+  if (REPO_LOCAL_GIT_VARS.has(name) || /^GIT_CONFIG_(KEY|VALUE)_\d+$/.test(name)) {
+    delete process.env[name];
+  }
+}
+
 // Node 25+ ships a native localStorage that lacks the full Storage API
 const createLocalStorageMock = () => {
   const store: Record<string, string> = {};
