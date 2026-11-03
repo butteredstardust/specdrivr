@@ -75,7 +75,7 @@
     "drizzle-orm": "^0.45.4",
     "ioredis": "^6.0.0",
     "isomorphic-dompurify": "^4.6.0",
-    "lucide-react": "^0.577.0",
+    "lucide-react": "^1.67.0",
     "next": "^16.4.3",
     "next-remove-imports": "^1.0.13",
     "next-themes": "^0.4.6",
