@@ -9,11 +9,14 @@ import {
   redactGitCredentials,
   runGit,
 } from '../src/lib/agent-git';
+import { withoutGitRepositoryContext } from '../src/lib/git-env';
 
 const API_BASE = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
 const AGENT_TOKEN = process.env.AGENT_TOKEN;
 const SESSION_ID = process.env.SESSION_ID;
 const POLL_INTERVAL_MS = 5000;
+// The repository the agent works on. Every git command and child process runs here.
+const repositoryCwd = process.cwd();
 
 if (!AGENT_TOKEN) throw new Error('AGENT_TOKEN is required');
 if (!SESSION_ID) throw new Error('SESSION_ID is required');
@@ -94,7 +97,7 @@ async function api(method: string, path: string, body?: unknown) {
  * Executes a git command without a shell and returns output.
  */
 function git(args: string[], env?: NodeJS.ProcessEnv): string {
-  return runGit(args, { env });
+  return runGit(args, { cwd: repositoryCwd, env });
 }
 
 function buildTaskPrompt(task: Task, backend: AgentBackend): string {
@@ -123,7 +126,8 @@ async function runVerification(
     shell: true,
     stdio: ['ignore', 'pipe', 'pipe'],
     detached: process.platform !== 'win32',
-    env: process.env,
+    cwd: repositoryCwd,
+    env: withoutGitRepositoryContext(process.env),
   });
   let output = '';
   let sessionStopped = false;
@@ -220,8 +224,8 @@ async function executeTask(task: Task): Promise<void> {
   let sessionStopped = false;
   let timedOut = false;
 
-  // Prepare environment with project-specific API keys
-  const env = { ...process.env };
+  // Prepare environment with project-specific API keys, without repository context variables
+  const env = withoutGitRepositoryContext(process.env);
   if (task.agentConfig?.geminiApiKey) {
     env.GEMINI_API_KEY = task.agentConfig.geminiApiKey;
     env.GOOGLE_API_KEY = task.agentConfig.geminiApiKey;
@@ -234,6 +238,7 @@ async function executeTask(task: Task): Promise<void> {
     const child = spawn(config.bin, args, {
       stdio: ['ignore', 'pipe', 'pipe'],
       shell: process.platform === 'win32',
+      cwd: repositoryCwd,
       env,
       detached: process.platform !== 'win32',
     });

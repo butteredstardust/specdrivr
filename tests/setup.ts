@@ -4,6 +4,7 @@ import { cleanup } from '@testing-library/react';
 import { config } from 'dotenv';
 import path from 'path';
 import postgres from 'postgres';
+import { GIT_REPOSITORY_CONTEXT_VARS } from '@/lib/git-env';
 
 // Mock server-only to allow importing server-side modules in tests
 vi.mock('server-only', () => ({}));
@@ -21,29 +22,13 @@ vi.mock('@/lib/webhooks', () => ({
 // worktree GIT_DIR is absolute, so a test that runs git in a temp directory
 // would operate on the developer's real repository instead (commits, config).
 // Remove them so every git child process resolves the repository from its cwd.
-// The list is `git rev-parse --local-env-vars`, plus ref and quarantine
-// redirects. Keep GIT_EXEC_PATH, credential and editor variables.
-const REPO_LOCAL_GIT_VARS = new Set([
-  'GIT_ALTERNATE_OBJECT_DIRECTORIES',
-  'GIT_COMMON_DIR',
-  'GIT_CONFIG',
-  'GIT_CONFIG_COUNT',
-  'GIT_CONFIG_PARAMETERS',
-  'GIT_DIR',
-  'GIT_GRAFT_FILE',
-  'GIT_IMPLICIT_WORK_TREE',
-  'GIT_INDEX_FILE',
-  'GIT_NAMESPACE',
-  'GIT_NO_REPLACE_OBJECTS',
-  'GIT_OBJECT_DIRECTORY',
-  'GIT_PREFIX',
-  'GIT_QUARANTINE_PATH',
-  'GIT_REPLACE_REF_BASE',
-  'GIT_SHALLOW_FILE',
-  'GIT_WORK_TREE',
-]);
+// Also remove inherited GIT_CONFIG_COUNT entries, so tests start without
+// command-scoped config. Keep GIT_EXEC_PATH, credential and editor variables.
 for (const name of Object.keys(process.env)) {
-  if (REPO_LOCAL_GIT_VARS.has(name) || /^GIT_CONFIG_(KEY|VALUE)_\d+$/.test(name)) {
+  if (
+    GIT_REPOSITORY_CONTEXT_VARS.includes(name) ||
+    /^GIT_CONFIG_(COUNT|(KEY|VALUE)_\d+)$/.test(name)
+  ) {
     delete process.env[name];
   }
 }

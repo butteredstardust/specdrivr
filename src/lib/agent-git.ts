@@ -1,4 +1,5 @@
 import { execFileSync } from 'child_process';
+import { withoutGitRepositoryContext } from './git-env';
 
 const GIT_CREDENTIAL_PATTERN = /(https?:\/\/)[^@\s/]+@/g;
 
@@ -13,6 +14,8 @@ export function redactGitCredentials(text: string): string {
 /**
  * Runs git with an argument vector, never through a shell, so task titles,
  * branch names and commit messages are passed verbatim. Errors are redacted.
+ * Repository context variables such as GIT_DIR are removed from the
+ * environment, so git always works on the repository at `cwd`.
  */
 export function runGit(
   args: string[],
@@ -21,7 +24,9 @@ export function runGit(
   try {
     return execFileSync('git', args, {
       cwd: options.cwd,
-      env: options.env,
+      // A child process needs the full raw environment, not the validated app config.
+      // eslint-disable-next-line no-restricted-properties
+      env: withoutGitRepositoryContext(options.env ?? process.env),
       encoding: 'utf-8',
       stdio: ['ignore', 'pipe', 'pipe'],
     }).trim();

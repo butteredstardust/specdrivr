@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdtempSync, rmSync, writeFileSync, existsSync } from 'node:fs';
+import { mkdtempSync, realpathSync, rmSync, writeFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -52,6 +52,18 @@ describe('runGit', () => {
     expect(runGit(['log', '-1', '--format=%s'], { cwd: repo })).toBe(message);
     expect(existsSync(path.join(repo, 'pwned'))).toBe(false);
     expect(existsSync(path.join(repo, 'pwned2'))).toBe(false);
+  });
+
+  it('works on the cwd repository when GIT_DIR names another repository', () => {
+    const other = mkdtempSync(path.join(tmpdir(), 'agent-git-other-'));
+    try {
+      runGit(['init', '-q'], { cwd: other });
+      const env = { ...process.env, GIT_DIR: path.join(other, '.git'), GIT_WORK_TREE: other };
+      const top = runGit(['rev-parse', '--show-toplevel'], { cwd: repo, env });
+      expect(realpathSync(top)).toBe(realpathSync(repo));
+    } finally {
+      rmSync(other, { recursive: true, force: true });
+    }
   });
 
   it('redacts credentials in error messages', () => {
@@ -116,6 +128,7 @@ describe('githubAuthEnv with inherited GIT_CONFIG entries', () => {
       GIT_CONFIG_COUNT: '1',
       GIT_CONFIG_KEY_0: 'core.abbrev',
       GIT_CONFIG_VALUE_0: '12',
+      GIT_DIR: '/nonexistent/.git',
     });
     expect(env.GIT_CONFIG_COUNT).toBe('3');
     expect(runGit(['config', '--get', 'core.abbrev'], { env })).toBe('12');
