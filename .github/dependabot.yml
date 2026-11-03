@@ -15,6 +15,12 @@ updates:
     versioning-strategy: increase-if-necessary
     labels:
       - dependencies
+    ignore:
+      # @types/node must match the Node runtime in .nvmrc (24.x). A newer
+      # major types APIs that the runtime does not have. Bump it manually
+      # together with .nvmrc.
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
     groups:
       # One PR per ecosystem cluster instead of dozens of single-package PRs.
       # Patch and minor bumps only - majors are opened individually so the
