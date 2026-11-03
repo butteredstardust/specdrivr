@@ -1,1 +1,0 @@
-ALTER TABLE "agent_config" ADD COLUMN "backend" text DEFAULT 'gemini' NOT NULL;

@@ -1,1 +1,0 @@
-ALTER TABLE "agent_sessions" ADD COLUMN "max_concurrent_tasks" integer DEFAULT 1 NOT NULL;
