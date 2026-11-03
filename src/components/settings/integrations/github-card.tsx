@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Github, Copy } from 'lucide-react';
+import { Copy } from 'lucide-react';
 import { clientLogger } from '@/lib/logger-client';
 import type { PublicAgentConfig } from '@/lib/agent-config-public';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { GitHubIcon } from '@/components/ui/github-icon';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -137,7 +138,7 @@ export function GitHubCard({ projectId, editable, initialData, onSaved }: GitHub
       <Card className="border-line bg-surface-raised h-full">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <Github className="text-fg-secondary size-4" />
+            <GitHubIcon className="text-fg-secondary size-4" />
             <CardTitle>GitHub</CardTitle>
           </div>
           <CardDescription className="text-fg-secondary text-xs">

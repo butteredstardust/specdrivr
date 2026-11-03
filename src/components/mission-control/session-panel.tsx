@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Pause, Play, XCircle, RefreshCw, ChevronRight, ExternalLink, Github } from 'lucide-react';
+import { Pause, Play, XCircle, RefreshCw, ChevronRight, ExternalLink } from 'lucide-react';
 import { cn, formatElapsed } from '@/lib/utils';
 import type { UserRole } from '@/db/schema';
 import { StatusIcon } from '@/components/ui/status-icon';
@@ -12,6 +12,7 @@ import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
 import { EntityId } from '@/components/ui/entity-id';
+import { GitHubIcon } from '@/components/ui/github-icon';
 
 type SessionPanelState = 'idle' | 'running' | 'paused' | 'completed' | 'failed' | 'cancelled';
 
@@ -290,7 +291,7 @@ export function SessionPanel({
                   className="text-fg-secondary hover:text-fg h-auto p-0 text-sm font-normal"
                   onClick={() => window.open(session.pullRequestUrl!, '_blank')}
                 >
-                  <Github className="mr-1.5 h-3.5 w-3.5" />
+                  <GitHubIcon className="mr-1.5 h-3.5 w-3.5" />
                   View PR
                   <ExternalLink className="ml-1 h-3 w-3 opacity-50" />
                 </Button>
