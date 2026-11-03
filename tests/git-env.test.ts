@@ -1,10 +1,20 @@
 import { describe, it, expect } from 'vitest';
+import { execFileSync } from 'node:child_process';
 import { GIT_REPOSITORY_CONTEXT_VARS, withoutGitRepositoryContext } from '@/lib/git-env';
 
 describe('withoutGitRepositoryContext', () => {
   it('removes every repository context variable', () => {
     const env = Object.fromEntries(GIT_REPOSITORY_CONTEXT_VARS.map((name) => [name, 'x']));
     expect(withoutGitRepositoryContext(env)).toEqual({});
+  });
+
+  it('covers every variable that git lists as repository-local', () => {
+    // GIT_CONFIG_COUNT carries configuration, not a repository location, so it stays.
+    const local = execFileSync('git', ['rev-parse', '--local-env-vars'], { encoding: 'utf-8' })
+      .split('\n')
+      .filter((name) => name && name !== 'GIT_CONFIG_COUNT');
+    expect(local.length).toBeGreaterThan(0);
+    expect(GIT_REPOSITORY_CONTEXT_VARS).toEqual(expect.arrayContaining(local));
   });
 
   it('keeps config, credential and other variables', () => {
