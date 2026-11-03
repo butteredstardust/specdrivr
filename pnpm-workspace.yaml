@@ -27,3 +27,8 @@ overrides:
   # GHSA-mrhx-c7xc-m3w5 is fixed in zod 4.6.6. Keep every zod 4 copy (the app,
   # better-auth, knip) on the patched release.
   'zod@^4': ^4.6.6
+  # GHSA-67mh-4wv8-2f99 is fixed in esbuild 0.25.0. drizzle-kit pulls in the
+  # deprecated @esbuild-kit/core-utils, which pins esbuild 0.18. It calls only
+  # transform and transformSync, so the drizzle-kit copy (0.25) is a drop-in.
+  # Remove this when drizzle-kit drops @esbuild-kit.
+  '@esbuild-kit/core-utils>esbuild': ^0.25.0
