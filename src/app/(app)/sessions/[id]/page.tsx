@@ -9,9 +9,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { EventLog } from '@/components/mission-control/event-log';
 import { TaskTimeline } from '@/components/sessions/task-timeline';
-import { Play, Pause, XCircle, ExternalLink, AlertCircle, Github } from 'lucide-react';
+import { Play, Pause, XCircle, ExternalLink, AlertCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { GitHubIcon } from '@/components/ui/github-icon';
 
 interface AgentSession {
   id: number;
@@ -150,7 +151,7 @@ export default function SessionDetailPage({ params }: PageProps) {
                 className="border-line bg-surface-inset h-7 gap-1.5 px-2 py-0"
                 onClick={() => window.open(session.pullRequestUrl!, '_blank')}
               >
-                <Github className="h-3.5 w-3.5" />
+                <GitHubIcon className="h-3.5 w-3.5" />
                 <span className="text-2xs font-medium tracking-tight">View PR</span>
                 <ExternalLink className="h-3 w-3 opacity-50" />
               </Button>

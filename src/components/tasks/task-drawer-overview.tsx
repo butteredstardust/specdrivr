@@ -3,12 +3,13 @@
 import { useState, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
-import { RefreshCw, MessageSquareQuote, ExternalLink, Github } from 'lucide-react';
+import { RefreshCw, MessageSquareQuote, ExternalLink } from 'lucide-react';
 import { clientLogger } from '@/lib/logger-client';
 import { StatusIcon } from '@/components/ui/status-icon';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { EntityId } from '@/components/ui/entity-id';
+import { GitHubIcon } from '@/components/ui/github-icon';
 import type { Task } from './task-drawer';
 
 interface TaskDrawerOverviewProps {
@@ -58,7 +59,7 @@ export function TaskDrawerOverview({ task, onRetry }: TaskDrawerOverviewProps) {
       {task.pullRequestUrl && (
         <div className="bg-surface-inset border-line-subtle flex items-center justify-between rounded-md border p-4">
           <div className="flex items-center gap-3">
-            <Github className="h-5 w-5 opacity-70" />
+            <GitHubIcon className="h-5 w-5 opacity-70" />
             <div className="flex flex-col gap-0.5">
               <span className="text-fg-muted text-2xs">PULL REQUEST</span>
               <span className="text-fg text-sm font-medium">Automated contribution</span>
